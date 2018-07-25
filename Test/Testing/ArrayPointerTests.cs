@@ -37,6 +37,7 @@ namespace Test.Testing
 			Assert.That(ptr.IsNull, Is.EqualTo(false));
 
 			Assertion.AssertElements(ptr, arr);
+			ptr.MoveToStart();
 
 
 			for (int i = 0; i < arr.Count; i++) {
@@ -48,6 +49,8 @@ namespace Test.Testing
 				Debug.Assert(ptr.Value.Equals(arr[i]));
 				ptr++;
 			}
+
+
 
 			for (int i = arr.Count - 1; i >= 0; i--) {
 				Assert.That(ptr.Value, Is.EqualTo(arr[i]));

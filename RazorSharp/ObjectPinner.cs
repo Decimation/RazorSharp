@@ -44,6 +44,7 @@ namespace RazorSharp
 		public static void InvokeWhilePinned(object obj, Action<object> action)
 		{
 			PinImpl(obj, action);
+
 		}
 	}
 

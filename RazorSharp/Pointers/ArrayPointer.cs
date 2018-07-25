@@ -7,271 +7,79 @@ using RazorSharp.Utilities;
 namespace RazorSharp.Pointers
 {
 
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-
-	//todo: fix bounds checking FUCK
 	public unsafe class ArrayPointer<T> : Pointer<T>
 	{
 
-
-		#region Fields and Accessors
-
-		/// <summary>
-		/// Strings require special length calculation.
-		/// </summary>
-		private bool m_isString;
+		#region Fields and accessors
 
 		/// <summary>
-		/// A pointer to the Int32 of the size.
+		/// Whether or not this is a string
 		/// </summary>
-		private IntPtr m_sizePtr {
+		private readonly bool m_isString;
+
+		/// <summary>
+		/// Original heap address
+		/// </summary>
+		private readonly IntPtr _origin;
+
+		/// <summary>
+		/// Offset relative to the origin
+		/// </summary>
+		private int m_offset;
+
+		/// <summary>
+		/// Pointer to the 4-byte size integer
+		/// </summary>
+		private IntPtr SizePtr {
 			get {
 				if (m_isString) {
 					// an Int32 is the first field in a string
 					// indicating the number of the elements
-					return Origin - sizeof(int);
+					return _origin - sizeof(int);
 				}
 				else {
 					// The lowest DWORD of a QWORD is the length of the array
-					return Origin - sizeof(long);
+					return _origin - sizeof(long);
 				}
 			}
 		}
 
-		private IntPtr Origin { get; }
-
+		/// <summary>
+		/// Number of elements in this array
+		/// </summary>
+		public int Count {
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get { return Marshal.ReadInt32(SizePtr); }
+		}
 
 		/// <summary>
-		/// Offset relative to the origin address.
-		/// This is only updated by pointer arithmetic, not by indexing.
+		/// Returns the heap address of the array's first element
 		/// </summary>
-		public int Offset { get; private set; }
+		public IntPtr FirstElement {
+			get {
+				// move back the indexes
+				return Address - (m_offset * ElementSize);
+			}
+		}
+
+		/// <summary>
+		/// Returns the heap address of the array's last element
+		/// </summary>
+		private IntPtr LastElement {
+			get { return FirstElement + ((Count - 1) * ElementSize); }
+		}
 
 		/// <summary>
 		/// Starting index
 		/// </summary>
-		public int Start => -Offset;
+		public int Start => -m_offset;
 
 		/// <summary>
 		/// Ending index
 		/// </summary>
 		public int End => Start + (Count - 1);
 
-
-		/// <summary>
-		/// Returns the heap address of the array's elements
-		/// </summary>
-		public IntPtr FirstElement {
-			get {
-				// move back the indexes
-				return Address - (Offset * ElementSize);
-			}
-		}
-
-		private IntPtr LastElement {
-			get { return FirstElement + ((Count - 1) * ElementSize); }
-		}
-
-		public virtual int Count {
-			get { return Marshal.ReadInt32(m_sizePtr); }
-		}
-
-		public override T this[int index] {
-			get {
-				AddressInBounds(index);
-				IndexBoundsCheck(index);
-				return base[index];
-			}
-			set {
-				AddressInBounds(index);
-				IndexBoundsCheck(index);
-				base[index] = value;
-			}
-		}
-
 		#endregion
-
-		#region Bounds checking
-
-		private static bool IsWithin(long value, long minimum, long maximum)
-		{
-			return value >= minimum && value <= maximum;
-		}
-
-		private void AddressInBounds(int indexerIndex = 0)
-		{
-			long start   = FirstElement.ToInt64();
-			long current = Address.ToInt64() + (indexerIndex * ElementSize);
-			long end     = LastElement.ToInt64();
-
-			string b = $"Address {current:X}, start: {start:X}, end: {end:X}";
-
-			// This is for isolated incidents when iterators
-			// and pointer arithmetic move past the end by 1 element.
-			//
-			// So we'll automatically move to the last element instead, rather
-			// than throwing an exception, just for convenience's sake.
-			if (current == start - ElementSize) {
-				MoveToStart();
-				return;
-			}
-
-			// ...and vice versa
-			if (current == end + ElementSize) {
-				MoveToEnd();
-				return;
-			}
-
-			if (!IsWithin(current, start, end)) {
-				throw new Exception(b);
-			}
-
-
-			//Console.WriteLine(b);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void IndexBoundsCheck(int index)
-		{
-			string bounds = $"Index {index} | bounds [{Start} - {End}]";
-
-
-			if (index == End) {
-				//Logger.Log(Level.Warning, Flags.Pointer, "Index {0} == {1}, moving to end", index, End);
-				//MoveToEnd();
-				return;
-			}
-
-
-			else if (index == Start) {
-				//Logger.Log(Level.Warning, Flags.Pointer, "Index {0} == {1}, moving to start", index, Start);
-				//MoveToStart();
-				return;
-			}
-
-
-			else if (!IsWithin(index, Start, End)) {
-				throw new IndexOutOfRangeException(bounds);
-			}
-		}
-
-		public void MoveToStart()
-		{
-			Address = FirstElement;
-			Offset  = 0;
-			//Console.WriteLine("Moved to start");
-		}
-
-		private void MoveToEnd()
-		{
-			Address = LastElement;
-			Offset  = Count - 1;
-			//Console.WriteLine("Moved to end");
-		}
-
-		#endregion
-
-
-		#region Overrides
-
-		protected override ConsoleTable ToTable()
-		{
-			var table = base.ToTable();
-			table.AddRow("Count", Count);
-			table.AddRow("Index", Offset);
-
-
-			table.AddRow("Size ptr", Hex.ToHex(m_sizePtr));
-			table.AddRow("Address", Hex.ToHex(Address));
-			table.AddRow("Start", Start);
-			table.AddRow("End", End);
-			table.AddRow("First Element", Hex.ToHex(FirstElement));
-			table.AddRow("Last element", Hex.ToHex(LastElement));
-			return table;
-		}
-
-		protected override ConsoleTable ToElementTable(int length)
-		{
-			var table = new ConsoleTable("Address", "Offset", "Value");
-
-			for (int i = Start; i <= End; i++) {
-				table.AddRow(Hex.ToHex(OffsetIndex(i)), i, this[i]);
-			}
-
-			return table;
-		}
-
-
-		public override string ToString(string format)
-		{
-			return base.ToString(format);
-		}
-
-		/// <inheritdoc />
-		/// <summary>
-		/// </summary>
-		/// <param name="format">E: Element table</param>
-		/// <param name="formatProvider"></param>
-		/// <returns></returns>
-		public override string ToString(string format, IFormatProvider formatProvider)
-		{
-			switch (format) {
-				case "E":
-					return ToElementTable(Count).ToMarkDownString();
-			}
-
-			return base.ToString(format, formatProvider);
-		}
-
-		private void PtrInRange(IntPtr val)
-		{
-
-
-			if (!IsWithin(val.ToInt64(), FirstElement.ToInt64(), LastElement.ToInt64())) {
-
-				if (val == LastElement + ElementSize) {
-					MoveToEnd();
-				}
-				else if (val == FirstElement + ElementSize) {
-					MoveToStart();
-				}
-				else throw new Exception(string.Format("{0} out of {1}, {2}", Hex.ToHex(val), Hex.ToHex(FirstElement), Hex.ToHex(LastElement)));
-			}
-		}
-
-		protected override void Increment(int cnt = 1)
-		{
-			var newAddr = Address + (cnt * ElementSize);
-			PtrInRange(newAddr);
-			Offset += cnt;
-
-			//IndexBoundsCheck(m_index);
-
-			//IndexBoundsCheck(cnt);
-
-
-			base.Increment(cnt);
-			//AddressInBounds();
-		}
-
-		protected override void Decrement(int cnt = 1)
-		{
-			var newAddr = Address - (cnt * ElementSize);
-			PtrInRange(newAddr);
-			Offset -= cnt;
-
-
-			//IndexBoundsCheck(m_index);
-
-			//IndexBoundsCheck(cnt);
-
-			base.Decrement(cnt);
-			//AddressInBounds();
-
-		}
-
-		#endregion
-
 
 		#region Constructors
 
@@ -279,13 +87,8 @@ namespace RazorSharp.Pointers
 			base(pHeap, metadata)
 		{
 			m_isString = isString;
-			Origin     = pHeap;
+			_origin    = pHeap;
 		}
-
-
-		//
-		// FUCK
-		//
 
 		private static ArrayPointer<T> CreateDecayedPointer(IntPtr pHeap, bool isString)
 		{
@@ -298,40 +101,102 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+		#region Instance methods
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void MoveToStart()
+		{
+			Address  = FirstElement;
+			m_offset = 0;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void MoveToEnd()
+		{
+			Address  = LastElement;
+			m_offset = Count - 1;
+		}
+
+		#endregion
+
+		private enum FixType
+		{
+			/// <summary>
+			/// Offset was 1 past the bounds, so we moved back
+			/// </summary>
+			BounceBack,
+
+			/// <summary>
+			/// Offset is >1 out of bounds
+			/// </summary>
+			OutOfBounds,
+
+			/// <summary>
+			/// Offset is OK
+			/// </summary>
+			Verified
+		}
+
+		#region Bounds checking
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void EnsureIndexerBounds(int requestedIndex)
+		{
+			if (requestedIndex > End) {
+				throw new IndexOutOfRangeException($"Requested index of {requestedIndex} > {End}");
+			}
+
+			if (requestedIndex < Start) {
+				throw new IndexOutOfRangeException($"Requested index of {requestedIndex} < {Start}");
+			}
+		}
+
+		private FixType EnsureOffsetBounds(int requestedOffset = 1)
+		{
+			// Past the end?
+			if (Address.ToInt64() + (requestedOffset * ElementSize) > LastElement.ToInt64()) {
+				// This is for isolated incidents when iterators
+				// and pointer arithmetic move past the end by 1 element.
+				//
+				// So we'll automatically move to the last element instead, rather
+				// than throwing an exception, just for convenience's sake.
+				if (requestedOffset == 1) {
+					MoveToEnd();
+					return FixType.BounceBack;
+				}
+
+				return FixType.OutOfBounds;
+			}
+
+			// Before the start?
+			if (Address.ToInt64() + (requestedOffset * ElementSize) < FirstElement.ToInt64()) {
+				// ... and vice versa
+				if (requestedOffset == -1) {
+					MoveToStart();
+					return FixType.BounceBack;
+				}
+
+				return FixType.OutOfBounds;
+			}
+
+			return FixType.Verified;
+		}
+
+		#endregion
 
 		#region Operators
 
-		#region Arithmetic
-
-		public static ArrayPointer<T> operator +(ArrayPointer<T> p, int i)
-		{
-			//p.IncrementBytes(i * p.ElementSize);
-			p.Increment(i);
-			return p;
-		}
-
-		public static ArrayPointer<T> operator -(ArrayPointer<T> p, int i)
-		{
-			//p.DecrementBytes(i * p.ElementSize);
-			p.Decrement(i);
-			return p;
-		}
-
 		public static ArrayPointer<T> operator ++(ArrayPointer<T> p)
 		{
-			//p.IncrementBytes(p.ElementSize);
 			p.Increment();
 			return p;
 		}
 
 		public static ArrayPointer<T> operator --(ArrayPointer<T> p)
 		{
-			//p.DecrementBytes(Unsafe.SizeOf<T>());
 			p.Decrement();
 			return p;
 		}
-
-		#endregion
 
 		#region Implicit
 
@@ -360,6 +225,105 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+		#region Overrides
+
+		public override T this[int index] {
+			get {
+				EnsureIndexerBounds(index);
+				return base[index];
+			}
+			set {
+				EnsureIndexerBounds(index);
+				base[index] = value;
+			}
+		}
+
+		protected override ConsoleTable ToTable()
+		{
+			var table = base.ToTable();
+			table.AddRow("Start", Start);
+			table.AddRow("End", End);
+			table.AddRow("Offset", m_offset);
+			table.AddRow("First element", Hex.ToHex(FirstElement));
+			table.AddRow("Last element", Hex.ToHex(LastElement));
+
+			return table;
+		}
+
+
+		protected override ConsoleTable ToElementTable(int length)
+		{
+			var table = new ConsoleTable("Address", "Offset", "Value");
+
+			for (int i = Start; i <= End; i++) {
+				table.AddRow(Hex.ToHex(OffsetIndex(i)), i, this[i]);
+			}
+
+			return table;
+		}
+
+		protected override void Increment(int cnt = 1)
+		{
+			switch (EnsureOffsetBounds(cnt)) {
+				case FixType.BounceBack:
+					return;
+
+				case FixType.OutOfBounds:
+					throw new IndexOutOfRangeException();
+					break;
+				case FixType.Verified:
+					m_offset += cnt;
+					base.Increment(cnt);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+		protected override void Decrement(int cnt = 1)
+		{
+			switch (EnsureOffsetBounds(-cnt)) {
+				case FixType.BounceBack:
+					return;
+				case FixType.OutOfBounds:
+					throw new IndexOutOfRangeException();
+					break;
+				case FixType.Verified:
+					m_offset -= cnt;
+					base.Decrement(cnt);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+		public override string ToString(string format)
+		{
+			return base.ToString(format);
+		}
+
+		/// <inheritdoc />
+		/// <summary>
+		/// </summary>
+		/// <param name="format">E: Element table</param>
+		/// <param name="formatProvider"></param>
+		/// <returns></returns>
+		public override string ToString(string format, IFormatProvider formatProvider)
+		{
+			switch (format) {
+				case "E":
+					return ToElementTable(Count).ToMarkDownString();
+			}
+
+			return base.ToString(format, formatProvider);
+		}
+
+		public override string ToString()
+		{
+			return base.ToString();
+		}
+
+		#endregion
 
 	}
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using NUnit.Framework;
@@ -17,18 +18,9 @@ namespace Test.Testing
 		{
 			var enumerator = enumer.GetEnumerator();
 			while (enumerator.MoveNext()) {
-				//Console.Clear();
-				//Console.Write("{0:T}",ptr);
 				Assert.That(enumerator.Current, Is.EqualTo(ptr.Value));
 				ptr++;
-				//Thread.Sleep(1000);
 			}
-
-			if (typeof(ArrayPointer<T>) == ptr.GetType()) {
-				((ArrayPointer<T>)ptr).MoveToStart();
-
-			}
-
 
 		}
 
@@ -71,13 +63,29 @@ namespace Test.Testing
 					oArr[i] = new object();
 				}
 
-				if (ptr.IsDecayed) {
 
-				}
-				else {
 					Assert.That(ptr.Value, Is.EqualTo(t));
 					Assert.That(ptr.Address, Is.EqualTo(Unsafe.AddressOf(ref t)));
+
+
+			}
+		}
+
+		internal static void AssertPressure<TPointer>(Pointer<TPointer> ptr, ref string s)
+		{
+			int passes = 0;
+			while (passes++ < MaxPasses) {
+
+				object[] oArr = new object[MaxObjects];
+				for (int i = 0; i < oArr.Length; i++) {
+					oArr[i] = new object();
 				}
+
+				if (ptr.IsDecayed) {
+					Assert.That(ptr.Value, Is.EqualTo(s[0]));
+
+				}
+
 
 			}
 		}

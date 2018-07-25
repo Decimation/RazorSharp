@@ -116,7 +116,7 @@ namespace RazorSharp.Pointers
 		protected virtual ConsoleTable ToTable()
 		{
 			var table = new ConsoleTable("Field", "Value");
-			table.AddRow("Address", Hex.ToHex(m_addr));
+			table.AddRow("Address", Hex.ToHex(Address));
 
 			if (Assertion.Throws<NullReferenceException>(delegate { table.AddRow("Value", Value); })) {
 				table.AddRow("Value", "(null)");

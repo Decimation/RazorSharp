@@ -2,12 +2,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using BenchmarkDotNet.Running;
 using NUnit.Framework;
 using RazorCommon;
 using RazorCommon.Strings;
@@ -26,6 +28,12 @@ namespace Test
 
 	internal static unsafe class Program
 	{
+
+		static Program()
+		{
+			//StandardOut.ModConsole();
+		}
+
 		/**
 		 * RazorSharp
 		 *
@@ -39,94 +47,41 @@ namespace Test
 		 *  - RazorCommon
 		 * 	- CompilerServices.Unsafe
 		 *  - RazorInvoke
+		 *  - Fody
+		 *  - MethodTimer Fody
 		 *
 		 * Test:
 		 *  - RazorCommon
 		 *  - CompilerServices.Unsafe
 		 * 	- NUnit
+		 *  - BenchmarkDotNet
+		 *  - Fody
+		 *  - MethodTimer Fody
 		 */
 		public static void Main(string[] args)
 		{
-			/*string        a   = "anime";
-			int           x   = 0xFF;
-			Pointer<char> ptr = a;
-
-			MemoryLayout.Step<char>(ptr.Address, a.Length);
-			string[] arr = {"foo", StringUtils.Random(10), StringUtils.Random(15)};
-			Pointer<string> arrPtr = arr;
-			MemoryLayout.Step<byte>(arrPtr.Address, arr.Length * 8);*/
-
-			string s = "foo";
-
-
-			// @start 	0x1EAA6BC5AA4
-			// @end		0x1EAA6BC5AA8
-
-			//227633200 32767 3 7274598 111 0 0 -2147483648 227633200 32767
-
-			int[] intArr = {1, 2, 3, 4, 5};
-
-			/*
-			ArrayPointer<char> arr = new ArrayPointer<char>(ref s);
-			Debug.Assert(arr.Count == s.Length);
-			Inspector<string> inspector = new ReferenceInspector<string>(ref s, InspectorMode.Address);
-			Console.WriteLine(inspector);
-
-			Console.WriteLine("{0:T}",arr);
-			Console.WriteLine();
-
-			ArrayPointer<int> intArrptr = new ArrayPointer<int>(ref intArr);
-			Debug.Assert(intArrptr.Count == intArr.Length);
-			Inspector<int[]> intInspector = new ReferenceInspector<int[]>(ref intArr, InspectorMode.Address);
-			Console.WriteLine(intInspector);
-			Console.WriteLine("{0:T}",intArrptr);*/
-
-			ArrayPointer<int> decayInt = intArr;
-			Debug.Assert(decayInt.Count == intArr.Length);
-			Assertion.AssertElements(decayInt, intArr);
-
-
-			AssertThrows<Exception>(delegate
-			{
-				var x = decayInt[-1];
-			});
-
-
-
-			AssertThrows<Exception>(delegate { decayInt += decayInt.Count + 1; });
-
-			AssertThrows<Exception>(delegate { decayInt -= 2; });
-
-
-
-			AssertThrows<Exception>(delegate
-			{
-				var x = decayInt[5];
-			});
-
-
-			ArrayPointer<char> decayStr = s;
-			Debug.Assert(decayStr.Count == s.Length);
+			var summary = BenchmarkRunner.Run<ArrayPointerBenchmarking>();
 		}
+
+
 
 		private static void PrintTable<T>(ArrayPointer<T> arr)
 		{
 			for (int i = 0; i < arr.Count; i++) {
 				Console.Clear();
-				Console.Write("{0:E}", arr);
+				Console.Write("{0:T}", arr);
 				arr++;
-				Thread.Sleep(500);
+				Thread.Sleep(1000);
 			}
 
-			arr.MoveToStart();
+			Console.ReadKey();
 			Console.Clear();
+			Console.Write("{0:T}", arr);
+			Console.WriteLine(Hex.ToHex(arr.Address));
 		}
 
 
-		static Program()
-		{
-			StandardOut.ModConsole();
-		}
+
 
 
 	}
