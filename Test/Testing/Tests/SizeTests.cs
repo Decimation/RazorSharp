@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using RazorSharp;
 
-namespace Test.Testing
+namespace Test.Testing.Tests
 {
 
 	[TestFixture]

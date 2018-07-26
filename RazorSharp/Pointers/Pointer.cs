@@ -156,7 +156,7 @@ namespace RazorSharp.Pointers
 
 		protected virtual void Decrement(int cnt = 1)
 		{
-			Address = Unsafe.Offset<T>(Address, cnt);
+			Address = Unsafe.Offset<T>(Address, -cnt);
 		}
 
 		protected virtual ConsoleTable ToElementTable(int length)

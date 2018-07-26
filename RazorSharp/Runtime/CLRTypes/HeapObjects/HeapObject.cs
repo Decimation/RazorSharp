@@ -11,11 +11,15 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 	{
 		// [FieldOffset(-8) public ObjHeader _header
 
-		[FieldOffset(0)] private readonly MethodTable* m_methodTablePtr;
+		[FieldOffset(0)] private          MethodTable* m_methodTablePtr;
 		[FieldOffset(8)] private readonly byte         m_fields;
 
-		public ObjHeader*   Header      => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
-		public MethodTable* MethodTable => m_methodTablePtr;
+		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
+
+		public MethodTable* MethodTable {
+			get => m_methodTablePtr;
+			internal set => m_methodTablePtr = value;
+		}
 
 		public override string ToString()
 		{

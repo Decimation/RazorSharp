@@ -41,9 +41,9 @@ namespace RazorSharp.Runtime
 			// We need to get the heap pointer manually because of type constraints
 			var ptr  = (Marshal.ReadIntPtr(Unsafe.AddressOf(ref t)));
 			var @out = *(MethodTable**) ptr;
-
-
 			return @out;
+
+			//return (*((HeapObject**) Unsafe.AddressOf(ref t)))->MethodTable;
 		}
 
 		public static ArrayObject** GetArrayObject<T>(ref T t) where T : class
@@ -71,7 +71,7 @@ namespace RazorSharp.Runtime
 			WriteMethodTable(ref t, MethodTableOf<TNew>());
 		}
 
-		private static MethodTable* MethodTableOf<T>()
+		public static MethodTable* MethodTableOf<T>()
 		{
 			return (MethodTable*) typeof(T).TypeHandle.Value;
 		}
@@ -80,8 +80,10 @@ namespace RazorSharp.Runtime
 		{
 			var addrMt = Unsafe.AddressOfHeap(ref t);
 			*((MethodTable**) addrMt) = m;
-		}
 
+			//var h = GetHeapObject(ref t);
+			//(**h).MethodTable = m;
+		}
 
 		internal static void SpoofMethodTable<TOrig, TSpoof>(ref TOrig t) where TOrig : class
 		{
@@ -96,7 +98,6 @@ namespace RazorSharp.Runtime
 
 			WriteMethodTable(ref t, (MethodTable*) typeof(TOrig).TypeHandle.Value);
 		}
-
 
 		/// <summary>
 		/// Reads a reference type's object header.

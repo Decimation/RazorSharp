@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using NUnit.Framework;
-using RazorSharp;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime;
 
-namespace Test.Testing
+namespace Test.Testing.Tests
 {
 
 	[TestFixture]

@@ -1,14 +1,11 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using NUnit.Framework;
 using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Pointers;
 
-namespace Test.Testing
+namespace Test.Testing.Tests
 {
 
 	[TestFixture]
@@ -30,8 +27,7 @@ namespace Test.Testing
 			AssertArrayPointer(strArrPtr, strArr);
 		}
 
-		[Test]
-		public void TestPointerArray() {}
+
 
 		private static void AssertArrayPointer<TElement>(ArrayPointer<TElement> ptr, IList<TElement> arr)
 		{

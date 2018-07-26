@@ -64,14 +64,29 @@ namespace Test
 		 * Notes:
 		 *  - 32-bit is not fully supported
 		 *  - Most types are not thread-safe
+		 *
+		 * Goals:
+		 *  - Provide identical functionality of ClrMD, SOS, Reflection
+		 * 	  but in a faster and more efficient way
 		 */
 		public static void Main(string[] args)
 		{
-			string[] arr = {"foo", "bar", "anime", "animanga"};
-			ArrayObject** arrObj = Runtime.GetArrayObject(ref arr);
-			Console.WriteLine(**arrObj);
 
 
+
+
+			string str = "foo";
+			ReferenceInspector<string>.Write(ref str);
+
+			var mt = Runtime.ReadMethodTable(ref str);
+			Console.WriteLine(*mt);
+
+
+			Console.WriteLine(*mt->EEClass);
+
+
+
+			//Console.ReadLine();
 		}
 
 		private static void PrintTable<T>(ArrayPointer<T> arr)

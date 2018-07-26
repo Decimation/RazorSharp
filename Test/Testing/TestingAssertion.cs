@@ -80,10 +80,10 @@ namespace Test.Testing
 			Debug.Assert((**ao).Length == arr.Length);
 			Debug.Assert((**ao).Header == Runtime.ReadObjHeader(ref arr));
 			Debug.Assert((**ao).MethodTable == Runtime.ReadMethodTable(ref arr));
-
-			if ((**ao).Handle.Value != IntPtr.Zero) {
+			//Debug.Assert((**ao).Handle.Value == typeof(T).TypeHandle.Value);
+			/*if ((**ao).Handle.Value != IntPtr.Zero) {
 				Debug.Assert((**ao).Handle.Value == typeof(T).TypeHandle.Value);
-			}
+			}*/
 		}
 
 		internal static void AssertStringObject(ref string s, StringObject** strObj)

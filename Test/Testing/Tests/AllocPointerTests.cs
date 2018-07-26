@@ -1,11 +1,9 @@
-using System;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Pointers;
 
-namespace Test.Testing
+namespace Test.Testing.Tests
 {
 	[TestFixture]
 	internal class AllocPointerTests

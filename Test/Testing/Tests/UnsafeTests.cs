@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using NUnit.Framework;
 using RazorSharp;
 
-namespace Test.Testing
+namespace Test.Testing.Tests
 {
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 

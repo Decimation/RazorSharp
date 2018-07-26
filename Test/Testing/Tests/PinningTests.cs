@@ -1,13 +1,8 @@
-using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using NUnit.Framework;
 using RazorSharp;
-using RazorSharp.Experimental;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime;
 
-namespace Test.Testing
+namespace Test.Testing.Tests
 {
 	[TestFixture]
 	internal class PinningTests

@@ -1,10 +1,8 @@
-using System;
 using NUnit.Framework;
-using RazorSharp.Analysis;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes.HeapObjects;
 
-namespace Test.Testing
+namespace Test.Testing.Tests
 {
 
 	[TestFixture]

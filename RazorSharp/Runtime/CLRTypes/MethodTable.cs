@@ -12,8 +12,8 @@ namespace RazorSharp.Runtime.CLRTypes
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct EEClassPtr
 	{
-		[FieldOffset(0)] internal void* m_pEEClass;
-		[FieldOffset(8)] internal void* m_pCanonMT;
+		[FieldOffset(0)] internal EEClass*     m_pEEClass;
+		[FieldOffset(0)] internal MethodTable* m_pCanonMT;
 
 		public override string ToString()
 		{
@@ -64,57 +64,108 @@ namespace RazorSharp.Runtime.CLRTypes
 	internal unsafe struct MapSlot
 	{
 		[FieldOffset(0)] internal void* m_pInterfaceMap;
-		[FieldOffset(8)] internal void* m_pMultipurposeSlot2;
+		[FieldOffset(0)] internal ulong m_pMultipurposeSlot2;
 	}
 
 	// Union
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct InstSlot
 	{
-		[FieldOffset(0)]  void* m_pPerInstInfo;
-		[FieldOffset(8)]  void* m_ElementTypeHnd;
-		[FieldOffset(16)] void* m_pMultipurposeSlot1;
+		[FieldOffset(0)] internal void* m_pPerInstInfo;
+		[FieldOffset(0)] internal ulong m_ElementTypeHnd;
+		[FieldOffset(0)] internal ulong m_pMultipurposeSlot1;
 	}
+
 
 	//https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.h
 	//https://github.com/dotnet/coreclr/blob/db55a1decc1d02538e61eac7db80b7daa351d5b6/src/gc/env/gcenv.object.h
 
+	// class.h
+
 	// todo: WIP
 	[StructLayout(LayoutKind.Explicit)]
-	internal unsafe struct EEClass
+	public unsafe struct EEClass
 	{
-		[FieldOffset(0)] private void* m_pGuidInfo;
+		[FieldOffset(0)]  private void*      m_pGuidInfo;
+		[FieldOffset(8)]  private void*      m_rpOptionalFields;
 
-		[FieldOffset(8)]  private void* m_rpOptionalFields;
-		[FieldOffset(16)] private void* m_pMethodTable;
-		[FieldOffset(24)] private void* m_pFieldDescList;
-		[FieldOffset(32)] private void* m_pChunks;
-
-		[FieldOffset(40)]
+		//** Status: verified
+		[FieldOffset(16)] private void*      m_pMethodTable;
+		[FieldOffset(24)] private FieldDesc* m_pFieldDescList;
+		[FieldOffset(32)] private void*      m_pChunks;
 
 		// Union
-		private uint m_cbNativeSize;
+		[FieldOffset(40)] private uint m_cbNativeSize;
 
-//#ifdef FEATURE_COMINTEROP
-		//ComCallWrapperTemplate * m_pccwTemplate; // points to interop data structures used when this type is exposed to COM
-//#endif                                               // FEATURE_COMINTEROP
+		// COMINTEROP
+		[FieldOffset(40)] private void* ohDelegate;
 
-		[FieldOffset(44)] private void* m_pccwTemplate;
-		[FieldOffset(52)] private DWORD m_dwAttrClass;
-		[FieldOffset(56)] private DWORD m_VMFlags;
+		[FieldOffset(40)] private int m_ComInterfaceType;
+
+		// End COMINTEROP
+		// End Union
+
+		// COMINTEROP
+		[FieldOffset(48)] private void* m_pccwTemplate;
+
+		// End COMINTEROP
+
+		//** Status: verified
+		[FieldOffset(56)] private DWORD m_dwAttrClass;
+		[FieldOffset(60)] private DWORD m_VMFlags;
+		[FieldOffset(64)] private byte  m_NormType;
+		[FieldOffset(65)] private byte  m_fFieldsArePacked;
+		[FieldOffset(66)] private byte  m_cbFixedEEClassFields;
+		[FieldOffset(67)] private byte  m_cbBaseSizePadding;
+
+		public DWORD Attributes => m_dwAttrClass;
 
 		// Line 1942...
 
+
+
 		public override string ToString()
 		{
-			return $"m_dwAttrClass: {m_dwAttrClass} m_VMFlags: {m_VMFlags}";
+			var table = new ConsoleTable("Field", "Value");
+			table.AddRow(nameof(m_pGuidInfo),Hex.ToHex(m_pGuidInfo));
+			table.AddRow(nameof(m_rpOptionalFields),Hex.ToHex(m_rpOptionalFields));
+			table.AddRow(nameof(m_pMethodTable), Hex.ToHex(m_pMethodTable));
+			table.AddRow(nameof(m_pFieldDescList),Hex.ToHex(m_pFieldDescList));
+			table.AddRow(nameof(m_pChunks),Hex.ToHex(m_pChunks));
+			table.AddRow(nameof(m_cbNativeSize),m_cbNativeSize);
+			table.AddRow(nameof(ohDelegate),Hex.ToHex(ohDelegate));
+			table.AddRow(nameof(m_ComInterfaceType),m_ComInterfaceType);
+			table.AddRow(nameof(m_pccwTemplate),Hex.ToHex(m_pccwTemplate));
+			table.AddRow(nameof(m_dwAttrClass),Hex.ToHex(m_dwAttrClass));
+			table.AddRow(nameof(m_VMFlags),m_VMFlags);
+			table.AddRow(nameof(m_NormType),m_NormType);
+			table.AddRow(nameof(m_fFieldsArePacked),m_fFieldsArePacked);
+			table.AddRow(nameof(m_cbFixedEEClassFields),m_cbFixedEEClassFields);
+			table.AddRow(nameof(m_cbBaseSizePadding),m_cbBaseSizePadding);
+			return table.ToMarkDownString();
 		}
 	}
+
+	//todo: fix
+	// field.h
+	[StructLayout(LayoutKind.Explicit)]
+	internal unsafe struct FieldDesc
+	{
+		[FieldOffset(0)] private MethodTable* m_pMTOfEnclosingClass;
+		[FieldOffset(8)] private uint         m_fields;
+
+		public override string ToString()
+		{
+			return String.Format("m_pMTOfEnclosingClass: {0}, m_fields: {1}", Hex.ToHex(m_pMTOfEnclosingClass),
+				m_fields);
+		}
+	}
+
 
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct MethodTable
 	{
-		/*[FieldOffset(0)]
+		/*[FieldOffset(-??)]
 		private GCInfo gc;*/
 
 		#region Properties and Accessors
@@ -160,8 +211,10 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public void* Module => m_pLoaderModule;
 
-		public void*        EEClass => _eeClassPtr.m_pEEClass;
+		public EEClass*     EEClass => _eeClassPtr.m_pEEClass;
 		public MethodTable* Canon   => (MethodTable*) _eeClassPtr.m_pCanonMT;
+
+		//public FieldDesc* FieldDescList => _eeClassPtr.m_pEEClass->m_pFieldDescList;
 
 		public bool HasComponentSize {
 			get {
@@ -180,24 +233,28 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		#region Fields
 
+		//** Status: verified
 		[FieldOffset(0)] private DWFlags m_dwFlags;
 
+		//** Status: verified
 		// Base size of instance of this class when allocated on the heap
 		[FieldOffset(4)] private DWORD m_BaseSize;
 
+		//** Status: unknown
 		[FieldOffset(8)] private WORD m_wFlags2;
 
+		//** Status: unknown
 		// Class token if it fits into 16-bits. If this is (WORD)-1, the class token is stored in the TokenOverflow optional member.
 		[FieldOffset(10)] private WORD m_wToken;
 
-
+		//** Status: unknown
 		// <NICE> In the normal cases we shouldn't need a full word for each of these </NICE>
 		[FieldOffset(12)] private WORD m_wNumVirtuals;
 
-
+		//** Status: verified
 		[FieldOffset(14)] private WORD m_wNumInterfaces;
 
-
+		//** Status: verified
 		// On Linux ARM is a RelativeFixupPointer. Otherwise,
 		// Parent PTR_MethodTable if enum_flag_HasIndirectParent is not set. Pointer to indirection cell
 		// if enum_flag_enum_flag_HasIndirectParent is set. The indirection is offset by offsetof(MethodTable, m_pParentMethodTable).
@@ -205,7 +262,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		// for enum_flag_HasIndirectParentMethodTable.
 		[FieldOffset(16)] private MethodTable* m_pParentMethodTable;
 
-
+		//** Status: verified
 		[FieldOffset(24)] private void* m_pLoaderModule; // LoaderModule. It is equal to the ZapModule in ngened images
 
 
@@ -220,7 +277,19 @@ namespace RazorSharp.Runtime.CLRTypes
 		};                         //      (used only if FEATURE_PREJIT is defined)
 
 
-		[FieldOffset(32)] private EEClassPtr _eeClassPtr;
+		//** Status: unknown
+		[FieldOffset(32)] private void* m_pWriteableData;
+
+		//** Status: verified
+		[FieldOffset(40)] private EEClassPtr _eeClassPtr;
+
+		//** Status: unknown
+		[FieldOffset(48)] private InstSlot m_slotInfo;
+
+		//** Status: unknown
+		[FieldOffset(56)] private MapSlot m_mapSlot;
+
+		//[FieldOffset(32)] private EEClassPtr _eeClassPtr;
 
 
 		// m_pPerInstInfo and m_pInterfaceMap have to be at fixed offsets because of performance sensitive
@@ -275,8 +344,17 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));
 			table.AddRow("Module", Hex.ToHex(m_pLoaderModule));
 
+			table.AddRow("m_pWriteableData", Hex.ToHex(m_pWriteableData));
+
 			table.AddRow("EEClass", Hex.ToHex(_eeClassPtr.m_pEEClass));
+			//table.AddRow("EEClass value", *_eeClassPtr.m_pEEClass);
 			table.AddRow("Canon MT", Hex.ToHex(_eeClassPtr.m_pCanonMT));
+
+			table.AddRow("m_ElementTypeHnd", (m_slotInfo.m_ElementTypeHnd));
+			table.AddRow("m_pMultipurposeSlot1", (m_slotInfo.m_pMultipurposeSlot1));
+			table.AddRow("m_pPerInstInfo", Hex.ToHex(m_slotInfo.m_pPerInstInfo));
+			table.AddRow("m_pInterfaceMap", Hex.ToHex(m_mapSlot.m_pInterfaceMap));
+			table.AddRow("m_pMultipurposeSlot2", (m_mapSlot.m_pMultipurposeSlot2));
 
 
 			return table.ToMarkDownString();
