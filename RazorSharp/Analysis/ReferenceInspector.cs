@@ -1,6 +1,7 @@
 using System;
 using RazorCommon;
 using RazorSharp.Runtime;
+using RazorSharp.Runtime.CLRTypes;
 
 namespace RazorSharp.Analysis
 {
@@ -93,6 +94,11 @@ namespace RazorSharp.Analysis
 
 				return table;
 			}
+		}
+
+		public new static void Write(ref T t)
+		{
+			Console.WriteLine(new ReferenceInspector<T>(ref t));
 		}
 
 		public override string ToString()

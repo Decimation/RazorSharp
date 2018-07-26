@@ -76,7 +76,7 @@ namespace RazorSharp.Utilities
 			{
 				{typeof(byte), new NameStyle("-", "__int8", "Byte", "byte")},
 
-				{typeof(char), new NameStyle("-", "-", "Char", "char")},
+				{typeof(char), new NameStyle("WCHAR", "-", "Char", "char")},
 
 				{typeof(ushort), new NameStyle("WORD", "-", "UInt16","ushort")},
 				{typeof(short), new NameStyle("-", "__int16", "Int16", "short")},

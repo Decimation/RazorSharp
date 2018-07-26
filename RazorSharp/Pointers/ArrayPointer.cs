@@ -7,15 +7,16 @@ using RazorSharp.Utilities;
 namespace RazorSharp.Pointers
 {
 
+	/// <summary>
+	/// This won't work when:
+	/// 	- A string is changed (i.e. concatenations)
+	///
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
 	public unsafe class ArrayPointer<T> : Pointer<T>
 	{
 
 		#region Fields and accessors
-
-		/// <summary>
-		/// Whether or not this is a string
-		/// </summary>
-		private readonly bool m_isString;
 
 		/// <summary>
 		/// Original heap address
@@ -28,29 +29,19 @@ namespace RazorSharp.Pointers
 		private int m_offset;
 
 		/// <summary>
-		/// Pointer to the 4-byte size integer
-		/// </summary>
-		private IntPtr SizePtr {
-			get {
-				if (m_isString) {
-					// an Int32 is the first field in a string
-					// indicating the number of the elements
-					return _origin - sizeof(int);
-				}
-				else {
-					// The lowest DWORD of a QWORD is the length of the array
-					return _origin - sizeof(long);
-				}
-			}
-		}
-
-		/// <summary>
 		/// Number of elements in this array
 		/// </summary>
-		public int Count {
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get { return Marshal.ReadInt32(SizePtr); }
-		}
+		public int Count { get; }
+
+		// If the count changes in either a string or an array
+		// its address will very likely change either way,
+		// invalidating this pointer,
+		// so recalculating it every time is pointless
+
+		//public int Count {
+		//	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		//	get { return Marshal.ReadInt32(m_sizePtr); }
+		//}
 
 		/// <summary>
 		/// Returns the heap address of the array's first element
@@ -86,8 +77,22 @@ namespace RazorSharp.Pointers
 		private protected ArrayPointer(IntPtr pHeap, PointerMetadata metadata, bool isString) :
 			base(pHeap, metadata)
 		{
-			m_isString = isString;
 			_origin    = pHeap;
+
+			IntPtr sizePtr;
+
+			// Calculate the size ptr
+			if (isString) {
+				// an Int32 is the first field in a string
+				// indicating the number of the elements
+				 sizePtr = _origin - sizeof(int);
+			}
+			else {
+				// The lowest DWORD of a QWORD is the length of the array
+				sizePtr = _origin - sizeof(long);
+			}
+
+			Count = Marshal.ReadInt32(sizePtr);
 		}
 
 		private static ArrayPointer<T> CreateDecayedPointer(IntPtr pHeap, bool isString)
@@ -200,7 +205,7 @@ namespace RazorSharp.Pointers
 
 		#region Implicit
 
-		// Implicit operators will have their pointers copied so
+		// Implicit operators will have their stack pointers copied so
 		// we can't get an accurate stack pointer, but we CAN get a heap pointer
 		//
 		// However this means we may need to pin the object
@@ -256,7 +261,7 @@ namespace RazorSharp.Pointers
 			var table = new ConsoleTable("Address", "Offset", "Value");
 
 			for (int i = Start; i <= End; i++) {
-				table.AddRow(Hex.ToHex(OffsetIndex(i)), i, this[i]);
+				table.AddRow(Hex.ToHex(Unsafe.Offset<T>(Address,i)), i, this[i]);
 			}
 
 			return table;

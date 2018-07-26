@@ -41,8 +41,8 @@ namespace Test.Testing
 
 			ObjectPinner.InvokeWhilePinned(s, delegate
 			{
-				Assertion.AssertPinning(ref s);
-				Assertion.AssertElements(ptr, s);
+				TestingAssertion.AssertPinning(ref s);
+				TestingAssertion.AssertElements(ptr, s);
 			});
 		}
 

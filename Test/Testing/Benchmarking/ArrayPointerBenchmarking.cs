@@ -1,8 +1,7 @@
-using System.Diagnostics;
 using BenchmarkDotNet.Attributes;
 using RazorSharp.Pointers;
 
-namespace Test.Testing
+namespace Test.Testing.Benchmarking
 {
 
 	public class ArrayPointerBenchmarking

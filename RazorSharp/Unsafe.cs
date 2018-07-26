@@ -82,6 +82,19 @@ namespace RazorSharp
 			return **(IntPtr**) (&tr);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static IntPtr Offset<T>(IntPtr p, int cnt)
+		{
+			int size = SizeOf<T>();
+			size *= cnt;
+			return p + size;
+		}
+
+		public static IntPtr Offset<T>(void* p, int cnt)
+		{
+			return Offset<T>((IntPtr) p,cnt);
+		}
+
 		public static IntPtr AddressOfHeap<T>(ref T t, OffsetType offset) where T : class
 		{
 			switch (offset) {

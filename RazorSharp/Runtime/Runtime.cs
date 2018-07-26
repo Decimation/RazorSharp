@@ -2,6 +2,9 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.Runtime.CLRTypes;
+using RazorSharp.Runtime.CLRTypes.HeapObjects;
+using RazorSharp.Utilities;
 
 namespace RazorSharp.Runtime
 {
@@ -32,7 +35,7 @@ namespace RazorSharp.Runtime
 				Logger.Log(Level.Warning, Flags.Memory,
 					$"typeof({typeof(T).Name}) is a value type, returning TypeHandle MethodTable*");
 
-				return (MethodTable*) typeof(T).TypeHandle.Value;
+				return MethodTableOf<int>();
 			}
 
 			// We need to get the heap pointer manually because of type constraints
@@ -43,6 +46,35 @@ namespace RazorSharp.Runtime
 			return @out;
 		}
 
+		public static ArrayObject** GetArrayObject<T>(ref T t) where T : class
+		{
+			if (!typeof(T).IsArray) {
+				TypeException.Throw<Array, T>();
+			}
+
+			return (ArrayObject**) Unsafe.AddressOf(ref t);
+		}
+
+		public static StringObject** GetStringObject(ref string s)
+		{
+			return (StringObject**) Unsafe.AddressOf(ref s);
+		}
+
+		public static HeapObject** GetHeapObject<T>(ref T t) where T : class
+		{
+			HeapObject** h = (HeapObject**) Unsafe.AddressOf(ref t);
+			return h;
+		}
+
+		public static void WriteMethodTable<TOrig, TNew>(ref TOrig t) where TOrig : class
+		{
+			WriteMethodTable(ref t, MethodTableOf<TNew>());
+		}
+
+		private static MethodTable* MethodTableOf<T>()
+		{
+			return (MethodTable*) typeof(T).TypeHandle.Value;
+		}
 
 		public static void WriteMethodTable<T>(ref T t, MethodTable* m) where T : class
 		{

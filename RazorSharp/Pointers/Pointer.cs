@@ -79,8 +79,10 @@ namespace RazorSharp.Pointers
 		}
 
 		public virtual T this[int index] {
-			get => CSUnsafe.Read<T>(OffsetIndex(index));
-			set => CSUnsafe.Write(OffsetIndex(index), value);
+			//get => CSUnsafe.Read<T>(OffsetIndex(index));
+			//set => CSUnsafe.Write(OffsetIndex(index), value);
+			get => CSUnsafe.Read<T>(Unsafe.Offset<T>(m_addr, index).ToPointer());
+			set => CSUnsafe.Write(Unsafe.Offset<T>(m_addr, index).ToPointer(), value);
 		}
 
 		#region Constructors
@@ -136,11 +138,6 @@ namespace RazorSharp.Pointers
 			return table;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected void* OffsetIndex(int index)
-		{
-			return (void*) ((long) m_addr + (m_metadata.ElementSize * index));
-		}
 
 		public long ToInt64()
 		{
@@ -154,58 +151,22 @@ namespace RazorSharp.Pointers
 
 		protected virtual void Increment(int cnt = 1)
 		{
-			IncrementBytes(cnt * ElementSize);
+			Address = Unsafe.Offset<T>(Address, cnt);
 		}
 
 		protected virtual void Decrement(int cnt = 1)
 		{
-			DecrementBytes(cnt * ElementSize);
+			Address = Unsafe.Offset<T>(Address, cnt);
 		}
 
 		protected virtual ConsoleTable ToElementTable(int length)
 		{
 			var table = new ConsoleTable("Address", "Offset", "Value");
 			for (int i = 0; i < length; i++) {
-				table.AddRow(Hex.ToHex(OffsetIndex(i)), i, this[i]);
+				table.AddRow(Hex.ToHex(Unsafe.Offset<T>(Address, i)), i, this[i]);
 			}
 
 			return table;
-		}
-
-		/// <summary>
-		/// Increment the pointer by n bytes.
-		/// </summary>
-		/// <param name="i">Number of bytes to increment the pointer by.</param>
-		private void IncrementBytes(int i)
-		{
-			switch (IntPtr.Size) {
-				case 8:
-					long l = ToInt64() + i;
-					Address = (IntPtr) l;
-					break;
-				case 4:
-					int n = ToInt32() + i;
-					Address = (IntPtr) n;
-					break;
-			}
-		}
-
-		/// <summary>
-		/// Decrement the pointer by n bytes.
-		/// </summary>
-		/// <param name="i">Number of bytes to decrement the pointer by.</param>
-		private void DecrementBytes(int i)
-		{
-			switch (IntPtr.Size) {
-				case 8:
-					long l = ToInt64() - i;
-					Address = (IntPtr) l;
-					break;
-				case 4:
-					int n = ToInt32() - i;
-					Address = (IntPtr) n;
-					break;
-			}
 		}
 
 		#endregion

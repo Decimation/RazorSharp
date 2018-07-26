@@ -30,13 +30,16 @@ namespace Test.Testing
 			AssertArrayPointer(strArrPtr, strArr);
 		}
 
+		[Test]
+		public void TestPointerArray() {}
+
 		private static void AssertArrayPointer<TElement>(ArrayPointer<TElement> ptr, IList<TElement> arr)
 		{
 			Assert.That(ptr.Count, Is.EqualTo(arr.Count));
 			Assert.That(ptr.IsDecayed, Is.EqualTo(true));
 			Assert.That(ptr.IsNull, Is.EqualTo(false));
 
-			Assertion.AssertElements(ptr, arr);
+			TestingAssertion.AssertElements(ptr, arr);
 			ptr.MoveToStart();
 
 
@@ -61,7 +64,7 @@ namespace Test.Testing
 			Assert.That(ptr[0], Is.EqualTo(arr[0]));
 
 			//Debug.Assert(ptr.ToArray().SequenceEqual(arr));
-			Assertion.AssertElements(ptr, arr);
+			TestingAssertion.AssertElements(ptr, arr);
 		}
 
 

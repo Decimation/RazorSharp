@@ -1,9 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
-using static RazorSharp.Unsafe;
 
-namespace RazorSharp.Runtime
+namespace RazorSharp.Runtime.CLRTypes
 {
 
 	using DWORD = UInt32;
@@ -124,7 +123,7 @@ namespace RazorSharp.Runtime
 
 		public DWORD Flags {
 			get {
-				var dwPtr = AddressOf(ref m_dwFlags);
+				var dwPtr = Unsafe.AddressOf(ref m_dwFlags);
 				return *(DWORD*) dwPtr;
 			}
 		}

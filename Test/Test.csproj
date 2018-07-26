@@ -190,9 +190,12 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Testing\AllocPointerTests.cs" />
-    <Compile Include="Testing\ArrayPointerBenchmarking.cs" />
     <Compile Include="Testing\ArrayPointerTests.cs" />
-    <Compile Include="Testing\Assertion.cs" />
+    <Compile Include="Testing\Benchmarking\PointerBenchmark.cs" />
+    <Compile Include="Testing\HeapObjectTests.cs" />
+    <Compile Include="Testing\TestingAssertion.cs" />
+    <Compile Include="Testing\Benchmarking\AllocPointerBenchmarking.cs" />
+    <Compile Include="Testing\Benchmarking\ArrayPointerBenchmarking.cs" />
     <Compile Include="Testing\Dummy.cs" />
     <Compile Include="Testing\PinningTests.cs" />
     <Compile Include="Testing\PointerTests.cs" />

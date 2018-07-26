@@ -17,9 +17,12 @@ using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime;
+using RazorSharp.Runtime.CLRTypes.HeapObjects;
 using Test.Testing;
+using Test.Testing.Benchmarking;
 using Unsafe = RazorSharp.Unsafe;
 using static RazorSharp.Utilities.Assertion;
+using Assertion = RazorSharp.Utilities.Assertion;
 
 namespace Test
 {
@@ -57,13 +60,19 @@ namespace Test
 		 *  - BenchmarkDotNet
 		 *  - Fody
 		 *  - MethodTimer Fody
+		 *
+		 * Notes:
+		 *  - 32-bit is not fully supported
+		 *  - Most types are not thread-safe
 		 */
 		public static void Main(string[] args)
 		{
-			var summary = BenchmarkRunner.Run<ArrayPointerBenchmarking>();
+			string[] arr = {"foo", "bar", "anime", "animanga"};
+			ArrayObject** arrObj = Runtime.GetArrayObject(ref arr);
+			Console.WriteLine(**arrObj);
+
+
 		}
-
-
 
 		private static void PrintTable<T>(ArrayPointer<T> arr)
 		{

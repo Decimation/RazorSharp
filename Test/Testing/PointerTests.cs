@@ -18,13 +18,13 @@ namespace Test.Testing
 			string        x = "foo";
 			string        y = "bar";
 			Pointer<char> p = x;
-			Assertion.AssertElements(p, x);
+			TestingAssertion.AssertElements(p, x);
 			p = y;
-			Assertion.AssertElements(p, y);
+			TestingAssertion.AssertElements(p, y);
 
 			int[]        arr = {1, 2, 3};
 			Pointer<int> p2  = arr;
-			Assertion.AssertElements(p2, arr);
+			TestingAssertion.AssertElements(p2, arr);
 
 
 			string        z     = "anime";

@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace RazorSharp.Runtime
+namespace RazorSharp.Runtime.CLRTypes
 {
 
 	public unsafe struct ObjHeader

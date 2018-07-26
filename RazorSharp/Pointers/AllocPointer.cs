@@ -9,6 +9,13 @@ using RazorCommon;
 namespace RazorSharp.Pointers
 {
 
+	/// <summary>
+	/// Represents a C/C++ style array using dynamic unmanaged memory allocation
+	///
+	/// - No bounds checking
+	/// - Resizable
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
 	public sealed unsafe class AllocPointer<T> : Pointer<T>, IDisposable, IEnumerable<T>
 	{
 		private class AllocPointerMetadata : PointerMetadata
@@ -157,12 +164,7 @@ namespace RazorSharp.Pointers
 		}
 
 
-		public T[] ToArrayCopy()
-		{
-			var arr = new T[Count];
-			Memory.Copy(Address, arr, 0);
-			return arr;
-		}
+
 
 		public IEnumerator<T> GetEnumerator()
 		{

@@ -13,3 +13,8 @@ C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorCommon.pdb
 C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\ObjectLayoutInspector.pdb
 C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorInvoke.dll
 C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorInvoke.pdb
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\MethodTimer.dll
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Microsoft.DotNet.PlatformAbstractions.dll
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Collections.Immutable.dll
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\MethodTimer.xml
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Collections.Immutable.xml
