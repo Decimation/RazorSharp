@@ -48,7 +48,7 @@ namespace Test.Testing.Tests
 
 			//Debug.Assert(mt->BaseSize == 0x18);
 			Debug.Assert(mt->ComponentSize == 0x2);
-			Debug.Assert(mt->NumVirtuals == 7);
+			Debug.Assert(mt->NumInterfaces == 7);
 
 			// Class Name:      System.String
 			// mdToken:         0000000002000073

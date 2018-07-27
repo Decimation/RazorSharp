@@ -80,71 +80,6 @@ namespace RazorSharp.Runtime.CLRTypes
 	//https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.h
 	//https://github.com/dotnet/coreclr/blob/db55a1decc1d02538e61eac7db80b7daa351d5b6/src/gc/env/gcenv.object.h
 
-	// class.h
-
-	// todo: WIP
-	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct EEClass
-	{
-		[FieldOffset(0)]  private void*      m_pGuidInfo;
-		[FieldOffset(8)]  private void*      m_rpOptionalFields;
-
-		//** Status: verified
-		[FieldOffset(16)] private void*      m_pMethodTable;
-		[FieldOffset(24)] private FieldDesc* m_pFieldDescList;
-		[FieldOffset(32)] private void*      m_pChunks;
-
-		// Union
-		[FieldOffset(40)] private uint m_cbNativeSize;
-
-		// COMINTEROP
-		[FieldOffset(40)] private void* ohDelegate;
-
-		[FieldOffset(40)] private int m_ComInterfaceType;
-
-		// End COMINTEROP
-		// End Union
-
-		// COMINTEROP
-		[FieldOffset(48)] private void* m_pccwTemplate;
-
-		// End COMINTEROP
-
-		//** Status: verified
-		[FieldOffset(56)] private DWORD m_dwAttrClass;
-		[FieldOffset(60)] private DWORD m_VMFlags;
-		[FieldOffset(64)] private byte  m_NormType;
-		[FieldOffset(65)] private byte  m_fFieldsArePacked;
-		[FieldOffset(66)] private byte  m_cbFixedEEClassFields;
-		[FieldOffset(67)] private byte  m_cbBaseSizePadding;
-
-		public DWORD Attributes => m_dwAttrClass;
-
-		// Line 1942...
-
-
-
-		public override string ToString()
-		{
-			var table = new ConsoleTable("Field", "Value");
-			table.AddRow(nameof(m_pGuidInfo),Hex.ToHex(m_pGuidInfo));
-			table.AddRow(nameof(m_rpOptionalFields),Hex.ToHex(m_rpOptionalFields));
-			table.AddRow(nameof(m_pMethodTable), Hex.ToHex(m_pMethodTable));
-			table.AddRow(nameof(m_pFieldDescList),Hex.ToHex(m_pFieldDescList));
-			table.AddRow(nameof(m_pChunks),Hex.ToHex(m_pChunks));
-			table.AddRow(nameof(m_cbNativeSize),m_cbNativeSize);
-			table.AddRow(nameof(ohDelegate),Hex.ToHex(ohDelegate));
-			table.AddRow(nameof(m_ComInterfaceType),m_ComInterfaceType);
-			table.AddRow(nameof(m_pccwTemplate),Hex.ToHex(m_pccwTemplate));
-			table.AddRow(nameof(m_dwAttrClass),Hex.ToHex(m_dwAttrClass));
-			table.AddRow(nameof(m_VMFlags),m_VMFlags);
-			table.AddRow(nameof(m_NormType),m_NormType);
-			table.AddRow(nameof(m_fFieldsArePacked),m_fFieldsArePacked);
-			table.AddRow(nameof(m_cbFixedEEClassFields),m_cbFixedEEClassFields);
-			table.AddRow(nameof(m_cbBaseSizePadding),m_cbBaseSizePadding);
-			return table.ToMarkDownString();
-		}
-	}
 
 	//todo: fix
 	// field.h
@@ -191,6 +126,11 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		#endregion
 
+		/// <summary>
+		/// The size of an individual element when this type is an array or string.
+		///
+		/// This size will be 2 with strings (sizeof(char)).
+		/// </summary>
 		public WORD ComponentSize {
 			get {
 				if (HasComponentSize)
@@ -199,6 +139,9 @@ namespace RazorSharp.Runtime.CLRTypes
 			}
 		}
 
+		/// <summary>
+		/// The base size of this class when allocated on the heap.
+		/// </summary>
 		public DWORD BaseSize => m_BaseSize;
 
 		public WORD Token => m_wToken;
@@ -211,8 +154,8 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public void* Module => m_pLoaderModule;
 
-		public EEClass*     EEClass => _eeClassPtr.m_pEEClass;
-		public MethodTable* Canon   => (MethodTable*) _eeClassPtr.m_pCanonMT;
+		public EEClass*     EEClass => m_pEEClass;
+		public MethodTable* Canon   => m_pCanonMT;
 
 		//public FieldDesc* FieldDescList => _eeClassPtr.m_pEEClass->m_pFieldDescList;
 
@@ -237,7 +180,6 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(0)] private DWFlags m_dwFlags;
 
 		//** Status: verified
-		// Base size of instance of this class when allocated on the heap
 		[FieldOffset(4)] private DWORD m_BaseSize;
 
 		//** Status: unknown
@@ -248,7 +190,6 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(10)] private WORD m_wToken;
 
 		//** Status: unknown
-		// <NICE> In the normal cases we shouldn't need a full word for each of these </NICE>
 		[FieldOffset(12)] private WORD m_wNumVirtuals;
 
 		//** Status: verified
@@ -265,7 +206,6 @@ namespace RazorSharp.Runtime.CLRTypes
 		//** Status: verified
 		[FieldOffset(24)] private void* m_pLoaderModule; // LoaderModule. It is equal to the ZapModule in ngened images
 
-
 		//todo - lowest two bits of what?
 		// The value of lowest two bits describe what the union contains
 		enum LowBits
@@ -281,7 +221,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(32)] private void* m_pWriteableData;
 
 		//** Status: verified
-		[FieldOffset(40)] private EEClassPtr _eeClassPtr;
+		[FieldOffset(40)] private EEClass*     m_pEEClass;
+		//** Status: verified
+		[FieldOffset(40)] private MethodTable* m_pCanonMT;
 
 		//** Status: unknown
 		[FieldOffset(48)] private InstSlot m_slotInfo;
@@ -289,18 +231,11 @@ namespace RazorSharp.Runtime.CLRTypes
 		//** Status: unknown
 		[FieldOffset(56)] private MapSlot m_mapSlot;
 
-		//[FieldOffset(32)] private EEClassPtr _eeClassPtr;
-
-
 		// m_pPerInstInfo and m_pInterfaceMap have to be at fixed offsets because of performance sensitive
 		// JITed code and JIT helpers. However, they are frequently not present. The space is used by other
 		// multipurpose slots on first come first served basis if the fixed ones are not present. The other
 		// multipurpose are DispatchMapSlot, NonVirtualSlots, ModuleOverride (see enum_flag_MultipurposeSlotsMask).
 		// The multipurpose slots that do not fit are stored after vtable slots.
-
-		//private InstSlot _instSlot;
-
-		//private MapSlot _mapSlot;
 
 		// VTable and Non-Virtual slots go here
 
@@ -326,17 +261,12 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			table.AddRow("Flags", string.Format("{0} ({1})", Flags, Collections.ToString(Constants.Extract(Flags))));
 
-			//table.AddRow("Flags", $"{Flags} ({TableFlags})");
-
-			//todo: this seems to read duplicates as some enums are the same ushort value
-			//table.AddRow("Flags (low)", string.Format("{0} ({1})", Flags, Collections.ToString(Constants.ExtractLow(m_dwFlags.m_flags))));
 
 			table.AddRow("Low flags", $"{LowFlags} ({TableFlagsLow})");
 
 			table.AddRow("Flags 2",
 				string.Format("{0} ({1})", Flags2, Collections.ToString(Constants.Extract(Flags2))));
 
-			//table.AddRow("Flags 2", $"{Flags2} ({TableFlags2})");
 			table.AddRow("Token", m_wToken);
 			table.AddRow("Number virtuals", m_wNumVirtuals);
 			table.AddRow("Number interfaces", m_wNumInterfaces);
@@ -346,17 +276,15 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			table.AddRow("m_pWriteableData", Hex.ToHex(m_pWriteableData));
 
-			table.AddRow("EEClass", Hex.ToHex(_eeClassPtr.m_pEEClass));
-			//table.AddRow("EEClass value", *_eeClassPtr.m_pEEClass);
-			table.AddRow("Canon MT", Hex.ToHex(_eeClassPtr.m_pCanonMT));
+			table.AddRow("EEClass", Hex.ToHex(m_pEEClass));
+
+			table.AddRow("Canon MT", Hex.ToHex(m_pCanonMT));
 
 			table.AddRow("m_ElementTypeHnd", (m_slotInfo.m_ElementTypeHnd));
 			table.AddRow("m_pMultipurposeSlot1", (m_slotInfo.m_pMultipurposeSlot1));
 			table.AddRow("m_pPerInstInfo", Hex.ToHex(m_slotInfo.m_pPerInstInfo));
 			table.AddRow("m_pInterfaceMap", Hex.ToHex(m_mapSlot.m_pInterfaceMap));
 			table.AddRow("m_pMultipurposeSlot2", (m_mapSlot.m_pMultipurposeSlot2));
-
-
 			return table.ToMarkDownString();
 		}
 
@@ -382,7 +310,7 @@ namespace RazorSharp.Runtime.CLRTypes
 				bool tokenEq   = Token == mtOther.Token;
 				bool parentEq  = Parent == mtOther.Parent;
 				bool moduleEq  = Module == mtOther.Module;
-				bool eeEq      = _eeClassPtr.Equals(mtOther._eeClassPtr);
+				bool eeEq = m_pEEClass == mtOther.m_pEEClass && m_pCanonMT == mtOther.m_pCanonMT;
 
 				return dwFlagsEq && sizesEq && flags2Eq && numEq && tokenEq && parentEq && moduleEq && eeEq;
 			}

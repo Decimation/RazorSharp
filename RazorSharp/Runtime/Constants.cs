@@ -263,4 +263,100 @@ namespace RazorSharp.Runtime
 
 	}
 
+	// Use with EEClassLayoutInfo::m_bFlags
+	[Flags]
+	public enum LayoutFlags : byte
+	{
+		// TRUE if the GC layout of the class is bit-for-bit identical
+		// to its unmanaged counterpart (i.e. no internal reference fields,
+		// no ansi-unicode char conversions required, etc.) Used to
+		// optimize marshaling.
+		Blittable = 0x01,
+
+		// Post V1.0 addition: Is this type also sequential in managed memory?
+		ManagedSequential = 0x02,
+
+		// When a sequential/explicit type has no fields, it is conceptually
+		// zero-sized, but actually is 1 byte in length. This holds onto this
+		// fact and allows us to revert the 1 byte of padding when another
+		// explicit type inherits from this type.
+		ZeroSized = 0x04,
+
+		// The size of the struct is explicitly specified in the meta-data.
+		HasExplicitSize = 0x08,
+
+		// FEATURE_HFA
+		e_NATIVE_PASS_IN_REGISTERS = 0x10, // Flag wheter a native struct is passed in registers.
+
+		// HFA type of the unmanaged layout
+		e_R4_HFA = 0x10,
+		e_R8_HFA = 0x20,
+
+	}
+
+	// Use with EEClass::VMFlags
+	[Flags]
+	public enum VMFlags : uint
+	{
+		VmflagLayoutDependsOnOtherModules = 0x00000001,
+		VmflagDelegate                    = 0x00000002,
+		VmflagFixedAddressVtStatics       = 0x00000020, // Value type Statics in this class will be pinned
+		VmflagHaslayout                   = 0x00000040,
+		VmflagIsnested                    = 0x00000080,
+		VmflagIsEquivalentType            = 0x00000200,
+
+		//   OVERLAYED is used to detect whether Equals can safely optimize to a bit-compare across the structure.
+		VmflagHasoverlayedfields = 0x00000400,
+
+		// Set this if this class or its parent have instance fields which
+		// must be explicitly inited in a constructor (e.g. pointers of any
+		// kind, gc or native).
+		//
+		// Currently this is used by the verifier when verifying value classes
+		// - it's ok to use uninitialised value classes if there are no
+		// pointer fields in them.
+		VmflagHasFieldsWhichMustBeInited = 0x00000800,
+
+		VmflagUnsafevaluetype = 0x00001000,
+
+		VmflagBestfitmappingInited =
+			0x00002000,                           // VMFLAG_BESTFITMAPPING and VMFLAG_THROWONUNMAPPABLECHAR are valid only if this is set
+		VmflagBestfitmapping        = 0x00004000, // BestFitMappingAttribute.Value
+		VmflagThrowonunmappablechar = 0x00008000, // BestFitMappingAttribute.ThrowOnUnmappableChar
+
+		// unused                              = 0x00010000,
+		VmflagNoGuid             = 0x00020000,
+		VmflagHasnonpublicfields = 0x00040000,
+
+		// unused                              = 0x00080000,
+		VmflagContainsStackPtr = 0x00100000,
+		VmflagPreferAlign8     = 0x00200000, // Would like to have 8-byte alignment
+		// unused                              = 0x00400000,
+
+		VmflagSparseForCominterop = 0x00800000,
+
+		// interfaces may have a coclass attribute
+		VmflagHascoclassattrib   = 0x01000000,
+		VmflagComeventitfmask    = 0x02000000, // class is a special COM event interface
+		VmflagProjectedFromWinrt = 0x04000000,
+		VmflagExportedToWinrt    = 0x08000000,
+
+		// This one indicates that the fields of the valuetype are
+		// not tightly packed and is used to check whether we can
+		// do bit-equality on value types to implement ValueType::Equals.
+		// It is not valid for classes, and only matters if ContainsPointer
+		// is false.
+		VmflagNotTightlyPacked = 0x10000000,
+
+		// True if methoddesc on this class have any real (non-interface) methodimpls
+		VmflagContainsMethodimpls = 0x20000000,
+
+		VmflagMarshalingtypeMask = 0xc0000000,
+
+		VmflagMarshalingtypeInhibit      = 0x40000000,
+		VmflagMarshalingtypeFreethreaded = 0x80000000,
+		VmflagMarshalingtypeStandard     = 0xc0000000,
+
+	}
+
 }

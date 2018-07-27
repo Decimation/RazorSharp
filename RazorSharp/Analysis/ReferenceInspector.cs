@@ -34,13 +34,15 @@ namespace RazorSharp.Analysis
 
 		private sealed class ReferenceSizeInfo : SizeInfo
 		{
-			public int BaseInstance { get; }
-			public int Heap         { get; }
+			public int BaseInstance   { get; }
+			public int Heap           { get; }
+			public int BaseFieldsSize { get; }
 
 			internal ReferenceSizeInfo(ref T t) : base()
 			{
-				BaseInstance = Unsafe.BaseInstanceSize<T>();
-				Heap         = Unsafe.HeapSize(ref t);
+				BaseInstance   = Unsafe.BaseInstanceSize<T>();
+				Heap           = Unsafe.HeapSize(ref t);
+				BaseFieldsSize = Unsafe.BaseFieldsSize<T>();
 			}
 
 			protected internal override ConsoleTable ToTable()
@@ -48,6 +50,7 @@ namespace RazorSharp.Analysis
 				var table = base.ToTable();
 				table.AddRow("Base instance size", BaseInstance);
 				table.AddRow("Heap size", Heap);
+				table.AddRow("Base fields size", BaseFieldsSize);
 				return table;
 			}
 		}
@@ -56,6 +59,7 @@ namespace RazorSharp.Analysis
 		{
 			public IntPtr Heap   { get; }
 			public IntPtr Fields { get; }
+
 			/// <summary>
 			/// String data if the type is a string,
 			/// Array data if the type is an array
@@ -69,9 +73,8 @@ namespace RazorSharp.Analysis
 				if (typeof(T).IsArray)
 					HeapMisc = Unsafe.AddressOfHeap(ref t, OffsetType.ArrayData);
 				else if (typeof(T) == typeof(string))
-					HeapMisc = Unsafe.AddressOfHeap(ref t, OffsetType.StringData);
+					HeapMisc  = Unsafe.AddressOfHeap(ref t, OffsetType.StringData);
 				else HeapMisc = IntPtr.Zero;
-
 			}
 
 			protected internal override ConsoleTable ToTable()
@@ -87,9 +90,7 @@ namespace RazorSharp.Analysis
 				else if (typeof(T) == typeof(String)) {
 					table.AddRow("String data", Hex.ToHex(HeapMisc));
 				}
-				else {
-
-				}
+				else { }
 
 
 				return table;
@@ -125,10 +126,6 @@ namespace RazorSharp.Analysis
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
-
-
-
-
 
 
 			return table.ToMarkDownString();

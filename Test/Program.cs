@@ -17,6 +17,7 @@ using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime;
+using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Runtime.CLRTypes.HeapObjects;
 using Test.Testing;
 using Test.Testing.Benchmarking;
@@ -32,10 +33,13 @@ namespace Test
 	internal static unsafe class Program
 	{
 
+#if DEBUG
 		static Program()
 		{
-			//StandardOut.ModConsole();
+			StandardOut.ModConsole();
 		}
+#endif
+
 
 		/**
 		 * RazorSharp
@@ -71,22 +75,23 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-
-
-
-
-			string str = "foo";
-			ReferenceInspector<string>.Write(ref str);
-
-			var mt = Runtime.ReadMethodTable(ref str);
+			string s  = "foo";
+			var    mt = Runtime.ReadMethodTable(ref s);
 			Console.WriteLine(*mt);
 
-
-			Console.WriteLine(*mt->EEClass);
-
-
-
 			//Console.ReadLine();
+		}
+
+		private struct Structure
+		{
+
+		}
+
+
+
+		private class Clazz
+		{
+			private int x;
 		}
 
 		private static void PrintTable<T>(ArrayPointer<T> arr)

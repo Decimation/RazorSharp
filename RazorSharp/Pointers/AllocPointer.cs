@@ -16,7 +16,7 @@ namespace RazorSharp.Pointers
 	/// - Resizable
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public sealed unsafe class AllocPointer<T> : Pointer<T>, IDisposable, IEnumerable<T>
+	public sealed unsafe class AllocPointer<T> : Pointer<T>, IDisposable
 	{
 		private class AllocPointerMetadata : PointerMetadata
 		{
@@ -60,7 +60,6 @@ namespace RazorSharp.Pointers
 				}
 			}
 		}
-
 
 		public override T Value {
 			get { return IsAllocated ? base.Value : default; }
@@ -163,14 +162,6 @@ namespace RazorSharp.Pointers
 			GC.SuppressFinalize(this);
 		}
 
-
-
-
-		public IEnumerator<T> GetEnumerator()
-		{
-			throw new NotImplementedException();
-		}
-
 		public override string ToString()
 		{
 			return base.ToString();
@@ -181,10 +172,7 @@ namespace RazorSharp.Pointers
 			//ReleaseUnmanagedResources();
 		}
 
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
+
 
 		#endregion
 

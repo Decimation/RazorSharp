@@ -110,10 +110,13 @@
     <Compile Include="Pointers\ArrayPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
     <Compile Include="Pointers\StackArrayPointer.cs" />
+    <Compile Include="Runtime\CLRTypes\EEClass.cs" />
+    <Compile Include="Runtime\CLRTypes\EEClassLayoutInfo.cs" />
     <Compile Include="Runtime\CLRTypes\HeapObjects\ArrayObject.cs" />
     <Compile Include="Runtime\CLRTypes\HeapObjects\HeapObject.cs" />
     <Compile Include="Runtime\CLRTypes\HeapObjects\IHeapObject.cs" />
     <Compile Include="Runtime\CLRTypes\HeapObjects\StringObject.cs" />
+    <Compile Include="Runtime\CLRTypes\LayoutEEClass.cs" />
     <Compile Include="Runtime\CLRTypes\MethodTable.cs" />
     <Compile Include="Runtime\CLRTypes\ObjHeader.cs" />
     <Compile Include="Runtime\Constants.cs" />

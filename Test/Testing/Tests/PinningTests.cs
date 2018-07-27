@@ -32,7 +32,7 @@ namespace Test.Testing.Tests
 		public void TestILPinning()
 		{
 			string s = "foo";
-			Pointer<char> ptr = s;
+			ArrayPointer<char> ptr = s;
 
 			ObjectPinner.InvokeWhilePinned(s, delegate
 			{

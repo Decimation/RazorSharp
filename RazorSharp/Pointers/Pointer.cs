@@ -46,6 +46,19 @@ namespace RazorSharp.Pointers
 				IsDecayed   = isDecayed;
 			}
 
+			protected bool Equals(PointerMetadata m)
+			{
+				return this.IsDecayed == m.IsDecayed && this.ElementSize == m.ElementSize;
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (obj.GetType() == this.GetType()) {
+					return Equals((PointerMetadata) obj);
+				}
+				return false;
+			}
+
 			internal PointerMetadata(int elementSize) : this(elementSize, false) { }
 		}
 
@@ -79,8 +92,6 @@ namespace RazorSharp.Pointers
 		}
 
 		public virtual T this[int index] {
-			//get => CSUnsafe.Read<T>(OffsetIndex(index));
-			//set => CSUnsafe.Write(OffsetIndex(index), value);
 			get => CSUnsafe.Read<T>(Unsafe.Offset<T>(m_addr, index).ToPointer());
 			set => CSUnsafe.Write(Unsafe.Offset<T>(m_addr, index).ToPointer(), value);
 		}
@@ -96,20 +107,9 @@ namespace RazorSharp.Pointers
 			m_metadata = metadata;
 		}
 
-		private protected Pointer(PointerMetadata metadata)
-		{
-			m_metadata = metadata;
-		}
-
 		public Pointer(void* v) : this((IntPtr) v) { }
 
 		public Pointer(ref T t) : this(Unsafe.AddressOf(ref t)) { }
-
-		private static Pointer<T> CreateDecayedPointer(IntPtr pHeap)
-		{
-			PointerMetadata meta = new PointerMetadata(Unsafe.SizeOf<T>(), true);
-			return new Pointer<T>(pHeap, meta);
-		}
 
 		#endregion
 
@@ -137,7 +137,6 @@ namespace RazorSharp.Pointers
 			table.AddRow("Decayed", m_metadata.IsDecayed);
 			return table;
 		}
-
 
 		public long ToInt64()
 		{
@@ -175,18 +174,6 @@ namespace RazorSharp.Pointers
 
 		#region Implicit
 
-		// Special support for strings
-		public static implicit operator Pointer<T>(string s)
-		{
-			Assertion.AssertType<char, T>();
-			return CreateDecayedPointer(Unsafe.AddressOfHeap(ref s, OffsetType.StringData));
-		}
-
-		public static implicit operator Pointer<T>(T[] arr)
-		{
-			return CreateDecayedPointer(Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData));
-		}
-
 		public static implicit operator Pointer<T>(void* v)
 		{
 			return new Pointer<T>(v);
@@ -198,7 +185,6 @@ namespace RazorSharp.Pointers
 		}
 
 		#endregion
-
 
 		#region Arithmetic
 
@@ -236,6 +222,8 @@ namespace RazorSharp.Pointers
 
 		#region Overrides
 
+		#region Equality
+
 		public override bool Equals(object obj)
 		{
 			if (obj?.GetType() == this.GetType()) {
@@ -243,14 +231,37 @@ namespace RazorSharp.Pointers
 				return ptr.Address == this.Address;
 			}
 
-			return base.Equals(obj);
+			return false;
 		}
+
+		protected bool Equals(Pointer<T> other)
+		{
+			return m_addr.Equals(other.m_addr) && m_metadata.Equals(other.m_metadata);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked {
+				return (m_addr.GetHashCode() * 397) ^ m_metadata.GetHashCode();
+			}
+		}
+
+		public static bool operator ==(Pointer<T> left, Pointer<T> right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(Pointer<T> left, Pointer<T> right)
+		{
+			return !left.Equals(right);
+		}
+
+		#endregion
 
 		public virtual string ToString(string format)
 		{
 			return this.ToString(format, CultureInfo.CurrentCulture);
 		}
-
 
 		/// <inheritdoc />
 		/// <param name="format">O: Object, P: Pointer, T: Table</param>

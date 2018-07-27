@@ -158,6 +158,8 @@ namespace RazorSharp
 		/// 	length			   = array or string length, 1 otherwise
 		/// 	component size	   = element size, if available
 		/// </summary>
+		///
+		/// Note: this also includes padding.
 		/// <returns>The size of the type's heap memory, in bytes</returns>
 		public static int HeapSize<T>(ref T t) where T : class
 		{
@@ -187,13 +189,24 @@ namespace RazorSharp
 		}
 
 		/// <summary>
+		/// Calculates the base size of the fields in the heap minus padding of the base size.
+		///
+		/// Note that if the fields *themselves* are padded, those are still included.
+		/// </summary>
+		public static int BaseFieldsSize<T>()
+		{
+			var mt = Runtime.Runtime.MethodTableOf<T>();
+			return  (int) mt->BaseSize - mt->EEClass->BaseSizePadding;
+		}
+
+		/// <summary>
 		/// Returns the base instance size according to the TypHandle (MethodTable).
 		/// </summary>
 		/// <returns>-1 if type is array, base instance size otherwise</returns>
 		public static int BaseInstanceSize<T>() where T : class
 		{
 			if (typeof(T).IsArray) return -1;
-			return Marshal.ReadInt32(typeof(T).TypeHandle.Value, 4);
+			return (int) Runtime.Runtime.MethodTableOf<T>()->BaseSize;
 		}
 
 

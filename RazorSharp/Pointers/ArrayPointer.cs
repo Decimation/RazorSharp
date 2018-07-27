@@ -15,7 +15,6 @@ namespace RazorSharp.Pointers
 	/// <typeparam name="T"></typeparam>
 	public unsafe class ArrayPointer<T> : Pointer<T>
 	{
-
 		#region Fields and accessors
 
 		/// <summary>
@@ -191,6 +190,45 @@ namespace RazorSharp.Pointers
 
 		#region Operators
 
+		#region Equality
+
+		protected bool Equals(ArrayPointer<T> other)
+		{
+			return base.Equals(other) && _origin.Equals(other._origin) && m_offset == other.m_offset && Count == other.Count;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			if (obj.GetType() != this.GetType()) return false;
+			return Equals((ArrayPointer<T>) obj);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked {
+				int hashCode = base.GetHashCode();
+				hashCode = (hashCode * 397) ^ _origin.GetHashCode();
+				//hashCode = (hashCode * 397) ^ m_offset;
+				hashCode = (hashCode * 397) ^ Count;
+				return hashCode;
+			}
+		}
+
+		public static bool operator ==(ArrayPointer<T> left, ArrayPointer<T> right)
+		{
+			return Equals(left, right);
+		}
+
+		public static bool operator !=(ArrayPointer<T> left, ArrayPointer<T> right)
+		{
+			return !Equals(left, right);
+		}
+
+		#endregion
+
+
 		public static ArrayPointer<T> operator ++(ArrayPointer<T> p)
 		{
 			p.Increment();
@@ -254,7 +292,6 @@ namespace RazorSharp.Pointers
 
 			return table;
 		}
-
 
 		protected override ConsoleTable ToElementTable(int length)
 		{
