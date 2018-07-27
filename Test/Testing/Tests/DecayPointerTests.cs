@@ -9,27 +9,27 @@ namespace Test.Testing.Tests
 {
 
 	[TestFixture]
-	internal class ArrayPointerTests
+	internal class DecayPointerTests
 	{
 		[Test]
 		public void TestArray()
 		{
 			int[]             arr       = {1, 2, 3, 4, 5};
-			ArrayPointer<int> arrPtrInt = arr;
-			AssertArrayPointer(arrPtrInt, arr);
+			DecayPointer<int> arrPtrInt = arr;
+			AssertDecayPointer(arrPtrInt, arr);
 
 			long[]             longArr = {1, 2, 3, 4, 5};
-			ArrayPointer<long> longPtr = longArr;
-			AssertArrayPointer(longPtr, longArr);
+			DecayPointer<long> longPtr = longArr;
+			AssertDecayPointer(longPtr, longArr);
 
 			string[]             strArr    = {StringUtils.Random(5), StringUtils.Random(10), "foo", "anime", ""};
-			ArrayPointer<string> strArrPtr = strArr;
-			AssertArrayPointer(strArrPtr, strArr);
+			DecayPointer<string> strArrPtr = strArr;
+			AssertDecayPointer(strArrPtr, strArr);
 		}
 
 
 
-		private static void AssertArrayPointer<TElement>(ArrayPointer<TElement> ptr, IList<TElement> arr)
+		private static void AssertDecayPointer<TElement>(DecayPointer<TElement> ptr, IList<TElement> arr)
 		{
 			Assert.That(ptr.Count, Is.EqualTo(arr.Count));
 			Assert.That(ptr.IsDecayed, Is.EqualTo(true));
@@ -69,7 +69,7 @@ namespace Test.Testing.Tests
 		{
 			string s = "anime";
 
-			ArrayPointer<char> ptr = s;
+			DecayPointer<char> ptr = s;
 
 			Assert.That(ptr.FirstElement, Is.EqualTo(Unsafe.AddressOfHeap(ref s, OffsetType.StringData)));
 

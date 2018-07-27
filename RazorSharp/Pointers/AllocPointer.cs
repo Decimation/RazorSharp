@@ -14,6 +14,7 @@ namespace RazorSharp.Pointers
 	///
 	/// - No bounds checking
 	/// - Resizable
+	/// - Allocation protection
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public sealed unsafe class AllocPointer<T> : Pointer<T>, IDisposable
@@ -23,7 +24,6 @@ namespace RazorSharp.Pointers
 			protected internal bool IsAllocated { get; set; }
 
 			protected internal int AllocatedSize { get; set; }
-
 
 			protected internal AllocPointerMetadata(int elementSize, bool allocated, int allocSize) : base(elementSize)
 			{
@@ -91,10 +91,7 @@ namespace RazorSharp.Pointers
 		public AllocPointer(int elements) : this(Marshal.AllocHGlobal(elements * Unsafe.SizeOf<T>()),
 			elements * Unsafe.SizeOf<T>()) { }
 
-		public AllocPointer(IntPtr p) : this(p, Unsafe.SizeOf<T>())
-		{
-
-		}
+		//public AllocPointer(IntPtr p) : this(p, Unsafe.SizeOf<T>()) { }
 
 		private AllocPointer(IntPtr p, int bytesAlloc) : base(p,
 			new AllocPointerMetadata(Unsafe.SizeOf<T>(), true, bytesAlloc))
@@ -176,8 +173,6 @@ namespace RazorSharp.Pointers
 		{
 			//ReleaseUnmanagedResources();
 		}
-
-
 
 		#endregion
 

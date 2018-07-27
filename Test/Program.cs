@@ -77,9 +77,10 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-
-
-
+			AllocPointer<int> array = new AllocPointer<int>(5);
+			array[0] = 1;
+			array[1] = 2;
+			Console.WriteLine("{0:T}",array);
 
 			// MethodDesc Table
 			// Entry 			MethodDesc    	 JIT 	Name
@@ -87,9 +88,7 @@ namespace Test
 			// 00007fff1c900a40 00007fff1bb6ccb8 PreJIT System.Collections.Generic.List`1[[System.Int32, mscorlib]]..ctor()
 			// 00007fff1bf70600 00007fff1bb6ccc0 PreJIT System.Collections.Generic.List`1[[System.Int32, mscorlib]]..ctor(Int32)
 			// 00007fff1bf497d0 00007fff1bb6ccc8 PreJIT System.Collections.Generic.List`1[[System.Int32, mscorlib]]..ctor(System.Collections.Generic.IEnumerable`1)
-
 		}
-
 
 
 	}

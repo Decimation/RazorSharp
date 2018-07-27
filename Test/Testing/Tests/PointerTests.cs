@@ -1,6 +1,9 @@
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using NUnit.Framework;
+using RazorSharp;
 using RazorSharp.Pointers;
+using Unsafe = RazorSharp.Unsafe;
 
 namespace Test.Testing.Tests
 {
@@ -17,6 +20,14 @@ namespace Test.Testing.Tests
 
 			Pointer<string> strPtr2 = new Pointer<string>(ref s);
 			Debug.Assert(strPtr == strPtr2);
+
+			string[] arr = {"", "foo", "anime"};
+			Pointer<string> strPtr3 = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData);
+			TestingAssertion.AssertElements(strPtr3, arr);
+			strPtr3 -= 3;
+			Debug.Assert(strPtr3.Value == arr[0]);
+			strPtr3++;
+			Debug.Assert(strPtr3.Value == arr[1]);
 		}
 
 		[Test]
@@ -24,25 +35,25 @@ namespace Test.Testing.Tests
 		{
 			string        x = "foo";
 			string        y = "bar";
-			ArrayPointer<char> p = x;
+			DecayPointer<char> p = x;
 			TestingAssertion.AssertElements(p, x);
 			p = y;
 			TestingAssertion.AssertElements(p, y);
 
 			int[]        arr = {1, 2, 3};
-			ArrayPointer<int> p2  = arr;
+			DecayPointer<int> p2  = arr;
 			TestingAssertion.AssertElements(p2, arr);
 
 
 			string        z     = "anime";
-			ArrayPointer<char> chPtr = z;
+			DecayPointer<char> chPtr = z;
 
 			Assert.That(chPtr[0], Is.EqualTo(z[0]));
 			chPtr++;
 			Assert.That(chPtr[0], Is.EqualTo(z[1]));
 			chPtr--;
 
-			ArrayPointer<char> chPtr2 = z;
+			DecayPointer<char> chPtr2 = z;
 
 			Debug.Assert(chPtr == chPtr2);
 

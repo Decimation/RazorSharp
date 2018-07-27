@@ -9,7 +9,7 @@ namespace Test.Testing.Benchmarking
 		[Params(10)] public int ArrayLength;
 
 		private int[]             m_array;
-		private ArrayPointer<int> m_ptr;
+		private DecayPointer<int> m_ptr;
 
 		[Benchmark]
 		public void IteratePointer()

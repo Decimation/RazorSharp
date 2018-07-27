@@ -195,7 +195,7 @@
     <Compile Include="Testing\Benchmarking\ArrayPointerBenchmarking.cs" />
     <Compile Include="Testing\Dummy.cs" />
     <Compile Include="Testing\Tests\AllocPointerTests.cs" />
-    <Compile Include="Testing\Tests\ArrayPointerTests.cs" />
+    <Compile Include="Testing\Tests\DecayPointerTests.cs" />
     <Compile Include="Testing\Tests\HeapObjectTests.cs" />
     <Compile Include="Testing\Tests\PinningTests.cs" />
     <Compile Include="Testing\Tests\PointerTests.cs" />

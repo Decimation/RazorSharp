@@ -11,7 +11,7 @@ namespace RazorSharp.Pointers
 {
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-
+	using Memory = Memory.Memory;
 
 	/// <summary>
 	/// A pointer to any type.
@@ -19,6 +19,8 @@ namespace RazorSharp.Pointers
 	///
 	/// If <![CDATA[T]]> is a reference type, pinning is not required as
 	/// the pointer contains the stack pointer, meaning the pointer works with the GC.
+	///
+	/// - No bounds checking
 	/// </summary>
 	/// <typeparam name="T">Type this pointer points to. If just raw memory, use byte.</typeparam>
 	public unsafe class Pointer<T> : IFormattable, IPointer<T>
@@ -94,13 +96,13 @@ namespace RazorSharp.Pointers
 		/// This is equivalent to this[0].
 		/// </summary>
 		public virtual T Value {
-			get => CSUnsafe.Read<T>(m_addr.ToPointer());
-			set => CSUnsafe.Write(m_addr.ToPointer(), value);
+			get => Memory.Read<T>(m_addr,0);
+			set => Memory.Write(m_addr, 0, value);
 		}
 
 		public virtual T this[int index] {
-			get => CSUnsafe.Read<T>(Unsafe.Offset<T>(m_addr, index).ToPointer());
-			set => CSUnsafe.Write(Unsafe.Offset<T>(m_addr, index).ToPointer(), value);
+			get => Memory.Read<T>(Unsafe.Offset<T>(m_addr, index),0);
+			set => Memory.Write(Unsafe.Offset<T>(m_addr, index),0, value);
 		}
 
 		#region Constructors
@@ -134,13 +136,13 @@ namespace RazorSharp.Pointers
 			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Address", Hex.ToHex(Address));
 
-			table.AddRow("Value", Memory.Memory.SafeToString(this));
+			table.AddRow("Value", Memory.SafeToString(this));
 
 
 
 			table.AddRow("Type", typeof(T).Name);
 
-			table.AddRow("this[0]",Memory.Memory.SafeToString(this,0));
+			table.AddRow("this[0]",Memory.SafeToString(this,0));
 
 
 			table.AddRow("Null", IsNull);

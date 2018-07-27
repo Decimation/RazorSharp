@@ -111,7 +111,6 @@
     <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\LightPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
-    <Compile Include="Pointers\StackArrayPointer.cs" />
     <Compile Include="Runtime\CLRTypes\EEClass.cs" />
     <Compile Include="Runtime\CLRTypes\EEClassLayoutInfo.cs" />
     <Compile Include="Runtime\CLRTypes\HeapObjects\ArrayObject.cs" />
