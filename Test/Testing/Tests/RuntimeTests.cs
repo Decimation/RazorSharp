@@ -71,6 +71,14 @@ namespace Test.Testing.Tests
 			Debug.Assert(mt->Module == (void*) 0x00007fff1ba81000);
 			Debug.Assert(mt->EEClass->Attributes == 0x102101);
 
+			// 26 = string's base size
+			// 6 = (sizeof(char) + sizeof(int))
+			// 26 - 6 = 20
+			Debug.Assert(mt->EEClass->BaseSizePadding == 20);
+			Debug.Assert(Unsafe.BaseFieldsSize<string>() == 6);
+			Debug.Assert(Unsafe.BaseInstanceSize<string>() == 26);
+
+
 			// Name:       C:\WINDOWS\Microsoft.Net\assembly\GAC_64\mscorlib\v4.0_4.0.0.0__b77a5c561934e089\mscorlib.dll
 			// Attributes: PEFile
 			// Assembly:   0000020aecb938e0

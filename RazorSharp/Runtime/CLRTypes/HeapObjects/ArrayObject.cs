@@ -14,7 +14,7 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 		[FieldOffset(0)]  private readonly MethodTable*      m_methodTablePtr;
 		[FieldOffset(8)]  private readonly uint              m_numComponents;
 		[FieldOffset(12)] private readonly uint              m_pad;
-		[FieldOffset(16)] private readonly RuntimeTypeHandle m_handle;
+
 
 		public uint         Length      => m_numComponents;
 		public ObjHeader*   Header      => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
@@ -23,7 +23,7 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 		/// <summary>
 		/// Only present if the method table is shared among many types (arrays of pointers)
 		/// </summary>
-		public RuntimeTypeHandle Handle => m_handle;
+		//public RuntimeTypeHandle Handle => m_handle;
 
 		public override string ToString()
 		{
@@ -32,9 +32,8 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 			table.AddRow("MethodTable*", Hex.ToHex(m_methodTablePtr));
 			table.AddRow("Length", Length);
 
-			if (m_handle.Value != IntPtr.Zero) {
-				table.AddRow("TypeHandle*", Hex.ToHex(m_handle.Value));
-			}
+
+
 
 			return table.ToMarkDownString();
 		}

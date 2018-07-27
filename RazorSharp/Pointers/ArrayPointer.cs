@@ -11,6 +11,8 @@ namespace RazorSharp.Pointers
 	/// This won't work when:
 	/// 	- A string is changed (i.e. concatenations)
 	///
+	/// Unlike Pointer, this supports implicit array-type conversions (decaying)
+	/// but doesn't work with the GC. This requires pinning.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public unsafe class ArrayPointer<T> : Pointer<T>

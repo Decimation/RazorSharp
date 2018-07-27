@@ -102,9 +102,7 @@ namespace RazorSharp
 
 					AssertType<string, T>();
 					var s = t as string;
-					fixed (char* c = s) {
-						return (IntPtr) c;
-					}
+					return AddressOfHeap(ref s) + RuntimeHelpers.OffsetToStringData;
 
 				case OffsetType.ArrayData:
 
@@ -112,12 +110,14 @@ namespace RazorSharp
 						TypeException.Throw<Array, T>();
 					}
 
-					return AddressOfHeap(ref t) + IntPtr.Size * 2;
+					return AddressOfHeap(ref t) + Runtime.Runtime.OffsetToArrayData;
 
 				case OffsetType.Fields:
 
 					// todo: if the type is an array, should this return ArrayData,
 					// todo: ...and if it's a string, should this return StringData?
+
+					// Skip over the MethodTable*
 					return AddressOfHeap(ref t) + IntPtr.Size;
 
 				case OffsetType.None:
@@ -200,16 +200,18 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		/// Returns the base instance size according to the TypHandle (MethodTable).
+		/// Returns the base instance size according to the TypeHandle (MethodTable).
+		/// This is the minimum heap size of a type.
 		/// </summary>
 		/// <returns>-1 if type is array, base instance size otherwise</returns>
 		public static int BaseInstanceSize<T>() where T : class
 		{
+			// Arrays don't have a TypeHandle, so we have to read the
+			// MethodTable* manually. We obviously can't do that here because
+			// this method is parameterless.
 			if (typeof(T).IsArray) return -1;
 			return (int) Runtime.Runtime.MethodTableOf<T>()->BaseSize;
 		}
-
-
 
 		#endregion
 
@@ -236,8 +238,8 @@ namespace RazorSharp
 		{
 			var heapBytes  = MemoryOf(ref t);
 			Debug.Assert(heapBytes.Length == HeapSize(ref t));
-			Memory.Zero(AddressOfHeap(ref t) - IntPtr.Size, HeapSize(ref t));
-			Memory.Write(newHeapAddr, heapBytes);
+			Memory.Memory.Zero(AddressOfHeap(ref t) - IntPtr.Size, HeapSize(ref t));
+			Memory.Memory.Write(newHeapAddr, heapBytes);
 			IntPtr newAddr = newHeapAddr + IntPtr.Size;
 			Marshal.WriteIntPtr(AddressOf(ref t), newAddr);
 		}

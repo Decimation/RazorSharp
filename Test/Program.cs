@@ -15,6 +15,8 @@ using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Analysis;
+using RazorSharp.Experimental;
+using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
@@ -70,46 +72,23 @@ namespace Test
 		 *  - Most types are not thread-safe
 		 *
 		 * Goals:
-		 *  - Provide identical functionality of ClrMD, SOS, Reflection
+		 *  - Provide identical functionality of ClrMD, SOS, and Reflection
 		 * 	  but in a faster and more efficient way
 		 */
 		public static void Main(string[] args)
 		{
-			string s  = "foo";
-			var    mt = Runtime.ReadMethodTable(ref s);
-			Console.WriteLine(*mt);
 
-			//Console.ReadLine();
+
+
+
+			// MethodDesc Table
+			// Entry 			MethodDesc    	 JIT 	Name
+			// 00007fff1bf70660 00007fff1bb6cf10 PreJIT System.Collections.Generic.List`1[[System.Int32, mscorlib]]..cctor()
+			// 00007fff1c900a40 00007fff1bb6ccb8 PreJIT System.Collections.Generic.List`1[[System.Int32, mscorlib]]..ctor()
+			// 00007fff1bf70600 00007fff1bb6ccc0 PreJIT System.Collections.Generic.List`1[[System.Int32, mscorlib]]..ctor(Int32)
+			// 00007fff1bf497d0 00007fff1bb6ccc8 PreJIT System.Collections.Generic.List`1[[System.Int32, mscorlib]]..ctor(System.Collections.Generic.IEnumerable`1)
+
 		}
-
-		private struct Structure
-		{
-
-		}
-
-
-
-		private class Clazz
-		{
-			private int x;
-		}
-
-		private static void PrintTable<T>(ArrayPointer<T> arr)
-		{
-			for (int i = 0; i < arr.Count; i++) {
-				Console.Clear();
-				Console.Write("{0:T}", arr);
-				arr++;
-				Thread.Sleep(1000);
-			}
-
-			Console.ReadKey();
-			Console.Clear();
-			Console.Write("{0:T}", arr);
-			Console.WriteLine(Hex.ToHex(arr.Address));
-		}
-
-
 
 
 

@@ -70,26 +70,10 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public byte BaseSizePadding => m_cbBaseSizePadding;
 
+		// ReSharper disable once InconsistentNaming
 		public VMFlags VMFlags => (VMFlags) m_VMFlags;
 
 		#endregion
-
-		// Line 1942...
-
-		//inline BOOL EEClass::IsBlittable()
-		//{
-		//	LIMITED_METHOD_CONTRACT;
-		//	// Either we have an opaque bunch of bytes, or we have some fields that are
-		//	// all isomorphic and explicitly layed out.
-		//	return (HasLayout() && GetLayoutInfo()->IsBlittable());
-		//}
-
-		//inline EEClassLayoutInfo *EEClass::GetLayoutInfo()
-		//{
-		//	LIMITED_METHOD_CONTRACT;
-		//	_ASSERTE(HasLayout());
-		//	return &((LayoutEEClass *) this)->m_LayoutInfo;
-		//}
 
 		//fixme
 		private EEClassLayoutInfo* GetLayoutInfo()

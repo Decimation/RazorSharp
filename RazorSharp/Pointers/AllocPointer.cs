@@ -91,10 +91,15 @@ namespace RazorSharp.Pointers
 		public AllocPointer(int elements) : this(Marshal.AllocHGlobal(elements * Unsafe.SizeOf<T>()),
 			elements * Unsafe.SizeOf<T>()) { }
 
+		public AllocPointer(IntPtr p) : this(p, Unsafe.SizeOf<T>())
+		{
+
+		}
+
 		private AllocPointer(IntPtr p, int bytesAlloc) : base(p,
 			new AllocPointerMetadata(Unsafe.SizeOf<T>(), true, bytesAlloc))
 		{
-			Zero();
+			//Zero();
 		}
 
 		#endregion
@@ -144,7 +149,7 @@ namespace RazorSharp.Pointers
 
 		public void Zero()
 		{
-			Memory.Zero(Address, AllocatedSize);
+			Memory.Memory.Zero(Address, AllocatedSize);
 		}
 
 		private void ReleaseUnmanagedResources()

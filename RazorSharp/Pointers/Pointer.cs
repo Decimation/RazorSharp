@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorSharp.Utilities;
@@ -16,10 +17,11 @@ namespace RazorSharp.Pointers
 	/// A pointer to any type.
 	/// Supports pointer arithmetic and other pointer operations.
 	///
-	/// Note: This does not pin references, but that is only a problem if the type is a decayed type.
+	/// If <![CDATA[T]]> is a reference type, pinning is not required as
+	/// the pointer contains the stack pointer, meaning the pointer works with the GC.
 	/// </summary>
 	/// <typeparam name="T">Type this pointer points to. If just raw memory, use byte.</typeparam>
-	public unsafe class Pointer<T> : IFormattable
+	public unsafe class Pointer<T> : IFormattable, IPointer<T>
 	{
 		/// <summary>
 		/// Contains metadata for operating Pointer
@@ -86,6 +88,11 @@ namespace RazorSharp.Pointers
 
 		public bool IsNull => m_addr == IntPtr.Zero;
 
+		/// <summary>
+		/// Returns the value the pointer is currently pointing to.
+		/// This is the equivalent of dereferencing the pointer.
+		/// This is equivalent to this[0].
+		/// </summary>
 		public virtual T Value {
 			get => CSUnsafe.Read<T>(m_addr.ToPointer());
 			set => CSUnsafe.Write(m_addr.ToPointer(), value);
@@ -115,21 +122,25 @@ namespace RazorSharp.Pointers
 
 		#region Methods
 
+
+
+		public Pointer<TNew> Reinterpret<TNew>()
+		{
+			return new Pointer<TNew>(Address);
+		}
+
 		protected virtual ConsoleTable ToTable()
 		{
 			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Address", Hex.ToHex(Address));
 
-			if (Assertion.Throws<NullReferenceException>(delegate { table.AddRow("Value", Value); })) {
-				table.AddRow("Value", "(null)");
-			}
+			table.AddRow("Value", Memory.Memory.SafeToString(this));
+
 
 
 			table.AddRow("Type", typeof(T).Name);
 
-			if (Assertion.Throws<NullReferenceException>(delegate { table.AddRow("this[0]", this[0]); })) {
-				table.AddRow("this[0]", "(null)");
-			}
+			table.AddRow("this[0]",Memory.Memory.SafeToString(this,0));
 
 
 			table.AddRow("Null", IsNull);

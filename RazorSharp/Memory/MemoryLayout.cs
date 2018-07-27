@@ -7,7 +7,7 @@ using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp.Utilities;
 
-namespace RazorSharp
+namespace RazorSharp.Memory
 {
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
@@ -25,29 +25,31 @@ namespace RazorSharp
 
 		private const int SleepMs = 600;
 
-		public static void Step<T>(IntPtr p, int len)
+		public static void Step<T>(IntPtr p, int elemLen)
 		{
-			for (int i = 0; i < len; i++) {
+			for (int i = 0; i < elemLen; i++) {
 				Console.Clear();
-				Point<T>(p, len * Unsafe.SizeOf<T>(), i);
+				Point<T>(p, elemLen * Unsafe.SizeOf<T>(), i);
 				Thread.Sleep(SleepMs);
 			}
 		}
 
-		public static void StepInteractive<T>(IntPtr p, int len)
+		public static void StepInteractive<T>(IntPtr p, int elemLen)
 		{
-			for (int i = 0; i < len; i++) {
+			for (int i = 0; i < elemLen; i++) {
 				Console.Clear();
-				Point<T>(p, len * Unsafe.SizeOf<T>(), i);
+				Point<T>(p, elemLen * Unsafe.SizeOf<T>(), i);
 				Console.ReadKey();
 			}
 		}
 
 
-		public static void Point<T>(IntPtr p, int len, int offset)
+
+
+		public static void Point<T>(IntPtr p, int byteLen, int offset)
 		{
 			// Line 1: Memory
-			var str = Create<T>(p, len);
+			var str = Create<T>(p, byteLen);
 
 			// Adjust the arrow to point to the first char in the sequence
 
@@ -77,8 +79,9 @@ namespace RazorSharp
 		}
 
 
-		public static string Create<T>(IntPtr p, int len, ToStringOptions options = ToStringOptions.Hex | ToStringOptions.PadZeros)
+		public static string Create<T>(IntPtr p, int len, ToStringOptions options = ToStringOptions.ZeroPadHex)
 		{
+
 			byte[] mem           = Memory.ReadBytes(p, 0, len);
 			int    possibleTypes = mem.Length / Unsafe.SizeOf<T>();
 
@@ -97,14 +100,12 @@ namespace RazorSharp
 				IntPtr adj = alloc + ofs * Unsafe.SizeOf<T>();
 
 				string s;
-				switch (options) {
-					case ToStringOptions.Hex:
-						s = Hex.TryCreateHex(CSUnsafe.Read<T>(adj.ToPointer()));
-						break;
-					default:
-						s = CSUnsafe.Read<T>(adj.ToPointer()).ToString();
-						break;
+				if (options.HasFlag(ToStringOptions.Hex))
+					s = Hex.TryCreateHex(CSUnsafe.Read<T>(adj.ToPointer()));
+				else {
+					s = CSUnsafe.Read<T>(adj.ToPointer()).ToString();
 				}
+
 
 
 				Marshal.FreeHGlobal(alloc);

@@ -20,6 +20,16 @@ namespace RazorSharp.Runtime
 		/// </summary>
 		private static readonly RuntimeTypeHandle StringHandle;
 
+		/// <summary>
+		/// Heap offset to the first array element.
+		///  - +8 for MethodTable*
+		///  - +4 for length
+		///  - +4 for padding (x64 only)
+		///
+		/// (x64 only)
+		/// </summary>
+		internal static readonly int OffsetToArrayData = IntPtr.Size * 2;
+
 		static Runtime()
 		{
 			StringHandle = typeof(string).TypeHandle;
@@ -33,9 +43,6 @@ namespace RazorSharp.Runtime
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
 			if (typeof(T).IsValueType) {
-				Logger.Log(Level.Warning, Flags.Memory,
-					$"typeof({typeof(T).Name}) is a value type, returning TypeHandle MethodTable*");
-
 				return MethodTableOf<T>();
 			}
 
@@ -79,7 +86,10 @@ namespace RazorSharp.Runtime
 
 		public static MethodTable* MethodTableOf<T>()
 		{
-			if (typeof(T).IsArray) return (MethodTable*) IntPtr.Zero;
+			// Array method tables need to be read using ReadMethodTable,
+			// they don't have a TypeHandle
+			Assertion.NegativeAssertType<Array, T>();
+
 			return (MethodTable*) typeof(T).TypeHandle.Value;
 		}
 
