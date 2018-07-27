@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using BenchmarkDotNet.Running;
+using MethodTimer;
 using NUnit.Framework;
 using RazorCommon;
 using RazorCommon.Strings;
@@ -39,6 +40,10 @@ namespace Test
 		static Program()
 		{
 			StandardOut.ModConsole();
+			Debug.Assert(IntPtr.Size == 8);
+			Debug.Assert(Environment.Is64BitProcess);
+			Logger.Log(Flags.Info, "Architecture: x64");
+			Logger.Log(Flags.Info, "Byte order: {0}", BitConverter.IsLittleEndian ? "Little Endian" : "Big Endian");
 		}
 #endif
 
@@ -77,17 +82,38 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			AllocPointer<int> array = new AllocPointer<int>(5);
-			array[0] = 1;
-			array[1] = 2;
-			Console.WriteLine("{0:T}",array);
+			/*alloc[0] = "g";
+			alloc[1] = "anime";
+			alloc[2] = "waifu";
+			alloc[3] = "animanga";
+			alloc[4] = "nyaa~";*/
+			var alloc = new AllocPointer<string>(5);
+			for (int i = 0; i < alloc.Count; i++) {
+				Console.Clear();
+				Console.Write("{0:T}", alloc);
+				Thread.Sleep(1000);
+				alloc++;
+			}
 
-			// MethodDesc Table
-			// Entry 			MethodDesc    	 JIT 	Name
-			// 00007fff1bf70660 00007fff1bb6cf10 PreJIT System.Collections.Generic.List`1[[System.Int32, mscorlib]]..cctor()
-			// 00007fff1c900a40 00007fff1bb6ccb8 PreJIT System.Collections.Generic.List`1[[System.Int32, mscorlib]]..ctor()
-			// 00007fff1bf70600 00007fff1bb6ccc0 PreJIT System.Collections.Generic.List`1[[System.Int32, mscorlib]]..ctor(Int32)
-			// 00007fff1bf497d0 00007fff1bb6ccc8 PreJIT System.Collections.Generic.List`1[[System.Int32, mscorlib]]..ctor(System.Collections.Generic.IEnumerable`1)
+		}
+
+		private static void Table<T>(AllocPointer<T> ptr)
+		{
+			for (int i = 0; i < ptr.Count; i++) {
+				Console.Clear();
+				Console.WriteLine("{0:E}", ptr);
+				Thread.Sleep(1000);
+				ptr++;
+			}
+
+			Thread.Sleep(1000);
+
+			for (int i = 0; i < ptr.Count; i++) {
+				Console.Clear();
+				Console.WriteLine("{0:E}", ptr);
+				Thread.Sleep(1000);
+				ptr--;
+			}
 		}
 
 

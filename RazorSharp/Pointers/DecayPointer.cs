@@ -17,6 +17,7 @@ namespace RazorSharp.Pointers
 	/// - Bounds checking
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
+	[Obsolete("Use AllocPointer")]
 	public unsafe class DecayPointer<T> : Pointer<T>
 	{
 		#region Fields and accessors

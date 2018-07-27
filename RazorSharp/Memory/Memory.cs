@@ -42,19 +42,20 @@ namespace RazorSharp.Memory
 		{
 			string s    = "";
 			IntPtr addr = Unsafe.Offset<T>(ptr, elemOfs);
-			if (Assertion.Throws<NullReferenceException>(
-				delegate { s = CSUnsafe.Read<T>(addr.ToPointer()).ToString(); })) {
-				return "(null)";
-			}
 
-			if (Assertion.Throws<AccessViolationException>(delegate
+			if (Assertion.Throws<AccessViolationException, NullReferenceException>(delegate
 			{
 				s = CSUnsafe.Read<T>(addr.ToPointer()).ToString();
 			})) {
-				return "(ave)";
+				return "(sigsegv)";
 			}
 
 			return s;
+		}
+
+		public static TOut As<TIn, TOut>(TIn t)
+		{
+			return (TOut) (object) t;
 		}
 
 		[HandleProcessCorruptedStateExceptions]
