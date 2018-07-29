@@ -36,7 +36,7 @@ namespace RazorSharp.Runtime
 		}
 
 		/// <summary>
-		/// Reads a CLR MethodTable (TypeHandle)
+		/// Manually reads a CLR MethodTable (TypeHandle)
 		/// </summary>
 		/// <returns>A pointer to the object type's MethodTable</returns>
 		public static MethodTable* ReadMethodTable<T>(ref T t)
@@ -84,11 +84,20 @@ namespace RazorSharp.Runtime
 			WriteMethodTable(ref t, MethodTableOf<TNew>());
 		}
 
+		/// <summary>
+		/// Returns a type's TypeHandle as a MethodTable
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
 		public static MethodTable* MethodTableOf<T>()
 		{
 			// Array method tables need to be read using ReadMethodTable,
 			// they don't have a TypeHandle
-			Assertion.NegativeAssertType<Array, T>();
+			//Assertion.NegativeAssertType<Array, T>();
+
+			if (typeof(T).IsArray) {
+				return null;
+			}
 
 			return (MethodTable*) typeof(T).TypeHandle.Value;
 		}

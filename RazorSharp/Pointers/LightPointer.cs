@@ -21,8 +21,8 @@ namespace RazorSharp.Pointers
 		private void* m_value;
 
 		public T this[int index] {
-			get => Memory.Read<T>(Unsafe.Offset<T>(m_value, index), 0);
-			set => Memory.Write(Unsafe.Offset<T>(m_value, index), 0, value);
+			get => Memory.Read<T>(Memory.Offset<T>(m_value, index), 0);
+			set => Memory.Write(Memory.Offset<T>(m_value, index), 0, value);
 		}
 
 		public T Value {

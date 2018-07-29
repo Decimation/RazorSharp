@@ -28,6 +28,8 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(24)] private FieldDesc* m_pFieldDescList;
 		[FieldOffset(32)] private void*      m_pChunks;
 
+		public FieldDesc* FieldDescList => m_pFieldDescList;
+
 		// Union
 		[FieldOffset(40)] private uint m_cbNativeSize;
 
@@ -51,6 +53,10 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(60)] private DWORD m_VMFlags;
 		[FieldOffset(64)] private byte  m_NormType;
 		[FieldOffset(65)] private byte  m_fFieldsArePacked;
+
+		/// <summary>
+		/// == sizeof(EEClass)
+		/// </summary>
 		[FieldOffset(66)] private byte  m_cbFixedEEClassFields;
 
 		/*
@@ -62,6 +68,11 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		#endregion
 
+		//return (WORD)GetPackableField(EEClass_Field_NumInstanceFields);
+		//SetPackableField(EEClass_Field_NumInstanceFields, wNumInstanceFields);
+
+		//return (WORD)GetPackableField(EEClass_Field_NumStaticFields);
+		//SetPackableField(EEClass_Field_NumStaticFields, wNumStaticFields);
 		#region Accessors
 
 		public bool HasLayout => VMFlags.HasFlag(VMFlags.VmflagHaslayout);
@@ -103,5 +114,22 @@ namespace RazorSharp.Runtime.CLRTypes
 			return table.ToMarkDownString();
 		}
 	}
+
+	enum EEClassFieldId
+	{
+		EEClass_Field_NumInstanceFields = 0,
+		EEClass_Field_NumMethods,
+		EEClass_Field_NumStaticFields,
+		EEClass_Field_NumHandleStatics,
+		EEClass_Field_NumBoxedStatics,
+		EEClass_Field_NonGCStaticFieldBytes,
+		EEClass_Field_NumThreadStaticFields,
+		EEClass_Field_NumHandleThreadStatics,
+		EEClass_Field_NumBoxedThreadStatics,
+		EEClass_Field_NonGCThreadStaticFieldBytes,
+		EEClass_Field_NumNonVirtualSlots,
+		EEClass_Field_COUNT
+	};
+
 
 }

@@ -76,7 +76,34 @@ namespace Test.Testing.Tests
 			Assert.That(alloc.Value, Is.EqualTo(default));
 			Assert.That(alloc[0], Is.EqualTo(default));
 
+			alloc.MoveToStart();
 
+			for (int i = 0; i < alloc.Count; i++) {
+
+				for (int j = alloc.Start; j <= alloc.End; j++) {
+					Debug.Assert(alloc.IndexInBounds(j));
+				}
+
+				alloc++;
+			}
+
+			for (int i = 0; i < alloc.Count; i++) {
+
+				for (int j = alloc.Start; j <= alloc.End; j++) {
+					Debug.Assert(alloc.IndexInBounds(j));
+				}
+				alloc--;
+			}
+
+			alloc.Address = alloc.LastElement;
+			Debug.Assert(alloc.Value == alloc[alloc.End]);
+
+
+			alloc.Address = alloc.FirstElement;
+			Debug.Assert(alloc.Value == alloc[alloc.Start]);
+
+			Debug.Assert(!alloc.IndexInBounds(-1));
+			Debug.Assert(!alloc.IndexInBounds(5));
 
 
 		}

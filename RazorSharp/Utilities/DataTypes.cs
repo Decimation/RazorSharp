@@ -36,8 +36,6 @@ namespace RazorSharp.Utilities
 			internal string CSharp { get; }
 			internal string CSharpKeyword { get; }
 
-
-
 			internal NameStyle(string windows, string @fixed, string cSharp, string cSharpKeyword)
 			{
 				Windows       = windows;
@@ -53,16 +51,12 @@ namespace RazorSharp.Utilities
 			switch (style) {
 				case NamingStyles.Windows:
 					return Styles[typeof(T)].Windows;
-					break;
 				case NamingStyles.Fixed:
 					return Styles[typeof(T)].Fixed;
-					break;
 				case NamingStyles.CSharp:
 					return Styles[typeof(T)].CSharp;
-					break;
 				case NamingStyles.CSharpKeyword:
 					return Styles[typeof(T)].CSharpKeyword;
-					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(style), style, null);
 			}

@@ -15,6 +15,11 @@ namespace Test.Testing
 			_integer = i;
 			_string  = s;
 		}
+
+		public int get()
+		{
+			return _integer;
+		}
 	}
 
 

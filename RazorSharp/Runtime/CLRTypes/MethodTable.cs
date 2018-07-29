@@ -2,62 +2,17 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
+// ReSharper disable InconsistentNaming
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+// ReSharper disable BuiltInTypeReferenceStyle
+
 namespace RazorSharp.Runtime.CLRTypes
 {
 
 	using DWORD = UInt32;
 	using WORD = UInt16;
-
-	// Union
-	[StructLayout(LayoutKind.Explicit)]
-	internal unsafe struct EEClassPtr
-	{
-		[FieldOffset(0)] internal EEClass*     m_pEEClass;
-		[FieldOffset(0)] internal MethodTable* m_pCanonMT;
-
-		public override string ToString()
-		{
-			return $"{nameof(m_pEEClass)}: {Hex.ToHex(m_pEEClass)}, {nameof(m_pCanonMT)}: {Hex.ToHex(m_pCanonMT)}";
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (obj.GetType() == this.GetType()) {
-				var eeOther = (EEClassPtr) obj;
-				return m_pEEClass == eeOther.m_pEEClass && m_pCanonMT == eeOther.m_pCanonMT;
-			}
-
-			return false;
-		}
-	}
-
-
-	// Union
-	[StructLayout(LayoutKind.Explicit)]
-	internal struct DWFlags
-	{
-		[FieldOffset(0)] internal WORD m_componentSize;
-		[FieldOffset(2)] internal WORD m_flags;
-
-		public override string ToString()
-		{
-			var table = new ConsoleTable("Field", "Value");
-			table.AddRow("Component size", m_componentSize);
-			table.AddRow("Flags", m_flags);
-
-			return table.ToStringAlternative();
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (obj.GetType() == this.GetType()) {
-				var dwOther = (DWFlags) obj;
-				return m_componentSize == dwOther.m_componentSize && m_flags == dwOther.m_flags;
-			}
-
-			return false;
-		}
-	}
+	using unsigned = UInt32;
 
 	// Union
 	[StructLayout(LayoutKind.Explicit)]
@@ -77,31 +32,47 @@ namespace RazorSharp.Runtime.CLRTypes
 	}
 
 
-	//https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.h
 	//https://github.com/dotnet/coreclr/blob/db55a1decc1d02538e61eac7db80b7daa351d5b6/src/gc/env/gcenv.object.h
 
-
-	//todo: fix
-	// field.h
+	/// <summary>
+	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/method.hpp#L1949
+	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	internal unsafe struct FieldDesc
+	public unsafe struct MethodDescChunk
 	{
-		[FieldOffset(0)] private MethodTable* m_pMTOfEnclosingClass;
-		[FieldOffset(8)] private uint         m_fields;
+		[FieldOffset(0)] private readonly MethodTable*     m_methodTable;
+		[FieldOffset(8)] private readonly MethodDescChunk* m_next;
 
-		public override string ToString()
-		{
-			return String.Format("m_pMTOfEnclosingClass: {0}, m_fields: {1}", Hex.ToHex(m_pMTOfEnclosingClass),
-				m_fields);
-		}
+		/// <summary>
+		/// The size of this chunk minus 1 (in multiples of MethodDesc::ALIGNMENT)
+		/// </summary>
+		[FieldOffset(16)] private readonly byte m_size;
+
+		/// <summary>
+		/// The number of MethodDescs in this chunk minus 1
+		/// </summary>
+		[FieldOffset(17)] private readonly byte m_count;
+
+		[FieldOffset(18)] private readonly ushort m_flagsAndTokenRange;
+
+		// wtf? Why do I need to cast lol
+		// m_count is a byte??
+		public byte Count => (byte) (m_count + 1);
+
+		public MethodTable* MethodTable => m_methodTable;
 	}
 
 
+
+
+
+
+	/// <summary>
+	/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.h#L4166
+	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct MethodTable
 	{
-		/*[FieldOffset(-??)]
-		private GCInfo gc;*/
 
 		#region Properties and Accessors
 
@@ -116,7 +87,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public MethodTableFlags TableFlags => (MethodTableFlags) Flags;
 
-		public WORD LowFlags => m_dwFlags.m_flags;
+		public WORD LowFlags => m_dwFlags.Flags;
 
 		public MethodTableFlagsLow TableFlagsLow => (MethodTableFlagsLow) LowFlags;
 
@@ -134,7 +105,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		public WORD ComponentSize {
 			get {
 				if (HasComponentSize)
-					return m_dwFlags.m_componentSize;
+					return m_dwFlags.ComponentSize;
 				else return 0;
 			}
 		}
@@ -177,23 +148,28 @@ namespace RazorSharp.Runtime.CLRTypes
 		#region Fields
 
 		//** Status: verified
+		// Low WORD is component size for array and string types (HasComponentSize() returns true).
+		// Used for flags otherwise.
 		[FieldOffset(0)] private DWFlags m_dwFlags;
 
 		//** Status: verified
-		[FieldOffset(4)] private DWORD m_BaseSize;
+		[FieldOffset(4)] private readonly DWORD m_BaseSize;
+
+		// Note that for value types GetBaseSize returns the size of instance fields for
+		// a boxed value, and GetNumInstanceFieldsBytes for an unboxed value.
 
 		//** Status: unknown
-		[FieldOffset(8)] private WORD m_wFlags2;
+		[FieldOffset(8)] private readonly WORD m_wFlags2;
 
 		//** Status: unknown
 		// Class token if it fits into 16-bits. If this is (WORD)-1, the class token is stored in the TokenOverflow optional member.
-		[FieldOffset(10)] private WORD m_wToken;
+		[FieldOffset(10)] private readonly WORD m_wToken;
 
 		//** Status: unknown
-		[FieldOffset(12)] private WORD m_wNumVirtuals;
+		[FieldOffset(12)] private readonly WORD m_wNumVirtuals;
 
 		//** Status: verified
-		[FieldOffset(14)] private WORD m_wNumInterfaces;
+		[FieldOffset(14)] private readonly WORD m_wNumInterfaces;
 
 		//** Status: verified
 		// On Linux ARM is a RelativeFixupPointer. Otherwise,
@@ -201,13 +177,15 @@ namespace RazorSharp.Runtime.CLRTypes
 		// if enum_flag_enum_flag_HasIndirectParent is set. The indirection is offset by offsetof(MethodTable, m_pParentMethodTable).
 		// It allows casting helpers to go through parent chain natually. Casting helper do not need need the explicit check
 		// for enum_flag_HasIndirectParentMethodTable.
-		[FieldOffset(16)] private MethodTable* m_pParentMethodTable;
+		[FieldOffset(16)] private readonly MethodTable* m_pParentMethodTable;
 
 		//** Status: verified
-		[FieldOffset(24)] private void* m_pLoaderModule; // LoaderModule. It is equal to the ZapModule in ngened images
+		[FieldOffset(24)]
+		private readonly void* m_pLoaderModule; // LoaderModule. It is equal to the ZapModule in ngened images
 
 		//todo - lowest two bits of what?
 		// The value of lowest two bits describe what the union contains
+		[Flags]
 		enum LowBits
 		{
 			UNION_EECLASS     = 0, //  0 - pointer to EEClass. This MethodTable is the canonical method table.
@@ -216,20 +194,33 @@ namespace RazorSharp.Runtime.CLRTypes
 			UNION_INDIRECTION = 3  //  3 - pointer to indirection cell that points to canonical MethodTable.
 		};                         //      (used only if FEATURE_PREJIT is defined)
 
+		const long UNION_MASK = 3;
+
+		//todo: does this work?
+		LowBits Get {
+			get {
+				long l = (long) m_pCanonMT;
+				return (LowBits) (l & UNION_MASK);
+			}
+
+		}
 
 		//** Status: unknown
-		[FieldOffset(32)] private void* m_pWriteableData;
+		[FieldOffset(32)] private readonly void* m_pWriteableData;
 
 		//** Status: verified
-		[FieldOffset(40)] private EEClass*     m_pEEClass;
+		[FieldOffset(40)] private readonly EEClass* m_pEEClass;
+
 		//** Status: verified
-		[FieldOffset(40)] private MethodTable* m_pCanonMT;
+		[FieldOffset(40)] private readonly MethodTable* m_pCanonMT;
 
 		//** Status: unknown
-		[FieldOffset(48)] private InstSlot m_slotInfo;
+		//[FieldOffset(48)] private readonly InstSlot m_slotInfo;
+
+		[FieldOffset(48)] private readonly void* m_methodDescTablePtr;
 
 		//** Status: unknown
-		[FieldOffset(56)] private MapSlot m_mapSlot;
+		[FieldOffset(56)] private readonly MapSlot m_mapSlot;
 
 		// m_pPerInstInfo and m_pInterfaceMap have to be at fixed offsets because of performance sensitive
 		// JITed code and JIT helpers. However, they are frequently not present. The space is used by other
@@ -256,12 +247,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		{
 			var table = new ConsoleTable("Field", "Value");
 			if (HasComponentSize)
-				table.AddRow("Component size", m_dwFlags.m_componentSize);
+				table.AddRow("Component size", m_dwFlags.ComponentSize);
 			table.AddRow("Base size", m_BaseSize);
-
 			table.AddRow("Flags", string.Format("{0} ({1})", Flags, Collections.ToString(Constants.Extract(Flags))));
-
-
 			table.AddRow("Low flags", $"{LowFlags} ({TableFlagsLow})");
 
 			table.AddRow("Flags 2",
@@ -270,21 +258,21 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Token", m_wToken);
 			table.AddRow("Number virtuals", m_wNumVirtuals);
 			table.AddRow("Number interfaces", m_wNumInterfaces);
-
 			table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));
 			table.AddRow("Module", Hex.ToHex(m_pLoaderModule));
 
 			table.AddRow("m_pWriteableData", Hex.ToHex(m_pWriteableData));
 
 			table.AddRow("EEClass", Hex.ToHex(m_pEEClass));
-
 			table.AddRow("Canon MT", Hex.ToHex(m_pCanonMT));
+			table.AddRow("MethodDesc Table ptr", Hex.ToHex(m_methodDescTablePtr));
 
-			table.AddRow("m_ElementTypeHnd", (m_slotInfo.m_ElementTypeHnd));
+			/*table.AddRow("m_ElementTypeHnd", (m_slotInfo.m_ElementTypeHnd));
 			table.AddRow("m_pMultipurposeSlot1", (m_slotInfo.m_pMultipurposeSlot1));
 			table.AddRow("m_pPerInstInfo", Hex.ToHex(m_slotInfo.m_pPerInstInfo));
 			table.AddRow("m_pInterfaceMap", Hex.ToHex(m_mapSlot.m_pInterfaceMap));
-			table.AddRow("m_pMultipurposeSlot2", (m_mapSlot.m_pMultipurposeSlot2));
+			table.AddRow("m_pMultipurposeSlot2", (m_mapSlot.m_pMultipurposeSlot2));*/
+			table.AddRow("Low bits", Get);
 			return table.ToMarkDownString();
 		}
 
@@ -298,24 +286,49 @@ namespace RazorSharp.Runtime.CLRTypes
 			return !a.Equals(b);
 		}
 
+		public override int GetHashCode()
+		{
+			unchecked {
+				int hashCode = m_dwFlags.GetHashCode();
+				hashCode = (hashCode * 397) ^ (int) m_BaseSize;
+				hashCode = (hashCode * 397) ^ m_wFlags2.GetHashCode();
+				hashCode = (hashCode * 397) ^ m_wToken.GetHashCode();
+				hashCode = (hashCode * 397) ^ m_wNumVirtuals.GetHashCode();
+				hashCode = (hashCode * 397) ^ m_wNumInterfaces.GetHashCode();
+				hashCode = (hashCode * 397) ^ unchecked((int) (long) m_pParentMethodTable);
+				hashCode = (hashCode * 397) ^ unchecked((int) (long) m_pLoaderModule);
+				hashCode = (hashCode * 397) ^ unchecked((int) (long) m_pWriteableData);
+				hashCode = (hashCode * 397) ^ unchecked((int) (long) m_pEEClass);
+				hashCode = (hashCode * 397) ^ unchecked((int) (long) m_pCanonMT);
+
+				//hashCode = (hashCode * 397) ^ m_slotInfo.GetHashCode();
+				//hashCode = (hashCode * 397) ^ m_mapSlot.GetHashCode();
+				return hashCode;
+			}
+		}
+
+		public bool Equals(MethodTable other)
+		{
+			return m_dwFlags.Equals(other.m_dwFlags)
+			       && m_BaseSize == other.m_BaseSize
+			       && m_wFlags2 == other.m_wFlags2
+			       && m_wToken == other.m_wToken
+			       && m_wNumVirtuals == other.m_wNumVirtuals
+			       && m_wNumInterfaces == other.m_wNumInterfaces
+			       && m_pParentMethodTable == other.m_pParentMethodTable
+			       && m_pLoaderModule == other.m_pLoaderModule
+			       && m_pWriteableData == other.m_pWriteableData
+			       && m_pEEClass == other.m_pEEClass
+			       && m_pCanonMT == other.m_pCanonMT;
+
+			// && m_slotInfo.Equals(other.m_slotInfo)
+			// && m_mapSlot.Equals(other.m_mapSlot);
+		}
 
 		public override bool Equals(object obj)
 		{
-			if (obj.GetType() == this.GetType()) {
-				var  mtOther   = (MethodTable) obj;
-				bool dwFlagsEq = m_dwFlags.Equals(mtOther.m_dwFlags);
-				bool sizesEq   = m_BaseSize == mtOther.m_BaseSize && ComponentSize == mtOther.ComponentSize;
-				bool flags2Eq  = m_wFlags2 == mtOther.m_wFlags2;
-				bool numEq     = NumInterfaces == mtOther.NumInterfaces && NumVirtuals == mtOther.NumVirtuals;
-				bool tokenEq   = Token == mtOther.Token;
-				bool parentEq  = Parent == mtOther.Parent;
-				bool moduleEq  = Module == mtOther.Module;
-				bool eeEq = m_pEEClass == mtOther.m_pEEClass && m_pCanonMT == mtOther.m_pCanonMT;
-
-				return dwFlagsEq && sizesEq && flags2Eq && numEq && tokenEq && parentEq && moduleEq && eeEq;
-			}
-
-			return false;
+			if (ReferenceEquals(null, obj)) return false;
+			return obj is MethodTable && Equals((MethodTable) obj);
 		}
 	}
 

@@ -96,13 +96,13 @@ namespace RazorSharp.Pointers
 		/// This is equivalent to this[0].
 		/// </summary>
 		public virtual T Value {
-			get => Memory.Read<T>(m_addr,0);
-			set => Memory.Write(m_addr, 0, value);
+			get => Memory.Read<T>(Address,0);
+			set => Memory.Write(Address, 0, value);
 		}
 
 		public virtual T this[int index] {
-			get => Memory.Read<T>(Unsafe.Offset<T>(m_addr, index),0);
-			set => Memory.Write(Unsafe.Offset<T>(m_addr, index),0, value);
+			get => Memory.Read<T>(Memory.Offset<T>(Address, index),0);
+			set => Memory.Write(Memory.Offset<T>(Address, index),0, value);
 		}
 
 		#region Constructors
@@ -163,19 +163,19 @@ namespace RazorSharp.Pointers
 
 		protected virtual void Increment(int cnt = 1)
 		{
-			Address = Unsafe.Offset<T>(Address, cnt);
+			Address = Memory.Offset<T>(Address, cnt);
 		}
 
 		protected virtual void Decrement(int cnt = 1)
 		{
-			Address = Unsafe.Offset<T>(Address, -cnt);
+			Address = Memory.Offset<T>(Address, -cnt);
 		}
 
 		protected virtual ConsoleTable ToElementTable(int length)
 		{
-			var table = new ConsoleTable("Address", "Offset", "Value");
+			var table = new ConsoleTable("Address", "Index", "Value");
 			for (int i = 0; i < length; i++) {
-				table.AddRow(Hex.ToHex(Unsafe.Offset<T>(Address, i)), i, this[i]);
+				table.AddRow(Hex.ToHex(Memory.Offset<T>(Address, i)), i, this[i]);
 			}
 
 			return table;
@@ -294,7 +294,6 @@ namespace RazorSharp.Pointers
 					if (typeof(T).IsIListType()) {
 						return Collections.ListToString((IList) Value);
 					}
-
 					return Value.ToString();
 				case "P":
 					return Hex.ToHex(Address);

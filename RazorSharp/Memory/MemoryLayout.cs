@@ -96,7 +96,7 @@ namespace RazorSharp.Memory
 				}
 
 				var alloc = Marshal.AllocHGlobal(mem.Length);
-				Memory.Write(alloc, mem);
+				Memory.WriteBytes(alloc, mem);
 				IntPtr adj = alloc + ofs * Unsafe.SizeOf<T>();
 
 				string s;

@@ -303,7 +303,7 @@ namespace RazorSharp.Pointers
 			var table = new ConsoleTable("Address", "Offset", "Value");
 
 			for (int i = Start; i <= End; i++) {
-				table.AddRow(Hex.ToHex(Unsafe.Offset<T>(Address,i)), i, this[i]);
+				table.AddRow(Hex.ToHex(Memory.Memory.Offset<T>(Address,i)), i, this[i]);
 			}
 
 			return table;
@@ -317,7 +317,6 @@ namespace RazorSharp.Pointers
 
 				case FixType.OutOfBounds:
 					throw new IndexOutOfRangeException();
-					break;
 				case FixType.Verified:
 					m_offset += cnt;
 					base.Increment(cnt);
@@ -334,7 +333,6 @@ namespace RazorSharp.Pointers
 					return;
 				case FixType.OutOfBounds:
 					throw new IndexOutOfRangeException();
-					break;
 				case FixType.Verified:
 					m_offset -= cnt;
 					base.Decrement(cnt);

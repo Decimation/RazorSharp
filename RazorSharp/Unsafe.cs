@@ -82,19 +82,6 @@ namespace RazorSharp
 			return **(IntPtr**) (&tr);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static IntPtr Offset<T>(IntPtr p, int cnt)
-		{
-			int size = SizeOf<T>();
-			size *= cnt;
-			return p + size;
-		}
-
-		public static IntPtr Offset<T>(void* p, int cnt)
-		{
-			return Offset<T>((IntPtr) p,cnt);
-		}
-
 		public static IntPtr AddressOfHeap<T>(ref T t, OffsetType offset) where T : class
 		{
 			switch (offset) {
@@ -144,7 +131,7 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		/// Calculates the size of a reference type's heap memory.
+		/// Calculates the size of a reference type in heap memory.
 		/// This is equivalent to the SOS "!do" command.
 		///
 		/// This is the most accurate size calculation.
@@ -154,13 +141,13 @@ namespace RazorSharp
 		/// (base instance size) + (length) * (component size)
 		///
 		/// where:
-		/// 	base instance size = 24 (x64) or 12 (x86)
+		/// 	base instance size = The base instance size of a type (24 (x64) or 12 (x86) by default)
 		/// 	length			   = array or string length, 1 otherwise
-		/// 	component size	   = element size, if available
+		/// 	component size	   = element size, if available; 0 otherwise
 		/// </summary>
 		///
 		/// Note: this also includes padding.
-		/// <returns>The size of the type's heap memory, in bytes</returns>
+		/// <returns>The size of the type in heap memory, in bytes</returns>
 		public static int HeapSize<T>(ref T t) where T : class
 		{
 			/**
@@ -173,10 +160,30 @@ namespace RazorSharp
 			 * string		14 + length * 2			26 + length * 2
 			 */
 
+			// From object.h line 65:
+
+			/* 	  The size of the object in the heap must be able to be computed
+			 *    very, very quickly for GC purposes.   Restrictions on the layout
+			 *    of the object guarantee this is possible.
+			 *
+			 *    Any object that inherits from Object must be able to
+			 *    compute its complete size by using the first 4 bytes of
+			 *    the object following the Object part and constants
+			 *    reachable from the MethodTable...
+			 *
+			 *    The formula used for this calculation is:
+			 *        MT->GetBaseSize() + ((OBJECTTYPEREF->GetSizeField() * MT->GetComponentSize())
+			 *
+			 *    So for Object, since this is of fixed size, the ComponentSize is 0, which makes the right side
+			 *    of the equation above equal to 0 no matter what the value of GetSizeField(), so the size is just the base size.
+			 *
+			 */
+
 			var methodTable = Runtime.Runtime.ReadMethodTable(ref t);
 
 			if (typeof(T).IsArray) {
 				var arr = t as Array;
+				// ReSharper disable once PossibleNullReferenceException
 				return (int) methodTable->BaseSize + arr.Length * methodTable->ComponentSize;
 			}
 
@@ -195,6 +202,11 @@ namespace RazorSharp
 		/// </summary>
 		public static int BaseFieldsSize<T>()
 		{
+			//inline DWORD MethodTable::GetNumInstanceFieldBytes()
+			//{
+			//	return(GetBaseSize() - GetClass()->GetBaseSizePadding());
+			//}
+
 			var mt = Runtime.Runtime.MethodTableOf<T>();
 			return  (int) mt->BaseSize - mt->EEClass->BaseSizePadding;
 		}
@@ -239,7 +251,7 @@ namespace RazorSharp
 			var heapBytes  = MemoryOf(ref t);
 			Debug.Assert(heapBytes.Length == HeapSize(ref t));
 			Memory.Memory.Zero(AddressOfHeap(ref t) - IntPtr.Size, HeapSize(ref t));
-			Memory.Memory.Write(newHeapAddr, heapBytes);
+			Memory.Memory.WriteBytes(newHeapAddr, heapBytes);
 			IntPtr newAddr = newHeapAddr + IntPtr.Size;
 			Marshal.WriteIntPtr(AddressOf(ref t), newAddr);
 		}
@@ -257,6 +269,7 @@ namespace RazorSharp
 		{
 			if (t.IsArray) {
 				var elem = t.GetElementType();
+				// ReSharper disable once PossibleNullReferenceException
 				return elem.IsValueType && IsBlittable(elem);
 			}
 

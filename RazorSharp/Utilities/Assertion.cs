@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.ExceptionServices;
+using RazorCommon;
 
 namespace RazorSharp.Utilities
 {
@@ -68,6 +70,30 @@ namespace RazorSharp.Utilities
 			}
 
 			return false;
+		}
+
+		public static void WeakAssertEqual<T>(params T[] values)
+		{
+			if (values == null || values.Length == 0)
+				return;
+
+			if (!values.All(v => v.Equals(values[0])))
+				Logger.Log(Level.Warning, Flags.Debug,
+					"Equality assertion of {0} failed", Collections.ToString(values));
+		}
+
+		public static void WeakAssert(bool cond)
+		{
+			if (!cond) {
+				Logger.Log(Level.Warning, Flags.Debug, "Assertion failed");
+			}
+		}
+
+		public static void AssertEqual<T>(params T[] values)
+		{
+			if (values == null || values.Length == 0)
+				return;
+			Debug.Assert(values.All(v => v.Equals(values[0])));
 		}
 	}
 

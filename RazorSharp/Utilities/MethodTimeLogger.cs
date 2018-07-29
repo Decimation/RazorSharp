@@ -1,7 +1,7 @@
 using System.Reflection;
 using RazorCommon;
 
-namespace RazorSharp
+namespace RazorSharp.Utilities
 {
 
 	public class MethodTimeLogger

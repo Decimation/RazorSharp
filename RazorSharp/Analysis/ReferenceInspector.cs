@@ -2,6 +2,7 @@ using System;
 using RazorCommon;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
+// ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Analysis
 {
@@ -15,19 +16,25 @@ namespace RazorSharp.Analysis
 			Addresses = new ReferenceAddressInfo(ref t);
 		}
 
+
 		private sealed class ReferenceMetadataInfo : MetadataInfo
 		{
-			public ObjHeader* Header { get; }
+			public ObjHeader*   Header      { get; }
+			public EEClass*     EEClass     { get; }
 
 			internal ReferenceMetadataInfo(ref T t) : base(ref t)
 			{
-				Header = Runtime.Runtime.ReadObjHeader(ref t);
+				Header      = Runtime.Runtime.ReadObjHeader(ref t);
+				EEClass     = MethodTable->EEClass;
 			}
 
 			protected internal override ConsoleTable ToTable()
 			{
+
 				var table = base.ToTable();
+				table.AddRow("EEClass", Hex.ToHex(EEClass));
 				table.AddRow("Object Header", Hex.ToHex(Header));
+
 				return table;
 			}
 		}
