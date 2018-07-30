@@ -36,7 +36,6 @@ namespace Test.Testing.Tests
 			AssertHeapSize(ref foo, 32);
 
 
-
 			/**
 			 * Size:        46(0x2e) bytes
 			 * sizeof(00000183c0a8f078) = 48 (0x30) bytes (System.String)

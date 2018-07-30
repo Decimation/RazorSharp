@@ -35,7 +35,7 @@ namespace Test.Testing.Tests
 			Assert.That(ptr.IsDecayed, Is.EqualTo(true));
 			Assert.That(ptr.IsNull, Is.EqualTo(false));
 
-			TestingAssertion.AssertElements(ptr, arr);
+			RAssert.Elements(ptr, arr);
 			ptr.MoveToStart();
 
 
@@ -60,7 +60,7 @@ namespace Test.Testing.Tests
 			Assert.That(ptr[0], Is.EqualTo(arr[0]));
 
 			//Debug.Assert(ptr.ToArray().SequenceEqual(arr));
-			TestingAssertion.AssertElements(ptr, arr);
+			RAssert.Elements(ptr, arr);
 		}
 
 

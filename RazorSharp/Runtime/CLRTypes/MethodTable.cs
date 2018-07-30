@@ -34,38 +34,6 @@ namespace RazorSharp.Runtime.CLRTypes
 
 	//https://github.com/dotnet/coreclr/blob/db55a1decc1d02538e61eac7db80b7daa351d5b6/src/gc/env/gcenv.object.h
 
-	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/method.hpp#L1949
-	/// </summary>
-	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct MethodDescChunk
-	{
-		[FieldOffset(0)] private readonly MethodTable*     m_methodTable;
-		[FieldOffset(8)] private readonly MethodDescChunk* m_next;
-
-		/// <summary>
-		/// The size of this chunk minus 1 (in multiples of MethodDesc::ALIGNMENT)
-		/// </summary>
-		[FieldOffset(16)] private readonly byte m_size;
-
-		/// <summary>
-		/// The number of MethodDescs in this chunk minus 1
-		/// </summary>
-		[FieldOffset(17)] private readonly byte m_count;
-
-		[FieldOffset(18)] private readonly ushort m_flagsAndTokenRange;
-
-		// wtf? Why do I need to cast lol
-		// m_count is a byte??
-		public byte Count => (byte) (m_count + 1);
-
-		public MethodTable* MethodTable => m_methodTable;
-	}
-
-
-
-
-
 
 	/// <summary>
 	/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.h#L4166
@@ -153,10 +121,11 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(0)] private DWFlags m_dwFlags;
 
 		//** Status: verified
+		/// <summary>
+		/// Note that for value types GetBaseSize returns the size of instance fields for
+		/// a boxed value, and GetNumInstanceFieldsBytes for an unboxed value.
+		/// </summary>
 		[FieldOffset(4)] private readonly DWORD m_BaseSize;
-
-		// Note that for value types GetBaseSize returns the size of instance fields for
-		// a boxed value, and GetNumInstanceFieldsBytes for an unboxed value.
 
 		//** Status: unknown
 		[FieldOffset(8)] private readonly WORD m_wFlags2;
@@ -199,10 +168,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		//todo: does this work?
 		LowBits Get {
 			get {
-				long l = (long) m_pCanonMT;
+				long l = (long) m_pEEClass;
 				return (LowBits) (l & UNION_MASK);
 			}
-
 		}
 
 		//** Status: unknown
@@ -217,6 +185,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		//** Status: unknown
 		//[FieldOffset(48)] private readonly InstSlot m_slotInfo;
 
+		//** Status: unknown
 		[FieldOffset(48)] private readonly void* m_methodDescTablePtr;
 
 		//** Status: unknown
@@ -265,14 +234,15 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			table.AddRow("EEClass", Hex.ToHex(m_pEEClass));
 			table.AddRow("Canon MT", Hex.ToHex(m_pCanonMT));
-			table.AddRow("MethodDesc Table ptr", Hex.ToHex(m_methodDescTablePtr));
+
+			//table.AddRow("MethodDesc Table ptr", Hex.ToHex(m_methodDescTablePtr));
 
 			/*table.AddRow("m_ElementTypeHnd", (m_slotInfo.m_ElementTypeHnd));
 			table.AddRow("m_pMultipurposeSlot1", (m_slotInfo.m_pMultipurposeSlot1));
 			table.AddRow("m_pPerInstInfo", Hex.ToHex(m_slotInfo.m_pPerInstInfo));
 			table.AddRow("m_pInterfaceMap", Hex.ToHex(m_mapSlot.m_pInterfaceMap));
 			table.AddRow("m_pMultipurposeSlot2", (m_mapSlot.m_pMultipurposeSlot2));*/
-			table.AddRow("Low bits", Get);
+			//table.AddRow("Low bits", Get);
 			return table.ToMarkDownString();
 		}
 

@@ -12,10 +12,6 @@ namespace RazorSharp.Pointers
 
 		int ToInt32();
 		long ToInt64();
-
-		// We want to keep these protected
-		//void Increment(int cnt = 1);
-		//void Decrement(int cnt = 1);
 	}
 
 }

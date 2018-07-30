@@ -99,7 +99,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\Inspector.cs" />
-    <Compile Include="Analysis\ReferenceInspector.cs" />
+    <Compile Include="Analysis\RefInspector.cs" />
     <Compile Include="Experimental\PinHandle.cs" />
     <Compile Include="Experimental\SmartScanner.cs" />
     <Compile Include="Experimental\Unmanaged.cs" />
@@ -111,6 +111,7 @@
     <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\LightPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
+    <Compile Include="Pointers\PointerUtil.cs" />
     <Compile Include="Runtime\CLRTypes\DWFlags.cs" />
     <Compile Include="Runtime\CLRTypes\EEClass.cs" />
     <Compile Include="Runtime\CLRTypes\EEClassLayoutInfo.cs" />
@@ -121,6 +122,7 @@
     <Compile Include="Runtime\CLRTypes\HeapObjects\StringObject.cs" />
     <Compile Include="Runtime\CLRTypes\LayoutEEClass.cs" />
     <Compile Include="Runtime\CLRTypes\MethodDesc.cs" />
+    <Compile Include="Runtime\CLRTypes\MethodDescChunk.cs" />
     <Compile Include="Runtime\CLRTypes\MethodTable.cs" />
     <Compile Include="Runtime\CLRTypes\ObjHeader.cs" />
     <Compile Include="Runtime\Constants.cs" />

@@ -12,12 +12,12 @@ using RazorSharp.Runtime.CLRTypes.HeapObjects;
 namespace Test.Testing
 {
 
-	internal static unsafe class TestingAssertion
+	internal static unsafe class RAssert
 	{
 		/// <summary>
 		/// Asserts the Pointer points to the proper array data.
 		/// </summary>
-		internal static void AssertElements<T>(Pointer<T> ptr, IEnumerable<T> enumer)
+		internal static void Elements<T>(Pointer<T> ptr, IEnumerable<T> enumer)
 		{
 			var enumerator = enumer.GetEnumerator();
 			while (enumerator.MoveNext()) {
@@ -33,7 +33,7 @@ namespace Test.Testing
 		/// Asserts that the heap and stack pointers of a reference type don't change at all
 		/// during GC compaction. This test will pass if the parameter is pinned.
 		/// </summary>
-		internal static void AssertPinning<T>(ref T t) where T : class
+		internal static void Pinning<T>(ref T t) where T : class
 		{
 			(IntPtr stackPtr, IntPtr heap) mem = (Unsafe.AddressOf(ref t), Unsafe.AddressOfHeap(ref t));
 
@@ -54,7 +54,7 @@ namespace Test.Testing
 		/// <summary>
 		/// Asserts that a Pointer points to the correct object address during GC pressure
 		/// </summary>
-		internal static void AssertPressure<TPointer, TValue>(Pointer<TPointer> ptr, ref TValue t)
+		internal static void Pressure<TPointer, TValue>(Pointer<TPointer> ptr, ref TValue t)
 		{
 			int passes = 0;
 			while (passes++ < MaxPasses) {
@@ -69,13 +69,13 @@ namespace Test.Testing
 			}
 		}
 
-		internal static void AssertHeapObject<T>(ref T t, HeapObject** h) where T : class
+		internal static void HeapObject<T>(ref T t, HeapObject** h) where T : class
 		{
 			Debug.Assert((**h).Header == Runtime.ReadObjHeader(ref t));
 			Debug.Assert((**h).MethodTable == Runtime.ReadMethodTable(ref t));
 		}
 
-		internal static void AssertArrayObject<T>(ref T[] arr, ArrayObject** ao)
+		internal static void ArrayObject<T>(ref T[] arr, ArrayObject** ao)
 		{
 			Debug.Assert((**ao).Length == arr.Length);
 			Debug.Assert((**ao).Header == Runtime.ReadObjHeader(ref arr));
@@ -86,7 +86,7 @@ namespace Test.Testing
 			}*/
 		}
 
-		internal static void AssertStringObject(ref string s, StringObject** strObj)
+		internal static void StringObject(ref string s, StringObject** strObj)
 		{
 			Debug.Assert((**strObj).MethodTable == Runtime.ReadMethodTable(ref s));
 			Debug.Assert((**strObj).Header == Runtime.ReadObjHeader(ref s));
@@ -94,7 +94,7 @@ namespace Test.Testing
 			Debug.Assert((**strObj).FirstChar == s[0]);
 		}
 
-		internal static void AssertPressure<TPointer>(Pointer<TPointer> ptr, ref string s)
+		internal static void Pressure<TPointer>(Pointer<TPointer> ptr, ref string s)
 		{
 			int passes = 0;
 			while (passes++ < MaxPasses) {

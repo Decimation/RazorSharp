@@ -9,6 +9,7 @@ namespace RazorSharp.Runtime.CLRTypes
 	using BYTE = Byte;
 	using UINT = UInt32; //probably, maybe
 
+	//todo
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct EEClassLayoutInfo
 	{

@@ -7,12 +7,12 @@ namespace RazorSharp.Pointers
 	using Memory = Memory.Memory;
 
 	/// <summary>
-	/// A lighter type of pointer, equal to the size of IntPtr.
+	/// A lighter type of Pointer, equal to the size of IntPtr.<para></para>
 	///
-	/// - No bounds checking
-	/// - No safety systems
+	/// - No bounds checking<para></para>
+	/// - No safety systems<para></para>
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
+	/// <typeparam name="T">Type to point to</typeparam>
 	public unsafe struct LightPointer<T> : IPointer<T>
 	{
 		/// <summary>
@@ -21,8 +21,8 @@ namespace RazorSharp.Pointers
 		private void* m_value;
 
 		public T this[int index] {
-			get => Memory.Read<T>(Memory.Offset<T>(m_value, index), 0);
-			set => Memory.Write(Memory.Offset<T>(m_value, index), 0, value);
+			get => Memory.Read<T>(PointerUtils.Offset<T>(m_value, index), 0);
+			set => Memory.Write(PointerUtils.Offset<T>(m_value, index), 0, value);
 		}
 
 		public T Value {

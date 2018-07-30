@@ -40,8 +40,7 @@ namespace RazorSharp.Memory
 		public static T SafeRead<T>(Pointer<T> ptr, int elemOfs = 0)
 		{
 			T      t    = default;
-			IntPtr addr = Offset<T>(ptr.Address, elemOfs);
-
+			IntPtr addr = PointerUtils.Offset<T>(ptr.Address, elemOfs);
 
 			if (Assertion.Throws<NullReferenceException>(delegate { t = CSUnsafe.Read<T>(addr.ToPointer()); })) {
 				return default;
@@ -58,7 +57,7 @@ namespace RazorSharp.Memory
 		public static string SafeToString<T>(IntPtr ptr, int elemOfs = 0)
 		{
 			string s    = "";
-			IntPtr addr = Offset<T>(ptr, elemOfs);
+			IntPtr addr = PointerUtils.Offset<T>(ptr, elemOfs);
 
 			if (Assertion.Throws<AccessViolationException, NullReferenceException>(delegate
 			{
@@ -69,8 +68,6 @@ namespace RazorSharp.Memory
 
 			return s;
 		}
-
-
 
 		[HandleProcessCorruptedStateExceptions]
 		public static string SafeToString<T>(Pointer<T> ptr, int elemOfs = 0)
@@ -89,7 +86,7 @@ namespace RazorSharp.Memory
 				b[i] = Marshal.ReadByte(p, byteOffset + i);
 			return b;
 		}
-		
+
 		public static void WriteBytes(IntPtr dest, byte[] src)
 		{
 			for (int i = 0; i < src.Length; i++) {
@@ -99,19 +96,19 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-
-
 		public static bool ReadBit(int b, int bitIndex)
 		{
 			//var bit = (b & (1 << bitNumber-1)) != 0;
 			return (b & (1 << bitIndex)) != 0;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Write<T>(IntPtr p, int byteOffset, T t)
 		{
 			CSUnsafe.Write((p + byteOffset).ToPointer(), t);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T Read<T>(IntPtr p, int byteOffset)
 		{
 			return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
@@ -131,32 +128,12 @@ namespace RazorSharp.Memory
 			return readMethodTable->Equals(*validMethodTable);
 		}
 
-		public static IntPtr Add(void* v, int bytes)
-		{
-			return (IntPtr) (((long) v) + bytes);
-		}
-
-		public static IntPtr Add(void* a, void* b)
-		{
-			return Add((IntPtr) a, (IntPtr) b);
-		}
-
-		public static IntPtr Add(IntPtr p, int bytes)
-		{
-			return (IntPtr) (((long) p) + bytes);
-		}
-
-		public static IntPtr Add(IntPtr p, IntPtr b)
-		{
-			return (IntPtr) (((long) p) + b.ToInt64());
-		}
-
 		public static void WriteAs<TPtr, TValue>(Pointer<TPtr> ptr, int elemOffsetTValue, TValue v)
 		{
 			var nPtr = ptr.Reinterpret<TValue>();
 			nPtr[elemOffsetTValue] = v;
 		}
-		
+
 
 		#region Zero
 
@@ -174,25 +151,6 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
-
-
-		#region Offset
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static IntPtr Offset<T>(IntPtr p, int cnt)
-		{
-			int size = Unsafe.SizeOf<T>();
-			size *= cnt;
-			return p + size;
-		}
-
-		public static IntPtr Offset<T>(void* p, int cnt)
-		{
-			return Offset<T>((IntPtr) p,cnt);
-		}
-
-		#endregion
-
 
 	}
 

@@ -7,9 +7,9 @@ using RazorSharp.Runtime.CLRTypes;
 namespace RazorSharp.Analysis
 {
 
-	public unsafe class ReferenceInspector<T> : Inspector<T> where T : class
+	public unsafe class RefInspector<T> : Inspector<T> where T : class
 	{
-		public ReferenceInspector(ref T t, InspectorMode mode = InspectorMode.All) : base(ref t, mode)
+		public RefInspector(ref T t, InspectorMode mode = InspectorMode.All) : base(ref t, mode)
 		{
 			Metadata  = new ReferenceMetadataInfo(ref t);
 			Sizes     = new ReferenceSizeInfo(ref t);
@@ -106,7 +106,7 @@ namespace RazorSharp.Analysis
 
 		public new static void Write(ref T t)
 		{
-			Console.WriteLine(new ReferenceInspector<T>(ref t));
+			Console.WriteLine(new RefInspector<T>(ref t));
 		}
 
 		public override string ToString()

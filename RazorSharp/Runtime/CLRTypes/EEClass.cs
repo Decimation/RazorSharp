@@ -13,7 +13,6 @@ namespace RazorSharp.Runtime.CLRTypes
 
 	// todo: WIP
 	[StructLayout(LayoutKind.Explicit)]
-
 	// ReSharper disable once InconsistentNaming
 	public unsafe struct EEClass
 	{

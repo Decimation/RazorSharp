@@ -303,7 +303,7 @@ namespace RazorSharp.Pointers
 			var table = new ConsoleTable("Address", "Offset", "Value");
 
 			for (int i = Start; i <= End; i++) {
-				table.AddRow(Hex.ToHex(Memory.Memory.Offset<T>(Address,i)), i, this[i]);
+				table.AddRow(Hex.ToHex(PointerUtils.Offset<T>(Address,i)), i, this[i]);
 			}
 
 			return table;

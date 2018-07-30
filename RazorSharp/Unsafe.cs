@@ -132,18 +132,18 @@ namespace RazorSharp
 
 		/// <summary>
 		/// Calculates the size of a reference type in heap memory.
-		/// This is equivalent to the SOS "!do" command.
+		/// This is equivalent to the SOS "!do" command.<para></para>
 		///
-		/// This is the most accurate size calculation.
+		/// This is the most accurate size calculation.<para></para>
 		///
-		/// This follows the size formula of:
+		/// This follows the size formula of:<para></para>
 		///
-		/// (base instance size) + (length) * (component size)
+		/// (base instance size) + (length) * (component size)<para></para>
 		///
 		/// where:
-		/// 	base instance size = The base instance size of a type (24 (x64) or 12 (x86) by default)
-		/// 	length			   = array or string length, 1 otherwise
-		/// 	component size	   = element size, if available; 0 otherwise
+		/// 	base instance size = The base instance size of a type (24 (x64) or 12 (x86) by default)<para></para>
+		/// 	length			   = array or string length, 1 otherwise<para></para>
+		/// 	component size	   = element size, if available; 0 otherwise<para></para>
 		/// </summary>
 		///
 		/// Note: this also includes padding.
@@ -187,8 +187,7 @@ namespace RazorSharp
 				return (int) methodTable->BaseSize + arr.Length * methodTable->ComponentSize;
 			}
 
-			if (t is string) {
-				var str = t as string;
+			if (t is string str) {
 				return (int) methodTable->BaseSize + str.Length * methodTable->ComponentSize;
 			}
 
@@ -198,7 +197,8 @@ namespace RazorSharp
 		/// <summary>
 		/// Calculates the base size of the fields in the heap minus padding of the base size.
 		///
-		/// Note that if the fields *themselves* are padded, those are still included.
+		/// Note: If the fields *themselves* are padded, those are still included.
+		/// Note: Doesn't work when T has generic parameters
 		/// </summary>
 		public static int BaseFieldsSize<T>()
 		{
@@ -206,6 +206,10 @@ namespace RazorSharp
 			//{
 			//	return(GetBaseSize() - GetClass()->GetBaseSizePadding());
 			//}
+
+			if (typeof(T).IsConstructedGenericType) {
+				return -1;
+			}
 
 			var mt = Runtime.Runtime.MethodTableOf<T>();
 			return  (int) mt->BaseSize - mt->EEClass->BaseSizePadding;

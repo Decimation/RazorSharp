@@ -23,7 +23,7 @@ namespace Test.Testing.Tests
 
 			string[] arr = {"", "foo", "anime"};
 			Pointer<string> strPtr3 = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData);
-			TestingAssertion.AssertElements(strPtr3, arr);
+			RAssert.Elements(strPtr3, arr);
 			strPtr3 -= 3;
 			Debug.Assert(strPtr3.Value == arr[0]);
 			strPtr3++;
@@ -36,13 +36,13 @@ namespace Test.Testing.Tests
 			string        x = "foo";
 			string        y = "bar";
 			DecayPointer<char> p = x;
-			TestingAssertion.AssertElements(p, x);
+			RAssert.Elements(p, x);
 			p = y;
-			TestingAssertion.AssertElements(p, y);
+			RAssert.Elements(p, y);
 
 			int[]        arr = {1, 2, 3};
 			DecayPointer<int> p2  = arr;
-			TestingAssertion.AssertElements(p2, arr);
+			RAssert.Elements(p2, arr);
 
 
 			string        z     = "anime";

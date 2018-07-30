@@ -42,10 +42,13 @@ namespace RazorSharp.Runtime
 			return new HashSet<MethodTableFlags2>(list).ToArray();
 		}
 
+		/// <summary>
+		/// Minimum GC object heap size
+		/// </summary>
 		internal static readonly int MinObjectSize = (2 * IntPtr.Size + sizeof(ObjHeader));
 
 		//todo
-		internal const uint GC_MARKED = 0x1;
+		private const uint GC_MARKED = 0x1;
 	}
 
 	/// <summary>
@@ -189,12 +192,6 @@ namespace RazorSharp.Runtime
 	[Flags]
 	public enum MethodTableFlagsLow : ushort
 	{
-
-		// AS YOU ADD NEW FLAGS PLEASE CONSIDER WHETHER Generics::NewInstantiation NEEDS
-		// TO BE UPDATED IN ORDER TO ENSURE THAT METHODTABLES DUPLICATED FOR GENERIC INSTANTIATIONS
-		// CARRY THE CORRECT FLAGS.
-		//
-
 		// We are overloading the low 2 bytes of m_dwFlags to be a component size for Strings
 		// and Arrays and some set of flags which we can be assured are of a specified state
 		// for Strings / Arrays, currently these will be a bunch of generics flags which don't
@@ -264,8 +261,6 @@ namespace RazorSharp.Runtime
 		                     HasVariance & 0 |
 		                     HasDefaultCtor & 0 |
 		                     HasPreciseInitCctors & 0)
-
-
 	}
 
 	/// <summary>

@@ -67,7 +67,7 @@ namespace RazorSharp.Pointers
 		}
 
 		private                    IntPtr          m_addr;
-		private protected readonly PointerMetadata m_metadata;
+		protected readonly PointerMetadata m_metadata;
 
 		/// <summary>
 		/// Whether this Pointer was created from implicit array conversion.
@@ -101,8 +101,8 @@ namespace RazorSharp.Pointers
 		}
 
 		public virtual T this[int index] {
-			get => Memory.Read<T>(Memory.Offset<T>(Address, index),0);
-			set => Memory.Write(Memory.Offset<T>(Address, index),0, value);
+			get => Memory.Read<T>(PointerUtils.Offset<T>(Address, index),0);
+			set => Memory.Write(PointerUtils.Offset<T>(Address, index),0, value);
 		}
 
 		#region Constructors
@@ -163,19 +163,19 @@ namespace RazorSharp.Pointers
 
 		protected virtual void Increment(int cnt = 1)
 		{
-			Address = Memory.Offset<T>(Address, cnt);
+			Address = PointerUtils.Offset<T>(Address, cnt);
 		}
 
 		protected virtual void Decrement(int cnt = 1)
 		{
-			Address = Memory.Offset<T>(Address, -cnt);
+			Address = PointerUtils.Offset<T>(Address, -cnt);
 		}
 
 		protected virtual ConsoleTable ToElementTable(int length)
 		{
 			var table = new ConsoleTable("Address", "Index", "Value");
 			for (int i = 0; i < length; i++) {
-				table.AddRow(Hex.ToHex(Memory.Offset<T>(Address, i)), i, this[i]);
+				table.AddRow(Hex.ToHex(PointerUtils.Offset<T>(Address, i)), i, this[i]);
 			}
 
 			return table;

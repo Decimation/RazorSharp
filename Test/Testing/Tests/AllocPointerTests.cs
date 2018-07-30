@@ -108,6 +108,8 @@ namespace Test.Testing.Tests
 			const int end  = 0xFF;
 
 			alloc.Dispose();
+
+
 			var allocI = new AllocPointer<int>(5)
 			{
 				[0] = zero,
@@ -119,8 +121,14 @@ namespace Test.Testing.Tests
 				Debug.Assert(zero == allocI[allocI.Start]);
 				Debug.Assert(allocI.IndexOf(end) == allocI.End);
 				Debug.Assert(allocI.IndexOf(zero) == allocI.Start);
-				alloc++;
+				allocI++;
 			}
+
+			allocI.Address = allocI.LastElement;
+
+			Debug.Assert(allocI.AddressInBounds(allocI.Address));
+
+			Debug.Assert(!allocI.AddressInBounds(allocI.Address + 1));
 		}
 
 

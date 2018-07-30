@@ -13,15 +13,15 @@ namespace Test.Testing.Tests
 		{
 			object       x = "foo";
 			HeapObject** h = Runtime.GetHeapObject(ref x);
-			TestingAssertion.AssertHeapObject(ref x, h);
+			RAssert.HeapObject(ref x, h);
 
 			string         s      = "foo";
 			StringObject** strObj = Runtime.GetStringObject(ref s);
-			TestingAssertion.AssertStringObject(ref s, strObj);
+			RAssert.StringObject(ref s, strObj);
 
 			int[]         arr    = {1, 2, 3};
 			ArrayObject** arrObj = Runtime.GetArrayObject(ref arr);
-			TestingAssertion.AssertArrayObject(ref arr, arrObj);
+			RAssert.ArrayObject(ref arr, arrObj);
 
 			s += " bar";
 			Assert.That(s.Length, Is.EqualTo((**strObj).Length));

@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using MethodTimer;
 using RazorCommon;
 using RazorInvoke;
+using RazorSharp.Pointers;
 using RazorSharp.Runtime.CLRTypes;
 
 namespace RazorSharp.Experimental
@@ -118,7 +119,7 @@ namespace RazorSharp.Experimental
 					m_regions.Add(memInfo.BaseAddress, regionData);
 				}
 
-				current = Memory.Memory.Add(memInfo.BaseAddress, memInfo.RegionSize);
+				current = PointerUtils.Add(memInfo.BaseAddress, memInfo.RegionSize);
 			}
 
 			Console.WriteLine("Regions: {0}", m_regions.Count);

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
 using RazorCommon;
@@ -14,19 +15,24 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void CollectionsToString_Bytes()
 		{
-			Collections.ToString(Bytes);
+			Collections.ToString(mem: Bytes);
+		}
+
+		public static void StringJoin()
+		{
+			
 		}
 
 		[Benchmark]
 		public void CollectionsToString_List()
 		{
-			Collections.ToString(List);
+			Collections.ListToString(List);
 		}
 
 		[Benchmark]
 		public void CollectionsToString_ArrayList()
 		{
-			Collections.ToString(ArrayList);
+			Collections.ListToString(ArrayList);
 		}
 	}
 
