@@ -12,6 +12,13 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [x] Taking the address of managed objects
 - [x] Pointer to managed types
 - [x] Pinning unblittable objects
-- [x] Layout of an object header
-- [x] Layout of a MethodTable
-- [x] Layout of an EEClass
+
+# CLR structures mapping
+- [x] ObjectHeader
+- [x] MethodTable
+- [x] EEClass
+- [ ] EEClassLayoutInfo
+- [ ] LayoutEEClass
+- [ ] FieldDesc
+- [ ] MethodDesc
+- [ ] MethodDescChunk
