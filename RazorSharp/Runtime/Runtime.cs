@@ -21,10 +21,10 @@ namespace RazorSharp.Runtime
 		private static readonly RuntimeTypeHandle StringHandle;
 
 		/// <summary>
-		/// Heap offset to the first array element.
-		///  - +8 for MethodTable*
-		///  - +4 for length
-		///  - +4 for padding (x64 only)
+		/// Heap offset to the first array element.<para></para>
+		///  - +8 for MethodTable*<para></para>
+		///  - +4 for length<para></para>
+		///  - +4 for padding (x64 only)<para></para>
 		///
 		/// (x64 only)
 		/// </summary>

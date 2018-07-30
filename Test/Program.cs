@@ -51,10 +51,17 @@ namespace Test
 		}
 #endif
 
-		static void RandomInit(AllocPointer<int> alloc)
+		private static void RandomInit(AllocPointer<byte> alloc)
 		{
 			for (int i = alloc.Start; i <= alloc.End; i++) {
-				alloc[i] = ThreadLocalRandom.Instance.Next(0, 100);
+				alloc[i] = (byte) ThreadLocalRandom.Instance.Next(0, 100);
+			}
+		}
+
+		private static void RandomInit(AllocPointer<string> alloc)
+		{
+			for (int i = alloc.Start; i <= alloc.End; i++) {
+				alloc[i] = StringUtils.Random(10);
 			}
 		}
 
@@ -92,20 +99,29 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			AllocPointer<int> alloc = new AllocPointer<int>(5);
-			alloc[4] = 0xFF;
-			Console.WriteLine(alloc.End);
-			Console.WriteLine(alloc.IndexOf(0xFF));
-			Console.WriteLine(alloc[alloc.End]);
+			Logger.Log("henlo\ng\ndesu");
+			TextLogger.Log<int>("g desu\nanime");
 
-			for (int i = alloc.Start; i <= alloc.End; i++) {
-				Debug.Assert(0xFF == alloc[alloc.End]);
-				alloc++;
+			var alloc = new AllocPointer<byte>(5);
+			RandomInit(alloc);
+
+			for (int i = 10; i >= 0; i--) {
+				Console.Clear();
+				Console.Write("{0:E}", alloc);
+				Thread.Sleep(1000);
+
+
+				alloc.Count++;
 			}
+			Console.Clear();
+			Console.Write("{0:E}", alloc);
+			Console.WriteLine(alloc.Count);
 
-
-			//Console.ReadLine();
-
+			alloc.Address = alloc.LastElement;
+			Console.WriteLine(Hex.ToHex(alloc.LastElement));
+			Debug.Assert(alloc.AddressInBounds(alloc.Address));
+			Console.WriteLine(Hex.ToHex(alloc.Address + 1));
+			Debug.Assert(!alloc.AddressInBounds(alloc.Address + 1));
 		}
 
 		private static void ModuleInfo(IntPtr module)

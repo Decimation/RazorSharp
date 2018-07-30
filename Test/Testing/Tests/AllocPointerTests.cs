@@ -8,6 +8,7 @@ using RazorSharp.Utilities;
 
 namespace Test.Testing.Tests
 {
+
 	[TestFixture]
 	internal class AllocPointerTests
 	{
@@ -49,7 +50,6 @@ namespace Test.Testing.Tests
 			Assertion.AssertThrows<Exception>(delegate
 			{
 				var x = alloc[-1];
-
 			});
 
 			Assertion.AssertThrows<Exception>(delegate
@@ -79,7 +79,6 @@ namespace Test.Testing.Tests
 			alloc.MoveToStart();
 
 			for (int i = 0; i < alloc.Count; i++) {
-
 				for (int j = alloc.Start; j <= alloc.End; j++) {
 					Debug.Assert(alloc.IndexInBounds(j));
 				}
@@ -88,10 +87,10 @@ namespace Test.Testing.Tests
 			}
 
 			for (int i = 0; i < alloc.Count; i++) {
-
 				for (int j = alloc.Start; j <= alloc.End; j++) {
 					Debug.Assert(alloc.IndexInBounds(j));
 				}
+
 				alloc--;
 			}
 
@@ -105,7 +104,23 @@ namespace Test.Testing.Tests
 			Debug.Assert(!alloc.IndexInBounds(-1));
 			Debug.Assert(!alloc.IndexInBounds(5));
 
+			const int zero = 123;
+			const int end  = 0xFF;
 
+			alloc.Dispose();
+			var allocI = new AllocPointer<int>(5)
+			{
+				[0] = zero,
+				[4] = end
+			};
+
+			for (int i = allocI.Start; i <= allocI.End; i++) {
+				Debug.Assert(end == allocI[allocI.End]);
+				Debug.Assert(zero == allocI[allocI.Start]);
+				Debug.Assert(allocI.IndexOf(end) == allocI.End);
+				Debug.Assert(allocI.IndexOf(zero) == allocI.Start);
+				alloc++;
+			}
 		}
 
 

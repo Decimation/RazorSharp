@@ -13,6 +13,7 @@ namespace RazorSharp.Pointers
 {
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+	using Memory = Memory.Memory;
 
 	/// <summary>
 	/// Represents a C/C++ style array using dynamic unmanaged memory allocation<para></para>
@@ -101,18 +102,47 @@ namespace RazorSharp.Pointers
 			set {
 				int oldCount = Count;
 
-				Address = Marshal.ReAllocHGlobal(FirstElement, (IntPtr) value);
+				//Address = Marshal.ReAllocHGlobal(FirstElement, (IntPtr) value);
+				Address = FirstElement;
+				InternalSetAddress(Marshal.ReAllocHGlobal(Address, (IntPtr) value));
 				SetAddressBounds();
 				m_offset               = 0;
 				Metadata.AllocatedSize = value;
 
 				int newElements = Count - oldCount;
+				TextLogger.Log<Pointer<T>>("New bounds: {0}",AddrBoundsString());
+				TextLogger.Log<Pointer<T>>("New elements: {0}", newElements);
 
 				// We have new memory we need to initialize
 				if (newElements > 0) {
 					Init(oldCount, Count - 1);
 				}
 			}
+		}
+
+
+
+		private struct MemoryPosition
+		{
+			internal int    Offset       { get; }
+			internal IntPtr Address      { get; }
+			internal IntPtr FirstElement { get; }
+			internal IntPtr LastElement  { get; }
+
+			internal MemoryPosition(int offset, IntPtr address, IntPtr firstElement, IntPtr lastElement)
+			{
+				Offset       = offset;
+				Address      = address;
+				FirstElement = firstElement;
+				LastElement  = lastElement;
+			}
+		}
+
+		private void InternalSetAddress(IntPtr addr)
+		{
+			var oldAddr = base.Address;
+			base.Address = addr;
+			TextLogger.Log<Pointer<T>>("Old address: {0:P}, new address: {1:P}", oldAddr, base.Address);
 		}
 
 		/// <summary>
@@ -123,7 +153,7 @@ namespace RazorSharp.Pointers
 
 			// This actually probably shouldn't be changed
 			set {
-				TextLogger.Log<Pointer<T>>("Attempting to set address of {0:P}", value);
+				TextLogger.Log<Pointer<T>>("Attempting to set address of {0:P} {1}", value, AddrBoundsString());
 				if (IsAllocated && AddressInBounds(value)) {
 					base.Address = value;
 				}
@@ -173,7 +203,7 @@ namespace RazorSharp.Pointers
 		private void SetAddressBounds()
 		{
 			FirstElement = Address;
-			LastElement  = Address + AllocatedSize - ElementSize;
+			LastElement = Address + AllocatedSize;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -214,8 +244,10 @@ namespace RazorSharp.Pointers
 		/// </summary>
 		/// <param name="p"></param>
 		/// <returns></returns>
-		private bool AddressInBounds(IntPtr p)
+		public bool AddressInBounds(IntPtr p)
 		{
+			TextLogger.Log<Pointer<T>>(AddrBoundsString());
+			// C++ pattern
 			if (p == IntPtr.Zero || p == new IntPtr(-1)) {
 				Dispose();
 			}
@@ -228,7 +260,7 @@ namespace RazorSharp.Pointers
 				return false;
 			}
 
-			TextLogger.Log<Pointer<T>>("Address {0:P} is in bounds\n{1}", p,AddrBoundsString());
+			TextLogger.Log<Pointer<T>>("Address {0:P} is in bounds\n{1}", p, AddrBoundsString());
 
 			return true;
 		}
@@ -242,7 +274,7 @@ namespace RazorSharp.Pointers
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private string IndexBoundsString()
 		{
-			return String.Format("Index Bounds: [{0} {1}]",Start, End);
+			return String.Format("Index Bounds: [{0} {1}]", Start, End);
 		}
 
 		/// <summary>
@@ -257,7 +289,7 @@ namespace RazorSharp.Pointers
 		/// </summary>
 		private FixType EnsureOffsetBounds(int requestedOffset = 1)
 		{
-			var reqAddr = Memory.Memory.Offset<T>(Address, requestedOffset);
+			var reqAddr = Memory.Offset<T>(Address, requestedOffset);
 			if (!AddressInBounds(reqAddr)) {
 				// This is for isolated incidents when iterators
 				// and pointer arithmetic move past the end by 1 element.
@@ -311,10 +343,8 @@ namespace RazorSharp.Pointers
 				throw new IndexOutOfRangeException($"Requested index of {requestedIndex} < {Start} [{Start} - {End}]");
 			}
 
-			TextLogger.Log<Pointer<T>>("Index {0} is in bounds\n{1}",requestedIndex,IndexBoundsString());
+			TextLogger.Log<Pointer<T>>("Index {0} is in bounds\n{1}", requestedIndex, IndexBoundsString());
 		}
-
-
 
 		#endregion
 
@@ -410,7 +440,8 @@ namespace RazorSharp.Pointers
 				case FixType.BounceBack:
 					return;
 				case FixType.OutOfBounds:
-					throw new IndexOutOfRangeException();
+					throw new IndexOutOfRangeException(
+						$"Index {Hex.ToHex(Memory.Offset<T>(Address, cnt))} is out of bounds: {AddrBoundsString()}");
 				case FixType.Verified:
 					m_offset += cnt;
 					base.Increment(cnt);
@@ -426,7 +457,8 @@ namespace RazorSharp.Pointers
 				case FixType.BounceBack:
 					return;
 				case FixType.OutOfBounds:
-					throw new IndexOutOfRangeException();
+					throw new IndexOutOfRangeException(
+						$"Index {Hex.ToHex(Memory.Offset<T>(Address, cnt))} is out of bounds: {AddrBoundsString()}");
 				case FixType.Verified:
 					m_offset -= cnt;
 					base.Decrement(cnt);
@@ -455,10 +487,14 @@ namespace RazorSharp.Pointers
 
 		protected override ConsoleTable ToElementTable(int length)
 		{
-			var table = new ConsoleTable("Address", "Index", "Value");
+			var table = new ConsoleTable("Address", "Index", "Value", "Allocated");
 
 			for (int i = Start; i <= End; i++) {
-				table.AddRow(Hex.ToHex(Memory.Memory.Offset<T>(Address, i)), i, this[i]);
+				var addr = Memory.Offset<T>(Address, i);
+				if (!AddressInBounds(addr)) {
+					break;
+				}
+				table.AddRow(Hex.ToHex(addr), i, this[i], AddressInBounds(addr) ? Check : BallotX);
 			}
 
 			return table;
