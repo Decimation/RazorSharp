@@ -43,9 +43,6 @@ namespace RazorSharp.Memory
 			}
 		}
 
-
-
-
 		public static void Point<T>(IntPtr p, int byteLen, int offset)
 		{
 			// Line 1: Memory
@@ -78,12 +75,9 @@ namespace RazorSharp.Memory
 			Console.WriteLine("{0}\n{1}\n{2} [{3}]", str, pt, addrStr, offset);
 		}
 
-
-		public static string Create<T>(IntPtr p, int len, ToStringOptions options = ToStringOptions.ZeroPadHex)
+		public static string Create<T>(byte[] mem, ToStringOptions options = ToStringOptions.ZeroPadHex)
 		{
-
-			byte[] mem           = Memory.ReadBytes(p, 0, len);
-			int    possibleTypes = mem.Length / Unsafe.SizeOf<T>();
+			int possibleTypes = mem.Length / Unsafe.SizeOf<T>();
 
 			if (typeof(T) == typeof(byte)) {
 				return Collections.ToString(mem, options);
@@ -99,14 +93,9 @@ namespace RazorSharp.Memory
 				Memory.WriteBytes(alloc, mem);
 				IntPtr adj = alloc + ofs * Unsafe.SizeOf<T>();
 
-				string s;
-				if (options.HasFlag(ToStringOptions.Hex))
-					s = Hex.TryCreateHex(CSUnsafe.Read<T>(adj.ToPointer()));
-				else {
-					s = CSUnsafe.Read<T>(adj.ToPointer()).ToString();
-				}
-
-
+				string s = options.HasFlag(ToStringOptions.Hex)
+					? Hex.TryCreateHex(CSUnsafe.Read<T>(adj.ToPointer()))
+					: CSUnsafe.Read<T>(adj.ToPointer()).ToString();
 
 				Marshal.FreeHGlobal(alloc);
 				return s;
@@ -119,6 +108,11 @@ namespace RazorSharp.Memory
 
 
 			return Collections.ToString(@out, options | ~ToStringOptions.UseCommas);
+		}
+
+		public static string Create<T>(IntPtr p, int byteLen, ToStringOptions options = ToStringOptions.ZeroPadHex)
+		{
+			return Create<T>(Memory.ReadBytes(p, 0, byteLen), options);
 		}
 	}
 

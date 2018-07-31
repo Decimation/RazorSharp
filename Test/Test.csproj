@@ -190,16 +190,15 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Testing\Benchmarking\CollectionsBenchmarking.cs" />
+    <Compile Include="Testing\Benchmarking\MarshalBenchmarking.cs" />
     <Compile Include="Testing\Benchmarking\MethodTableAcquisitionBenchmarking.cs" />
     <Compile Include="Testing\Benchmarking\PointerBenchmark.cs" />
     <Compile Include="Testing\Benchmarking\UnsafeBenchmarking.cs" />
     <Compile Include="Testing\GenericDummy.cs" />
     <Compile Include="Testing\RAssert.cs" />
     <Compile Include="Testing\Benchmarking\AllocPointerBenchmarking.cs" />
-    <Compile Include="Testing\Benchmarking\ArrayPointerBenchmarking.cs" />
     <Compile Include="Testing\Dummy.cs" />
     <Compile Include="Testing\Tests\AllocPointerTests.cs" />
-    <Compile Include="Testing\Tests\DecayPointerTests.cs" />
     <Compile Include="Testing\Tests\HeapObjectTests.cs" />
     <Compile Include="Testing\Tests\PinningTests.cs" />
     <Compile Include="Testing\Tests\PointerTests.cs" />

@@ -28,7 +28,7 @@ namespace RazorSharp.Runtime
 		///
 		/// (x64 only)
 		/// </summary>
-		internal static readonly int OffsetToArrayData = IntPtr.Size * 2;
+		public static readonly int OffsetToArrayData = IntPtr.Size * 2;
 
 		static Runtime()
 		{

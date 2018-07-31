@@ -12,6 +12,7 @@ namespace RazorSharp.Memory
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
+
 	public static unsafe class Memory
 	{
 
@@ -102,13 +103,6 @@ namespace RazorSharp.Memory
 			return (b & (1 << bitIndex)) != 0;
 		}
 
-		public static void Copy(byte* dest, byte* src, int cnt)
-		{
-			for (int i = 0; i < cnt; i++) {
-				src[i] = dest[i];
-			}
-		}
-
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Write<T>(IntPtr p, int byteOffset, T t)
 		{
@@ -120,8 +114,6 @@ namespace RazorSharp.Memory
 		{
 			return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
 		}
-
-
 
 		public static bool IsValid<T>(IntPtr addrOfPtr) where T : class
 		{

@@ -19,7 +19,7 @@ namespace RazorSharp.Pointers
 	/// <summary>
 	/// Represents a high-level C/C++ style array using dynamic unmanaged memory allocation<para></para>
 	/// This allows for creation of managed types in unmanaged memory.<para></para>
-	///
+	/// This is also similar to C++'s Vector type, as this "array" is not fixed.
 	/// - Bounds checking<para></para>
 	/// - Resizable<para></para>
 	/// - Allocation protection<para></para>

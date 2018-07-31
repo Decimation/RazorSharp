@@ -5,7 +5,10 @@ using RazorCommon;
 namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 {
 
-	//https://github.com/dotnet/coreclr/blob/a6c2f7834d338e08bf3dcf9dedb48b2a0c08fcfa/src/vm/object.h#L743
+	/// <summary>
+	/// Source: https://github.com/dotnet/coreclr/blob/a6c2f7834d338e08bf3dcf9dedb48b2a0c08fcfa/src/vm/object.h#L743
+	/// Should be used with Runtime.GetArrayObject and double indirection
+	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct ArrayObject : IHeapObject
 	{

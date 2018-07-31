@@ -7,8 +7,9 @@ namespace RazorSharp.Pointers
 	using Memory = Memory.Memory;
 
 	/// <summary>
-	/// A lighter type of Pointer, equal to the size of IntPtr.<para></para>
+	/// A bare-bones, lighter type of Pointer, equal to the size of IntPtr.<para></para>
 	/// Can be represented as a pointer in memory. <para></para>
+	///
 	///
 	/// - No bounds checking<para></para>
 	/// - No safety systems<para></para>
@@ -18,9 +19,11 @@ namespace RazorSharp.Pointers
 	public unsafe struct LightPointer<T> : IPointer<T>
 	{
 		/// <summary>
-		/// We want this to be the only field so it can be represented identically in memory.
+		/// We want this to be the only field so it can be represented as a pointer in memory.
 		/// </summary>
 		private void* m_value;
+
+		#region Properties
 
 		public T this[int index] {
 			get => Memory.Read<T>(PointerUtils.Offset<T>(m_value, index), 0);
@@ -39,15 +42,18 @@ namespace RazorSharp.Pointers
 
 		public int ElementSize => Unsafe.SizeOf<T>();
 
+		#endregion
+
+		#region Constructors
+
 		public LightPointer(void* v)
 		{
 			m_value = v;
 		}
 
-		public static implicit operator LightPointer<T>(void* v)
-		{
-			return new LightPointer<T>(v);
-		}
+		#endregion
+
+		#region Methods
 
 		public int ToInt32()
 		{
@@ -59,10 +65,24 @@ namespace RazorSharp.Pointers
 			return (long) m_value;
 		}
 
-		public override string ToString()
+		#endregion
+
+
+		#region Operators
+
+		public static implicit operator LightPointer<T>(void* v)
 		{
-			return Value.ToString();
+			return new LightPointer<T>(v);
 		}
+
+		public static implicit operator LightPointer<T>(IntPtr p)
+		{
+			return new LightPointer<T>(p.ToPointer());
+		}
+
+		#endregion
+
+		#region Equality operators
 
 		public bool Equals(LightPointer<T> other)
 		{
@@ -89,6 +109,21 @@ namespace RazorSharp.Pointers
 		{
 			return !left.Equals(right);
 		}
+
+		#endregion
+
+		#region Overrides
+
+		public override string ToString()
+		{
+			return Value.ToString();
+		}
+
+		#endregion
+
+
+
+
 	}
 
 }

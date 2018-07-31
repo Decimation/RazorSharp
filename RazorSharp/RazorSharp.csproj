@@ -135,6 +135,8 @@
     <Compile Include="Utilities\MethodTimeLogger.cs" />
     <Compile Include="Utilities\StandardOut.cs" />
     <Compile Include="Utilities\TypeException.cs" />
+    <Compile Include="Virtual\VirtualHeap.cs" />
+    <Compile Include="Virtual\VirtualString.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

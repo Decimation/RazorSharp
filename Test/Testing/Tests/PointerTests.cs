@@ -28,40 +28,10 @@ namespace Test.Testing.Tests
 			Debug.Assert(strPtr3.Value == arr[0]);
 			strPtr3++;
 			Debug.Assert(strPtr3.Value == arr[1]);
+
+			RAssert.Pressure(strPtr, ref s);
+			RAssert.Pressure(strPtr2, ref s);
 		}
-
-		[Test]
-		public void TestArrayPointers()
-		{
-			string        x = "foo";
-			string        y = "bar";
-			DecayPointer<char> p = x;
-			RAssert.Elements(p, x);
-			p = y;
-			RAssert.Elements(p, y);
-
-			int[]        arr = {1, 2, 3};
-			DecayPointer<int> p2  = arr;
-			RAssert.Elements(p2, arr);
-
-
-			string        z     = "anime";
-			DecayPointer<char> chPtr = z;
-
-			Assert.That(chPtr[0], Is.EqualTo(z[0]));
-			chPtr++;
-			Assert.That(chPtr[0], Is.EqualTo(z[1]));
-			chPtr--;
-
-			DecayPointer<char> chPtr2 = z;
-
-			Debug.Assert(chPtr == chPtr2);
-
-
-			//AssertElements(chPtr, z);
-		}
-
-
 	}
 
 }

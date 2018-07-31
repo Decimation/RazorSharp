@@ -60,7 +60,6 @@ namespace RazorSharp
 		/// <returns>The address of the type in memory.</returns>
 		public static IntPtr AddressOf<T>(ref T t)
 		{
-
 			TypedReference tr = __makeref(t);
 			return *(IntPtr*) (&tr);
 		}
@@ -246,6 +245,17 @@ namespace RazorSharp
 			// Need to include the ObjHeader
 			Marshal.Copy(AddressOfHeap(ref t) - IntPtr.Size, alloc, 0, heapSize);
 			return alloc;
+		}
+
+		public static byte[] MemoryOfFields<T>(ref T t) where T : class
+		{
+			// Subtract the size of the ObjHeader and MethodTable*
+			int fieldSize = HeapSize(ref t) - (IntPtr.Size * 2);
+			byte[] fields = new byte[fieldSize];
+
+			// Skip over the MethodTable*
+			Marshal.Copy(AddressOfHeap(ref t) + IntPtr.Size, fields, 0, fieldSize);
+			return fields;
 		}
 
 		/// <summary>

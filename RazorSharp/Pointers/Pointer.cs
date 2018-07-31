@@ -20,6 +20,9 @@ namespace RazorSharp.Pointers
 	/// If <![CDATA[T]]> is a reference type, pinning is not required as
 	/// the pointer contains the stack pointer, meaning the pointer works with the GC.
 	///
+	/// However, if this pointer points to heap memory, the pointer may become invalidated when
+	/// the GC compacts the heap.
+	///
 	/// - No bounds checking<para></para>
 	///
 	/// </summary>

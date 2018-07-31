@@ -1,13 +1,36 @@
 using System;
+using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.Utilities;
 
 namespace RazorSharp.Experimental
 {
 
+	/// <summary>
+	/// Creates types in unmanaged memory. AllocPointer can also be used.<para></para>>
+	///
+	/// Types that cannot be created in unmanaged memory: <para></para>
+	/// - String <para></para>
+	/// - IList <para></para>
+	///
+	/// For that, use AllocPointer.
+	/// </summary>
+	/// <typeparam name="T"></typeparam>
 	public struct UnmanagedAllocated<T> where T : class
 	{
+		/// <summary>
+		/// Types that can't be created in stack memory
+		/// (out of the types that have been tested)
+		/// </summary>
+		private static readonly Type[] DisallowedTypes =
+		{
+			typeof(string),
+			typeof(IList),
+		};
+
 		private readonly IntPtr m_unmanaged;
 
 		private T m_dummy;
@@ -26,6 +49,10 @@ namespace RazorSharp.Experimental
 
 		public static UnmanagedAllocated<T> Alloc()
 		{
+			if (DisallowedTypes.Contains(typeof(T))) {
+				throw new TypeException($"Type {typeof(T).Name} cannot be created in unmanaged memory.");
+			}
+
 			UnmanagedAllocated<T> unmanaged =
 				new UnmanagedAllocated<T>(Marshal.AllocHGlobal(Unsafe.BaseInstanceSize<T>()),
 					Activator.CreateInstance<T>());

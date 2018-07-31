@@ -27,6 +27,7 @@ using RazorSharp.Utilities;
 using Test.Testing;
 using Test.Testing.Benchmarking;
 using Unsafe = RazorSharp.Unsafe;
+using static RazorSharp.Unsafe;
 using static RazorSharp.Utilities.Assertion;
 using Assertion = RazorSharp.Utilities.Assertion;
 
@@ -85,13 +86,8 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			byte* stackMem = stackalloc byte[Unsafe.BaseInstanceSize<Dummy>()];
-			var stackDummy = new StackAllocated<Dummy>(stackMem);
-			Console.WriteLine(stackDummy);
 			
 		}
-
-		
 
 		private static void ManualTable<T>(AllocPointer<T> alloc)
 		{
@@ -122,43 +118,6 @@ namespace Test
 			for (int i = 0; i < ptr.Count; i++) {
 				ptr[i] = StringUtils.Random(10);
 			}
-		}
-
-		
-
-
-		// todo
-		private static T NewStackAlloc<T>(byte* stackPtr) where T : class
-		{
-			T t = Activator.CreateInstance<T>();
-
-
-			Console.WriteLine(Unsafe.HeapSize(ref t));
-			var allocSize = Unsafe.BaseInstanceSize<T>();
-			var heapMem   = Unsafe.MemoryOf(ref t);
-
-			for (int i = 0; i < allocSize; i++) {
-				stackPtr[i] = heapMem[i];
-			}
-
-			// Move over ObjHeader
-			stackPtr += IntPtr.Size;
-
-			Unsafe.WriteReference(ref t, stackPtr);
-			return t;
-		}
-
-		private static void ReStackAlloc<T>(byte* stackPtr, ref T t) where T : class
-		{
-			var allocSize = Unsafe.HeapSize(ref t);
-			var heapAddr  = (byte*) Unsafe.AddressOfHeap(ref t) - IntPtr.Size;
-			for (int i = 0; i < allocSize; i++) {
-				stackPtr[i] = heapAddr[i];
-			}
-
-			// Move over ObjHeader
-			stackPtr += IntPtr.Size;
-			Unsafe.WriteReference(ref t, stackPtr);
 		}
 
 

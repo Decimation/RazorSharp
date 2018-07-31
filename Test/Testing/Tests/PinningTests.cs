@@ -28,18 +28,7 @@ namespace Test.Testing.Tests
 			Assert.That(p2.IsPinned, Is.EqualTo(false));
 		}*/
 
-		[Test]
-		public void TestILPinning()
-		{
-			string s = "foo";
-			DecayPointer<char> ptr = s;
 
-			ObjectPinner.InvokeWhilePinned(s, delegate
-			{
-				RAssert.Pinning(ref s);
-				RAssert.Elements(ptr, s);
-			});
-		}
 
 
 
