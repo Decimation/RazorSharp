@@ -102,6 +102,13 @@ namespace RazorSharp.Memory
 			return (b & (1 << bitIndex)) != 0;
 		}
 
+		public static void Copy(byte* dest, byte* src, int cnt)
+		{
+			for (int i = 0; i < cnt; i++) {
+				src[i] = dest[i];
+			}
+		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Write<T>(IntPtr p, int byteOffset, T t)
 		{
@@ -109,10 +116,12 @@ namespace RazorSharp.Memory
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T Read<T>(IntPtr p, int byteOffset)
+		public static T Read<T>(IntPtr p, int byteOffset = 0)
 		{
 			return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
 		}
+
+
 
 		public static bool IsValid<T>(IntPtr addrOfPtr) where T : class
 		{

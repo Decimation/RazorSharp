@@ -85,8 +85,126 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
+			var allocPtr = new AllocPointer<string>(5);
+			RandomInit(allocPtr);
 
+			Console.WriteLine("{0:E}", allocPtr);
+			GC.AddMemoryPressure(10000);
+			GC.Collect();
+			ManualTable(allocPtr);
+
+			StackAllocTest();
+
+			var mem = stackalloc byte[Unsafe.BaseInstanceSize<GenericDummy<int>>()];
+
+			var stackGen = new StackAllocated<GenericDummy<int>>(mem);
+			Console.WriteLine(stackGen);
+			stackGen.Value.Value++;
+			stackGen.Value.hello();
+			Console.WriteLine(stackGen);
+
+			var unmanaged = UnmanagedAllocated<GenericDummy<int>>.Alloc();
+			Console.WriteLine(unmanaged);
+			unmanaged.Value.Value++;
+			Console.WriteLine(unmanaged);
+
+			unmanaged.Value = new GenericDummy<int>(55555);
+			Console.WriteLine(unmanaged);
 		}
+
+		private static void ManualTable<T>(AllocPointer<T> alloc)
+		{
+			bool refType = !typeof(T).IsValueType;
+
+			ConsoleTable table =
+				refType
+					? new ConsoleTable("Index", "Address", "Value", "Heap pointer")
+					: new ConsoleTable("Index", "Address", "Value");
+
+			for (int i = alloc.Start; i <= alloc.End; i++) {
+				var addr = PointerUtils.Offset<T>(alloc.Address, i);
+
+				if (refType) {
+					table.AddRow(i, Hex.ToHex(addr), alloc[i], Hex.ToHex(Marshal.ReadIntPtr(addr)));
+				}
+				else {
+					table.AddRow(i, Hex.ToHex(addr), alloc[i]);
+				}
+			}
+
+
+			Console.WriteLine(table.ToMarkDownString());
+		}
+
+		private static void RandomInit(AllocPointer<string> ptr)
+		{
+			for (int i = 0; i < ptr.Count; i++) {
+				ptr[i] = StringUtils.Random(10);
+			}
+		}
+
+		private static void StackAllocTest()
+		{
+			string str = "foo";
+			RefInspector<string>.Write(ref str);
+
+			byte* alloc = stackalloc byte[Unsafe.HeapSize(ref str)];
+			ReStackAlloc(alloc, ref str);
+			RefInspector<string>.Write(ref str);
+
+
+			byte*  alloc2 = stackalloc byte[24];
+			object obj2   = NewStackAlloc<object>(alloc2);
+			RefInspector<object>.Write(ref obj2);
+			obj2 = "";
+			RefInspector<object>.Write(ref obj2);
+
+			byte*                 alloc3 = stackalloc byte[Unsafe.BaseInstanceSize<Dummy>()];
+			StackAllocated<Dummy> stack  = new StackAllocated<Dummy>(alloc3);
+			Console.WriteLine(stack);
+			stack.Value.Integer++;
+			Console.WriteLine(stack);
+
+
+			stack.Value = new Dummy(1, "g");
+			Console.WriteLine(stack);
+		}
+
+
+		// todo
+		private static T NewStackAlloc<T>(byte* stackPtr) where T : class
+		{
+			T t = Activator.CreateInstance<T>();
+
+
+			Console.WriteLine(Unsafe.HeapSize(ref t));
+			var allocSize = Unsafe.BaseInstanceSize<T>();
+			var heapMem   = Unsafe.MemoryOf(ref t);
+
+			for (int i = 0; i < allocSize; i++) {
+				stackPtr[i] = heapMem[i];
+			}
+
+			// Move over ObjHeader
+			stackPtr += IntPtr.Size;
+
+			Unsafe.WriteReference(ref t, stackPtr);
+			return t;
+		}
+
+		private static void ReStackAlloc<T>(byte* stackPtr, ref T t) where T : class
+		{
+			var allocSize = Unsafe.HeapSize(ref t);
+			var heapAddr  = (byte*) Unsafe.AddressOfHeap(ref t) - IntPtr.Size;
+			for (int i = 0; i < allocSize; i++) {
+				stackPtr[i] = heapAddr[i];
+			}
+
+			// Move over ObjHeader
+			stackPtr += IntPtr.Size;
+			Unsafe.WriteReference(ref t, stackPtr);
+		}
+
 
 		//todo
 		private static void ModuleInfo(IntPtr module)

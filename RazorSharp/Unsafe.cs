@@ -60,6 +60,7 @@ namespace RazorSharp
 		/// <returns>The address of the type in memory.</returns>
 		public static IntPtr AddressOf<T>(ref T t)
 		{
+
 			TypedReference tr = __makeref(t);
 			return *(IntPtr*) (&tr);
 		}
@@ -298,6 +299,15 @@ namespace RazorSharp
 		#endregion
 
 
+		public static void WriteReference<T>(ref T t, IntPtr newHeapAddr)
+		{
+			Marshal.WriteIntPtr(Unsafe.AddressOf(ref t), newHeapAddr);
+		}
+
+		public static void WriteReference<T>(ref T t, void* newHeapAddr)
+		{
+			Marshal.WriteIntPtr(Unsafe.AddressOf(ref t), new IntPtr(newHeapAddr));
+		}
 	}
 
 }

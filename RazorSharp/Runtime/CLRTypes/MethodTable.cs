@@ -183,13 +183,23 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(40)] private readonly MethodTable* m_pCanonMT;
 
 		//** Status: unknown
+		[FieldOffset(48)] private void** m_pPerInstInfo;
+		[FieldOffset(48)] private void*  m_ElementTypeHnd;
+		[FieldOffset(48)] private void*  m_pMultipurposeSlot1;
+
+		//** Status: unknown
+		[FieldOffset(56)] private void* m_pInterfaceMap;
+		[FieldOffset(56)] private void* m_pMultipurposeSlot2;
+
+
+		//** Status: unknown
 		//[FieldOffset(48)] private readonly InstSlot m_slotInfo;
 
 		//** Status: unknown
-		[FieldOffset(48)] private readonly void* m_methodDescTablePtr;
+		//[FieldOffset(48)] private readonly void* m_methodDescTablePtr;
 
 		//** Status: unknown
-		[FieldOffset(56)] private readonly MapSlot m_mapSlot;
+		//[FieldOffset(56)] private readonly MapSlot m_mapSlot;
 
 		// m_pPerInstInfo and m_pInterfaceMap have to be at fixed offsets because of performance sensitive
 		// JITed code and JIT helpers. However, they are frequently not present. The space is used by other
@@ -234,6 +244,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			table.AddRow("EEClass", Hex.ToHex(m_pEEClass));
 			table.AddRow("Canon MT", Hex.ToHex(m_pCanonMT));
+
 
 			//table.AddRow("MethodDesc Table ptr", Hex.ToHex(m_methodDescTablePtr));
 

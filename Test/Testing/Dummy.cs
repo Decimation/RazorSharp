@@ -1,4 +1,5 @@
 using System;
+using RazorCommon;
 
 namespace Test.Testing
 {
@@ -8,7 +9,17 @@ namespace Test.Testing
 		private int    _integer;
 		private string _string;
 
-		internal Dummy() : this(new Random().Next(0, 100), "foo") { }
+		public int Integer {
+			get => _integer;
+			set => _integer = value;
+		}
+
+		public string String {
+			get => _string;
+			set => _string = value;
+		}
+
+		public Dummy() : this(new Random().Next(0, 100), "foo") { }
 
 		internal Dummy(int i, string s)
 		{
@@ -16,9 +27,11 @@ namespace Test.Testing
 			_string  = s;
 		}
 
-		public int get()
+
+
+		public override string ToString()
 		{
-			return _integer;
+			return String.Format("Int: {0}, String: {1}", _integer, _string);
 		}
 	}
 

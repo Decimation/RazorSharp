@@ -41,6 +41,11 @@ namespace RazorSharp.Pointers
 			return p + size;
 		}
 
+		public static int OffsetOf(IntPtr lo, IntPtr hi)
+		{
+			return (int) (hi.ToInt64() - lo.ToInt64());
+		}
+
 		public static unsafe IntPtr Offset<T>(void* p, int elemCnt)
 		{
 			return Offset<T>((IntPtr) p,elemCnt);

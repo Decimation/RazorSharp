@@ -20,7 +20,8 @@ namespace RazorSharp.Pointers
 	/// If <![CDATA[T]]> is a reference type, pinning is not required as
 	/// the pointer contains the stack pointer, meaning the pointer works with the GC.
 	///
-	/// - No bounds checking
+	/// - No bounds checking<para></para>
+	///
 	/// </summary>
 	/// <typeparam name="T">Type this pointer points to. If just raw memory, use byte.</typeparam>
 	public unsafe class Pointer<T> : IFormattable, IPointer<T>
@@ -60,13 +61,14 @@ namespace RazorSharp.Pointers
 				if (obj.GetType() == this.GetType()) {
 					return Equals((PointerMetadata) obj);
 				}
+
 				return false;
 			}
 
 			internal PointerMetadata(int elementSize) : this(elementSize, false) { }
 		}
 
-		private                    IntPtr          m_addr;
+		private            IntPtr          m_addr;
 		protected readonly PointerMetadata m_metadata;
 
 		/// <summary>
@@ -96,13 +98,13 @@ namespace RazorSharp.Pointers
 		/// This is equivalent to this[0].
 		/// </summary>
 		public virtual T Value {
-			get => Memory.Read<T>(Address,0);
+			get => Memory.Read<T>(Address, 0);
 			set => Memory.Write(Address, 0, value);
 		}
 
 		public virtual T this[int index] {
-			get => Memory.Read<T>(PointerUtils.Offset<T>(Address, index),0);
-			set => Memory.Write(PointerUtils.Offset<T>(Address, index),0, value);
+			get => Memory.Read<T>(PointerUtils.Offset<T>(Address, index), 0);
+			set => Memory.Write(PointerUtils.Offset<T>(Address, index), 0, value);
 		}
 
 		#region Constructors
@@ -124,8 +126,6 @@ namespace RazorSharp.Pointers
 
 		#region Methods
 
-
-
 		public Pointer<TNew> Reinterpret<TNew>()
 		{
 			return new Pointer<TNew>(Address);
@@ -139,10 +139,9 @@ namespace RazorSharp.Pointers
 			table.AddRow("Value", Memory.SafeToString(this));
 
 
-
 			table.AddRow("Type", typeof(T).Name);
 
-			table.AddRow("this[0]",Memory.SafeToString(this,0));
+			table.AddRow("this[0]", Memory.SafeToString(this, 0));
 
 
 			table.AddRow("Null", IsNull);
@@ -294,6 +293,7 @@ namespace RazorSharp.Pointers
 					if (typeof(T).IsIListType()) {
 						return Collections.ListToString((IList) Value);
 					}
+
 					return Value.ToString();
 				case "P":
 					return Hex.ToHex(Address);

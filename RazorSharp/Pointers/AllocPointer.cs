@@ -8,6 +8,7 @@ using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using RazorCommon;
+using RazorCommon.Strings;
 
 namespace RazorSharp.Pointers
 {
@@ -100,7 +101,6 @@ namespace RazorSharp.Pointers
 		public int AllocatedSize {
 			get => Metadata.AllocatedSize;
 			set {
-
 				// Reallocate
 
 				int oldCount = Count;
@@ -306,7 +306,6 @@ namespace RazorSharp.Pointers
 		}
 
 
-
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void EnsureIndexerBounds(int requestedIndex)
 		{
@@ -447,12 +446,35 @@ namespace RazorSharp.Pointers
 			return table;
 		}
 
-		private const char Check   = '\u2713';
-		private const char BallotX = '\u2717';
+		[HandleProcessCorruptedStateExceptions]
+		private string ReadMaybeNull(IntPtr addr)
+		{
+			try {
+				//if ((*(IntPtr*) addr) == IntPtr.Zero) return "(null)";
+				if (Marshal.ReadIntPtr(addr) == IntPtr.Zero) return "NULL";
+				return Memory.Read<T>(addr).ToString();
+			}
+			catch (AccessViolationException) {
+				return ("(ave)");
+			}
+			catch (NullReferenceException) {
+				return "(null)";
+			}
+		}
 
 		protected override ConsoleTable ToElementTable(int length)
 		{
-			var table = new ConsoleTable("Address", "Index", "Value", "Allocated");
+			bool         refType = !typeof(T).IsValueType;
+			ConsoleTable table;
+			if (refType) {
+				table = new ConsoleTable("Index", "Address", "Value", "Heap pointer", "Allocated");
+			}
+			else {
+				table = new ConsoleTable("Index", "Address", "Value", "Allocated");
+			}
+
+
+
 
 			for (int i = Start; i <= End; i++) {
 				var addr = PointerUtils.Offset<T>(Address, i);
@@ -460,11 +482,22 @@ namespace RazorSharp.Pointers
 					break;
 				}
 
-				table.AddRow(Hex.ToHex(addr), i, this[i], AddressInBounds(addr) ? Check : BallotX);
+				if (refType) {
+					table.AddRow(i, Hex.ToHex(addr), this[i], Hex.ToHex(Marshal.ReadIntPtr(addr)),
+						AddressInBounds(addr) ? StringUtils.Check : StringUtils.BallotX);
+				}
+				else {
+					table.AddRow(i, Hex.ToHex(addr), this[i],
+						AddressInBounds(addr) ? StringUtils.Check : StringUtils.BallotX);
+				}
 			}
+
+
+
 
 			return table;
 		}
+
 
 		private void ReleaseUnmanagedResources()
 		{

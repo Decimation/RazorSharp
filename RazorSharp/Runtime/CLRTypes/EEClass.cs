@@ -11,7 +11,10 @@ namespace RazorSharp.Runtime.CLRTypes
 	using DWORD = UInt32;
 	using WORD = UInt16;
 
-	// todo: WIP
+	/// <summary>
+	/// Source: https://github.com/dotnet/coreclr/blob/6bb3f84d42b9756c5fa18158db8f724d57796296/src/vm/class.h#L1901
+	/// todo: WIP
+	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	// ReSharper disable once InconsistentNaming
 	public unsafe struct EEClass

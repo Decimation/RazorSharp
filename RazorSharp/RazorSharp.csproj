@@ -102,7 +102,8 @@
     <Compile Include="Analysis\RefInspector.cs" />
     <Compile Include="Experimental\PinHandle.cs" />
     <Compile Include="Experimental\SmartScanner.cs" />
-    <Compile Include="Experimental\Unmanaged.cs" />
+    <Compile Include="Experimental\StackAllocated.cs" />
+    <Compile Include="Experimental\UnmanagedAllocated.cs" />
     <Compile Include="Memory\Memory.cs" />
     <Compile Include="Memory\MemoryLayout.cs" />
     <Compile Include="ObjectPinner.cs" />
@@ -111,7 +112,7 @@
     <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\LightPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
-    <Compile Include="Pointers\PointerUtil.cs" />
+    <Compile Include="Pointers\PointerUtils.cs" />
     <Compile Include="Runtime\CLRTypes\DWFlags.cs" />
     <Compile Include="Runtime\CLRTypes\EEClass.cs" />
     <Compile Include="Runtime\CLRTypes\EEClassLayoutInfo.cs" />

@@ -193,6 +193,7 @@
     <Compile Include="Testing\Benchmarking\MethodTableAcquisitionBenchmarking.cs" />
     <Compile Include="Testing\Benchmarking\PointerBenchmark.cs" />
     <Compile Include="Testing\Benchmarking\UnsafeBenchmarking.cs" />
+    <Compile Include="Testing\GenericDummy.cs" />
     <Compile Include="Testing\RAssert.cs" />
     <Compile Include="Testing\Benchmarking\AllocPointerBenchmarking.cs" />
     <Compile Include="Testing\Benchmarking\ArrayPointerBenchmarking.cs" />
