@@ -13,7 +13,7 @@ namespace RazorSharp.Experimental
 	{
 		private readonly byte* m_stackPtr;
 
-		// Heap pointer points to m_stackPtr + sizeof(ObjHeader)
+		// 'Heap' pointer points to m_stackPtr + sizeof(ObjHeader)
 		private T m_dummy;
 
 		public T Value {

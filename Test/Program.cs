@@ -85,32 +85,13 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			var allocPtr = new AllocPointer<string>(5);
-			RandomInit(allocPtr);
-
-			Console.WriteLine("{0:E}", allocPtr);
-			GC.AddMemoryPressure(10000);
-			GC.Collect();
-			ManualTable(allocPtr);
-
-			StackAllocTest();
-
-			var mem = stackalloc byte[Unsafe.BaseInstanceSize<GenericDummy<int>>()];
-
-			var stackGen = new StackAllocated<GenericDummy<int>>(mem);
-			Console.WriteLine(stackGen);
-			stackGen.Value.Value++;
-			stackGen.Value.hello();
-			Console.WriteLine(stackGen);
-
-			var unmanaged = UnmanagedAllocated<GenericDummy<int>>.Alloc();
-			Console.WriteLine(unmanaged);
-			unmanaged.Value.Value++;
-			Console.WriteLine(unmanaged);
-
-			unmanaged.Value = new GenericDummy<int>(55555);
-			Console.WriteLine(unmanaged);
+			byte* stackMem = stackalloc byte[Unsafe.BaseInstanceSize<Dummy>()];
+			var stackDummy = new StackAllocated<Dummy>(stackMem);
+			Console.WriteLine(stackDummy);
+			
 		}
+
+		
 
 		private static void ManualTable<T>(AllocPointer<T> alloc)
 		{
@@ -143,32 +124,7 @@ namespace Test
 			}
 		}
 
-		private static void StackAllocTest()
-		{
-			string str = "foo";
-			RefInspector<string>.Write(ref str);
-
-			byte* alloc = stackalloc byte[Unsafe.HeapSize(ref str)];
-			ReStackAlloc(alloc, ref str);
-			RefInspector<string>.Write(ref str);
-
-
-			byte*  alloc2 = stackalloc byte[24];
-			object obj2   = NewStackAlloc<object>(alloc2);
-			RefInspector<object>.Write(ref obj2);
-			obj2 = "";
-			RefInspector<object>.Write(ref obj2);
-
-			byte*                 alloc3 = stackalloc byte[Unsafe.BaseInstanceSize<Dummy>()];
-			StackAllocated<Dummy> stack  = new StackAllocated<Dummy>(alloc3);
-			Console.WriteLine(stack);
-			stack.Value.Integer++;
-			Console.WriteLine(stack);
-
-
-			stack.Value = new Dummy(1, "g");
-			Console.WriteLine(stack);
-		}
+		
 
 
 		// todo
