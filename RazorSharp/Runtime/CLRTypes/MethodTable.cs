@@ -184,6 +184,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		//** Status: verified
 		[FieldOffset(40)] private readonly MethodTable* m_pCanonMT;
 
+#if EXTRA_FIELDS
 		//** Status: unknown
 		[FieldOffset(48)] private void** m_pPerInstInfo;
 		[FieldOffset(48)] private void*  m_ElementTypeHnd;
@@ -192,6 +193,8 @@ namespace RazorSharp.Runtime.CLRTypes
 		//** Status: unknown
 		[FieldOffset(56)] private void* m_pInterfaceMap;
 		[FieldOffset(56)] private void* m_pMultipurposeSlot2;
+#endif
+
 
 
 		//** Status: unknown

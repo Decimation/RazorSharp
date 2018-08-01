@@ -234,7 +234,7 @@ namespace RazorSharp.Pointers
 		/// <returns></returns>
 		public bool AddressInBounds(IntPtr p)
 		{
-			TextLogger.Log<Pointer<T>>(AddrBoundsString());
+
 
 			// C++ pattern
 			if (p == IntPtr.Zero || p == new IntPtr(-1)) {
@@ -317,7 +317,7 @@ namespace RazorSharp.Pointers
 				throw new IndexOutOfRangeException($"Requested index of {requestedIndex} < {Start} [{Start} - {End}]");
 			}
 
-			TextLogger.Log<Pointer<T>>("Index {0} is in bounds\n{1}", requestedIndex, IndexBoundsString());
+
 		}
 
 		#endregion

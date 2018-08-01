@@ -18,7 +18,7 @@ namespace RazorSharp.Runtime.CLRTypes
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct FieldDesc
 	{
-		// This actually only seems to be a short
+		// This actually only seems to be a byte
 		[FieldOffset(0)] private readonly MethodTable* m_pMTOfEnclosingClass;
 
 		// unsigned m_mb                  	: 24;

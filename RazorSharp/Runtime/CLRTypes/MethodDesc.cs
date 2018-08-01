@@ -28,8 +28,8 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(4)] private readonly WORD m_wSlotNumber;
 		[FieldOffset(6)] private readonly WORD m_wFlags;
 
-		public MethodDescFlags2 Flags2 => (MethodDescFlags2) m_bFlags2;
-		public MethodDescFlags3 Flags3 => (MethodDescFlags3) m_wFlags3AndTokenRemainder;
+		private MethodDescFlags2 Flags2 => (MethodDescFlags2) m_bFlags2;
+		private MethodDescFlags3 Flags3 => (MethodDescFlags3) m_wFlags3AndTokenRemainder;
 
 		public override string ToString()
 		{
@@ -40,6 +40,8 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow(nameof(m_wSlotNumber), m_wSlotNumber);
 			table.AddRow(nameof(m_wFlags), m_wFlags);
 
+			table.AddRow("Flags2", Flags2);
+			table.AddRow("Flags3",Flags3);
 
 
 
@@ -52,7 +54,7 @@ namespace RazorSharp.Runtime.CLRTypes
 	/// Use with: MethodDesc::m_bFlags2
 	/// </summary>
 	[Flags]
-	public enum MethodDescFlags2 : byte
+	internal enum MethodDescFlags2 : byte
 	{
 		/// <summary>
 		/// The method entrypoint is stable (either precode or actual code)
@@ -83,7 +85,7 @@ namespace RazorSharp.Runtime.CLRTypes
 	/// Use with: MethodDesc::m_wFlags3AndTokenRemainder
 	/// </summary>
 	[Flags]
-	public enum MethodDescFlags3 : ushort
+	internal enum MethodDescFlags3 : ushort
 	{
 
 		TokenRemainderMask = 0x3FFF,

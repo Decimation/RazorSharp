@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 namespace RazorSharp.Pointers
 {
 
-	public static class PointerUtils
+	public static unsafe class PointerUtils
 	{
 		public static unsafe IntPtr Add(void* v, int bytes)
 		{
@@ -24,6 +24,20 @@ namespace RazorSharp.Pointers
 		public static IntPtr Add(IntPtr p, IntPtr b)
 		{
 			return (IntPtr) (((long) p) + b.ToInt64());
+		}
+
+
+
+		public static void MakeSequential<T>(LightPointer<T>[] arr)
+		{
+			long[] ptrs = new long[arr.Length];
+			for (int i = 0; i < ptrs.Length; i++) {
+				ptrs[i] = (long) arr[i].Address;
+			}
+			Array.Sort(ptrs);
+			for (int i = 0; i < ptrs.Length; i++) {
+				arr[i] = new LightPointer<T>(ptrs[i]);
+			}
 		}
 
 		/// <summary>

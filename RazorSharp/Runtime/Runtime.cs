@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using MethodTimer;
 using RazorCommon;
+using RazorSharp.Pointers;
 using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Runtime.CLRTypes.HeapObjects;
 using RazorSharp.Utilities;
@@ -13,6 +14,9 @@ namespace RazorSharp.Runtime
 
 	/// <summary>
 	/// Provides utilities for manipulating CLR structures
+	///
+	/// https://github.com/dotnet/coreclr/blob/fcb04373e2015ae12b55f33fdd0dd4580110db98/src/vm/runtimehandles.h
+	/// https://github.com/dotnet/coreclr/blob/fcb04373e2015ae12b55f33fdd0dd4580110db98/src/vm/runtimehandles.cpp
 	/// </summary>
 	public static unsafe class Runtime
 	{
@@ -126,29 +130,76 @@ namespace RazorSharp.Runtime
 			WriteMethodTable(ref t, (MethodTable*) typeof(TOrig).TypeHandle.Value);
 		}
 
-		public static FieldDesc*[] GetFieldDescs<T>(BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
+		public static LightPointer<FieldDesc>[] GetFieldDescs<T>(BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
 		{
-			var fields = typeof(T).GetFields(flags);
-			var arr = new FieldDesc*[fields.Length];
+			return GetFieldDescs(typeof(T), flags);
+		}
+
+		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
+		public static LightPointer<FieldDesc>[] GetFieldDescs(Type t,
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+		{
+			var fields = t.GetFields(flags);
+			var arr    = new LightPointer<FieldDesc>[fields.Length];
 
 			for (int i = 0; i < arr.Length; i++) {
 				arr[i] = (FieldDesc*) fields[i].FieldHandle.Value;
+			}
 
+			PointerUtils.MakeSequential(arr);
+
+			return arr;
+		}
+
+		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
+		public static LightPointer<MethodDesc>[] GetMethodDescs<T>(
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+		{
+			return GetMethodDescs(typeof(T), flags);
+		}
+
+		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
+		public static LightPointer<MethodDesc>[] GetMethodDescs(Type t,
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+		{
+			var fields = t.GetMethods(flags);
+
+
+			var arr    = new LightPointer<MethodDesc>[fields.Length];
+
+			for (int i = 0; i < arr.Length; i++) {
+				arr[i] = (MethodDesc*) fields[i].MethodHandle.Value;
 			}
 
 			return arr;
 		}
 
-		public static MethodDesc* GetMethodDesc<T>(string name, BindingFlags flags = BindingFlags.Instance | BindingFlags.Public)
+		public static MethodDesc* GetMethodDesc(Type t, string name,
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.Public)
 		{
-			var methodHandle = typeof(T).GetMethod(name, flags).MethodHandle;
+			var methodHandle = t.GetMethod(name, flags).MethodHandle;
 			return (MethodDesc*) methodHandle.Value;
 		}
 
-		public static FieldDesc* GetFieldDesc<T>(string name, BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+		public static MethodDesc* GetMethodDesc<T>(string name,
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.Public)
 		{
-			var fieldHandle = typeof(T).GetField(name, flags).FieldHandle;
+			return GetMethodDesc(typeof(T), name, flags);
+		}
+
+		public static FieldDesc* GetFieldDesc(Type t, string name,
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+		{
+			var fieldHandle = t.GetField(name, flags).FieldHandle;
 			return (FieldDesc*) fieldHandle.Value;
+		}
+
+
+		public static FieldDesc* GetFieldDesc<T>(string name,
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+		{
+			return GetFieldDesc(typeof(T), name, flags);
 		}
 
 		/// <summary>

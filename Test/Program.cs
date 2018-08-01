@@ -92,14 +92,43 @@ namespace Test
 		{
 			Dummy d = new Dummy();
 			RefInspector<Dummy>.Write(ref d);
-			foreach (var v in Runtime.GetFieldDescs<Dummy>(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public)) {
-				Console.WriteLine(*v);
-				Console.WriteLine(Hex.ToHex(v));
+
+			Console.WriteLine(
+				Hex.ToHex(PointerUtils.Offset<byte>(Runtime.MethodTableOf<Dummy>(), sizeof(MethodTable))));
+			Console.WriteLine();
+
+			Console.WriteLine("FieldDesc:");
+			foreach (var v in Runtime.GetFieldDescs<Dummy>(BindingFlags.Instance | BindingFlags.NonPublic |
+			                                               BindingFlags.Static | BindingFlags.Public)) {
+				Console.WriteLine(Hex.ToHex(v.Address));
 			}
+
+			Console.WriteLine();
+
+			Console.WriteLine("MethodDesc:");
+			foreach (var v in Runtime.GetMethodDescs<Dummy>(BindingFlags.Instance | BindingFlags.NonPublic |
+			                                                BindingFlags.Static | BindingFlags.Public)) {
+				Console.WriteLine(Hex.ToHex(v.Address));
+			}
+
+			Console.WriteLine();
+
+			var hMethod = typeof(Dummy).GetMethod("DoSomething", BindingFlags.Instance | BindingFlags.Public)
+				.MethodHandle;
+			var md1 = (MethodDesc*) hMethod.Value;
+
+			//Console.WriteLine(Hex.ToHex(hMethod.Value));
+			//Console.WriteLine(Hex.ToHex(hMethod.GetFunctionPointer()));
+			//Console.WriteLine(*md1);
+
 
 
 		}
 
+		private static void Stat<T>()
+		{
+
+		}
 
 
 		private static void ManualTable<T>(AllocPointer<T> alloc)
@@ -132,8 +161,6 @@ namespace Test
 				ptr[i] = StringUtils.Random(10);
 			}
 		}
-
-
 
 
 	}

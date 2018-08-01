@@ -51,6 +51,11 @@ namespace RazorSharp.Pointers
 			m_value = v;
 		}
 
+		public LightPointer(long v)
+		{
+			m_value = (void*) v;
+		}
+
 		#endregion
 
 		#region Methods
@@ -120,8 +125,6 @@ namespace RazorSharp.Pointers
 		}
 
 		#endregion
-
-
 
 
 	}
