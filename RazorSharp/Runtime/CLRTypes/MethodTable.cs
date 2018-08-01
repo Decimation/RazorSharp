@@ -146,7 +146,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		// On Linux ARM is a RelativeFixupPointer. Otherwise,
 		// Parent PTR_MethodTable if enum_flag_HasIndirectParent is not set. Pointer to indirection cell
 		// if enum_flag_enum_flag_HasIndirectParent is set. The indirection is offset by offsetof(MethodTable, m_pParentMethodTable).
-		// It allows casting helpers to go through parent chain natually. Casting helper do not need need the explicit check
+		// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
 		// for enum_flag_HasIndirectParentMethodTable.
 		[FieldOffset(16)] private readonly MethodTable* m_pParentMethodTable;
 

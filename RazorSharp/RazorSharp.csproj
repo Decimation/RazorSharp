@@ -49,6 +49,9 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
+    <Reference Include="ObjectLayoutInspector, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\ObjectLayoutInspector\ObjectLayoutInspector\bin\Debug\ObjectLayoutInspector.dll</HintPath>
+    </Reference>
     <Reference Include="RazorCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\RazorCommon\RazorCommon\bin\x64\Release\RazorCommon.dll</HintPath>
     </Reference>
@@ -112,6 +115,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\Inspector.cs" />
+    <Compile Include="Analysis\ObjectLayout.cs" />
     <Compile Include="Analysis\RefInspector.cs" />
     <Compile Include="Experimental\PinHandle.cs" />
     <Compile Include="Experimental\SmartScanner.cs" />
@@ -119,7 +123,6 @@
     <Compile Include="Experimental\UnmanagedAllocated.cs" />
     <Compile Include="Memory\Memory.cs" />
     <Compile Include="Memory\MemoryLayout.cs" />
-    <Compile Include="Memory\ObjectLayout.cs" />
     <Compile Include="ObjectPinner.cs" />
     <Compile Include="Pointers\AllocPointer.cs" />
     <Compile Include="Pointers\DecayPointer.cs" />

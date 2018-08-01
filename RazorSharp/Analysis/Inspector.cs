@@ -5,29 +5,34 @@ using RazorSharp.Runtime.CLRTypes;
 
 namespace RazorSharp.Analysis
 {
+
 	[Flags]
 	public enum InspectorMode
 	{
-		None = 0,
-		Meta = 1,
+		None    = 0,
+		Meta    = 1,
 		Address = 2,
-		Size = 4,
-		All = Meta | Address | Size,
+		Size    = 4,
+		All     = Meta | Address | Size,
 	}
+
 	public unsafe class Inspector<T>
 	{
-		public MetadataInfo Metadata  { get; protected set; }
-		public AddressInfo  Addresses { get; protected set; }
-		public SizeInfo     Sizes     { get; protected set; }
+		public MetadataInfo    Metadata  { get; protected set; }
+		public AddressInfo     Addresses { get; protected set; }
+		public SizeInfo        Sizes     { get; protected set; }
+		public ObjectLayout<T> Layout    { get; protected set; }
 
-		protected readonly InspectorMode _mode;
+
+		protected readonly InspectorMode Mode;
 
 		public Inspector(ref T t, InspectorMode mode = InspectorMode.All)
 		{
-			_mode = mode;
+			Mode      = mode;
 			Metadata  = new MetadataInfo(ref t);
 			Addresses = new AddressInfo(ref t);
 			Sizes     = new SizeInfo();
+			Layout    = new ObjectLayout<T>(ref t);
 		}
 
 
@@ -96,14 +101,17 @@ namespace RazorSharp.Analysis
 
 		public static void Write(ref T t)
 		{
-			Console.WriteLine(new Inspector<T>(ref t));
+			var inspector = new Inspector<T>(ref t);
+			Console.WriteLine(inspector);
+			Console.WriteLine();
+			Console.WriteLine(inspector.Layout);
 		}
 
 		public override string ToString()
 		{
 			var table = new ConsoleTable("Property", "Value");
 
-			switch (_mode) {
+			switch (Mode) {
 				case InspectorMode.None:
 					break;
 				case InspectorMode.Meta:
@@ -123,7 +131,6 @@ namespace RazorSharp.Analysis
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
-
 
 
 			return table.ToMarkDownString();

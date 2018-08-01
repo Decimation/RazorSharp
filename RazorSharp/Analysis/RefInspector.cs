@@ -2,6 +2,7 @@ using System;
 using RazorCommon;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
+
 // ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Analysis
@@ -19,18 +20,17 @@ namespace RazorSharp.Analysis
 
 		private sealed class ReferenceMetadataInfo : MetadataInfo
 		{
-			public ObjHeader*   Header      { get; }
-			public EEClass*     EEClass     { get; }
+			public ObjHeader* Header  { get; }
+			public EEClass*   EEClass { get; }
 
 			internal ReferenceMetadataInfo(ref T t) : base(ref t)
 			{
-				Header      = Runtime.Runtime.ReadObjHeader(ref t);
-				EEClass     = MethodTable->EEClass;
+				Header  = Runtime.Runtime.ReadObjHeader(ref t);
+				EEClass = MethodTable->EEClass;
 			}
 
 			protected internal override ConsoleTable ToTable()
 			{
-
 				var table = base.ToTable();
 				table.AddRow("EEClass", Hex.ToHex(EEClass));
 				table.AddRow("Object Header", Hex.ToHex(Header));
@@ -106,13 +106,16 @@ namespace RazorSharp.Analysis
 
 		public new static void Write(ref T t)
 		{
-			Console.WriteLine(new RefInspector<T>(ref t));
+			var inspector = new RefInspector<T>(ref t);
+			Console.WriteLine(inspector);
+			Console.WriteLine();
+			Console.WriteLine(inspector.Layout);
 		}
 
 		public override string ToString()
 		{
 			var table = new ConsoleTable("Property", "Value");
-			switch (_mode) {
+			switch (Mode) {
 				case InspectorMode.None:
 					break;
 				case InspectorMode.Meta:
