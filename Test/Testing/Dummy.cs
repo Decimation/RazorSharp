@@ -1,13 +1,20 @@
 using System;
+using System.Threading;
 using RazorCommon;
 
 namespace Test.Testing
 {
 
-	internal class Dummy
+	public class Dummy
 	{
-		private int    _integer;
-		private string _string;
+
+		private        int    _integer;
+		private        string _string;
+		internal       uint   Internal;
+		protected      ushort Protected;
+		private static int    _static;
+		public         int    Public;
+
 
 		public int Integer {
 			get => _integer;
@@ -28,13 +35,13 @@ namespace Test.Testing
 		}
 
 
+		public void DoSomething() { }
 
 		public override string ToString()
 		{
 			return String.Format("Int: {0}, String: {1}", _integer, _string);
 		}
 	}
-
 
 
 }

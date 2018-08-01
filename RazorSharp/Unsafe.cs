@@ -9,7 +9,12 @@ using static RazorSharp.Utilities.Assertion;
 
 namespace RazorSharp
 {
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+	//using Memory = RazorSharp.Memory.Memory;
+	//using Runtime = RazorSharp.Runtime.Runtime;
+
 
 	public enum OffsetType
 	{
@@ -49,10 +54,11 @@ namespace RazorSharp
 	/// </summary>
 	public static unsafe class Unsafe
 	{
+
 		#region Address
 
 		/// <summary>
-		/// Returns the address of a type in memory.
+		/// Returns the address of a type in memory.<para></para>
 		///
 		/// Note: This does not pin the reference in memory if it is a reference type.
 		/// </summary>
@@ -73,7 +79,6 @@ namespace RazorSharp
 		/// <returns>The address of the heap object.</returns>
 		public static IntPtr AddressOfHeap<T>(ref T t) where T : class
 		{
-
 			TypedReference tr = __makeref(t);
 
 			// NOTE:
@@ -179,10 +184,13 @@ namespace RazorSharp
 			 *
 			 */
 
+			// We have to manually read the MethodTable because if it's an array,
+			// the TypeHandle won't work.
 			var methodTable = Runtime.Runtime.ReadMethodTable(ref t);
 
 			if (typeof(T).IsArray) {
 				var arr = t as Array;
+
 				// ReSharper disable once PossibleNullReferenceException
 				return (int) methodTable->BaseSize + arr.Length * methodTable->ComponentSize;
 			}
@@ -191,7 +199,16 @@ namespace RazorSharp
 				return (int) methodTable->BaseSize + str.Length * methodTable->ComponentSize;
 			}
 
+
 			return (int) methodTable->BaseSize;
+		}
+
+		public static bool IsBoxed<T>(T value)
+		{
+			return
+				(typeof(T).IsInterface || typeof(T) == typeof(object)) &&
+				value != null &&
+				value.GetType().IsValueType;
 		}
 
 		/// <summary>
@@ -200,7 +217,7 @@ namespace RazorSharp
 		/// Note: If the fields *themselves* are padded, those are still included.
 		/// Note: Doesn't work when T has generic parameters
 		/// </summary>
-		public static int BaseFieldsSize<T>()
+		public static int BaseFieldsSize<T>() where T : class
 		{
 			//inline DWORD MethodTable::GetNumInstanceFieldBytes()
 			//{
@@ -212,7 +229,7 @@ namespace RazorSharp
 			}
 
 			var mt = Runtime.Runtime.MethodTableOf<T>();
-			return  (int) mt->BaseSize - mt->EEClass->BaseSizePadding;
+			return (int) mt->BaseSize - mt->EEClass->BaseSizePadding;
 		}
 
 		/// <summary>
@@ -250,8 +267,8 @@ namespace RazorSharp
 		public static byte[] MemoryOfFields<T>(ref T t) where T : class
 		{
 			// Subtract the size of the ObjHeader and MethodTable*
-			int fieldSize = HeapSize(ref t) - (IntPtr.Size * 2);
-			byte[] fields = new byte[fieldSize];
+			int    fieldSize = HeapSize(ref t) - (IntPtr.Size * 2);
+			byte[] fields    = new byte[fieldSize];
 
 			// Skip over the MethodTable*
 			Marshal.Copy(AddressOfHeap(ref t) + IntPtr.Size, fields, 0, fieldSize);
@@ -263,7 +280,7 @@ namespace RazorSharp
 		/// </summary>
 		public static void Move<T>(ref T t, IntPtr newHeapAddr) where T : class
 		{
-			var heapBytes  = MemoryOf(ref t);
+			var heapBytes = MemoryOf(ref t);
 			Debug.Assert(heapBytes.Length == HeapSize(ref t));
 			Memory.Memory.Zero(AddressOfHeap(ref t) - IntPtr.Size, HeapSize(ref t));
 			Memory.Memory.WriteBytes(newHeapAddr, heapBytes);
@@ -284,6 +301,7 @@ namespace RazorSharp
 		{
 			if (t.IsArray) {
 				var elem = t.GetElementType();
+
 				// ReSharper disable once PossibleNullReferenceException
 				return elem.IsValueType && IsBlittable(elem);
 			}

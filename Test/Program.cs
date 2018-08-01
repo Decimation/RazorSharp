@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -24,12 +26,14 @@ using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Runtime.CLRTypes.HeapObjects;
 using RazorSharp.Utilities;
+using RazorSharp.Virtual;
 using Test.Testing;
 using Test.Testing.Benchmarking;
 using Unsafe = RazorSharp.Unsafe;
 using static RazorSharp.Unsafe;
 using static RazorSharp.Utilities.Assertion;
 using Assertion = RazorSharp.Utilities.Assertion;
+using Module = RazorSharp.Runtime.CLRTypes.Module;
 
 namespace Test
 {
@@ -86,8 +90,17 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			
+			Dummy d = new Dummy();
+			RefInspector<Dummy>.Write(ref d);
+			foreach (var v in Runtime.GetFieldDescs<Dummy>(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Public)) {
+				Console.WriteLine(*v);
+				Console.WriteLine(Hex.ToHex(v));
+			}
+
+
 		}
+
+
 
 		private static void ManualTable<T>(AllocPointer<T> alloc)
 		{
@@ -121,26 +134,7 @@ namespace Test
 		}
 
 
-		//todo
-		private static void ModuleInfo(IntPtr module)
-		{
-			long* addrPtr = (long*) module.ToPointer();
 
-			var assembly                = addrPtr + 6;
-			var typeDefToMethodTableMap = addrPtr + 48;
-			var typeRefToMethodTableMap = typeDefToMethodTableMap + 9;
-			var methodDefToDescMap      = typeRefToMethodTableMap + 9;
-			var fieldDefToDescMap       = methodDefToDescMap + 9;
-
-			var table = new ConsoleTable("Data", "Address");
-
-			table.AddRow("Assembly", Hex.ToHex(*assembly));
-			table.AddRow("TypeDefToMethodTableMap", Hex.ToHex(*typeDefToMethodTableMap));
-			table.AddRow("TypeRefToMethodTableMap", Hex.ToHex(*typeRefToMethodTableMap));
-			table.AddRow("MethodDefToDescMap", Hex.ToHex(*methodDefToDescMap));
-			table.AddRow("FieldDefToDescMap", Hex.ToHex(*fieldDefToDescMap));
-			Console.WriteLine(table.ToMarkDownString());
-		}
 
 	}
 

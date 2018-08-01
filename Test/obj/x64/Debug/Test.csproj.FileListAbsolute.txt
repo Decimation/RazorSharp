@@ -47,3 +47,9 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Reflection.Met
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Threading.Tasks.Extensions.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.ValueTuple.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\obj\x64\Debug\Test.exe.config
+C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Buffers.dll
+C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Memory.dll
+C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Numerics.Vectors.dll
+C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Buffers.xml
+C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Memory.xml
+C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Numerics.Vectors.xml

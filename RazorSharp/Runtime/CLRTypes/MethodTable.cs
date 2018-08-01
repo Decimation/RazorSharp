@@ -37,6 +37,8 @@ namespace RazorSharp.Runtime.CLRTypes
 
 	/// <summary>
 	/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.h#L4166
+	///
+	/// Internal representation: TypeHandle.Value
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct MethodTable
@@ -91,7 +93,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public MethodTable* Parent => m_pParentMethodTable;
 
-		public void* Module => m_pLoaderModule;
+		public Module* Module => m_pLoaderModule;
 
 		public EEClass*     EEClass => m_pEEClass;
 		public MethodTable* Canon   => m_pCanonMT;
@@ -150,7 +152,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		//** Status: verified
 		[FieldOffset(24)]
-		private readonly void* m_pLoaderModule; // LoaderModule. It is equal to the ZapModule in ngened images
+		private readonly Module* m_pLoaderModule; // LoaderModule. It is equal to the ZapModule in ngened images
 
 		//todo - lowest two bits of what?
 		// The value of lowest two bits describe what the union contains

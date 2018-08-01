@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
@@ -101,6 +102,31 @@ namespace RazorSharp.Memory
 		{
 			//var bit = (b & (1 << bitNumber-1)) != 0;
 			return (b & (1 << bitIndex)) != 0;
+		}
+
+		public static bool ReadBit(uint b, int bitIndex)
+		{
+			return ReadBit((int) b, bitIndex);
+		}
+
+		public static int ReadBits(int b, int bitIndexBegin, int bitLen)
+		{
+			if (bitLen > 32) throw new Exception();
+
+			bool[] bits = new bool[bitLen];
+			for (int i = 0; i < bitLen; i++) {
+				bits[i] = ReadBit(b, bitIndexBegin + i);
+			}
+
+			BitArray bitArray = new BitArray(bits);
+			int[] array = new int[1];
+			bitArray.CopyTo(array, 0);
+			return array[0];
+		}
+
+		public static int ReadBits(uint b, int bitIndexBegin, int bitLen)
+		{
+			return ReadBits((int) b, bitIndexBegin, bitLen);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

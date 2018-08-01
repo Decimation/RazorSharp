@@ -18,3 +18,9 @@ C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Microsoft.DotNe
 C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Collections.Immutable.dll
 C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\MethodTimer.xml
 C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Collections.Immutable.xml
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Buffers.dll
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Memory.dll
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Numerics.Vectors.dll
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Buffers.xml
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Memory.xml
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Numerics.Vectors.xml

@@ -9,8 +9,11 @@ namespace RazorSharp.Runtime.CLRTypes
 	using WORD = UInt16;
 	using unsigned = UInt32;
 
+	//todo: fix
 	/// <summary>
 	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/method.hpp#L1683
+	///
+	/// Internal representation: MethodHandle.Value
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct MethodDesc
@@ -36,6 +39,8 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow(nameof(m_bFlags2), m_bFlags2);
 			table.AddRow(nameof(m_wSlotNumber), m_wSlotNumber);
 			table.AddRow(nameof(m_wFlags), m_wFlags);
+
+
 
 
 			return table.ToMarkDownString();

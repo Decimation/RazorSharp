@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using MethodTimer;
 using RazorCommon;
@@ -123,6 +124,31 @@ namespace RazorSharp.Runtime
 			Debug.Assert(t.GetType() == typeof(TSpoof));
 
 			WriteMethodTable(ref t, (MethodTable*) typeof(TOrig).TypeHandle.Value);
+		}
+
+		public static FieldDesc*[] GetFieldDescs<T>(BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+		{
+			var fields = typeof(T).GetFields(flags);
+			var arr = new FieldDesc*[fields.Length];
+
+			for (int i = 0; i < arr.Length; i++) {
+				arr[i] = (FieldDesc*) fields[i].FieldHandle.Value;
+
+			}
+
+			return arr;
+		}
+
+		public static MethodDesc* GetMethodDesc<T>(string name, BindingFlags flags = BindingFlags.Instance | BindingFlags.Public)
+		{
+			var methodHandle = typeof(T).GetMethod(name, flags).MethodHandle;
+			return (MethodDesc*) methodHandle.Value;
+		}
+
+		public static FieldDesc* GetFieldDesc<T>(string name, BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+		{
+			var fieldHandle = typeof(T).GetField(name, flags).FieldHandle;
+			return (FieldDesc*) fieldHandle.Value;
 		}
 
 		/// <summary>
