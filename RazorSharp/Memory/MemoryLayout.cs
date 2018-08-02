@@ -13,7 +13,7 @@ namespace RazorSharp.Memory
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	/// <summary>
-	/// Provides a way to interpret an array of bytes as different types
+	/// Provides a way to interpret memory as different types
 	/// </summary>
 	public static unsafe class MemoryLayout
 	{

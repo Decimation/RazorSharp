@@ -15,10 +15,10 @@ namespace RazorSharp.Pointers
 
 	/// <summary>
 	/// A pointer to any type.
-	/// Supports pointer arithmetic and other pointer operations.
+	/// Supports pointer arithmetic and other pointer operations.<para></para>
 	///
 	/// If <![CDATA[T]]> is a reference type, pinning is not required as
-	/// the pointer contains the stack pointer, meaning the pointer works with the GC.
+	/// the pointer contains the stack pointer, meaning the pointer works with the GC.<para></para>
 	///
 	/// However, if this pointer points to heap memory, the pointer may become invalidated when
 	/// the GC compacts the heap.
@@ -40,23 +40,15 @@ namespace RazorSharp.Pointers
 			/// </summary>
 			internal int ElementSize { get; }
 
-			/// <summary>
-			/// Whether the type was decayed into a pointer
-			///
-			/// (i.e. a string or array was implicitly cast into a pointer)
-			/// </summary>
-			internal bool IsDecayed { get; }
-
 
 			protected internal PointerMetadata(int elementSize, bool isDecayed)
 			{
 				ElementSize = elementSize;
-				IsDecayed   = isDecayed;
 			}
 
 			protected bool Equals(PointerMetadata m)
 			{
-				return this.IsDecayed == m.IsDecayed && this.ElementSize == m.ElementSize;
+				return this.ElementSize == m.ElementSize;
 			}
 
 			public override bool Equals(object obj)
@@ -75,15 +67,6 @@ namespace RazorSharp.Pointers
 		protected readonly PointerMetadata m_metadata;
 
 		/// <summary>
-		/// Whether this Pointer was created from implicit array conversion.
-		///
-		/// Note: Unless the type is pinned or this points to a stack pointer, this Pointer will become
-		/// invalid when the GC compacts the heap as the pointer points
-		/// to heap memory
-		/// </summary>
-		public bool IsDecayed => m_metadata.IsDecayed;
-
-		/// <summary>
 		/// The size of the type being pointed to.
 		/// </summary>
 		public int ElementSize => m_metadata.ElementSize;
@@ -91,6 +74,10 @@ namespace RazorSharp.Pointers
 		public virtual IntPtr Address {
 			get => m_addr;
 			set => m_addr = value;
+		}
+
+		public ref T Reference {
+			get => ref Memory.AsRef<T>(Address);
 		}
 
 		public bool IsNull => m_addr == IntPtr.Zero;
@@ -129,6 +116,11 @@ namespace RazorSharp.Pointers
 
 		#region Methods
 
+		public TNew As<TNew>()
+		{
+			return Memory.Read<TNew>(Address);
+		}
+
 		public Pointer<TNew> Reinterpret<TNew>()
 		{
 			return new Pointer<TNew>(Address);
@@ -138,18 +130,11 @@ namespace RazorSharp.Pointers
 		{
 			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Address", Hex.ToHex(Address));
-
 			table.AddRow("Value", Memory.SafeToString(this));
-
-
 			table.AddRow("Type", typeof(T).Name);
-
 			table.AddRow("this[0]", Memory.SafeToString(this, 0));
-
-
 			table.AddRow("Null", IsNull);
 			table.AddRow("Element size", m_metadata.ElementSize);
-			table.AddRow("Decayed", m_metadata.IsDecayed);
 			return table;
 		}
 

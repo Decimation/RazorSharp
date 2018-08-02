@@ -83,7 +83,6 @@ namespace RazorSharp.Runtime
 
 		#endregion
 
-
 		public static void WriteMethodTable<TOrig, TNew>(ref TOrig t) where TOrig : class
 		{
 			WriteMethodTable(ref t, MethodTableOf<TNew>());
@@ -130,18 +129,21 @@ namespace RazorSharp.Runtime
 			WriteMethodTable(ref t, (MethodTable*) typeof(TOrig).TypeHandle.Value);
 		}
 
+		#region FieldDesc
+
 		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
-		public static LightPointer<FieldDesc>[] GetFieldDescs<T>(BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+		public static LitePointer<FieldDesc>[] GetFieldDescs<T>(
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
 		{
 			return GetFieldDescs(typeof(T), flags);
 		}
 
 		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
-		public static LightPointer<FieldDesc>[] GetFieldDescs(Type t,
+		public static LitePointer<FieldDesc>[] GetFieldDescs(Type t,
 			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
 		{
 			var fields = t.GetFields(flags);
-			var arr    = new LightPointer<FieldDesc>[fields.Length];
+			var arr    = new LitePointer<FieldDesc>[fields.Length];
 
 			for (int i = 0; i < arr.Length; i++) {
 				arr[i] = (FieldDesc*) fields[i].FieldHandle.Value;
@@ -152,21 +154,39 @@ namespace RazorSharp.Runtime
 			return arr;
 		}
 
+		public static FieldDesc* GetFieldDesc(Type t, string name,
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+		{
+			var fieldHandle = t.GetField(name, flags).FieldHandle;
+			return (FieldDesc*) fieldHandle.Value;
+		}
+
+
+		public static FieldDesc* GetFieldDesc<T>(string name,
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+		{
+			return GetFieldDesc(typeof(T), name, flags);
+		}
+
+		#endregion
+
+		#region MethodDesc
+
 		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
-		public static LightPointer<MethodDesc>[] GetMethodDescs<T>(
+		public static LitePointer<MethodDesc>[] GetMethodDescs<T>(
 			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
 		{
 			return GetMethodDescs(typeof(T), flags);
 		}
 
 		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
-		public static LightPointer<MethodDesc>[] GetMethodDescs(Type t,
+		public static LitePointer<MethodDesc>[] GetMethodDescs(Type t,
 			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
 		{
 			var fields = t.GetMethods(flags);
 
 
-			var arr    = new LightPointer<MethodDesc>[fields.Length];
+			var arr = new LitePointer<MethodDesc>[fields.Length];
 
 			for (int i = 0; i < arr.Length; i++) {
 				arr[i] = (MethodDesc*) fields[i].MethodHandle.Value;
@@ -188,19 +208,10 @@ namespace RazorSharp.Runtime
 			return GetMethodDesc(typeof(T), name, flags);
 		}
 
-		public static FieldDesc* GetFieldDesc(Type t, string name,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
-		{
-			var fieldHandle = t.GetField(name, flags).FieldHandle;
-			return (FieldDesc*) fieldHandle.Value;
-		}
+
+		#endregion
 
 
-		public static FieldDesc* GetFieldDesc<T>(string name,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
-		{
-			return GetFieldDesc(typeof(T), name, flags);
-		}
 
 		/// <summary>
 		/// Reads a reference type's object header.

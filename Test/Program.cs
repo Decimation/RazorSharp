@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -65,22 +66,6 @@ namespace Test
 		 * 	- RazorCLR
 		 * 	- RazorSharp
 		 *
-		 * RazorSharp:
-		 *  - RazorCommon
-		 * 	- CompilerServices.Unsafe
-		 *  - RazorInvoke
-		 *  - Fody
-		 *  - MethodTimer Fody
-		 *  - ObjectLayoutInspector
-		 *
-		 * Test:
-		 *  - RazorCommon
-		 *  - CompilerServices.Unsafe
-		 * 	- NUnit
-		 *  - BenchmarkDotNet
-		 *  - Fody
-		 *  - MethodTimer Fody
-		 *
 		 * Notes:
 		 *  - 32-bit is not fully supported
 		 *  - Most types are probably not thread-safe
@@ -91,19 +76,69 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			Dummy d = new Dummy();
-			RefInspector<Dummy>.Write(ref d);
+			int              val     = 0xFF;
+			LitePointer<int> lpInt32 = &val;
+			lpInt32.Reference = 0;
+			Console.WriteLine(lpInt32);
+
+			string              z        = "foo";
+			LitePointer<string> lpString = AddressOf(ref z);
+			lpString.Reference = "g";
+			Debug.Assert(z == lpString.Reference);
 
 
-			int x = new int();
-			Inspector<int>.Write(ref x);
+			Debug.Assert(lpString.Address == AddressOf(ref lpString.Reference));
+
+
+			byte[]            stringMem      = MemoryOf(ref z);
+			LitePointer<long> lpStringMemory = AddressOfHeap(ref stringMem, OffsetType.ArrayData);
+			lpStringMemory++;
+			Console.WriteLine("{0:X}", lpStringMemory.As<long>());
+			LitePointer<string> lpStringActual = AddressOf(ref lpStringMemory);
+			Console.WriteLine(lpStringActual);
 
 
 		}
 
-		private static void Stat<T>()
+
+		/**
+		 * Class this ptr:
+		 *
+		 * public IntPtr __this {
+		 *		get {
+		 *			var v = this;
+		 *			var hThis = Unsafe.AddressOfHeap(ref v);
+		 *			return hThis;
+		 *		}
+		 *	}
+		 *
+		 *
+		 * Struct this ptr:
+		 *
+		 * public IntPtr __this {
+		 *		get => Unsafe.AddressOf(ref this);
+		 * }
+		 */
+
+
+		class Clazz
 		{
 
+
+			public IntPtr __this {
+				get {
+					var v     = this;
+					var hThis = Unsafe.AddressOfHeap(ref v);
+					return hThis;
+				}
+			}
+		}
+
+
+		private static void SetChar(this string str, int i, char c)
+		{
+			LitePointer<char> lpChar = AddressOfHeap(ref str, OffsetType.StringData);
+			lpChar[i] = c;
 		}
 
 		private static void ManualTable<T>(AllocPointer<T> alloc)
@@ -137,6 +172,25 @@ namespace Test
 			}
 		}
 
+		/**
+		 * Dependencies:
+		 *
+		 * RazorSharp:
+		 *  - RazorCommon
+		 * 	- CompilerServices.Unsafe
+		 *  - RazorInvoke
+		 *  - Fody
+		 *  - MethodTimer Fody
+		 *  - ObjectLayoutInspector
+		 *
+		 * Test:
+		 *  - RazorCommon
+		 *  - CompilerServices.Unsafe
+		 * 	- NUnit
+		 *  - BenchmarkDotNet
+		 *  - Fody
+		 *  - MethodTimer Fody
+		 */
 
 	}
 

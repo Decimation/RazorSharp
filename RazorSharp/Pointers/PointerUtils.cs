@@ -6,12 +6,12 @@ namespace RazorSharp.Pointers
 
 	public static unsafe class PointerUtils
 	{
-		public static unsafe IntPtr Add(void* v, int bytes)
+		public static IntPtr Add(void* v, int bytes)
 		{
 			return (IntPtr) (((long) v) + bytes);
 		}
 
-		public static unsafe IntPtr Add(void* a, void* b)
+		public static IntPtr Add(void* a, void* b)
 		{
 			return Add((IntPtr) a, (IntPtr) b);
 		}
@@ -26,9 +26,7 @@ namespace RazorSharp.Pointers
 			return (IntPtr) (((long) p) + b.ToInt64());
 		}
 
-
-
-		public static void MakeSequential<T>(LightPointer<T>[] arr)
+		public static void MakeSequential<T>(LitePointer<T>[] arr)
 		{
 			long[] ptrs = new long[arr.Length];
 			for (int i = 0; i < ptrs.Length; i++) {
@@ -36,7 +34,7 @@ namespace RazorSharp.Pointers
 			}
 			Array.Sort(ptrs);
 			for (int i = 0; i < ptrs.Length; i++) {
-				arr[i] = new LightPointer<T>(ptrs[i]);
+				arr[i] = new LitePointer<T>(ptrs[i]);
 			}
 		}
 
@@ -60,7 +58,7 @@ namespace RazorSharp.Pointers
 			return (int) (hi.ToInt64() - lo.ToInt64());
 		}
 
-		public static unsafe IntPtr Offset<T>(void* p, int elemCnt)
+		public static IntPtr Offset<T>(void* p, int elemCnt)
 		{
 			return Offset<T>((IntPtr) p,elemCnt);
 		}

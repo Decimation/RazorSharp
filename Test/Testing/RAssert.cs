@@ -103,9 +103,7 @@ namespace Test.Testing
 					oArr[i] = new object();
 				}
 
-				if (ptr.IsDecayed) {
-					Assert.That(ptr.Value, Is.EqualTo(s[0]));
-				}
+
 			}
 		}
 	}

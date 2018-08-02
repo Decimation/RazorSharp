@@ -7,7 +7,8 @@ namespace RazorSharp.Virtual
 	public unsafe struct VirtualString
 	{
 
-		[FieldOffset(0)] private int  m_length;
+		private char[] m_value;
+
 
 	}
 

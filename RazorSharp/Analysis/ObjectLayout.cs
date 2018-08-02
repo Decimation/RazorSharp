@@ -21,8 +21,6 @@ namespace RazorSharp.Analysis
 		private readonly T            m_value;
 		private const    string       Omitted = "-";
 
-
-
 		public ObjectLayout(ref T t)
 		{
 			var addr = Unsafe.AddressOf(ref t);

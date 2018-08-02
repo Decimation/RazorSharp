@@ -127,7 +127,7 @@
     <Compile Include="Pointers\AllocPointer.cs" />
     <Compile Include="Pointers\DecayPointer.cs" />
     <Compile Include="Pointers\IPointer.cs" />
-    <Compile Include="Pointers\LightPointer.cs" />
+    <Compile Include="Pointers\LitePointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
     <Compile Include="Pointers\PointerUtils.cs" />
     <Compile Include="Runtime\CLRTypes\DWFlags.cs" />

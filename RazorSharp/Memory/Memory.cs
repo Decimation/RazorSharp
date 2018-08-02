@@ -141,6 +141,11 @@ namespace RazorSharp.Memory
 			return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
 		}
 
+		public static ref T AsRef<T>(IntPtr p)
+		{
+			return ref CSUnsafe.AsRef<T>(p.ToPointer());
+		}
+
 		public static bool IsValid<T>(IntPtr addrOfPtr) where T : class
 		{
 			if (addrOfPtr == IntPtr.Zero) return false;

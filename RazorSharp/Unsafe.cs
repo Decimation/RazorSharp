@@ -264,6 +264,14 @@ namespace RazorSharp
 			return alloc;
 		}
 
+		public static byte[] MemoryOfVal<T>(ref T t) where T : struct
+		{
+			int    size  = SizeOf<T>();
+			byte[] alloc = new byte[size];
+			Marshal.Copy(AddressOf(ref t), alloc, 0, size);
+			return alloc;
+		}
+
 		public static byte[] MemoryOfFields<T>(ref T t) where T : class
 		{
 			// Subtract the size of the ObjHeader and MethodTable*
