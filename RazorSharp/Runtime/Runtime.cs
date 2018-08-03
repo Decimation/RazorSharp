@@ -133,14 +133,14 @@ namespace RazorSharp.Runtime
 
 		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
 		public static LitePointer<FieldDesc>[] GetFieldDescs<T>(
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
 		{
 			return GetFieldDescs(typeof(T), flags);
 		}
 
 		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
 		public static LitePointer<FieldDesc>[] GetFieldDescs(Type t,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
 		{
 			var fields = t.GetFields(flags);
 			var arr    = new LitePointer<FieldDesc>[fields.Length];
@@ -155,7 +155,7 @@ namespace RazorSharp.Runtime
 		}
 
 		public static FieldDesc* GetFieldDesc(Type t, string name,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
 		{
 			var fieldHandle = t.GetField(name, flags).FieldHandle;
 			return (FieldDesc*) fieldHandle.Value;
@@ -163,7 +163,7 @@ namespace RazorSharp.Runtime
 
 
 		public static FieldDesc* GetFieldDesc<T>(string name,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
 		{
 			return GetFieldDesc(typeof(T), name, flags);
 		}
@@ -174,14 +174,14 @@ namespace RazorSharp.Runtime
 
 		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
 		public static LitePointer<MethodDesc>[] GetMethodDescs<T>(
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
 		{
 			return GetMethodDescs(typeof(T), flags);
 		}
 
 		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
 		public static LitePointer<MethodDesc>[] GetMethodDescs(Type t,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic)
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
 		{
 			var fields = t.GetMethods(flags);
 
@@ -196,21 +196,19 @@ namespace RazorSharp.Runtime
 		}
 
 		public static MethodDesc* GetMethodDesc(Type t, string name,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.Public)
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Public)
 		{
 			var methodHandle = t.GetMethod(name, flags).MethodHandle;
 			return (MethodDesc*) methodHandle.Value;
 		}
 
 		public static MethodDesc* GetMethodDesc<T>(string name,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.Public)
+			BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Public)
 		{
 			return GetMethodDesc(typeof(T), name, flags);
 		}
 
-
 		#endregion
-
 
 
 		/// <summary>

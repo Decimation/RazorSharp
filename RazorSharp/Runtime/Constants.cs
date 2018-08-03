@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RazorCommon;
 using RazorSharp.Runtime.CLRTypes;
+
 // ReSharper disable UnusedMember.Global
 // ReSharper disable IdentifierTypo
 
@@ -12,36 +14,6 @@ namespace RazorSharp.Runtime
 
 	public static unsafe class Constants
 	{
-		internal static MethodTableFlags[] Extract(uint flagBinary)
-		{
-			var allValues = Enum.GetValues(typeof(MethodTableFlags));
-			var list      = new List<MethodTableFlags>();
-
-			foreach (var v in allValues) {
-				if ((flagBinary & (uint) v) != 0) {
-					list.Add((MethodTableFlags) v);
-				}
-			}
-
-
-			return new HashSet<MethodTableFlags>(list).ToArray();
-		}
-
-		internal static MethodTableFlags2[] Extract(ushort flagBinary)
-		{
-			var allValues = Enum.GetValues(typeof(MethodTableFlags2));
-			var list      = new List<MethodTableFlags2>();
-
-			foreach (var v in allValues) {
-				if ((flagBinary & (ushort) v) != 0) {
-					list.Add((MethodTableFlags2) v);
-				}
-			}
-
-
-			return new HashSet<MethodTableFlags2>(list).ToArray();
-		}
-
 		/// <summary>
 		/// Minimum GC object heap size
 		/// </summary>
@@ -49,6 +21,147 @@ namespace RazorSharp.Runtime
 
 		//todo
 		private const uint GC_MARKED = 0x1;
+
+		public static CorElementType TypeToCorType<T>()
+		{
+			switch (Type.GetTypeCode(typeof(T))) {
+				case TypeCode.Empty:
+				case TypeCode.DBNull:
+					goto case default;
+				case TypeCode.Boolean:
+					return CorElementType.Boolean;
+				case TypeCode.Char:
+					return CorElementType.Char;
+				case TypeCode.SByte:
+					return CorElementType.I1;
+				case TypeCode.Byte:
+					return CorElementType.U1;
+				case TypeCode.Int16:
+					return CorElementType.I2;
+				case TypeCode.UInt16:
+					return CorElementType.U2;
+				case TypeCode.Int32:
+					return CorElementType.I4;
+				case TypeCode.UInt32:
+					return CorElementType.U4;
+				case TypeCode.Int64:
+					return CorElementType.I8;
+				case TypeCode.UInt64:
+					return CorElementType.U8;
+				case TypeCode.Single:
+					return CorElementType.R4;
+				case TypeCode.Double:
+					return CorElementType.R8;
+				case TypeCode.DateTime:
+				case TypeCode.Decimal:
+					return CorElementType.ValueType;
+				case TypeCode.Object:
+				case TypeCode.String:
+					return CorElementType.Class;
+				default:
+					throw new ArgumentOutOfRangeException($"{typeof(T).Name} has not been mapped to {nameof(CorElementType)}.");
+			}
+		}
+	}
+
+	/// <summary>
+	/// Source: https://github.com/dotnet/coreclr/blob/f31097f14560b193e76a7b2e1e61af9870b5356b/src/System.Private.CoreLib/src/System/Reflection/MdImport.cs#L22
+	/// Source 2: https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L863
+	/// For sizes: https://github.com/dotnet/coreclr/blob/de586767f51432e5d89f6fcffee07c488fdeeb7b/src/vm/siginfo.cpp#L63
+	///
+	/// Use with: FieldDesc::Type
+	/// </summary>
+	public enum CorElementType : byte
+	{
+		End         = 0x00,
+		Void        = 0x01,
+
+		/// <summary>
+		/// bool
+		/// </summary>
+		Boolean     = 0x02,
+
+		/// <summary>
+		/// char
+		/// </summary>
+		Char        = 0x03,
+
+		/// <summary>
+		/// sbyte
+		/// </summary>
+		I1          = 0x04,
+
+		/// <summary>
+		/// byte
+		/// </summary>
+		U1          = 0x05,
+
+		/// <summary>
+		/// short
+		/// </summary>
+		I2          = 0x06,
+
+		/// <summary>
+		/// ushort
+		/// </summary>
+		U2          = 0x07,
+
+		/// <summary>
+		/// int
+		/// </summary>
+		I4          = 0x08,
+
+		/// <summary>
+		/// uint
+		/// </summary>
+		U4          = 0x09,
+
+		/// <summary>
+		/// long
+		/// </summary>
+		I8          = 0x0A,
+
+		/// <summary>
+		/// ulong
+		/// </summary>
+		U8          = 0x0B,
+
+		/// <summary>
+		/// float
+		/// </summary>
+		R4          = 0x0C,
+
+		/// <summary>
+		/// double
+		/// </summary>
+		R8          = 0x0D,
+
+		/// <summary>
+		/// Note: strings don't actually map to this. They map to Class.
+		/// </summary>
+		String      = 0x0E,
+
+		Ptr         = 0x0F,
+		ByRef       = 0x10,
+		ValueType   = 0x11,
+		Class       = 0x12,
+		Var         = 0x13,
+		Array       = 0x14,
+		GenericInst = 0x15,
+		TypedByRef  = 0x16,
+		I           = 0x18,
+		U           = 0x19,
+		FnPtr       = 0x1B,
+		Object      = 0x1C,
+		SzArray     = 0x1D,
+		MVar        = 0x1E,
+		CModReqd    = 0x1F,
+		CModOpt     = 0x20,
+		Internal    = 0x21,
+		Max         = 0x22,
+		Modifier    = 0x40,
+		Sentinel    = 0x41,
+		Pinned      = 0x45,
 	}
 
 	/// <summary>
@@ -247,13 +360,6 @@ namespace RazorSharp.Runtime
 		UnusedComponentSize5 = 0x00002000,
 		UnusedComponentSize6 = 0x00004000,
 		UnusedComponentSize7 = 0x00008000,
-
-
-		// IMPORTANT! IMPORTANT! IMPORTANT!
-		//
-		// As you change the flags in WFLAGS_LOW_ENUM you also need to change this
-		// to be up to date to reflect the default values of those flags for the
-		// case where this MethodTable is for a String or Array
 
 		StringArrayValues = (StaticsMask_NonDynamic & 0xFFFF |
 		                     NotInPZM & 0 |

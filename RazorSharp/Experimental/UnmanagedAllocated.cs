@@ -19,7 +19,7 @@ namespace RazorSharp.Experimental
 	/// For that, use AllocPointer.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public struct UnmanagedAllocated<T> where T : class
+	internal struct UnmanagedAllocated<T> where T : class
 	{
 		/// <summary>
 		/// Types that can't be created in stack memory

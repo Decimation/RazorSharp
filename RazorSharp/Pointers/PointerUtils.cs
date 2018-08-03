@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace RazorSharp.Pointers
@@ -28,6 +29,7 @@ namespace RazorSharp.Pointers
 
 		public static void MakeSequential<T>(LitePointer<T>[] arr)
 		{
+
 			long[] ptrs = new long[arr.Length];
 			for (int i = 0; i < ptrs.Length; i++) {
 				ptrs[i] = (long) arr[i].Address;

@@ -19,7 +19,7 @@ namespace RazorSharp.Experimental
 	/// - IList <para></para>
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public unsafe struct StackAllocated<T> where T : class
+	internal unsafe struct StackAllocated<T> where T : class
 	{
 		/// <summary>
 		/// Types that can't be created in stack memory

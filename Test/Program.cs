@@ -10,12 +10,15 @@ using System.Numerics;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Threading;
 using BenchmarkDotNet.Running;
 using MethodTimer;
 using NUnit.Framework;
+using ObjectLayoutInspector;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp;
@@ -76,64 +79,35 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			int              val     = 0xFF;
-			LitePointer<int> lpInt32 = &val;
-			lpInt32.Reference = 0;
-			Console.WriteLine(lpInt32);
-
-			string              z        = "foo";
-			LitePointer<string> lpString = AddressOf(ref z);
-			lpString.Reference = "g";
-			Debug.Assert(z == lpString.Reference);
+			/*Dummy d = new Dummy();
+			var ol = new ObjectLayout<Dummy>(ref d);
+			Console.WriteLine(ol);
+			WriteFieldDescs<Dummy>();
+			//TableFieldDescs<Dummy>();*/
 
 
-			Debug.Assert(lpString.Address == AddressOf(ref lpString.Reference));
 
-
-			byte[]            stringMem      = MemoryOf(ref z);
-			LitePointer<long> lpStringMemory = AddressOfHeap(ref stringMem, OffsetType.ArrayData);
-			lpStringMemory++;
-			Console.WriteLine("{0:X}", lpStringMemory.As<long>());
-			LitePointer<string> lpStringActual = AddressOf(ref lpStringMemory);
-			Console.WriteLine(lpStringActual);
-
-
+			var summary = BenchmarkRunner.Run<UnsafeBenchmarking>();
 		}
 
-
-		/**
-		 * Class this ptr:
-		 *
-		 * public IntPtr __this {
-		 *		get {
-		 *			var v = this;
-		 *			var hThis = Unsafe.AddressOfHeap(ref v);
-		 *			return hThis;
-		 *		}
-		 *	}
-		 *
-		 *
-		 * Struct this ptr:
-		 *
-		 * public IntPtr __this {
-		 *		get => Unsafe.AddressOf(ref this);
-		 * }
-		 */
-
-
-		class Clazz
+		private static void WriteFieldDescs<T>()
 		{
-
-
-			public IntPtr __this {
-				get {
-					var v     = this;
-					var hThis = Unsafe.AddressOfHeap(ref v);
-					return hThis;
-				}
+			foreach (var v in Runtime.GetFieldDescs<T>()) {
+				Console.WriteLine(v.Value);
 			}
 		}
 
+		private static void TableFieldDescs<T>()
+		{
+			var table = new ConsoleTable("Offset", "CorType", "Type");
+			var fieldDescs = Runtime.GetFieldDescs<T>();
+			fieldDescs = fieldDescs.OrderBy(x => x.Value.Offset).ToArray();
+			foreach (var v in fieldDescs) {
+				table.AddRow(v.Value.Offset,v.Value.CorType, v.Value.Type);
+			}
+
+			Console.WriteLine(table.ToMarkDownString());
+		}
 
 		private static void SetChar(this string str, int i, char c)
 		{
@@ -190,6 +164,26 @@ namespace Test
 		 *  - BenchmarkDotNet
 		 *  - Fody
 		 *  - MethodTimer Fody
+		 *  - ObjectLayoutInspector
+		 */
+
+		/**
+		 * Class this ptr:
+		 *
+		 * public IntPtr __this {
+		 *		get {
+		 *			var v = this;
+		 *			var hThis = Unsafe.AddressOfHeap(ref v);
+		 *			return hThis;
+		 *		}
+		 *	}
+		 *
+		 *
+		 * Struct this ptr:
+		 *
+		 * public IntPtr __this {
+		 *		get => Unsafe.AddressOf(ref this);
+		 * }
 		 */
 
 	}

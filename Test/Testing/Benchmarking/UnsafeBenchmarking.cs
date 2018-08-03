@@ -1,4 +1,5 @@
 using BenchmarkDotNet.Attributes;
+using RazorSharp;
 
 namespace Test.Testing.Benchmarking
 {
@@ -6,8 +7,25 @@ namespace Test.Testing.Benchmarking
 
 	public class UnsafeBenchmarking
 	{
+		private Dummy _dummy;
+
+		[GlobalSetup]
+		public void Setup()
+		{
+			_dummy = new Dummy();
+		}
 
 		[Benchmark]
+		public void OffsetOf()
+		{
+			Unsafe.OffsetOf(ref _dummy, _dummy.Decimal);
+		}
+
+
+
+
+
+		//[Benchmark]
 		public void SizeOf_Test()
 		{
 			// Inline Unsafe.SizeOf<T>

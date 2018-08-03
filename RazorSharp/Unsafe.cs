@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using ObjectLayoutInspector;
 using RazorCommon;
+using RazorSharp.Pointers;
+using RazorSharp.Runtime;
 using RazorSharp.Utilities;
 using static RazorSharp.Utilities.Assertion;
 
@@ -54,6 +58,28 @@ namespace RazorSharp
 	/// </summary>
 	public static unsafe class Unsafe
 	{
+		private const int InvalidValue = -1;
+
+		public static int OffsetOf<TType, TMember>(ref TType type, TMember val)
+		{
+			// Find possible matching FieldDesc types
+			var fieldDescs = Runtime.Runtime.GetFieldDescs<TType>().Select(x => x.Value)
+				.Where(x => x.CorType == Constants.TypeToCorType<TMember>()).ToArray();
+
+			LitePointer<TMember> rawMemory = AddressOf(ref type);
+			if (!typeof(TType).IsValueType) {
+				rawMemory = Marshal.ReadIntPtr(rawMemory.Address) + IntPtr.Size;
+			}
+
+			for (int i = 0; i < fieldDescs.Length; i++) {
+				if (rawMemory[i].Equals(val)) {
+					return fieldDescs[i].Offset;
+				}
+			}
+
+
+			return InvalidValue;
+		}
 
 		#region Address
 
@@ -69,6 +95,7 @@ namespace RazorSharp
 			TypedReference tr = __makeref(t);
 			return *(IntPtr*) (&tr);
 		}
+
 
 		/// <summary>
 		/// Returns the address of a reference type's heap memory.
@@ -225,7 +252,7 @@ namespace RazorSharp
 			//}
 
 			if (typeof(T).IsConstructedGenericType) {
-				return -1;
+				return InvalidValue;
 			}
 
 			var mt = Runtime.Runtime.MethodTableOf<T>();
@@ -242,7 +269,7 @@ namespace RazorSharp
 			// Arrays don't have a TypeHandle, so we have to read the
 			// MethodTable* manually. We obviously can't do that here because
 			// this method is parameterless.
-			if (typeof(T).IsArray) return -1;
+			if (typeof(T).IsArray) return InvalidValue;
 			return (int) Runtime.Runtime.MethodTableOf<T>()->BaseSize;
 		}
 

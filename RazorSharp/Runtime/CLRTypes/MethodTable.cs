@@ -1,4 +1,8 @@
+#define EXTRA_FIELDS
+
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
@@ -59,6 +63,9 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public WORD LowFlags => m_dwFlags.Flags;
 
+		/// <summary>
+		/// Note: these may not be accurate
+		/// </summary>
 		public MethodTableFlagsLow TableFlagsLow => (MethodTableFlagsLow) LowFlags;
 
 		public WORD Flags2 => m_wFlags2;
@@ -68,9 +75,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		#endregion
 
 		/// <summary>
-		/// The size of an individual element when this type is an array or string.
+		/// The size of an individual element when this type is an array or string. <para></para>
 		///
-		/// This size will be 2 with strings (sizeof(char)).
+		/// (i.e. This size will be 2 with strings (sizeof(char)).)
 		/// </summary>
 		public WORD ComponentSize {
 			get {
@@ -95,8 +102,13 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public Module* Module => m_pLoaderModule;
 
-		public EEClass*     EEClass => m_pEEClass;
-		public MethodTable* Canon   => m_pCanonMT;
+		public EEClass* EEClass {
+			get { return UnionType == LowBits.EEClass ? m_pEEClass : null; }
+		}
+
+		public MethodTable* Canon {
+			get { return UnionType == LowBits.MethodTable ? m_pCanonMT : null; }
+		}
 
 		//public FieldDesc* FieldDescList => _eeClassPtr.m_pEEClass->m_pFieldDescList;
 
@@ -109,9 +121,39 @@ namespace RazorSharp.Runtime.CLRTypes
 				//
 				// The solution here is to do what the VM does and check the
 				// HasComponentSize flag so that we're on the same page.
-				return (TableFlags & MethodTableFlags.HasComponentSize) != 0;
+				return TableFlags.HasFlag(MethodTableFlags.HasComponentSize);
 			}
 		}
+
+		public bool IsArray {
+			get { return (TableFlags.HasFlag(MethodTableFlags.Array)); }
+		}
+
+		public bool IsStringOrArray {
+			get => HasComponentSize;
+		}
+
+
+		// https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.h#L4100
+		/*private DWORD GetFlag(MethodTableFlagsLow flag)
+		{
+			return (DWORD) (IsStringOrArray
+				? (MethodTableFlagsLow.StringArrayValues & flag)
+				: (((MethodTableFlagsLow) Flags) & flag));
+		}
+		private MethodTableFlagsLow[] GetLowFlags()
+		{
+			var ls = new List<MethodTableFlagsLow>();
+
+			foreach (var f in Enums.ToArray<MethodTableFlagsLow>()) {
+				if (GetFlag(f) != 0) {
+					ls.Add(f);
+				}
+			}
+			return ls.ToArray();
+		}*/
+
+
 
 		#endregion
 
@@ -151,32 +193,30 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(16)] private readonly MethodTable* m_pParentMethodTable;
 
 		//** Status: verified
-		[FieldOffset(24)]
-		private readonly Module* m_pLoaderModule; // LoaderModule. It is equal to the ZapModule in ngened images
-
-		//todo - lowest two bits of what?
-		// The value of lowest two bits describe what the union contains
-		[Flags]
-		enum LowBits
-		{
-			UNION_EECLASS     = 0, //  0 - pointer to EEClass. This MethodTable is the canonical method table.
-			UNION_INVALID     = 1, //  1 - not used
-			UNION_METHODTABLE = 2, //  2 - pointer to canonical MethodTable.
-			UNION_INDIRECTION = 3  //  3 - pointer to indirection cell that points to canonical MethodTable.
-		};                         //      (used only if FEATURE_PREJIT is defined)
-
-		const long UNION_MASK = 3;
-
-		//todo: does this work?
-		LowBits Get {
-			get {
-				long l = (long) m_pEEClass;
-				return (LowBits) (l & UNION_MASK);
-			}
-		}
+		[FieldOffset(24)] private readonly Module* m_pLoaderModule;
 
 		//** Status: unknown
 		[FieldOffset(32)] private readonly void* m_pWriteableData;
+
+
+		// The value of lowest two bits describe what the union contains
+		[Flags]
+		private enum LowBits
+		{
+			EEClass     = 0, //  0 - pointer to EEClass. This MethodTable is the canonical method table.
+			Invalid     = 1, //  1 - not used
+			MethodTable = 2, //  2 - pointer to canonical MethodTable.
+			Indirection = 3  //  3 - pointer to indirection cell that points to canonical MethodTable.
+		};                   //      (used only if FEATURE_PREJIT is defined)
+
+		private const long UnionMask = 3;
+
+		private LowBits UnionType {
+			get {
+				long l = (long) m_pEEClass;
+				return (LowBits) (l & UnionMask);
+			}
+		}
 
 		//** Status: verified
 		[FieldOffset(40)] private readonly EEClass* m_pEEClass;
@@ -185,16 +225,29 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(40)] private readonly MethodTable* m_pCanonMT;
 
 #if EXTRA_FIELDS
-		//** Status: unknown
-		[FieldOffset(48)] private void** m_pPerInstInfo;
-		[FieldOffset(48)] private void*  m_ElementTypeHnd;
-		[FieldOffset(48)] private void*  m_pMultipurposeSlot1;
 
 		//** Status: unknown
-		[FieldOffset(56)] private void* m_pInterfaceMap;
-		[FieldOffset(56)] private void* m_pMultipurposeSlot2;
+		[FieldOffset(48)] private readonly void** m_pPerInstInfo;
+
+		/// <summary>
+		/// If the type is an array type, this is the TypeHandle of
+		/// an individual element
+		///
+		/// (i.e. if the type is string[], this will be equal to typeof(string).TypeHandle)
+		/// </summary>
+
+		//** Status: verified
+		[FieldOffset(48)] private readonly void* m_ElementTypeHnd;
+
+		//** Status: unknown
+		[FieldOffset(48)] private readonly void* m_pMultipurposeSlot1;
+
+		//** Status: unknown
+		[FieldOffset(56)] private readonly void* m_pInterfaceMap;
+
+		//** Status: unknown
+		[FieldOffset(56)] private readonly void* m_pMultipurposeSlot2;
 #endif
-
 
 
 		//** Status: unknown
@@ -229,38 +282,67 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public override string ToString()
 		{
+			const string joinStr = ", ";
+
+			var flags  = String.Join(joinStr, TableFlags.GetFlags());
+			var flags2 = String.Join(joinStr, TableFlags2.GetFlags());
+			//var lowFlags = String.Join(", ", TableFlagsLow.GetFlags().Distinct());
+
 			var table = new ConsoleTable("Field", "Value");
 			if (HasComponentSize)
 				table.AddRow("Component size", m_dwFlags.ComponentSize);
 			table.AddRow("Base size", m_BaseSize);
-			table.AddRow("Flags", string.Format("{0} ({1})", Flags, Collections.ToString(Constants.Extract(Flags))));
+			table.AddRow("Flags", $"{Flags} ({flags})");
 			table.AddRow("Low flags", $"{LowFlags} ({TableFlagsLow})");
-
-			table.AddRow("Flags 2",
-				string.Format("{0} ({1})", Flags2, Collections.ToString(Constants.Extract(Flags2))));
+			table.AddRow("Flags 2", $"{Flags2} ({flags2})");
 
 			table.AddRow("Token", m_wToken);
 			table.AddRow("Number virtuals", m_wNumVirtuals);
 			table.AddRow("Number interfaces", m_wNumInterfaces);
-			table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));
+			if (m_pParentMethodTable != null)
+				table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));
 			table.AddRow("Module", Hex.ToHex(m_pLoaderModule));
 
 			table.AddRow("m_pWriteableData", Hex.ToHex(m_pWriteableData));
 
-			table.AddRow("EEClass", Hex.ToHex(m_pEEClass));
-			table.AddRow("Canon MT", Hex.ToHex(m_pCanonMT));
+			switch (UnionType) {
+				case LowBits.EEClass:
+					table.AddRow("EEClass", Hex.ToHex(m_pEEClass));
+					break;
+				case LowBits.Invalid:
+					table.AddRow("(Invalid)", Hex.ToHex(m_pEEClass));
+					break;
+				case LowBits.MethodTable:
+					table.AddRow("Canon MT", Hex.ToHex(m_pCanonMT));
+					break;
+				case LowBits.Indirection:
+					table.AddRow("Indirection cell", Hex.ToHex(m_pCanonMT));
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 
+
+			if (IsArray)
+				table.AddRow("Element type handle", Hex.ToHex(m_ElementTypeHnd));
 
 			//table.AddRow("MethodDesc Table ptr", Hex.ToHex(m_methodDescTablePtr));
-
 			/*table.AddRow("m_ElementTypeHnd", (m_slotInfo.m_ElementTypeHnd));
 			table.AddRow("m_pMultipurposeSlot1", (m_slotInfo.m_pMultipurposeSlot1));
 			table.AddRow("m_pPerInstInfo", Hex.ToHex(m_slotInfo.m_pPerInstInfo));
 			table.AddRow("m_pInterfaceMap", Hex.ToHex(m_mapSlot.m_pInterfaceMap));
 			table.AddRow("m_pMultipurposeSlot2", (m_mapSlot.m_pMultipurposeSlot2));*/
-			//table.AddRow("Low bits", Get);
+			table.AddRow("Union type", UnionType);
 			return table.ToMarkDownString();
 		}
+
+		/**
+		 * __forceinline DWORD GetFlag(WFLAGS_LOW_ENUM flag) const
+    		{
+    		    SUPPORTS_DAC;
+    		    return (IsStringOrArray() ? (enum_flag_StringArrayValues & flag) : (m_dwFlags & flag));
+    		}
+		 */
 
 		public static bool operator ==(MethodTable a, MethodTable b)
 		{

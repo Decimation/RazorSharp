@@ -14,7 +14,7 @@ using RazorSharp.Runtime.CLRTypes;
 namespace RazorSharp.Experimental
 {
 	// WIP
-	public unsafe class SmartScanner : IDisposable
+	internal unsafe class SmartScanner : IDisposable
 	{
 		private readonly Process m_proc;
 

@@ -16,6 +16,7 @@ namespace RazorSharp.Memory
 
 	public static unsafe class Memory
 	{
+		private const byte Int32Bits = 32;
 
 		#region Swap
 
@@ -98,6 +99,7 @@ namespace RazorSharp.Memory
 
 		#endregion
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool ReadBit(int b, int bitIndex)
 		{
 			//var bit = (b & (1 << bitNumber-1)) != 0;
@@ -111,7 +113,7 @@ namespace RazorSharp.Memory
 
 		public static int ReadBits(int b, int bitIndexBegin, int bitLen)
 		{
-			if (bitLen > 32) throw new Exception();
+			if (bitLen > Int32Bits) throw new Exception();
 
 			bool[] bits = new bool[bitLen];
 			for (int i = 0; i < bitLen; i++) {
@@ -139,6 +141,22 @@ namespace RazorSharp.Memory
 		public static T Read<T>(IntPtr p, int byteOffset = 0)
 		{
 			return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[HandleProcessCorruptedStateExceptions]
+		public static T ReadSafe<T>(IntPtr p, int byteOffset = 0)
+		{
+			try {
+				return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
+			}
+			catch (NullReferenceException) {
+				return default;
+			}
+			catch (AccessViolationException) {
+				return default;
+			}
+
 		}
 
 		public static ref T AsRef<T>(IntPtr p)

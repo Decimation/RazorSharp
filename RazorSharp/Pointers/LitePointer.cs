@@ -30,13 +30,11 @@ namespace RazorSharp.Pointers
 		#region Properties
 
 		public T this[int index] {
-			get => Memory.Read<T>(PointerUtils.Offset<T>(m_value, index), 0);
+			get => Memory.Read<T>(PointerUtils.Offset<T>(m_value, index));
 			set => Memory.Write(PointerUtils.Offset<T>(m_value, index), 0, value);
 		}
 
-		public ref T Reference {
-			get => ref Memory.AsRef<T>(Address);
-		}
+		public ref T Reference => ref Memory.AsRef<T>(Address);
 
 //		public IntPtr __this {
 //			get => Unsafe.AddressOf(ref this);
@@ -47,7 +45,7 @@ namespace RazorSharp.Pointers
 			set => Memory.Write((IntPtr) m_value, 0, value);
 		}
 
-		public TNew As<TNew>()
+		public TNew Peek<TNew>()
 		{
 			return Memory.Read<TNew>(Address);
 		}
@@ -103,7 +101,6 @@ namespace RazorSharp.Pointers
 		}
 
 		#endregion
-
 
 		#region Operators
 
@@ -165,6 +162,20 @@ namespace RazorSharp.Pointers
 			return unchecked((int) (long) m_value);
 		}
 
+		public static bool operator ==(LitePointer<T> left, LitePointer<T> right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(LitePointer<T> left, LitePointer<T> right)
+		{
+			return !left.Equals(right);
+		}
+
+		#endregion
+
+		#region Overrides
+
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			if (String.IsNullOrEmpty(format)) format   = "O";
@@ -187,20 +198,6 @@ namespace RazorSharp.Pointers
 					goto case "O";
 			}
 		}
-
-		public static bool operator ==(LitePointer<T> left, LitePointer<T> right)
-		{
-			return left.Equals(right);
-		}
-
-		public static bool operator !=(LitePointer<T> left, LitePointer<T> right)
-		{
-			return !left.Equals(right);
-		}
-
-		#endregion
-
-		#region Overrides
 
 		public override string ToString()
 		{

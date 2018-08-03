@@ -21,8 +21,15 @@ namespace RazorSharp.Analysis
 		private readonly T            m_value;
 		private const    string       Omitted = "-";
 
+		public bool FieldsOnly { get; set; }
+		public bool FullOffset { get; set; }
+
+
 		public ObjectLayout(ref T t)
 		{
+			FieldsOnly = true;
+			FullOffset = false;
+
 			var addr = Unsafe.AddressOf(ref t);
 			m_addr = addr;
 			if (!typeof(T).IsValueType) {
@@ -38,11 +45,10 @@ namespace RazorSharp.Analysis
 			Create();
 		}
 
-
 		private void Create()
 		{
 			int baseOfs = 0;
-			if (!typeof(T).IsValueType) {
+			if (!typeof(T).IsValueType & !FieldsOnly) {
 				m_table.AddRow(-IntPtr.Size, Hex.ToHex(m_addr - IntPtr.Size), IntPtr.Size, "ObjHeader",
 					"(Object header)", Omitted);
 				m_table.AddRow(0, Hex.ToHex(m_addr), IntPtr.Size, "MethodTable*", "(MethodTable ptr)", Omitted);
@@ -53,7 +59,12 @@ namespace RazorSharp.Analysis
 				var rightOfs = baseOfs + v.Offset;
 				var leftOfs  = rightOfs + (v.Size - 1);
 
-				var ofsStr = $"{rightOfs}-{leftOfs}";
+				string ofsStr;
+				if (FullOffset)
+					ofsStr = $"{rightOfs}-{leftOfs}";
+				else {
+					ofsStr = rightOfs.ToString();
+				}
 
 				if (v.GetType() != typeof(Padding)) {
 					FieldLayout fl = (FieldLayout) v;

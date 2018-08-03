@@ -50,7 +50,7 @@
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="ObjectLayoutInspector, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\ObjectLayoutInspector\ObjectLayoutInspector\bin\Debug\ObjectLayoutInspector.dll</HintPath>
+      <HintPath>..\..\ObjectLayoutInspector\ObjectLayoutInspector\bin\x64\Release\ObjectLayoutInspector.dll</HintPath>
     </Reference>
     <Reference Include="RazorCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\RazorCommon\RazorCommon\bin\x64\Release\RazorCommon.dll</HintPath>

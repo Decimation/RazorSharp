@@ -2,6 +2,8 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
+// ReSharper disable InconsistentNaming
+
 namespace RazorSharp.Runtime.CLRTypes
 {
 
@@ -18,7 +20,7 @@ namespace RazorSharp.Runtime.CLRTypes
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct FieldDesc
 	{
-		// This actually only seems to be a byte
+		// This actually only seems to be a byte?
 		[FieldOffset(0)] private readonly MethodTable* m_pMTOfEnclosingClass;
 
 		// unsigned m_mb                  	: 24;
@@ -28,40 +30,45 @@ namespace RazorSharp.Runtime.CLRTypes
 		// unsigned m_prot                	: 3;
 		// unsigned m_requiresFullMbValue 	: 1;
 
-		[FieldOffset(8)] private unsigned m_dword1;
+		[FieldOffset(8)] private readonly unsigned m_dword1;
 
 		// unsigned m_dwOffset         		: 27;
 		// unsigned m_type             		: 5;
-		[FieldOffset(12)] private unsigned m_dword2;
-
-		// todo: don't know if these work for bitfields?
+		[FieldOffset(12)] private readonly unsigned m_dword2;
 
 		/// <summary>
 		/// MemberDef
 		/// </summary>
-		public unsigned MB {
-			get => m_dword1 & 0x18;
+		public int MB {
+			//get => Memory.ReadBits(m_dword1, 0, 24);
+			get => (int) (m_dword1 & 0xFFFFFF);
 		}
 
 		/// <summary>
 		/// Offset in heap memory
 		/// </summary>
-		public unsigned Offset {
-			// 27 bits
-			get => m_dword2 & 0x1B;
+		public int Offset {
+			//get { return Memory.ReadBits(m_dword2, 0, 27); }
+			get => (int) (m_dword2 & 0x7FFFFFF);
 		}
 
 		/// <summary>
 		/// Field type
 		/// </summary>
-		private int Type {
-			get => Memory.ReadBits(m_dword2, 27, 5);
+		public int Type {
+			get => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
+		}
+
+		public CorElementType CorType {
+			get => (CorElementType) Type;
 		}
 
 		/// <summary>
 		/// Whether the field is static
 		/// </summary>
-		public bool IsStatic => Memory.ReadBit(m_dword1, 24);
+		public bool IsStatic {
+			get { return Memory.ReadBit(m_dword1, 24); }
+		}
 
 		/// <summary>
 		/// Whether the field is decorated with a ThreadStatic attribute
@@ -76,7 +83,10 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <summary>
 		/// Access level
 		/// </summary>
-		public int Protection => Memory.ReadBits(m_dword1, 26, 3);
+		public int Protection {
+			//get { return Memory.ReadBits(m_dword1, 26, 3); }
+			get => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
+		}
 
 
 		public bool RequiresFullMBValue => Memory.ReadBit(m_dword1, 31);
@@ -85,14 +95,12 @@ namespace RazorSharp.Runtime.CLRTypes
 		{
 			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("MethodTable", Hex.ToHex(m_pMTOfEnclosingClass));
-			//table.AddRow("unsigned 1", m_dword1);
-			//table.AddRow("unsigned 2", m_dword2);
 
 			// Unsigned 1
 			table.AddRow("MB", MB);
 			table.AddRow("Offset", Offset);
-			table.AddRow("Type", Memory.ReadBits(m_dword2, 27, 5));
-			table.AddRow("Type", (CorElementType) Memory.ReadBits(m_dword2, 27, 5));
+			table.AddRow("Type", Type);
+			table.AddRow("Type", CorType);
 
 			table.AddRow("Static", IsStatic);
 			table.AddRow("ThreadLocal", IsThreadLocal);
@@ -105,50 +113,6 @@ namespace RazorSharp.Runtime.CLRTypes
 
 	}
 
-	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/f31097f14560b193e76a7b2e1e61af9870b5356b/src/System.Private.CoreLib/src/System/Reflection/MdImport.cs#L22
-	/// Source 2: https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L863
-	/// For sizes: https://github.com/dotnet/coreclr/blob/de586767f51432e5d89f6fcffee07c488fdeeb7b/src/vm/siginfo.cpp#L63
-	/// </summary>
-	internal enum CorElementType : byte
-	{
-		End         = 0x00,
-		Void        = 0x01,
-		Boolean     = 0x02,
-		Char        = 0x03,
-		I1          = 0x04,
-		U1          = 0x05,
-		I2          = 0x06,
-		U2          = 0x07,
-		I4          = 0x08,
-		U4          = 0x09,
-		I8          = 0x0A,
-		U8          = 0x0B,
-		R4          = 0x0C,
-		R8          = 0x0D,
-		String      = 0x0E,
-		Ptr         = 0x0F,
-		ByRef       = 0x10,
-		ValueType   = 0x11,
-		Class       = 0x12,
-		Var         = 0x13,
-		Array       = 0x14,
-		GenericInst = 0x15,
-		TypedByRef  = 0x16,
-		I           = 0x18,
-		U           = 0x19,
-		FnPtr       = 0x1B,
-		Object      = 0x1C,
-		SzArray     = 0x1D,
-		MVar        = 0x1E,
-		CModReqd    = 0x1F,
-		CModOpt     = 0x20,
-		Internal    = 0x21,
-		Max         = 0x22,
-		Modifier    = 0x40,
-		Sentinel    = 0x41,
-		Pinned      = 0x45,
-	}
 
 	internal enum MbMask
 	{

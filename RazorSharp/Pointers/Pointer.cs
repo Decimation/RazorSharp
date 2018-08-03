@@ -60,6 +60,11 @@ namespace RazorSharp.Pointers
 				return false;
 			}
 
+			public override int GetHashCode()
+			{
+				return ElementSize;
+			}
+
 			internal PointerMetadata(int elementSize) : this(elementSize, false) { }
 		}
 
@@ -116,7 +121,7 @@ namespace RazorSharp.Pointers
 
 		#region Methods
 
-		public TNew As<TNew>()
+		public TNew Peek<TNew>()
 		{
 			return Memory.Read<TNew>(Address);
 		}

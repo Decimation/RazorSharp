@@ -13,13 +13,13 @@ namespace RazorSharp.Pointers
 
 
 		/// <summary>
-		/// Reinterpret the underlying memory as the specified type.<para></para>
+		/// Read the underlying memory as the specified type.<para></para>
 		///
 		/// (Note: Not like CSUnsafe.As)
 		/// </summary>
 		/// <typeparam name="TNew"></typeparam>
 		/// <returns></returns>
-		TNew As<TNew>();
+		TNew Peek<TNew>();
 
 		int ToInt32();
 		long ToInt64();

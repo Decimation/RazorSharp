@@ -74,6 +74,9 @@
       <HintPath>..\packages\NUnit.3.10.1\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="ObjectLayoutInspector, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\ObjectLayoutInspector\ObjectLayoutInspector\bin\x64\Release\ObjectLayoutInspector.dll</HintPath>
+    </Reference>
     <Reference Include="RazorCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\RazorCommon\RazorCommon\bin\x64\Release\RazorCommon.dll</HintPath>
     </Reference>
