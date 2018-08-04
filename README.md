@@ -17,8 +17,8 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [x] ObjectHeader
 - [x] MethodTable
 - [x] EEClass
-- [ ] EEClassLayoutInfo
-- [ ] LayoutEEClass
+- [x] EEClassLayoutInfo
+- [x] LayoutEEClass
 - [x] FieldDesc
 - [x] MethodDesc
 - [ ] MethodDescChunk
