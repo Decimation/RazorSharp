@@ -132,27 +132,20 @@ namespace RazorSharp.Runtime
 		#region FieldDesc
 
 		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
-		public static LitePointer<FieldDesc>[] GetFieldDescs<T>(
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+		public static LitePointer<FieldDesc>[] GetFieldDescs<T>()
 		{
-			return GetFieldDescs(typeof(T), flags);
-		}
+			var ee = MethodTableOf<T>()->EEClass;
+			var len = ee->FieldDescListLength;
 
-		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
-		public static LitePointer<FieldDesc>[] GetFieldDescs(Type t,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-		{
-			var fields = t.GetFields(flags);
-			var arr    = new LitePointer<FieldDesc>[fields.Length];
-
-			for (int i = 0; i < arr.Length; i++) {
-				arr[i] = (FieldDesc*) fields[i].FieldHandle.Value;
+			LitePointer<FieldDesc>[] lpFd = new LitePointer<FieldDesc>[len];
+			for (int i = 0; i < len; i++) {
+				lpFd[i] = &ee->FieldDescList[i];
 			}
 
-			PointerUtils.MakeSequential(arr);
-
-			return arr;
+			return lpFd;
 		}
+
+
 
 		public static FieldDesc* GetFieldDesc(Type t, string name,
 			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)

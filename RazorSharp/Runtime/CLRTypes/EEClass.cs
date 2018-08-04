@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.Pointers;
+
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable InconsistentNaming
@@ -17,6 +19,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 	/// <summary>
 	/// Source: https://github.com/dotnet/coreclr/blob/6bb3f84d42b9756c5fa18158db8f724d57796296/src/vm/class.h#L1901
+	///
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct EEClass
@@ -28,7 +31,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(8)] private readonly void* m_rpOptionalFields;
 
 		//** Status: verified
-		[FieldOffset(16)] private readonly void*      m_pMethodTable;
+		[FieldOffset(16)] private readonly MethodTable* m_pMethodTable;
+
+		//** Status: verified
 		[FieldOffset(24)] private readonly FieldDesc* m_pFieldDescList;
 		[FieldOffset(32)] private readonly void*      m_pChunks;
 
@@ -82,6 +87,9 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public CorElementType NormalType => (CorElementType) m_NormType;
 
+		/// <summary>
+		/// CRITICAL NOTE: This points to incorrect memory when the address of "this" changes
+		/// </summary>
 		private EEClassLayoutInfo* LayoutInfo {
 			get {
 				//return &((LayoutEEClass *) this)->m_LayoutInfo;
@@ -100,6 +108,85 @@ namespace RazorSharp.Runtime.CLRTypes
 			get { return HasLayout && LayoutInfo->IsBlittable; }
 		}
 
+		public int NumInstanceFields {
+			get { return (int) GetPackableField(EEClassFieldId.NumInstanceFields); }
+		}
+
+		public int NumStaticFields {
+			get { return (int) GetPackableField(EEClassFieldId.NumStaticFields); }
+		}
+
+		public int NumMethods {
+			get { return (int) GetPackableField(EEClassFieldId.NumMethods); }
+		}
+
+		public int NumNonVirtualSlots {
+			get { return (int) GetPackableField(EEClassFieldId.NumNonVirtualSlots); }
+		}
+
+		private DWORD GetPackableField(EEClassFieldId eField)
+		{
+			//Console.WriteLine(Hex.ToHex(PackedFields));
+			return (m_fFieldsArePacked == 1
+				? PackedFields->GetPackedField((DWORD) eField)
+				: PackedFields->GetUnpackedField((DWORD) eField));
+		}
+
+		/// <summary>
+		/// CRITICAL NOTE: This points to incorrect memory when the address of "this" changes
+		/// </summary>
+		private PackedDWORDFields_11* PackedFields {
+			get { return (PackedDWORDFields_11*) (Unsafe.AddressOf(ref this) + m_cbFixedEEClassFields); }
+		}
+
+		private EEClass* ParentClass {
+			get { return m_pMethodTable->Parent->EEClass; }
+		}
+
+		public int FieldDescListLength {
+			//There are (m_wNumInstanceFields - GetParentClass()->m_wNumInstanceFields + m_wNumStaticFields) entries
+			//get { return (NumInstanceFields - ParentClass->NumInstanceFields + NumStaticFields); }
+
+			get {
+				EEClass*     pClass     = m_pMethodTable->EEClass;
+				int          fieldCount = pClass->NumInstanceFields + pClass->NumStaticFields;
+				MethodTable* pParentMT  = m_pMethodTable->Parent;
+
+				if (pParentMT != null)
+					fieldCount -= pParentMT->EEClass->NumInstanceFields;
+				return fieldCount;
+			}
+		}
+
+		/// <summary>
+		/// CRITICAL NOTE: This points to incorrect memory when the address of "this" changes
+		/// </summary>
+		public FieldDesc* FieldDescList {
+
+			get {
+				const int fieldDescListFieldOffset = 24;
+				//PTR_HOST_MEMBER_TADDR(EEClass, this, m_pFieldDescList)
+				var cpy    = (IntPtr) m_pFieldDescList;
+				var __this = Unsafe.AddressOf(ref this);
+				__this += fieldDescListFieldOffset;
+				return (FieldDesc*) PointerUtils.Add(cpy, __this);
+			}
+		}
+
+		/// <summary>
+		/// CRITICAL NOTE: This points to incorrect memory when the address of "this" changes
+		/// </summary>
+		public MethodDescChunk* MethodDescChunkList {
+			//todo: verify
+			get {
+				const int chunksFieldOffset = 32;
+				var cpy    = (IntPtr) m_pChunks;
+				var __this = Unsafe.AddressOf(ref this);
+				__this += chunksFieldOffset;
+				return (MethodDescChunk*) PointerUtils.Add(cpy, __this);
+			}
+		}
+
 		#endregion
 
 		public override string ToString()
@@ -116,13 +203,23 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow(nameof(m_pccwTemplate), Hex.ToHex(m_pccwTemplate));
 			table.AddRow("Attributes", Hex.ToHex(m_dwAttrClass));
 			table.AddRow("Normal type", NormalType);
-			table.AddRow("Fields are packed", m_fFieldsArePacked);
+			table.AddRow("Fields are packed", m_fFieldsArePacked == 1);
 			table.AddRow("Fixed EEClass fields", m_cbFixedEEClassFields);
 			table.AddRow("Base size padding", m_cbBaseSizePadding);
 			table.AddRow("VMFlags", String.Join(", ", VMFlags.GetFlags()));
 
 
-			table.RemoveEmptyRows();
+			// !NOTE NOTE NOTE!
+			// this->ToString() must be used to view these
+			// when the pointer is copied, NumInstanceFields and NumStaticFields
+			// read from incorrect memory (not the packed fields like they should)
+			table.AddRow("Instance fields", NumInstanceFields);
+			table.AddRow("Static fields", NumStaticFields);
+			table.AddRow("Methods", NumMethods);
+			table.AddRow("Non virtual slots", NumNonVirtualSlots);
+
+
+			//table.RemoveFromRows(0, "0x0");
 			return table.ToMarkDownString();
 		}
 	}

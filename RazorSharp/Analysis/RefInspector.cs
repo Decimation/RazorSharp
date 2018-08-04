@@ -40,7 +40,6 @@ namespace RazorSharp.Analysis
 			{
 				var table = base.ToTable();
 
-				table.AddRow("EEClass", Hex.ToHex(EEClass));
 				table.AddRow("Object Header", Hex.ToHex(Header));
 				return table;
 			}
@@ -123,12 +122,10 @@ namespace RazorSharp.Analysis
 		}
 
 
-		public new static void Write(ref T t)
+		public new static void Write(ref T t, InspectorMode mode = InspectorMode.All)
 		{
-			var inspector = new RefInspector<T>(ref t);
+			var inspector = new RefInspector<T>(ref t, mode);
 			Console.WriteLine(inspector);
-
-
 		}
 	}
 

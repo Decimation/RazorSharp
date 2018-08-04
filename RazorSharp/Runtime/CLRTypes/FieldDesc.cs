@@ -55,7 +55,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <summary>
 		/// Field type
 		/// </summary>
-		public int Type {
+		private int Type {
 			get => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
 		}
 
@@ -103,8 +103,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			// Unsigned 1
 			table.AddRow("MB", MB);
 			table.AddRow("Offset", Offset);
-			table.AddRow("Type", Type);
-			table.AddRow("Type", CorType);
+			table.AddRow("CorType", CorType);
 			table.AddRow("Size", Size);
 
 			table.AddRow("Static", IsStatic);

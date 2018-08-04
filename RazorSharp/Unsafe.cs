@@ -8,6 +8,7 @@ using ObjectLayoutInspector;
 using RazorCommon;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime;
+using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;
 using static RazorSharp.Utilities.Assertion;
 
@@ -17,7 +18,7 @@ namespace RazorSharp
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	//using Memory = RazorSharp.Memory.Memory;
-	//using Runtime = RazorSharp.Runtime.Runtime;
+	//using Runtime = Runtime.Runtime;
 
 
 	public enum OffsetType
@@ -62,18 +63,24 @@ namespace RazorSharp
 
 		public static int OffsetOf<TType, TMember>(ref TType type, TMember val)
 		{
+			int memberSize = SizeOf<TMember>();
+
 			// Find possible matching FieldDesc types
 			var fieldDescs = Runtime.Runtime.GetFieldDescs<TType>().Select(x => x.Value)
 				.Where(x => x.CorType == Constants.TypeToCorType<TMember>()).ToArray();
 
+
 			LitePointer<TMember> rawMemory = AddressOf(ref type);
+
 			if (!typeof(TType).IsValueType) {
 				rawMemory = Marshal.ReadIntPtr(rawMemory.Address) + IntPtr.Size;
 			}
 
-			for (int i = 0; i < fieldDescs.Length; i++) {
-				if (rawMemory[i].Equals(val)) {
-					return fieldDescs[i].Offset;
+
+			foreach (FieldDesc t in fieldDescs) {
+				int adjustedOfs = t.Offset / memberSize;
+				if (rawMemory[adjustedOfs].Equals(val)) {
+					return t.Offset;
 				}
 			}
 

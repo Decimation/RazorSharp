@@ -46,11 +46,18 @@ namespace RazorSharp.Analysis
 
 		private void Create()
 		{
+			const string objHeaderType   = "ObjHeader";
+			const string methodTableType = "MethodTable*";
+			const string objHeaderName   = "(Object header)";
+			const string methodTableName = "(MethodTable ptr)";
+			const string bytePaddingType = "Byte";
+			const string bytePaddingName = "(padding)";
+
 			int baseOfs = 0;
 			if (!typeof(T).IsValueType & !FieldsOnly) {
-				m_table.AddRow(-IntPtr.Size, Hex.ToHex(m_addr - IntPtr.Size), IntPtr.Size, "ObjHeader",
-					"(Object header)", Omitted);
-				m_table.AddRow(0, Hex.ToHex(m_addr), IntPtr.Size, "MethodTable*", "(MethodTable ptr)", Omitted);
+				m_table.AddRow(-IntPtr.Size, Hex.ToHex(m_addr - IntPtr.Size), IntPtr.Size, objHeaderType,
+					objHeaderName, Omitted);
+				m_table.AddRow(0, Hex.ToHex(m_addr), IntPtr.Size, methodTableType, methodTableName, Omitted);
 				baseOfs += IntPtr.Size;
 			}
 
@@ -71,8 +78,13 @@ namespace RazorSharp.Analysis
 						fl.FieldInfo.Name, fl.FieldInfo.GetValue(m_value));
 				}
 				else {
-					m_table.AddRow(ofsStr, Hex.ToHex(m_addr + v.Offset + baseOfs), v.Size, "Byte", "(padding)", 0);
+					m_table.AddRow(ofsStr, Hex.ToHex(m_addr + v.Offset + baseOfs), v.Size, bytePaddingType, bytePaddingName, 0);
 				}
+			}
+
+			// TypeLayout says strings have 2 bytes of padding but that isn't true
+			if (typeof(T) == typeof(string)) {
+				m_table.Rows.RemoveAt(m_table.Rows.Count - 1);
 			}
 		}
 

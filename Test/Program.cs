@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using BenchmarkDotNet.Running;
@@ -79,33 +80,15 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
+			Dummy d      = new Dummy();
+			var   layout = new ObjectLayout<Dummy>(ref d);
+			Console.WriteLine(layout);
 
-			string s = "foo";
-			RefInspector<string>.Write(ref s);
+			RefInspector<Dummy>.Write(ref d, InspectorMode.Field);
 
-			var ri = new RefInspector<string>(ref s, InspectorMode.Internal);
-
-			Console.WriteLine(*ri.Internal.EEClass);
 
 
 			//var summary = BenchmarkRunner.Run<UnsafeBenchmarking>();
-		}
-
-
-
-
-
-
-		private static void TableFieldDescs<T>()
-		{
-			var table = new ConsoleTable("Offset", "CorType", "Type", "Size");
-			var fieldDescs = Runtime.GetFieldDescs<T>();
-			fieldDescs = fieldDescs.OrderBy(x => x.Value.Offset).ToArray();
-			foreach (var v in fieldDescs) {
-				table.AddRow(v.Value.Offset,v.Value.CorType, v.Value.Type, v.Value.Size);
-			}
-
-			Console.WriteLine(table.ToMarkDownString());
 		}
 
 		private static void SetChar(this string str, int i, char c)

@@ -390,7 +390,7 @@ namespace RazorSharp.Runtime
 		BitSblkIsHashcode           = 0x04000000
 	}
 
-	internal enum EEClassFieldId
+	internal enum EEClassFieldId : uint
 	{
 		NumInstanceFields = 0,
 		NumMethods,

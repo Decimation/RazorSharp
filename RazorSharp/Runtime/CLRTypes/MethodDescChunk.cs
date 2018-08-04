@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using RazorCommon;
 
 namespace RazorSharp.Runtime.CLRTypes
 {
@@ -30,6 +31,19 @@ namespace RazorSharp.Runtime.CLRTypes
 		public byte Count => (byte) (m_count + 1);
 
 		public MethodTable* MethodTable => m_methodTable;
+
+
+		public override string ToString()
+		{
+			var table = new ConsoleTable("Field", "Value");
+			table.AddRow("MethodTable", Hex.ToHex(m_methodTable));
+			table.AddRow("Next chunk", Hex.ToHex(m_next));
+			table.AddRow("Size", m_size);
+			table.AddRow("Count (-1)", m_count);
+			table.AddRow("Flags and token range", m_flagsAndTokenRange);
+
+			return table.ToMarkDownString();
+		}
 	}
 
 }

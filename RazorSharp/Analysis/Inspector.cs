@@ -1,8 +1,12 @@
 using System;
+using System.Linq;
 using System.Text;
 using RazorCommon;
+using RazorCommon.Strings;
+using RazorSharp.Pointers;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
+
 // ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Analysis
@@ -16,8 +20,9 @@ namespace RazorSharp.Analysis
 		Address  = 2,
 		Size     = 4,
 		Internal = 8,
-		Layout   = 16,
-		All      = Meta | Address | Size | Internal | Layout,
+		Field    = 16,
+		Layout   = 32,
+		All      = Meta | Address | Size | Internal | Layout | Field,
 	}
 
 	public unsafe class Inspector<T>
@@ -26,6 +31,7 @@ namespace RazorSharp.Analysis
 		public AddressInfo     Addresses { get; protected set; }
 		public SizeInfo        Sizes     { get; protected set; }
 		public InternalInfo    Internal  { get; protected set; }
+		public FieldInfo       Fields    { get; protected set; }
 		public ObjectLayout<T> Layout    { get; protected set; }
 
 
@@ -38,9 +44,38 @@ namespace RazorSharp.Analysis
 			Addresses = new AddressInfo(ref t);
 			Sizes     = new SizeInfo();
 			Internal  = new InternalInfo(ref t);
+			Fields    = new FieldInfo();
 			Layout    = new ObjectLayout<T>(ref t);
 		}
 
+
+		public sealed class FieldInfo
+		{
+			public LitePointer<FieldDesc>[] FieldDescs { get; }
+
+			internal FieldInfo()
+			{
+				FieldDescs = Runtime.Runtime.GetFieldDescs<T>();
+				FieldDescs = FieldDescs.OrderBy(x => x.Value.Offset).ToArray();
+			}
+
+			private ConsoleTable ToTable()
+			{
+				var table = new ConsoleTable("Offset", "Address", "CorType", "Static", "Size");
+
+				foreach (var v in FieldDescs) {
+					table.AddRow(v.Value.Offset, Hex.ToHex(v.Address), v.Value.CorType,
+						v.Value.IsStatic ? StringUtils.Check : StringUtils.BallotX, v.Value.Size);
+				}
+
+				return table;
+			}
+
+			public override string ToString()
+			{
+				return CreateLabelString("FieldDescs:", ToTable());
+			}
+		}
 
 		public class InternalInfo
 		{
@@ -87,8 +122,8 @@ namespace RazorSharp.Analysis
 			{
 				var table = new ConsoleTable("Info", "Value");
 				table.AddRow("Value", Value);
-				table.AddRow("Blittable", IsBlittable);
-				table.AddRow("Value type", IsValueType);
+				table.AddRow("Blittable", IsBlittable ? StringUtils.Check : StringUtils.BallotX);
+				table.AddRow("Value type", IsValueType ? StringUtils.Check : StringUtils.BallotX);
 				return table;
 			}
 
@@ -149,9 +184,9 @@ namespace RazorSharp.Analysis
 			return String.Format("\n{0}\n{1}\n", ANSI.BoldString(label), table.ToMarkDownString());
 		}
 
-		public static void Write(ref T t)
+		public static void Write(ref T t, InspectorMode mode = InspectorMode.All)
 		{
-			var inspector = new Inspector<T>(ref t);
+			var inspector = new Inspector<T>(ref t, mode);
 			Console.WriteLine(inspector);
 		}
 
@@ -160,9 +195,6 @@ namespace RazorSharp.Analysis
 		{
 			var sb = new StringBuilder();
 
-			if (Mode.HasFlag(InspectorMode.Internal)) {
-				sb.Append(Internal);
-			}
 
 			if (Mode.HasFlag(InspectorMode.Meta)) {
 				sb.Append(Metadata);
@@ -174,6 +206,14 @@ namespace RazorSharp.Analysis
 
 			if (Mode.HasFlag(InspectorMode.Size)) {
 				sb.Append(Sizes);
+			}
+
+			if (Mode.HasFlag(InspectorMode.Internal)) {
+				sb.Append(Internal);
+			}
+
+			if (Mode.HasFlag(InspectorMode.Field)) {
+				sb.Append(Fields);
 			}
 
 			if (Mode.HasFlag(InspectorMode.Layout)) {
