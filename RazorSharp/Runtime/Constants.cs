@@ -22,6 +22,87 @@ namespace RazorSharp.Runtime
 		//todo
 		private const uint GC_MARKED = 0x1;
 
+		/// <summary>
+		/// Source: https://github.com/dotnet/coreclr/blob/de586767f51432e5d89f6fcffee07c488fdeeb7b/src/vm/siginfo.cpp#L63
+		/// </summary>
+		internal static int SizeOfCorElementType(CorElementType t)
+		{
+			const int specialSize = -1;
+
+			switch (t)
+			{
+				case CorElementType.Void:
+					return 0;
+
+				case CorElementType.Boolean:
+					return sizeof(bool);
+
+				case CorElementType.Char:
+					return sizeof(char);
+
+				case CorElementType.I1:
+					return sizeof(sbyte);
+				case CorElementType.U1:
+					return sizeof(byte);
+
+				case CorElementType.I2:
+					return sizeof(short);
+				case CorElementType.U2:
+					return sizeof(ushort);
+
+				case CorElementType.I4:
+					return sizeof(int);
+				case CorElementType.U4:
+					return sizeof(uint);
+
+				case CorElementType.I8:
+					return sizeof(long);
+				case CorElementType.U8:
+					return sizeof(ulong);
+
+				case CorElementType.R4:
+					return sizeof(float);
+				case CorElementType.R8:
+					return sizeof(double);
+
+				case CorElementType.String:
+				case CorElementType.Ptr:
+				case CorElementType.ByRef:
+				case CorElementType.Class:
+				case CorElementType.Array:
+				case CorElementType.I:
+				case CorElementType.U:
+				case CorElementType.FnPtr:
+				case CorElementType.Object:
+				case CorElementType.SzArray:
+					return IntPtr.Size;
+
+
+				case CorElementType.End:
+				case CorElementType.ValueType:
+				case CorElementType.Var:
+				case CorElementType.GenericInst:
+				case CorElementType.CModReqd:
+				case CorElementType.CModOpt:
+				case CorElementType.Internal:
+				case CorElementType.MVar:
+					return specialSize;
+
+				case CorElementType.TypedByRef:
+					return IntPtr.Size * 2;
+
+				case CorElementType.Max:
+				case CorElementType.Modifier:
+				case CorElementType.Sentinel:
+				case CorElementType.Pinned:
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(t), t, null);
+			}
+
+			throw new Exception($"Size for CorElementType {t} is unknown");
+		}
+
 		public static CorElementType TypeToCorType<T>()
 		{
 			switch (Type.GetTypeCode(typeof(T))) {
@@ -59,7 +140,8 @@ namespace RazorSharp.Runtime
 				case TypeCode.String:
 					return CorElementType.Class;
 				default:
-					throw new ArgumentOutOfRangeException($"{typeof(T).Name} has not been mapped to {nameof(CorElementType)}.");
+					throw new ArgumentOutOfRangeException(
+						$"{typeof(T).Name} has not been mapped to {nameof(CorElementType)}.");
 			}
 		}
 	}
@@ -73,78 +155,87 @@ namespace RazorSharp.Runtime
 	/// </summary>
 	public enum CorElementType : byte
 	{
-		End         = 0x00,
-		Void        = 0x01,
+		End  = 0x00,
+		Void = 0x01,
 
 		/// <summary>
 		/// bool
 		/// </summary>
-		Boolean     = 0x02,
+		Boolean = 0x02,
 
 		/// <summary>
 		/// char
 		/// </summary>
-		Char        = 0x03,
+		Char = 0x03,
 
 		/// <summary>
 		/// sbyte
 		/// </summary>
-		I1          = 0x04,
+		I1 = 0x04,
 
 		/// <summary>
 		/// byte
 		/// </summary>
-		U1          = 0x05,
+		U1 = 0x05,
 
 		/// <summary>
 		/// short
 		/// </summary>
-		I2          = 0x06,
+		I2 = 0x06,
 
 		/// <summary>
 		/// ushort
 		/// </summary>
-		U2          = 0x07,
+		U2 = 0x07,
 
 		/// <summary>
 		/// int
 		/// </summary>
-		I4          = 0x08,
+		I4 = 0x08,
 
 		/// <summary>
 		/// uint
 		/// </summary>
-		U4          = 0x09,
+		U4 = 0x09,
 
 		/// <summary>
 		/// long
 		/// </summary>
-		I8          = 0x0A,
+		I8 = 0x0A,
 
 		/// <summary>
 		/// ulong
 		/// </summary>
-		U8          = 0x0B,
+		U8 = 0x0B,
 
 		/// <summary>
 		/// float
 		/// </summary>
-		R4          = 0x0C,
+		R4 = 0x0C,
 
 		/// <summary>
 		/// double
 		/// </summary>
-		R8          = 0x0D,
+		R8 = 0x0D,
 
 		/// <summary>
 		/// Note: strings don't actually map to this. They map to Class.
 		/// </summary>
-		String      = 0x0E,
+		String = 0x0E,
 
 		Ptr         = 0x0F,
 		ByRef       = 0x10,
+
+		/// <summary>
+		/// Struct type
+		/// </summary>
 		ValueType   = 0x11,
+
+		/// <summary>
+		/// Reference type (i.e. string, object)
+		/// </summary>
 		Class       = 0x12,
+
 		Var         = 0x13,
 		Array       = 0x14,
 		GenericInst = 0x15,
@@ -299,6 +390,22 @@ namespace RazorSharp.Runtime
 		BitSblkIsHashcode           = 0x04000000
 	}
 
+	internal enum EEClassFieldId
+	{
+		NumInstanceFields = 0,
+		NumMethods,
+		NumStaticFields,
+		NumHandleStatics,
+		NumBoxedStatics,
+		NonGCStaticFieldBytes,
+		NumThreadStaticFields,
+		NumHandleThreadStatics,
+		NumBoxedThreadStatics,
+		NonGCThreadStaticFieldBytes,
+		NumNonVirtualSlots,
+		COUNT
+	}
+
 	/// <summary>
 	/// Use with: MethodTable::m_dwFlags.Flags
 	/// </summary>
@@ -449,15 +556,15 @@ namespace RazorSharp.Runtime
 	[Flags]
 	public enum VMFlags : uint
 	{
-		VmflagLayoutDependsOnOtherModules = 0x00000001,
-		VmflagDelegate                    = 0x00000002,
-		VmflagFixedAddressVtStatics       = 0x00000020, // Value type Statics in this class will be pinned
-		VmflagHaslayout                   = 0x00000040,
-		VmflagIsnested                    = 0x00000080,
-		VmflagIsEquivalentType            = 0x00000200,
+		LayoutDependsOnOtherModules = 0x00000001,
+		Delegate                    = 0x00000002,
+		FixedAddressVtStatics       = 0x00000020, // Value type Statics in this class will be pinned
+		HasLayout                   = 0x00000040,
+		IsNested                    = 0x00000080,
+		IsEquivalentType            = 0x00000200,
 
 		//   OVERLAYED is used to detect whether Equals can safely optimize to a bit-compare across the structure.
-		VmflagHasoverlayedfields = 0x00000400,
+		HasOverlayedFields = 0x00000400,
 
 		// Set this if this class or its parent have instance fields which
 		// must be explicitly inited in a constructor (e.g. pointers of any
@@ -466,47 +573,47 @@ namespace RazorSharp.Runtime
 		// Currently this is used by the verifier when verifying value classes
 		// - it's ok to use uninitialised value classes if there are no
 		// pointer fields in them.
-		VmflagHasFieldsWhichMustBeInited = 0x00000800,
+		HasFieldsWhichMustBeInited = 0x00000800,
 
-		VmflagUnsafevaluetype = 0x00001000,
+		UnsafeValueType = 0x00001000,
 
-		VmflagBestfitmappingInited =
+		BestFitMappingInited =
 			0x00002000,                           // VMFLAG_BESTFITMAPPING and VMFLAG_THROWONUNMAPPABLECHAR are valid only if this is set
-		VmflagBestfitmapping        = 0x00004000, // BestFitMappingAttribute.Value
-		VmflagThrowonunmappablechar = 0x00008000, // BestFitMappingAttribute.ThrowOnUnmappableChar
+		BestFitMapping        = 0x00004000, // BestFitMappingAttribute.Value
+		ThrowOnUnmappableChar = 0x00008000, // BestFitMappingAttribute.ThrowOnUnmappableChar
 
 		// unused                              = 0x00010000,
-		VmflagNoGuid             = 0x00020000,
-		VmflagHasnonpublicfields = 0x00040000,
+		NoGuid             = 0x00020000,
+		HasNonPublicFields = 0x00040000,
 
 		// unused                              = 0x00080000,
-		VmflagContainsStackPtr = 0x00100000,
-		VmflagPreferAlign8     = 0x00200000, // Would like to have 8-byte alignment
+		ContainsStackPtr = 0x00100000,
+		PreferAlign8     = 0x00200000, // Would like to have 8-byte alignment
 		// unused                              = 0x00400000,
 
-		VmflagSparseForCominterop = 0x00800000,
+		SparseForCominterop = 0x00800000,
 
 		// interfaces may have a coclass attribute
-		VmflagHascoclassattrib   = 0x01000000,
-		VmflagComeventitfmask    = 0x02000000, // class is a special COM event interface
-		VmflagProjectedFromWinrt = 0x04000000,
-		VmflagExportedToWinrt    = 0x08000000,
+		HasCoClassAttrib   = 0x01000000,
+		ComEventItfMask    = 0x02000000, // class is a special COM event interface
+		ProjectedFromWinRT = 0x04000000,
+		ExportedToWinRT    = 0x08000000,
 
 		// This one indicates that the fields of the valuetype are
 		// not tightly packed and is used to check whether we can
 		// do bit-equality on value types to implement ValueType::Equals.
 		// It is not valid for classes, and only matters if ContainsPointer
 		// is false.
-		VmflagNotTightlyPacked = 0x10000000,
+		NotTightlyPacked = 0x10000000,
 
 		// True if methoddesc on this class have any real (non-interface) methodimpls
-		VmflagContainsMethodimpls = 0x20000000,
+		ContainsMethodImpls = 0x20000000,
 
-		VmflagMarshalingtypeMask = 0xc0000000,
+		MarshalingTypeMask = 0xc0000000,
 
-		VmflagMarshalingtypeInhibit      = 0x40000000,
-		VmflagMarshalingtypeFreethreaded = 0x80000000,
-		VmflagMarshalingtypeStandard     = 0xc0000000,
+		MarshalingTypeInhibit      = 0x40000000,
+		MarshalingTypeFreeThreaded = 0x80000000,
+		MarshalingTypeStandard     = 0xc0000000,
 
 	}
 

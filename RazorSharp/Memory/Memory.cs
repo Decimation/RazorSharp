@@ -140,23 +140,8 @@ namespace RazorSharp.Memory
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T Read<T>(IntPtr p, int byteOffset = 0)
 		{
+
 			return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		[HandleProcessCorruptedStateExceptions]
-		public static T ReadSafe<T>(IntPtr p, int byteOffset = 0)
-		{
-			try {
-				return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
-			}
-			catch (NullReferenceException) {
-				return default;
-			}
-			catch (AccessViolationException) {
-				return default;
-			}
-
 		}
 
 		public static ref T AsRef<T>(IntPtr p)

@@ -48,7 +48,7 @@ namespace RazorSharp.Experimental
 		public static PinHandle<T> Pin(ref T t)
 		{
 			var handle = new PinHandle<T>();
-			if (Unsafe.IsBlittable<T>()) {
+			if (Runtime.Runtime.IsBlittable<T>()) {
 				handle.m_handle = GCHandle.Alloc(t, GCHandleType.Pinned);
 			}
 			else {

@@ -1,6 +1,7 @@
 using System;
 using ObjectLayoutInspector;
 using RazorCommon;
+using RazorSharp.Pointers;
 
 namespace RazorSharp.Analysis
 {
@@ -20,10 +21,8 @@ namespace RazorSharp.Analysis
 		private readonly TypeLayout   m_layout;
 		private readonly T            m_value;
 		private const    string       Omitted = "-";
-
-		public bool FieldsOnly { get; set; }
-		public bool FullOffset { get; set; }
-
+		public           bool         FieldsOnly { get; set; }
+		public           bool         FullOffset { get; set; }
 
 		public ObjectLayout(ref T t)
 		{
@@ -79,7 +78,7 @@ namespace RazorSharp.Analysis
 
 		public override string ToString()
 		{
-			return m_table.ToMarkDownString();
+			return Inspector<T>.CreateLabelString("Memory layout:", m_table);
 		}
 	}
 

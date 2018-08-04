@@ -1,7 +1,9 @@
 using System;
+using System.Text;
 using RazorCommon;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
+// ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Analysis
 {
@@ -9,11 +11,13 @@ namespace RazorSharp.Analysis
 	[Flags]
 	public enum InspectorMode
 	{
-		None    = 0,
-		Meta    = 1,
-		Address = 2,
-		Size    = 4,
-		All     = Meta | Address | Size,
+		None     = 0,
+		Meta     = 1,
+		Address  = 2,
+		Size     = 4,
+		Internal = 8,
+		Layout   = 16,
+		All      = Meta | Address | Size | Internal | Layout,
 	}
 
 	public unsafe class Inspector<T>
@@ -21,6 +25,7 @@ namespace RazorSharp.Analysis
 		public MetadataInfo    Metadata  { get; protected set; }
 		public AddressInfo     Addresses { get; protected set; }
 		public SizeInfo        Sizes     { get; protected set; }
+		public InternalInfo    Internal  { get; protected set; }
 		public ObjectLayout<T> Layout    { get; protected set; }
 
 
@@ -32,7 +37,36 @@ namespace RazorSharp.Analysis
 			Metadata  = new MetadataInfo(ref t);
 			Addresses = new AddressInfo(ref t);
 			Sizes     = new SizeInfo();
+			Internal  = new InternalInfo(ref t);
 			Layout    = new ObjectLayout<T>(ref t);
+		}
+
+
+		public class InternalInfo
+		{
+			// Value types have a MethodTable, but not a
+			// MethodTable*.
+			public MethodTable* MethodTable { get; }
+			public EEClass*     EEClass     { get; }
+
+			protected internal InternalInfo(ref T t)
+			{
+				MethodTable = Runtime.Runtime.ReadMethodTable(ref t);
+				EEClass     = MethodTable->EEClass;
+			}
+
+			protected internal virtual ConsoleTable ToTable()
+			{
+				var table = new ConsoleTable("Info", "Value");
+				table.AddRow("Method Table", Hex.ToHex(MethodTable));
+				table.AddRow("EEClass", Hex.ToHex(EEClass));
+				return table;
+			}
+
+			public override string ToString()
+			{
+				return CreateLabelString("Internal:", ToTable());
+			}
 		}
 
 
@@ -42,26 +76,25 @@ namespace RazorSharp.Analysis
 			public bool IsBlittable { get; }
 			public bool IsValueType { get; }
 
-			// Value types have a MethodTable, but not a
-			// MethodTable*.
-			public MethodTable* MethodTable { get; }
-
 			protected internal MetadataInfo(ref T t)
 			{
 				Value       = t;
-				IsBlittable = Unsafe.IsBlittable<T>();
+				IsBlittable = Runtime.Runtime.IsBlittable<T>();
 				IsValueType = typeof(T).IsValueType;
-				MethodTable = Runtime.Runtime.ReadMethodTable(ref t);
 			}
 
 			protected internal virtual ConsoleTable ToTable()
 			{
-				var table = new ConsoleTable("Field", "Value");
+				var table = new ConsoleTable("Info", "Value");
 				table.AddRow("Value", Value);
 				table.AddRow("Blittable", IsBlittable);
 				table.AddRow("Value type", IsValueType);
-				table.AddRow("Method Table", Hex.ToHex(MethodTable));
 				return table;
+			}
+
+			public override string ToString()
+			{
+				return CreateLabelString("Metadata:", ToTable());
 			}
 		}
 
@@ -80,6 +113,11 @@ namespace RazorSharp.Analysis
 				table.AddRow("Address", Hex.ToHex(Address));
 				return table;
 			}
+
+			public override string ToString()
+			{
+				return CreateLabelString("Addresses:", ToTable());
+			}
 		}
 
 		public class SizeInfo
@@ -97,43 +135,52 @@ namespace RazorSharp.Analysis
 				table.AddRow("Size", Size);
 				return table;
 			}
+
+			public override string ToString()
+			{
+				return CreateLabelString("Sizes:", ToTable());
+			}
+		}
+
+		protected internal static string CreateLabelString(string label, ConsoleTable table)
+		{
+			var cols = table.Columns.Count;
+
+			return String.Format("\n{0}\n{1}\n", ANSI.BoldString(label), table.ToMarkDownString());
 		}
 
 		public static void Write(ref T t)
 		{
 			var inspector = new Inspector<T>(ref t);
 			Console.WriteLine(inspector);
-			Console.WriteLine();
-			Console.WriteLine(inspector.Layout);
 		}
+
 
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Property", "Value");
+			var sb = new StringBuilder();
 
-			switch (Mode) {
-				case InspectorMode.None:
-					break;
-				case InspectorMode.Meta:
-					table.AddAllRows(Metadata.ToTable().Rows);
-					break;
-				case InspectorMode.Address:
-					table.AddAllRows(Addresses.ToTable().Rows);
-					break;
-				case InspectorMode.Size:
-					table.AddAllRows(Sizes.ToTable().Rows);
-					break;
-				case InspectorMode.All:
-					table.AddAllRows(Metadata.ToTable().Rows);
-					table.AddAllRows(Addresses.ToTable().Rows);
-					table.AddAllRows(Sizes.ToTable().Rows);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
+			if (Mode.HasFlag(InspectorMode.Internal)) {
+				sb.Append(Internal);
 			}
 
+			if (Mode.HasFlag(InspectorMode.Meta)) {
+				sb.Append(Metadata);
+			}
 
-			return table.ToMarkDownString();
+			if (Mode.HasFlag(InspectorMode.Address)) {
+				sb.Append(Addresses);
+			}
+
+			if (Mode.HasFlag(InspectorMode.Size)) {
+				sb.Append(Sizes);
+			}
+
+			if (Mode.HasFlag(InspectorMode.Layout)) {
+				sb.Append(Layout);
+			}
+
+			return sb.ToString();
 		}
 	}
 

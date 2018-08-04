@@ -88,6 +88,10 @@ namespace RazorSharp.Runtime.CLRTypes
 			get => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
 		}
 
+		public int Size {
+			get => Constants.SizeOfCorElementType(CorType);
+		}
+
 
 		public bool RequiresFullMBValue => Memory.ReadBit(m_dword1, 31);
 
@@ -101,6 +105,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Offset", Offset);
 			table.AddRow("Type", Type);
 			table.AddRow("Type", CorType);
+			table.AddRow("Size", Size);
 
 			table.AddRow("Static", IsStatic);
 			table.AddRow("ThreadLocal", IsThreadLocal);

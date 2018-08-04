@@ -9,7 +9,7 @@ namespace RazorSharp.Runtime.CLRTypes
 	using WORD = UInt16;
 	using unsigned = UInt32;
 
-	//todo: fix
+	//todo: complete
 	/// <summary>
 	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/method.hpp#L1683
 	///
@@ -21,18 +21,24 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(0)] private readonly UInt16 m_wFlags3AndTokenRemainder;
 		[FieldOffset(2)] private readonly byte   m_chunkIndex;
 		[FieldOffset(3)] private readonly byte   m_bFlags2;
+		[FieldOffset(4)] private readonly WORD   m_wSlotNumber;
+		[FieldOffset(6)] private readonly WORD   m_wFlags;
+		[FieldOffset(8)] private readonly void*  m_function;
 
-		// The slot number of this MethodDesc in the vtable array.
-		// Note that we may store other information in the high bits if available --
-		// see enum_packedSlotLayout and mdcRequiresFullSlotNumber for details.
-		[FieldOffset(4)] private readonly WORD m_wSlotNumber;
-		[FieldOffset(6)] private readonly WORD m_wFlags;
+		/// <summary>
+		/// Note: This doesn't actually seem to be in the source code, but it matches
+		/// MethodHandle.GetFunctionPointer
+		/// </summary>
+		public void* Function => m_function;
 
 		private MethodDescFlags2 Flags2 => (MethodDescFlags2) m_bFlags2;
 		private MethodDescFlags3 Flags3 => (MethodDescFlags3) m_wFlags3AndTokenRemainder;
 
 		public override string ToString()
 		{
+			var flags3 = String.Join(", ", Flags3.GetFlags());
+			var flags2 = String.Join(", ", Flags2.GetFlags());
+
 			var table = new ConsoleTable("Field", "Value");
 			table.AddRow(nameof(m_wFlags3AndTokenRemainder), m_wFlags3AndTokenRemainder);
 			table.AddRow(nameof(m_chunkIndex), m_chunkIndex);
@@ -40,9 +46,9 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow(nameof(m_wSlotNumber), m_wSlotNumber);
 			table.AddRow(nameof(m_wFlags), m_wFlags);
 
-			table.AddRow("Flags2", Flags2);
-			table.AddRow("Flags3",Flags3);
 
+			table.AddRow("Flags2", flags2);
+			table.AddRow("Flags3", flags3);
 
 
 			return table.ToMarkDownString();

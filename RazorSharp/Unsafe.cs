@@ -323,42 +323,6 @@ namespace RazorSharp
 			Marshal.WriteIntPtr(AddressOf(ref t), newAddr);
 		}
 
-		/// <summary>
-		/// Determines whether a type is blittable, that is, they don't
-		/// require conversion between managed and unmanaged code.
-		/// </summary>
-		public static bool IsBlittable<T>()
-		{
-			return IsBlittable(typeof(T));
-		}
-
-		private static bool IsBlittable(Type t)
-		{
-			if (t.IsArray) {
-				var elem = t.GetElementType();
-
-				// ReSharper disable once PossibleNullReferenceException
-				return elem.IsValueType && IsBlittable(elem);
-			}
-
-			if (t == typeof(string))
-				return true;
-
-			try {
-				object instance = FormatterServices.GetUninitializedObject(t);
-				GCHandle.Alloc(instance, GCHandleType.Pinned).Free();
-				return true;
-			}
-			catch (MemberAccessException) {
-				// Type is abstract
-				return false;
-			}
-			catch (ArgumentException) {
-				// Type is not blittable
-				return false;
-			}
-		}
-
 		#endregion
 
 

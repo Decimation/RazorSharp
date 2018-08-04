@@ -223,6 +223,15 @@ namespace RazorSharp.Runtime
 		}
 
 
+		/// <summary>
+		/// Determines whether a type is blittable, that is, they don't
+		/// require conversion between managed and unmanaged code.
+		/// </summary>
+		public static bool IsBlittable<T>()
+		{
+			if (typeof(T).IsArray || typeof(T) == typeof(string)) return true;
+			return RazorSharp.Runtime.Runtime.MethodTableOf<T>()->EEClass->IsBlittable;
+		}
 	}
 
 }

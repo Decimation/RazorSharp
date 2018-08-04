@@ -79,31 +79,30 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			/*Dummy d = new Dummy();
-			var ol = new ObjectLayout<Dummy>(ref d);
-			Console.WriteLine(ol);
-			WriteFieldDescs<Dummy>();
-			//TableFieldDescs<Dummy>();*/
+
+			string s = "foo";
+			RefInspector<string>.Write(ref s);
+
+			var ri = new RefInspector<string>(ref s, InspectorMode.Internal);
+
+			Console.WriteLine(*ri.Internal.EEClass);
 
 
-
-			var summary = BenchmarkRunner.Run<UnsafeBenchmarking>();
+			//var summary = BenchmarkRunner.Run<UnsafeBenchmarking>();
 		}
 
-		private static void WriteFieldDescs<T>()
-		{
-			foreach (var v in Runtime.GetFieldDescs<T>()) {
-				Console.WriteLine(v.Value);
-			}
-		}
+
+
+
+
 
 		private static void TableFieldDescs<T>()
 		{
-			var table = new ConsoleTable("Offset", "CorType", "Type");
+			var table = new ConsoleTable("Offset", "CorType", "Type", "Size");
 			var fieldDescs = Runtime.GetFieldDescs<T>();
 			fieldDescs = fieldDescs.OrderBy(x => x.Value.Offset).ToArray();
 			foreach (var v in fieldDescs) {
-				table.AddRow(v.Value.Offset,v.Value.CorType, v.Value.Type);
+				table.AddRow(v.Value.Offset,v.Value.CorType, v.Value.Type, v.Value.Size);
 			}
 
 			Console.WriteLine(table.ToMarkDownString());
