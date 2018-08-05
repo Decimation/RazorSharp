@@ -104,25 +104,15 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <summary>
 		/// For use with Runtime.IsBlittable
 		/// </summary>
-		internal bool IsBlittable {
-			get { return HasLayout && LayoutInfo->IsBlittable; }
-		}
+		internal bool IsBlittable => HasLayout && LayoutInfo->IsBlittable;
 
-		internal int NumInstanceFields {
-			get { return (int) GetPackableField(EEClassFieldId.NumInstanceFields); }
-		}
+		internal int NumInstanceFields => (int) GetPackableField(EEClassFieldId.NumInstanceFields);
 
-		internal int NumStaticFields {
-			get { return (int) GetPackableField(EEClassFieldId.NumStaticFields); }
-		}
+		internal int NumStaticFields => (int) GetPackableField(EEClassFieldId.NumStaticFields);
 
-		internal int NumMethods {
-			get { return (int) GetPackableField(EEClassFieldId.NumMethods); }
-		}
+		internal int NumMethods => (int) GetPackableField(EEClassFieldId.NumMethods);
 
-		internal int NumNonVirtualSlots {
-			get { return (int) GetPackableField(EEClassFieldId.NumNonVirtualSlots); }
-		}
+		internal int NumNonVirtualSlots => (int) GetPackableField(EEClassFieldId.NumNonVirtualSlots);
 
 		private DWORD GetPackableField(EEClassFieldId eField)
 		{
@@ -137,15 +127,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		///
 		/// Only access this via MethodTable
 		/// </summary>
-		private PackedDWORDFields* PackedFields {
-			get { return (PackedDWORDFields*) (Unsafe.AddressOf(ref this) + m_cbFixedEEClassFields); }
-		}
+		private PackedDWORDFields* PackedFields => (PackedDWORDFields*) (Unsafe.AddressOf(ref this) + m_cbFixedEEClassFields);
 
-		private EEClass* ParentClass {
-			get { return m_pMethodTable->Parent->EEClass; }
-		}
-
-
+		private EEClass* ParentClass => m_pMethodTable->Parent->EEClass;
 
 		internal int FieldDescListLength {
 			//There are (m_wNumInstanceFields - GetParentClass()->m_wNumInstanceFields + m_wNumStaticFields) entries

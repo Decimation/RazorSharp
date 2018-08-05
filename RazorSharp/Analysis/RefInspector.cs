@@ -141,8 +141,10 @@ namespace RazorSharp.Analysis
 				Console.WriteLine(ANSI.BoldString("MethodTable:"));
 				Console.WriteLine(*inspector.Internal.MethodTable);
 
-				Console.WriteLine(ANSI.BoldString("EEClass:"));
-				Console.WriteLine(inspector.Internal.EEClass->ToString());
+				if (inspector.Internal.EEClass != null) {
+					Console.WriteLine(ANSI.BoldString("EEClass:"));
+					Console.WriteLine(inspector.Internal.EEClass->ToString());
+				}
 			}
 		}
 	}
