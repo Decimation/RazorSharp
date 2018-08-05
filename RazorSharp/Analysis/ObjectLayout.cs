@@ -20,17 +20,21 @@ namespace RazorSharp.Analysis
 		private readonly ConsoleTable m_table;
 		private readonly TypeLayout   m_layout;
 		private readonly T            m_value;
-		private const    string       Omitted = "-";
+		private const    char         Omitted = '-';
 		public           bool         FieldsOnly { get; set; }
 		public           bool         FullOffset { get; set; }
 
 		public ObjectLayout(ref T t)
 		{
+			if (typeof(T).IsArray) {
+				throw new Exception($"Layout of arrays ({typeof(T).Name}) cannot be calculated");
+			}
+
 			FieldsOnly = true;
 			FullOffset = false;
-
 			var addr = Unsafe.AddressOf(ref t);
 			m_addr = addr;
+
 			if (!typeof(T).IsValueType) {
 				// Point to heap
 				m_addr = *(IntPtr*) addr;
@@ -38,53 +42,88 @@ namespace RazorSharp.Analysis
 
 			m_table  = new ConsoleTable("Offset", "Address", "Size", "Type", "Name", "Value");
 			m_layout = TypeLayout.GetLayout<T>();
-
-			m_value = t;
+			m_value  = t;
 
 			Create();
 		}
 
-		private void Create()
+		private string GetOffsetString(int baseOfs, int rightOfs, int leftOfs)
+		{
+			string ofsStr;
+			if (!FieldsOnly) {
+				ofsStr = FullOffset ? $"{rightOfs}-{leftOfs}" : rightOfs.ToString();
+			}
+			else {
+				ofsStr = FullOffset ? $"{rightOfs - baseOfs}-{leftOfs - baseOfs}" : (rightOfs - baseOfs).ToString();
+			}
+
+			return ofsStr;
+		}
+
+		private void CreateInternalInfo()
 		{
 			const string objHeaderType   = "ObjHeader";
 			const string methodTableType = "MethodTable*";
 			const string objHeaderName   = "(Object header)";
 			const string methodTableName = "(MethodTable ptr)";
+
+			if (!FieldsOnly) {
+				m_table.AddRow(-IntPtr.Size, Hex.ToHex(m_addr - IntPtr.Size), IntPtr.Size, objHeaderType,
+					objHeaderName, Omitted);
+				m_table.AddRow(0, Hex.ToHex(m_addr), IntPtr.Size, methodTableType, methodTableName, Omitted);
+			}
+		}
+
+
+		private void Create()
+		{
 			const string bytePaddingType = "Byte";
 			const string bytePaddingName = "(padding)";
 
 			int baseOfs = 0;
-			if (!typeof(T).IsValueType & !FieldsOnly) {
-				m_table.AddRow(-IntPtr.Size, Hex.ToHex(m_addr - IntPtr.Size), IntPtr.Size, objHeaderType,
-					objHeaderName, Omitted);
-				m_table.AddRow(0, Hex.ToHex(m_addr), IntPtr.Size, methodTableType, methodTableName, Omitted);
+			if (!typeof(T).IsValueType) {
 				baseOfs += IntPtr.Size;
+				CreateInternalInfo();
 			}
+
 
 			foreach (var v in m_layout.Fields) {
 				var rightOfs = baseOfs + v.Offset;
 				var leftOfs  = rightOfs + (v.Size - 1);
 
-				string ofsStr;
-				if (FullOffset)
-					ofsStr = $"{rightOfs}-{leftOfs}";
-				else {
-					ofsStr = rightOfs.ToString();
-				}
+				string ofsStr = GetOffsetString(baseOfs, rightOfs, leftOfs);
 
 				if (v.GetType() != typeof(Padding)) {
 					FieldLayout fl = (FieldLayout) v;
-					m_table.AddRow(ofsStr, Hex.ToHex(m_addr + v.Offset + baseOfs), v.Size, fl.FieldInfo.FieldType.Name,
+					m_table.AddRow(ofsStr, Hex.ToHex(m_addr + v.Offset + baseOfs), v.Size,
+						fl.FieldInfo.FieldType.Name,
 						fl.FieldInfo.Name, fl.FieldInfo.GetValue(m_value));
 				}
 				else {
-					m_table.AddRow(ofsStr, Hex.ToHex(m_addr + v.Offset + baseOfs), v.Size, bytePaddingType, bytePaddingName, 0);
+					m_table.AddRow(ofsStr, Hex.ToHex(m_addr + v.Offset + baseOfs), v.Size, bytePaddingType,
+						bytePaddingName, 0);
 				}
 			}
 
-			// TypeLayout says strings have 2 bytes of padding but that isn't true
 			if (typeof(T) == typeof(string)) {
+				// TypeLayout says strings have 2 bytes of padding but that isn't true
 				m_table.Rows.RemoveAt(m_table.Rows.Count - 1);
+
+				var       str        = m_value as string;
+				const int charOffset = 6;
+
+
+				// ReSharper disable once PossibleNullReferenceException
+				for (int i = 0; i < str.Length - 1; i++) {
+					var rightOfs = baseOfs + charOffset + (i * sizeof(char));
+					var leftOfs  = rightOfs + (sizeof(char) - 1);
+
+					string ofsStr = GetOffsetString(baseOfs, rightOfs, leftOfs);
+
+					var addr = m_addr + charOffset + (i * sizeof(char)) + baseOfs;
+					m_table.AddRow(ofsStr, Hex.ToHex(addr), sizeof(char), typeof(char).Name, Omitted,
+						Memory.Memory.Read<char>(addr));
+				}
 			}
 		}
 

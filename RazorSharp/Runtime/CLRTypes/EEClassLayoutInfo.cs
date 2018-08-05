@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
+
 // ReSharper disable InconsistentNaming
 // ReSharper disable BuiltInTypeReferenceStyle
 

@@ -108,19 +108,19 @@ namespace RazorSharp.Runtime.CLRTypes
 			get { return HasLayout && LayoutInfo->IsBlittable; }
 		}
 
-		public int NumInstanceFields {
+		internal int NumInstanceFields {
 			get { return (int) GetPackableField(EEClassFieldId.NumInstanceFields); }
 		}
 
-		public int NumStaticFields {
+		internal int NumStaticFields {
 			get { return (int) GetPackableField(EEClassFieldId.NumStaticFields); }
 		}
 
-		public int NumMethods {
+		internal int NumMethods {
 			get { return (int) GetPackableField(EEClassFieldId.NumMethods); }
 		}
 
-		public int NumNonVirtualSlots {
+		internal int NumNonVirtualSlots {
 			get { return (int) GetPackableField(EEClassFieldId.NumNonVirtualSlots); }
 		}
 
@@ -134,16 +134,20 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		/// <summary>
 		/// CRITICAL NOTE: This points to incorrect memory when the address of "this" changes
+		///
+		/// Only access this via MethodTable
 		/// </summary>
-		private PackedDWORDFields_11* PackedFields {
-			get { return (PackedDWORDFields_11*) (Unsafe.AddressOf(ref this) + m_cbFixedEEClassFields); }
+		private PackedDWORDFields* PackedFields {
+			get { return (PackedDWORDFields*) (Unsafe.AddressOf(ref this) + m_cbFixedEEClassFields); }
 		}
 
 		private EEClass* ParentClass {
 			get { return m_pMethodTable->Parent->EEClass; }
 		}
 
-		public int FieldDescListLength {
+
+
+		internal int FieldDescListLength {
 			//There are (m_wNumInstanceFields - GetParentClass()->m_wNumInstanceFields + m_wNumStaticFields) entries
 			//get { return (NumInstanceFields - ParentClass->NumInstanceFields + NumStaticFields); }
 
@@ -160,11 +164,14 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		/// <summary>
 		/// CRITICAL NOTE: This points to incorrect memory when the address of "this" changes
+		///
+		/// Only access this via MethodTable
 		/// </summary>
-		public FieldDesc* FieldDescList {
+		internal FieldDesc* FieldDescList {
 
 			get {
 				const int fieldDescListFieldOffset = 24;
+
 				//PTR_HOST_MEMBER_TADDR(EEClass, this, m_pFieldDescList)
 				var cpy    = (IntPtr) m_pFieldDescList;
 				var __this = Unsafe.AddressOf(ref this);
@@ -175,13 +182,15 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		/// <summary>
 		/// CRITICAL NOTE: This points to incorrect memory when the address of "this" changes
+		///
+		/// Only access this via MethodTable
 		/// </summary>
-		public MethodDescChunk* MethodDescChunkList {
+		internal MethodDescChunk* MethodDescChunkList {
 			//todo: verify
 			get {
 				const int chunksFieldOffset = 32;
-				var cpy    = (IntPtr) m_pChunks;
-				var __this = Unsafe.AddressOf(ref this);
+				var       cpy               = (IntPtr) m_pChunks;
+				var       __this            = Unsafe.AddressOf(ref this);
 				__this += chunksFieldOffset;
 				return (MethodDescChunk*) PointerUtils.Add(cpy, __this);
 			}
@@ -195,7 +204,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow(nameof(m_pGuidInfo), Hex.ToHex(m_pGuidInfo));
 			table.AddRow(nameof(m_rpOptionalFields), Hex.ToHex(m_rpOptionalFields));
 			table.AddRow("Method Table", Hex.ToHex(m_pMethodTable));
-			table.AddRow(nameof(m_pFieldDescList), Hex.ToHex(m_pFieldDescList));
+
 			table.AddRow(nameof(m_pChunks), Hex.ToHex(m_pChunks));
 			table.AddRow("Native size", m_cbNativeSize);
 			table.AddRow(nameof(ohDelegate), Hex.ToHex(ohDelegate));
@@ -213,13 +222,13 @@ namespace RazorSharp.Runtime.CLRTypes
 			// this->ToString() must be used to view these
 			// when the pointer is copied, NumInstanceFields and NumStaticFields
 			// read from incorrect memory (not the packed fields like they should)
-			table.AddRow("Instance fields", NumInstanceFields);
+			/*table.AddRow("Instance fields", NumInstanceFields);
 			table.AddRow("Static fields", NumStaticFields);
 			table.AddRow("Methods", NumMethods);
-			table.AddRow("Non virtual slots", NumNonVirtualSlots);
+			table.AddRow("Non virtual slots", NumNonVirtualSlots);*/
 
 
-			//table.RemoveFromRows(0, "0x0");
+			table.RemoveFromRows(0, "0x0");
 			return table.ToMarkDownString();
 		}
 	}

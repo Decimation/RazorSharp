@@ -19,28 +19,22 @@ namespace Test.Testing.Benchmarking
 			_dummy = new Dummy();
 		}
 
-		//[Benchmark]
-		//[Arguments(typeof(Dummy), "DoSomething")]
-		public MethodDesc GetMethodDesc(Type t, string name)
+		[Benchmark]
+		public void MethodTable_HeapObject()
 		{
-			var methodHandle = t.GetMethod(name, BindingFlags.Instance | BindingFlags.Public).MethodHandle;
-			return *(MethodDesc*) methodHandle.Value;
+			var mt = (**Runtime.GetHeapObject(ref _dummy)).MethodTable;
 		}
-
-
 
 		[Benchmark]
-		public void GetFieldDescs()
+		public void MethodTable_ReadMethodTable()
 		{
-			Runtime.GetFieldDescs<Dummy>();
+			var mt = Runtime.ReadMethodTable(ref _dummy);
 		}
 
-		//[Benchmark]
-		//[Arguments(typeof(Dummy), "_integer")]
-		public FieldDesc GetFieldDesc(Type t, string name)
+		[Benchmark]
+		public void MethodTable_MethodTableOf()
 		{
-			var fieldHandle = t.GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).FieldHandle;
-			return *(FieldDesc*) fieldHandle.Value;
+			var mt = Runtime.MethodTableOf<Dummy>();
 		}
 	}
 

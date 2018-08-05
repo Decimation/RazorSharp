@@ -1,20 +1,20 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+
 // ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Runtime.CLRTypes
 {
+
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct ObjHeader
 	{
 
 #if !WIN32
-		[FieldOffset(0)]
-		private readonly UInt32 m_uAlignpad;
+		[FieldOffset(0)] private readonly UInt32 m_uAlignpad;
 #endif
-		[FieldOffset(4)]
-		private UInt32 m_uSyncBlockValue;
+		[FieldOffset(4)] private UInt32 m_uSyncBlockValue;
 
 		public UInt32 Bits => m_uSyncBlockValue;
 

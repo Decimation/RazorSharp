@@ -1,4 +1,7 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using RazorCommon;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
@@ -27,16 +30,14 @@ namespace RazorSharp.Analysis
 
 		public sealed class ReferenceInternalInfo : InternalInfo
 		{
-			public ObjHeader* Header  { get; }
-
+			public ObjHeader* Header { get; }
 
 			internal ReferenceInternalInfo(ref T t) : base(ref t)
 			{
-				Header  = Runtime.ReadObjHeader(ref t);
-
+				Header = Runtime.ReadObjHeader(ref t);
 			}
 
-			protected internal override ConsoleTable ToTable()
+			protected override ConsoleTable ToTable()
 			{
 				var table = base.ToTable();
 
@@ -49,7 +50,7 @@ namespace RazorSharp.Analysis
 		{
 			internal ReferenceMetadataInfo(ref T t) : base(ref t) { }
 
-			protected internal override ConsoleTable ToTable()
+			protected override ConsoleTable ToTable()
 			{
 				var table = base.ToTable();
 				return table;
@@ -69,15 +70,24 @@ namespace RazorSharp.Analysis
 				BaseFieldsSize = Unsafe.BaseFieldsSize<T>();
 			}
 
-			protected internal override ConsoleTable ToTable()
+			protected override ConsoleTable ToTable()
 			{
-				var table = base.ToTable();
+				/*var table = base.ToTable();
 				table.AddRow("Heap size", Heap);
 				table.AddRow("Base instance size", BaseInstance);
 				table.AddRow("Base fields size", BaseFieldsSize);
+				return table;*/
+
+				var table = base.ToTable();
+				table.AttachColumn("Heap size", Heap);
+				table.AttachColumn("Base instance size", BaseInstance);
+				table.AttachColumn("Base fields size", BaseFieldsSize);
+
+
 				return table;
 			}
 		}
+
 
 		public sealed class ReferenceAddressInfo : AddressInfo
 		{
@@ -101,18 +111,19 @@ namespace RazorSharp.Analysis
 				else HeapMisc = IntPtr.Zero;
 			}
 
-			protected internal override ConsoleTable ToTable()
+			protected override ConsoleTable ToTable()
 			{
 				var table = base.ToTable();
-				table.AddRow("Heap", Hex.ToHex(Heap));
-				table.AddRow("Fields", Hex.ToHex(Fields));
+				table.AttachColumn("Heap", Hex.ToHex(Heap));
+				table.AttachColumn("Fields", Hex.ToHex(Fields));
+
 
 				if (typeof(T).IsArray) {
-					table.AddRow("Array data", Hex.ToHex(HeapMisc));
+					table.AttachColumn("Array data", Hex.ToHex(HeapMisc));
 				}
 
 				else if (typeof(T) == typeof(String)) {
-					table.AddRow("String data", Hex.ToHex(HeapMisc));
+					table.AttachColumn("String data", Hex.ToHex(HeapMisc));
 				}
 				else { }
 
@@ -122,10 +133,17 @@ namespace RazorSharp.Analysis
 		}
 
 
-		public new static void Write(ref T t, InspectorMode mode = InspectorMode.All)
+		public new static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.All)
 		{
 			var inspector = new RefInspector<T>(ref t, mode);
 			Console.WriteLine(inspector);
+			if (printStructures) {
+				Console.WriteLine(ANSI.BoldString("MethodTable:"));
+				Console.WriteLine(*inspector.Internal.MethodTable);
+
+				Console.WriteLine(ANSI.BoldString("EEClass:"));
+				Console.WriteLine(inspector.Internal.EEClass->ToString());
+			}
 		}
 	}
 

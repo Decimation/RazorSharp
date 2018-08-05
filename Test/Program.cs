@@ -80,15 +80,11 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			Dummy d      = new Dummy();
-			var   layout = new ObjectLayout<Dummy>(ref d);
-			Console.WriteLine(layout);
+			string @string = "foo";
+			RefInspector<string>.Write(ref @string,true);
 
-			RefInspector<Dummy>.Write(ref d, InspectorMode.Field);
-
-
-
-			//var summary = BenchmarkRunner.Run<UnsafeBenchmarking>();
+			string[] ptrArr = new string[0];
+			RefInspector<string[]>.Write(ref ptrArr, true);
 		}
 
 		private static void SetChar(this string str, int i, char c)
@@ -107,7 +103,7 @@ namespace Test
 					: new ConsoleTable("Index", "Address", "Value");
 
 			for (int i = alloc.Start; i <= alloc.End; i++) {
-				var addr = PointerUtils.Offset<T>(alloc.Address, i);
+				IntPtr addr = PointerUtils.Offset<T>(alloc.Address, i);
 
 				if (refType) {
 					table.AddRow(i, Hex.ToHex(addr), alloc[i], Hex.ToHex(Marshal.ReadIntPtr(addr)));

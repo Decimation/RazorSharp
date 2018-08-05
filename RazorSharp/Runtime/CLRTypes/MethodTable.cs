@@ -106,8 +106,14 @@ namespace RazorSharp.Runtime.CLRTypes
 			get { return UnionType == LowBits.EEClass ? m_pEEClass : null; }
 		}
 
+
+		/// <summary>
+		/// Note: Canon seems to be incorrect for pointer array MethodTables
+		/// </summary>
 		public MethodTable* Canon {
-			get { return UnionType == LowBits.MethodTable ? m_pCanonMT : null; }
+			get {
+				return UnionType == LowBits.MethodTable ? m_pCanonMT: null;
+			}
 		}
 
 		//public FieldDesc* FieldDescList => _eeClassPtr.m_pEEClass->m_pFieldDescList;
@@ -133,27 +139,14 @@ namespace RazorSharp.Runtime.CLRTypes
 			get => HasComponentSize;
 		}
 
+		public int NumInstanceFields  => EEClass->NumInstanceFields;
+		public int NumStaticFields    => EEClass->NumStaticFields;
+		public int NumNonVirtualSlots => EEClass->NumNonVirtualSlots;
+		public int NumMethods         => EEClass->NumMethods;
 
-		// https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.h#L4100
-		/*private DWORD GetFlag(MethodTableFlagsLow flag)
-		{
-			return (DWORD) (IsStringOrArray
-				? (MethodTableFlagsLow.StringArrayValues & flag)
-				: (((MethodTableFlagsLow) Flags) & flag));
-		}
-		private MethodTableFlagsLow[] GetLowFlags()
-		{
-			var ls = new List<MethodTableFlagsLow>();
-
-			foreach (var f in Enums.ToArray<MethodTableFlagsLow>()) {
-				if (GetFlag(f) != 0) {
-					ls.Add(f);
-				}
-			}
-			return ls.ToArray();
-		}*/
-
-
+		public FieldDesc*       FieldDescList       => EEClass->FieldDescList;
+		public int              FieldDescListLength => EEClass->FieldDescListLength;
+		public MethodDescChunk* MethodDescChunkList => EEClass->MethodDescChunkList;
 
 		#endregion
 
@@ -203,11 +196,28 @@ namespace RazorSharp.Runtime.CLRTypes
 		[Flags]
 		private enum LowBits
 		{
-			EEClass     = 0, //  0 - pointer to EEClass. This MethodTable is the canonical method table.
-			Invalid     = 1, //  1 - not used
-			MethodTable = 2, //  2 - pointer to canonical MethodTable.
-			Indirection = 3  //  3 - pointer to indirection cell that points to canonical MethodTable.
-		};                   //      (used only if FEATURE_PREJIT is defined)
+			/// <summary>
+			/// 0 - pointer to EEClass.
+			/// This MethodTable is the canonical method table.
+			/// </summary>
+			EEClass = 0,
+
+			/// <summary>
+			/// 1 - not used
+			/// </summary>
+			Invalid = 1,
+
+			/// <summary>
+			/// 2 - pointer to canonical MethodTable.
+			/// </summary>
+			MethodTable = 2,
+
+			/// <summary>
+			/// 3 - pointer to indirection cell that points to canonical MethodTable.
+			/// (used only if FEATURE_PREJIT is defined)
+			/// </summary>
+			Indirection = 3
+		}
 
 		private const long UnionMask = 3;
 
@@ -233,7 +243,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// If the type is an array type, this is the TypeHandle of
 		/// an individual element
 		///
-		/// (i.e. if the type is string[], this will be equal to typeof(string).TypeHandle)
+		/// (i.e. if the type is string[], this will be equal to typeof(string).TypeHandle.Value)
 		/// </summary>
 
 		//** Status: verified
@@ -286,6 +296,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			var flags  = String.Join(joinStr, TableFlags.GetFlags());
 			var flags2 = String.Join(joinStr, TableFlags2.GetFlags());
+
 			//var lowFlags = String.Join(", ", TableFlagsLow.GetFlags().Distinct());
 
 			var table = new ConsoleTable("Field", "Value");
@@ -293,18 +304,17 @@ namespace RazorSharp.Runtime.CLRTypes
 				table.AddRow("Component size", m_dwFlags.ComponentSize);
 			table.AddRow("Base size", m_BaseSize);
 			table.AddRow("Flags", $"{Flags} ({flags})");
-			table.AddRow("Low flags", $"{LowFlags} ({TableFlagsLow})");
 			table.AddRow("Flags 2", $"{Flags2} ({flags2})");
-
+			table.AddRow("Low flags", $"{LowFlags} ({TableFlagsLow})");
 			table.AddRow("Token", m_wToken);
-			table.AddRow("Number virtuals", m_wNumVirtuals);
-			table.AddRow("Number interfaces", m_wNumInterfaces);
+
 			if (m_pParentMethodTable != null)
 				table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));
-			table.AddRow("Module", Hex.ToHex(m_pLoaderModule));
 
+			table.AddRow("Module", Hex.ToHex(m_pLoaderModule));
 			table.AddRow("m_pWriteableData", Hex.ToHex(m_pWriteableData));
 
+			table.AddRow("Union type", UnionType);
 			switch (UnionType) {
 				case LowBits.EEClass:
 					table.AddRow("EEClass", Hex.ToHex(m_pEEClass));
@@ -326,13 +336,27 @@ namespace RazorSharp.Runtime.CLRTypes
 			if (IsArray)
 				table.AddRow("Element type handle", Hex.ToHex(m_ElementTypeHnd));
 
-			//table.AddRow("MethodDesc Table ptr", Hex.ToHex(m_methodDescTablePtr));
-			/*table.AddRow("m_ElementTypeHnd", (m_slotInfo.m_ElementTypeHnd));
-			table.AddRow("m_pMultipurposeSlot1", (m_slotInfo.m_pMultipurposeSlot1));
-			table.AddRow("m_pPerInstInfo", Hex.ToHex(m_slotInfo.m_pPerInstInfo));
-			table.AddRow("m_pInterfaceMap", Hex.ToHex(m_mapSlot.m_pInterfaceMap));
-			table.AddRow("m_pMultipurposeSlot2", (m_mapSlot.m_pMultipurposeSlot2));*/
-			table.AddRow("Union type", UnionType);
+
+			table.AddRow("Multipurpose slot 2", Hex.ToHex(m_pMultipurposeSlot2));
+
+
+			if (UnionType == LowBits.EEClass) {
+				table.AddRow("FieldDesc List", Hex.ToHex(FieldDescList));
+				table.AddRow("FieldDesc List length", FieldDescListLength);
+				table.AddRow("MethodDescChunk List", Hex.ToHex(MethodDescChunkList));
+
+				table.AddRow("Number instance fields", NumInstanceFields);
+				table.AddRow("Number static fields", NumStaticFields);
+				table.AddRow("Number non virtual slots", NumNonVirtualSlots);
+				table.AddRow("Number methods", NumMethods);
+			}
+
+
+			table.AddRow("Number virtuals", m_wNumVirtuals);
+			table.AddRow("Number interfaces", m_wNumInterfaces);
+
+
+			table.RemoveFromRows(0, "0x0");
 			return table.ToMarkDownString();
 		}
 

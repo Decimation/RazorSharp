@@ -1,10 +1,12 @@
 using System;
 using System.Runtime.InteropServices;
+
 // ReSharper disable InconsistentNaming
 // ReSharper disable BuiltInTypeReferenceStyle
 
 namespace RazorSharp.Runtime.CLRTypes
 {
+
 	using DWORD = UInt32;
 
 	/// <summary>
@@ -13,7 +15,7 @@ namespace RazorSharp.Runtime.CLRTypes
 	/// Used only for EEClass
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	internal unsafe struct PackedDWORDFields_11
+	internal unsafe struct PackedDWORDFields
 	{
 		/// <summary>
 		/// EEClassFieldId::COUNT = 11
@@ -29,7 +31,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		// Get the value of the given field when the structure is in its unpacked state.
 		internal DWORD GetUnpackedField(DWORD dwFieldIndex)
 		{
-			fixed (PackedDWORDFields_11* p = &this)
+			fixed (PackedDWORDFields* p = &this)
 				return p->m_rgUnpackedFields[dwFieldIndex];
 		}
 
@@ -68,7 +70,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 				// Mask out the bits we want and shift them down into the bottom of the result DWORD.
 
-				fixed (PackedDWORDFields_11* p = &this) {
+				fixed (PackedDWORDFields* p = &this) {
 					return (p->m_rgPackedFields[dwStartBlock] & dwValueMask) >> (int) dwValueShift;
 				}
 			}

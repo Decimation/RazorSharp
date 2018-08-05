@@ -258,9 +258,10 @@ namespace RazorSharp
 			//	return(GetBaseSize() - GetClass()->GetBaseSizePadding());
 			//}
 
-			if (typeof(T).IsConstructedGenericType) {
+			if (typeof(T).IsConstructedGenericType || typeof(T).IsArray) {
 				return InvalidValue;
 			}
+
 
 			var mt = Runtime.Runtime.MethodTableOf<T>();
 			return (int) mt->BaseSize - mt->EEClass->BaseSizePadding;

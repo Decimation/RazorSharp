@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+
 // ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Runtime.CLRTypes
@@ -8,9 +9,9 @@ namespace RazorSharp.Runtime.CLRTypes
 	internal struct LayoutEEClass
 	{
 		// Note: This offset should be 72 or sizeof(EEClass)
-		// 		 but I'm keeping it at 0 to minimize size usage
-		[FieldOffset(0)]
-		public EEClassLayoutInfo m_LayoutInfo;
+		// 		 but I'm keeping it at 0 to minimize size usage,
+		//		 so I'll just offset the pointer by 72 bytes
+		[FieldOffset(0)] public EEClassLayoutInfo m_LayoutInfo;
 	}
 
 }

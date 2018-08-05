@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using MethodTimer;
@@ -40,24 +41,6 @@ namespace RazorSharp.Runtime
 			StringHandle = typeof(string).TypeHandle;
 		}
 
-		/// <summary>
-		/// Manually reads a CLR MethodTable (TypeHandle)
-		/// </summary>
-		/// <returns>A pointer to the object type's MethodTable</returns>
-		public static MethodTable* ReadMethodTable<T>(ref T t)
-		{
-			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
-			if (typeof(T).IsValueType) {
-				return MethodTableOf<T>();
-			}
-
-			// We need to get the heap pointer manually because of type constraints
-			var ptr  = (Marshal.ReadIntPtr(Unsafe.AddressOf(ref t)));
-			var @out = *(MethodTable**) ptr;
-			return @out;
-
-			//return (*((HeapObject**) Unsafe.AddressOf(ref t)))->MethodTable;
-		}
 
 		#region HeapObjects
 
@@ -83,6 +66,27 @@ namespace RazorSharp.Runtime
 
 		#endregion
 
+		#region Method Table
+
+		/// <summary>
+		/// Manually reads a CLR MethodTable (TypeHandle)
+		/// </summary>
+		/// <returns>A pointer to the object type's MethodTable</returns>
+		public static MethodTable* ReadMethodTable<T>(ref T t)
+		{
+			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
+			if (typeof(T).IsValueType) {
+				return MethodTableOf<T>();
+			}
+
+			// We need to get the heap pointer manually because of type constraints
+			var ptr  = (Marshal.ReadIntPtr(Unsafe.AddressOf(ref t)));
+			var @out = *(MethodTable**) ptr;
+			return @out;
+
+			//return (*((HeapObject**) Unsafe.AddressOf(ref t)))->MethodTable;
+		}
+
 		public static void WriteMethodTable<TOrig, TNew>(ref TOrig t) where TOrig : class
 		{
 			WriteMethodTable(ref t, MethodTableOf<TNew>());
@@ -100,7 +104,8 @@ namespace RazorSharp.Runtime
 			//Assertion.NegativeAssertType<Array, T>();
 
 			if (typeof(T).IsArray) {
-				return null;
+				//return null;
+				throw new RuntimeException($"{typeof(T).Name} does not have a TypeHandle.");
 			}
 
 			return (MethodTable*) typeof(T).TypeHandle.Value;
@@ -129,34 +134,36 @@ namespace RazorSharp.Runtime
 			WriteMethodTable(ref t, (MethodTable*) typeof(TOrig).TypeHandle.Value);
 		}
 
+		#endregion
+
+
 		#region FieldDesc
 
 		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
 		public static LitePointer<FieldDesc>[] GetFieldDescs<T>()
 		{
-			var ee = MethodTableOf<T>()->EEClass;
-			var len = ee->FieldDescListLength;
+			var mt = MethodTableOf<T>();
 
-			LitePointer<FieldDesc>[] lpFd = new LitePointer<FieldDesc>[len];
+			var len = mt->FieldDescListLength;
+
+			var lpFd = new LitePointer<FieldDesc>[len];
 			for (int i = 0; i < len; i++) {
-				lpFd[i] = &ee->FieldDescList[i];
+				lpFd[i] = &mt->FieldDescList[i];
 			}
 
 			return lpFd;
 		}
 
+		private const BindingFlags DefaultFlags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
 
-		public static FieldDesc* GetFieldDesc(Type t, string name,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+		public static FieldDesc* GetFieldDesc(Type t, string name, BindingFlags flags = DefaultFlags)
 		{
 			var fieldHandle = t.GetField(name, flags).FieldHandle;
 			return (FieldDesc*) fieldHandle.Value;
 		}
 
-
-		public static FieldDesc* GetFieldDesc<T>(string name,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+		public static FieldDesc* GetFieldDesc<T>(string name, BindingFlags flags = DefaultFlags)
 		{
 			return GetFieldDesc(typeof(T), name, flags);
 		}
@@ -165,21 +172,18 @@ namespace RazorSharp.Runtime
 
 		#region MethodDesc
 
-		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
-		public static LitePointer<MethodDesc>[] GetMethodDescs<T>(
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+		public static LitePointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
 		{
 			return GetMethodDescs(typeof(T), flags);
 		}
 
-		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
-		public static LitePointer<MethodDesc>[] GetMethodDescs(Type t,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+		public static LitePointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
 		{
 			var fields = t.GetMethods(flags);
 
 
 			var arr = new LitePointer<MethodDesc>[fields.Length];
+			arr = arr.OrderBy(x => x.Address.ToInt64()).ToArray();
 
 			for (int i = 0; i < arr.Length; i++) {
 				arr[i] = (MethodDesc*) fields[i].MethodHandle.Value;
@@ -188,15 +192,13 @@ namespace RazorSharp.Runtime
 			return arr;
 		}
 
-		public static MethodDesc* GetMethodDesc(Type t, string name,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Public)
+		public static MethodDesc* GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
 		{
 			var methodHandle = t.GetMethod(name, flags).MethodHandle;
 			return (MethodDesc*) methodHandle.Value;
 		}
 
-		public static MethodDesc* GetMethodDesc<T>(string name,
-			BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Public)
+		public static MethodDesc* GetMethodDesc<T>(string name, BindingFlags flags = DefaultFlags)
 		{
 			return GetMethodDesc(typeof(T), name, flags);
 		}
@@ -222,8 +224,9 @@ namespace RazorSharp.Runtime
 		/// </summary>
 		public static bool IsBlittable<T>()
 		{
-			if (typeof(T).IsArray || typeof(T) == typeof(string)) return true;
-			return RazorSharp.Runtime.Runtime.MethodTableOf<T>()->EEClass->IsBlittable;
+			if (typeof(T).IsArray || typeof(T) == typeof(string))
+				return true;
+			return MethodTableOf<T>()->EEClass->IsBlittable;
 		}
 	}
 

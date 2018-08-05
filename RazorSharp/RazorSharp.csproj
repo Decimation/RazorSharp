@@ -144,7 +144,7 @@
     <Compile Include="Runtime\CLRTypes\MethodTable.cs" />
     <Compile Include="Runtime\CLRTypes\Module.cs" />
     <Compile Include="Runtime\CLRTypes\ObjHeader.cs" />
-    <Compile Include="Runtime\CLRTypes\PackedDWORDFields_11.cs" />
+    <Compile Include="Runtime\CLRTypes\PackedDWORDFields.cs" />
     <Compile Include="Runtime\Constants.cs" />
     <Compile Include="Runtime\Runtime.cs" />
     <Compile Include="Unsafe.cs" />
@@ -152,6 +152,7 @@
     <Compile Include="Utilities\Assertion.cs" />
     <Compile Include="Utilities\DataTypes.cs" />
     <Compile Include="Utilities\MethodTimeLogger.cs" />
+    <Compile Include="Utilities\RuntimeException.cs" />
     <Compile Include="Utilities\StandardOut.cs" />
     <Compile Include="Utilities\TypeException.cs" />
     <Compile Include="Virtual\VirtualHeap.cs" />

@@ -4,7 +4,7 @@ using RazorCommon;
 namespace RazorSharp.Runtime.CLRTypes
 {
 
-	//todo: fix
+	//todo: verify
 	/// <summary>
 	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/method.hpp#L1949
 	/// </summary>
