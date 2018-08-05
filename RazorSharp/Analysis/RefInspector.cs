@@ -137,14 +137,9 @@ namespace RazorSharp.Analysis
 		{
 			var inspector = new RefInspector<T>(ref t, mode);
 			Console.WriteLine(inspector);
-			if (printStructures) {
-				Console.WriteLine(ANSI.BoldString("MethodTable:"));
-				Console.WriteLine(*inspector.Internal.MethodTable);
 
-				if (inspector.Internal.EEClass != null) {
-					Console.WriteLine(ANSI.BoldString("EEClass:"));
-					Console.WriteLine(inspector.Internal.EEClass->ToString());
-				}
+			if (printStructures) {
+				PrintStructures(inspector);
 			}
 		}
 	}

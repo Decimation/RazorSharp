@@ -54,6 +54,7 @@ namespace RazorSharp.Analysis
 				ofsStr = FullOffset ? $"{rightOfs}-{leftOfs}" : rightOfs.ToString();
 			}
 			else {
+				// Offset relative to the fields (-IntPtr.Size)
 				ofsStr = FullOffset ? $"{rightOfs - baseOfs}-{leftOfs - baseOfs}" : (rightOfs - baseOfs).ToString();
 			}
 

@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
@@ -30,6 +31,16 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// MethodHandle.GetFunctionPointer
 		/// </summary>
 		public void* Function => m_function;
+
+
+		public TDelegate GetDelegate<TDelegate>() where TDelegate : Delegate
+		{
+			var del = Marshal.GetDelegateForFunctionPointer<TDelegate>((IntPtr) m_function);
+
+			RuntimeHelpers.PrepareDelegate(del);
+
+			return del;
+		}
 
 		private MethodDescFlags2 Flags2 => (MethodDescFlags2) m_bFlags2;
 		private MethodDescFlags3 Flags3 => (MethodDescFlags3) m_wFlags3AndTokenRemainder;

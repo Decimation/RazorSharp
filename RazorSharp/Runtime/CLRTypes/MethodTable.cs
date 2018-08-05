@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.Pointers;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable FieldCanBeMadeReadOnly.Global
@@ -108,12 +109,10 @@ namespace RazorSharp.Runtime.CLRTypes
 
 
 		/// <summary>
-		/// Note: Canon seems to be incorrect for pointer array MethodTables
+		/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L1145
 		/// </summary>
 		public MethodTable* Canon {
-			get {
-				return UnionType == LowBits.MethodTable ? m_pCanonMT: null;
-			}
+			get { return UnionType == LowBits.MethodTable ? (MethodTable*) PointerUtils.Subtract(m_pCanonMT,2) : null; }
 		}
 
 		//public FieldDesc* FieldDescList => _eeClassPtr.m_pEEClass->m_pFieldDescList;
@@ -194,7 +193,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		// The value of lowest two bits describe what the union contains
 		[Flags]
-		private enum LowBits
+		public enum LowBits
 		{
 			/// <summary>
 			/// 0 - pointer to EEClass.
@@ -221,7 +220,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		private const long UnionMask = 3;
 
-		private LowBits UnionType {
+		public LowBits UnionType {
 			get {
 				long l = (long) m_pEEClass;
 				return (LowBits) (l & UnionMask);
@@ -317,13 +316,13 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Union type", UnionType);
 			switch (UnionType) {
 				case LowBits.EEClass:
-					table.AddRow("EEClass", Hex.ToHex(m_pEEClass));
+					table.AddRow("EEClass", Hex.ToHex(EEClass));
 					break;
 				case LowBits.Invalid:
 					table.AddRow("(Invalid)", Hex.ToHex(m_pEEClass));
 					break;
 				case LowBits.MethodTable:
-					table.AddRow("Canon MT", Hex.ToHex(m_pCanonMT));
+					table.AddRow("Canon MT", Hex.ToHex(Canon));
 					break;
 				case LowBits.Indirection:
 					table.AddRow("Indirection cell", Hex.ToHex(m_pCanonMT));
@@ -367,6 +366,8 @@ namespace RazorSharp.Runtime.CLRTypes
     		    return (IsStringOrArray() ? (enum_flag_StringArrayValues & flag) : (m_dwFlags & flag));
     		}
 		 */
+
+		#region Equality
 
 		public static bool operator ==(MethodTable a, MethodTable b)
 		{
@@ -422,6 +423,10 @@ namespace RazorSharp.Runtime.CLRTypes
 			if (ReferenceEquals(null, obj)) return false;
 			return obj is MethodTable && Equals((MethodTable) obj);
 		}
+
+		#endregion
+
+
 	}
 
 }

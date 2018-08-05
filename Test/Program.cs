@@ -80,12 +80,31 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			string @string = "foo";
-			RefInspector<string>.Write(ref @string,true);
+//			string @string = "foo";
+//			RefInspector<string>.Write(ref @string,true);
 
 			string[] ptrArr = new string[0];
-			RefInspector<string[]>.Write(ref ptrArr, true);
+			RefInspector<string[]>.Write(ref ptrArr, true, InspectorMode.Address | InspectorMode.Internal);
+
+
+/*			Dummy d = new Dummy();
+			RefInspector<Dummy>.Write(ref d);
+			var incrMD = Runtime.GetMethodDesc<Dummy>("Increment");
+			Console.WriteLine(Hex.ToHex(incrMD->Function));
+			Console.WriteLine(d.Integer);
+			var del = incrMD->GetDelegate<Increment>();
+			Console.ReadLine();
+
+			del.Invoke();
+			Console.WriteLine(d.Integer);*/
+
+			object[] objArr = new object[0];
+			RefInspector<object[]>.Write(ref objArr, true, InspectorMode.Address | InspectorMode.Internal);
+
+			Console.ReadLine();
 		}
+
+		private delegate void Increment();
 
 		private static void SetChar(this string str, int i, char c)
 		{

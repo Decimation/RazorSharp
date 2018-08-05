@@ -61,6 +61,10 @@ namespace Test.Testing
 			_dateTime = DateTime.Now;
 		}
 
+		public void Increment()
+		{
+			_int++;
+		}
 
 		public void DoSomething() { }
 

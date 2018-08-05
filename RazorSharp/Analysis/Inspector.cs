@@ -87,26 +87,39 @@ namespace RazorSharp.Analysis
 			}
 		}
 
+		private const string EEClassStr     = "EEClass";
+		private const string MethodTableStr = "Method Table";
+		private const string CanonMTStr     = "Canon MT";
+
 		public class InternalInfo
 		{
 			// Value types have a MethodTable, but not a
 			// MethodTable*.
 			public MethodTable* MethodTable { get; }
 			public EEClass*     EEClass     { get; }
+			public MethodTable* Canon       { get; }
+
 
 			protected internal InternalInfo(ref T t)
 			{
 				MethodTable = Runtime.Runtime.ReadMethodTable(ref t);
 				EEClass     = MethodTable->EEClass;
+				Canon       = MethodTable->Canon;
 			}
 
 			protected virtual ConsoleTable ToTable()
 			{
 				var table = new ConsoleTable("Info", "Value");
-				table.AddRow("Method Table", Hex.ToHex(MethodTable));
-				table.AddRow("EEClass", Hex.ToHex(EEClass));
+				table.AddRow(MethodTableStr, Hex.ToHex(MethodTable));
 
-				table.RemoveFromRows("0x0");
+
+				if (MethodTable->UnionType == Runtime.CLRTypes.MethodTable.LowBits.EEClass) {
+					table.AddRow(EEClassStr, Hex.ToHex(EEClass));
+				}
+				else if (MethodTable->UnionType == Runtime.CLRTypes.MethodTable.LowBits.MethodTable)
+					table.AddRow(CanonMTStr, Hex.ToHex(Canon));
+
+
 				return table;
 			}
 
@@ -207,8 +220,23 @@ namespace RazorSharp.Analysis
 			Console.WriteLine(inspector);
 
 			if (printStructures) {
-				Console.WriteLine(ANSI.BoldString("MethodTable:"));
-				Console.WriteLine(*inspector.Internal.MethodTable);
+				PrintStructures(inspector);
+			}
+		}
+
+		protected static void PrintStructures(Inspector<T> inspector)
+		{
+			Console.WriteLine(ANSI.BoldString(MethodTableStr + ':'));
+			Console.WriteLine(*inspector.Internal.MethodTable);
+
+			if (inspector.Internal.MethodTable->UnionType == (MethodTable.LowBits.EEClass)) {
+				Console.WriteLine(ANSI.BoldString(EEClassStr + ':'));
+				Console.WriteLine(inspector.Internal.EEClass->ToString());
+			}
+
+			if (inspector.Internal.MethodTable->UnionType == (MethodTable.LowBits.MethodTable)) {
+				Console.WriteLine(ANSI.BoldString(CanonMTStr + ':'));
+				Console.WriteLine(inspector.Internal.MethodTable->Canon->ToString());
 			}
 		}
 
