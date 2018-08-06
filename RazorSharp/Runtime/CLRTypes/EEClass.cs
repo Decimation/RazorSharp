@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable BuiltInTypeReferenceStyle
@@ -93,7 +94,8 @@ namespace RazorSharp.Runtime.CLRTypes
 		private EEClassLayoutInfo* LayoutInfo {
 			get {
 				//return &((LayoutEEClass *) this)->m_LayoutInfo;
-				if (!HasLayout) return null;
+				if (!HasLayout)
+					throw new RuntimeException("EEClass does not have LayoutInfo");
 
 				var thisptr = Unsafe.AddressOf(ref this);
 				thisptr += sizeof(EEClass);
@@ -188,8 +190,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow(nameof(m_pGuidInfo), Hex.ToHex(m_pGuidInfo));
 			table.AddRow(nameof(m_rpOptionalFields), Hex.ToHex(m_rpOptionalFields));
 			table.AddRow("Method Table", Hex.ToHex(m_pMethodTable));
-
-			table.AddRow(nameof(m_pChunks), Hex.ToHex(m_pChunks));
+			//table.AddRow(nameof(m_pChunks), Hex.ToHex(m_pChunks));
 			table.AddRow("Native size", m_cbNativeSize);
 			table.AddRow(nameof(ohDelegate), Hex.ToHex(ohDelegate));
 			table.AddRow(nameof(m_ComInterfaceType), m_ComInterfaceType);
@@ -200,6 +201,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Fixed EEClass fields", m_cbFixedEEClassFields);
 			table.AddRow("Base size padding", m_cbBaseSizePadding);
 			table.AddRow("VMFlags", String.Join(", ", VMFlags.GetFlags()));
+			table.AddRow("Has layout", HasLayout);
 
 
 			// !NOTE NOTE NOTE!

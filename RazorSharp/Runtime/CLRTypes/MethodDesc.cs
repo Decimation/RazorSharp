@@ -24,11 +24,15 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(3)] private readonly byte   m_bFlags2;
 		[FieldOffset(4)] private readonly WORD   m_wSlotNumber;
 		[FieldOffset(6)] private readonly WORD   m_wFlags;
+		/// <summary>
+		/// Note: This doesn't actually seem to be in the source code, but it matches
+		/// MethodHandle.GetFunctionPointer for non-virtual functions
+		/// todo
+		/// </summary>
 		[FieldOffset(8)] private readonly void*  m_function;
 
 		/// <summary>
-		/// Note: This doesn't actually seem to be in the source code, but it matches
-		/// MethodHandle.GetFunctionPointer
+		/// Function pointer. Note: If the function is virtual, this is an invalid pointer.
 		/// </summary>
 		public void* Function => m_function;
 
@@ -41,6 +45,27 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			return del;
 		}
+
+		/// <summary>
+		/// Invokes a non-virtual method that uses the "this" pointer. That is, the method uses instance fields.
+		/// </summary>
+		/// <param name="instance">Instance to invoke the method upon</param>
+		/// <param name="args">Parameters for the method, if any</param>
+		public void Invoke<TInstance, TDelegate>(ref TInstance instance, params object[] args) where TDelegate : Delegate
+		{
+			TDelegate d = GetDelegate<TDelegate>();
+
+			var __this = Unsafe.AddressOf(ref instance);
+			if (!typeof(TInstance).IsValueType) {
+				__this = Marshal.ReadIntPtr(__this);
+			}
+
+			if (args.Length == 0)
+				d.DynamicInvoke(__this);
+			else
+				d.DynamicInvoke(__this, args);
+		}
+
 
 		private MethodDescFlags2 Flags2 => (MethodDescFlags2) m_bFlags2;
 		private MethodDescFlags3 Flags3 => (MethodDescFlags3) m_wFlags3AndTokenRemainder;
@@ -60,6 +85,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			table.AddRow("Flags2", flags2);
 			table.AddRow("Flags3", flags3);
+			table.AddRow("Function", Hex.ToHex(Function));
 
 
 			return table.ToMarkDownString();

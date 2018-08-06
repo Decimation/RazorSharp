@@ -41,7 +41,7 @@ namespace RazorSharp.Analysis
 			{
 				var table = base.ToTable();
 
-				table.AddRow("Object Header", Hex.ToHex(Header));
+				table.AttachColumn("Object Header", Hex.ToHex(Header));
 				return table;
 			}
 		}
@@ -122,10 +122,9 @@ namespace RazorSharp.Analysis
 					table.AttachColumn("Array data", Hex.ToHex(HeapMisc));
 				}
 
-				else if (typeof(T) == typeof(String)) {
+				else if (typeof(T) == typeof(string)) {
 					table.AttachColumn("String data", Hex.ToHex(HeapMisc));
 				}
-				else { }
 
 
 				return table;
@@ -136,11 +135,7 @@ namespace RazorSharp.Analysis
 		public new static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.All)
 		{
 			var inspector = new RefInspector<T>(ref t, mode);
-			Console.WriteLine(inspector);
-
-			if (printStructures) {
-				PrintStructures(inspector);
-			}
+			WriteInspector(inspector, printStructures);
 		}
 	}
 

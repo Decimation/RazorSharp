@@ -66,6 +66,11 @@ namespace Test.Testing
 			_int++;
 		}
 
+		public void echo()
+		{
+			Console.WriteLine("echo");
+		}
+
 		public void DoSomething() { }
 
 		public override string ToString()

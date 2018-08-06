@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable FieldCanBeMadeReadOnly.Global
@@ -104,7 +106,16 @@ namespace RazorSharp.Runtime.CLRTypes
 		public Module* Module => m_pLoaderModule;
 
 		public EEClass* EEClass {
-			get { return UnionType == LowBits.EEClass ? m_pEEClass : null; }
+			get {
+				switch (UnionType) {
+					case LowBits.EEClass:
+						return m_pEEClass;
+					case LowBits.MethodTable:
+						return Canon->EEClass;
+					default:
+						throw new Exception("EEClass could not be accessed");
+				}
+			}
 		}
 
 
@@ -112,7 +123,27 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L1145
 		/// </summary>
 		public MethodTable* Canon {
-			get { return UnionType == LowBits.MethodTable ? (MethodTable*) PointerUtils.Subtract(m_pCanonMT,2) : null; }
+			get {
+				switch (UnionType) {
+					case LowBits.MethodTable:
+						return (MethodTable*) PointerUtils.Subtract(m_pCanonMT, 2);
+					case LowBits.EEClass:
+					{
+						fixed (MethodTable* mt = &this)
+							return mt;
+					}
+					default:
+						throw new RuntimeException("Canon MT could not be accessed");
+				}
+			}
+		}
+
+		public MethodTable* ElementTypeHandle {
+			get {
+				if (IsArray)
+					return (MethodTable*) m_ElementTypeHnd;
+				throw new RuntimeException("Element type handles cannot be accessed when type is not an array");
+			}
 		}
 
 		//public FieldDesc* FieldDescList => _eeClassPtr.m_pEEClass->m_pFieldDescList;
@@ -193,7 +224,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		// The value of lowest two bits describe what the union contains
 		[Flags]
-		public enum LowBits
+		private enum LowBits
 		{
 			/// <summary>
 			/// 0 - pointer to EEClass.
@@ -220,7 +251,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		private const long UnionMask = 3;
 
-		public LowBits UnionType {
+		private LowBits UnionType {
 			get {
 				long l = (long) m_pEEClass;
 				return (LowBits) (l & UnionMask);
@@ -311,48 +342,34 @@ namespace RazorSharp.Runtime.CLRTypes
 				table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));
 
 			table.AddRow("Module", Hex.ToHex(m_pLoaderModule));
-			table.AddRow("m_pWriteableData", Hex.ToHex(m_pWriteableData));
+
+			//table.AddRow("m_pWriteableData", Hex.ToHex(m_pWriteableData));
 
 			table.AddRow("Union type", UnionType);
-			switch (UnionType) {
-				case LowBits.EEClass:
-					table.AddRow("EEClass", Hex.ToHex(EEClass));
-					break;
-				case LowBits.Invalid:
-					table.AddRow("(Invalid)", Hex.ToHex(m_pEEClass));
-					break;
-				case LowBits.MethodTable:
-					table.AddRow("Canon MT", Hex.ToHex(Canon));
-					break;
-				case LowBits.Indirection:
-					table.AddRow("Indirection cell", Hex.ToHex(m_pCanonMT));
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-
+			table.AddRow("EEClass", Hex.ToHex(EEClass));
+			table.AddRow("Canon MT", Hex.ToHex(Canon));
 
 			if (IsArray)
 				table.AddRow("Element type handle", Hex.ToHex(m_ElementTypeHnd));
 
 
-			table.AddRow("Multipurpose slot 2", Hex.ToHex(m_pMultipurposeSlot2));
+			//table.AddRow("Multipurpose slot 2", Hex.ToHex(m_pMultipurposeSlot2));
 
 
-			if (UnionType == LowBits.EEClass) {
-				table.AddRow("FieldDesc List", Hex.ToHex(FieldDescList));
-				table.AddRow("FieldDesc List length", FieldDescListLength);
-				table.AddRow("MethodDescChunk List", Hex.ToHex(MethodDescChunkList));
+			table.AddRow("FieldDesc List", Hex.ToHex(FieldDescList));
+			table.AddRow("FieldDesc List length", FieldDescListLength);
+			table.AddRow("MethodDescChunk List", Hex.ToHex(MethodDescChunkList));
 
-				table.AddRow("Number instance fields", NumInstanceFields);
-				table.AddRow("Number static fields", NumStaticFields);
-				table.AddRow("Number non virtual slots", NumNonVirtualSlots);
-				table.AddRow("Number methods", NumMethods);
-			}
+			table.AddRow("Number instance fields", NumInstanceFields);
+			table.AddRow("Number static fields", NumStaticFields);
+			table.AddRow("Number non virtual slots", NumNonVirtualSlots);
+			table.AddRow("Number methods", NumMethods);
 
 
 			table.AddRow("Number virtuals", m_wNumVirtuals);
 			table.AddRow("Number interfaces", m_wNumInterfaces);
+
+			table.AddRow("Blittable", EEClass->IsBlittable ? StringUtils.Check : StringUtils.BallotX);
 
 
 			table.RemoveFromRows(0, "0x0");

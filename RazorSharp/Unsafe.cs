@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -61,13 +62,27 @@ namespace RazorSharp
 	{
 		private const int InvalidValue = -1;
 
+		public static int OffsetOf<TType>(string fieldName)
+		{
+			return Runtime.Runtime.GetFieldDesc<TType>(fieldName)->Offset;
+		}
+
 		public static int OffsetOf<TType, TMember>(ref TType type, TMember val)
 		{
 			int memberSize = SizeOf<TMember>();
 
 			// Find possible matching FieldDesc types
-			var fieldDescs = Runtime.Runtime.GetFieldDescs<TType>().Select(x => x.Value)
-				.Where(x => x.CorType == Constants.TypeToCorType<TMember>()).ToArray();
+			//var fieldDescs = Runtime.Runtime.GetFieldDescs<TType>().Select(x => x.Value)
+			//	.Where(x => x.CorType == Constants.TypeToCorType<TMember>()).ToArray();
+
+			// Not using LINQ is faster
+			var fieldDescsPtrs = Runtime.Runtime.GetFieldDescs<TType>();
+			var fieldDescs = new List<FieldDesc>();
+			foreach (var p in fieldDescsPtrs) {
+				if (p.Value.CorType == Constants.TypeToCorType<TMember>()) {
+					fieldDescs.Add(p.Value);
+				}
+			}
 
 
 			LitePointer<TMember> rawMemory = AddressOf(ref type);

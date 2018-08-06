@@ -21,6 +21,11 @@ namespace Test.Testing.Benchmarking
 			Unsafe.OffsetOf(ref _dummy, _dummy.Decimal);
 		}
 
+		[Benchmark]
+		public void OffsetOfByName()
+		{
+			Unsafe.OffsetOf<Dummy>("_decimal");
+		}
 
 
 

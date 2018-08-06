@@ -80,31 +80,30 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-//			string @string = "foo";
-//			RefInspector<string>.Write(ref @string,true);
-
-			string[] ptrArr = new string[0];
-			RefInspector<string[]>.Write(ref ptrArr, true, InspectorMode.Address | InspectorMode.Internal);
-
-
-/*			Dummy d = new Dummy();
-			RefInspector<Dummy>.Write(ref d);
-			var incrMD = Runtime.GetMethodDesc<Dummy>("Increment");
-			Console.WriteLine(Hex.ToHex(incrMD->Function));
-			Console.WriteLine(d.Integer);
-			var del = incrMD->GetDelegate<Increment>();
-			Console.ReadLine();
-
-			del.Invoke();
-			Console.WriteLine(d.Integer);*/
-
-			object[] objArr = new object[0];
-			RefInspector<object[]>.Write(ref objArr, true, InspectorMode.Address | InspectorMode.Internal);
-
-			Console.ReadLine();
+			List<int> ls = new List<int>();
+			Info(ref ls);
 		}
 
-		private delegate void Increment();
+		private static void Info<T>(ref T t) where T : class
+		{
+			RefInspector<T>.Write(ref t, false, InspectorMode.All & ~InspectorMode.MethodDescs);
+		}
+
+		private static void TableMethods()
+		{
+			var table = new ConsoleTable("Function", "MethodDesc", "Name", "Virtual");
+			foreach (var v in typeof(Dummy).GetMethods(BindingFlags.Instance | BindingFlags.Public |
+			                                           BindingFlags.NonPublic)) {
+				table.AddRow(Hex.ToHex(v.MethodHandle.GetFunctionPointer()), Hex.ToHex(v.MethodHandle.Value),
+					v.Name, v.IsVirtual ? StringUtils.Check : StringUtils.BallotX);
+			}
+
+			Console.WriteLine(table.ToMarkDownString());
+		}
+
+		private delegate void Increment(void* __this);
+
+		private delegate void echo();
 
 		private static void SetChar(this string str, int i, char c)
 		{
@@ -112,29 +111,6 @@ namespace Test
 			lpChar[i] = c;
 		}
 
-		private static void ManualTable<T>(AllocPointer<T> alloc)
-		{
-			bool refType = !typeof(T).IsValueType;
-
-			ConsoleTable table =
-				refType
-					? new ConsoleTable("Index", "Address", "Value", "Heap pointer")
-					: new ConsoleTable("Index", "Address", "Value");
-
-			for (int i = alloc.Start; i <= alloc.End; i++) {
-				IntPtr addr = PointerUtils.Offset<T>(alloc.Address, i);
-
-				if (refType) {
-					table.AddRow(i, Hex.ToHex(addr), alloc[i], Hex.ToHex(Marshal.ReadIntPtr(addr)));
-				}
-				else {
-					table.AddRow(i, Hex.ToHex(addr), alloc[i]);
-				}
-			}
-
-
-			Console.WriteLine(table.ToMarkDownString());
-		}
 
 		private static void RandomInit(AllocPointer<string> ptr)
 		{

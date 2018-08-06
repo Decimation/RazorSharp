@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using ObjectLayoutInspector;
 using RazorCommon;
 using RazorSharp.Pointers;
@@ -21,41 +22,67 @@ namespace RazorSharp.Analysis
 		private readonly TypeLayout   m_layout;
 		private readonly T            m_value;
 		private const    char         Omitted = '-';
-		public           bool         FieldsOnly { get; set; }
-		public           bool         FullOffset { get; set; }
+		private readonly bool         m_fieldsOnly;
 
-		public ObjectLayout(ref T t)
+		/// <summary>
+		/// Whether to include the full byte range of offsets (not included for MethodTable* or Object Header)
+		/// </summary>
+		private readonly bool m_fullOffset;
+
+		public ObjectLayout(ref T t, bool fieldsOnly = true, bool fullOffset = false)
 		{
-			if (typeof(T).IsArray) {
-				throw new Exception($"Layout of arrays ({typeof(T).Name}) cannot be calculated");
-			}
-
-			FieldsOnly = true;
-			FullOffset = false;
+			m_fieldsOnly = fieldsOnly;
+			m_fullOffset = fullOffset;
+			m_value      = t;
 			var addr = Unsafe.AddressOf(ref t);
-			m_addr = addr;
+			m_addr  = addr;
+			m_table = new ConsoleTable("Offset", "Address", "Size", "Type", "Name", "Value");
 
 			if (!typeof(T).IsValueType) {
 				// Point to heap
 				m_addr = *(IntPtr*) addr;
 			}
 
-			m_table  = new ConsoleTable("Offset", "Address", "Size", "Type", "Name", "Value");
-			m_layout = TypeLayout.GetLayout<T>();
-			m_value  = t;
+			if (typeof(T).IsArray) {
+				m_addr += Runtime.Runtime.OffsetToArrayData;
+				ArrayCreate();
+			}
+			else {
+				m_layout = TypeLayout.GetLayout<T>();
+				Create();
+			}
+		}
 
-			Create();
+		private void ArrayCreate()
+		{
+			CreateInternalInfo();
+			LitePointer<T> lpArray  = m_addr;
+			int            len      = (m_value as Array).Length;
+			int            baseOfs  = IntPtr.Size;
+			var            elemName = typeof(T).GetElementType().Name;
+
+			for (int i = 0; i < len; i++) {
+				var offset   = i / lpArray.ElementSize;
+				var rightOfs = baseOfs + offset;
+				var leftOfs  = rightOfs + (lpArray.ElementSize - 1);
+
+				string ofsStr = GetOffsetString(baseOfs, rightOfs, leftOfs);
+
+
+				m_table.AddRow(ofsStr, Hex.ToHex(lpArray.Address), lpArray.ElementSize, elemName,
+					String.Format("Index {0}", i), lpArray[i]);
+			}
 		}
 
 		private string GetOffsetString(int baseOfs, int rightOfs, int leftOfs)
 		{
 			string ofsStr;
-			if (!FieldsOnly) {
-				ofsStr = FullOffset ? $"{rightOfs}-{leftOfs}" : rightOfs.ToString();
+			if (!m_fieldsOnly) {
+				ofsStr = m_fullOffset ? $"{rightOfs}-{leftOfs}" : rightOfs.ToString();
 			}
 			else {
 				// Offset relative to the fields (-IntPtr.Size)
-				ofsStr = FullOffset ? $"{rightOfs - baseOfs}-{leftOfs - baseOfs}" : (rightOfs - baseOfs).ToString();
+				ofsStr = m_fullOffset ? $"{rightOfs - baseOfs}-{leftOfs - baseOfs}" : (rightOfs - baseOfs).ToString();
 			}
 
 			return ofsStr;
@@ -68,7 +95,7 @@ namespace RazorSharp.Analysis
 			const string objHeaderName   = "(Object header)";
 			const string methodTableName = "(MethodTable ptr)";
 
-			if (!FieldsOnly) {
+			if (!m_fieldsOnly) {
 				m_table.AddRow(-IntPtr.Size, Hex.ToHex(m_addr - IntPtr.Size), IntPtr.Size, objHeaderType,
 					objHeaderName, Omitted);
 				m_table.AddRow(0, Hex.ToHex(m_addr), IntPtr.Size, methodTableType, methodTableName, Omitted);

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using System.Text;
 using RazorCommon;
+using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime;
@@ -16,14 +17,15 @@ namespace RazorSharp.Analysis
 	[Flags]
 	public enum InspectorMode
 	{
-		None       = 0,
-		Meta       = 1,
-		Address    = 2,
-		Size       = 4,
-		Internal   = 8,
-		FieldDescs = 16,
-		Layout     = 32,
-		All        = Meta | Address | Size | Internal | Layout | FieldDescs,
+		None        = 0,
+		Meta        = 1,
+		Address     = 2,
+		Size        = 4,
+		Internal    = 8,
+		FieldDescs  = 16,
+		MethodDescs = 32,
+		Layout      = 64,
+		All         = Meta | Address | Size | Internal | Layout | FieldDescs | MethodDescs,
 	}
 
 	public unsafe class Inspector<T>
@@ -33,10 +35,11 @@ namespace RazorSharp.Analysis
 		public SizeInfo        Sizes     { get; protected set; }
 		public InternalInfo    Internal  { get; protected set; }
 		public FieldInfo       Fields    { get; protected set; }
+		public MethodInfo      Methods   { get; protected set; }
 		public ObjectLayout<T> Layout    { get; protected set; }
 
-
-		protected readonly InspectorMode Mode;
+		protected readonly        InspectorMode Mode;
+		protected static readonly string        Separator = new string('-', Console.BufferWidth);
 
 		public Inspector(ref T t, InspectorMode mode = InspectorMode.All)
 		{
@@ -46,9 +49,34 @@ namespace RazorSharp.Analysis
 			Sizes     = new SizeInfo();
 			Internal  = new InternalInfo(ref t);
 			Fields    = new FieldInfo();
+			Methods   = new MethodInfo();
+			Layout    = new ObjectLayout<T>(ref t,false);
+		}
 
-			if (!typeof(T).IsArray)
-				Layout = new ObjectLayout<T>(ref t);
+		public sealed class MethodInfo
+		{
+			public LitePointer<MethodDesc>[] MethodDescs { get; }
+
+			internal MethodInfo()
+			{
+				MethodDescs = Runtime.Runtime.GetMethodDescs<T>();
+				MethodDescs = MethodDescs.OrderBy(x => (long) x.Value.Function).ToArray();
+			}
+
+			private ConsoleTable ToTable()
+			{
+				var table = new ConsoleTable("Function", "MethodDesc");
+				foreach (var v in MethodDescs) {
+					table.AddRow(Hex.ToHex(v.Value.Function), Hex.ToHex(v.Address));
+				}
+
+				return table;
+			}
+
+			public override string ToString()
+			{
+				return CreateLabelString("MethodDescs:", ToTable());
+			}
 		}
 
 		public sealed class FieldInfo
@@ -68,7 +96,7 @@ namespace RazorSharp.Analysis
 
 			private ConsoleTable ToTable()
 			{
-				var table = new ConsoleTable("Offset", "Address", "CorType", "Static", "Size");
+				var table = new ConsoleTable("Field Offset", "FD Address", "CorType", "Static", "Size");
 
 				if (FieldDescs != null) {
 					foreach (var v in FieldDescs) {
@@ -109,15 +137,10 @@ namespace RazorSharp.Analysis
 
 			protected virtual ConsoleTable ToTable()
 			{
-				var table = new ConsoleTable("Info", "Value");
-				table.AddRow(MethodTableStr, Hex.ToHex(MethodTable));
-
-
-				if (MethodTable->UnionType == Runtime.CLRTypes.MethodTable.LowBits.EEClass) {
-					table.AddRow(EEClassStr, Hex.ToHex(EEClass));
-				}
-				else if (MethodTable->UnionType == Runtime.CLRTypes.MethodTable.LowBits.MethodTable)
-					table.AddRow(CanonMTStr, Hex.ToHex(Canon));
+				var table = new ConsoleTable(String.Empty, MethodTableStr);
+				table.AddRow("Address", Hex.ToHex(MethodTable));
+				table.AttachColumn(EEClassStr, Hex.ToHex(EEClass));
+				table.AttachColumn(CanonMTStr, Hex.ToHex(Canon));
 
 
 				return table;
@@ -147,8 +170,9 @@ namespace RazorSharp.Analysis
 			protected virtual ConsoleTable ToTable()
 			{
 				var table = new ConsoleTable("Info", "Value");
-				table.AddRow("Value", typeof(T).IsArray ? Collections.ListToString((IList) Value) : Value.ToString());
-				table.AddRow("Blittable", IsBlittable ? StringUtils.Check : StringUtils.BallotX);
+				table.AddRow("Value", typeof(T).IsIListType() ? Collections.ListToString((IList) Value) : Value.ToString());
+
+				//table.AddRow("Blittable", IsBlittable ? StringUtils.Check : StringUtils.BallotX);
 				table.AddRow("Value type", IsValueType ? StringUtils.Check : StringUtils.BallotX);
 				return table;
 			}
@@ -171,7 +195,7 @@ namespace RazorSharp.Analysis
 			protected virtual ConsoleTable ToTable()
 			{
 				var table = new ConsoleTable(String.Empty, "Address");
-				table.AddRow("Address type", Hex.ToHex(Address));
+				table.AddRow("Address", Hex.ToHex(Address));
 				return table;
 			}
 
@@ -217,34 +241,38 @@ namespace RazorSharp.Analysis
 		public static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.All)
 		{
 			var inspector = new Inspector<T>(ref t, mode);
+			WriteInspector(inspector, printStructures);
+		}
+
+		protected static void WriteInspector(Inspector<T> inspector, bool printStructures)
+		{
+			Console.WriteLine(Separator);
+			Console.WriteLine("{0}Inspection of type {1}", new string(' ', Separator.Length / 3), typeof(T).Name);
 			Console.WriteLine(inspector);
 
 			if (printStructures) {
 				PrintStructures(inspector);
 			}
+
+			Console.WriteLine(Separator);
 		}
 
-		protected static void PrintStructures(Inspector<T> inspector)
+		private static void PrintStructures(Inspector<T> inspector)
 		{
 			Console.WriteLine(ANSI.BoldString(MethodTableStr + ':'));
 			Console.WriteLine(*inspector.Internal.MethodTable);
 
-			if (inspector.Internal.MethodTable->UnionType == (MethodTable.LowBits.EEClass)) {
-				Console.WriteLine(ANSI.BoldString(EEClassStr + ':'));
-				Console.WriteLine(inspector.Internal.EEClass->ToString());
-			}
+			Console.WriteLine(ANSI.BoldString(EEClassStr + ':'));
+			Console.WriteLine(inspector.Internal.EEClass->ToString());
 
-			if (inspector.Internal.MethodTable->UnionType == (MethodTable.LowBits.MethodTable)) {
-				Console.WriteLine(ANSI.BoldString(CanonMTStr + ':'));
-				Console.WriteLine(inspector.Internal.MethodTable->Canon->ToString());
-			}
+			Console.WriteLine(ANSI.BoldString(CanonMTStr + ':'));
+			Console.WriteLine(inspector.Internal.MethodTable->Canon->ToString());
 		}
 
 
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
-
 
 			if (Mode.HasFlag(InspectorMode.Meta)) {
 				sb.Append(Metadata);
@@ -264,6 +292,10 @@ namespace RazorSharp.Analysis
 
 			if (Mode.HasFlag(InspectorMode.FieldDescs)) {
 				sb.Append(Fields);
+			}
+
+			if (Mode.HasFlag(InspectorMode.MethodDescs)) {
+				sb.Append(Methods);
 			}
 
 			if (Mode.HasFlag(InspectorMode.Layout)) {
