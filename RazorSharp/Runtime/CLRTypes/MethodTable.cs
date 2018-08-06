@@ -21,23 +21,6 @@ namespace RazorSharp.Runtime.CLRTypes
 	using WORD = UInt16;
 	using unsigned = UInt32;
 
-	// Union
-	[StructLayout(LayoutKind.Explicit)]
-	internal unsafe struct MapSlot
-	{
-		[FieldOffset(0)] internal void* m_pInterfaceMap;
-		[FieldOffset(0)] internal ulong m_pMultipurposeSlot2;
-	}
-
-	// Union
-	[StructLayout(LayoutKind.Explicit)]
-	internal unsafe struct InstSlot
-	{
-		[FieldOffset(0)] internal void* m_pPerInstInfo;
-		[FieldOffset(0)] internal ulong m_ElementTypeHnd;
-		[FieldOffset(0)] internal ulong m_pMultipurposeSlot1;
-	}
-
 
 	//https://github.com/dotnet/coreclr/blob/db55a1decc1d02538e61eac7db80b7daa351d5b6/src/gc/env/gcenv.object.h
 

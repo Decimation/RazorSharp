@@ -90,11 +90,37 @@ namespace RazorSharp.Pointers
 			return (long) m_value;
 		}
 
+		/// <summary>
+		/// Add the specified number of bytes to the address
+		/// </summary>
+		/// <param name="bytes">Number of bytes to add</param>
+		public void Add(int bytes)
+		{
+			m_value = PointerUtils.Add(m_value, bytes).ToPointer();
+		}
+
+		/// <summary>
+		/// Subtract the specified number of bytes from the address
+		/// </summary>
+		/// <param name="bytes">Number of bytes to subtract</param>
+		public void Subtract(int bytes)
+		{
+			m_value = PointerUtils.Subtract(m_value, bytes).ToPointer();
+		}
+
+		/// <summary>
+		/// Increment the address by the specified number of elements
+		/// </summary>
+		/// <param name="cnt">Number of elements</param>
 		private void Increment(int cnt = 1)
 		{
 			m_value = PointerUtils.Offset<T>(m_value, cnt).ToPointer();
 		}
 
+		/// <summary>
+		/// Decrement the address by the specified number of elements
+		/// </summary>
+		/// <param name="cnt">Number of elements</param>
 		private void Decrement(int cnt = 1)
 		{
 			m_value = PointerUtils.Offset<T>(m_value, -cnt).ToPointer();

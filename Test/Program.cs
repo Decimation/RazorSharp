@@ -31,7 +31,6 @@ using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Runtime.CLRTypes.HeapObjects;
 using RazorSharp.Utilities;
-using RazorSharp.Virtual;
 using Test.Testing;
 using Test.Testing.Benchmarking;
 using Unsafe = RazorSharp.Unsafe;

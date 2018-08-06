@@ -33,6 +33,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		/// <summary>
 		/// Function pointer. Note: If the function is virtual, this is an invalid pointer.
+		/// todo
 		/// </summary>
 		public void* Function => m_function;
 

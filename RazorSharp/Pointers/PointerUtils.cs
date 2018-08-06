@@ -11,6 +11,7 @@ namespace RazorSharp.Pointers
 		{
 			return (IntPtr) (((long) v) - bytes);
 		}
+
 		public static IntPtr Add(void* v, int bytes)
 		{
 			return (IntPtr) (((long) v) + bytes);
@@ -33,11 +34,11 @@ namespace RazorSharp.Pointers
 
 		public static void MakeSequential<T>(Pointer<T>[] arr)
 		{
-
 			long[] ptrs = new long[arr.Length];
 			for (int i = 0; i < ptrs.Length; i++) {
 				ptrs[i] = (long) arr[i].Address;
 			}
+
 			Array.Sort(ptrs);
 			for (int i = 0; i < ptrs.Length; i++) {
 				arr[i] = new Pointer<T>(ptrs[i]);
@@ -59,14 +60,9 @@ namespace RazorSharp.Pointers
 			return p + size;
 		}
 
-		public static int OffsetOf(IntPtr lo, IntPtr hi)
-		{
-			return (int) (hi.ToInt64() - lo.ToInt64());
-		}
-
 		public static IntPtr Offset<T>(void* p, int elemCnt)
 		{
-			return Offset<T>((IntPtr) p,elemCnt);
+			return Offset<T>((IntPtr) p, elemCnt);
 		}
 	}
 

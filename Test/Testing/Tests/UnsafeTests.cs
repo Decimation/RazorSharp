@@ -26,10 +26,10 @@ namespace Test.Testing.Tests
 			IntPtr arrData = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData);
 			Assert.That(Marshal.ReadInt32(arrData), Is.EqualTo(arr[0]));
 
-			Dummy d = new Dummy(100, "bar");
-			IntPtr dData = Unsafe.AddressOfHeap(ref d, OffsetType.Fields);
+			//Dummy d = new Dummy(100, "bar");
+			//IntPtr dData = Unsafe.AddressOfHeap(ref d, OffsetType.Fields);
 			// Largest field is first in memory
-			Assert.That(Marshal.ReadInt32(dData, IntPtr.Size), Is.EqualTo(100));
+			//Assert.That(Marshal.ReadInt32(dData, IntPtr.Size), Is.EqualTo(100));
 		}
 	}
 

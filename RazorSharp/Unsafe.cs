@@ -62,6 +62,8 @@ namespace RazorSharp
 	{
 		private const int InvalidValue = -1;
 
+		#region OffsetOf
+
 		public static int OffsetOf<TType>(string fieldName)
 		{
 			return Runtime.Runtime.GetFieldDesc<TType>(fieldName)->Offset;
@@ -77,7 +79,7 @@ namespace RazorSharp
 
 			// Not using LINQ is faster
 			var fieldDescsPtrs = Runtime.Runtime.GetFieldDescs<TType>();
-			var fieldDescs = new List<FieldDesc>();
+			var fieldDescs     = new List<FieldDesc>();
 			foreach (var p in fieldDescsPtrs) {
 				if (p.Value.CorType == Constants.TypeToCorType<TMember>()) {
 					fieldDescs.Add(p.Value);
@@ -103,6 +105,9 @@ namespace RazorSharp
 			return InvalidValue;
 		}
 
+		#endregion
+
+
 		#region Address
 
 		/// <summary>
@@ -117,7 +122,6 @@ namespace RazorSharp
 			TypedReference tr = __makeref(t);
 			return *(IntPtr*) (&tr);
 		}
-
 
 		/// <summary>
 		/// Returns the address of a reference type's heap memory.
