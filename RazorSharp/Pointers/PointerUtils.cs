@@ -31,7 +31,7 @@ namespace RazorSharp.Pointers
 			return (IntPtr) (((long) p) + b.ToInt64());
 		}
 
-		public static void MakeSequential<T>(LitePointer<T>[] arr)
+		public static void MakeSequential<T>(Pointer<T>[] arr)
 		{
 
 			long[] ptrs = new long[arr.Length];
@@ -40,7 +40,7 @@ namespace RazorSharp.Pointers
 			}
 			Array.Sort(ptrs);
 			for (int i = 0; i < ptrs.Length; i++) {
-				arr[i] = new LitePointer<T>(ptrs[i]);
+				arr[i] = new Pointer<T>(ptrs[i]);
 			}
 		}
 

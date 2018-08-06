@@ -9,12 +9,12 @@ namespace Test.Testing.Benchmarking
 		[Params(10)]
 		public int ArrayLength;
 
-		private AllocPointer<int> m_allocPtr;
+		private AllocExPointer<int> m_allocPtr;
 
 		[GlobalSetup]
 		public void Setup()
 		{
-			m_allocPtr = new AllocPointer<int>(ArrayLength);
+			m_allocPtr = new AllocExPointer<int>(ArrayLength);
 		}
 
 		[GlobalCleanup]

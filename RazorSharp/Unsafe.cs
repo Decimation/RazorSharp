@@ -85,7 +85,7 @@ namespace RazorSharp
 			}
 
 
-			LitePointer<TMember> rawMemory = AddressOf(ref type);
+			Pointer<TMember> rawMemory = AddressOf(ref type);
 
 			if (!typeof(TType).IsValueType) {
 				rawMemory = Marshal.ReadIntPtr(rawMemory.Address) + IntPtr.Size;
@@ -276,7 +276,6 @@ namespace RazorSharp
 			if (typeof(T).IsConstructedGenericType || typeof(T).IsArray) {
 				return InvalidValue;
 			}
-
 
 			var mt = Runtime.Runtime.MethodTableOf<T>();
 			return (int) mt->BaseSize - mt->EEClass->BaseSizePadding;

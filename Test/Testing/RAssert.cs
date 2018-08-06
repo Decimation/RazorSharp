@@ -15,9 +15,9 @@ namespace Test.Testing
 	internal static unsafe class RAssert
 	{
 		/// <summary>
-		/// Asserts the Pointer points to the proper array data.
+		/// Asserts the ExPointer points to the proper array data.
 		/// </summary>
-		internal static void Elements<T>(Pointer<T> ptr, IEnumerable<T> enumer)
+		internal static void Elements<T>(ExPointer<T> ptr, IEnumerable<T> enumer)
 		{
 			var enumerator = enumer.GetEnumerator();
 			while (enumerator.MoveNext()) {
@@ -52,9 +52,9 @@ namespace Test.Testing
 		}
 
 		/// <summary>
-		/// Asserts that a Pointer points to the correct object address during GC pressure
+		/// Asserts that an ExPointer points to the correct object address during GC pressure
 		/// </summary>
-		internal static void Pressure<TPointer, TValue>(Pointer<TPointer> ptr, ref TValue t)
+		internal static void Pressure<TPointer, TValue>(ExPointer<TPointer> ptr, ref TValue t)
 		{
 			int passes = 0;
 			while (passes++ < MaxPasses) {
@@ -94,7 +94,7 @@ namespace Test.Testing
 			Debug.Assert((**strObj).FirstChar == s[0]);
 		}
 
-		internal static void Pressure<TPointer>(Pointer<TPointer> ptr, ref string s)
+		internal static void Pressure<TPointer>(ExPointer<TPointer> ptr, ref string s)
 		{
 			int passes = 0;
 			while (passes++ < MaxPasses) {

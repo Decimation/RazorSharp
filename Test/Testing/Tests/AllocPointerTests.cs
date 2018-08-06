@@ -15,7 +15,7 @@ namespace Test.Testing.Tests
 		[Test]
 		public void Test()
 		{
-			var alloc = new AllocPointer<string>(5)
+			var alloc = new AllocExPointer<string>(5)
 			{
 				[0] = "g",
 				[1] = "anime",
@@ -36,13 +36,13 @@ namespace Test.Testing.Tests
 
 			Assertion.AssertThrows<Exception>(delegate
 			{
-				var p = new AllocPointer<string>(5);
+				var p = new AllocExPointer<string>(5);
 				p += p.Count + 1;
 			});
 
 			Assertion.AssertThrows<Exception>(delegate
 			{
-				var p = new AllocPointer<string>(5);
+				var p = new AllocExPointer<string>(5);
 				p -= p.Count + 1;
 			});
 
@@ -109,7 +109,7 @@ namespace Test.Testing.Tests
 			alloc.Dispose();
 
 
-			var allocI = new AllocPointer<int>(5)
+			var allocI = new AllocExPointer<int>(5)
 			{
 				[0] = zero,
 				[4] = end

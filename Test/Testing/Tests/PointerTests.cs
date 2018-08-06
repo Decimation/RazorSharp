@@ -15,14 +15,14 @@ namespace Test.Testing.Tests
 		public void Test()
 		{
 			string s = "foo";
-			Pointer<string> strPtr = new Pointer<string>(ref s);
+			ExPointer<string> strPtr = new ExPointer<string>(ref s);
 			Assert.That(strPtr.Value, Is.EqualTo(s));
 
-			Pointer<string> strPtr2 = new Pointer<string>(ref s);
+			ExPointer<string> strPtr2 = new ExPointer<string>(ref s);
 			Debug.Assert(strPtr == strPtr2);
 
 			string[] arr = {"", "foo", "anime"};
-			Pointer<string> strPtr3 = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData);
+			ExPointer<string> strPtr3 = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData);
 			RAssert.Elements(strPtr3, arr);
 			strPtr3 -= 3;
 			Debug.Assert(strPtr3.Value == arr[0]);

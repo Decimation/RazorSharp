@@ -9,7 +9,7 @@ namespace Test.Testing.Benchmarking
 	{
 		private int[] _arr = {1, 2, 3, 4, 5};
 
-		private Pointer<int> _arrPtr;
+		private ExPointer<int> _arrPtr;
 
 		[GlobalSetup]
 		public void Setup()

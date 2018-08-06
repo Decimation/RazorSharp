@@ -6,13 +6,13 @@ namespace Test.Testing.Benchmarking
 
 	public class LitePointerBenchmarking
 	{
-		private LitePointer<string> lpString;
+		private Pointer<string> lpString;
 		private string value = "foo";
 
 		[GlobalSetup]
 		public void Setup()
 		{
-			lpString = new LitePointer<string>(ref value);
+			lpString = new Pointer<string>(ref value);
 		}
 
 		[Benchmark]

@@ -7,7 +7,7 @@ namespace Test.Testing.Tests
 {
 
 	[TestFixture]
-	public class OffsetOfTests
+	internal class OffsetOfTests
 	{
 		[Test]
 		public void Test()

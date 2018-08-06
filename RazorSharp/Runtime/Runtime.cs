@@ -140,13 +140,13 @@ namespace RazorSharp.Runtime
 		#region FieldDesc
 
 		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
-		public static LitePointer<FieldDesc>[] GetFieldDescs<T>()
+		public static Pointer<FieldDesc>[] GetFieldDescs<T>()
 		{
 			var mt = MethodTableOf<T>();
 
 			var len = mt->FieldDescListLength;
 
-			var lpFd = new LitePointer<FieldDesc>[len];
+			var lpFd = new Pointer<FieldDesc>[len];
 			for (int i = 0; i < len; i++) {
 				lpFd[i] = &mt->FieldDescList[i];
 			}
@@ -172,17 +172,17 @@ namespace RazorSharp.Runtime
 
 		#region MethodDesc
 
-		public static LitePointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
+		public static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
 		{
 			return GetMethodDescs(typeof(T), flags);
 		}
 
-		public static LitePointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
+		public static Pointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
 		{
 			var fields = t.GetMethods(flags);
 
 
-			var arr = new LitePointer<MethodDesc>[fields.Length];
+			var arr = new Pointer<MethodDesc>[fields.Length];
 			arr = arr.OrderBy(x => x.Address.ToInt64()).ToArray();
 
 			for (int i = 0; i < arr.Length; i++) {

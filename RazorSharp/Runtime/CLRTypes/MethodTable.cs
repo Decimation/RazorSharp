@@ -372,6 +372,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Blittable", EEClass->IsBlittable ? StringUtils.Check : StringUtils.BallotX);
 
 
+
 			table.RemoveFromRows(0, "0x0");
 			return table.ToMarkDownString();
 		}

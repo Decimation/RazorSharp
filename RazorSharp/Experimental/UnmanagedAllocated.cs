@@ -10,13 +10,13 @@ namespace RazorSharp.Experimental
 {
 
 	/// <summary>
-	/// Creates types in unmanaged memory. AllocPointer can also be used.<para></para>>
+	/// Creates types in unmanaged memory. AllocExPointer can also be used.<para></para>>
 	///
 	/// Types that cannot be created in unmanaged memory: <para></para>
 	/// - String <para></para>
 	/// - IList <para></para>
 	///
-	/// For that, use AllocPointer.
+	/// For that, use ExAllocExPointer.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	internal struct UnmanagedAllocated<T> where T : class

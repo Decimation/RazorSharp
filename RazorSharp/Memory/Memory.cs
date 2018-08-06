@@ -40,7 +40,7 @@ namespace RazorSharp.Memory
 		#region Safe
 
 		[HandleProcessCorruptedStateExceptions]
-		public static T SafeRead<T>(Pointer<T> ptr, int elemOfs = 0)
+		public static T SafeRead<T>(ExPointer<T> ptr, int elemOfs = 0)
 		{
 			T      t    = default;
 			IntPtr addr = PointerUtils.Offset<T>(ptr.Address, elemOfs);
@@ -73,7 +73,7 @@ namespace RazorSharp.Memory
 		}
 
 		[HandleProcessCorruptedStateExceptions]
-		public static string SafeToString<T>(Pointer<T> ptr, int elemOfs = 0)
+		public static string SafeToString<T>(ExPointer<T> ptr, int elemOfs = 0)
 		{
 			return SafeToString<T>(ptr.Address, elemOfs);
 		}
@@ -163,7 +163,7 @@ namespace RazorSharp.Memory
 			return readMethodTable->Equals(*validMethodTable);
 		}
 
-		public static void WriteAs<TPtr, TValue>(Pointer<TPtr> ptr, int elemOffsetTValue, TValue v)
+		public static void WriteAs<TPtr, TValue>(ExPointer<TPtr> ptr, int elemOffsetTValue, TValue v)
 		{
 			var nPtr = ptr.Reinterpret<TValue>();
 			nPtr[elemOffsetTValue] = v;

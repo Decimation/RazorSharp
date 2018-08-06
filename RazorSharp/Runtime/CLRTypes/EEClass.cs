@@ -78,6 +78,8 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		#region Accessors
 
+		public MethodTable* MethodTable => m_pMethodTable;
+
 		public bool HasLayout => VMFlags.HasFlag(VMFlags.HasLayout);
 
 		public DWORD Attributes => m_dwAttrClass;

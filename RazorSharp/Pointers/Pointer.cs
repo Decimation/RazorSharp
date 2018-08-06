@@ -1,11 +1,8 @@
 using System;
 using System.Collections;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 using RazorCommon;
 using RazorCommon.Extensions;
-using RazorSharp.Utilities;
 
 namespace RazorSharp.Pointers
 {
@@ -13,210 +10,132 @@ namespace RazorSharp.Pointers
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 	using Memory = Memory.Memory;
 
-	/// <summary>
-	/// A pointer to any type.
-	/// Supports pointer arithmetic and other pointer operations.<para></para>
-	///
-	/// If <![CDATA[T]]> is a reference type, pinning is not required as
-	/// the pointer contains the stack pointer, meaning the pointer works with the GC.<para></para>
-	///
-	/// However, if this pointer points to heap memory, the pointer may become invalidated when
-	/// the GC compacts the heap.
-	///
-	/// - No bounds checking<para></para>
-	///
-	/// </summary>
-	/// <typeparam name="T">Type this pointer points to. If just raw memory, use byte.</typeparam>
-	public unsafe class Pointer<T> : IFormattable, IPointer<T>
+
+	///  <summary>
+	///  A bare-bones, lighter type of ExPointer, equal to the size of IntPtr.<para></para>
+	///  Can be represented as a pointer in memory. <para></para>
+	///  - No bounds checking<para></para>
+	///  - No safety systems<para></para>
+	///  - No type safety <para></para>
+	///  </summary>
+	///  <typeparam name="T">Type to point to</typeparam>
+	public unsafe struct Pointer<T> : IPointer<T>, IFormattable
 	{
 		/// <summary>
-		/// Contains metadata for operating Pointer
+		/// The address we're pointing to.<para></para>
+		/// We want this to be the only field so it can be represented as a pointer in memory.
 		/// </summary>
-		protected class PointerMetadata
-		{
+		private void* m_value;
 
-			/// <summary>
-			/// The element size (size of type pointed to)
-			/// </summary>
-			internal int ElementSize { get; }
+		#region Properties
 
-
-			protected internal PointerMetadata(int elementSize, bool isDecayed)
-			{
-				ElementSize = elementSize;
-			}
-
-			protected bool Equals(PointerMetadata m)
-			{
-				return this.ElementSize == m.ElementSize;
-			}
-
-			public override bool Equals(object obj)
-			{
-				if (obj.GetType() == this.GetType()) {
-					return Equals((PointerMetadata) obj);
-				}
-
-				return false;
-			}
-
-			public override int GetHashCode()
-			{
-				return ElementSize;
-			}
-
-			internal PointerMetadata(int elementSize) : this(elementSize, false) { }
+		public T this[int index] {
+			get => Memory.Read<T>(PointerUtils.Offset<T>(m_value, index));
+			set => Memory.Write(PointerUtils.Offset<T>(m_value, index), 0, value);
 		}
 
-		private            IntPtr          m_addr;
-		protected readonly PointerMetadata m_metadata;
+		public ref T Reference => ref Memory.AsRef<T>(Address);
 
-		/// <summary>
-		/// The size of the type being pointed to.
-		/// </summary>
-		public int ElementSize => m_metadata.ElementSize;
+//		public IntPtr __this {
+//			get => Unsafe.AddressOf(ref this);
+//		}
 
-		public virtual IntPtr Address {
-			get => m_addr;
-			set => m_addr = value;
+		public T Value {
+			get => Memory.Read<T>((IntPtr) m_value, 0);
+			set => Memory.Write((IntPtr) m_value, 0, value);
 		}
-
-		public ref T Reference {
-			get => ref Memory.AsRef<T>(Address);
-		}
-
-		public bool IsNull => m_addr == IntPtr.Zero;
-
-		/// <summary>
-		/// Returns the value the pointer is currently pointing to.
-		/// This is the equivalent of dereferencing the pointer.
-		/// This is equivalent to this[0].
-		/// </summary>
-		public virtual T Value {
-			get => Memory.Read<T>(Address, 0);
-			set => Memory.Write(Address, 0, value);
-		}
-
-		public virtual T this[int index] {
-			get => Memory.Read<T>(PointerUtils.Offset<T>(Address, index), 0);
-			set => Memory.Write(PointerUtils.Offset<T>(Address, index), 0, value);
-		}
-
-		#region Constructors
-
-		public Pointer(IntPtr p) : this(p, new PointerMetadata(Unsafe.SizeOf<T>())) { }
-
-		// Base constructor
-		private protected Pointer(IntPtr p, PointerMetadata metadata)
-		{
-			m_addr     = p;
-			m_metadata = metadata;
-		}
-
-		public Pointer(void* v) : this((IntPtr) v) { }
-
-		public Pointer(ref T t) : this(Unsafe.AddressOf(ref t)) { }
-
-		#endregion
-
-		#region Methods
 
 		public TNew Peek<TNew>()
 		{
 			return Memory.Read<TNew>(Address);
 		}
 
-		public Pointer<TNew> Reinterpret<TNew>()
-		{
-			return new Pointer<TNew>(Address);
+		public IntPtr Address {
+			get => (IntPtr) m_value;
+			set => m_value = (void*) value;
 		}
 
-		protected virtual ConsoleTable ToTable()
+		public int ElementSize => Unsafe.SizeOf<T>();
+
+		#endregion
+
+		#region Constructors
+
+		public Pointer(void* v)
 		{
-			var table = new ConsoleTable("Field", "Value");
-			table.AddRow("Address", Hex.ToHex(Address));
-			table.AddRow("Value", Memory.SafeToString(this));
-			table.AddRow("Type", typeof(T).Name);
-			table.AddRow("this[0]", Memory.SafeToString(this, 0));
-			table.AddRow("Null", IsNull);
-			table.AddRow("Element size", m_metadata.ElementSize);
-			return table;
+			m_value = v;
+		}
+
+		public Pointer(long v)
+		{
+			m_value = (void*) v;
+		}
+
+		public Pointer(ref T t)
+		{
+			m_value = Unsafe.AddressOf(ref t).ToPointer();
+		}
+
+		#endregion
+
+		#region Methods
+
+		public int ToInt32()
+		{
+			return (int) m_value;
 		}
 
 		public long ToInt64()
 		{
-			return (long) m_addr;
+			return (long) m_value;
 		}
 
-		public int ToInt32()
+		private void Increment(int cnt = 1)
 		{
-			return checked((int) m_addr);
+			m_value = PointerUtils.Offset<T>(m_value, cnt).ToPointer();
 		}
 
-		protected virtual void Increment(int cnt = 1)
+		private void Decrement(int cnt = 1)
 		{
-			Address = PointerUtils.Offset<T>(Address, cnt);
-		}
-
-		protected virtual void Decrement(int cnt = 1)
-		{
-			Address = PointerUtils.Offset<T>(Address, -cnt);
-		}
-
-		protected virtual ConsoleTable ToElementTable(int length)
-		{
-			var table = new ConsoleTable("Address", "Index", "Value");
-			for (int i = 0; i < length; i++) {
-				table.AddRow(Hex.ToHex(PointerUtils.Offset<T>(Address, i)), i, this[i]);
-			}
-
-			return table;
+			m_value = PointerUtils.Offset<T>(m_value, -cnt).ToPointer();
 		}
 
 		#endregion
 
 		#region Operators
 
-		#region Implicit
-
 		public static implicit operator Pointer<T>(void* v)
 		{
 			return new Pointer<T>(v);
 		}
 
-		public static implicit operator Pointer<T>(IntPtr v)
+		public static implicit operator Pointer<T>(IntPtr p)
 		{
-			return new Pointer<T>(v.ToPointer());
+			return new Pointer<T>(p.ToPointer());
 		}
-
-		#endregion
 
 		#region Arithmetic
 
 		public static Pointer<T> operator +(Pointer<T> p, int i)
 		{
-			//p.IncrementBytes(i * Unsafe.SizeOf<T>());
 			p.Increment(i);
 			return p;
 		}
 
 		public static Pointer<T> operator -(Pointer<T> p, int i)
 		{
-			//p.DecrementBytes(i * Unsafe.SizeOf<T>());
 			p.Decrement(i);
 			return p;
 		}
 
 		public static Pointer<T> operator ++(Pointer<T> p)
 		{
-			//p.IncrementBytes(1 * Unsafe.SizeOf<T>());
 			p.Increment();
 			return p;
 		}
 
 		public static Pointer<T> operator --(Pointer<T> p)
 		{
-			//p.DecrementBytes(1 * Unsafe.SizeOf<T>());
 			p.Decrement();
 			return p;
 		}
@@ -225,30 +144,22 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
-		#region Overrides
+		#region Equality operators
 
-		#region Equality
+		public bool Equals(Pointer<T> other)
+		{
+			return m_value == other.m_value;
+		}
 
 		public override bool Equals(object obj)
 		{
-			if (obj?.GetType() == this.GetType()) {
-				Pointer<object> ptr = (Pointer<object>) obj;
-				return ptr.Address == this.Address;
-			}
-
-			return false;
-		}
-
-		protected bool Equals(Pointer<T> other)
-		{
-			return m_addr.Equals(other.m_addr) && m_metadata.Equals(other.m_metadata);
+			if (ReferenceEquals(null, obj)) return false;
+			return obj is Pointer<T> && Equals((Pointer<T>) obj);
 		}
 
 		public override int GetHashCode()
 		{
-			unchecked {
-				return (m_addr.GetHashCode() * 397) ^ m_metadata.GetHashCode();
-			}
+			return unchecked((int) (long) m_value);
 		}
 
 		public static bool operator ==(Pointer<T> left, Pointer<T> right)
@@ -263,14 +174,9 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
-		public virtual string ToString(string format)
-		{
-			return this.ToString(format, CultureInfo.CurrentCulture);
-		}
+		#region Overrides
 
-		/// <inheritdoc />
-		/// <param name="format">O: Object, P: Pointer, T: Table</param>
-		public virtual string ToString(string format, IFormatProvider formatProvider)
+		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			if (String.IsNullOrEmpty(format)) format   = "O";
 			if (formatProvider == null) formatProvider = CultureInfo.CurrentCulture;
@@ -279,19 +185,15 @@ namespace RazorSharp.Pointers
 			/**
 			 * @O	Object
 			 * @P	Pointer
-			 * @T	Table
 			 */
 			switch (format.ToUpperInvariant()) {
 				case "O":
 					if (typeof(T).IsIListType()) {
 						return Collections.ListToString((IList) Value);
 					}
-
 					return Value.ToString();
 				case "P":
 					return Hex.ToHex(Address);
-				case "T":
-					return ToTable().ToMarkDownString();
 				default:
 					goto case "O";
 			}
@@ -299,10 +201,11 @@ namespace RazorSharp.Pointers
 
 		public override string ToString()
 		{
-			return ToString("O");
+			return Value.ToString();
 		}
 
 		#endregion
+
 
 	}
 

@@ -11,14 +11,14 @@ namespace RazorSharp.Pointers
 	/// This won't work when:
 	/// 	- A string is changed (i.e. concatenations)
 	///
-	/// Unlike Pointer, this supports implicit array-type conversions (decaying)
+	/// Unlike ExPointer, this supports implicit array-type conversions (decaying)
 	/// but doesn't work with the GC. This requires pinning.
 	///
 	/// - Bounds checking
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	[Obsolete("Use AllocPointer", true)]
-	public unsafe class DecayPointer<T> : Pointer<T>
+	[Obsolete("Use AllocExPointer", true)]
+	internal unsafe class DecayPointer<T> : ExPointer<T>
 	{
 		#region Fields and accessors
 

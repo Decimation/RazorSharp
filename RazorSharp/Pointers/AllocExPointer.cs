@@ -25,7 +25,7 @@ namespace RazorSharp.Pointers
 	/// - Allocation protection<para></para>
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public sealed unsafe class AllocPointer<T> : Pointer<T>, IDisposable, IEnumerable<T>
+	public sealed unsafe class AllocExPointer<T> : ExPointer<T>, IDisposable, IEnumerable<T>
 	{
 		private class AllocPointerMetadata : PointerMetadata
 		{
@@ -329,12 +329,12 @@ namespace RazorSharp.Pointers
 		/// unmanaged memory.
 		/// </summary>
 		/// <param name="elements">Number of elements to allocate</param>
-		public AllocPointer(int elements) : this(Marshal.AllocHGlobal(elements * Unsafe.SizeOf<T>()),
+		public AllocExPointer(int elements) : this(Marshal.AllocHGlobal(elements * Unsafe.SizeOf<T>()),
 			elements * Unsafe.SizeOf<T>()) { }
 
 
 		// Base constructor
-		private AllocPointer(IntPtr p, int bytesAlloc) : base(p,
+		private AllocExPointer(IntPtr p, int bytesAlloc) : base(p,
 			new AllocPointerMetadata(Unsafe.SizeOf<T>(), true, bytesAlloc))
 		{
 			// Initialize all memory
@@ -348,25 +348,25 @@ namespace RazorSharp.Pointers
 
 		#region Arithmetic
 
-		public static AllocPointer<T> operator +(AllocPointer<T> p, int i)
+		public static AllocExPointer<T> operator +(AllocExPointer<T> p, int i)
 		{
 			p.Increment(i);
 			return p;
 		}
 
-		public static AllocPointer<T> operator -(AllocPointer<T> p, int i)
+		public static AllocExPointer<T> operator -(AllocExPointer<T> p, int i)
 		{
 			p.Decrement(i);
 			return p;
 		}
 
-		public static AllocPointer<T> operator ++(AllocPointer<T> p)
+		public static AllocExPointer<T> operator ++(AllocExPointer<T> p)
 		{
 			p.Increment();
 			return p;
 		}
 
-		public static AllocPointer<T> operator --(AllocPointer<T> p)
+		public static AllocExPointer<T> operator --(AllocExPointer<T> p)
 		{
 			p.Decrement();
 			return p;
@@ -558,7 +558,7 @@ namespace RazorSharp.Pointers
 			return this.ToString("O");
 		}
 
-		~AllocPointer()
+		~AllocExPointer()
 		{
 			//ReleaseUnmanagedResources();
 		}

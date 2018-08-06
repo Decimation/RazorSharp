@@ -55,7 +55,7 @@ namespace RazorSharp.Analysis
 
 		public sealed class MethodInfo
 		{
-			public LitePointer<MethodDesc>[] MethodDescs { get; }
+			public Pointer<MethodDesc>[] MethodDescs { get; }
 
 			internal MethodInfo()
 			{
@@ -81,7 +81,7 @@ namespace RazorSharp.Analysis
 
 		public sealed class FieldInfo
 		{
-			public LitePointer<FieldDesc>[] FieldDescs { get; }
+			public Pointer<FieldDesc>[] FieldDescs { get; }
 
 			internal FieldInfo()
 			{

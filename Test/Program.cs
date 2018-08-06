@@ -80,13 +80,29 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			List<int> ls = new List<int>();
-			Info(ref ls);
+
 		}
 
-		private static void Info<T>(ref T t) where T : class
+		private static void TestTypes<T>(ref T t) where T : class
 		{
-			RefInspector<T>.Write(ref t, false, InspectorMode.All & ~InspectorMode.MethodDescs);
+			List<int> ls = new List<int>();
+			RefInspector<List<int>>.Write(ref ls, false, InspectorMode.Address | InspectorMode.Internal);
+
+
+			var s = "foo";
+			RefInspector<string>.Write(ref s, false, InspectorMode.Address | InspectorMode.Internal);
+
+
+			var d = new Dummy();
+			RefInspector<Dummy>.Write(ref d, !false, InspectorMode.Address | InspectorMode.Internal);
+
+
+			var parr = new string[5];
+			RefInspector<string[]>.Write(ref parr, false, InspectorMode.Address | InspectorMode.Internal);
+
+
+			var arr = new int[5];
+			RefInspector<int[]>.Write(ref arr, false, InspectorMode.Address | InspectorMode.Internal);
 		}
 
 		private static void TableMethods()
@@ -101,18 +117,16 @@ namespace Test
 			Console.WriteLine(table.ToMarkDownString());
 		}
 
-		private delegate void Increment(void* __this);
 
-		private delegate void echo();
 
 		private static void SetChar(this string str, int i, char c)
 		{
-			LitePointer<char> lpChar = AddressOfHeap(ref str, OffsetType.StringData);
+			Pointer<char> lpChar = AddressOfHeap(ref str, OffsetType.StringData);
 			lpChar[i] = c;
 		}
 
 
-		private static void RandomInit(AllocPointer<string> ptr)
+		private static void RandomInit(AllocExPointer<string> ptr)
 		{
 			for (int i = 0; i < ptr.Count; i++) {
 				ptr[i] = StringUtils.Random(10);

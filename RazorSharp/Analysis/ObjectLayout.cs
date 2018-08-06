@@ -56,7 +56,7 @@ namespace RazorSharp.Analysis
 		private void ArrayCreate()
 		{
 			CreateInternalInfo();
-			LitePointer<T> lpArray  = m_addr;
+			Pointer<T> lpArray  = m_addr;
 			int            len      = (m_value as Array).Length;
 			int            baseOfs  = IntPtr.Size;
 			var            elemName = typeof(T).GetElementType().Name;
@@ -123,6 +123,7 @@ namespace RazorSharp.Analysis
 
 				if (v.GetType() != typeof(Padding)) {
 					FieldLayout fl = (FieldLayout) v;
+
 					m_table.AddRow(ofsStr, Hex.ToHex(m_addr + v.Offset + baseOfs), v.Size,
 						fl.FieldInfo.FieldType.Name,
 						fl.FieldInfo.Name, fl.FieldInfo.GetValue(m_value));
