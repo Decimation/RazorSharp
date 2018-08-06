@@ -23,7 +23,7 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [x] MethodDesc
 - [ ] MethodDescChunk
 - [ ] Module
-- [ ] PackedDWORDFields
+- [x] PackedDWORDFields
 
 # todo
 - [ ] ObjectLayout for arrays
@@ -32,3 +32,4 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [x] Fix Canon MT for pointer arrays
 - [ ] Get field names via FieldDesc
 - [ ] ObjectLayout without ObjectLayoutInspector TypeLayout (very slow)
+- [ ] Fix "Function" field in MethodDesc for virtual functions
