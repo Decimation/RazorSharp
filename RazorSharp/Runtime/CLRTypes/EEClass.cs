@@ -20,7 +20,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 	/// <summary>
 	/// Source: https://github.com/dotnet/coreclr/blob/6bb3f84d42b9756c5fa18158db8f724d57796296/src/vm/class.h#L1901
-	///
+	/// DO NOT DEREFERENCE AN EECLASS POINTER OR ELSE CERTAIN ACCESSORS WILL POINT TO INCORRECT MEMORY
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct EEClass

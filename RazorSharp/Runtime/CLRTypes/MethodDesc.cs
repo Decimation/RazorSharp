@@ -24,18 +24,10 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(3)] private readonly byte   m_bFlags2;
 		[FieldOffset(4)] private readonly WORD   m_wSlotNumber;
 		[FieldOffset(6)] private readonly WORD   m_wFlags;
-		/// <summary>
-		/// Note: This doesn't actually seem to be in the source code, but it matches
-		/// MethodHandle.GetFunctionPointer for non-virtual functions
-		/// todo
-		/// </summary>
-		[FieldOffset(8)] private readonly void*  m_function;
 
-		/// <summary>
-		/// Function pointer. Note: If the function is virtual, this is an invalid pointer.
-		/// todo
-		/// </summary>
-		public void* Function => m_function;
+/*		// Note: This doesn't actually seem to be in the source code, but it matches
+		// MethodHandle.GetFunctionPointer for non-virtual functions
+//		[FieldOffset(8)] private readonly void*  m_function;
 
 
 		public TDelegate GetDelegate<TDelegate>() where TDelegate : Delegate
@@ -65,8 +57,30 @@ namespace RazorSharp.Runtime.CLRTypes
 				d.DynamicInvoke(__this);
 			else
 				d.DynamicInvoke(__this, args);
+		}*/
+
+		/// <summary>
+		/// Slightly slower than using MethodHandle.GetFunctionPointer
+		/// </summary>
+		public void* Function {
+			get {
+				fixed (MethodDesc* __this = &this) {
+					return CLRFunctions.MethodDescFunctions.GetMultiCallableAddrOfCode(__this);
+				}
+			}
 		}
 
+		/// <summary>
+		/// Slower than using Reflection
+		/// </summary>
+		public string Name {
+			get {
+				fixed (MethodDesc* __this = &this) {
+					byte* lpcutf8 = CLRFunctions.MethodDescFunctions.GetName(__this);
+					return CLRFunctions.StringFunctions.NewString(lpcutf8);
+				}
+			}
+		}
 
 		private MethodDescFlags2 Flags2 => (MethodDescFlags2) m_bFlags2;
 		private MethodDescFlags3 Flags3 => (MethodDescFlags3) m_wFlags3AndTokenRemainder;
@@ -86,7 +100,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			table.AddRow("Flags2", flags2);
 			table.AddRow("Flags3", flags3);
-			table.AddRow("Function", Hex.ToHex(Function));
+//			table.AddRow("Function", Hex.ToHex(Function));
 
 
 			return table.ToMarkDownString();

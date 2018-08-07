@@ -79,10 +79,17 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
+			var dummyTH = typeof(Dummy).TypeHandle;
+			var mem = MemoryOfVal(ref dummyTH);
 
+			Console.WriteLine(Collections.ToString(mem, ToStringOptions.ZeroPadHex | ToStringOptions.UseCommas));
+
+
+
+			//BenchmarkRunner.Run<SigScanningBenchmarking>();
 		}
 
-		private static void TestTypes<T>(ref T t) where T : class
+		private static void DisplayTypes<T>(ref T t) where T : class
 		{
 			List<int> ls = new List<int>();
 			RefInspector<List<int>>.Write(ref ls, false, InspectorMode.Address | InspectorMode.Internal);
@@ -104,11 +111,11 @@ namespace Test
 			RefInspector<int[]>.Write(ref arr, false, InspectorMode.Address | InspectorMode.Internal);
 		}
 
-		private static void TableMethods()
+		private static void TableMethods<T>()
 		{
 			var table = new ConsoleTable("Function", "MethodDesc", "Name", "Virtual");
-			foreach (var v in typeof(Dummy).GetMethods(BindingFlags.Instance | BindingFlags.Public |
-			                                           BindingFlags.NonPublic)) {
+			foreach (var v in typeof(T).GetMethods(BindingFlags.Instance | BindingFlags.Public |
+			                                       BindingFlags.NonPublic)) {
 				table.AddRow(Hex.ToHex(v.MethodHandle.GetFunctionPointer()), Hex.ToHex(v.MethodHandle.Value),
 					v.Name, v.IsVirtual ? StringUtils.Check : StringUtils.BallotX);
 			}
@@ -116,14 +123,11 @@ namespace Test
 			Console.WriteLine(table.ToMarkDownString());
 		}
 
-
-
 		private static void SetChar(this string str, int i, char c)
 		{
 			Pointer<char> lpChar = AddressOfHeap(ref str, OffsetType.StringData);
 			lpChar[i] = c;
 		}
-
 
 		private static void RandomInit(AllocExPointer<string> ptr)
 		{

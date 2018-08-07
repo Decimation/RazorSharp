@@ -161,6 +161,12 @@ namespace RazorSharp.Runtime.CLRTypes
 		public int              FieldDescListLength => EEClass->FieldDescListLength;
 		public MethodDescChunk* MethodDescChunkList => EEClass->MethodDescChunkList;
 
+		public int NumInstanceFieldBytes {
+			get {
+				return (int) BaseSize - EEClass->BaseSizePadding;
+			}
+		}
+
 		#endregion
 
 		#region Fields
@@ -339,19 +345,23 @@ namespace RazorSharp.Runtime.CLRTypes
 			//table.AddRow("Multipurpose slot 2", Hex.ToHex(m_pMultipurposeSlot2));
 
 
+			// EEClass fields
 			table.AddRow("FieldDesc List", Hex.ToHex(FieldDescList));
 			table.AddRow("FieldDesc List length", FieldDescListLength);
 			table.AddRow("MethodDescChunk List", Hex.ToHex(MethodDescChunkList));
 
+			// EEClass fields
 			table.AddRow("Number instance fields", NumInstanceFields);
 			table.AddRow("Number static fields", NumStaticFields);
 			table.AddRow("Number non virtual slots", NumNonVirtualSlots);
 			table.AddRow("Number methods", NumMethods);
+			table.AddRow("Number instance field bytes", NumInstanceFields);
 
 
 			table.AddRow("Number virtuals", m_wNumVirtuals);
 			table.AddRow("Number interfaces", m_wNumInterfaces);
 
+			// EEClass field
 			table.AddRow("Blittable", EEClass->IsBlittable ? StringUtils.Check : StringUtils.BallotX);
 
 

@@ -23,6 +23,9 @@ namespace RazorSharp.Analysis
 		Size        = 4,
 		Internal    = 8,
 		FieldDescs  = 16,
+		/// <summary>
+		/// WIP
+		/// </summary>
 		MethodDescs = 32,
 		Layout      = 64,
 		All         = Meta | Address | Size | Internal | Layout | FieldDescs | MethodDescs,
@@ -30,13 +33,14 @@ namespace RazorSharp.Analysis
 
 	public unsafe class Inspector<T>
 	{
-		public MetadataInfo    Metadata  { get; protected set; }
-		public AddressInfo     Addresses { get; protected set; }
-		public SizeInfo        Sizes     { get; protected set; }
-		public InternalInfo    Internal  { get; protected set; }
-		public FieldInfo       Fields    { get; protected set; }
-		public MethodInfo      Methods   { get; protected set; }
-		public ObjectLayout<T> Layout    { get; protected set; }
+		public MetadataInfo Metadata  { get; protected set; }
+		public AddressInfo  Addresses { get; protected set; }
+		public SizeInfo     Sizes     { get; protected set; }
+		public InternalInfo Internal  { get; protected set; }
+		public FieldInfo Fields { get; protected set; }
+
+		//public MethodInfo      Methods   { get; protected set; }
+		public ObjectLayout<T> Layout { get; protected set; }
 
 		protected readonly        InspectorMode Mode;
 		protected static readonly string        Separator = new string('-', Console.BufferWidth);
@@ -49,11 +53,13 @@ namespace RazorSharp.Analysis
 			Sizes     = new SizeInfo();
 			Internal  = new InternalInfo(ref t);
 			Fields    = new FieldInfo();
-			Methods   = new MethodInfo();
-			Layout    = new ObjectLayout<T>(ref t,false);
+
+			//Methods   = new MethodInfo();
+			Layout = new ObjectLayout<T>(ref t, false);
 		}
 
-		public sealed class MethodInfo
+		// WIP
+		/*public sealed class MethodInfo
 		{
 			public Pointer<MethodDesc>[] MethodDescs { get; }
 
@@ -77,7 +83,7 @@ namespace RazorSharp.Analysis
 			{
 				return CreateLabelString("MethodDescs:", ToTable());
 			}
-		}
+		}*/
 
 		public sealed class FieldInfo
 		{
@@ -170,7 +176,8 @@ namespace RazorSharp.Analysis
 			protected virtual ConsoleTable ToTable()
 			{
 				var table = new ConsoleTable("Info", "Value");
-				table.AddRow("Value", typeof(T).IsIListType() ? Collections.ListToString((IList) Value) : Value.ToString());
+				table.AddRow("Value",
+					typeof(T).IsIListType() ? Collections.ListToString((IList) Value) : Value.ToString());
 
 				//table.AddRow("Blittable", IsBlittable ? StringUtils.Check : StringUtils.BallotX);
 				table.AddRow("Value type", IsValueType ? StringUtils.Check : StringUtils.BallotX);
@@ -295,7 +302,7 @@ namespace RazorSharp.Analysis
 			}
 
 			if (Mode.HasFlag(InspectorMode.MethodDescs)) {
-				sb.Append(Methods);
+				//sb.Append(Methods);
 			}
 
 			if (Mode.HasFlag(InspectorMode.Layout)) {

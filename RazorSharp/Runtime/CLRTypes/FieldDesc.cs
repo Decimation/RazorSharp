@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
@@ -89,9 +90,26 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		public int Size {
-			get => Constants.SizeOfCorElementType(CorType);
+			//todo: get size of -1
+			get {
+				int s = Constants.SizeOfCorElementType(CorType);
+				return s;
+			}
 		}
 
+
+
+		/// <summary>
+		/// Slower than using Reflection
+		/// </summary>
+		public string Name {
+			get {
+				fixed (FieldDesc* __this = &this) {
+					byte* lpcutf8 = CLRFunctions.FieldDescFunctions.GetName(__this);
+					return CLRFunctions.StringFunctions.NewString(lpcutf8);
+				}
+			}
+		}
 
 		public bool RequiresFullMBValue => Memory.ReadBit(m_dword1, 31);
 

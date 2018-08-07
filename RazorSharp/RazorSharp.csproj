@@ -123,6 +123,7 @@
     <Compile Include="Experimental\UnmanagedAllocated.cs" />
     <Compile Include="Memory\Memory.cs" />
     <Compile Include="Memory\MemoryLayout.cs" />
+    <Compile Include="Memory\SigScanner.cs" />
     <Compile Include="ObjectPinner.cs" />
     <Compile Include="Pointers\AllocExPointer.cs" />
     <Compile Include="Pointers\DecayPointer.cs" />
@@ -130,6 +131,7 @@
     <Compile Include="Pointers\Pointer.cs" />
     <Compile Include="Pointers\ExPointer.cs" />
     <Compile Include="Pointers\PointerUtils.cs" />
+    <Compile Include="Runtime\CLRFunctions.cs" />
     <Compile Include="Runtime\CLRTypes\DWFlags.cs" />
     <Compile Include="Runtime\CLRTypes\EEClass.cs" />
     <Compile Include="Runtime\CLRTypes\EEClassLayoutInfo.cs" />

@@ -50,7 +50,7 @@ namespace Test.Testing
 		public DateTime DateTime => _dateTime;
 		public Dummy() : this(new Random().Next(0, 100), "foo") { }
 
-		internal Dummy(int i, string s)
+		private Dummy(int i, string s)
 		{
 			_int    = i;
 			_string = s;
