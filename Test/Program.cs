@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -79,15 +80,12 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			var dummyTH = typeof(Dummy).TypeHandle;
-			var mem = MemoryOfVal(ref dummyTH);
-
-			Console.WriteLine(Collections.ToString(mem, ToStringOptions.ZeroPadHex | ToStringOptions.UseCommas));
 
 
-
-			//BenchmarkRunner.Run<SigScanningBenchmarking>();
 		}
+
+		
+
 
 		private static void DisplayTypes<T>(ref T t) where T : class
 		{

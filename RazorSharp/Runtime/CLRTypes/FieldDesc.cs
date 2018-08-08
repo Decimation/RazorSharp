@@ -21,7 +21,6 @@ namespace RazorSharp.Runtime.CLRTypes
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct FieldDesc
 	{
-		// This actually only seems to be a byte?
 		[FieldOffset(0)] private readonly MethodTable* m_pMTOfEnclosingClass;
 
 		// unsigned m_mb                  	: 24;
@@ -30,7 +29,6 @@ namespace RazorSharp.Runtime.CLRTypes
 		// unsigned m_isRVA               	: 1;
 		// unsigned m_prot                	: 3;
 		// unsigned m_requiresFullMbValue 	: 1;
-
 		[FieldOffset(8)] private readonly unsigned m_dword1;
 
 		// unsigned m_dwOffset         		: 27;
@@ -96,8 +94,6 @@ namespace RazorSharp.Runtime.CLRTypes
 				return s;
 			}
 		}
-
-
 
 		/// <summary>
 		/// Slower than using Reflection

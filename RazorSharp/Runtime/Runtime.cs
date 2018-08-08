@@ -21,10 +21,6 @@ namespace RazorSharp.Runtime
 	/// </summary>
 	public static unsafe class Runtime
 	{
-		/// <summary>
-		/// Cached for usage with PinHandle
-		/// </summary>
-		private static readonly RuntimeTypeHandle StringHandle;
 
 		/// <summary>
 		/// Heap offset to the first array element.<para></para>
@@ -38,7 +34,7 @@ namespace RazorSharp.Runtime
 
 		static Runtime()
 		{
-			StringHandle = typeof(string).TypeHandle;
+			//StringHandle = typeof(string).TypeHandle;
 		}
 
 
@@ -87,7 +83,7 @@ namespace RazorSharp.Runtime
 			//return (*((HeapObject**) Unsafe.AddressOf(ref t)))->MethodTable;
 		}
 
-		public static void WriteMethodTable<TOrig, TNew>(ref TOrig t) where TOrig : class
+		private static void WriteMethodTable<TOrig, TNew>(ref TOrig t) where TOrig : class
 		{
 			WriteMethodTable(ref t, MethodTableOf<TNew>());
 		}
@@ -120,18 +116,24 @@ namespace RazorSharp.Runtime
 			//(**h).MethodTable = m;
 		}
 
-		internal static void SpoofMethodTable<TOrig, TSpoof>(ref TOrig t) where TOrig : class
-		{
-			IntPtr handle = typeof(TSpoof) == typeof(string) ? StringHandle.Value : typeof(TSpoof).TypeHandle.Value;
-			WriteMethodTable(ref t, (MethodTable*) handle);
-		}
+//		internal static void SpoofMethodTable<TOrig, TSpoof>(ref TOrig t) where TOrig : class
+//		{
+//			IntPtr handle = typeof(TSpoof) == typeof(string) ? StringHandle.Value : typeof(TSpoof).TypeHandle.Value;
+//			WriteMethodTable(ref t, (MethodTable*) handle);
+//		}
 
-		internal static void RestoreMethodTable<TSpoof, TOrig>(ref TOrig t) where TOrig : class
-		{
-			// Make sure it was spoofed in the first place
-			Debug.Assert(t.GetType() == typeof(TSpoof));
+//		internal static void RestoreMethodTable<TSpoof, TOrig>(ref TOrig t) where TOrig : class
+//		{
+//			// Make sure it was spoofed in the first place
+//			Debug.Assert(t.GetType() == typeof(TSpoof));
+//
+//			WriteMethodTable(ref t, (MethodTable*) typeof(TOrig).TypeHandle.Value);
+//		}
 
-			WriteMethodTable(ref t, (MethodTable*) typeof(TOrig).TypeHandle.Value);
+		public static IntPtr ReadMethodTablePointer<T>(ref T t) where T : class
+		{
+			var heapMem = Unsafe.AddressOfHeap(ref t);
+			return Marshal.ReadIntPtr(heapMem);
 		}
 
 		#endregion

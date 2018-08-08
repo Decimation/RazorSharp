@@ -74,7 +74,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
-		/// The base size of this class when allocated on the heap.
+		/// The base size of this class when allocated on the heap. Note that for value types
+		/// GetBaseSize returns the size of instance fields for a boxed value, and
+		/// GetNumInstanceFieldsBytes for an unboxed value.
 		/// </summary>
 		public DWORD BaseSize => m_BaseSize;
 
@@ -177,10 +179,6 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(0)] private DWFlags m_dwFlags;
 
 		//** Status: verified
-		/// <summary>
-		/// Note that for value types GetBaseSize returns the size of instance fields for
-		/// a boxed value, and GetNumInstanceFieldsBytes for an unboxed value.
-		/// </summary>
 		[FieldOffset(4)] private readonly DWORD m_BaseSize;
 
 		//** Status: unknown
@@ -355,7 +353,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Number static fields", NumStaticFields);
 			table.AddRow("Number non virtual slots", NumNonVirtualSlots);
 			table.AddRow("Number methods", NumMethods);
-			table.AddRow("Number instance field bytes", NumInstanceFields);
+			table.AddRow("Number instance field bytes", NumInstanceFieldBytes);
 
 
 			table.AddRow("Number virtuals", m_wNumVirtuals);
@@ -369,14 +367,6 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.RemoveFromRows(0, "0x0");
 			return table.ToMarkDownString();
 		}
-
-		/**
-		 * __forceinline DWORD GetFlag(WFLAGS_LOW_ENUM flag) const
-    		{
-    		    SUPPORTS_DAC;
-    		    return (IsStringOrArray() ? (enum_flag_StringArrayValues & flag) : (m_dwFlags & flag));
-    		}
-		 */
 
 		#region Equality
 

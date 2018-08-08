@@ -114,7 +114,6 @@ namespace RazorSharp.Analysis
 				CreateInternalInfo();
 			}
 
-
 			foreach (var v in m_layout.Fields) {
 				var rightOfs = baseOfs + v.Offset;
 				var leftOfs  = rightOfs + (v.Size - 1);

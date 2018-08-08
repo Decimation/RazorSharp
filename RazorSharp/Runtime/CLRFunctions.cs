@@ -111,14 +111,10 @@ namespace RazorSharp.Runtime
 			internal static readonly GetNameDelegate GetName;
 
 
-
-
 			static FieldDescFunctions()
 			{
 				AddFunction<GetNameDelegate>("FieldDesc::GetName", GetNameSignature);
 				GetName = (GetNameDelegate) Functions["FieldDesc::GetName"];
-
-
 			}
 		}
 

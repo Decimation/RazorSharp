@@ -17,18 +17,19 @@ namespace RazorSharp.Analysis
 	[Flags]
 	public enum InspectorMode
 	{
-		None        = 0,
-		Meta        = 1,
-		Address     = 2,
-		Size        = 4,
-		Internal    = 8,
-		FieldDescs  = 16,
+		None       = 0,
+		Meta       = 1,
+		Address    = 2,
+		Size       = 4,
+		Internal   = 8,
+		FieldDescs = 16,
+
 		/// <summary>
 		/// WIP
 		/// </summary>
 		MethodDescs = 32,
-		Layout      = 64,
-		All         = Meta | Address | Size | Internal | Layout | FieldDescs | MethodDescs,
+		Layout = 64,
+		All    = Meta | Address | Size | Internal | Layout | FieldDescs | MethodDescs,
 	}
 
 	public unsafe class Inspector<T>
@@ -37,13 +38,13 @@ namespace RazorSharp.Analysis
 		public AddressInfo  Addresses { get; protected set; }
 		public SizeInfo     Sizes     { get; protected set; }
 		public InternalInfo Internal  { get; protected set; }
-		public FieldInfo Fields { get; protected set; }
+		public FieldInfo    Fields    { get; protected set; }
 
 		//public MethodInfo      Methods   { get; protected set; }
 		public ObjectLayout<T> Layout { get; protected set; }
 
 		protected readonly        InspectorMode Mode;
-		protected static readonly string        Separator = new string('-', Console.BufferWidth);
+		private static readonly string        Separator = new string('-', Console.BufferWidth);
 
 		public Inspector(ref T t, InspectorMode mode = InspectorMode.All)
 		{
@@ -254,7 +255,7 @@ namespace RazorSharp.Analysis
 		protected static void WriteInspector(Inspector<T> inspector, bool printStructures)
 		{
 			Console.WriteLine(Separator);
-			Console.WriteLine("{0}Inspection of type {1}", new string(' ', Separator.Length / 3), typeof(T).Name);
+			Console.WriteLine("Inspection of type {0}", typeof(T).Name);
 			Console.WriteLine(inspector);
 
 			if (printStructures) {

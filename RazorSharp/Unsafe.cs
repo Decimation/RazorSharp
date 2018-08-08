@@ -282,7 +282,7 @@ namespace RazorSharp
 			}
 
 			var mt = Runtime.Runtime.MethodTableOf<T>();
-			return (int) mt->BaseSize - mt->EEClass->BaseSizePadding;
+			return (int) mt->NumInstanceFieldBytes;
 		}
 
 		/// <summary>

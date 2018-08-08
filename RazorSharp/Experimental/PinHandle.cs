@@ -52,9 +52,9 @@ namespace RazorSharp.Experimental
 				handle.m_handle = GCHandle.Alloc(t, GCHandleType.Pinned);
 			}
 			else {
-				Runtime.Runtime.SpoofMethodTable<T, string>(ref t);
+//				Runtime.Runtime.SpoofMethodTable<T, string>(ref t);
 				handle.m_handle = GCHandle.Alloc(t, GCHandleType.Pinned);
-				Runtime.Runtime.RestoreMethodTable<string, T>(ref t);
+//				Runtime.Runtime.RestoreMethodTable<string, T>(ref t);
 			}
 
 			return handle;

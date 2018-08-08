@@ -3,6 +3,7 @@ using System.Reflection.Emit;
 
 namespace RazorSharp
 {
+
 	/// <summary>
 	/// Pins an object in memory even if the type is unblittable.
 	///
@@ -14,8 +15,9 @@ namespace RazorSharp
 
 		private static Action<object, Action<object>> CreatePinImpl()
 		{
-			var method = new DynamicMethod("InvokeWhilePinnedImpl", typeof(void), new[] { typeof(object), typeof(Action<object>) }, typeof(ObjectPinner).Module);
-			var il     = method.GetILGenerator();
+			var method = new DynamicMethod("InvokeWhilePinnedImpl", typeof(void),
+				new[] {typeof(object), typeof(Action<object>)}, typeof(ObjectPinner).Module);
+			var il = method.GetILGenerator();
 
 			// create a pinned local variable of type object
 			// this wouldn't be valid in C#, but the runtime doesn't complain about the IL
@@ -33,7 +35,7 @@ namespace RazorSharp
 
 			il.Emit(OpCodes.Ret);
 
-			return (Action<object, Action<object>>)method.CreateDelegate(typeof(Action<object, Action<object>>));
+			return (Action<object, Action<object>>) method.CreateDelegate(typeof(Action<object, Action<object>>));
 		}
 
 		/// <summary>
@@ -44,7 +46,6 @@ namespace RazorSharp
 		public static void InvokeWhilePinned(object obj, Action<object> action)
 		{
 			PinImpl(obj, action);
-
 		}
 	}
 

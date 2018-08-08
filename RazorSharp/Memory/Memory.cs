@@ -40,23 +40,6 @@ namespace RazorSharp.Memory
 		#region Safe
 
 		[HandleProcessCorruptedStateExceptions]
-		public static T SafeRead<T>(ExPointer<T> ptr, int elemOfs = 0)
-		{
-			T      t    = default;
-			IntPtr addr = PointerUtils.Offset<T>(ptr.Address, elemOfs);
-
-			if (Assertion.Throws<NullReferenceException>(delegate { t = CSUnsafe.Read<T>(addr.ToPointer()); })) {
-				return default;
-			}
-
-			if (Assertion.Throws<AccessViolationException>(delegate { t = CSUnsafe.Read<T>(addr.ToPointer()); })) {
-				return default;
-			}
-
-			return t;
-		}
-
-		[HandleProcessCorruptedStateExceptions]
 		public static string SafeToString<T>(IntPtr ptr, int elemOfs = 0)
 		{
 			string s    = "";
@@ -121,7 +104,7 @@ namespace RazorSharp.Memory
 			}
 
 			BitArray bitArray = new BitArray(bits);
-			int[] array = new int[1];
+			int[]    array    = new int[1];
 			bitArray.CopyTo(array, 0);
 			return array[0];
 		}
@@ -140,7 +123,6 @@ namespace RazorSharp.Memory
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T Read<T>(IntPtr p, int byteOffset = 0)
 		{
-
 			return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
 		}
 
@@ -158,7 +140,6 @@ namespace RazorSharp.Memory
 			var mt = Marshal.ReadIntPtr(addrOfPtr);
 
 			var readMethodTable = *(MethodTable**) mt;
-
 
 			return readMethodTable->Equals(*validMethodTable);
 		}
