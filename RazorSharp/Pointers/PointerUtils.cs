@@ -1,6 +1,9 @@
+#region
+
 using System;
-using System.Linq;
 using System.Runtime.CompilerServices;
+
+#endregion
 
 namespace RazorSharp.Pointers
 {
@@ -24,13 +27,14 @@ namespace RazorSharp.Pointers
 
 		public static IntPtr Add(IntPtr p, int bytes)
 		{
-			return (IntPtr) (((long) p) + bytes);
+			return p + bytes;
 		}
 
 		public static IntPtr Add(IntPtr p, IntPtr b)
 		{
 			return (IntPtr) (((long) p) + b.ToInt64());
 		}
+
 
 		public static void MakeSequential<T>(Pointer<T>[] arr)
 		{

@@ -1,5 +1,9 @@
+#region
+
 using System;
 using System.Reflection.Emit;
+
+#endregion
 
 namespace RazorSharp
 {

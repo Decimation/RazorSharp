@@ -1,5 +1,9 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
+
+#endregion
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable BuiltInTypeReferenceStyle
@@ -7,7 +11,11 @@ using System.Runtime.InteropServices;
 namespace RazorSharp.Runtime.CLRTypes
 {
 
+	#region
+
 	using DWORD = UInt32;
+
+	#endregion
 
 	/// <summary>
 	/// Source: https://github.com/dotnet/coreclr/blob/32f0f9721afb584b4a14d69135bea7ddc129f755/src/vm/packedfields.inl

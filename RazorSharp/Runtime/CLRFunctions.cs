@@ -1,17 +1,23 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using RazorCommon;
 using RazorSharp.Memory;
 using RazorSharp.Runtime.CLRTypes;
+
+#endregion
 
 // ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Runtime
 {
 
+	#region
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+	#endregion
 
 
 	/// <summary>
@@ -34,7 +40,6 @@ namespace RazorSharp.Runtime
 		{
 			Functions.Add(name, Scanner.GetDelegate<TDelegate>(signature));
 		}
-
 
 		internal static class MethodDescFunctions
 		{
@@ -110,11 +115,20 @@ namespace RazorSharp.Runtime
 
 			internal static readonly GetNameDelegate GetName;
 
+			private const string LoadSizeSignature = "48 83 EC 28 8B 51 0C 48 8D 05 4A 25 63 00 C1 EA 1B";
+
+			internal delegate int LoadSizeDelegate(FieldDesc* __this);
+
+			internal static readonly LoadSizeDelegate LoadSize;
+
 
 			static FieldDescFunctions()
 			{
 				AddFunction<GetNameDelegate>("FieldDesc::GetName", GetNameSignature);
 				GetName = (GetNameDelegate) Functions["FieldDesc::GetName"];
+
+				AddFunction<LoadSizeDelegate>("FieldDesc::LoadSize", LoadSizeSignature);
+				LoadSize = (LoadSizeDelegate) Functions["FieldDesc::LoadSize"];
 			}
 		}
 

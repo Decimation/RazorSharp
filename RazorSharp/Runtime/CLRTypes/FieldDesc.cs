@@ -1,21 +1,29 @@
+#region
+
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.Pointers;
+using RazorSharp.Utilities;
+
+#endregion
 
 // ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Runtime.CLRTypes
 {
 
+	#region
+
 	using unsigned = UInt32;
-	using Memory = Memory.Memory;
+
+	#endregion
 
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp
-	/// Source 2: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.h#L43
-	///
+	/// Source: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp<para></para>
+	/// Source 2: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.h#L43<para></para>
+	/// DO NOT DEREFERENCE <para></para>
 	/// Internal representation: FieldHandle.Value
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
@@ -38,25 +46,17 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <summary>
 		/// MemberDef
 		/// </summary>
-		public int MB {
-			//get => Memory.ReadBits(m_dword1, 0, 24);
-			get => (int) (m_dword1 & 0xFFFFFF);
-		}
+		public int MB => (int) (m_dword1 & 0xFFFFFF);
 
 		/// <summary>
 		/// Offset in heap memory
 		/// </summary>
-		public int Offset {
-			//get { return Memory.ReadBits(m_dword2, 0, 27); }
-			get => (int) (m_dword2 & 0x7FFFFFF);
-		}
+		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
 
 		/// <summary>
 		/// Field type
 		/// </summary>
-		private int Type {
-			get => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
-		}
+		private int Type => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
 
 		public CorElementType CorType {
 			get => (CorElementType) Type;
@@ -65,54 +65,77 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <summary>
 		/// Whether the field is static
 		/// </summary>
-		public bool IsStatic {
-			get { return Memory.ReadBit(m_dword1, 24); }
-		}
+		public bool IsStatic => Memory.Memory.ReadBit(m_dword1, 24);
 
 		/// <summary>
 		/// Whether the field is decorated with a ThreadStatic attribute
 		/// </summary>
-		public bool IsThreadLocal => Memory.ReadBit(m_dword1, 25);
+		public bool IsThreadLocal => Memory.Memory.ReadBit(m_dword1, 25);
 
 		/// <summary>
 		/// Unknown
 		/// </summary>
-		public bool IsRVA => Memory.ReadBit(m_dword1, 26);
+		public bool IsRVA => Memory.Memory.ReadBit(m_dword1, 26);
 
 		/// <summary>
 		/// Access level
 		/// </summary>
-		public int Protection {
-			//get { return Memory.ReadBits(m_dword1, 26, 3); }
-			get => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
-		}
+		public int Protection => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
 
+		/// <summary>
+		/// Address-sensitive
+		/// </summary>
 		public int Size {
-			//todo: get size of -1
 			get {
 				int s = Constants.SizeOfCorElementType(CorType);
+				if (s == -1) {
+					fixed (FieldDesc* __this = &this) {
+						return CLRFunctions.FieldDescFunctions.LoadSize(__this);
+					}
+				}
+
 				return s;
 			}
 		}
 
 		/// <summary>
 		/// Slower than using Reflection
+		///
+		/// Address-sensitive
 		/// </summary>
 		public string Name {
 			get {
+#if DEBUG_SIGSCANNING
 				fixed (FieldDesc* __this = &this) {
 					byte* lpcutf8 = CLRFunctions.FieldDescFunctions.GetName(__this);
 					return CLRFunctions.StringFunctions.NewString(lpcutf8);
 				}
+#else
+				return Assertion.WIPString;
+#endif
 			}
 		}
 
-		public bool RequiresFullMBValue => Memory.ReadBit(m_dword1, 31);
+		/// <summary>
+		/// Address-sensitive
+		/// </summary>
+		public MethodTable* MethodTableOfEnclosingClass {
+			get {
+				return (MethodTable*) PointerUtils.Add(Unsafe.AddressOf(ref this).ToPointer(), m_pMTOfEnclosingClass);
+			}
+		}
+
+		public bool RequiresFullMBValue => Memory.Memory.ReadBit(m_dword1, 31);
 
 		public override string ToString()
 		{
 			var table = new ConsoleTable("Field", "Value");
-			table.AddRow("MethodTable", Hex.ToHex(m_pMTOfEnclosingClass));
+
+			// !NOTE NOTE NOTE!
+			// this->ToString() must be used to view this
+			// when the pointer is copied, MethodTableOfEnclosingClass
+			// read from incorrect memory
+			table.AddRow("Enclosing MethodTable", Hex.ToHex(MethodTableOfEnclosingClass));
 
 			// Unsigned 1
 			table.AddRow("MB", MB);
@@ -125,6 +148,8 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("RVA", IsRVA);
 			table.AddRow("Protection", Protection);
 			table.AddRow("Requires full MB value", RequiresFullMBValue);
+
+			table.AddRow("Name", Name);
 
 			return table.ToMarkDownString();
 		}

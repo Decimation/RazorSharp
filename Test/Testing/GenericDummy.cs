@@ -1,4 +1,8 @@
+#region
+
 using System;
+
+#endregion
 
 namespace Test.Testing
 {
@@ -22,10 +26,7 @@ namespace Test.Testing
 			m_value = value;
 		}
 
-		public void hello()
-		{
-
-		}
+		public void hello() { }
 
 		public override string ToString()
 		{

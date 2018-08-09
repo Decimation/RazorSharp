@@ -1,9 +1,9 @@
-using System;
-using System.Reflection;
+#region
+
 using BenchmarkDotNet.Attributes;
-using ObjectLayoutInspector;
 using RazorSharp.Runtime;
-using RazorSharp.Runtime.CLRTypes;
+
+#endregion
 
 namespace Test.Testing.Benchmarking
 {

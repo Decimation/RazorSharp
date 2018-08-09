@@ -1,7 +1,10 @@
-using System;
+#region
+
 using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
 using RazorCommon;
+
+#endregion
 
 namespace Test.Testing.Benchmarking
 {
@@ -18,10 +21,7 @@ namespace Test.Testing.Benchmarking
 			Collections.ToString(mem: Bytes);
 		}
 
-		public static void StringJoin()
-		{
-			
-		}
+		public static void StringJoin() { }
 
 		[Benchmark]
 		public void CollectionsToString_List()

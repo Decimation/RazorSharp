@@ -1,6 +1,10 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
+
+#endregion
 
 namespace Test.Testing.Benchmarking
 {
@@ -8,7 +12,7 @@ namespace Test.Testing.Benchmarking
 	public class MarshalBenchmarking
 	{
 		private IntPtr _hMem;
-		private int _length;
+		private int    _length;
 
 		[GlobalSetup]
 		public void Setup()

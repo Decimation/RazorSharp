@@ -1,9 +1,12 @@
+#region
+
 using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+
+#endregion
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable BuiltInTypeReferenceStyle
@@ -13,14 +16,20 @@ namespace RazorSharp.Runtime.CLRTypes
 {
 
 	// class.h
+
+	#region
+
 	using BYTE = Byte;
 	using QWORD = UInt64;
 	using DWORD = UInt32;
 	using WORD = UInt16;
 
+	#endregion
+
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/6bb3f84d42b9756c5fa18158db8f724d57796296/src/vm/class.h#L1901
-	/// DO NOT DEREFERENCE AN EECLASS POINTER OR ELSE CERTAIN ACCESSORS WILL POINT TO INCORRECT MEMORY
+	/// Source: https://github.com/dotnet/coreclr/blob/6bb3f84d42b9756c5fa18158db8f724d57796296/src/vm/class.h#L1901<para></para>
+	///
+	/// DO NOT DEREFERENCE<para></para>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct EEClass
@@ -67,10 +76,6 @@ namespace RazorSharp.Runtime.CLRTypes
 		//** Status: verified
 		[FieldOffset(66)] private readonly byte m_cbFixedEEClassFields;
 
-		/*
-		 * Number of bytes to subtract from code:MethodTable::GetBaseSize() to get the actual number of bytes
-		 * of instance fields stored in the object on the GC heap.
-		 */
 		//** Status: verified
 		[FieldOffset(67)] private readonly byte m_cbBaseSizePadding;
 
@@ -84,6 +89,10 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public DWORD Attributes => m_dwAttrClass;
 
+		/// <summary>
+		/// Number of bytes to subtract from code:MethodTable::GetBaseSize() to get the actual number of bytes
+		/// of instance fields stored in the object on the GC heap.
+		/// </summary>
 		public byte BaseSizePadding => m_cbBaseSizePadding;
 
 		public VMFlags VMFlags => (VMFlags) m_VMFlags;
@@ -91,7 +100,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		public CorElementType NormalType => (CorElementType) m_NormType;
 
 		/// <summary>
-		/// CRITICAL NOTE: This points to incorrect memory when the address of "this" changes
+		/// Address-sensitive
 		/// </summary>
 		private EEClassLayoutInfo* LayoutInfo {
 			get {
@@ -99,23 +108,36 @@ namespace RazorSharp.Runtime.CLRTypes
 				if (!HasLayout)
 					throw new RuntimeException("EEClass does not have LayoutInfo");
 
-				var thisptr = Unsafe.AddressOf(ref this);
-				thisptr += sizeof(EEClass);
+				var thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass));
 				return &((LayoutEEClass*) thisptr)->m_LayoutInfo;
 			}
 		}
 
 		/// <summary>
+		/// Abstracted to MethodTable
+		///
 		/// For use with Runtime.IsBlittable
 		/// </summary>
 		internal bool IsBlittable => HasLayout && LayoutInfo->IsBlittable;
 
+		/// <summary>
+		/// Abstracted to MethodTable
+		/// </summary>
 		internal int NumInstanceFields => (int) GetPackableField(EEClassFieldId.NumInstanceFields);
 
+		/// <summary>
+		/// Abstracted to MethodTable
+		/// </summary>
 		internal int NumStaticFields => (int) GetPackableField(EEClassFieldId.NumStaticFields);
 
+		/// <summary>
+		/// Abstracted to MethodTable
+		/// </summary>
 		internal int NumMethods => (int) GetPackableField(EEClassFieldId.NumMethods);
 
+		/// <summary>
+		/// Abstracted to MethodTable
+		/// </summary>
 		internal int NumNonVirtualSlots => (int) GetPackableField(EEClassFieldId.NumNonVirtualSlots);
 
 		private DWORD GetPackableField(EEClassFieldId eField)
@@ -127,11 +149,10 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
-		/// CRITICAL NOTE: This points to incorrect memory when the address of "this" changes
-		///
-		/// Only access this via MethodTable
+		/// Address-sensitive
 		/// </summary>
-		private PackedDWORDFields* PackedFields => (PackedDWORDFields*) (Unsafe.AddressOf(ref this) + m_cbFixedEEClassFields);
+		private PackedDWORDFields* PackedFields =>
+			(PackedDWORDFields*) PointerUtils.Add(Unsafe.AddressOf(ref this), m_cbFixedEEClassFields);
 
 		private EEClass* ParentClass => m_pMethodTable->Parent->EEClass;
 
@@ -151,9 +172,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
-		/// CRITICAL NOTE: This points to incorrect memory when the address of "this" changes
-		///
-		/// Only access this via MethodTable
+		/// Address-sensitive
 		/// </summary>
 		internal FieldDesc* FieldDescList {
 
@@ -169,9 +188,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
-		/// CRITICAL NOTE: This points to incorrect memory when the address of "this" changes
-		///
-		/// Only access this via MethodTable
+		/// Address-sensitive
 		/// </summary>
 		internal MethodDescChunk* MethodDescChunkList {
 			//todo: verify
@@ -192,6 +209,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow(nameof(m_pGuidInfo), Hex.ToHex(m_pGuidInfo));
 			table.AddRow(nameof(m_rpOptionalFields), Hex.ToHex(m_rpOptionalFields));
 			table.AddRow("Method Table", Hex.ToHex(m_pMethodTable));
+
 			//table.AddRow(nameof(m_pChunks), Hex.ToHex(m_pChunks));
 			table.AddRow("Native size", m_cbNativeSize);
 			table.AddRow(nameof(ohDelegate), Hex.ToHex(ohDelegate));

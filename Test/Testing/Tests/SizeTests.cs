@@ -1,6 +1,10 @@
+#region
+
 using System.Collections.Generic;
 using NUnit.Framework;
 using RazorSharp;
+
+#endregion
 
 namespace Test.Testing.Tests
 {
@@ -80,7 +84,6 @@ namespace Test.Testing.Tests
 			 */
 			var strArr = new[] {"foo", "bar", "abcdef", new string(' ', 5), new string(' ', 15)};
 			AssertHeapSize(ref strArr, 64);
-
 		}
 
 		private static void AssertHeapSize<T>(ref T t, int heapSize) where T : class

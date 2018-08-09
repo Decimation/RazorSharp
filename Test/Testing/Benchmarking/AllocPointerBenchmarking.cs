@@ -1,13 +1,16 @@
+#region
+
 using BenchmarkDotNet.Attributes;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace Test.Testing.Benchmarking
 {
 
 	public class AllocPointerBenchmarking
 	{
-		[Params(10)]
-		public int ArrayLength;
+		[Params(10)] public int ArrayLength;
 
 		private AllocExPointer<int> m_allocPtr;
 

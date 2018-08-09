@@ -1,6 +1,8 @@
+#region
+
 using System;
-using System.Threading;
-using RazorCommon;
+
+#endregion
 
 // ReSharper disable UnusedMember.Global
 #pragma warning disable 649
@@ -57,7 +59,7 @@ namespace Test.Testing
 			_object = 0;
 
 			// Value escapes the local scope but whatever jaja
-			_voidptr = &i;
+			_voidptr  = &i;
 			_dateTime = DateTime.Now;
 		}
 

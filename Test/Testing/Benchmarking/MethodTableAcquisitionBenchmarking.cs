@@ -1,6 +1,10 @@
+#region
+
 using BenchmarkDotNet.Attributes;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
+
+#endregion
 
 namespace Test.Testing.Benchmarking
 {

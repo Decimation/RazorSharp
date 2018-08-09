@@ -1,16 +1,23 @@
+#region
+
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using RazorCommon;
 using RazorCommon.Extensions;
-using RazorCommon.Strings;
 using RazorSharp.Utilities;
+
+#endregion
 
 namespace RazorSharp.Memory
 {
 
+	#region
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+	#endregion
 
 	/// <summary>
 	/// Provides a way to interpret memory as different types

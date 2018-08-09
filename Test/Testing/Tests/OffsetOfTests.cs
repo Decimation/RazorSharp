@@ -1,7 +1,11 @@
+#region
+
 using System;
 using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
+
+#endregion
 
 namespace Test.Testing.Tests
 {

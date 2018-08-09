@@ -1,6 +1,10 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
+
+#endregion
 
 namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 {

@@ -1,22 +1,26 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using ObjectLayoutInspector;
-using RazorCommon;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;
 using static RazorSharp.Utilities.Assertion;
 
+#endregion
+
 namespace RazorSharp
 {
 
+	#region
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+	#endregion
 
 	//using Memory = RazorSharp.Memory.Memory;
 	//using Runtime = Runtime.Runtime;
@@ -81,8 +85,10 @@ namespace RazorSharp
 			var fieldDescsPtrs = Runtime.Runtime.GetFieldDescs<TType>();
 			var fieldDescs     = new List<FieldDesc>();
 			foreach (var p in fieldDescsPtrs) {
-				if (p.Value.CorType == Constants.TypeToCorType<TMember>()) {
-					fieldDescs.Add(p.Value);
+				if (p->CorType == Constants.TypeToCorType<TMember>()) {
+					// Special note:
+					// we can dereference here because we don't access any address-sensitive fields
+					fieldDescs.Add(*p);
 				}
 			}
 

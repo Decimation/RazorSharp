@@ -1,14 +1,20 @@
+#region
+
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using RazorCommon;
+
+#endregion
 
 namespace RazorSharp.Runtime.CLRTypes
 {
 
+	#region
+
 	using DWORD = UInt32;
 	using WORD = UInt16;
+
+	#endregion
 
 	//todo: fix
 	/// <summary>

@@ -1,9 +1,12 @@
+#region
+
 using NUnit.Framework;
-using RazorSharp;
-using RazorSharp.Pointers;
+
+#endregion
 
 namespace Test.Testing.Tests
 {
+
 	[TestFixture]
 	internal class PinningTests
 	{
@@ -27,10 +30,6 @@ namespace Test.Testing.Tests
 			Assert.That(p2.IsAllocated, Is.EqualTo(false));
 			Assert.That(p2.IsPinned, Is.EqualTo(false));
 		}*/
-
-
-
-
 
 
 	}

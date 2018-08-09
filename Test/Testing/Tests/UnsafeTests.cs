@@ -1,11 +1,20 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
 using RazorSharp;
 
+#endregion
+
 namespace Test.Testing.Tests
 {
+
+	#region
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+	#endregion
 
 	[TestFixture]
 	internal unsafe class UnsafeTests
@@ -22,7 +31,7 @@ namespace Test.Testing.Tests
 			IntPtr sChars = Unsafe.AddressOfHeap(ref s, OffsetType.StringData);
 			Assert.That(Marshal.ReadInt16(sChars), Is.EqualTo(s[0]));
 
-			int[] arr = {1, 2, 3};
+			int[]  arr     = {1, 2, 3};
 			IntPtr arrData = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData);
 			Assert.That(Marshal.ReadInt32(arrData), Is.EqualTo(arr[0]));
 

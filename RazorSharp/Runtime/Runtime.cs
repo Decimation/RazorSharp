@@ -1,14 +1,15 @@
+#region
+
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using MethodTimer;
-using RazorCommon;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Runtime.CLRTypes.HeapObjects;
 using RazorSharp.Utilities;
+
+#endregion
 
 namespace RazorSharp.Runtime
 {
@@ -142,13 +143,13 @@ namespace RazorSharp.Runtime
 		#region FieldDesc
 
 		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
-		public static Pointer<FieldDesc>[] GetFieldDescs<T>()
+		public static FieldDesc*[] GetFieldDescs<T>()
 		{
 			var mt = MethodTableOf<T>();
 
 			var len = mt->FieldDescListLength;
 
-			var lpFd = new Pointer<FieldDesc>[len];
+			var lpFd = new FieldDesc*[len];
 			for (int i = 0; i < len; i++) {
 				lpFd[i] = &mt->FieldDescList[i];
 			}
@@ -228,7 +229,7 @@ namespace RazorSharp.Runtime
 		{
 			if (typeof(T).IsArray || typeof(T) == typeof(string))
 				return true;
-			return MethodTableOf<T>()->EEClass->IsBlittable;
+			return MethodTableOf<T>()->IsBlittable;
 		}
 	}
 

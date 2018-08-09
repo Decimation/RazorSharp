@@ -1,12 +1,22 @@
+#region
+
 using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorInvoke;
 
+#endregion
+
 namespace RazorSharp.Memory
 {
+
+	#region
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+	#endregion
+
 	/// <summary>
 	/// Class for executing Assembly code
 	/// </summary>
@@ -29,7 +39,6 @@ namespace RazorSharp.Memory
 			if (!Kernel32.VirtualFree(buf, (uint) memory.Length, Enumerations.FreeTypes.Decommit)) {
 				Logger.Log(Level.Error, Flags.Memory, "Asm::asm failed to free memory");
 			}
-
 		}
 
 		/// <summary>

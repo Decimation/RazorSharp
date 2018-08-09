@@ -1,20 +1,25 @@
+#region
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using System.Threading;
 using RazorCommon;
 using RazorCommon.Strings;
+
+#endregion
 
 namespace RazorSharp.Pointers
 {
 
+	#region
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-	using Memory = Memory.Memory;
+
+	#endregion
 
 	/// <summary>
 	/// Represents a high-level C/C++ style array using dynamic unmanaged memory allocation<para></para>
@@ -234,8 +239,6 @@ namespace RazorSharp.Pointers
 		/// <returns></returns>
 		public bool AddressInBounds(IntPtr p)
 		{
-
-
 			// C++ pattern
 			if (p == IntPtr.Zero || p == new IntPtr(-1)) {
 				Dispose();
@@ -316,8 +319,6 @@ namespace RazorSharp.Pointers
 			if (requestedIndex < Start) {
 				throw new IndexOutOfRangeException($"Requested index of {requestedIndex} < {Start} [{Start} - {End}]");
 			}
-
-
 		}
 
 		#endregion
@@ -452,7 +453,7 @@ namespace RazorSharp.Pointers
 			try {
 				//if ((*(IntPtr*) addr) == IntPtr.Zero) return "(null)";
 				if (Marshal.ReadIntPtr(addr) == IntPtr.Zero) return "NULL";
-				return Memory.Read<T>(addr).ToString();
+				return Memory.Memory.Read<T>(addr).ToString();
 			}
 			catch (AccessViolationException) {
 				return ("(ave)");
@@ -474,8 +475,6 @@ namespace RazorSharp.Pointers
 			}
 
 
-
-
 			for (int i = Start; i <= End; i++) {
 				var addr = PointerUtils.Offset<T>(Address, i);
 				if (!AddressInBounds(addr)) {
@@ -491,8 +490,6 @@ namespace RazorSharp.Pointers
 						AddressInBounds(addr) ? StringUtils.Check : StringUtils.BallotX);
 				}
 			}
-
-
 
 
 			return table;

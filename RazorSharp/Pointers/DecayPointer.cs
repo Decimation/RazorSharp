@@ -1,8 +1,12 @@
+#region
+
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorSharp.Utilities;
+
+#endregion
 
 namespace RazorSharp.Pointers
 {
@@ -20,6 +24,7 @@ namespace RazorSharp.Pointers
 	[Obsolete("Use AllocExPointer", true)]
 	internal unsafe class DecayPointer<T> : ExPointer<T>
 	{
+
 		#region Fields and accessors
 
 		/// <summary>
@@ -81,7 +86,7 @@ namespace RazorSharp.Pointers
 		private protected DecayPointer(IntPtr pHeap, PointerMetadata metadata, bool isString) :
 			base(pHeap, metadata)
 		{
-			_origin    = pHeap;
+			_origin = pHeap;
 
 			IntPtr sizePtr;
 
@@ -89,7 +94,7 @@ namespace RazorSharp.Pointers
 			if (isString) {
 				// an Int32 is the first field in a string
 				// indicating the number of the elements
-				 sizePtr = _origin - sizeof(int);
+				sizePtr = _origin - sizeof(int);
 			}
 			else {
 				// The lowest DWORD of a QWORD is the length of the array
@@ -199,7 +204,8 @@ namespace RazorSharp.Pointers
 
 		protected bool Equals(DecayPointer<T> other)
 		{
-			return base.Equals(other) && _origin.Equals(other._origin) && m_offset == other.m_offset && Count == other.Count;
+			return base.Equals(other) && _origin.Equals(other._origin) && m_offset == other.m_offset &&
+			       Count == other.Count;
 		}
 
 		public override bool Equals(object obj)
@@ -215,6 +221,7 @@ namespace RazorSharp.Pointers
 			unchecked {
 				int hashCode = base.GetHashCode();
 				hashCode = (hashCode * 397) ^ _origin.GetHashCode();
+
 				//hashCode = (hashCode * 397) ^ m_offset;
 				hashCode = (hashCode * 397) ^ Count;
 				return hashCode;
@@ -303,7 +310,7 @@ namespace RazorSharp.Pointers
 			var table = new ConsoleTable("Address", "Offset", "Value");
 
 			for (int i = Start; i <= End; i++) {
-				table.AddRow(Hex.ToHex(PointerUtils.Offset<T>(Address,i)), i, this[i]);
+				table.AddRow(Hex.ToHex(PointerUtils.Offset<T>(Address, i)), i, this[i]);
 			}
 
 			return table;

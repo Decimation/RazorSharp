@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Collections;
 using System.Linq;
@@ -6,8 +8,9 @@ using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
+
+#endregion
 
 // ReSharper disable InconsistentNaming
 
@@ -43,7 +46,7 @@ namespace RazorSharp.Analysis
 		//public MethodInfo      Methods   { get; protected set; }
 		public ObjectLayout<T> Layout { get; protected set; }
 
-		protected readonly        InspectorMode Mode;
+		protected readonly      InspectorMode Mode;
 		private static readonly string        Separator = new string('-', Console.BufferWidth);
 
 		public Inspector(ref T t, InspectorMode mode = InspectorMode.All)
@@ -88,7 +91,7 @@ namespace RazorSharp.Analysis
 
 		public sealed class FieldInfo
 		{
-			public Pointer<FieldDesc>[] FieldDescs { get; }
+			public FieldDesc*[] FieldDescs { get; }
 
 			internal FieldInfo()
 			{
@@ -97,7 +100,17 @@ namespace RazorSharp.Analysis
 				}
 				else {
 					FieldDescs = Runtime.Runtime.GetFieldDescs<T>();
-					FieldDescs = FieldDescs.OrderBy(x => x.Value.Offset).ToArray();
+
+
+					Pointer<FieldDesc>[] tmp = new Pointer<FieldDesc>[FieldDescs.Length];
+					for (int i = 0; i < FieldDescs.Length; i++) {
+						tmp[i] = FieldDescs[i];
+					}
+
+					tmp = tmp.OrderBy(x => x.Value.Offset).ToArray();
+					for (int i = 0; i < tmp.Length; i++) {
+						FieldDescs[i] = (FieldDesc*) tmp[i].Address;
+					}
 				}
 			}
 
@@ -107,8 +120,8 @@ namespace RazorSharp.Analysis
 
 				if (FieldDescs != null) {
 					foreach (var v in FieldDescs) {
-						table.AddRow(v.Value.Offset, Hex.ToHex(v.Address), v.Value.CorType,
-							v.Value.IsStatic ? StringUtils.Check : StringUtils.BallotX, v.Value.Size);
+						table.AddRow(v->Offset, Hex.ToHex(v), v->CorType,
+							v->IsStatic ? StringUtils.Check : StringUtils.BallotX, v->Size);
 					}
 				}
 
@@ -125,6 +138,7 @@ namespace RazorSharp.Analysis
 		private const string EEClassStr     = "EEClass";
 		private const string MethodTableStr = "Method Table";
 		private const string CanonMTStr     = "Canon MT";
+		private const string ObjHeaderStr   = "ObjHeader";
 
 		public class InternalInfo
 		{
@@ -267,13 +281,15 @@ namespace RazorSharp.Analysis
 
 		private static void PrintStructures(Inspector<T> inspector)
 		{
-			Console.WriteLine(ANSI.BoldString(MethodTableStr + ':'));
+			const char colon = ':';
+
+			Console.WriteLine(ANSI.BoldString(MethodTableStr + colon));
 			Console.WriteLine(*inspector.Internal.MethodTable);
 
-			Console.WriteLine(ANSI.BoldString(EEClassStr + ':'));
+			Console.WriteLine(ANSI.BoldString(EEClassStr + colon));
 			Console.WriteLine(inspector.Internal.EEClass->ToString());
 
-			Console.WriteLine(ANSI.BoldString(CanonMTStr + ':'));
+			Console.WriteLine(ANSI.BoldString(CanonMTStr + colon));
 			Console.WriteLine(inspector.Internal.MethodTable->Canon->ToString());
 		}
 

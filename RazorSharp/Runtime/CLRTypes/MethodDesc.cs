@@ -1,14 +1,21 @@
+#region
+
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
+
+#endregion
 
 namespace RazorSharp.Runtime.CLRTypes
 {
 
+	#region
+
 	using DWORD = UInt32;
 	using WORD = UInt16;
 	using unsigned = UInt32;
+
+	#endregion
 
 	//todo: complete
 	/// <summary>
@@ -100,6 +107,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			table.AddRow("Flags2", flags2);
 			table.AddRow("Flags3", flags3);
+
 //			table.AddRow("Function", Hex.ToHex(Function));
 
 

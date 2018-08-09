@@ -1,15 +1,19 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
-using RazorSharp.Memory;
 
+#endregion
 
 namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 {
 
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-	using Memory = RazorSharp.Memory.Memory;
+	#region
 
+	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+	#endregion
 
 
 	/// <summary>

@@ -1,5 +1,9 @@
+#region
+
 using System.Runtime.InteropServices;
 using RazorCommon;
+
+#endregion
 
 namespace RazorSharp.Runtime.CLRTypes
 {

@@ -1,13 +1,15 @@
+#region
+
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes.HeapObjects;
+
+#endregion
 
 namespace Test.Testing
 {
@@ -80,6 +82,7 @@ namespace Test.Testing
 			Debug.Assert((**ao).Length == arr.Length);
 			Debug.Assert((**ao).Header == Runtime.ReadObjHeader(ref arr));
 			Debug.Assert((**ao).MethodTable == Runtime.ReadMethodTable(ref arr));
+
 			//Debug.Assert((**ao).Handle.Value == typeof(T).TypeHandle.Value);
 			/*if ((**ao).Handle.Value != IntPtr.Zero) {
 				Debug.Assert((**ao).Handle.Value == typeof(T).TypeHandle.Value);
@@ -102,8 +105,6 @@ namespace Test.Testing
 				for (int i = 0; i < oArr.Length; i++) {
 					oArr[i] = new object();
 				}
-
-
 			}
 		}
 	}

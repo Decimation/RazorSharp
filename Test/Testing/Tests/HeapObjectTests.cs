@@ -1,6 +1,10 @@
+#region
+
 using NUnit.Framework;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes.HeapObjects;
+
+#endregion
 
 namespace Test.Testing.Tests
 {

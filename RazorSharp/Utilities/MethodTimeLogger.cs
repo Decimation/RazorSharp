@@ -1,5 +1,9 @@
+#region
+
 using System.Reflection;
 using RazorCommon;
+
+#endregion
 
 namespace RazorSharp.Utilities
 {
@@ -20,7 +24,6 @@ namespace RazorSharp.Utilities
 					message);
 			}
 #endif
-
 		}
 	}
 

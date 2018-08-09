@@ -1,6 +1,10 @@
+#region
+
 using System.Reflection;
 using BenchmarkDotNet.Attributes;
 using RazorSharp.Runtime;
+
+#endregion
 
 namespace Test.Testing.Benchmarking
 {

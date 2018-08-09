@@ -1,15 +1,22 @@
+#region
+
 using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Linq;
 using RazorCommon;
-using RazorCommon.Extensions;
-using RazorSharp.Analysis;
 using RazorSharp.Utilities;
+
+#endregion
 
 namespace RazorSharp.Experimental
 {
+
+	#region
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+	#endregion
 
 	/// <summary>
 	/// Creates types in stack memory.<para></para>
@@ -43,7 +50,7 @@ namespace RazorSharp.Experimental
 
 		private T ReAllocateRefOnStack(ref T refValue)
 		{
-			var refMem  = Unsafe.MemoryOf(ref refValue);
+			var refMem    = Unsafe.MemoryOf(ref refValue);
 			var allocSize = Unsafe.BaseInstanceSize<T>();
 			Debug.Assert(refMem.Length == allocSize);
 
@@ -72,7 +79,6 @@ namespace RazorSharp.Experimental
 			T dummy = Activator.CreateInstance<T>();
 			m_dummy = dummy;
 			m_dummy = ReAllocateRefOnStack(ref dummy);
-
 		}
 
 		public override string ToString()

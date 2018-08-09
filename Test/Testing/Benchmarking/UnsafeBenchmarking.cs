@@ -1,9 +1,18 @@
+#region
+
 using BenchmarkDotNet.Attributes;
 using RazorSharp;
 
+#endregion
+
 namespace Test.Testing.Benchmarking
 {
+
+	#region
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+	#endregion
 
 	public class UnsafeBenchmarking
 	{
@@ -26,8 +35,6 @@ namespace Test.Testing.Benchmarking
 		{
 			Unsafe.OffsetOf<Dummy>("_decimal");
 		}
-
-
 
 
 		//[Benchmark]

@@ -1,49 +1,28 @@
-﻿using System;
-using System.Buffers;
-using System.Collections;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Dynamic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Numerics;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading;
-using BenchmarkDotNet.Running;
-using MethodTimer;
-using NUnit.Framework;
-using ObjectLayoutInspector;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Analysis;
-using RazorSharp.Experimental;
-using RazorSharp.Memory;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime;
-using RazorSharp.Runtime.CLRTypes;
-using RazorSharp.Runtime.CLRTypes.HeapObjects;
 using RazorSharp.Utilities;
 using Test.Testing;
-using Test.Testing.Benchmarking;
-using Unsafe = RazorSharp.Unsafe;
 using static RazorSharp.Unsafe;
-using static RazorSharp.Utilities.Assertion;
-using Assertion = RazorSharp.Utilities.Assertion;
-using Module = RazorSharp.Runtime.CLRTypes.Module;
+
+#endregion
 
 namespace Test
 {
 
+	#region
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+	#endregion
 
 	internal static unsafe class Program
 	{
@@ -80,11 +59,10 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-
-
+			Dummy d = new Dummy();
+			RefInspector<Dummy>.Write(ref d);
+			Console.ReadLine();
 		}
-
-		
 
 
 		private static void DisplayTypes<T>(ref T t) where T : class

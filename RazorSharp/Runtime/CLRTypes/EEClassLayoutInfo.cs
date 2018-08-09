@@ -1,6 +1,10 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
+
+#endregion
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable BuiltInTypeReferenceStyle
@@ -8,9 +12,15 @@ using RazorCommon;
 namespace RazorSharp.Runtime.CLRTypes
 {
 
+	#region
+
 	using UINT32 = UInt32;
 	using BYTE = Byte;
-	using UINT = UInt32; //probably, maybe
+	using UINT = UInt32;
+
+	#endregion
+
+//probably, maybe
 
 
 	[StructLayout(LayoutKind.Explicit)]

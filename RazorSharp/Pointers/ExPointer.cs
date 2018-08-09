@@ -1,17 +1,21 @@
+#region
+
 using System;
 using System.Collections;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 using RazorCommon;
 using RazorCommon.Extensions;
-using RazorSharp.Utilities;
+
+#endregion
 
 namespace RazorSharp.Pointers
 {
 
+	#region
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-	using Memory = Memory.Memory;
+
+	#endregion
 
 	/// <summary>
 	/// A pointer to any type.
@@ -82,7 +86,7 @@ namespace RazorSharp.Pointers
 		}
 
 		public ref T Reference {
-			get => ref Memory.AsRef<T>(Address);
+			get => ref Memory.Memory.AsRef<T>(Address);
 		}
 
 		public bool IsNull => m_addr == IntPtr.Zero;
@@ -93,13 +97,13 @@ namespace RazorSharp.Pointers
 		/// This is equivalent to this[0].
 		/// </summary>
 		public virtual T Value {
-			get => Memory.Read<T>(Address, 0);
-			set => Memory.Write(Address, 0, value);
+			get => Memory.Memory.Read<T>(Address, 0);
+			set => Memory.Memory.Write(Address, 0, value);
 		}
 
 		public virtual T this[int index] {
-			get => Memory.Read<T>(PointerUtils.Offset<T>(Address, index), 0);
-			set => Memory.Write(PointerUtils.Offset<T>(Address, index), 0, value);
+			get => Memory.Memory.Read<T>(PointerUtils.Offset<T>(Address, index), 0);
+			set => Memory.Memory.Write(PointerUtils.Offset<T>(Address, index), 0, value);
 		}
 
 		#region Constructors
@@ -123,7 +127,7 @@ namespace RazorSharp.Pointers
 
 		public TNew Peek<TNew>()
 		{
-			return Memory.Read<TNew>(Address);
+			return Memory.Memory.Read<TNew>(Address);
 		}
 
 		public ExPointer<TNew> Reinterpret<TNew>()
@@ -135,9 +139,9 @@ namespace RazorSharp.Pointers
 		{
 			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Address", Hex.ToHex(Address));
-			table.AddRow("Value", Memory.SafeToString(this));
+			table.AddRow("Value", Memory.Memory.SafeToString(this));
 			table.AddRow("Type", typeof(T).Name);
-			table.AddRow("this[0]", Memory.SafeToString(this, 0));
+			table.AddRow("this[0]", Memory.Memory.SafeToString(this, 0));
 			table.AddRow("Null", IsNull);
 			table.AddRow("Element size", m_metadata.ElementSize);
 			return table;

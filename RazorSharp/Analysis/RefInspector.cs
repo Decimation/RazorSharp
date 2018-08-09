@@ -1,17 +1,15 @@
+#region
+
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using RazorCommon;
-using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
+
+#endregion
 
 // ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Analysis
 {
-
-	using Runtime = Runtime.Runtime;
 
 	public unsafe class RefInspector<T> : Inspector<T> where T : class
 	{
@@ -34,7 +32,7 @@ namespace RazorSharp.Analysis
 
 			internal ReferenceInternalInfo(ref T t) : base(ref t)
 			{
-				Header = Runtime.ReadObjHeader(ref t);
+				Header = Runtime.Runtime.ReadObjHeader(ref t);
 			}
 
 			protected override ConsoleTable ToTable()

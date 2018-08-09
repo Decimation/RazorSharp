@@ -1,13 +1,15 @@
 #define EXTRA_FIELDS
 
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+
+#endregion
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable FieldCanBeMadeReadOnly.Global
@@ -17,9 +19,13 @@ using RazorSharp.Utilities;
 namespace RazorSharp.Runtime.CLRTypes
 {
 
+	#region
+
 	using DWORD = UInt32;
 	using WORD = UInt16;
 	using unsigned = UInt32;
+
+	#endregion
 
 
 	//https://github.com/dotnet/coreclr/blob/db55a1decc1d02538e61eac7db80b7daa351d5b6/src/gc/env/gcenv.object.h
@@ -27,7 +33,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 	/// <summary>
 	/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.h#L4166
-	///
+	/// DO NOT DEREFERENCE<para></para>
 	/// Internal representation: TypeHandle.Value
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
@@ -45,16 +51,16 @@ namespace RazorSharp.Runtime.CLRTypes
 			}
 		}
 
-		public MethodTableFlags TableFlags => (MethodTableFlags) Flags;
-
 		public WORD LowFlags => m_dwFlags.Flags;
+		public WORD Flags2   => m_wFlags2;
+
+		public MethodTableFlags TableFlags => (MethodTableFlags) Flags;
 
 		/// <summary>
 		/// Note: these may not be accurate
 		/// </summary>
 		public MethodTableFlagsLow TableFlagsLow => (MethodTableFlagsLow) LowFlags;
 
-		public WORD Flags2 => m_wFlags2;
 
 		public MethodTableFlags2 TableFlags2 => (MethodTableFlags2) Flags2;
 
@@ -65,13 +71,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		///
 		/// (i.e. This size will be 2 with strings (sizeof(char)).)
 		/// </summary>
-		public WORD ComponentSize {
-			get {
-				if (HasComponentSize)
-					return m_dwFlags.ComponentSize;
-				else return 0;
-			}
-		}
+		public WORD ComponentSize => HasComponentSize ? m_dwFlags.ComponentSize : (ushort) 0;
 
 		/// <summary>
 		/// The base size of this class when allocated on the heap. Note that for value types
@@ -80,22 +80,18 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// </summary>
 		public DWORD BaseSize => m_BaseSize;
 
-		public WORD Token => m_wToken;
-
-		public WORD NumVirtuals => m_wNumVirtuals;
-
-		public WORD NumInterfaces => m_wNumInterfaces;
-
-		public MethodTable* Parent => m_pParentMethodTable;
-
-		public Module* Module => m_pLoaderModule;
+		public WORD         Token         => m_wToken;
+		public WORD         NumVirtuals   => m_wNumVirtuals;
+		public WORD         NumInterfaces => m_wNumInterfaces;
+		public MethodTable* Parent        => m_pParentMethodTable;
+		public Module*      Module        => m_pLoaderModule;
 
 		public EEClass* EEClass {
 			get {
 				switch (UnionType) {
-					case LowBits.EEClass:
+					case Constants.LowBits.EEClass:
 						return m_pEEClass;
-					case LowBits.MethodTable:
+					case Constants.LowBits.MethodTable:
 						return Canon->EEClass;
 					default:
 						throw new Exception("EEClass could not be accessed");
@@ -103,16 +99,17 @@ namespace RazorSharp.Runtime.CLRTypes
 			}
 		}
 
-
 		/// <summary>
 		/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L1145
+		///
+		/// Address-sensitive
 		/// </summary>
 		public MethodTable* Canon {
 			get {
 				switch (UnionType) {
-					case LowBits.MethodTable:
+					case Constants.LowBits.MethodTable:
 						return (MethodTable*) PointerUtils.Subtract(m_pCanonMT, 2);
-					case LowBits.EEClass:
+					case Constants.LowBits.EEClass:
 					{
 						fixed (MethodTable* mt = &this)
 							return mt;
@@ -131,43 +128,18 @@ namespace RazorSharp.Runtime.CLRTypes
 			}
 		}
 
-		//public FieldDesc* FieldDescList => _eeClassPtr.m_pEEClass->m_pFieldDescList;
-
-		public bool HasComponentSize {
-			get {
-				// Note that we can't just check m_componentSize != 0 here. The VM
-				// may still construct a method table that does not have a component
-				// size, according to this method, but still has a number in the low
-				// 16 bits of the method table flags parameter.
-				//
-				// The solution here is to do what the VM does and check the
-				// HasComponentSize flag so that we're on the same page.
-				return TableFlags.HasFlag(MethodTableFlags.HasComponentSize);
-			}
-		}
-
-		public bool IsArray {
-			get { return (TableFlags.HasFlag(MethodTableFlags.Array)); }
-		}
-
-		public bool IsStringOrArray {
-			get => HasComponentSize;
-		}
-
-		public int NumInstanceFields  => EEClass->NumInstanceFields;
-		public int NumStaticFields    => EEClass->NumStaticFields;
-		public int NumNonVirtualSlots => EEClass->NumNonVirtualSlots;
-		public int NumMethods         => EEClass->NumMethods;
-
-		public FieldDesc*       FieldDescList       => EEClass->FieldDescList;
-		public int              FieldDescListLength => EEClass->FieldDescListLength;
-		public MethodDescChunk* MethodDescChunkList => EEClass->MethodDescChunkList;
-
-		public int NumInstanceFieldBytes {
-			get {
-				return (int) BaseSize - EEClass->BaseSizePadding;
-			}
-		}
+		public bool             HasComponentSize      => TableFlags.HasFlag(MethodTableFlags.HasComponentSize);
+		public bool             IsArray               => TableFlags.HasFlag(MethodTableFlags.Array);
+		public bool             IsStringOrArray       => HasComponentSize;
+		public int              NumInstanceFields     => EEClass->NumInstanceFields;
+		public int              NumStaticFields       => EEClass->NumStaticFields;
+		public int              NumNonVirtualSlots    => EEClass->NumNonVirtualSlots;
+		public int              NumMethods            => EEClass->NumMethods;
+		public int              NumInstanceFieldBytes => (int) BaseSize - EEClass->BaseSizePadding;
+		public FieldDesc*       FieldDescList         => EEClass->FieldDescList;
+		public int              FieldDescListLength   => EEClass->FieldDescListLength;
+		public MethodDescChunk* MethodDescChunkList   => EEClass->MethodDescChunkList;
+		public bool             IsBlittable           => EEClass->IsBlittable;
 
 		#endregion
 
@@ -209,39 +181,12 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(32)] private readonly void* m_pWriteableData;
 
 
-		// The value of lowest two bits describe what the union contains
-		[Flags]
-		private enum LowBits
-		{
-			/// <summary>
-			/// 0 - pointer to EEClass.
-			/// This MethodTable is the canonical method table.
-			/// </summary>
-			EEClass = 0,
-
-			/// <summary>
-			/// 1 - not used
-			/// </summary>
-			Invalid = 1,
-
-			/// <summary>
-			/// 2 - pointer to canonical MethodTable.
-			/// </summary>
-			MethodTable = 2,
-
-			/// <summary>
-			/// 3 - pointer to indirection cell that points to canonical MethodTable.
-			/// (used only if FEATURE_PREJIT is defined)
-			/// </summary>
-			Indirection = 3
-		}
-
 		private const long UnionMask = 3;
 
-		private LowBits UnionType {
+		private Constants.LowBits UnionType {
 			get {
 				long l = (long) m_pEEClass;
-				return (LowBits) (l & UnionMask);
+				return (Constants.LowBits) (l & UnionMask);
 			}
 		}
 
@@ -361,7 +306,6 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			// EEClass field
 			table.AddRow("Blittable", EEClass->IsBlittable ? StringUtils.Check : StringUtils.BallotX);
-
 
 
 			table.RemoveFromRows(0, "0x0");

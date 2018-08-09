@@ -1,14 +1,20 @@
+#region
+
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using RazorCommon;
 
+#endregion
+
 namespace RazorSharp.Utilities
 {
 
 	public static class Assertion
 	{
+		internal const string WIPString = "(wip)";
+
 		/// <summary>
 		/// Asserts that TActual is TExpected
 		/// </summary>
@@ -57,7 +63,8 @@ namespace RazorSharp.Utilities
 		}
 
 		[HandleProcessCorruptedStateExceptions]
-		public static bool Throws<TException1, TException2>(Action action) where TException1 : Exception where TException2 : Exception
+		public static bool Throws<TException1, TException2>(Action action)
+			where TException1 : Exception where TException2 : Exception
 		{
 			try {
 				action();

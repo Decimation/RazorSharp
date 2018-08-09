@@ -1,10 +1,14 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
+
+#endregion
 
 namespace RazorSharp.Experimental
 {
 
-	[Obsolete("Use ObjectPinner",true)]
+	[Obsolete("Use ObjectPinner", true)]
 	internal struct PinHandle<T> where T : class
 	{
 		private GCHandle m_handle;
@@ -54,6 +58,7 @@ namespace RazorSharp.Experimental
 			else {
 //				Runtime.Runtime.SpoofMethodTable<T, string>(ref t);
 				handle.m_handle = GCHandle.Alloc(t, GCHandleType.Pinned);
+
 //				Runtime.Runtime.RestoreMethodTable<string, T>(ref t);
 			}
 

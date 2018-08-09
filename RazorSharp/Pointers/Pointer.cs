@@ -1,14 +1,21 @@
+#region
+
 using System;
 using System.Collections;
 using System.Globalization;
 using RazorCommon;
 using RazorCommon.Extensions;
 
+#endregion
+
 namespace RazorSharp.Pointers
 {
 
+	#region
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-	using Memory = Memory.Memory;
+
+	#endregion
 
 
 	///  <summary>
@@ -30,24 +37,24 @@ namespace RazorSharp.Pointers
 		#region Properties
 
 		public T this[int index] {
-			get => Memory.Read<T>(PointerUtils.Offset<T>(m_value, index));
-			set => Memory.Write(PointerUtils.Offset<T>(m_value, index), 0, value);
+			get => Memory.Memory.Read<T>(PointerUtils.Offset<T>(m_value, index));
+			set => Memory.Memory.Write(PointerUtils.Offset<T>(m_value, index), 0, value);
 		}
 
-		public ref T Reference => ref Memory.AsRef<T>(Address);
+		public ref T Reference => ref Memory.Memory.AsRef<T>(Address);
 
 //		public IntPtr __this {
 //			get => Unsafe.AddressOf(ref this);
 //		}
 
 		public T Value {
-			get => Memory.Read<T>((IntPtr) m_value, 0);
-			set => Memory.Write((IntPtr) m_value, 0, value);
+			get => Memory.Memory.Read<T>((IntPtr) m_value, 0);
+			set => Memory.Memory.Write((IntPtr) m_value, 0, value);
 		}
 
 		public TNew Peek<TNew>()
 		{
-			return Memory.Read<TNew>(Address);
+			return Memory.Memory.Read<TNew>(Address);
 		}
 
 		public IntPtr Address {
@@ -140,6 +147,11 @@ namespace RazorSharp.Pointers
 			return new Pointer<T>(p.ToPointer());
 		}
 
+		public static explicit operator void*(Pointer<T> ptr)
+		{
+			return ptr.Address.ToPointer();
+		}
+
 		#region Arithmetic
 
 		public static Pointer<T> operator +(Pointer<T> p, int i)
@@ -217,6 +229,7 @@ namespace RazorSharp.Pointers
 					if (typeof(T).IsIListType()) {
 						return Collections.ListToString((IList) Value);
 					}
+
 					return Value.ToString();
 				case "P":
 					return Hex.ToHex(Address);

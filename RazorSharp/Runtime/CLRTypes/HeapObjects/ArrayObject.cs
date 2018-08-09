@@ -1,6 +1,10 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
+
+#endregion
 
 namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 {
@@ -14,9 +18,9 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 	{
 		// [FieldOffset(-8) public ObjHeader _header
 
-		[FieldOffset(0)]  private readonly MethodTable*      m_methodTablePtr;
-		[FieldOffset(8)]  private readonly uint              m_numComponents;
-		[FieldOffset(12)] private readonly uint              m_pad;
+		[FieldOffset(0)]  private readonly MethodTable* m_methodTablePtr;
+		[FieldOffset(8)]  private readonly uint         m_numComponents;
+		[FieldOffset(12)] private readonly uint         m_pad;
 
 
 		public uint         Length      => m_numComponents;
@@ -26,16 +30,14 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 		/// <summary>
 		/// Only present if the method table is shared among many types (arrays of pointers)
 		/// </summary>
-		//public RuntimeTypeHandle Handle => m_handle;
 
+		//public RuntimeTypeHandle Handle => m_handle;
 		public override string ToString()
 		{
 			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Header*", Hex.ToHex(Header));
 			table.AddRow("MethodTable*", Hex.ToHex(m_methodTablePtr));
 			table.AddRow("Length", Length);
-
-
 
 
 			return table.ToMarkDownString();

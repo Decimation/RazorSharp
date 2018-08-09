@@ -1,8 +1,11 @@
+#region
+
 using System;
-using System.Runtime.InteropServices;
 using ObjectLayoutInspector;
 using RazorCommon;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace RazorSharp.Analysis
 {
@@ -57,9 +60,9 @@ namespace RazorSharp.Analysis
 		{
 			CreateInternalInfo();
 			Pointer<T> lpArray  = m_addr;
-			int            len      = (m_value as Array).Length;
-			int            baseOfs  = IntPtr.Size;
-			var            elemName = typeof(T).GetElementType().Name;
+			int        len      = (m_value as Array).Length;
+			int        baseOfs  = IntPtr.Size;
+			var        elemName = typeof(T).GetElementType().Name;
 
 			for (int i = 0; i < len; i++) {
 				var offset   = i / lpArray.ElementSize;

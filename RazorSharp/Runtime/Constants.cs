@@ -1,8 +1,9 @@
+#region
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using RazorCommon;
 using RazorSharp.Runtime.CLRTypes;
+
+#endregion
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable IdentifierTypo
@@ -29,8 +30,7 @@ namespace RazorSharp.Runtime
 		{
 			const int specialSize = -1;
 
-			switch (t)
-			{
+			switch (t) {
 				case CorElementType.Void:
 					return 0;
 
@@ -144,6 +144,35 @@ namespace RazorSharp.Runtime
 						$"{typeof(T).Name} has not been mapped to {nameof(CorElementType)}.");
 			}
 		}
+
+		/// <summary>
+		/// The value of lowest two bits describe what the union contains
+		/// </summary>
+		[Flags]
+		public enum LowBits
+		{
+			/// <summary>
+			/// 0 - pointer to EEClass.
+			/// This MethodTable is the canonical method table.
+			/// </summary>
+			EEClass = 0,
+
+			/// <summary>
+			/// 1 - not used
+			/// </summary>
+			Invalid = 1,
+
+			/// <summary>
+			/// 2 - pointer to canonical MethodTable.
+			/// </summary>
+			MethodTable = 2,
+
+			/// <summary>
+			/// 3 - pointer to indirection cell that points to canonical MethodTable.
+			/// (used only if FEATURE_PREJIT is defined)
+			/// </summary>
+			Indirection = 3
+		}
 	}
 
 	/// <summary>
@@ -223,18 +252,18 @@ namespace RazorSharp.Runtime
 		/// </summary>
 		String = 0x0E,
 
-		Ptr         = 0x0F,
-		ByRef       = 0x10,
+		Ptr   = 0x0F,
+		ByRef = 0x10,
 
 		/// <summary>
 		/// Struct type
 		/// </summary>
-		ValueType   = 0x11,
+		ValueType = 0x11,
 
 		/// <summary>
 		/// Reference type (i.e. string, object)
 		/// </summary>
-		Class       = 0x12,
+		Class = 0x12,
 
 		Var         = 0x13,
 		Array       = 0x14,
@@ -578,7 +607,7 @@ namespace RazorSharp.Runtime
 		UnsafeValueType = 0x00001000,
 
 		BestFitMappingInited =
-			0x00002000,                           // VMFLAG_BESTFITMAPPING and VMFLAG_THROWONUNMAPPABLECHAR are valid only if this is set
+			0x00002000,                     // VMFLAG_BESTFITMAPPING and VMFLAG_THROWONUNMAPPABLECHAR are valid only if this is set
 		BestFitMapping        = 0x00004000, // BestFitMappingAttribute.Value
 		ThrowOnUnmappableChar = 0x00008000, // BestFitMappingAttribute.ThrowOnUnmappableChar
 

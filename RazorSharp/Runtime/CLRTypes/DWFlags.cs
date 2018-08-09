@@ -1,13 +1,23 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
+#endregion
+
 namespace RazorSharp.Runtime.CLRTypes
 {
+
+	#region
+
 	using DWORD = UInt32;
 	using WORD = UInt16;
 
+	#endregion
+
 	[StructLayout(LayoutKind.Explicit)]
+
 	// ReSharper disable once InconsistentNaming
 	internal struct DWFlags
 	{

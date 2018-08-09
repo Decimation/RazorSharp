@@ -1,5 +1,9 @@
+#region
+
 using System;
 using System.Collections.Generic;
+
+#endregion
 
 namespace RazorSharp.Utilities
 {
@@ -33,7 +37,7 @@ namespace RazorSharp.Utilities
 		{
 			internal string Windows       { get; }
 			internal string Fixed         { get; }
-			internal string CSharp { get; }
+			internal string CSharp        { get; }
 			internal string CSharpKeyword { get; }
 
 			internal NameStyle(string windows, string @fixed, string cSharp, string cSharpKeyword)
@@ -42,7 +46,6 @@ namespace RazorSharp.Utilities
 				Fixed         = @fixed;
 				CSharp        = cSharp;
 				CSharpKeyword = cSharpKeyword;
-
 			}
 		}
 
@@ -72,14 +75,14 @@ namespace RazorSharp.Utilities
 
 				{typeof(char), new NameStyle("WCHAR", "-", "Char", "char")},
 
-				{typeof(ushort), new NameStyle("WORD", "-", "UInt16","ushort")},
+				{typeof(ushort), new NameStyle("WORD", "-", "UInt16", "ushort")},
 				{typeof(short), new NameStyle("-", "__int16", "Int16", "short")},
 
-				{typeof(uint), new NameStyle("DWORD", "-",  "UInt32","uint")},
-				{typeof(int), new NameStyle("-", "__int32", "Int32","int" )},
+				{typeof(uint), new NameStyle("DWORD", "-", "UInt32", "uint")},
+				{typeof(int), new NameStyle("-", "__int32", "Int32", "int")},
 
-				{typeof(ulong), new NameStyle("QWORD", "-", "UInt64", "ulong" )},
-				{typeof(long), new NameStyle("-", "__int64", "Int64", "long" )},
+				{typeof(ulong), new NameStyle("QWORD", "-", "UInt64", "ulong")},
+				{typeof(long), new NameStyle("-", "__int64", "Int64", "long")},
 
 				{typeof(string), new NameStyle("-", "-", "String", "string")}
 			};

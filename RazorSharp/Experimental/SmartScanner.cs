@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,8 +13,11 @@ using RazorInvoke;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime.CLRTypes;
 
+#endregion
+
 namespace RazorSharp.Experimental
 {
+
 	// WIP
 	internal unsafe class SmartScanner : IDisposable
 	{
@@ -35,18 +40,24 @@ namespace RazorSharp.Experimental
 			m_handle = Kernel32.OpenProcess((Enumerations.ProcessAccessFlags) 1080, false, m_proc.Id);
 		}
 
+		public void PrintRegions()
+		{
+			foreach (var v in GetRegions()) {
+				Console.WriteLine("{0} | {1} | {2}", v.Type, Hex.ToHex(v.BaseAddress), v.RegionSize);
+			}
+		}
+
 		[Time]
 		public Dictionary<IntPtr, byte[]> Find(byte[] memory)
 		{
-			int cnt = 0;
+			int cnt  = 0;
 			var list = new Dictionary<IntPtr, byte[]>();
 			foreach (var v in m_regions) {
-
-
 				// Read aligned
 				// Scan for heap memory
 				for (int i = 0; i < v.Value.Length; i += memory.Length) {
 					var segment = new ArraySegment<byte>(v.Value, i, memory.Length);
+
 					//Console.Write("\rReading region [{0}, {1} bytes] [{2}] [{3}]", Hex.ToHex(v.Key), v.Value.Length,Collections.ToString(segment.ToArray()),cnt);
 
 					if (segment.SequenceEqual(memory)) {
@@ -100,6 +111,25 @@ namespace RazorSharp.Experimental
 			}
 		}
 
+		private List<MemoryBasicInformation> GetRegions()
+		{
+			var                    ls      = new List<MemoryBasicInformation>();
+			MemoryBasicInformation memInfo = new MemoryBasicInformation();
+			IntPtr                 current = IntPtr.Zero;
+
+			while (current.ToInt64() < m_maxAddress.ToInt64() &&
+			       Kernel32.VirtualQueryEx(m_handle, current, out memInfo, (uint) Marshal.SizeOf(memInfo)) != 0) {
+				if ((int) memInfo.State == 4096 && (int) memInfo.Protect == 4 && (uint) memInfo.RegionSize != 0) {
+					ls.Add(memInfo);
+				}
+
+
+				current = PointerUtils.Add(memInfo.BaseAddress, memInfo.RegionSize);
+			}
+
+			return ls;
+		}
+
 		public void ReadRegions()
 		{
 			MemoryBasicInformation memInfo = new MemoryBasicInformation();
@@ -110,6 +140,7 @@ namespace RazorSharp.Experimental
 				if ((int) memInfo.State == 4096 && (int) memInfo.Protect == 4 && (uint) memInfo.RegionSize != 0) {
 					byte[] regionData = new byte[(int) memInfo.RegionSize];
 					ulong  bytesRead  = 0;
+
 
 					if (!Kernel32.ReadProcessMemory(m_handle, memInfo.BaseAddress, regionData,
 						(ulong) memInfo.RegionSize, ref bytesRead))

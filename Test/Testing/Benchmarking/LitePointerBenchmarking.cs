@@ -1,5 +1,9 @@
+#region
+
 using BenchmarkDotNet.Attributes;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace Test.Testing.Benchmarking
 {
@@ -7,7 +11,7 @@ namespace Test.Testing.Benchmarking
 	public class LitePointerBenchmarking
 	{
 		private Pointer<string> lpString;
-		private string value = "foo";
+		private string          value = "foo";
 
 		[GlobalSetup]
 		public void Setup()

@@ -1,17 +1,24 @@
+#region
+
 using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using System.Text;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;
 
+#endregion
+
 namespace RazorSharp.Memory
 {
 
+	#region
+
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+	#endregion
 
 
 	public static unsafe class Memory
