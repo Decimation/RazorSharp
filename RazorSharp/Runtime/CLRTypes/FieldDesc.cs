@@ -90,6 +90,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		public int Size {
 			get {
 				int s = Constants.SizeOfCorElementType(CorType);
+
 				if (s == -1) {
 					fixed (FieldDesc* __this = &this) {
 						return CLRFunctions.FieldDescFunctions.LoadSize(__this);

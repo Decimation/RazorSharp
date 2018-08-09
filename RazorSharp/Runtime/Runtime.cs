@@ -77,7 +77,7 @@ namespace RazorSharp.Runtime
 			}
 
 			// We need to get the heap pointer manually because of type constraints
-			var ptr  = (Marshal.ReadIntPtr(Unsafe.AddressOf(ref t)));
+			var ptr  = Marshal.ReadIntPtr(Unsafe.AddressOf(ref t));
 			var @out = *(MethodTable**) ptr;
 			return @out;
 
@@ -130,12 +130,6 @@ namespace RazorSharp.Runtime
 //
 //			WriteMethodTable(ref t, (MethodTable*) typeof(TOrig).TypeHandle.Value);
 //		}
-
-		public static IntPtr ReadMethodTablePointer<T>(ref T t) where T : class
-		{
-			var heapMem = Unsafe.AddressOfHeap(ref t);
-			return Marshal.ReadIntPtr(heapMem);
-		}
 
 		#endregion
 
@@ -227,8 +221,11 @@ namespace RazorSharp.Runtime
 		/// </summary>
 		public static bool IsBlittable<T>()
 		{
+			// We'll say arrays and strings are blittable cause they're
+			// usable with GCHandle
 			if (typeof(T).IsArray || typeof(T) == typeof(string))
 				return true;
+
 			return MethodTableOf<T>()->IsBlittable;
 		}
 	}

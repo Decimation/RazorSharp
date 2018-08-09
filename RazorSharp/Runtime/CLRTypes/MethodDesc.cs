@@ -68,6 +68,8 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		/// <summary>
 		/// Slightly slower than using MethodHandle.GetFunctionPointer
+		///
+		/// Address-sensitive
 		/// </summary>
 		public void* Function {
 			get {
@@ -79,6 +81,8 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		/// <summary>
 		/// Slower than using Reflection
+		///
+		/// Address-sensitive
 		/// </summary>
 		public string Name {
 			get {
@@ -98,6 +102,8 @@ namespace RazorSharp.Runtime.CLRTypes
 			var flags2 = String.Join(", ", Flags2.GetFlags());
 
 			var table = new ConsoleTable("Field", "Value");
+			table.AddRow("Name", Name);
+			table.AddRow("Function", Hex.ToHex(Function));
 			table.AddRow(nameof(m_wFlags3AndTokenRemainder), m_wFlags3AndTokenRemainder);
 			table.AddRow(nameof(m_chunkIndex), m_chunkIndex);
 			table.AddRow(nameof(m_bFlags2), m_bFlags2);
@@ -109,6 +115,8 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Flags3", flags3);
 
 //			table.AddRow("Function", Hex.ToHex(Function));
+
+
 
 
 			return table.ToMarkDownString();

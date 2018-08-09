@@ -360,12 +360,12 @@ namespace RazorSharp
 
 		public static void WriteReference<T>(ref T t, IntPtr newHeapAddr)
 		{
-			Marshal.WriteIntPtr(Unsafe.AddressOf(ref t), newHeapAddr);
+			Marshal.WriteIntPtr(AddressOf(ref t), newHeapAddr);
 		}
 
 		public static void WriteReference<T>(ref T t, void* newHeapAddr)
 		{
-			Marshal.WriteIntPtr(Unsafe.AddressOf(ref t), new IntPtr(newHeapAddr));
+			Marshal.WriteIntPtr(AddressOf(ref t), new IntPtr(newHeapAddr));
 		}
 	}
 

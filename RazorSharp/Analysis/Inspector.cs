@@ -66,6 +66,7 @@ namespace RazorSharp.Analysis
 			Layout = new ObjectLayout<T>(ref t, false);
 		}
 
+
 		// WIP
 		/*public sealed class MethodInfo
 		{
@@ -180,14 +181,16 @@ namespace RazorSharp.Analysis
 
 		public class MetadataInfo
 		{
-			public T    Value       { get; }
-			public bool IsBlittable { get; }
+			public T Value { get; }
+
+			//public bool IsBlittable { get; }
 			public bool IsValueType { get; }
 
 			protected internal MetadataInfo(ref T t)
 			{
-				Value       = t;
-				IsBlittable = Runtime.Runtime.IsBlittable<T>();
+				Value = t;
+
+				//IsBlittable = Runtime.Runtime.IsBlittable<T>();
 				IsValueType = typeof(T).IsValueType;
 			}
 

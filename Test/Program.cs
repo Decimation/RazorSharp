@@ -63,30 +63,14 @@ namespace Test
 
 		public static void Main(string[] args)
 		{
-			Structure structure = new Structure();
-
-			RefInspector<Structure>.Write(ref structure);
-
-			foreach (var v in Runtime.GetFieldDescs<Structure>()) {
-				Console.WriteLine(v->ToString());
-			}
-		}
-
-		class Structure
-		{
-			private            string PrivateString;
-			public             string PublicString;
-			protected          string ProtectedString;
-			internal           string InternalString;
-			protected internal string ProtectedInternalString;
-			private protected  string PrivateProtectedString;
+			var md = Runtime.GetMethodDesc<Dummy>("Increment");
+			Console.WriteLine(md->ToString());
 		}
 
 
-		private static readonly Dummy d = new Dummy();
 
 
-		private static void DisplayTypes<T>(ref T t) where T : class
+		private static void DisplayTypes()
 		{
 			List<int> ls = new List<int>();
 			RefInspector<List<int>>.Write(ref ls, false, InspectorMode.Address | InspectorMode.Internal);

@@ -122,7 +122,6 @@
     <Compile Include="Experimental\SmartScanner.cs" />
     <Compile Include="Experimental\StackAllocated.cs" />
     <Compile Include="Experimental\UnmanagedAllocated.cs" />
-    <Compile Include="LPCUTF8.cs" />
     <Compile Include="Memory\Asm.cs" />
     <Compile Include="Memory\Memory.cs" />
     <Compile Include="Memory\MemoryLayout.cs" />

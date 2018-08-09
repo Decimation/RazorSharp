@@ -77,12 +77,12 @@ namespace Test.Testing.Tests
 			//                                  >> Domain:Value  0000020aecb433a0:NotInit  <<
 
 //			Debug.Assert(mt->Module == (void*) 0x00007fff1ba81000);
-//			Debug.Assert(mt->EEClass->Attributes == 0x102101);
+			Debug.Assert(mt->EEClass->Attributes == 0x102101);
 
 			// 26 = string's base size
 			// 6 = (sizeof(char) + sizeof(int))
 			// 26 - 6 = 20
-//			Debug.Assert(mt->EEClass->BaseSizePadding == 20);
+			Debug.Assert(mt->EEClass->BaseSizePadding == 20);
 			Debug.Assert(Unsafe.BaseFieldsSize<string>() == 6);
 			Debug.Assert(Unsafe.BaseInstanceSize<string>() == 26);
 
@@ -161,7 +161,7 @@ namespace Test.Testing.Tests
 			Debug.Assert(mt->NumInstanceFields == 4);
 			Debug.Assert(mt->NumStaticFields == 1);
 
-//			Debug.Assert(mt->EEClass->Attributes == 0x102001);
+			Debug.Assert(mt->EEClass->Attributes == 0x102001);
 //			Debug.Assert(mt->EEClass == (EEClass*) 0x00007ff8196d88e0);
 			Debug.Assert(mt->FieldDescListLength == 5);
 		}
@@ -220,7 +220,7 @@ namespace Test.Testing.Tests
 
 //			Debug.Assert(mt->Parent == (MethodTable*) 0x00007ff8196e4838);
 //			Debug.Assert(mt->EEClass->MethodTable == (MethodTable*) 0x00007ff819d39118);
-//			Debug.Assert(mt->EEClass->Attributes == 0x2101);
+			Debug.Assert(mt->EEClass->Attributes == 0x2101);
 			Debug.Assert(mt->NumInstanceFields == 0);
 			Debug.Assert(mt->NumStaticFields == 0);
 		}
@@ -283,7 +283,7 @@ namespace Test.Testing.Tests
 			Debug.Assert(mt->Module == (void*) 0x00007ff819611000);
 
 //			Debug.Assert(mt->EEClass->MethodTable == (MethodTable*)0x00007ff819d36ea8);
-//			Debug.Assert(mt->EEClass->Attributes == 0x2101);
+			Debug.Assert(mt->EEClass->Attributes == 0x2101);
 			Debug.Assert(mt->NumInstanceFields == 0);
 			Debug.Assert(mt->NumStaticFields == 0);
 		}
@@ -341,8 +341,7 @@ namespace Test.Testing.Tests
 			//Debug.Assert(mt->EEClass->MethodTable == (MethodTable*) 0x00007ff7bdce6c18);
 			Debug.Assert(mt->NumInstanceFields == 17);
 			Debug.Assert(mt->NumStaticFields == 0);
-
-//			Debug.Assert(mt->EEClass->Attributes == 0x100001);
+			Debug.Assert(mt->EEClass->Attributes == 0x100001);
 		}
 
 		private static void AssertProperties<T>(ref T t) { }
