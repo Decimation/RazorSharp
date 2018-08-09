@@ -51,6 +51,10 @@ namespace RazorSharp.Analysis
 
 		public Inspector(ref T t, InspectorMode mode = InspectorMode.All)
 		{
+			if (!typeof(T).IsValueType) {
+				//throw new Exception("Use RefInspector for reference types");
+			}
+
 			Mode      = mode;
 			Metadata  = new MetadataInfo(ref t);
 			Addresses = new AddressInfo(ref t);

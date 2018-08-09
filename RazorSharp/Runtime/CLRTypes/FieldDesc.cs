@@ -80,7 +80,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <summary>
 		/// Access level
 		/// </summary>
-		public int Protection => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
+		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
+
+		public ProtectionLevel Protection => (ProtectionLevel) ProtectionInt;
 
 		/// <summary>
 		/// Address-sensitive
@@ -127,6 +129,17 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public bool RequiresFullMBValue => Memory.Memory.ReadBit(m_dword1, 31);
 
+		public enum ProtectionLevel
+		{
+			Private           = 4,
+			PrivateProtected  = 8,
+			Internal          = 12,
+			Protected         = 16,
+			ProtectedInternal = 20,
+			Public            = 24,
+		}
+
+
 		public override string ToString()
 		{
 			var table = new ConsoleTable("Field", "Value");
@@ -146,6 +159,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Static", IsStatic);
 			table.AddRow("ThreadLocal", IsThreadLocal);
 			table.AddRow("RVA", IsRVA);
+
 			table.AddRow("Protection", Protection);
 			table.AddRow("Requires full MB value", RequiresFullMBValue);
 

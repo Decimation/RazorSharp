@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using BenchmarkDotNet.Environments;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp;
@@ -12,6 +14,7 @@ using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing;
 using static RazorSharp.Unsafe;
+using Runtime = RazorSharp.Runtime.Runtime;
 
 #endregion
 
@@ -24,6 +27,23 @@ namespace Test
 
 	#endregion
 
+	/**
+	 * RazorSharp
+	 *
+	 * History:
+	 * 	- RazorSharp (deci-common-c)
+	 * 	- RazorSharpNeue
+	 * 	- RazorCLR
+	 * 	- RazorSharp
+	 *
+	 * Notes:
+	 *  - 32-bit is not fully supported
+	 *  - Most types are probably not thread-safe
+	 *
+	 * Goals:
+	 *  - Provide identical functionality of ClrMD, SOS, and Reflection
+	 * 	  but in a faster and more efficient way
+	 */
 	internal static unsafe class Program
 	{
 
@@ -40,29 +60,30 @@ namespace Test
 		}
 #endif
 
-		/**
-		 * RazorSharp
-		 *
-		 * History:
-		 * 	- RazorSharp (deci-common-c)
-		 * 	- RazorSharpNeue
-		 * 	- RazorCLR
-		 * 	- RazorSharp
-		 *
-		 * Notes:
-		 *  - 32-bit is not fully supported
-		 *  - Most types are probably not thread-safe
-		 *
-		 * Goals:
-		 *  - Provide identical functionality of ClrMD, SOS, and Reflection
-		 * 	  but in a faster and more efficient way
-		 */
+
 		public static void Main(string[] args)
 		{
-			Dummy d = new Dummy();
-			RefInspector<Dummy>.Write(ref d);
-			Console.ReadLine();
+			Structure structure = new Structure();
+
+			RefInspector<Structure>.Write(ref structure);
+
+			foreach (var v in Runtime.GetFieldDescs<Structure>()) {
+				Console.WriteLine(v->ToString());
+			}
 		}
+
+		class Structure
+		{
+			private            string PrivateString;
+			public             string PublicString;
+			protected          string ProtectedString;
+			internal           string InternalString;
+			protected internal string ProtectedInternalString;
+			private protected  string PrivateProtectedString;
+		}
+
+
+		private static readonly Dummy d = new Dummy();
 
 
 		private static void DisplayTypes<T>(ref T t) where T : class
