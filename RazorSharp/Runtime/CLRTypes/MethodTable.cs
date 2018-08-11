@@ -142,7 +142,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		public MethodDescChunk* MethodDescChunkList   => EEClass->MethodDescChunkList;
 		public bool             IsBlittable           => EEClass->IsBlittable;
 
-		public TypeInfo TypeInfo => Runtime.MethodTableMap[this];
+//		public TypeInfo TypeInfo => Runtime.MethodTableMap[this];
 
 		#endregion
 
@@ -265,7 +265,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			//var lowFlags = String.Join(", ", TableFlagsLow.GetFlags().Distinct());
 
 			var table = new ConsoleTable("Field", "Value");
-			table.AddRow("Name", TypeInfo.Name);
+//			table.AddRow("Name", TypeInfo.Name);
 			if (HasComponentSize)
 				table.AddRow("Component size", m_dwFlags.ComponentSize);
 			table.AddRow("Base size", m_BaseSize);

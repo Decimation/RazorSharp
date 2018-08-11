@@ -37,6 +37,7 @@ namespace RazorSharp.Runtime
 
 		internal static readonly Dictionary<FieldDesc, FieldInfo>   FieldMap;
 		internal static readonly Dictionary<MethodDesc, MethodInfo> MethodMap;
+		// wip
 		internal static readonly Dictionary<MethodTable, TypeInfo> MethodTableMap;
 
 		static Runtime()

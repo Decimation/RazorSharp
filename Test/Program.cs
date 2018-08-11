@@ -62,16 +62,19 @@ namespace Test
 		public static void Main(string[] args)
 		{
 			Vector v = new Vector();
-			Inspector<Vector>.Write(ref v,true, InspectorMode.All & ~InspectorMode.MethodDescs);
+			Inspector<Vector>.Write(ref v, true, InspectorMode.All & ~InspectorMode.MethodDescs);
 
 			Clazz c = new Clazz();
-			RefInspector<Clazz>.Write(ref c,true, InspectorMode.All & ~InspectorMode.MethodDescs);
+			RefInspector<Clazz>.Write(ref c, true, InspectorMode.All & ~InspectorMode.MethodDescs);
 
 			string s = "foo";
 			RefInspector<string>.Write(ref s, false, InspectorMode.All & ~InspectorMode.MethodDescs);
 
 			int[] arr = {1, 2, 3};
 			RefInspector<int[]>.Write(ref arr, true, InspectorMode.All & ~InspectorMode.MethodDescs);
+
+			string[] ptrArr = new[] {"foo"};
+			RefInspector<string[]>.Write(ref ptrArr, true);
 
 			//BenchmarkRunner.Run<LayoutBenchmarking>();
 
