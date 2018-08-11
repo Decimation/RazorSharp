@@ -33,4 +33,4 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [x] Get field names via FieldDesc
 - [x] ObjectLayout without ObjectLayoutInspector TypeLayout (very slow)
 - [x] Fix "Function" field in MethodDesc for virtual functions
-- [ ] InvalidProgramException when using MethodDescs in RefInspector<string>
+- [ ] Fix InvalidProgramException when using MethodDescs in RefInspector<string>
