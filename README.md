@@ -30,6 +30,6 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [ ] MethodDescChunk
 - [ ] Read MethodDescs without Reflection
 - [x] Fix Canon MT for pointer arrays
-- [ ] Get field names via FieldDesc
-- [ ] ObjectLayout without ObjectLayoutInspector TypeLayout (very slow)
-- [ ] Fix "Function" field in MethodDesc for virtual functions
+- [x] Get field names via FieldDesc
+- [x] ObjectLayout without ObjectLayoutInspector TypeLayout (very slow)
+- [x] Fix "Function" field in MethodDesc for virtual functions
