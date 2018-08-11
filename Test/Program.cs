@@ -4,17 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using BenchmarkDotNet.Environments;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Analysis;
+using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing;
 using static RazorSharp.Unsafe;
-using Runtime = RazorSharp.Runtime.Runtime;
 
 #endregion
 
@@ -63,11 +61,67 @@ namespace Test
 
 		public static void Main(string[] args)
 		{
-			var md = Runtime.GetMethodDesc<Dummy>("Increment");
-			Console.WriteLine(md->ToString());
+			Vector v = new Vector();
+			Inspector<Vector>.Write(ref v,true, InspectorMode.All & ~InspectorMode.MethodDescs);
+
+			Clazz c = new Clazz();
+			RefInspector<Clazz>.Write(ref c,true, InspectorMode.All & ~InspectorMode.MethodDescs);
+
+			string s = "foo";
+			RefInspector<string>.Write(ref s, false, InspectorMode.All & ~InspectorMode.MethodDescs);
+
+			int[] arr = {1, 2, 3};
+			RefInspector<int[]>.Write(ref arr, true, InspectorMode.All & ~InspectorMode.MethodDescs);
+
+			//BenchmarkRunner.Run<LayoutBenchmarking>();
+
+
+//			Console.ReadLine();
 		}
 
 
+		private class Clazz
+		{
+			private byte x;
+
+			private long    l;
+			private decimal d;
+
+		}
+
+		private struct Vector
+		{
+			private float _x;
+			private float _y;
+			private byte  b;
+
+
+			public float X {
+				get => _x;
+				set => _x = value;
+			}
+
+			public float Y {
+				get => _y;
+				set => _y = value;
+			}
+
+			public Vector(float x, float y)
+			{
+				_x = x;
+				_y = y;
+				Debug.Assert(Memory.IsOnStack(ref _x));
+				Debug.Assert(Memory.IsOnStack(ref _y));
+				Debug.Assert(Memory.IsOnStack(ref x));
+				Debug.Assert(Memory.IsOnStack(ref y));
+				b = 0;
+			}
+
+			public override string ToString()
+			{
+				return String.Format("x = {0}, y = {1}", _x, _y);
+			}
+		}
 
 
 		private static void DisplayTypes()

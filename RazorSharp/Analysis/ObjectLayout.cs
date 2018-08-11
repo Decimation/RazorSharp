@@ -1,9 +1,8 @@
 #region
 
 using System;
-using ObjectLayoutInspector;
+using System.Linq;
 using RazorCommon;
-using RazorSharp.Pointers;
 
 #endregion
 
@@ -15,22 +14,21 @@ namespace RazorSharp.Analysis
 	///
 	/// If a reference type is specified, the heap layout is displayed.<para></para>
 	///
-	/// If a value type is specified, the stack layout is displayed.<para></para>
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public unsafe class ObjectLayout<T>
 	{
-		private readonly IntPtr       m_addr;
-		private readonly ConsoleTable m_table;
-		private readonly TypeLayout   m_layout;
-		private readonly T            m_value;
-		private const    char         Omitted = '-';
-		private readonly bool         m_fieldsOnly;
+		private readonly IntPtr m_addr;
+		private readonly T      m_value;
+		private const    char   Omitted = '-';
+		private readonly bool   m_fieldsOnly;
 
 		/// <summary>
 		/// Whether to include the full byte range of offsets (not included for MethodTable* or Object Header)
 		/// </summary>
 		private readonly bool m_fullOffset;
+
+		public ConsoleTable Table { get; }
 
 		public ObjectLayout(ref T t, bool fieldsOnly = true, bool fullOffset = false)
 		{
@@ -38,8 +36,12 @@ namespace RazorSharp.Analysis
 			m_fullOffset = fullOffset;
 			m_value      = t;
 			var addr = Unsafe.AddressOf(ref t);
-			m_addr  = addr;
-			m_table = new ConsoleTable("Offset", "Address", "Size", "Type", "Name", "Value");
+			m_addr = addr;
+
+			// If we're only displaying fields, we'll display the offset relative to the first field
+
+			Table = new ConsoleTable(fieldsOnly ? "Field Offset" : "Memory Offset", "Address", "Size", "Type", "Name",
+				"Value");
 
 			if (!typeof(T).IsValueType) {
 				// Point to heap
@@ -47,33 +49,13 @@ namespace RazorSharp.Analysis
 			}
 
 			if (typeof(T).IsArray) {
-				m_addr += Runtime.Runtime.OffsetToArrayData;
-				ArrayCreate();
+				throw new Exception();
 			}
-			else {
-				m_layout = TypeLayout.GetLayout<T>();
-				Create();
-			}
-		}
 
-		private void ArrayCreate()
-		{
-			CreateInternalInfo();
-			Pointer<T> lpArray  = m_addr;
-			int        len      = (m_value as Array).Length;
-			int        baseOfs  = IntPtr.Size;
-			var        elemName = typeof(T).GetElementType().Name;
+			Create(ref t);
 
-			for (int i = 0; i < len; i++) {
-				var offset   = i / lpArray.ElementSize;
-				var rightOfs = baseOfs + offset;
-				var leftOfs  = rightOfs + (lpArray.ElementSize - 1);
-
-				string ofsStr = GetOffsetString(baseOfs, rightOfs, leftOfs);
-
-
-				m_table.AddRow(ofsStr, Hex.ToHex(lpArray.Address), lpArray.ElementSize, elemName,
-					String.Format("Index {0}", i), lpArray[i]);
+			if (typeof(T) == typeof(string)) {
+				StringCreate();
 			}
 		}
 
@@ -91,7 +73,7 @@ namespace RazorSharp.Analysis
 			return ofsStr;
 		}
 
-		private void CreateInternalInfo()
+		private void CreateInternalReferenceTypeInfo()
 		{
 			const string objHeaderType   = "ObjHeader";
 			const string methodTableType = "MethodTable*";
@@ -99,68 +81,87 @@ namespace RazorSharp.Analysis
 			const string methodTableName = "(MethodTable ptr)";
 
 			if (!m_fieldsOnly) {
-				m_table.AddRow(-IntPtr.Size, Hex.ToHex(m_addr - IntPtr.Size), IntPtr.Size, objHeaderType,
+				Table.AddRow(-IntPtr.Size, Hex.ToHex(m_addr - IntPtr.Size), IntPtr.Size, objHeaderType,
 					objHeaderName, Omitted);
-				m_table.AddRow(0, Hex.ToHex(m_addr), IntPtr.Size, methodTableType, methodTableName, Omitted);
+				Table.AddRow(0, Hex.ToHex(m_addr), IntPtr.Size, methodTableType, methodTableName, Omitted);
 			}
 		}
 
-
-		private void Create()
+		private void StringCreate()
 		{
-			const string bytePaddingType = "Byte";
-			const string bytePaddingName = "(padding)";
+			int       baseOfs    = IntPtr.Size;
+			var       str        = m_value as string;
+			const int charOffset = 6;
+
+
+			// ReSharper disable once PossibleNullReferenceException
+			for (int i = 0; i < str.Length - 1; i++) {
+				var rightOfs = baseOfs + charOffset + i * sizeof(char);
+				var leftOfs  = rightOfs + (sizeof(char) - 1);
+
+				string ofsStr = GetOffsetString(baseOfs, rightOfs, leftOfs);
+
+				var addr = m_addr + charOffset + i * sizeof(char) + baseOfs;
+				Table.AddRow(ofsStr, Hex.ToHex(addr), sizeof(char), typeof(char).Name, $"(Character {i + 1})",
+					Memory.Memory.Read<char>(addr));
+			}
+		}
+
+		private void Create(ref T t)
+		{
+			const string paddingStr  = "(padding)";
+			const string paddingByte = "Byte";
+
+			var fieldDescs = Runtime.Runtime.GetFieldDescs<T>();
+			fieldDescs = fieldDescs.OrderBy(x => x.Reference.Offset).ToArray();
+			Collections.RemoveAll(ref fieldDescs, x => x.Reference.IsStatic);
+
 
 			int baseOfs = 0;
 			if (!typeof(T).IsValueType) {
 				baseOfs += IntPtr.Size;
-				CreateInternalInfo();
+				CreateInternalReferenceTypeInfo();
 			}
 
-			foreach (var v in m_layout.Fields) {
-				var rightOfs = baseOfs + v.Offset;
-				var leftOfs  = rightOfs + (v.Size - 1);
+			for (int i = 0; i < fieldDescs.Length; i++) {
+				var v        = fieldDescs[i];
+				var rightOfs = baseOfs + v.Reference.Offset;
+				var leftOfs  = rightOfs + (v.Reference.Size - 1);
 
 				string ofsStr = GetOffsetString(baseOfs, rightOfs, leftOfs);
 
-				if (v.GetType() != typeof(Padding)) {
-					FieldLayout fl = (FieldLayout) v;
+				Table.AddRow(ofsStr, Hex.ToHex(v.Reference.GetAddress(ref t)), v.Reference.Size,
+					v.Reference.FieldInfo.FieldType.Name, v.Reference.Name, v.Reference.GetValue(t));
 
-					m_table.AddRow(ofsStr, Hex.ToHex(m_addr + v.Offset + baseOfs), v.Size,
-						fl.FieldInfo.FieldType.Name,
-						fl.FieldInfo.Name, fl.FieldInfo.GetValue(m_value));
+
+				// start padding
+				int nextOffsetOrSize = Unsafe.BaseFieldsSize<T>();
+				if (i != fieldDescs.Length - 1) {
+					nextOffsetOrSize = fieldDescs[i + 1].Reference.Offset;
 				}
-				else {
-					m_table.AddRow(ofsStr, Hex.ToHex(m_addr + v.Offset + baseOfs), v.Size, bytePaddingType,
-						bytePaddingName, 0);
+
+				var nextSectOfsCandidate = fieldDescs[i].Reference.Offset + fieldDescs[i].Reference.Size;
+
+				if (nextSectOfsCandidate < nextOffsetOrSize) {
+					var padSize   = nextOffsetOrSize - nextSectOfsCandidate;
+					var ro        = baseOfs + nextSectOfsCandidate;
+					var lo        = ro + ((padSize) - 1);
+					var padOffset = nextSectOfsCandidate + baseOfs;
+
+
+					Table.AddRow(GetOffsetString(baseOfs, ro, lo), Hex.ToHex(m_addr + padOffset), padSize,
+						paddingByte,
+						paddingStr, 0);
 				}
-			}
 
-			if (typeof(T) == typeof(string)) {
-				// TypeLayout says strings have 2 bytes of padding but that isn't true
-				m_table.Rows.RemoveAt(m_table.Rows.Count - 1);
-
-				var       str        = m_value as string;
-				const int charOffset = 6;
-
-
-				// ReSharper disable once PossibleNullReferenceException
-				for (int i = 0; i < str.Length - 1; i++) {
-					var rightOfs = baseOfs + charOffset + (i * sizeof(char));
-					var leftOfs  = rightOfs + (sizeof(char) - 1);
-
-					string ofsStr = GetOffsetString(baseOfs, rightOfs, leftOfs);
-
-					var addr = m_addr + charOffset + (i * sizeof(char)) + baseOfs;
-					m_table.AddRow(ofsStr, Hex.ToHex(addr), sizeof(char), typeof(char).Name, Omitted,
-						Memory.Memory.Read<char>(addr));
-				}
+				// end padding
 			}
 		}
 
+
 		public override string ToString()
 		{
-			return Inspector<T>.CreateLabelString("Memory layout:", m_table);
+			return Inspector<T>.CreateLabelString("Memory layout:", Table);
 		}
 	}
 

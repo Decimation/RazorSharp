@@ -41,6 +41,35 @@ namespace RazorSharp.Runtime
 			Functions.Add(name, Scanner.GetDelegate<TDelegate>(signature));
 		}
 
+		internal static class ThreadFunctions
+		{
+			private const string GetStackLowerBoundSignature =
+				"48 83 EC 58 48 8D 54 24 20 48 8D 4C 24 20 E8 A5 B7 F5 FF";
+
+			public delegate void* GetStackLowerBoundDelegate();
+
+			public static readonly GetStackLowerBoundDelegate GetStackLowerBound;
+
+			private const string GetStackGuaranteeSignature =
+				"48 83 EC 28 83 3D DD 41 93 00 00 0F 85 E3 6C 37 00 B8 00 10 00 00";
+
+			internal delegate int GetStackGuaranteeDelegate(IntPtr __this);
+
+			internal static readonly GetStackGuaranteeDelegate GetStackGuarantee;
+
+			static ThreadFunctions()
+			{
+				AddFunction<GetStackLowerBoundDelegate>("Thread::GetStackLowerBound", GetStackLowerBoundSignature);
+				GetStackLowerBound = (GetStackLowerBoundDelegate) Functions["Thread::GetStackLowerBound"];
+
+				// var thread = Kernel32.OpenThread(0x4, false, Kernel32.GetCurrentThreadId());
+				// Console.WriteLine("Stack size: {0}", CLRFunctions.ThreadFunctions.GetStackGuarantee(thread));
+				AddFunction<GetStackGuaranteeDelegate>("Thread::GetStackGuarantee", GetStackGuaranteeSignature);
+				GetStackGuarantee = (GetStackGuaranteeDelegate) Functions["Thread::GetStackGuarantee"];
+			}
+
+		}
+
 		internal static class MethodDescFunctions
 		{
 			private const string GetMultiCallableAddrOfCodeSignature =

@@ -64,7 +64,7 @@ namespace RazorSharp
 	/// </summary>
 	public static unsafe class Unsafe
 	{
-		private const int InvalidValue = -1;
+		internal const int InvalidValue = -1;
 
 		#region OffsetOf
 
@@ -85,10 +85,10 @@ namespace RazorSharp
 			var fieldDescsPtrs = Runtime.Runtime.GetFieldDescs<TType>();
 			var fieldDescs     = new List<FieldDesc>();
 			foreach (var p in fieldDescsPtrs) {
-				if (p->CorType == Constants.TypeToCorType<TMember>()) {
+				if (p.Reference.CorType == Constants.TypeToCorType<TMember>()) {
 					// Special note:
 					// we can dereference here because we don't access any address-sensitive fields
-					fieldDescs.Add(*p);
+					fieldDescs.Add(p.Reference);
 				}
 			}
 
@@ -115,6 +115,17 @@ namespace RazorSharp
 
 
 		#region Address
+
+		/// <summary>
+		/// Returns the address of a field in the specified type.
+		/// </summary>
+		/// <param name="instance">Instance of the enclosing type</param>
+		/// <param name="name">Name of the field</param>
+		public static IntPtr AddressOf<T>(ref T instance, string name)
+		{
+			var fd = Runtime.Runtime.GetFieldDesc<T>(name);
+			return fd->GetAddress(ref instance);
+		}
 
 		/// <summary>
 		/// Returns the address of a type in memory.<para></para>
@@ -276,7 +287,7 @@ namespace RazorSharp
 		/// Note: If the fields *themselves* are padded, those are still included.
 		/// Note: Doesn't work when T has generic parameters
 		/// </summary>
-		public static int BaseFieldsSize<T>() where T : class
+		public static int BaseFieldsSize<T>() //where T : class
 		{
 			//inline DWORD MethodTable::GetNumInstanceFieldBytes()
 			//{
@@ -367,6 +378,8 @@ namespace RazorSharp
 		{
 			Marshal.WriteIntPtr(AddressOf(ref t), new IntPtr(newHeapAddr));
 		}
+
+
 	}
 
 }

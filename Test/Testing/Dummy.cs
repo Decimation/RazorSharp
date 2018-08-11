@@ -77,7 +77,7 @@ namespace Test.Testing
 
 		public override string ToString()
 		{
-			return default;
+			return String.Format("int: {0} | string: {1}", _int, _string);
 		}
 	}
 

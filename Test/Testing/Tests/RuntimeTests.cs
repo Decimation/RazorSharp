@@ -162,6 +162,7 @@ namespace Test.Testing.Tests
 			Debug.Assert(mt->NumStaticFields == 1);
 
 			Debug.Assert(mt->EEClass->Attributes == 0x102001);
+
 //			Debug.Assert(mt->EEClass == (EEClass*) 0x00007ff8196d88e0);
 			Debug.Assert(mt->FieldDescListLength == 5);
 		}

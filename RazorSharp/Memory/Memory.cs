@@ -5,6 +5,7 @@ using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using RazorInvoke;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;
@@ -138,6 +139,11 @@ namespace RazorSharp.Memory
 			return ref CSUnsafe.AsRef<T>(p.ToPointer());
 		}
 
+		public static T As<T>(object o) where T : class
+		{
+			return CSUnsafe.As<T>(o);
+		}
+
 		public static bool IsValid<T>(IntPtr addrOfPtr) where T : class
 		{
 			if (addrOfPtr == IntPtr.Zero) return false;
@@ -151,12 +157,17 @@ namespace RazorSharp.Memory
 			return readMethodTable->Equals(*validMethodTable);
 		}
 
-		public static void WriteAs<TPtr, TValue>(ExPointer<TPtr> ptr, int elemOffsetTValue, TValue v)
-		{
-			var nPtr = ptr.Reinterpret<TValue>();
-			nPtr[elemOffsetTValue] = v;
-		}
 
+		public static object[] CopyOut<T>(IntPtr addr, int size)
+		{
+			Pointer<T> ptr  = addr;
+			object[]   @out = new object[size];
+			for (int i = 0; i < size; i++) {
+				@out[i] = ptr[i];
+			}
+
+			return @out;
+		}
 
 		#region Zero
 
@@ -175,6 +186,34 @@ namespace RazorSharp.Memory
 
 		#endregion
 
+		/// <summary>
+		/// Determines whether a variable is on the current thread's stack.
+		/// </summary>
+		public static bool IsOnStack<T>(ref T t)
+		{
+			return IsOnStack(Unsafe.AddressOf(ref t).ToPointer());
+		}
+
+		public static bool IsOnStack(void* v)
+		{
+			var bounds = Kernel32.GetCurrentThreadStackLimits();
+			return RazorMath.Between(((IntPtr) v).ToInt64(), bounds.low.ToInt64(), bounds.high.ToInt64(), true);
+		}
+
+		/// <summary>
+		/// Allocates a value type in zeroed, unmanaged memory.<para></para>
+		/// Once you are done using the memory, dispose using Marshal.FreeHGlobal.
+		/// </summary>
+		/// <typeparam name="T">Value type to allocate</typeparam>
+		/// <returns>A pointer to the allocated memory</returns>
+		public static Pointer<T> AllocUnmanaged<T>() where T : struct
+		{
+			var    size  = Unsafe.SizeOf<T>();
+			IntPtr alloc = Marshal.AllocHGlobal(size);
+			Zero(alloc, size);
+
+			return alloc;
+		}
 	}
 
 }

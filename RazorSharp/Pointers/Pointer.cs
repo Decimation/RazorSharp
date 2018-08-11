@@ -47,6 +47,9 @@ namespace RazorSharp.Pointers
 //			get => Unsafe.AddressOf(ref this);
 //		}
 
+		/// <summary>
+		/// Dereferences the pointer
+		/// </summary>
 		public T Value {
 			get => Memory.Memory.Read<T>((IntPtr) m_value, 0);
 			set => Memory.Memory.Write((IntPtr) m_value, 0, value);

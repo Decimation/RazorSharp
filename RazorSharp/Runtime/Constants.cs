@@ -103,9 +103,9 @@ namespace RazorSharp.Runtime
 			throw new Exception($"Size for CorElementType {t} is unknown");
 		}
 
-		public static CorElementType TypeToCorType<T>()
+		private static CorElementType TypeToCorType(Type t)
 		{
-			switch (Type.GetTypeCode(typeof(T))) {
+			switch (Type.GetTypeCode(t)) {
 				case TypeCode.Empty:
 				case TypeCode.DBNull:
 					goto case default;
@@ -141,9 +141,15 @@ namespace RazorSharp.Runtime
 					return CorElementType.Class;
 				default:
 					throw new ArgumentOutOfRangeException(
-						$"{typeof(T).Name} has not been mapped to {nameof(CorElementType)}.");
+						$"{t.Name} has not been mapped to {nameof(CorElementType)}.");
 			}
 		}
+
+		internal static CorElementType TypeToCorType<T>()
+		{
+			return TypeToCorType(typeof(T));
+		}
+
 
 		/// <summary>
 		/// The value of lowest two bits describe what the union contains
@@ -172,6 +178,19 @@ namespace RazorSharp.Runtime
 			/// (used only if FEATURE_PREJIT is defined)
 			/// </summary>
 			Indirection = 3
+		}
+
+		/// <summary>
+		/// Use with: FieldDesc::ProtectionInt
+		/// </summary>
+		public enum ProtectionLevel
+		{
+			Private           = 4,
+			PrivateProtected  = 8,
+			Internal          = 12,
+			Protected         = 16,
+			ProtectedInternal = 20,
+			Public            = 24,
 		}
 	}
 
@@ -282,6 +301,67 @@ namespace RazorSharp.Runtime
 		Modifier    = 0x40,
 		Sentinel    = 0x41,
 		Pinned      = 0x45,
+	}
+
+	/// <summary>
+	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/method.hpp#L1701
+	/// Use with: MethodDesc::m_bFlags2
+	/// </summary>
+	[Flags]
+	internal enum MethodDescFlags2 : byte
+	{
+		/// <summary>
+		/// The method entrypoint is stable (either precode or actual code)
+		/// </summary>
+		HasStableEntryPoint = 0x01,
+
+		/// <summary>
+		/// implies that HasStableEntryPoint is set.
+		/// Precode has been allocated for this method
+		/// </summary>
+		HasPrecode = 0x02,
+
+		IsUnboxingStub = 0x04,
+
+		/// <summary>
+		/// Has slot for native code
+		/// </summary>
+		HasNativeCodeSlot = 0x08,
+
+		/// <summary>
+		/// Jit may expand method as an intrinsic
+		/// </summary>
+		IsJitIntrinsic = 0x10,
+	}
+
+	/// <summary>
+	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/method.hpp#L1686
+	/// Use with: MethodDesc::m_wFlags3AndTokenRemainder
+	/// </summary>
+	[Flags]
+	internal enum MethodDescFlags3 : ushort
+	{
+
+		TokenRemainderMask = 0x3FFF,
+
+		// These are separate to allow the flags space available and used to be obvious here
+		// and for the logic that splits the token to be algorithmically generated based on the
+		// #define
+
+		/// <summary>
+		/// Indicates that a type-forwarded type is used as a valuetype parameter (this flag is only valid for ngenned items)
+		/// </summary>
+		HasForwardedValuetypeParameter = 0x4000,
+
+		/// <summary>
+		/// Indicates that all typeref's in the signature of the method have been resolved to typedefs (or that process failed) (this flag is only valid for non-ngenned methods)
+		/// </summary>
+		ValueTypeParametersWalked = 0x4000,
+
+		/// <summary>
+		/// Indicates that we have verified that there are no equivalent valuetype parameters for this method
+		/// </summary>
+		DoesNotHaveEquivalentValuetypeParameters = 0x8000,
 	}
 
 	/// <summary>

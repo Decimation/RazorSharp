@@ -61,7 +61,7 @@ namespace RazorSharp.Analysis
 			public int BaseInstance   { get; }
 			public int BaseFieldsSize { get; }
 
-			internal ReferenceSizeInfo(ref T t) : base()
+			internal ReferenceSizeInfo(ref T t)
 			{
 				Heap           = Unsafe.HeapSize(ref t);
 				BaseInstance   = Unsafe.BaseInstanceSize<T>();
@@ -82,6 +82,8 @@ namespace RazorSharp.Analysis
 				table.AttachColumn("Base fields size", BaseFieldsSize);
 
 
+
+				table.DetachFromColumns(Unsafe.InvalidValue);
 				return table;
 			}
 		}

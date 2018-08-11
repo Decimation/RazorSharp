@@ -1,6 +1,8 @@
 #region
 
 using System;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorSharp.Pointers;
@@ -29,6 +31,11 @@ namespace RazorSharp.Runtime.CLRTypes
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct FieldDesc
 	{
+		private const int FieldOffsetMax    = (1 << 27) - 1;
+		private const int FieldOffsetNewEnC = FieldOffsetMax - 4;
+
+		#region Fields
+
 		[FieldOffset(0)] private readonly MethodTable* m_pMTOfEnclosingClass;
 
 		// unsigned m_mb                  	: 24;
@@ -42,6 +49,10 @@ namespace RazorSharp.Runtime.CLRTypes
 		// unsigned m_dwOffset         		: 27;
 		// unsigned m_type             		: 5;
 		[FieldOffset(12)] private readonly unsigned m_dword2;
+
+		#endregion
+
+		#region Accessors
 
 		/// <summary>
 		/// MemberDef
@@ -82,7 +93,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// </summary>
 		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
 
-		public ProtectionLevel Protection => (ProtectionLevel) ProtectionInt;
+		public Constants.ProtectionLevel Protection => (Constants.ProtectionLevel) ProtectionInt;
 
 		/// <summary>
 		/// Address-sensitive
@@ -101,6 +112,43 @@ namespace RazorSharp.Runtime.CLRTypes
 			}
 		}
 
+		public object GetValue<TInstance>(TInstance t)
+		{
+			return FieldInfo.GetValue(t);
+		}
+
+		public FieldInfo FieldInfo => Runtime.FieldMap[this];
+
+		/// <summary>
+		/// Returns the address of the field in the specified type.<para></para>
+		///
+		/// Source 1: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp#L516 <para></para>
+		/// Source 2: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp#L489 <para></para>
+		/// Source 3: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp#L467 <para></para>
+		///
+		/// <exception cref="RuntimeException">If the field is static</exception>
+		/// </summary>
+		public IntPtr GetAddress<TInstance>(ref TInstance t)
+		{
+			if (IsStatic)
+				throw new RuntimeException("You cannot get the address of a static field (yet)");
+
+			Debug.Assert(Runtime.ReadMethodTable(ref t) == MethodTableOfEnclosingClass);
+			Debug.Assert(Offset != FieldOffsetNewEnC);
+
+			var data = Unsafe.AddressOf(ref t);
+			if (typeof(TInstance).IsValueType) {
+				return data + Offset;
+			}
+			else {
+				data =  Marshal.ReadIntPtr(data);
+				data += IntPtr.Size + Offset;
+
+				return data;
+			}
+		}
+
+
 		/// <summary>
 		/// Slower than using Reflection
 		///
@@ -108,14 +156,16 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// </summary>
 		public string Name {
 			get {
-#if DEBUG_SIGSCANNING
+#if SIGSCAN
 				fixed (FieldDesc* __this = &this) {
 					byte* lpcutf8 = CLRFunctions.FieldDescFunctions.GetName(__this);
 					return CLRFunctions.StringFunctions.NewString(lpcutf8);
 				}
-#else
-				return Assertion.WIPString;
 #endif
+				return FieldInfo.Name;
+
+
+//				return Assertion.WIPString;
 			}
 		}
 
@@ -130,15 +180,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public bool RequiresFullMBValue => Memory.Memory.ReadBit(m_dword1, 31);
 
-		public enum ProtectionLevel
-		{
-			Private           = 4,
-			PrivateProtected  = 8,
-			Internal          = 12,
-			Protected         = 16,
-			ProtectedInternal = 20,
-			Public            = 24,
-		}
+		#endregion
 
 
 		public override string ToString()
@@ -147,9 +189,10 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			// !NOTE NOTE NOTE!
 			// this->ToString() must be used to view this
-			// when the pointer is copied, MethodTableOfEnclosingClass
-			// read from incorrect memory
+
+			table.AddRow("Name", Name);
 			table.AddRow("Enclosing MethodTable", Hex.ToHex(MethodTableOfEnclosingClass));
+
 
 			// Unsigned 1
 			table.AddRow("MB", MB);
@@ -164,7 +207,6 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Protection", Protection);
 			table.AddRow("Requires full MB value", RequiresFullMBValue);
 
-			table.AddRow("Name", Name);
 
 			return table.ToMarkDownString();
 		}

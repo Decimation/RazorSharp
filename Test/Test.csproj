@@ -80,6 +80,9 @@
     <Reference Include="RazorCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\RazorCommon\RazorCommon\bin\x64\Release\RazorCommon.dll</HintPath>
     </Reference>
+    <Reference Include="RazorInvoke, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\RazorInvoke\RazorInvoke\bin\Release\RazorInvoke.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
       <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>

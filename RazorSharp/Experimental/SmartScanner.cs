@@ -123,6 +123,8 @@ namespace RazorSharp.Experimental
 					ls.Add(memInfo);
 				}
 
+				//ls.Add(memInfo);
+
 
 				current = PointerUtils.Add(memInfo.BaseAddress, memInfo.RegionSize);
 			}

@@ -20,19 +20,15 @@ namespace RazorSharp.Analysis
 	[Flags]
 	public enum InspectorMode
 	{
-		None       = 0,
-		Meta       = 1,
-		Address    = 2,
-		Size       = 4,
-		Internal   = 8,
-		FieldDescs = 16,
-
-		/// <summary>
-		/// WIP
-		/// </summary>
+		None        = 0,
+		Meta        = 1,
+		Address     = 2,
+		Size        = 4,
+		Internal    = 8,
+		FieldDescs  = 16,
 		MethodDescs = 32,
-		Layout = 64,
-		All    = Meta | Address | Size | Internal | Layout | FieldDescs | MethodDescs,
+		Layout      = 64,
+		All         = Meta | Address | Size | Internal | Layout | FieldDescs | MethodDescs,
 	}
 
 	public unsafe class Inspector<T>
@@ -42,12 +38,13 @@ namespace RazorSharp.Analysis
 		public SizeInfo     Sizes     { get; protected set; }
 		public InternalInfo Internal  { get; protected set; }
 		public FieldInfo    Fields    { get; protected set; }
+		public MethodInfo   Methods   { get; protected set; }
 
-		//public MethodInfo      Methods   { get; protected set; }
-		public ObjectLayout<T> Layout { get; protected set; }
+		private readonly ConsoleTable m_layout;
 
 		protected readonly      InspectorMode Mode;
 		private static readonly string        Separator = new string('-', Console.BufferWidth);
+
 
 		public Inspector(ref T t, InspectorMode mode = InspectorMode.All)
 		{
@@ -55,34 +52,53 @@ namespace RazorSharp.Analysis
 				//throw new Exception("Use RefInspector for reference types");
 			}
 
-			Mode      = mode;
-			Metadata  = new MetadataInfo(ref t);
-			Addresses = new AddressInfo(ref t);
-			Sizes     = new SizeInfo();
-			Internal  = new InternalInfo(ref t);
-			Fields    = new FieldInfo();
+			Mode = mode;
 
-			//Methods   = new MethodInfo();
-			Layout = new ObjectLayout<T>(ref t, false);
+			if (Mode.HasFlag(InspectorMode.Meta)) {
+				Metadata = new MetadataInfo(ref t);
+			}
+
+			if (Mode.HasFlag(InspectorMode.Address)) {
+				Addresses = new AddressInfo(ref t);
+			}
+
+			if (Mode.HasFlag(InspectorMode.Size)) {
+				Sizes = new SizeInfo();
+			}
+
+			if (Mode.HasFlag(InspectorMode.Internal)) {
+				Internal = new InternalInfo(ref t);
+			}
+
+			if (Mode.HasFlag(InspectorMode.FieldDescs)) {
+				Fields = new FieldInfo(ref t);
+			}
+
+			if (Mode.HasFlag(InspectorMode.MethodDescs)) {
+				Methods = new MethodInfo();
+			}
+
+			if (Mode.HasFlag(InspectorMode.Layout) && !typeof(T).IsArray) {
+				m_layout = new ObjectLayout<T>(ref t, false).Table;
+			}
 		}
 
 
-		// WIP
-		/*public sealed class MethodInfo
+		public sealed class MethodInfo
 		{
 			public Pointer<MethodDesc>[] MethodDescs { get; }
 
 			internal MethodInfo()
 			{
 				MethodDescs = Runtime.Runtime.GetMethodDescs<T>();
-				MethodDescs = MethodDescs.OrderBy(x => (long) x.Value.Function).ToArray();
+				MethodDescs = MethodDescs.OrderBy(x => (long) x.Reference.Function).ToArray();
 			}
 
 			private ConsoleTable ToTable()
 			{
-				var table = new ConsoleTable("Function", "MethodDesc");
+				var table = new ConsoleTable("MethodDesc Address", "Function Address", "Name");
 				foreach (var v in MethodDescs) {
-					table.AddRow(Hex.ToHex(v.Value.Function), Hex.ToHex(v.Address));
+					table.AddRow(Hex.ToHex(v.Address), Hex.ToHex(v.Reference.Function), v.Reference.Name);
 				}
 
 				return table;
@@ -92,41 +108,42 @@ namespace RazorSharp.Analysis
 			{
 				return CreateLabelString("MethodDescs:", ToTable());
 			}
-		}*/
+		}
 
 		public sealed class FieldInfo
 		{
-			public FieldDesc*[] FieldDescs { get; }
+			public           Pointer<FieldDesc>[] FieldDescs { get; }
+			private readonly ConsoleTable         m_table;
 
-			internal FieldInfo()
+
+			internal FieldInfo(ref T value)
 			{
 				if (typeof(T).IsArray) {
 					FieldDescs = null;
 				}
 				else {
 					FieldDescs = Runtime.Runtime.GetFieldDescs<T>();
-
-
-					Pointer<FieldDesc>[] tmp = new Pointer<FieldDesc>[FieldDescs.Length];
-					for (int i = 0; i < FieldDescs.Length; i++) {
-						tmp[i] = FieldDescs[i];
-					}
-
-					tmp = tmp.OrderBy(x => x.Value.Offset).ToArray();
-					for (int i = 0; i < tmp.Length; i++) {
-						FieldDescs[i] = (FieldDesc*) tmp[i].Address;
-					}
+					FieldDescs = FieldDescs.OrderBy(x => x.Reference.Offset).ToArray();
 				}
+
+				m_table = ToTable(ref value);
 			}
 
-			private ConsoleTable ToTable()
+			private ConsoleTable ToTable(ref T value)
 			{
-				var table = new ConsoleTable("Field Offset", "FD Address", "CorType", "Static", "Size");
+				const string omitted = "-";
+
+				var table = new ConsoleTable("Field Offset", "FieldDesc Address", "Field Address", "CorType", "Static",
+					"Size", "Name", "Value");
 
 				if (FieldDescs != null) {
 					foreach (var v in FieldDescs) {
-						table.AddRow(v->Offset, Hex.ToHex(v), v->CorType,
-							v->IsStatic ? StringUtils.Check : StringUtils.BallotX, v->Size);
+						string fieldAddrHex =
+							v.Reference.IsStatic ? omitted : Hex.ToHex(v.Reference.GetAddress(ref value));
+
+						table.AddRow(v.Reference.Offset, Hex.ToHex(v.Address), fieldAddrHex, v.Reference.CorType,
+							v.Reference.IsStatic ? StringUtils.Check : StringUtils.BallotX, v.Reference.Size,
+							v.Reference.Name, v.Reference.GetValue(value));
 					}
 				}
 
@@ -136,7 +153,7 @@ namespace RazorSharp.Analysis
 
 			public override string ToString()
 			{
-				return CreateLabelString("FieldDescs:", ToTable());
+				return CreateLabelString("FieldDescs:", m_table);
 			}
 		}
 
@@ -177,7 +194,6 @@ namespace RazorSharp.Analysis
 				return CreateLabelString("Internal:", ToTable());
 			}
 		}
-
 
 		public class MetadataInfo
 		{
@@ -262,8 +278,6 @@ namespace RazorSharp.Analysis
 
 		protected internal static string CreateLabelString(string label, ConsoleTable table)
 		{
-			var cols = table.Columns.Count;
-
 			return String.Format("\n{0}\n{1}\n", ANSI.BoldString(label), table.ToMarkDownString());
 		}
 
@@ -296,8 +310,11 @@ namespace RazorSharp.Analysis
 			Console.WriteLine(ANSI.BoldString(EEClassStr + colon));
 			Console.WriteLine(inspector.Internal.EEClass->ToString());
 
-			Console.WriteLine(ANSI.BoldString(CanonMTStr + colon));
-			Console.WriteLine(inspector.Internal.MethodTable->Canon->ToString());
+			if (inspector.Internal.Canon != inspector.Internal.MethodTable) {
+				Console.WriteLine(ANSI.BoldString(CanonMTStr + colon));
+				Console.WriteLine(inspector.Internal.MethodTable->Canon->ToString());
+			}
+
 		}
 
 
@@ -326,11 +343,11 @@ namespace RazorSharp.Analysis
 			}
 
 			if (Mode.HasFlag(InspectorMode.MethodDescs)) {
-				//sb.Append(Methods);
+				sb.Append(Methods);
 			}
 
-			if (Mode.HasFlag(InspectorMode.Layout)) {
-				sb.Append(Layout);
+			if (Mode.HasFlag(InspectorMode.Layout) && !typeof(T).IsArray) {
+				sb.Append(CreateLabelString("Memory layout:", m_layout));
 			}
 
 			return sb.ToString();

@@ -133,6 +133,7 @@
     <Compile Include="Pointers\Pointer.cs" />
     <Compile Include="Pointers\ExPointer.cs" />
     <Compile Include="Pointers\PointerUtils.cs" />
+    <Compile Include="RazorMath.cs" />
     <Compile Include="Runtime\CLRFunctions.cs" />
     <Compile Include="Runtime\CLRTypes\DWFlags.cs" />
     <Compile Include="Runtime\CLRTypes\EEClass.cs" />
