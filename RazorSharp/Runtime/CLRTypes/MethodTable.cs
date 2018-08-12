@@ -81,12 +81,49 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// </summary>
 		public DWORD BaseSize => m_BaseSize;
 
-		public WORD         Token         => m_wToken;
-		public WORD         NumVirtuals   => m_wNumVirtuals;
-		public WORD         NumInterfaces => m_wNumInterfaces;
-		public MethodTable* Parent        => m_pParentMethodTable;
-		public Module*      Module        => m_pLoaderModule;
+		/// <summary>
+		/// Class token if it fits into 16-bits. If this is (WORD)-1, the class token is stored in the TokenOverflow optional member.
+		/// </summary>
+		public WORD Token => m_wToken;
 
+		/// <summary>
+		/// The number of virtual methods in this type (4 by default; from Object)
+		/// </summary>
+		public WORD NumVirtuals => m_wNumVirtuals;
+
+		/// <summary>
+		/// The number of interfaces this type implements
+		/// </summary>
+		public WORD NumInterfaces => m_wNumInterfaces;
+
+		/// <summary>
+		/// The parent type's MethodTable.
+		/// </summary>
+		/// <exception cref="NotImplementedException">If the type is an indirect parent</exception>
+		public MethodTable* Parent {
+			// On Linux ARM is a RelativeFixupPointer. Otherwise,
+			// Parent PTR_MethodTable if enum_flag_HasIndirectParent is not set. Pointer to indirection cell
+			// if enum_flag_HasIndirectParent is set. The indirection is offset by offsetof(MethodTable, m_pParentMethodTable).
+			// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
+			// for enum_flag_HasIndirectParentMethodTable.
+			get {
+				if (!TableFlags.HasFlag(MethodTableFlags.HasIndirectParent)) {
+					return m_pParentMethodTable;
+				}
+				else {
+					throw new NotImplementedException("Parent is indirect");
+				}
+			}
+		}
+
+		public Module* Module => m_pLoaderModule;
+
+		/// <summary>
+		/// The corresponding EEClass to this MethodTable.<para></para>
+		/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L22 <para></para>
+		///
+		/// </summary>
+		/// <exception cref="NotImplementedException">If the union type is not EEClass or MethodTable</exception>
 		public EEClass* EEClass {
 			get {
 				switch (UnionType) {
@@ -95,15 +132,17 @@ namespace RazorSharp.Runtime.CLRTypes
 					case Constants.LowBits.MethodTable:
 						return Canon->EEClass;
 					default:
-						throw new Exception("EEClass could not be accessed");
+						throw new NotImplementedException("EEClass union type is not implemented");
 				}
 			}
 		}
 
 		/// <summary>
-		/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L1145
+		/// The canonical MethodTable.<para></para>
 		///
-		/// Address-sensitive
+		/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L1145 <para></para>
+		///
+		/// Address-sensitive <para></para>
 		/// </summary>
 		public MethodTable* Canon {
 			get {
@@ -121,6 +160,10 @@ namespace RazorSharp.Runtime.CLRTypes
 			}
 		}
 
+		/// <summary>
+		/// Element type handle of an individual element if this is the MethodTable of an array.
+		/// </summary>
+		/// <exception cref="RuntimeException">If this is not an array MethodTable.</exception>
 		public MethodTable* ElementTypeHandle {
 			get {
 				if (IsArray)
@@ -129,60 +172,66 @@ namespace RazorSharp.Runtime.CLRTypes
 			}
 		}
 
-		public bool             HasComponentSize      => TableFlags.HasFlag(MethodTableFlags.HasComponentSize);
-		public bool             IsArray               => TableFlags.HasFlag(MethodTableFlags.Array);
-		public bool             IsStringOrArray       => HasComponentSize;
-		public int              NumInstanceFields     => EEClass->NumInstanceFields;
-		public int              NumStaticFields       => EEClass->NumStaticFields;
-		public int              NumNonVirtualSlots    => EEClass->NumNonVirtualSlots;
-		public int              NumMethods            => EEClass->NumMethods;
-		public int              NumInstanceFieldBytes => (int) BaseSize - EEClass->BaseSizePadding;
-		public FieldDesc*       FieldDescList         => EEClass->FieldDescList;
-		public int              FieldDescListLength   => EEClass->FieldDescListLength;
-		public MethodDescChunk* MethodDescChunkList   => EEClass->MethodDescChunkList;
-		public bool             IsBlittable           => EEClass->IsBlittable;
+		public bool HasComponentSize => TableFlags.HasFlag(MethodTableFlags.HasComponentSize);
+		public bool IsArray          => TableFlags.HasFlag(MethodTableFlags.Array);
+		public bool IsStringOrArray  => HasComponentSize;
+		public bool IsBlittable      => EEClass->IsBlittable;
+		public bool IsString         => HasComponentSize && !IsArray;
 
-//		public TypeInfo TypeInfo => Runtime.MethodTableMap[this];
+		/// <summary>
+		/// The number of instance fields in this type.
+		/// </summary>
+		public int NumInstanceFields => EEClass->NumInstanceFields;
+
+		/// <summary>
+		/// The number of static fields in this type.
+		/// </summary>
+		public int NumStaticFields => EEClass->NumStaticFields;
+
+		public int NumNonVirtualSlots => EEClass->NumNonVirtualSlots;
+
+		/// <summary>
+		/// Number of methods in this type.
+		/// </summary>
+		public int NumMethods => EEClass->NumMethods;
+
+		/// <summary>
+		/// The size of the instance fields in this type.
+		/// </summary>
+		public int NumInstanceFieldBytes => (int) BaseSize - EEClass->BaseSizePadding;
+
+		/// <summary>
+		/// Array of FieldDescs for this type.
+		/// </summary>
+		public FieldDesc* FieldDescList => EEClass->FieldDescList;
+
+		/// <summary>
+		/// Length of the FieldDecList
+		/// </summary>
+		public int FieldDescListLength => EEClass->FieldDescListLength;
+
+		public MethodDescChunk* MethodDescChunkList => EEClass->MethodDescChunkList;
 
 		#endregion
 
 		#region Fields
 
-		//** Status: verified
-		// Low WORD is component size for array and string types (HasComponentSize() returns true).
-		// Used for flags otherwise.
-		[FieldOffset(0)] private DWFlags m_dwFlags;
-
-		//** Status: verified
-		[FieldOffset(4)] private readonly DWORD m_BaseSize;
-
-		//** Status: unknown
-		[FieldOffset(8)] private readonly WORD m_wFlags2;
-
-		//** Status: unknown
-		// Class token if it fits into 16-bits. If this is (WORD)-1, the class token is stored in the TokenOverflow optional member.
-		[FieldOffset(10)] private readonly WORD m_wToken;
-
-		//** Status: unknown
-		[FieldOffset(12)] private readonly WORD m_wNumVirtuals;
-
-		//** Status: verified
-		[FieldOffset(14)] private readonly WORD m_wNumInterfaces;
-
-		//** Status: verified
-		// On Linux ARM is a RelativeFixupPointer. Otherwise,
-		// Parent PTR_MethodTable if enum_flag_HasIndirectParent is not set. Pointer to indirection cell
-		// if enum_flag_enum_flag_HasIndirectParent is set. The indirection is offset by offsetof(MethodTable, m_pParentMethodTable).
-		// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
-		// for enum_flag_HasIndirectParentMethodTable.
+		[FieldOffset(0)]  private          DWFlags      m_dwFlags;
+		[FieldOffset(4)]  private readonly DWORD        m_BaseSize;
+		[FieldOffset(8)]  private readonly WORD         m_wFlags2;
+		[FieldOffset(10)] private readonly WORD         m_wToken;
+		[FieldOffset(12)] private readonly WORD         m_wNumVirtuals;
+		[FieldOffset(14)] private readonly WORD         m_wNumInterfaces;
 		[FieldOffset(16)] private readonly MethodTable* m_pParentMethodTable;
-
-		//** Status: verified
-		[FieldOffset(24)] private readonly Module* m_pLoaderModule;
-
-		//** Status: unknown
-		[FieldOffset(32)] private readonly void* m_pWriteableData;
-
+		[FieldOffset(24)] private readonly Module*      m_pLoaderModule;
+		[FieldOffset(32)] private readonly void*        m_pWriteableData;
+		[FieldOffset(40)] private readonly EEClass*     m_pEEClass;
+		[FieldOffset(40)] private readonly MethodTable* m_pCanonMT;
+		[FieldOffset(48)] private readonly void**       m_pPerInstInfo;
+		[FieldOffset(48)] private readonly void*        m_ElementTypeHnd;
+		[FieldOffset(48)] private readonly void*        m_pMultipurposeSlot1;
+		[FieldOffset(56)] private readonly void*        m_pInterfaceMap;
+		[FieldOffset(56)] private readonly void*        m_pMultipurposeSlot2;
 
 		private const long UnionMask = 3;
 
@@ -192,66 +241,6 @@ namespace RazorSharp.Runtime.CLRTypes
 				return (Constants.LowBits) (l & UnionMask);
 			}
 		}
-
-		//** Status: verified
-		[FieldOffset(40)] private readonly EEClass* m_pEEClass;
-
-		//** Status: verified
-		[FieldOffset(40)] private readonly MethodTable* m_pCanonMT;
-
-#if EXTRA_FIELDS
-
-		//** Status: unknown
-		[FieldOffset(48)] private readonly void** m_pPerInstInfo;
-
-		/// <summary>
-		/// If the type is an array type, this is the TypeHandle of
-		/// an individual element
-		///
-		/// (i.e. if the type is string[], this will be equal to typeof(string).TypeHandle.Value)
-		/// </summary>
-
-		//** Status: verified
-		[FieldOffset(48)] private readonly void* m_ElementTypeHnd;
-
-		//** Status: unknown
-		[FieldOffset(48)] private readonly void* m_pMultipurposeSlot1;
-
-		//** Status: unknown
-		[FieldOffset(56)] private readonly void* m_pInterfaceMap;
-
-		//** Status: unknown
-		[FieldOffset(56)] private readonly void* m_pMultipurposeSlot2;
-#endif
-
-
-		//** Status: unknown
-		//[FieldOffset(48)] private readonly InstSlot m_slotInfo;
-
-		//** Status: unknown
-		//[FieldOffset(48)] private readonly void* m_methodDescTablePtr;
-
-		//** Status: unknown
-		//[FieldOffset(56)] private readonly MapSlot m_mapSlot;
-
-		// m_pPerInstInfo and m_pInterfaceMap have to be at fixed offsets because of performance sensitive
-		// JITed code and JIT helpers. However, they are frequently not present. The space is used by other
-		// multipurpose slots on first come first served basis if the fixed ones are not present. The other
-		// multipurpose are DispatchMapSlot, NonVirtualSlots, ModuleOverride (see enum_flag_MultipurposeSlotsMask).
-		// The multipurpose slots that do not fit are stored after vtable slots.
-
-		// VTable and Non-Virtual slots go here
-
-		// Overflow multipurpose slots go here
-
-		// Optional Members go here
-		//    See above for the list of optional members
-
-		// Generic dictionary pointers go here
-
-		// Interface map goes here
-
-		// Generic instantiation+dictionary goes here
 
 		#endregion
 
@@ -265,6 +254,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			//var lowFlags = String.Join(", ", TableFlagsLow.GetFlags().Distinct());
 
 			var table = new ConsoleTable("Field", "Value");
+
 //			table.AddRow("Name", TypeInfo.Name);
 			if (HasComponentSize)
 				table.AddRow("Component size", m_dwFlags.ComponentSize);

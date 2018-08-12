@@ -57,7 +57,18 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <summary>
 		/// MemberDef
 		/// </summary>
-		public int MB => (int) (m_dword1 & 0xFFFFFF);
+		private int MB => (int) (m_dword1 & 0xFFFFFF);
+
+		public int MemberDef {
+			get {
+				if (RequiresFullMBValue) {
+					return TokenFromRid(MB & (int) MbMask.PackedMbLayoutMbMask, CorTokenType.mdtFieldDef);
+				}
+
+				return TokenFromRid(MB, CorTokenType.mdtFieldDef);
+			}
+		}
+
 
 		/// <summary>
 		/// Offset in heap memory
@@ -182,6 +193,14 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		#endregion
 
+		//https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L1512
+		private int TokenFromRid(int rid, CorTokenType tktype)
+		{
+			return rid | ((int) tktype);
+		}
+
+
+
 
 		public override string ToString()
 		{
@@ -196,6 +215,9 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			// Unsigned 1
 			table.AddRow("MB", MB);
+			table.AddRow("MemberDef", MemberDef);
+
+
 			table.AddRow("Offset", Offset);
 			table.AddRow("CorType", CorType);
 			table.AddRow("Size", Size);

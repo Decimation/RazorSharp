@@ -134,10 +134,11 @@ namespace Test.Testing.Tests
 			// ComponentSize:   0x0
 			// Slots in VTable: 77
 			// Number of IFaces in IFaceMap: 8
-			Debug.Assert(mt->Module == (void*) 0x00007ff819611000);
+
+//			Debug.Assert(mt->Module == (void*) 0x00007ff819611000);
 			Debug.Assert(mt->BaseSize == 40);
 			Debug.Assert(Unsafe.HeapSize(ref list) == 40);
-			Debug.Assert(mt == (MethodTable*) 0x00007ff819d105d8);
+//			Debug.Assert(mt == (MethodTable*) 0x00007ff819d105d8);
 			Debug.Assert(mt->ComponentSize == 0);
 			Debug.Assert(mt->NumInterfaces == 8);
 
@@ -183,8 +184,8 @@ namespace Test.Testing.Tests
 			// Fields:
 			// None
 
-			Debug.Assert(mt == (MethodTable*) 0x00007ff819d39118);
-			Debug.Assert(mt->EEClass == (EEClass*) 0x00007ff8196e4668);
+//			Debug.Assert(mt == (MethodTable*) 0x00007ff819d39118);
+//			Debug.Assert(mt->EEClass == (EEClass*) 0x00007ff8196e4668);
 			Debug.Assert(Unsafe.HeapSize(ref arr) == 44);
 
 			// 0:007> !DumpMT /d 00007ff819d39118
@@ -198,8 +199,8 @@ namespace Test.Testing.Tests
 			// Slots in VTable: 28
 			// Number of IFaces in IFaceMap: 6
 
-			Debug.Assert(mt->EEClass == (EEClass*) 0x00007ff8196e4668);
-			Debug.Assert(mt->Module == (void*) 0x00007ff819611000);
+//			Debug.Assert(mt->EEClass == (EEClass*) 0x00007ff8196e4668);
+//			Debug.Assert(mt->Module == (void*) 0x00007ff819611000);
 			Debug.Assert(mt->BaseSize == 0x18);
 			Debug.Assert(mt->ComponentSize == 4);
 			Debug.Assert(mt->NumInterfaces == 6);
@@ -233,6 +234,8 @@ namespace Test.Testing.Tests
 			var      mt  = Runtime.ReadMethodTable(ref arr);
 
 
+			Debug.Assert(mt->ElementTypeHandle == Runtime.MethodTableOf<string>());
+
 			// !do 0x175000746A8
 			// Name:        System.String[]
 			// MethodTable: 00007ff819d1eb08
@@ -243,8 +246,8 @@ namespace Test.Testing.Tests
 			// None
 
 //			Debug.Assert(mt == (MethodTable*)0x00007ff819d1eb08);
-			Assert.That((long) mt, Is.EqualTo(0x00007ff819d1eb08));
-			Debug.Assert(mt->EEClass == (EEClass*) 0x00007ff8196e3ca0);
+//			Assert.That((long) mt, Is.EqualTo(0x00007ff819d1eb08));
+//			Debug.Assert(mt->EEClass == (EEClass*) 0x00007ff8196e3ca0);
 			Debug.Assert(Unsafe.HeapSize(ref arr) == 64);
 
 			// !DumpMT /d 00007ff819d1eb08
@@ -258,8 +261,8 @@ namespace Test.Testing.Tests
 			// Slots in VTable: 28
 			// Number of IFaces in IFaceMap: 6
 
-			Debug.Assert(mt->EEClass == (EEClass*) 0x00007ff8196e3ca0);
-			Debug.Assert(mt->Module == (void*) 0x00007ff819611000);
+//			Debug.Assert(mt->EEClass == (EEClass*) 0x00007ff8196e3ca0);
+//			Debug.Assert(mt->Module == (void*) 0x00007ff819611000);
 			Debug.Assert(mt->BaseSize == 0x18);
 			Debug.Assert(mt->ComponentSize == 8);
 			Debug.Assert(mt->NumInterfaces == 6);
@@ -281,7 +284,7 @@ namespace Test.Testing.Tests
 			// fails
 //			Debug.Assert(mt->Parent == (void*) 0x00007ff8196e4838);
 //			Assert.That((long)mt->Parent, Is.EqualTo(0x00007ff8196e4838));
-			Debug.Assert(mt->Module == (void*) 0x00007ff819611000);
+//			Debug.Assert(mt->Module == (void*) 0x00007ff819611000);
 
 //			Debug.Assert(mt->EEClass->MethodTable == (MethodTable*)0x00007ff819d36ea8);
 			Debug.Assert(mt->EEClass->Attributes == 0x2101);
@@ -345,7 +348,6 @@ namespace Test.Testing.Tests
 			Debug.Assert(mt->EEClass->Attributes == 0x100001);
 		}
 
-		private static void AssertProperties<T>(ref T t) { }
 	}
 
 }

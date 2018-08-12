@@ -28,7 +28,9 @@ namespace RazorSharp.Analysis
 		FieldDescs  = 16,
 		MethodDescs = 32,
 		Layout      = 64,
-		All         = Meta | Address | Size | Internal | Layout | FieldDescs | MethodDescs,
+
+		//All         = Meta | Address | Size | Internal | Layout | FieldDescs | MethodDescs,
+		Default = Meta | Address | Size | Internal | Layout | FieldDescs
 	}
 
 	public unsafe class Inspector<T>
@@ -46,7 +48,7 @@ namespace RazorSharp.Analysis
 		private static readonly string        Separator = new string('-', Console.BufferWidth);
 
 
-		public Inspector(ref T t, InspectorMode mode = InspectorMode.All)
+		public Inspector(ref T t, InspectorMode mode = InspectorMode.Default)
 		{
 			if (!typeof(T).IsValueType) {
 				//throw new Exception("Use RefInspector for reference types");
@@ -70,7 +72,7 @@ namespace RazorSharp.Analysis
 				Internal = new InternalInfo(ref t);
 			}
 
-			if (Mode.HasFlag(InspectorMode.FieldDescs)) {
+			if (Mode.HasFlag(InspectorMode.FieldDescs) && !typeof(T).IsArray) {
 				Fields = new FieldInfo(ref t);
 			}
 
@@ -157,10 +159,11 @@ namespace RazorSharp.Analysis
 			}
 		}
 
-		private const string EEClassStr     = "EEClass";
-		private const string MethodTableStr = "Method Table";
-		private const string CanonMTStr     = "Canon MT";
-		private const string ObjHeaderStr   = "ObjHeader";
+		private const string EEClassStr           = "EEClass";
+		private const string MethodTableStr       = "Method Table";
+		private const string CanonMTStr           = "Canon MT";
+		private const string ObjHeaderStr         = "ObjHeader";
+		private const string EEClassLayoutInfoStr = "EEClassLayoutInfo";
 
 		public class InternalInfo
 		{
@@ -252,11 +255,13 @@ namespace RazorSharp.Analysis
 
 		public class SizeInfo
 		{
-			public int Size { get; }
+			public int Size   { get; }
+			public int Native { get; }
 
 			protected internal SizeInfo()
 			{
-				Size = Unsafe.SizeOf<T>();
+				Size   = Unsafe.SizeOf<T>();
+				Native = Unsafe.NativeSizeOf<T>();
 			}
 
 			protected virtual ConsoleTable ToTable()
@@ -266,6 +271,7 @@ namespace RazorSharp.Analysis
 				//return table;
 				var table = new ConsoleTable(String.Empty, "Size");
 				table.AddRow("Size value", Size);
+				table.AttachColumn("Native size", Native);
 
 				return table;
 			}
@@ -281,7 +287,7 @@ namespace RazorSharp.Analysis
 			return String.Format("\n{0}\n{1}\n", ANSI.BoldString(label), table.ToMarkDownString());
 		}
 
-		public static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.All)
+		public static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.Default)
 		{
 			var inspector = new Inspector<T>(ref t, mode);
 			WriteInspector(inspector, printStructures);
@@ -305,7 +311,7 @@ namespace RazorSharp.Analysis
 			const char colon = ':';
 
 			Console.WriteLine(ANSI.BoldString(MethodTableStr + colon));
-			Console.WriteLine(*inspector.Internal.MethodTable);
+			Console.WriteLine(inspector.Internal.MethodTable->ToString());
 
 			Console.WriteLine(ANSI.BoldString(EEClassStr + colon));
 			Console.WriteLine(inspector.Internal.EEClass->ToString());
@@ -315,6 +321,10 @@ namespace RazorSharp.Analysis
 				Console.WriteLine(inspector.Internal.MethodTable->Canon->ToString());
 			}
 
+			if (inspector.Internal.EEClass->HasLayout) {
+				Console.WriteLine(ANSI.BoldString(EEClassLayoutInfoStr + colon));
+				Console.WriteLine(inspector.Internal.EEClass->LayoutInfo->ToString());
+			}
 		}
 
 
@@ -338,7 +348,7 @@ namespace RazorSharp.Analysis
 				sb.Append(Internal);
 			}
 
-			if (Mode.HasFlag(InspectorMode.FieldDescs)) {
+			if (Mode.HasFlag(InspectorMode.FieldDescs) && !typeof(T).IsArray) {
 				sb.Append(Fields);
 			}
 

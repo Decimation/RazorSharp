@@ -18,7 +18,7 @@ namespace RazorSharp.Analysis
 		public new ReferenceAddressInfo  Addresses => (ReferenceAddressInfo) base.Addresses;
 		public new ReferenceInternalInfo Internal  => (ReferenceInternalInfo) base.Internal;
 
-		public RefInspector(ref T t, InspectorMode mode = InspectorMode.All) : base(ref t, mode)
+		public RefInspector(ref T t, InspectorMode mode = InspectorMode.Default) : base(ref t, mode)
 		{
 			base.Metadata  = new ReferenceMetadataInfo(ref t);
 			base.Sizes     = new ReferenceSizeInfo(ref t);
@@ -132,7 +132,7 @@ namespace RazorSharp.Analysis
 		}
 
 
-		public new static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.All)
+		public new static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.Default)
 		{
 			var inspector = new RefInspector<T>(ref t, mode);
 			WriteInspector(inspector, printStructures);

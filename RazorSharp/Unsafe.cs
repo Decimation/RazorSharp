@@ -6,10 +6,10 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;
 using static RazorSharp.Utilities.Assertion;
+using RazorSharp.Runtime;
 
 #endregion
 
@@ -19,11 +19,10 @@ namespace RazorSharp
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+	using RRuntime = Runtime.Runtime;
+	using MMemory = Memory.Memory;
 
 	#endregion
-
-	//using Memory = RazorSharp.Memory.Memory;
-	//using Runtime = Runtime.Runtime;
 
 
 	public enum OffsetType
@@ -70,7 +69,7 @@ namespace RazorSharp
 
 		public static int OffsetOf<TType>(string fieldName)
 		{
-			return Runtime.Runtime.GetFieldDesc<TType>(fieldName)->Offset;
+			return RRuntime.GetFieldDesc<TType>(fieldName)->Offset;
 		}
 
 		public static int OffsetOf<TType, TMember>(ref TType type, TMember val)
@@ -78,11 +77,11 @@ namespace RazorSharp
 			int memberSize = SizeOf<TMember>();
 
 			// Find possible matching FieldDesc types
-			//var fieldDescs = Runtime.Runtime.GetFieldDescs<TType>().Select(x => x.Value)
+			//var fieldDescs = RRuntime.GetFieldDescs<TType>().Select(x => x.Value)
 			//	.Where(x => x.CorType == Constants.TypeToCorType<TMember>()).ToArray();
 
 			// Not using LINQ is faster
-			var fieldDescsPtrs = Runtime.Runtime.GetFieldDescs<TType>();
+			var fieldDescsPtrs = RRuntime.GetFieldDescs<TType>();
 			var fieldDescs     = new List<FieldDesc>();
 			foreach (var p in fieldDescsPtrs) {
 				if (p.Reference.CorType == Constants.TypeToCorType<TMember>()) {
@@ -123,7 +122,8 @@ namespace RazorSharp
 		/// <param name="name">Name of the field</param>
 		public static IntPtr AddressOf<T>(ref T instance, string name)
 		{
-			var fd = Runtime.Runtime.GetFieldDesc<T>(name);
+			var fd = RRuntime.GetFieldDesc<T>(name);
+
 			return fd->GetAddress(ref instance);
 		}
 
@@ -172,7 +172,7 @@ namespace RazorSharp
 						TypeException.Throw<Array, T>();
 					}
 
-					return AddressOfHeap(ref t) + Runtime.Runtime.OffsetToArrayData;
+					return AddressOfHeap(ref t) + RRuntime.OffsetToArrayData;
 
 				case OffsetType.Fields:
 
@@ -195,7 +195,19 @@ namespace RazorSharp
 		#region Sizes
 
 		/// <summary>
-		/// Calculates the size of a type in stack memory.
+		/// Calculates the native (Marshal) size of a type. <para></para>
+		/// Corresponds to Marshal.SizeOf.
+		/// </summary>
+		/// <returns>The native size if the type has a native representation; -1 otherwise</returns>
+		public static int NativeSizeOf<T>()
+		{
+			var mt     = RRuntime.MethodTableOf<T>();
+			var native = mt->EEClass->NativeSize;
+			return native == 0 ? InvalidValue : native;
+		}
+
+		/// <summary>
+		/// Calculates the size of a type in memory.<para></para>
 		/// (Call to CompilerServices.Unsafe.SizeOf)
 		/// </summary>
 		/// <returns>IntPtr.Size for reference types, size in stack for value types</returns>
@@ -256,7 +268,7 @@ namespace RazorSharp
 
 			// We have to manually read the MethodTable because if it's an array,
 			// the TypeHandle won't work.
-			var methodTable = Runtime.Runtime.ReadMethodTable(ref t);
+			var methodTable = RRuntime.ReadMethodTable(ref t);
 
 			if (typeof(T).IsArray) {
 				var arr = t as Array;
@@ -298,13 +310,15 @@ namespace RazorSharp
 				return InvalidValue;
 			}
 
-			var mt = Runtime.Runtime.MethodTableOf<T>();
+			var mt = RRuntime.MethodTableOf<T>();
 			return (int) mt->NumInstanceFieldBytes;
 		}
 
 		/// <summary>
 		/// Returns the base instance size according to the TypeHandle (MethodTable).
-		/// This is the minimum heap size of a type.
+		/// This is the minimum heap size of a type.<para></para>
+		///
+		/// <para>Corresponds to MethodTable.BaseSize</para>
 		/// </summary>
 		/// <returns>-1 if type is array, base instance size otherwise</returns>
 		public static int BaseInstanceSize<T>() where T : class
@@ -313,7 +327,7 @@ namespace RazorSharp
 			// MethodTable* manually. We obviously can't do that here because
 			// this method is parameterless.
 			if (typeof(T).IsArray) return InvalidValue;
-			return (int) Runtime.Runtime.MethodTableOf<T>()->BaseSize;
+			return (int) RRuntime.MethodTableOf<T>()->BaseSize;
 		}
 
 		#endregion
@@ -360,8 +374,8 @@ namespace RazorSharp
 		{
 			var heapBytes = MemoryOf(ref t);
 			Debug.Assert(heapBytes.Length == HeapSize(ref t));
-			Memory.Memory.Zero(AddressOfHeap(ref t) - IntPtr.Size, HeapSize(ref t));
-			Memory.Memory.WriteBytes(newHeapAddr, heapBytes);
+			MMemory.Zero(AddressOfHeap(ref t) - IntPtr.Size, HeapSize(ref t));
+			MMemory.WriteBytes(newHeapAddr, heapBytes);
 			IntPtr newAddr = newHeapAddr + IntPtr.Size;
 			Marshal.WriteIntPtr(AddressOf(ref t), newAddr);
 		}

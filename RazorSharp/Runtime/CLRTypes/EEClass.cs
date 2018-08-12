@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorSharp.Pointers;
@@ -37,63 +38,63 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		#region Fields
 
-		[FieldOffset(0)] private readonly void* m_pGuidInfo;
-		[FieldOffset(8)] private readonly void* m_rpOptionalFields;
-
-		//** Status: verified
+		[FieldOffset(0)]  private readonly void*        m_pGuidInfo;
+		[FieldOffset(8)]  private readonly void*        m_rpOptionalFields;
 		[FieldOffset(16)] private readonly MethodTable* m_pMethodTable;
-
-		//** Status: verified
-		[FieldOffset(24)] private readonly FieldDesc* m_pFieldDescList;
-		[FieldOffset(32)] private readonly void*      m_pChunks;
-
-
-		//** Status: verified
-		[FieldOffset(40)] private readonly uint  m_cbNativeSize;
-		[FieldOffset(40)] private readonly void* ohDelegate;
-		[FieldOffset(40)] private readonly int   m_ComInterfaceType;
-		[FieldOffset(48)] private readonly void* m_pccwTemplate;
-
-
-		//** Status: verified
-		[FieldOffset(56)] private readonly DWORD m_dwAttrClass;
-
-		//** Status: verified
-		[FieldOffset(60)] private readonly DWORD m_VMFlags;
-
-		//** Status: verified
-		[FieldOffset(64)] private readonly byte m_NormType;
-
-		//** Status: verified
-		[FieldOffset(65)] private readonly byte m_fFieldsArePacked;
+		[FieldOffset(24)] private readonly FieldDesc*   m_pFieldDescList;
+		[FieldOffset(32)] private readonly void*        m_pChunks;
+		[FieldOffset(40)] private readonly uint         m_cbNativeSize;
+		[FieldOffset(40)] private readonly void*        ohDelegate;
+		[FieldOffset(40)] private readonly int          m_ComInterfaceType;
+		[FieldOffset(48)] private readonly void*        m_pccwTemplate;
+		[FieldOffset(56)] private readonly DWORD        m_dwAttrClass;
+		[FieldOffset(60)] private readonly DWORD        m_VMFlags;
+		[FieldOffset(64)] private readonly byte         m_NormType;
+		[FieldOffset(65)] private readonly byte         m_fFieldsArePacked;
 
 		/// <summary>
 		/// Count of bytes of normal fields of this instance (EEClass,
 		/// LayoutEEClass etc.). Doesn't count bytes of "packed" fields
 		///
 		/// </summary>
-
-		//** Status: verified
 		[FieldOffset(66)] private readonly byte m_cbFixedEEClassFields;
 
-		//** Status: verified
 		[FieldOffset(67)] private readonly byte m_cbBaseSizePadding;
 
 		#endregion
 
 		#region Accessors
 
+		/// <summary>
+		/// Corresponding MethodTable of this EEClass
+		/// </summary>
 		public MethodTable* MethodTable => m_pMethodTable;
+
 
 		public bool HasLayout => VMFlags.HasFlag(VMFlags.HasLayout);
 
+		/// <summary>
+		/// DWORD of TypeAttributes
+		/// </summary>
 		public DWORD Attributes => m_dwAttrClass;
+
+		/// <summary>
+		/// Corresponds to Type.TypeAttributes
+		/// </summary>
+		public TypeAttributes TypeAttributes => (TypeAttributes) Attributes;
 
 		/// <summary>
 		/// Number of bytes to subtract from code:MethodTable::GetBaseSize() to get the actual number of bytes
 		/// of instance fields stored in the object on the GC heap.
 		/// </summary>
 		public byte BaseSizePadding => m_cbBaseSizePadding;
+
+		/// <summary>
+		/// Abstracted to Unsafe.NativeSizeOf<para></para>
+		///
+		/// Corresponds to Marshal.SizeOf<para></para>
+		/// </summary>
+		internal int NativeSize => (int) m_cbNativeSize;
 
 		public VMFlags VMFlags => (VMFlags) m_VMFlags;
 
@@ -102,7 +103,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <summary>
 		/// Address-sensitive
 		/// </summary>
-		private EEClassLayoutInfo* LayoutInfo {
+		internal EEClassLayoutInfo* LayoutInfo {
 			get {
 				//return &((LayoutEEClass *) this)->m_LayoutInfo;
 				if (!HasLayout)
@@ -156,6 +157,9 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		private EEClass* ParentClass => m_pMethodTable->Parent->EEClass;
 
+		/// <summary>
+		/// Abstracted to MethodTable
+		/// </summary>
 		internal int FieldDescListLength {
 			//There are (m_wNumInstanceFields - GetParentClass()->m_wNumInstanceFields + m_wNumStaticFields) entries
 			//get { return (NumInstanceFields - ParentClass->NumInstanceFields + NumStaticFields); }
@@ -215,7 +219,8 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow(nameof(ohDelegate), Hex.ToHex(ohDelegate));
 			table.AddRow(nameof(m_ComInterfaceType), m_ComInterfaceType);
 			table.AddRow(nameof(m_pccwTemplate), Hex.ToHex(m_pccwTemplate));
-			table.AddRow("Attributes", Hex.ToHex(m_dwAttrClass));
+			table.AddRow("Attributes", Hex.ToHex(m_dwAttrClass)  );
+			table.AddRow("Attributes",TypeAttributes);
 			table.AddRow("Normal type", NormalType);
 			table.AddRow("Fields are packed", m_fFieldsArePacked == 1);
 			table.AddRow("Fixed EEClass fields", m_cbFixedEEClassFields);

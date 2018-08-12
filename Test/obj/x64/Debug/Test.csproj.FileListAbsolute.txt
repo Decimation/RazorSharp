@@ -13,9 +13,7 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\obj\x64\Debug\Test.csproj.CopyCompl
 C:\Users\Viper\RiderProjects\RazorSharp\Test\obj\x64\Debug\Test.exe
 C:\Users\Viper\RiderProjects\RazorSharp\Test\obj\x64\Debug\Test.pdb
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\RazorCommon.dll
-C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\ObjectLayoutInspector.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\RazorCommon.pdb
-C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\ObjectLayoutInspector.pdb
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\RazorInvoke.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\RazorInvoke.pdb
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\Test.exe.config
@@ -53,3 +51,5 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Numerics.Vecto
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Buffers.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Memory.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Numerics.Vectors.xml
+C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\ObjectLayoutInspector.dll
+C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\ObjectLayoutInspector.pdb

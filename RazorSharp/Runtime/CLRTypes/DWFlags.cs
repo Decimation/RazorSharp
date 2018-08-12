@@ -4,6 +4,8 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
+// ReSharper disable InconsistentNaming
+
 #endregion
 
 namespace RazorSharp.Runtime.CLRTypes
@@ -16,16 +18,26 @@ namespace RazorSharp.Runtime.CLRTypes
 
 	#endregion
 
+	/// <summary>
+	/// Low WORD is component size for array and string types (HasComponentSize() returns true).<para></para>
+	/// Used for flags otherwise.
+	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-
-	// ReSharper disable once InconsistentNaming
 	internal struct DWFlags
 	{
 		[FieldOffset(0)] private readonly WORD m_componentSize;
 		[FieldOffset(2)] private readonly WORD m_flags;
 
+		/// <summary>
+		/// The size of one component (or element).<para></para>
+		/// Applicable only to strings and arrays.
+		/// </summary>
 		internal WORD ComponentSize => m_componentSize;
-		internal WORD Flags         => m_flags;
+
+		/// <summary>
+		/// Flags
+		/// </summary>
+		internal WORD Flags => m_flags;
 
 		public override string ToString()
 		{
@@ -35,6 +47,8 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			return table.ToStringAlternative();
 		}
+
+		#region Equality
 
 		public override bool Equals(object obj)
 		{
@@ -67,6 +81,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		{
 			return !left.Equals(right);
 		}
+
+		#endregion
+
 	}
 
 }

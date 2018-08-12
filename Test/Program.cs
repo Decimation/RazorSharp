@@ -3,7 +3,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Numerics;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using BenchmarkDotNet.Environments;
+using BenchmarkDotNet.Running;
+using ObjectLayoutInspector;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp;
@@ -12,7 +17,9 @@ using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing;
+using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
+using Runtime = RazorSharp.Runtime.Runtime;
 
 #endregion
 
@@ -58,96 +65,59 @@ namespace Test
 		}
 #endif
 
+		private static object InvokeGenericMethod(Type t, string name, Type typeArgs, object instance,
+			params object[] args)
+		{
+			MethodInfo method = t.GetMethod(name,
+				BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic);
+			method = method.MakeGenericMethod(typeArgs);
+			return method.Invoke(method.IsStatic ? null : instance, args);
+		}
 
 		public static void Main(string[] args)
 		{
-			Vector v = new Vector();
-			Inspector<Vector>.Write(ref v, true, InspectorMode.All & ~InspectorMode.MethodDescs);
 
-			Clazz c = new Clazz();
-			RefInspector<Clazz>.Write(ref c, true, InspectorMode.All & ~InspectorMode.MethodDescs);
+
+			Point p = new Point();
+			WriteOutVal(ref p);
 
 			string s = "foo";
-			RefInspector<string>.Write(ref s, false, InspectorMode.All & ~InspectorMode.MethodDescs);
+			WriteOut(ref s);
 
-			int[] arr = {1, 2, 3};
-			RefInspector<int[]>.Write(ref arr, true, InspectorMode.All & ~InspectorMode.MethodDescs);
 
-			string[] ptrArr = new[] {"foo"};
-			RefInspector<string[]>.Write(ref ptrArr, true);
-
-			//BenchmarkRunner.Run<LayoutBenchmarking>();
+			/**
+			 * Reflection							CLR
+			 *
+			 * FieldInfo.MetadataToken				FieldDesc.MemberDef
+			 * FieldInfo::FieldHandle.Value			FieldDesc*
+			 * CorElementType						FieldDesc.Type
+			 * MethodInfo::MethodHandle.Value		MethodDesc*
+			 * Type::TypeHandle.Value				MethodTable*
+			 * Type::Attributes						EEClass.m_dwAttrClass
+			 * Marshal::SizeOf						EEClass.m_cbNativeSize
+			 *
+			 */
 
 
 //			Console.ReadLine();
 		}
 
-
-		private class Clazz
+		private static void WriteOutVal<T>(ref T t) where T : struct
 		{
-			private byte x;
-
-			private long    l;
-			private decimal d;
-
+			Inspector<T>.Write(ref t, true);
 		}
 
-		private struct Vector
+		private static void WriteOut<T>(ref T t) where T : class
 		{
-			private float _x;
-			private float _y;
-			private byte  b;
-
-
-			public float X {
-				get => _x;
-				set => _x = value;
-			}
-
-			public float Y {
-				get => _y;
-				set => _y = value;
-			}
-
-			public Vector(float x, float y)
-			{
-				_x = x;
-				_y = y;
-				Debug.Assert(Memory.IsOnStack(ref _x));
-				Debug.Assert(Memory.IsOnStack(ref _y));
-				Debug.Assert(Memory.IsOnStack(ref x));
-				Debug.Assert(Memory.IsOnStack(ref y));
-				b = 0;
-			}
-
-			public override string ToString()
-			{
-				return String.Format("x = {0}, y = {1}", _x, _y);
-			}
+			RefInspector<T>.Write(ref t, true);
 		}
 
-
-		private static void DisplayTypes()
+		public struct Point
 		{
-			List<int> ls = new List<int>();
-			RefInspector<List<int>>.Write(ref ls, false, InspectorMode.Address | InspectorMode.Internal);
-
-
-			var s = "foo";
-			RefInspector<string>.Write(ref s, false, InspectorMode.Address | InspectorMode.Internal);
-
-
-			var d = new Dummy();
-			RefInspector<Dummy>.Write(ref d, !false, InspectorMode.Address | InspectorMode.Internal);
-
-
-			var parr = new string[5];
-			RefInspector<string[]>.Write(ref parr, false, InspectorMode.Address | InspectorMode.Internal);
-
-
-			var arr = new int[5];
-			RefInspector<int[]>.Write(ref arr, false, InspectorMode.Address | InspectorMode.Internal);
+			internal int _x;
+			internal int _y;
 		}
+
 
 		private static void TableMethods<T>()
 		{
@@ -183,7 +153,6 @@ namespace Test
 		 *  - RazorInvoke
 		 *  - Fody
 		 *  - MethodTimer Fody
-		 *  - ObjectLayoutInspector
 		 *
 		 * Test:
 		 *  - RazorCommon
@@ -192,7 +161,6 @@ namespace Test
 		 *  - BenchmarkDotNet
 		 *  - Fody
 		 *  - MethodTimer Fody
-		 *  - ObjectLayoutInspector
 		 */
 
 		/**

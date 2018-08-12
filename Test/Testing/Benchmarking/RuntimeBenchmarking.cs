@@ -1,7 +1,11 @@
 #region
 
+using System.Reflection.Metadata;
 using BenchmarkDotNet.Attributes;
+using RazorSharp;
+using RazorSharp.Analysis;
 using RazorSharp.Runtime;
+using TypeLayout = ObjectLayoutInspector.TypeLayout;
 
 #endregion
 
@@ -20,21 +24,21 @@ namespace Test.Testing.Benchmarking
 		}
 
 		[Benchmark]
-		public void MethodTable_HeapObject()
+		public void GetLayout()
 		{
-			var mt = (**Runtime.GetHeapObject(ref _dummy)).MethodTable;
+			TypeLayout.GetLayout<Dummy>();
 		}
 
 		[Benchmark]
-		public void MethodTable_ReadMethodTable()
+		public void ObjectLayout()
 		{
-			var mt = Runtime.ReadMethodTable(ref _dummy);
+			new ObjectLayout<Dummy>(ref _dummy);
 		}
 
 		[Benchmark]
-		public void MethodTable_MethodTableOf()
+		public void GetFieldDescs()
 		{
-			var mt = Runtime.MethodTableOf<Dummy>();
+			Runtime.GetFieldDescs<Dummy>();
 		}
 	}
 

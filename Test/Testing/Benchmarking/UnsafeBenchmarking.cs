@@ -36,6 +36,12 @@ namespace Test.Testing.Benchmarking
 			Unsafe.OffsetOf<Dummy>("_decimal");
 		}
 
+		[Benchmark]
+		public void AddressOfByName()
+		{
+			Unsafe.AddressOf(ref _dummy, "_int");
+		}
+
 
 		//[Benchmark]
 		public void SizeOf_Test()

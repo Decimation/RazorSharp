@@ -49,7 +49,7 @@ namespace RazorSharp.Analysis
 			}
 
 			if (typeof(T).IsArray) {
-				throw new Exception();
+				throw new Exception("You cannot get the layout of an array (yet)");
 			}
 
 			Create(ref t);

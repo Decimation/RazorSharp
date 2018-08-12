@@ -37,14 +37,11 @@ namespace RazorSharp.Runtime
 
 		internal static readonly Dictionary<FieldDesc, FieldInfo>   FieldMap;
 		internal static readonly Dictionary<MethodDesc, MethodInfo> MethodMap;
-		// wip
-		internal static readonly Dictionary<MethodTable, TypeInfo> MethodTableMap;
 
 		static Runtime()
 		{
 			FieldMap  = new Dictionary<FieldDesc, FieldInfo>();
 			MethodMap = new Dictionary<MethodDesc, MethodInfo>();
-			MethodTableMap = new Dictionary<MethodTable, TypeInfo>();
 		}
 
 		private static void AddSet<TKey, TValue>(Dictionary<TKey, TValue> dict, TKey tk, TValue tv)
@@ -65,18 +62,16 @@ namespace RazorSharp.Runtime
 
 		private static void AddField(FieldDesc fd, FieldInfo fi)
 		{
+			//Console.WriteLine("Adding field {0}", fi.Name);
 			AddSet(FieldMap, fd, fi);
 		}
 
 		private static void AddMethod(MethodDesc md, MethodInfo mi)
 		{
+			//Console.WriteLine("Adding method {0}", mi.Name);
 			AddSet(MethodMap, md, mi);
 		}
 
-		private static void AddMethodTable(MethodTable mt, TypeInfo ti)
-		{
-			AddSet(MethodTableMap, mt, ti);
-		}
 
 		#region HeapObjects
 
@@ -124,7 +119,6 @@ namespace RazorSharp.Runtime
 			}
 
 
-			AddMethodTable(*mt, typeof(T).GetTypeInfo());
 			return mt;
 
 			//return (*((HeapObject**) Unsafe.AddressOf(ref t)))->MethodTable;
@@ -185,9 +179,18 @@ namespace RazorSharp.Runtime
 
 		#region FieldDesc
 
-		// ReSharper disable once ReturnTypeCanBeEnumerable.Global
+		/// <summary>
+		/// Gets all the FieldDescs from a type's FieldDescList.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="RuntimeException">If the type is an array</exception>
 		public static Pointer<FieldDesc>[] GetFieldDescs<T>()
 		{
+			if (typeof(T).IsArray) {
+				throw new RuntimeException("Arrays do not have fields");
+			}
+
 			var mt   = MethodTableOf<T>();
 			var len  = mt->FieldDescListLength;
 			var lpFd = new Pointer<FieldDesc>[len];
@@ -201,9 +204,7 @@ namespace RazorSharp.Runtime
 			// Remove all const fields
 			Collections.RemoveAll(ref fieldHandles, x => x.IsLiteral);
 
-
 			Debug.Assert(fieldHandles.Length == mt->FieldDescListLength);
-
 
 			fieldHandles = fieldHandles.OrderBy(x => x.FieldHandle.Value.ToInt64()).ToArray();
 			lpFd         = lpFd.OrderBy(x => x.ToInt64()).ToArray();
@@ -228,8 +229,13 @@ namespace RazorSharp.Runtime
 		/// <param name="flags"></param>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the field is const</exception>
+		/// <exception cref="RuntimeException">If the type is an array</exception>
 		public static FieldDesc* GetFieldDesc(Type t, string name, BindingFlags flags = DefaultFlags)
 		{
+			if (t.IsArray) {
+				throw new RuntimeException("Arrays do not have fields");
+			}
+
 			var fieldInfo = t.GetField(name, flags);
 			if (fieldInfo.IsLiteral)
 				throw new RuntimeException("Const field");
@@ -260,14 +266,12 @@ namespace RazorSharp.Runtime
 			var arr     = new Pointer<MethodDesc>[methods.Length];
 			Debug.Assert(arr.Length == methods.Length);
 
-
 			for (int i = 0; i < arr.Length; i++) {
 				arr[i] = (MethodDesc*) methods[i].MethodHandle.Value;
 			}
 
 			methods = methods.OrderBy(x => x.MethodHandle.Value.ToInt64()).ToArray();
 			arr     = arr.OrderBy(x => x.ToInt64()).ToArray();
-
 
 			for (int i = 0; i < arr.Length; i++) {
 				AddMethod(arr[i].Reference, methods[i]);
