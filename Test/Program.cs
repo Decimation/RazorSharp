@@ -3,23 +3,18 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Numerics;
+using System.Diagnostics.Contracts;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using BenchmarkDotNet.Environments;
-using BenchmarkDotNet.Running;
-using ObjectLayoutInspector;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
+using RazorSharp.Runtime.CLRTypes.HeapObjects;
 using RazorSharp.Utilities;
 using Test.Testing;
-using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
-using Runtime = RazorSharp.Runtime.Runtime;
 
 #endregion
 
@@ -29,6 +24,7 @@ namespace Test
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+	using mem = Memory;
 
 	#endregion
 
@@ -59,9 +55,10 @@ namespace Test
 			StandardOut.ModConsole();
 			Debug.Assert(IntPtr.Size == 8);
 			Debug.Assert(Environment.Is64BitProcess);
-			Logger.Log(Flags.Info, "Architecture: x64");
-			Logger.Log(Flags.Info, "Byte order: {0}", BitConverter.IsLittleEndian ? "Little Endian" : "Big Endian");
-			Logger.Log(Flags.Info, "CLR {0}", Environment.Version);
+
+//			Logger.Log(Flags.Info, "Architecture: x64");
+//			Logger.Log(Flags.Info, "Byte order: {0}", BitConverter.IsLittleEndian ? "Little Endian" : "Big Endian");
+//			Logger.Log(Flags.Info, "CLR {0}", Environment.Version);
 		}
 #endif
 
@@ -74,33 +71,29 @@ namespace Test
 			return method.Invoke(method.IsStatic ? null : instance, args);
 		}
 
+
 		public static void Main(string[] args)
 		{
-
-
 			Point p = new Point();
+
 			WriteOutVal(ref p);
+			Pointer<int> lpInt32 = AddressOf(ref p, "X", true);
+			lpInt32[0] = int.MinValue;
+			lpInt32[1] = int.MaxValue;
+			Debug.Assert(p.X == int.MinValue);
+			Debug.Assert(p.Y == int.MaxValue);
 
-			string s = "foo";
-			WriteOut(ref s);
+			string foo = "foo";
+			Pointer<StringObject> lpStr = AddressOfHeap(ref foo);
 
+			Console.WriteLine(lpStr.Reference[0]);
+			Console.WriteLine(lpStr.Reference[1]);
 
-			/**
-			 * Reflection							CLR
-			 *
-			 * FieldInfo.MetadataToken				FieldDesc.MemberDef
-			 * FieldInfo::FieldHandle.Value			FieldDesc*
-			 * CorElementType						FieldDesc.Type
-			 * MethodInfo::MethodHandle.Value		MethodDesc*
-			 * Type::TypeHandle.Value				MethodTable*
-			 * Type::Attributes						EEClass.m_dwAttrClass
-			 * Marshal::SizeOf						EEClass.m_cbNativeSize
-			 *
-			 */
 
 
 //			Console.ReadLine();
 		}
+
 
 		private static void WriteOutVal<T>(ref T t) where T : struct
 		{
@@ -110,12 +103,6 @@ namespace Test
 		private static void WriteOut<T>(ref T t) where T : class
 		{
 			RefInspector<T>.Write(ref t, true);
-		}
-
-		public struct Point
-		{
-			internal int _x;
-			internal int _y;
 		}
 
 
@@ -137,12 +124,6 @@ namespace Test
 			lpChar[i] = c;
 		}
 
-		private static void RandomInit(AllocExPointer<string> ptr)
-		{
-			for (int i = 0; i < ptr.Count; i++) {
-				ptr[i] = StringUtils.Random(10);
-			}
-		}
 
 		/**
 		 * Dependencies:
@@ -180,6 +161,37 @@ namespace Test
 		 * public IntPtr __this {
 		 *		get => Unsafe.AddressOf(ref this);
 		 * }
+		 */
+
+		/**
+		 * CLR										Used in										Equivalent
+		 *
+		 * MethodTable.BaseSize						Unsafe.BaseInstanceSize, Unsafe.HeapSize	-
+		 * MethodTable.ComponentSize				Unsafe.HeapSize								-
+		 * MethodTable.NumInstanceFieldBytes		Unsafe.BaseFieldsSize						-
+		 * EEClass.m_cbNativeSize					Unsafe.NativeSize							Marshal.SizeOf, EEClassLayoutInfo.m_cbNativeSize
+		 * EEClassLayoutInfo.m_cbNativeSize			-											Marshal.SizeOf, EEClass.m_cbNativeSize
+		 * EEClassLayoutInfo.m_cbManagedSize		-											Unsafe.SizeOf
+		 */
+
+		/**
+		 * Reflection							CLR
+		 *
+		 * FieldInfo.MetadataToken				FieldDesc.MemberDef
+		 * FieldInfo::FieldHandle.Value			FieldDesc*
+		 * CorElementType						FieldDesc.Type
+		 * MethodInfo::MethodHandle.Value		MethodDesc*
+		 * Type::TypeHandle.Value				MethodTable*
+		 * Type::Attributes						EEClass.m_dwAttrClass
+		 * Marshal::SizeOf						EEClass.m_cbNativeSize
+		 *
+		 */
+
+		/**
+		 * #defines:
+		 *
+		 * FEATURE_COMINTEROP
+		 * _TARGET_64BIT_
 		 */
 
 	}

@@ -1,11 +1,9 @@
 #region
 
-using System.Reflection.Metadata;
 using BenchmarkDotNet.Attributes;
-using RazorSharp;
+using ObjectLayoutInspector;
 using RazorSharp.Analysis;
 using RazorSharp.Runtime;
-using TypeLayout = ObjectLayoutInspector.TypeLayout;
 
 #endregion
 

@@ -24,6 +24,9 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 
 
 		public uint         Length      => m_numComponents;
+		/// <summary>
+		/// Address-sensitive
+		/// </summary>
 		public ObjHeader*   Header      => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
 		public MethodTable* MethodTable => m_methodTablePtr;
 

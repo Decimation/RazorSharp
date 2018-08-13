@@ -311,7 +311,7 @@ namespace RazorSharp.Runtime
 
 
 		/// <summary>
-		/// Determines whether a type is blittable, that is, they don't
+		/// Determines whether a type is blittable; that is, they don't
 		/// require conversion between managed and unmanaged code.
 		/// </summary>
 		public static bool IsBlittable<T>()

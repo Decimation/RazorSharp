@@ -216,6 +216,7 @@
     <Compile Include="Testing\Benchmarking\RuntimeBenchmarking.cs" />
     <Compile Include="Testing\Benchmarking\UnsafeBenchmarking.cs" />
     <Compile Include="Testing\GenericDummy.cs" />
+    <Compile Include="Testing\Point.cs" />
     <Compile Include="Testing\RAssert.cs" />
     <Compile Include="Testing\Benchmarking\AllocPointerBenchmarking.cs" />
     <Compile Include="Testing\Dummy.cs" />

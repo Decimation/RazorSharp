@@ -57,15 +57,13 @@ namespace RazorSharp.Analysis
 
 		public sealed class ReferenceSizeInfo : SizeInfo
 		{
-			public int Heap           { get; }
-			public int BaseInstance   { get; }
-			public int BaseFieldsSize { get; }
+			public int Heap         { get; }
+			public int BaseInstance { get; }
 
 			internal ReferenceSizeInfo(ref T t)
 			{
-				Heap           = Unsafe.HeapSize(ref t);
-				BaseInstance   = Unsafe.BaseInstanceSize<T>();
-				BaseFieldsSize = Unsafe.BaseFieldsSize<T>();
+				Heap         = Unsafe.HeapSize(ref t);
+				BaseInstance = Unsafe.BaseInstanceSize<T>();
 			}
 
 			protected override ConsoleTable ToTable()
@@ -79,8 +77,8 @@ namespace RazorSharp.Analysis
 				var table = base.ToTable();
 				table.AttachColumn("Heap size", Heap);
 				table.AttachColumn("Base instance size", BaseInstance);
-				table.AttachColumn("Base fields size", BaseFieldsSize);
 
+				//table.AttachColumn("Base fields size", BaseFieldsSize);
 
 
 				table.DetachFromColumns(Unsafe.InvalidValue);

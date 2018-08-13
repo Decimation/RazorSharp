@@ -84,6 +84,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			get => (CorElementType) Type;
 		}
 
+
 		/// <summary>
 		/// Whether the field is static
 		/// </summary>
@@ -104,7 +105,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// </summary>
 		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
 
-		public Constants.ProtectionLevel Protection => (Constants.ProtectionLevel) ProtectionInt;
+		public ProtectionLevel Protection => (ProtectionLevel) ProtectionInt;
 
 		/// <summary>
 		/// Address-sensitive
@@ -194,12 +195,10 @@ namespace RazorSharp.Runtime.CLRTypes
 		#endregion
 
 		//https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L1512
-		private int TokenFromRid(int rid, CorTokenType tktype)
+		private static int TokenFromRid(int rid, CorTokenType tktype)
 		{
 			return rid | ((int) tktype);
 		}
-
-
 
 
 		public override string ToString()

@@ -3,7 +3,6 @@
 #region
 
 using System;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
@@ -127,9 +126,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		public EEClass* EEClass {
 			get {
 				switch (UnionType) {
-					case Constants.LowBits.EEClass:
+					case LowBits.EEClass:
 						return m_pEEClass;
-					case Constants.LowBits.MethodTable:
+					case LowBits.MethodTable:
 						return Canon->EEClass;
 					default:
 						throw new NotImplementedException("EEClass union type is not implemented");
@@ -147,9 +146,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		public MethodTable* Canon {
 			get {
 				switch (UnionType) {
-					case Constants.LowBits.MethodTable:
+					case LowBits.MethodTable:
 						return (MethodTable*) PointerUtils.Subtract(m_pCanonMT, 2);
-					case Constants.LowBits.EEClass:
+					case LowBits.EEClass:
 					{
 						fixed (MethodTable* mt = &this)
 							return mt;
@@ -235,10 +234,10 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		private const long UnionMask = 3;
 
-		private Constants.LowBits UnionType {
+		private LowBits UnionType {
 			get {
 				long l = (long) m_pEEClass;
-				return (Constants.LowBits) (l & UnionMask);
+				return (LowBits) (l & UnionMask);
 			}
 		}
 

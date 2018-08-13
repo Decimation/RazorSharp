@@ -6,10 +6,10 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.Pointers;
+using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;
 using static RazorSharp.Utilities.Assertion;
-using RazorSharp.Runtime;
 
 #endregion
 
@@ -65,6 +65,7 @@ namespace RazorSharp
 	{
 		internal const int InvalidValue = -1;
 
+
 		#region OffsetOf
 
 		public static int OffsetOf<TType>(string fieldName)
@@ -115,13 +116,19 @@ namespace RazorSharp
 
 		#region Address
 
+
 		/// <summary>
 		/// Returns the address of a field in the specified type.
 		/// </summary>
 		/// <param name="instance">Instance of the enclosing type</param>
 		/// <param name="name">Name of the field</param>
-		public static IntPtr AddressOf<T>(ref T instance, string name)
+		/// <param name="isAutoProperty">Whether the field is an auto-property</param>
+		public static IntPtr AddressOf<T>(ref T instance, string name, bool isAutoProperty = false)
 		{
+			if (isAutoProperty) {
+				name = AutoPropertyBackingFieldName(name);
+			}
+
 			var fd = RRuntime.GetFieldDesc<T>(name);
 
 			return fd->GetAddress(ref instance);
@@ -285,7 +292,7 @@ namespace RazorSharp
 			return (int) methodTable->BaseSize;
 		}
 
-		public static bool IsBoxed<T>(T value)
+		public static bool IsBoxed<T>(in T value)
 		{
 			return
 				(typeof(T).IsInterface || typeof(T) == typeof(object)) &&
@@ -294,19 +301,19 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		/// Calculates the base size of the fields in the heap minus padding of the base size.
+		/// <para>Calculates the base size of the fields in the heap minus padding and overhead of the base size.</para>
 		///
-		/// Note: If the fields *themselves* are padded, those are still included.
-		/// Note: Doesn't work when T has generic parameters
+		/// <para>Note: If the fields *themselves* are padded, those are still included.</para>
+		/// <para>Note: Equals SizeOf for value types</para>
 		/// </summary>
-		public static int BaseFieldsSize<T>() //where T : class
+		public static int BaseFieldsSize<T>()
 		{
 			//inline DWORD MethodTable::GetNumInstanceFieldBytes()
 			//{
 			//	return(GetBaseSize() - GetClass()->GetBaseSizePadding());
 			//}
 
-			if (typeof(T).IsConstructedGenericType || typeof(T).IsArray) {
+			if (typeof(T).IsArray) {
 				return InvalidValue;
 			}
 
@@ -382,6 +389,17 @@ namespace RazorSharp
 
 		#endregion
 
+		/// <summary>
+		/// Gets the internal name of an auto-property's backing field.
+		/// <example>If the auto-property's name is X, the backing field name is &lt;X&gt;k__BackingField.</example>
+		/// </summary>
+		/// <param name="propname">Auto-property's name</param>
+		/// <returns>Internal name of the auto-property's backing field</returns>
+		private static string AutoPropertyBackingFieldName(string propname)
+		{
+			const string backingFieldFormat = "<{0}>k__BackingField";
+			return String.Format(backingFieldFormat, propname);
+		}
 
 		public static void WriteReference<T>(ref T t, IntPtr newHeapAddr)
 		{

@@ -5,7 +5,6 @@ using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.Runtime;
-using RazorSharp.Runtime.CLRTypes;
 
 #endregion
 
@@ -138,6 +137,7 @@ namespace Test.Testing.Tests
 //			Debug.Assert(mt->Module == (void*) 0x00007ff819611000);
 			Debug.Assert(mt->BaseSize == 40);
 			Debug.Assert(Unsafe.HeapSize(ref list) == 40);
+
 //			Debug.Assert(mt == (MethodTable*) 0x00007ff819d105d8);
 			Debug.Assert(mt->ComponentSize == 0);
 			Debug.Assert(mt->NumInterfaces == 8);
@@ -290,6 +290,14 @@ namespace Test.Testing.Tests
 			Debug.Assert(mt->EEClass->Attributes == 0x2101);
 			Debug.Assert(mt->NumInstanceFields == 0);
 			Debug.Assert(mt->NumStaticFields == 0);
+		}
+
+		[Test]
+		public void TestPoint()
+		{
+			Point p   = new Point();
+			var   xfd = Runtime.GetFieldDesc<Point>("_x");
+			Debug.Assert(xfd->MemberDef == xfd->FieldInfo.MetadataToken);
 		}
 
 		[Test]

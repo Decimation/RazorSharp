@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
@@ -32,8 +33,25 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 
 		public uint         Length      => m_stringLength;
 		public char         FirstChar   => m_firstChar;
+		/// <summary>
+		/// Address-sensitive
+		/// </summary>
 		public ObjHeader*   Header      => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
 		public MethodTable* MethodTable => m_methodTablePtr;
+
+		/// <summary>
+		/// Address-sensitive
+		/// </summary>
+
+		public char this[int index] {
+			get {
+				var __this = (char*)Unsafe.AddressOf(ref this);
+
+					return __this[index + (RuntimeHelpers.OffsetToStringData / 2)];
+
+			}
+		}
+
 
 
 		public override string ToString()

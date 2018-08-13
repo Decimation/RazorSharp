@@ -41,6 +41,23 @@ namespace RazorSharp.Runtime
 			Functions.Add(name, Scanner.GetDelegate<TDelegate>(signature));
 		}
 
+		internal static class ObjectFunctions
+		{
+			private const string AllocateObjectSignature =
+				"48 89 5C 24 10 48 89 6C 24 20 56 57 41 54 41 56 41 57 48 81 EC 80 00 00 00";
+
+			internal delegate void* AllocateObjectDelegate(MethodTable* mt, bool fHandleCom = true);
+
+			internal static readonly AllocateObjectDelegate AllocateObject;
+
+			static ObjectFunctions()
+			{
+				AddFunction<AllocateObjectDelegate>("AllocateObject", AllocateObjectSignature);
+				AllocateObject = (AllocateObjectDelegate) Functions["AllocateObject"];
+			}
+
+		}
+
 		internal static class ThreadFunctions
 		{
 			private const string GetStackLowerBoundSignature =

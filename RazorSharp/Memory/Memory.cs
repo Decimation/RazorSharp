@@ -90,10 +90,25 @@ namespace RazorSharp.Memory
 
 		#endregion
 
+		public static T[] CopyOut<T>(IntPtr addr, int elemCount)
+		{
+			return CopyOut<T>((Pointer<T>) addr, elemCount);
+		}
+
+		public static T[] CopyOut<T>(Pointer<T> ptr, int elemCount)
+		{
+			T[] arr = new T[elemCount];
+
+			for (int i = 0; i < elemCount; i++) {
+				arr[i] = ptr[i];
+			}
+
+			return arr;
+		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool ReadBit(int b, int bitIndex)
 		{
-			//var bit = (b & (1 << bitNumber-1)) != 0;
 			return (b & (1 << bitIndex)) != 0;
 		}
 
@@ -157,17 +172,6 @@ namespace RazorSharp.Memory
 			return readMethodTable->Equals(*validMethodTable);
 		}
 
-
-		public static object[] CopyOut<T>(IntPtr addr, int size)
-		{
-			Pointer<T> ptr  = addr;
-			object[]   @out = new object[size];
-			for (int i = 0; i < size; i++) {
-				@out[i] = ptr[i];
-			}
-
-			return @out;
-		}
 
 		#region Zero
 

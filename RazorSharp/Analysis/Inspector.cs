@@ -255,13 +255,15 @@ namespace RazorSharp.Analysis
 
 		public class SizeInfo
 		{
-			public int Size   { get; }
-			public int Native { get; }
+			public int Size           { get; }
+			public int Native         { get; }
+			public int BaseFieldsSize { get; }
 
 			protected internal SizeInfo()
 			{
-				Size   = Unsafe.SizeOf<T>();
-				Native = Unsafe.NativeSizeOf<T>();
+				Size           = Unsafe.SizeOf<T>();
+				Native         = Unsafe.NativeSizeOf<T>();
+				BaseFieldsSize = Unsafe.BaseFieldsSize<T>();
 			}
 
 			protected virtual ConsoleTable ToTable()
@@ -272,6 +274,7 @@ namespace RazorSharp.Analysis
 				var table = new ConsoleTable(String.Empty, "Size");
 				table.AddRow("Size value", Size);
 				table.AttachColumn("Native size", Native);
+				table.AttachColumn("Base fields size", BaseFieldsSize);
 
 				return table;
 			}

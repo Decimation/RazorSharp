@@ -14,6 +14,7 @@ namespace RazorSharp.Pointers
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+	using MMemory = Memory.Memory;
 
 	#endregion
 
@@ -37,27 +38,25 @@ namespace RazorSharp.Pointers
 		#region Properties
 
 		public T this[int index] {
-			get => Memory.Memory.Read<T>(PointerUtils.Offset<T>(m_value, index));
-			set => Memory.Memory.Write(PointerUtils.Offset<T>(m_value, index), 0, value);
+			get => MMemory.Read<T>(PointerUtils.Offset<T>(m_value, index));
+			set => MMemory.Write(PointerUtils.Offset<T>(m_value, index), 0, value);
 		}
 
-		public ref T Reference => ref Memory.Memory.AsRef<T>(Address);
 
-//		public IntPtr __this {
-//			get => Unsafe.AddressOf(ref this);
-//		}
+		public ref T Reference => ref MMemory.AsRef<T>(Address);
+
 
 		/// <summary>
 		/// Dereferences the pointer
 		/// </summary>
 		public T Value {
-			get => Memory.Memory.Read<T>((IntPtr) m_value, 0);
-			set => Memory.Memory.Write((IntPtr) m_value, 0, value);
+			get => MMemory.Read<T>((IntPtr) m_value, 0);
+			set => MMemory.Write((IntPtr) m_value, 0, value);
 		}
 
 		public TNew Peek<TNew>()
 		{
-			return Memory.Memory.Read<TNew>(Address);
+			return MMemory.Read<TNew>(Address);
 		}
 
 		public IntPtr Address {
@@ -67,9 +66,16 @@ namespace RazorSharp.Pointers
 
 		public int ElementSize => Unsafe.SizeOf<T>();
 
+		public Pointer<TNew> Reinterpret<TNew>()
+		{
+			return new Pointer<TNew>(Address);
+		}
+
 		#endregion
 
 		#region Constructors
+
+		public Pointer(IntPtr p) : this(p.ToPointer()) { }
 
 		public Pointer(void* v)
 		{

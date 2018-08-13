@@ -16,9 +16,10 @@ namespace RazorSharp.Runtime
 	public static unsafe class Constants
 	{
 		/// <summary>
-		/// Minimum GC object heap size
+		/// Minimum GC object heap size <para></para>
+		/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/object.h#L119
 		/// </summary>
-		internal static readonly int MinObjectSize = (2 * IntPtr.Size + sizeof(ObjHeader));
+		internal static readonly int MinObjectSize = (2 * IntPtr.Size) + sizeof(ObjHeader);
 
 		//todo
 		private const uint GC_MARKED = 0x1;
@@ -152,53 +153,53 @@ namespace RazorSharp.Runtime
 		}
 
 
+	}
+
+	/// <summary>
+	/// The value of lowest two bits describe what the union contains
+	/// </summary>
+	[Flags]
+	public enum LowBits
+	{
 		/// <summary>
-		/// The value of lowest two bits describe what the union contains
+		/// 0 - pointer to EEClass.
+		/// This MethodTable is the canonical method table.
 		/// </summary>
-		[Flags]
-		public enum LowBits
-		{
-			/// <summary>
-			/// 0 - pointer to EEClass.
-			/// This MethodTable is the canonical method table.
-			/// </summary>
-			EEClass = 0,
-
-			/// <summary>
-			/// 1 - not used
-			/// </summary>
-			Invalid = 1,
-
-			/// <summary>
-			/// 2 - pointer to canonical MethodTable.
-			/// </summary>
-			MethodTable = 2,
-
-			/// <summary>
-			/// 3 - pointer to indirection cell that points to canonical MethodTable.
-			/// (used only if FEATURE_PREJIT is defined)
-			/// </summary>
-			Indirection = 3
-		}
+		EEClass = 0,
 
 		/// <summary>
-		/// Use with: FieldDesc::ProtectionInt
+		/// 1 - not used
 		/// </summary>
-		public enum ProtectionLevel
-		{
-			Private           = 4,
-			PrivateProtected  = 8,
-			Internal          = 12,
-			Protected         = 16,
-			ProtectedInternal = 20,
-			Public            = 24,
-		}
+		Invalid = 1,
+
+		/// <summary>
+		/// 2 - pointer to canonical MethodTable.
+		/// </summary>
+		MethodTable = 2,
+
+		/// <summary>
+		/// 3 - pointer to indirection cell that points to canonical MethodTable.
+		/// (used only if FEATURE_PREJIT is defined)
+		/// </summary>
+		Indirection = 3
+	}
+
+	/// <summary>
+	/// Use with: FieldDesc::ProtectionInt
+	/// </summary>
+	public enum ProtectionLevel
+	{
+		Private           = 4,
+		PrivateProtected  = 8,
+		Internal          = 12,
+		Protected         = 16,
+		ProtectedInternal = 20,
+		Public            = 24,
 	}
 
 
-
 	/// <summary>
-	/// https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L1476
+	/// Source: https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L1476
 	/// </summary>
 	internal enum CorTokenType
 	{
@@ -226,10 +227,11 @@ namespace RazorSharp.Runtime
 		mdtGenericParam           = 0x2a000000, //
 		mdtMethodSpec             = 0x2b000000, //
 		mdtGenericParamConstraint = 0x2c000000,
+		mdtString                 = 0x70000000, //
+		mdtName                   = 0x71000000, //
 
-		mdtString   = 0x70000000, //
-		mdtName     = 0x71000000, //
-		mdtBaseType = 0x72000000, // Leave this on the high end value. This does not correspond to metadata table
+		mdtBaseType =
+			0x72000000, // Leave this on the high end value. This does not correspond to metadata table
 	}
 
 	/// <summary>

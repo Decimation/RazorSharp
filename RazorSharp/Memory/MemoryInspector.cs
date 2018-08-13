@@ -1,11 +1,13 @@
 #region
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using RazorCommon;
 using RazorCommon.Extensions;
+using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
 #endregion
@@ -22,7 +24,7 @@ namespace RazorSharp.Memory
 	/// <summary>
 	/// Provides a way to interpret memory as different types
 	/// </summary>
-	public static unsafe class MemoryLayout
+	public static unsafe class MemoryInspector
 	{
 
 		public static string Create<T>(IntPtr p)
@@ -66,21 +68,19 @@ namespace RazorSharp.Memory
 				adjOffset = indexes[offset] - str.JSubstring(indexes[offset - 1], indexes[offset] - 1).Length;
 			}
 
-
 			// Line 2: Arrow
 			var pt = new string(' ', adjOffset) + "^";
 
 			// Line 3: Address [index]
-			var addr = p + adjOffset;
-
+			var addr = p.ToInt64() + (offset * Unsafe.SizeOf<T>());
 
 			// [type] [address]
 			var addrStr = String.Format("{0}{1} {2}", new string(' ', adjOffset),
 				DataTypes.GetStyle<T>(NamingStyles.CSharpKeyword), Hex.ToHex(addr));
 
-
 			Console.WriteLine("{0}\n{1}\n{2} [{3}]", str, pt, addrStr, offset);
 		}
+
 
 		public static string Create<T>(byte[] mem, ToStringOptions options = ToStringOptions.ZeroPadHex)
 		{
@@ -89,33 +89,45 @@ namespace RazorSharp.Memory
 			if (typeof(T) == typeof(byte)) {
 				return Collections.ToString(mem, options);
 			}
+			if (possibleTypes < 1) {
+				throw new Exception($"Insufficient memory for type {typeof(T).Name}");
+			}
 
-			string As(int ofs)
+			string res = null;
+
+			ObjectPinner.InvokeWhilePinned(mem, delegate
 			{
-				if (possibleTypes < 1) {
-					throw new Exception($"Insufficient memory for type {typeof(T).Name}");
+				Pointer<T> ptrMem = Unsafe.AddressOfHeap(ref mem, OffsetType.ArrayData);
+
+				string OfsAs(int o)
+				{
+
+
+					string s = options.HasFlag(ToStringOptions.Hex)
+						? Hex.TryCreateHex(ptrMem[o], options)
+						: ptrMem[o].ToString();
+					return s;
+				}
+				string[] @out = new string[possibleTypes];
+				for (int i = 0; i < possibleTypes; i++) {
+					@out[i] = OfsAs(i);
 				}
 
-				var alloc = Marshal.AllocHGlobal(mem.Length);
-				Memory.WriteBytes(alloc, mem);
-				IntPtr adj = alloc + ofs * Unsafe.SizeOf<T>();
-
-				string s = options.HasFlag(ToStringOptions.Hex)
-					? Hex.TryCreateHex(CSUnsafe.Read<T>(adj.ToPointer()))
-					: CSUnsafe.Read<T>(adj.ToPointer()).ToString();
-
-				Marshal.FreeHGlobal(alloc);
-				return s;
-			}
-
-			string[] @out = new string[possibleTypes];
-			for (int i = 0; i < possibleTypes; i++) {
-				@out[i] = As(i);
-			}
+				res = Collections.ToString(@out, options & ~ToStringOptions.UseCommas);
 
 
-			return Collections.ToString(@out, options | ~ToStringOptions.UseCommas);
+
+			});
+
+
+
+
+
+
+			return res ;
 		}
+
+
 
 		public static string Create<T>(IntPtr p, int byteLen, ToStringOptions options = ToStringOptions.ZeroPadHex)
 		{

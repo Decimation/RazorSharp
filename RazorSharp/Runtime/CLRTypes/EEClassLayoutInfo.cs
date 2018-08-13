@@ -4,6 +4,8 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+
 #endregion
 
 // ReSharper disable InconsistentNaming
@@ -26,7 +28,7 @@ namespace RazorSharp.Runtime.CLRTypes
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct EEClassLayoutInfo
 	{
-		// size (in bytes) of fixed portion of NStruct.
+		// why is there an m_cbNativeSize in EEClassLayoutInfo and EEClass?
 		[FieldOffset(0)] private readonly UINT32 m_cbNativeSize;
 		[FieldOffset(4)] private readonly UINT32 m_cbManagedSize;
 
@@ -50,6 +52,18 @@ namespace RazorSharp.Runtime.CLRTypes
 
 
 		[FieldOffset(16)] private readonly void* m_pFieldMarshalers;
+
+		/// <summary>
+		/// <para>Size (in bytes) of fixed portion of NStruct.</para>
+		///
+		/// <para>Equal to: Marshal.SizeOf and EEClass.m_cbNativeSize</para>
+		/// </summary>
+		internal uint NativeSize => m_cbNativeSize;
+
+		/// <summary>
+		/// Equal to: Unsafe.SizeOf
+		/// </summary>
+		internal uint ManagedSize => m_cbManagedSize;
 
 		public LayoutFlags Flags => (LayoutFlags) m_bFlags;
 

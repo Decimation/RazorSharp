@@ -1,8 +1,12 @@
 #region
 
+#region
+
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
+
+#endregion
 
 // ReSharper disable InconsistentNaming
 

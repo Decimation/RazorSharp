@@ -121,7 +121,7 @@
     <Compile Include="Experimental\UnmanagedAllocated.cs" />
     <Compile Include="Memory\Asm.cs" />
     <Compile Include="Memory\Memory.cs" />
-    <Compile Include="Memory\MemoryLayout.cs" />
+    <Compile Include="Memory\MemoryInspector.cs" />
     <Compile Include="Memory\SigScanner.cs" />
     <Compile Include="ObjectPinner.cs" />
     <Compile Include="Pointers\AllocExPointer.cs" />

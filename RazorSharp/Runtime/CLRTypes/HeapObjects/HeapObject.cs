@@ -21,6 +21,9 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 		[FieldOffset(0)] private          MethodTable* m_methodTablePtr;
 		[FieldOffset(8)] private readonly byte         m_fields;
 
+		/// <summary>
+		/// Address-sensitive
+		/// </summary>
 		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
 
 		public MethodTable* MethodTable {
