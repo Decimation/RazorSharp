@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using NUnit.Framework;
+using RazorCommon;
 using RazorSharp;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime;
@@ -50,6 +51,32 @@ namespace Test.Testing
 				// pass when reference is pinned
 				Assert.That(mem.stackPtr, Is.EqualTo(Unsafe.AddressOf(ref t)));
 				Assert.That(mem.heap, Is.EqualTo(Unsafe.AddressOfHeap(ref t)));
+			}
+		}
+
+		internal static void Pinning2<T>(ref T t) where T : class
+		{
+			(IntPtr stackPtr, IntPtr heap) mem = (Unsafe.AddressOf(ref t), Unsafe.AddressOfHeap(ref t));
+
+
+			int passes = 0;
+			while (passes++ < MaxPasses) {
+				object[] oArr = new object[MaxObjects];
+				for (int i = 0; i < oArr.Length; i++) {
+					oArr[i] = new object();
+				}
+
+				// pass when reference is pinned
+				if (mem.stackPtr != Unsafe.AddressOf(ref t)) {
+					//Console.WriteLine("Stack: {0} != {1}", Hex.ToHex(mem.stackPtr), Hex.ToHex(Unsafe.AddressOf(ref t)));
+					//break;
+				}
+
+				if (mem.heap != Unsafe.AddressOfHeap(ref t)) {
+					Console.WriteLine("Heap: {0} != {1}", Hex.ToHex(mem.heap), Hex.ToHex(Unsafe.AddressOfHeap(ref t)));
+					break;
+				}
+
 			}
 		}
 

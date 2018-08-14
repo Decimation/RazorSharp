@@ -78,10 +78,10 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Native size", m_cbNativeSize);
 			table.AddRow("Managed size", m_cbManagedSize);
 			table.AddRow("Largest alignment req of all", m_LargestAlignmentRequirementOfAllMembers);
-			table.AddRow("Flags", m_bFlags);
-			table.AddRow("Flags", String.Join(", ", Flags.GetFlags()));
+			table.AddRow("Flags", String.Format("{0} ({1})",m_bFlags, String.Join(", ", Flags.GetFlags())));
+
 			table.AddRow("Packing size", m_cbPackingSize);
-			table.AddRow("CMT fields", m_numCTMFields);
+			table.AddRow("CTM fields", m_numCTMFields);
 			table.AddRow("Field marshalers", Hex.ToHex(m_pFieldMarshalers));
 			table.AddRow("Blittable", IsBlittable);
 			table.AddRow("Zero sized", ZeroSized);

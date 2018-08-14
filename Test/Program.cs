@@ -4,7 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Dynamic;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using BenchmarkDotNet.Environments;
+using NUnit.Framework;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp;
@@ -15,6 +20,7 @@ using RazorSharp.Runtime.CLRTypes.HeapObjects;
 using RazorSharp.Utilities;
 using Test.Testing;
 using static RazorSharp.Unsafe;
+using Runtime = RazorSharp.Runtime.Runtime;
 
 #endregion
 
@@ -72,27 +78,13 @@ namespace Test
 		}
 
 
-		public static void Main(string[] args)
+		private static T* AddrOf<T>(ref T t) where T : unmanaged
 		{
-			Point p = new Point();
-
-			WriteOutVal(ref p);
-			Pointer<int> lpInt32 = AddressOf(ref p, "X", true);
-			lpInt32[0] = int.MinValue;
-			lpInt32[1] = int.MaxValue;
-			Debug.Assert(p.X == int.MinValue);
-			Debug.Assert(p.Y == int.MaxValue);
-
-			string foo = "foo";
-			Pointer<StringObject> lpStr = AddressOfHeap(ref foo);
-
-			Console.WriteLine(lpStr.Reference[0]);
-			Console.WriteLine(lpStr.Reference[1]);
-
-
-
-//			Console.ReadLine();
+			return (T*) AddressOf(ref t);
 		}
+
+
+		public static void Main(string[] args) { }
 
 
 		private static void WriteOutVal<T>(ref T t) where T : struct
@@ -118,10 +110,14 @@ namespace Test
 			Console.WriteLine(table.ToMarkDownString());
 		}
 
+
 		private static void SetChar(this string str, int i, char c)
 		{
-			Pointer<char> lpChar = AddressOfHeap(ref str, OffsetType.StringData);
-			lpChar[i] = c;
+			ObjectPinner.InvokeWhilePinned(str, delegate
+			{
+				Pointer<char> lpChar = AddressOfHeap(ref str, OffsetType.StringData);
+				lpChar[i] = c;
+			});
 		}
 
 
@@ -132,16 +128,12 @@ namespace Test
 		 *  - RazorCommon
 		 * 	- CompilerServices.Unsafe
 		 *  - RazorInvoke
-		 *  - Fody
-		 *  - MethodTimer Fody
 		 *
 		 * Test:
 		 *  - RazorCommon
 		 *  - CompilerServices.Unsafe
 		 * 	- NUnit
 		 *  - BenchmarkDotNet
-		 *  - Fody
-		 *  - MethodTimer Fody
 		 */
 
 		/**
@@ -164,14 +156,14 @@ namespace Test
 		 */
 
 		/**
-		 * CLR										Used in										Equivalent
+		 * CLR										Used in										Equals
 		 *
 		 * MethodTable.BaseSize						Unsafe.BaseInstanceSize, Unsafe.HeapSize	-
 		 * MethodTable.ComponentSize				Unsafe.HeapSize								-
 		 * MethodTable.NumInstanceFieldBytes		Unsafe.BaseFieldsSize						-
 		 * EEClass.m_cbNativeSize					Unsafe.NativeSize							Marshal.SizeOf, EEClassLayoutInfo.m_cbNativeSize
 		 * EEClassLayoutInfo.m_cbNativeSize			-											Marshal.SizeOf, EEClass.m_cbNativeSize
-		 * EEClassLayoutInfo.m_cbManagedSize		-											Unsafe.SizeOf
+		 * EEClassLayoutInfo.m_cbManagedSize		-											Unsafe.SizeOf, Unsafe.BaseFieldsSize (value types)
 		 */
 
 		/**

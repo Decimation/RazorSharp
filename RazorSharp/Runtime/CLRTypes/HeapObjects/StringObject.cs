@@ -4,6 +4,8 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+// ReSharper disable ConvertToAutoProperty
 
 #endregion
 
@@ -28,15 +30,17 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 
 		[FieldOffset(0)]  private readonly MethodTable* m_methodTablePtr;
 		[FieldOffset(8)]  private readonly uint         m_stringLength;
-		[FieldOffset(12)] private          char         m_firstChar;
+		[FieldOffset(12)] private readonly char         m_firstChar;
 
 
-		public uint         Length      => m_stringLength;
-		public char         FirstChar   => m_firstChar;
+		public uint Length    => m_stringLength;
+		public char FirstChar => m_firstChar;
+
 		/// <summary>
 		/// Address-sensitive
 		/// </summary>
-		public ObjHeader*   Header      => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
+		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
+
 		public MethodTable* MethodTable => m_methodTablePtr;
 
 		/// <summary>
@@ -45,13 +49,11 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 
 		public char this[int index] {
 			get {
-				var __this = (char*)Unsafe.AddressOf(ref this);
+				var __this = (char*) Unsafe.AddressOf(ref this);
 
-					return __this[index + (RuntimeHelpers.OffsetToStringData / 2)];
-
+				return __this[index + (RuntimeHelpers.OffsetToStringData / 2)];
 			}
 		}
-
 
 
 		public override string ToString()

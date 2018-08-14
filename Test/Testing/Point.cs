@@ -3,7 +3,7 @@ using System;
 namespace Test.Testing
 {
 
-	public struct Point
+	internal struct Point
 	{
 
 		public int X { get; }
@@ -14,6 +14,10 @@ namespace Test.Testing
 		{
 			X = x;
 			Y = y;
+		}
+
+		public void DoSomething() {
+			Console.WriteLine("hi");
 		}
 
 		public override string ToString()

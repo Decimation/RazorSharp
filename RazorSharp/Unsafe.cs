@@ -123,7 +123,7 @@ namespace RazorSharp
 		/// <param name="instance">Instance of the enclosing type</param>
 		/// <param name="name">Name of the field</param>
 		/// <param name="isAutoProperty">Whether the field is an auto-property</param>
-		public static IntPtr AddressOf<T>(ref T instance, string name, bool isAutoProperty = false)
+		public static IntPtr AddressOfField<T>(ref T instance, string name, bool isAutoProperty = false)
 		{
 			if (isAutoProperty) {
 				name = AutoPropertyBackingFieldName(name);
@@ -208,6 +208,7 @@ namespace RazorSharp
 		/// <returns>The native size if the type has a native representation; -1 otherwise</returns>
 		public static int NativeSizeOf<T>()
 		{
+			if (typeof(T).IsArray) return InvalidValue;
 			var mt     = RRuntime.MethodTableOf<T>();
 			var native = mt->EEClass->NativeSize;
 			return native == 0 ? InvalidValue : native;
@@ -234,13 +235,14 @@ namespace RazorSharp
 		///
 		/// (base instance size) + (length) * (component size)<para></para>
 		///
-		/// where:
+		/// <para>where:</para>
 		/// 	base instance size = The base instance size of a type (24 (x64) or 12 (x86) by default)<para></para>
 		/// 	length			   = array or string length, 1 otherwise<para></para>
 		/// 	component size	   = element size, if available; 0 otherwise<para></para>
 		/// </summary>
 		///
-		/// Note: this also includes padding.
+		/// <para>Note: this also includes padding.</para>
+		/// <para>Note: Equals BaseInstanceSize for objects that aren't arrays or strings.</para>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		public static int HeapSize<T>(ref T t) where T : class
 		{
@@ -303,8 +305,8 @@ namespace RazorSharp
 		/// <summary>
 		/// <para>Calculates the base size of the fields in the heap minus padding and overhead of the base size.</para>
 		///
-		/// <para>Note: If the fields *themselves* are padded, those are still included.</para>
-		/// <para>Note: Equals SizeOf for value types</para>
+		/// <para>Note: If the fields *themselves* are padded, those bytes are still included.</para>
+		/// <para>Note: Equals SizeOf&lt;T&gt; for value types</para>
 		/// </summary>
 		public static int BaseFieldsSize<T>()
 		{
@@ -325,7 +327,6 @@ namespace RazorSharp
 		/// Returns the base instance size according to the TypeHandle (MethodTable).
 		/// This is the minimum heap size of a type.<para></para>
 		///
-		/// <para>Corresponds to MethodTable.BaseSize</para>
 		/// </summary>
 		/// <returns>-1 if type is array, base instance size otherwise</returns>
 		public static int BaseInstanceSize<T>() where T : class

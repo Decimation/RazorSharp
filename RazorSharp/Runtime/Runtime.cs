@@ -100,7 +100,8 @@ namespace RazorSharp.Runtime
 		#region Method Table
 
 		/// <summary>
-		/// Manually reads a CLR MethodTable (TypeHandle)
+		/// Manually reads a CLR MethodTable (TypeHandle).<para></para>
+		/// If the type is a value type, the MethodTable will be returned from the TypeHandle.<para></para>
 		/// </summary>
 		/// <returns>A pointer to the object type's MethodTable</returns>
 		public static MethodTable* ReadMethodTable<T>(ref T t)

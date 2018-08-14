@@ -39,7 +39,7 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void AddressOfByName()
 		{
-			Unsafe.AddressOf(ref _dummy, "_int");
+			Unsafe.AddressOfField(ref _dummy, "_int");
 		}
 
 

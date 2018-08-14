@@ -17,6 +17,8 @@ using RazorSharp.Runtime.CLRTypes;
 namespace RazorSharp.Analysis
 {
 
+	using Memory = Memory.Memory;
+
 	[Flags]
 	public enum InspectorMode
 	{
@@ -200,7 +202,8 @@ namespace RazorSharp.Analysis
 
 		public class MetadataInfo
 		{
-			public T Value { get; }
+			public T    Value   { get; }
+			public bool OnStack { get; }
 
 			//public bool IsBlittable { get; }
 			public bool IsValueType { get; }
@@ -211,6 +214,7 @@ namespace RazorSharp.Analysis
 
 				//IsBlittable = Runtime.Runtime.IsBlittable<T>();
 				IsValueType = typeof(T).IsValueType;
+				OnStack     = Memory.IsOnStack(ref t);
 			}
 
 
@@ -222,6 +226,7 @@ namespace RazorSharp.Analysis
 
 				//table.AddRow("Blittable", IsBlittable ? StringUtils.Check : StringUtils.BallotX);
 				table.AddRow("Value type", IsValueType ? StringUtils.Check : StringUtils.BallotX);
+				table.AddRow("On stack", OnStack ? StringUtils.Check : StringUtils.BallotX);
 				return table;
 			}
 

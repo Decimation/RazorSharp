@@ -7,7 +7,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using MethodTimer;
 using RazorCommon;
 using RazorInvoke;
 using RazorSharp.Pointers;
@@ -47,7 +46,7 @@ namespace RazorSharp.Experimental
 			}
 		}
 
-		[Time]
+
 		public Dictionary<IntPtr, byte[]> Find(byte[] memory)
 		{
 			int cnt  = 0;

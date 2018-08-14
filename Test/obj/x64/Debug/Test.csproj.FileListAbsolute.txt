@@ -19,7 +19,6 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\RazorInvoke.pdb
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\Test.exe.config
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\BenchmarkDotNet.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\CommandLine.dll
-C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\MethodTimer.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\Microsoft.CodeAnalysis.CSharp.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\Microsoft.CodeAnalysis.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\Microsoft.DotNet.PlatformAbstractions.dll
@@ -35,7 +34,6 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.ValueTuple.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Xml.XPath.XmlDocument.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\BenchmarkDotNet.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\CommandLine.xml
-C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\MethodTimer.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\Microsoft.CodeAnalysis.pdb
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\Microsoft.CodeAnalysis.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\Microsoft.CodeAnalysis.CSharp.pdb
@@ -45,9 +43,7 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Reflection.Met
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Threading.Tasks.Extensions.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.ValueTuple.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\obj\x64\Debug\Test.exe.config
-C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Buffers.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Memory.dll
-C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Numerics.Vectors.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Buffers.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Memory.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Numerics.Vectors.xml

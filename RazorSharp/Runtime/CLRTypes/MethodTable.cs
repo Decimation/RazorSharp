@@ -165,9 +165,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <exception cref="RuntimeException">If this is not an array MethodTable.</exception>
 		public MethodTable* ElementTypeHandle {
 			get {
-				if (IsArray)
+				if (IsStringOrArray)
 					return (MethodTable*) m_ElementTypeHnd;
-				throw new RuntimeException("Element type handles cannot be accessed when type is not an array");
+				else throw new RuntimeException("Element type handles cannot be accessed when type is not an array");
 			}
 		}
 

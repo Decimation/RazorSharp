@@ -91,7 +91,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		/// <summary>
 		/// Abstracted to Unsafe.NativeSizeOf<para></para>
-		/// Valid only if EEClass::IsBlittable() or EEClass::HasLayout() is true <para></para>
+		/// Valid only if EEClass::IsBlittable() or EEClass::HasLayout() is true; 0 otherwise<para></para>
 		/// Size of fixed portion in bytes <para></para>
 		/// Corresponds to Marshal.SizeOf<para></para>
 		/// </summary>

@@ -5,7 +5,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
@@ -399,6 +398,15 @@ namespace RazorSharp.Pointers
 			}
 		}
 
+		public void Init(params T[] args)
+		{
+			if (args.Length > Count) throw new ArgumentOutOfRangeException();
+
+			for (int i = 0; i < args.Length; i++) {
+				this[i] = args[i];
+			}
+		}
+
 		protected override void Increment(int cnt = 1)
 		{
 			switch (EnsureOffsetBounds(cnt)) {
@@ -447,22 +455,6 @@ namespace RazorSharp.Pointers
 			return table;
 		}
 
-		[HandleProcessCorruptedStateExceptions]
-		private string ReadMaybeNull(IntPtr addr)
-		{
-			try {
-				//if ((*(IntPtr*) addr) == IntPtr.Zero) return "(null)";
-				if (Marshal.ReadIntPtr(addr) == IntPtr.Zero) return "NULL";
-				return Memory.Memory.Read<T>(addr).ToString();
-			}
-			catch (AccessViolationException) {
-				return ("(ave)");
-			}
-			catch (NullReferenceException) {
-				return "(null)";
-			}
-		}
-
 		protected override ConsoleTable ToElementTable(int length)
 		{
 			bool         refType = !typeof(T).IsValueType;
@@ -507,6 +499,7 @@ namespace RazorSharp.Pointers
 		public void Dispose()
 		{
 			Logger.Log(Flags.Memory, "Freeing {0} bytes @ {1:P}", AllocatedSize, Address);
+			MoveToStart();
 			ReleaseUnmanagedResources();
 
 			Metadata.AllocatedSize = 0;

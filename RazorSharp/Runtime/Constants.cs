@@ -235,9 +235,9 @@ namespace RazorSharp.Runtime
 	}
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/f31097f14560b193e76a7b2e1e61af9870b5356b/src/System.Private.CoreLib/src/System/Reflection/MdImport.cs#L22
-	/// Source 2: https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L863
-	/// For sizes: https://github.com/dotnet/coreclr/blob/de586767f51432e5d89f6fcffee07c488fdeeb7b/src/vm/siginfo.cpp#L63
+	/// Source: https://github.com/dotnet/coreclr/blob/f31097f14560b193e76a7b2e1e61af9870b5356b/src/System.Private.CoreLib/src/System/Reflection/MdImport.cs#L22 <para></para>
+	/// Source 2: https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L863 <para></para>
+	/// For sizes: https://github.com/dotnet/coreclr/blob/de586767f51432e5d89f6fcffee07c488fdeeb7b/src/vm/siginfo.cpp#L63 <para></para>
 	///
 	/// Use with: FieldDesc::Type
 	/// </summary>
