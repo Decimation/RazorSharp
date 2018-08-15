@@ -14,6 +14,7 @@ namespace RazorSharp.Pointers
 	/// <summary>
 	/// This won't work when:
 	/// 	- A string is changed (i.e. concatenations)
+	/// 	- Reference changes
 	///
 	/// Unlike ExPointer, this supports implicit array-type conversions (decaying)
 	/// but doesn't work with the GC. This requires pinning.
@@ -22,7 +23,7 @@ namespace RazorSharp.Pointers
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Obsolete("Use AllocExPointer", true)]
-	internal unsafe class DecayPointer<T> : ExPointer<T>
+	internal unsafe class DecayExPointer<T> : ExPointer<T>
 	{
 
 		#region Fields and accessors
@@ -58,7 +59,7 @@ namespace RazorSharp.Pointers
 		public IntPtr FirstElement {
 			get {
 				// move back the indexes
-				return Address - (m_offset * ElementSize);
+				return Address - m_offset * ElementSize;
 			}
 		}
 
@@ -66,7 +67,7 @@ namespace RazorSharp.Pointers
 		/// Returns the heap address of the array's last element
 		/// </summary>
 		private IntPtr LastElement {
-			get { return FirstElement + ((Count - 1) * ElementSize); }
+			get { return FirstElement + (Count - 1) * ElementSize; }
 		}
 
 		/// <summary>
@@ -83,7 +84,7 @@ namespace RazorSharp.Pointers
 
 		#region Constructors
 
-		private protected DecayPointer(IntPtr pHeap, PointerMetadata metadata, bool isString) :
+		private protected DecayExPointer(IntPtr pHeap, PointerMetadata metadata, bool isString) :
 			base(pHeap, metadata)
 		{
 			_origin = pHeap;
@@ -104,10 +105,10 @@ namespace RazorSharp.Pointers
 			Count = Marshal.ReadInt32(sizePtr);
 		}
 
-		private static DecayPointer<T> CreateDecayedPointer(IntPtr pHeap, bool isString)
+		private static DecayExPointer<T> CreateDecayedPointer(IntPtr pHeap, bool isString)
 		{
 			PointerMetadata meta = new PointerMetadata(Unsafe.SizeOf<T>(), true);
-			var             p    = new DecayPointer<T>(pHeap, meta, isString);
+			var             p    = new DecayExPointer<T>(pHeap, meta, isString);
 
 
 			return p;
@@ -168,7 +169,7 @@ namespace RazorSharp.Pointers
 		private FixType EnsureOffsetBounds(int requestedOffset = 1)
 		{
 			// Past the end?
-			if (Address.ToInt64() + (requestedOffset * ElementSize) > LastElement.ToInt64()) {
+			if (Address.ToInt64() + requestedOffset * ElementSize > LastElement.ToInt64()) {
 				// This is for isolated incidents when iterators
 				// and pointer arithmetic move past the end by 1 element.
 				//
@@ -183,7 +184,7 @@ namespace RazorSharp.Pointers
 			}
 
 			// Before the start?
-			if (Address.ToInt64() + (requestedOffset * ElementSize) < FirstElement.ToInt64()) {
+			if (Address.ToInt64() + requestedOffset * ElementSize < FirstElement.ToInt64()) {
 				// ... and vice versa
 				if (requestedOffset == -1) {
 					MoveToStart();
@@ -202,7 +203,7 @@ namespace RazorSharp.Pointers
 
 		#region Equality
 
-		protected bool Equals(DecayPointer<T> other)
+		protected bool Equals(DecayExPointer<T> other)
 		{
 			return base.Equals(other) && _origin.Equals(other._origin) && m_offset == other.m_offset &&
 			       Count == other.Count;
@@ -213,7 +214,7 @@ namespace RazorSharp.Pointers
 			if (ReferenceEquals(null, obj)) return false;
 			if (ReferenceEquals(this, obj)) return true;
 			if (obj.GetType() != this.GetType()) return false;
-			return Equals((DecayPointer<T>) obj);
+			return Equals((DecayExPointer<T>) obj);
 		}
 
 		public override int GetHashCode()
@@ -228,12 +229,12 @@ namespace RazorSharp.Pointers
 			}
 		}
 
-		public static bool operator ==(DecayPointer<T> left, DecayPointer<T> right)
+		public static bool operator ==(DecayExPointer<T> left, DecayExPointer<T> right)
 		{
 			return Equals(left, right);
 		}
 
-		public static bool operator !=(DecayPointer<T> left, DecayPointer<T> right)
+		public static bool operator !=(DecayExPointer<T> left, DecayExPointer<T> right)
 		{
 			return !Equals(left, right);
 		}
@@ -241,13 +242,13 @@ namespace RazorSharp.Pointers
 		#endregion
 
 
-		public static DecayPointer<T> operator ++(DecayPointer<T> p)
+		public static DecayExPointer<T> operator ++(DecayExPointer<T> p)
 		{
 			p.Increment();
 			return p;
 		}
 
-		public static DecayPointer<T> operator --(DecayPointer<T> p)
+		public static DecayExPointer<T> operator --(DecayExPointer<T> p)
 		{
 			p.Decrement();
 			return p;
@@ -261,7 +262,7 @@ namespace RazorSharp.Pointers
 		// However this means we may need to pin the object
 
 
-		public static implicit operator DecayPointer<T>(string s)
+		public static implicit operator DecayExPointer<T>(string s)
 		{
 			Assertion.AssertType<char, T>();
 
@@ -270,7 +271,7 @@ namespace RazorSharp.Pointers
 				true);
 		}
 
-		public static implicit operator DecayPointer<T>(T[] arr)
+		public static implicit operator DecayExPointer<T>(T[] arr)
 		{
 			return CreateDecayedPointer(Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData),
 				false);

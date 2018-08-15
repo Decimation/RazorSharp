@@ -92,7 +92,7 @@ namespace RazorSharp.Memory
 
 		public static T[] CopyOut<T>(IntPtr addr, int elemCount)
 		{
-			return CopyOut<T>((Pointer<T>) addr, elemCount);
+			return CopyOut((Pointer<T>) addr, elemCount);
 		}
 
 		public static T[] CopyOut<T>(Pointer<T> ptr, int elemCount)
@@ -210,13 +210,23 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <typeparam name="T">Value type to allocate</typeparam>
 		/// <returns>A pointer to the allocated memory</returns>
-		public static Pointer<T> AllocUnmanaged<T>() where T : struct
+		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1) where T : struct
 		{
-			var    size  = Unsafe.SizeOf<T>();
+			var    size  = Unsafe.SizeOf<T>() * elemCnt;
 			IntPtr alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
 
 			return alloc;
+		}
+
+		public static bool IsAligned(IntPtr p)
+		{
+			return IsAligned(p, IntPtr.Size);
+		}
+
+		private static bool IsAligned(IntPtr p, int byteAlignment)
+		{
+			return ((p.ToInt64()) & (byteAlignment-1)) == 0;
 		}
 	}
 

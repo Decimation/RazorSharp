@@ -23,11 +23,13 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 		[FieldOffset(12)] private readonly uint         m_pad;
 
 
-		public uint         Length      => m_numComponents;
+		public uint Length => m_numComponents;
+
 		/// <summary>
 		/// Address-sensitive
 		/// </summary>
-		public ObjHeader*   Header      => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
+		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
+
 		public MethodTable* MethodTable => m_methodTablePtr;
 
 		/// <summary>

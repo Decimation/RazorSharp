@@ -31,7 +31,7 @@ namespace RazorSharp.Pointers
 	///
 	/// </summary>
 	/// <typeparam name="T">Type this pointer points to. If just raw memory, use byte.</typeparam>
-	public unsafe class ExPointer<T> : IFormattable, IPointer<T>
+	public unsafe class ExPointer<T> : IFormattable//, IPointer<T>
 	{
 		/// <summary>
 		/// Contains metadata for operating ExPointer

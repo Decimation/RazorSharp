@@ -1,4 +1,8 @@
+#region
+
 using System;
+
+#endregion
 
 namespace Test.Testing
 {
@@ -6,9 +10,9 @@ namespace Test.Testing
 	internal struct Point
 	{
 
-		public int X { get; }
+		public int X { get; set; }
 
-		public int Y { get; }
+		public int Y { get; set; }
 
 		public Point(int x, int y)
 		{
@@ -16,8 +20,16 @@ namespace Test.Testing
 			Y = y;
 		}
 
-		public void DoSomething() {
+		public void DoSomething()
+		{
 			Console.WriteLine("hi");
+		}
+
+		public static Point operator ++(Point p)
+		{
+			p.X++;
+			p.Y++;
+			return p;
 		}
 
 		public override string ToString()

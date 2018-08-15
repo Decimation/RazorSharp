@@ -4,6 +4,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
+
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable ConvertToAutoProperty
 
@@ -51,7 +52,7 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 			get {
 				var __this = (char*) Unsafe.AddressOf(ref this);
 
-				return __this[index + (RuntimeHelpers.OffsetToStringData / 2)];
+				return __this[index + RuntimeHelpers.OffsetToStringData / 2];
 			}
 		}
 

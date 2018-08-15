@@ -17,8 +17,6 @@ using RazorSharp.Runtime.CLRTypes;
 namespace RazorSharp.Analysis
 {
 
-	using Memory = Memory.Memory;
-
 	[Flags]
 	public enum InspectorMode
 	{
@@ -31,7 +29,6 @@ namespace RazorSharp.Analysis
 		MethodDescs = 32,
 		Layout      = 64,
 
-		//All         = Meta | Address | Size | Internal | Layout | FieldDescs | MethodDescs,
 		Default = Meta | Address | Size | Internal | Layout | FieldDescs
 	}
 
@@ -214,7 +211,7 @@ namespace RazorSharp.Analysis
 
 				//IsBlittable = Runtime.Runtime.IsBlittable<T>();
 				IsValueType = typeof(T).IsValueType;
-				OnStack     = Memory.IsOnStack(ref t);
+				OnStack     = Memory.Memory.IsOnStack(ref t);
 			}
 
 
@@ -263,12 +260,14 @@ namespace RazorSharp.Analysis
 			public int Size           { get; }
 			public int Native         { get; }
 			public int BaseFieldsSize { get; }
+			public int Managed { get; }
 
 			protected internal SizeInfo()
 			{
 				Size           = Unsafe.SizeOf<T>();
 				Native         = Unsafe.NativeSizeOf<T>();
 				BaseFieldsSize = Unsafe.BaseFieldsSize<T>();
+				Managed = Unsafe.ManagedSizeOf<T>();
 			}
 
 			protected virtual ConsoleTable ToTable()
@@ -279,7 +278,9 @@ namespace RazorSharp.Analysis
 				var table = new ConsoleTable(String.Empty, "Size");
 				table.AddRow("Size value", Size);
 				table.AttachColumn("Native size", Native);
+				table.AttachColumn("Managed size", Managed);
 				table.AttachColumn("Base fields size", BaseFieldsSize);
+
 
 				return table;
 			}

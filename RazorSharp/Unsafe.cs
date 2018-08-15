@@ -116,7 +116,6 @@ namespace RazorSharp
 
 		#region Address
 
-
 		/// <summary>
 		/// Returns the address of a field in the specified type.
 		/// </summary>
@@ -125,11 +124,9 @@ namespace RazorSharp
 		/// <param name="isAutoProperty">Whether the field is an auto-property</param>
 		public static IntPtr AddressOfField<T>(ref T instance, string name, bool isAutoProperty = false)
 		{
-			if (isAutoProperty) {
-				name = AutoPropertyBackingFieldName(name);
-			}
 
-			var fd = RRuntime.GetFieldDesc<T>(name);
+
+			var fd = RRuntime.GetFieldDesc<T>(name,isAutoProperty);
 
 			return fd->GetAddress(ref instance);
 		}
@@ -201,14 +198,31 @@ namespace RazorSharp
 
 		#region Sizes
 
+		public static int ManagedSizeOf<T>()
+		{
+			if (typeof(T).IsArray) {
+				return InvalidValue;
+			}
+			var mt = RRuntime.MethodTableOf<T>();
+			var ee = mt->EEClass;
+			if (ee->HasLayout) {
+				return (int) ee->LayoutInfo->ManagedSize;
+			}
+
+			return InvalidValue;
+		}
+
 		/// <summary>
 		/// Calculates the native (Marshal) size of a type. <para></para>
-		/// Corresponds to Marshal.SizeOf.
+		/// Equals Marshal.SizeOf. Equals StructLayoutAttribute.Size when the type isn't zero-sized.
 		/// </summary>
 		/// <returns>The native size if the type has a native representation; -1 otherwise</returns>
 		public static int NativeSizeOf<T>()
 		{
-			if (typeof(T).IsArray) return InvalidValue;
+			// 0
+			if (typeof(T).IsArray)
+				return InvalidValue;
+
 			var mt     = RRuntime.MethodTableOf<T>();
 			var native = mt->EEClass->NativeSize;
 			return native == 0 ? InvalidValue : native;
@@ -367,7 +381,7 @@ namespace RazorSharp
 		public static byte[] MemoryOfFields<T>(ref T t) where T : class
 		{
 			// Subtract the size of the ObjHeader and MethodTable*
-			int    fieldSize = HeapSize(ref t) - (IntPtr.Size * 2);
+			int    fieldSize = HeapSize(ref t) - IntPtr.Size * 2;
 			byte[] fields    = new byte[fieldSize];
 
 			// Skip over the MethodTable*
@@ -389,18 +403,6 @@ namespace RazorSharp
 		}
 
 		#endregion
-
-		/// <summary>
-		/// Gets the internal name of an auto-property's backing field.
-		/// <example>If the auto-property's name is X, the backing field name is &lt;X&gt;k__BackingField.</example>
-		/// </summary>
-		/// <param name="propname">Auto-property's name</param>
-		/// <returns>Internal name of the auto-property's backing field</returns>
-		private static string AutoPropertyBackingFieldName(string propname)
-		{
-			const string backingFieldFormat = "<{0}>k__BackingField";
-			return String.Format(backingFieldFormat, propname);
-		}
 
 		public static void WriteReference<T>(ref T t, IntPtr newHeapAddr)
 		{

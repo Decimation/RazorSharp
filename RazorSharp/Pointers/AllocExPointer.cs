@@ -87,7 +87,7 @@ namespace RazorSharp.Pointers
 
 		private AllocPointerMetadata Metadata {
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get => ((AllocPointerMetadata) m_metadata);
+			get => (AllocPointerMetadata) m_metadata;
 		}
 
 		private int m_offset;

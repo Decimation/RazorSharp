@@ -106,7 +106,7 @@ namespace RazorSharp.Experimental
 		{
 			Debug.Assert(mem.Length == Unsafe.SizeOf<T>());
 			fixed (byte* b = mem) {
-				return (*(MethodTable**) b) == (Runtime.Runtime.MethodTableOf<T>());
+				return *(MethodTable**) b == Runtime.Runtime.MethodTableOf<T>();
 			}
 		}
 

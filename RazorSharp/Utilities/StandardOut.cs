@@ -22,7 +22,7 @@ namespace RazorSharp.Utilities
 			Kernel32.GetConsoleMode(handle, out uint mode);
 			mode |= (uint) Enumerations.ConsoleOutputModes.EnableVirtualTerminalProcessing;
 			Kernel32.SetConsoleMode(handle, mode);
-			Logger.Log(Level.Standard, Flags.Info, "Console modded");
+//			Logger.Log(Level.Standard, Flags.Info, "Console modded");
 		}
 	}
 

@@ -23,7 +23,7 @@ namespace RazorSharp.Runtime
 	/// <summary>
 	/// Some CLR functions are too complex to replicate in C# so we'll use sigscanning to execute them
 	/// </summary>
-	internal static unsafe class CLRFunctions
+	public static unsafe class CLRFunctions
 	{
 		private static readonly Dictionary<string, Delegate> Functions;
 		private static readonly SigScanner                   Scanner;

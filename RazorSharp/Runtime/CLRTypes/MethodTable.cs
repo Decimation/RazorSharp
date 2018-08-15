@@ -245,11 +245,6 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public override string ToString()
 		{
-			const string joinStr = ", ";
-
-			var flags  = String.Join(joinStr, TableFlags.GetFlags());
-			var flags2 = String.Join(joinStr, TableFlags2.GetFlags());
-
 			//var lowFlags = String.Join(", ", TableFlagsLow.GetFlags().Distinct());
 
 			var table = new ConsoleTable("Field", "Value");
@@ -258,8 +253,8 @@ namespace RazorSharp.Runtime.CLRTypes
 			if (HasComponentSize)
 				table.AddRow("Component size", m_dwFlags.ComponentSize);
 			table.AddRow("Base size", m_BaseSize);
-			table.AddRow("Flags", $"{Flags} ({flags})");
-			table.AddRow("Flags 2", $"{Flags2} ({flags2})");
+			table.AddRow("Flags", $"{Flags} ({TableFlags.Join()})");
+			table.AddRow("Flags 2", $"{Flags2} ({TableFlags2.Join()})");
 			table.AddRow("Low flags", $"{LowFlags} ({TableFlagsLow})");
 			table.AddRow("Token", m_wToken);
 

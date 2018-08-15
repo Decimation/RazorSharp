@@ -41,6 +41,8 @@ namespace RazorSharp.Runtime.CLRTypes
 		{
 			fixed (PackedDWORDFields* p = &this)
 				return p->m_rgUnpackedFields[dwFieldIndex];
+
+			//return m_rgUnpackedFields[dwFieldIndex];
 		}
 
 
@@ -88,7 +90,7 @@ namespace RazorSharp.Runtime.CLRTypes
 				// non-spanning gets and stitch the result together from that. We can revisit this in the future
 				// if the perf is a problem.
 				DWORD dwInitialBits =
-					kBitsPerDWORD - (dwOffset % kBitsPerDWORD); // Number of bits to get in the first DWORD
+					kBitsPerDWORD - dwOffset % kBitsPerDWORD; // Number of bits to get in the first DWORD
 				DWORD dwReturn;
 
 				// Get the initial (low-order) bits from the first DWORD.

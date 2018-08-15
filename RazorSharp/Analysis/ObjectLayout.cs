@@ -102,7 +102,7 @@ namespace RazorSharp.Analysis
 				string ofsStr = GetOffsetString(baseOfs, rightOfs, leftOfs);
 
 				var addr = m_addr + charOffset + i * sizeof(char) + baseOfs;
-				Table.AddRow(ofsStr, Hex.ToHex(addr), sizeof(char), typeof(char).Name, $"(Character {i + 1})",
+				Table.AddRow(ofsStr, Hex.ToHex(addr), sizeof(char), typeof(char).Name, $"(Character {i + 2})",
 					Memory.Memory.Read<char>(addr));
 			}
 		}
@@ -145,7 +145,7 @@ namespace RazorSharp.Analysis
 				if (nextSectOfsCandidate < nextOffsetOrSize) {
 					var padSize   = nextOffsetOrSize - nextSectOfsCandidate;
 					var ro        = baseOfs + nextSectOfsCandidate;
-					var lo        = ro + ((padSize) - 1);
+					var lo        = ro + (padSize - 1);
 					var padOffset = nextSectOfsCandidate + baseOfs;
 
 

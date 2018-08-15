@@ -12,12 +12,12 @@ namespace RazorSharp.Pointers
 	{
 		public static IntPtr Subtract(void* v, int bytes)
 		{
-			return (IntPtr) (((long) v) - bytes);
+			return (IntPtr) ((long) v - bytes);
 		}
 
 		public static IntPtr Add(void* v, int bytes)
 		{
-			return (IntPtr) (((long) v) + bytes);
+			return (IntPtr) ((long) v + bytes);
 		}
 
 		public static IntPtr Add(void* a, void* b)
@@ -32,22 +32,9 @@ namespace RazorSharp.Pointers
 
 		public static IntPtr Add(IntPtr p, IntPtr b)
 		{
-			return (IntPtr) (((long) p) + b.ToInt64());
+			return (IntPtr) ((long) p + b.ToInt64());
 		}
 
-
-		public static void MakeSequential<T>(Pointer<T>[] arr)
-		{
-			long[] ptrs = new long[arr.Length];
-			for (int i = 0; i < ptrs.Length; i++) {
-				ptrs[i] = (long) arr[i].Address;
-			}
-
-			Array.Sort(ptrs);
-			for (int i = 0; i < ptrs.Length; i++) {
-				arr[i] = new Pointer<T>(ptrs[i]);
-			}
-		}
 
 		/// <summary>
 		/// Offsets a pointer by cnt elements.

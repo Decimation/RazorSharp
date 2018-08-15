@@ -119,9 +119,10 @@
     <Compile Include="Memory\Memory.cs" />
     <Compile Include="Memory\MemoryInspector.cs" />
     <Compile Include="Memory\SigScanner.cs" />
+    <Compile Include="Misc.cs" />
     <Compile Include="ObjectPinner.cs" />
     <Compile Include="Pointers\AllocExPointer.cs" />
-    <Compile Include="Pointers\DecayPointer.cs" />
+    <Compile Include="Pointers\DecayExPointer.cs" />
     <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
     <Compile Include="Pointers\ExPointer.cs" />

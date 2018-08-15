@@ -1,9 +1,7 @@
 #region
 
 using System;
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using RazorCommon;
 using RazorCommon.Extensions;
@@ -72,7 +70,7 @@ namespace RazorSharp.Memory
 			var pt = new string(' ', adjOffset) + "^";
 
 			// Line 3: Address [index]
-			var addr = p.ToInt64() + (offset * Unsafe.SizeOf<T>());
+			var addr = p.ToInt64() + offset * Unsafe.SizeOf<T>();
 
 			// [type] [address]
 			var addrStr = String.Format("{0}{1} {2}", new string(' ', adjOffset),
@@ -89,6 +87,7 @@ namespace RazorSharp.Memory
 			if (typeof(T) == typeof(byte)) {
 				return Collections.ToString(mem, options);
 			}
+
 			if (possibleTypes < 1) {
 				throw new Exception($"Insufficient memory for type {typeof(T).Name}");
 			}
@@ -101,32 +100,23 @@ namespace RazorSharp.Memory
 
 				string OfsAs(int o)
 				{
-
-
 					string s = options.HasFlag(ToStringOptions.Hex)
 						? Hex.TryCreateHex(ptrMem[o], options)
 						: ptrMem[o].ToString();
 					return s;
 				}
+
 				string[] @out = new string[possibleTypes];
 				for (int i = 0; i < possibleTypes; i++) {
 					@out[i] = OfsAs(i);
 				}
 
 				res = Collections.ToString(@out, options & ~ToStringOptions.UseCommas);
-
-
-
 			});
 
 
-
-
-
-
-			return res ;
+			return res;
 		}
-
 
 
 		public static string Create<T>(IntPtr p, int byteLen, ToStringOptions options = ToStringOptions.ZeroPadHex)

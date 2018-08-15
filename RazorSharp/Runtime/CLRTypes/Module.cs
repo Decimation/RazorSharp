@@ -23,13 +23,13 @@ namespace RazorSharp.Runtime.CLRTypes
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct Module
 	{
-		[FieldOffset(0)]  private void*       m_pSimpleName;
-		[FieldOffset(8)]  private void*       m_file;
-		[FieldOffset(16)] private MethodDesc* m_pDllMain;
-		[FieldOffset(24)] private DWORD       m_dwTransientFlags;
-		[FieldOffset(28)] private DWORD       m_dwPersistedFlags;
-		[FieldOffset(32)] private void*       m_pVASigCookieBlock;
-		[FieldOffset(40)] private void*       m_pAssembly;
+		[FieldOffset(0)] private readonly byte*       m_pSimpleName;
+		[FieldOffset(8)]  private readonly void*       m_file;
+		[FieldOffset(16)] private readonly MethodDesc* m_pDllMain;
+		[FieldOffset(24)] private readonly DWORD       m_dwTransientFlags;
+		[FieldOffset(28)] private readonly DWORD       m_dwPersistedFlags;
+		[FieldOffset(32)] private readonly void*       m_pVASigCookieBlock;
+		[FieldOffset(40)] private readonly void*       m_pAssembly;
 
 		//todo
 		private static void ModuleInfo(IntPtr module)

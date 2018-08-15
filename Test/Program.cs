@@ -3,24 +3,19 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Dynamic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Threading;
-using BenchmarkDotNet.Environments;
-using NUnit.Framework;
 using RazorCommon;
 using RazorCommon.Strings;
-using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime.CLRTypes.HeapObjects;
+using RazorSharp.Runtime;
+using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;
 using Test.Testing;
 using static RazorSharp.Unsafe;
-using Runtime = RazorSharp.Runtime.Runtime;
 
 #endregion
 
@@ -29,8 +24,8 @@ namespace Test
 
 	#region
 
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-	using mem = Memory;
+	using CSUnsafe = Unsafe;
+	using Unsafe = RazorSharp.Unsafe;
 
 	#endregion
 
@@ -68,15 +63,6 @@ namespace Test
 		}
 #endif
 
-		private static object InvokeGenericMethod(Type t, string name, Type typeArgs, object instance,
-			params object[] args)
-		{
-			MethodInfo method = t.GetMethod(name,
-				BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic);
-			method = method.MakeGenericMethod(typeArgs);
-			return method.Invoke(method.IsStatic ? null : instance, args);
-		}
-
 
 		private static T* AddrOf<T>(ref T t) where T : unmanaged
 		{
@@ -84,17 +70,88 @@ namespace Test
 		}
 
 
-		public static void Main(string[] args) { }
+		public static void Main(string[] args)
+		{
+
+			TestTypes();
+		}
+
+		private static void TestTypes()
+		{
+			/**
+			 * string
+			 *
+			 * Generic:		no
+			 * Type:		reference
+			 */
+			string s = "foo";
+			WriteOut(ref s);
+
+			/**
+			 * int[]
+			 *
+			 * Generic:		no
+			 * Type:		reference
+			 */
+			int[] arr = {1, 2, 3};
+			WriteOut(ref arr,true);
+
+			/**
+			 * string[]
+			 *
+			 * Generic:		no
+			 * Type:		reference
+			 */
+			string[] ptrArr = {"foo", "bar", "desu"};
+			WriteOut(ref ptrArr);
+
+			/**
+			 * int
+			 *
+			 * Generic:		no
+			 * Type:		value
+			 */
+			int i = 0xFF;
+			WriteOutVal(ref i);
+
+			/**
+			 * Dummy
+			 *
+			 * Generic:		no
+			 * Type:		reference
+			 */
+			Dummy d = new Dummy();
+			WriteOut(ref d);
+
+			/**
+			 * List<int>
+			 *
+			 * Generic:		yes
+			 * Type:		reference
+			 */
+			List<int> ls = new List<int>();
+			WriteOut(ref ls);
+
+			/**
+			 * Point
+			 *
+			 * Generic:		no
+			 * Type:		value
+			 *
+			 */
+			Point pt = new Point();
+			WriteOutVal(ref pt);
+		}
 
 
 		private static void WriteOutVal<T>(ref T t) where T : struct
 		{
-			Inspector<T>.Write(ref t, true);
+			Inspector<T>.Write(ref t, !true);
 		}
 
-		private static void WriteOut<T>(ref T t) where T : class
+		private static void WriteOut<T>(ref T t, bool printStructures = false) where T : class
 		{
-			RefInspector<T>.Write(ref t, true);
+			RefInspector<T>.Write(ref t, printStructures);
 		}
 
 
@@ -108,16 +165,6 @@ namespace Test
 			}
 
 			Console.WriteLine(table.ToMarkDownString());
-		}
-
-
-		private static void SetChar(this string str, int i, char c)
-		{
-			ObjectPinner.InvokeWhilePinned(str, delegate
-			{
-				Pointer<char> lpChar = AddressOfHeap(ref str, OffsetType.StringData);
-				lpChar[i] = c;
-			});
 		}
 
 

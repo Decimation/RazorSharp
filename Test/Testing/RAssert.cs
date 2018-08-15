@@ -76,7 +76,6 @@ namespace Test.Testing
 					Console.WriteLine("Heap: {0} != {1}", Hex.ToHex(mem.heap), Hex.ToHex(Unsafe.AddressOfHeap(ref t)));
 					break;
 				}
-
 			}
 		}
 

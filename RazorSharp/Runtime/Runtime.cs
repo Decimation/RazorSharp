@@ -35,7 +35,7 @@ namespace RazorSharp.Runtime
 		/// </summary>
 		public static readonly int OffsetToArrayData = IntPtr.Size * 2;
 
-		internal static readonly Dictionary<FieldDesc, FieldInfo>   FieldMap;
+		internal static readonly Dictionary<FieldDesc, FieldInfo> FieldMap;
 		internal static readonly Dictionary<MethodDesc, MethodInfo> MethodMap;
 
 		static Runtime()
@@ -231,10 +231,13 @@ namespace RazorSharp.Runtime
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the field is const</exception>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		public static FieldDesc* GetFieldDesc(Type t, string name, BindingFlags flags = DefaultFlags)
+		public static FieldDesc* GetFieldDesc(Type t, string name, bool isAutoProperty = false, BindingFlags flags = DefaultFlags)
 		{
 			if (t.IsArray) {
 				throw new RuntimeException("Arrays do not have fields");
+			}
+			if (isAutoProperty) {
+				name = AutoPropertyBackingFieldName(name);
 			}
 
 			var fieldInfo = t.GetField(name, flags);
@@ -247,9 +250,9 @@ namespace RazorSharp.Runtime
 			return fd;
 		}
 
-		public static FieldDesc* GetFieldDesc<T>(string name, BindingFlags flags = DefaultFlags)
+		public static FieldDesc* GetFieldDesc<T>(string name, bool isAutoProperty = false,BindingFlags flags = DefaultFlags)
 		{
-			return GetFieldDesc(typeof(T), name, flags);
+			return GetFieldDesc(typeof(T), name, isAutoProperty,flags);
 		}
 
 		#endregion
@@ -323,6 +326,18 @@ namespace RazorSharp.Runtime
 				return true;
 
 			return MethodTableOf<T>()->IsBlittable;
+		}
+
+		/// <summary>
+		/// Gets the internal name of an auto-property's backing field.
+		/// <example>If the auto-property's name is X, the backing field name is &lt;X&gt;k__BackingField.</example>
+		/// </summary>
+		/// <param name="propname">Auto-property's name</param>
+		/// <returns>Internal name of the auto-property's backing field</returns>
+		private static string AutoPropertyBackingFieldName(string propname)
+		{
+			const string backingFieldFormat = "<{0}>k__BackingField";
+			return String.Format(backingFieldFormat, propname);
 		}
 	}
 

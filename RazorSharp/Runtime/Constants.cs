@@ -19,7 +19,7 @@ namespace RazorSharp.Runtime
 		/// Minimum GC object heap size <para></para>
 		/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/object.h#L119
 		/// </summary>
-		internal static readonly int MinObjectSize = (2 * IntPtr.Size) + sizeof(ObjHeader);
+		internal static readonly int MinObjectSize = 2 * IntPtr.Size + sizeof(ObjHeader);
 
 		//todo
 		private const uint GC_MARKED = 0x1;
@@ -617,12 +617,12 @@ namespace RazorSharp.Runtime
 		UnusedComponentSize6 = 0x00004000,
 		UnusedComponentSize7 = 0x00008000,
 
-		StringArrayValues = (StaticsMask_NonDynamic & 0xFFFF |
-		                     NotInPZM & 0 |
-		                     GenericsMask_NonGeneric & 0xFFFF |
-		                     HasVariance & 0 |
-		                     HasDefaultCtor & 0 |
-		                     HasPreciseInitCctors & 0)
+		StringArrayValues = StaticsMask_NonDynamic & 0xFFFF |
+		                    NotInPZM & 0 |
+		                    GenericsMask_NonGeneric & 0xFFFF |
+		                    HasVariance & 0 |
+		                    HasDefaultCtor & 0 |
+		                    HasPreciseInitCctors & 0
 	}
 
 	/// <summary>

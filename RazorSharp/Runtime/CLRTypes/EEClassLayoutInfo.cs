@@ -67,7 +67,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public LayoutFlags Flags => (LayoutFlags) m_bFlags;
 
-		// todo: This doesn't seem to be right and I don't know why
+
 		public bool ZeroSized => Flags.HasFlag(LayoutFlags.ZeroSized);
 
 		public bool IsBlittable => Flags.HasFlag(LayoutFlags.Blittable);
@@ -78,7 +78,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Native size", m_cbNativeSize);
 			table.AddRow("Managed size", m_cbManagedSize);
 			table.AddRow("Largest alignment req of all", m_LargestAlignmentRequirementOfAllMembers);
-			table.AddRow("Flags", String.Format("{0} ({1})",m_bFlags, String.Join(", ", Flags.GetFlags())));
+			table.AddRow("Flags", String.Format("{0} ({1})", m_bFlags, String.Join(", ", Flags.GetFlags())));
 
 			table.AddRow("Packing size", m_cbPackingSize);
 			table.AddRow("CTM fields", m_numCTMFields);

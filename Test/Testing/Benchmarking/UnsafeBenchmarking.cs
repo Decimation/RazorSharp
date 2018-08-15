@@ -1,7 +1,7 @@
 #region
 
+using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
-using RazorSharp;
 
 #endregion
 
@@ -10,7 +10,7 @@ namespace Test.Testing.Benchmarking
 
 	#region
 
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+	using CSUnsafe = Unsafe;
 
 	#endregion
 
@@ -27,19 +27,19 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void OffsetOf()
 		{
-			Unsafe.OffsetOf(ref _dummy, _dummy.Decimal);
+			RazorSharp.Unsafe.OffsetOf(ref _dummy, _dummy.Decimal);
 		}
 
 		[Benchmark]
 		public void OffsetOfByName()
 		{
-			Unsafe.OffsetOf<Dummy>("_decimal");
+			RazorSharp.Unsafe.OffsetOf<Dummy>("_decimal");
 		}
 
 		[Benchmark]
 		public void AddressOfByName()
 		{
-			Unsafe.AddressOfField(ref _dummy, "_int");
+			RazorSharp.Unsafe.AddressOfField(ref _dummy, "_int");
 		}
 
 

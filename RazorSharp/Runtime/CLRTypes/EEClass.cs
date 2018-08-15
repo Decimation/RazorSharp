@@ -145,9 +145,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		private DWORD GetPackableField(EEClassFieldId eField)
 		{
 			//Console.WriteLine(Hex.ToHex(PackedFields));
-			return (m_fFieldsArePacked == 1
+			return m_fFieldsArePacked == 1
 				? PackedFields->GetPackedField((DWORD) eField)
-				: PackedFields->GetUnpackedField((DWORD) eField));
+				: PackedFields->GetUnpackedField((DWORD) eField);
 		}
 
 		/// <summary>
@@ -227,7 +227,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Fields are packed", m_fFieldsArePacked == 1);
 			table.AddRow("Fixed EEClass fields", m_cbFixedEEClassFields);
 			table.AddRow("Base size padding", m_cbBaseSizePadding);
-			table.AddRow("VMFlags", String.Join(", ", VMFlags.GetFlags()));
+			table.AddRow("VMFlags", VMFlags.Join());
 			table.AddRow("Has layout", HasLayout);
 
 

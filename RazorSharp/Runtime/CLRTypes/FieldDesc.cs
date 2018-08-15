@@ -197,7 +197,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		//https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L1512
 		private static int TokenFromRid(int rid, CorTokenType tktype)
 		{
-			return rid | ((int) tktype);
+			return rid | (int) tktype;
 		}
 
 

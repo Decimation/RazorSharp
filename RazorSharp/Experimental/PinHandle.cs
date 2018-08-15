@@ -34,7 +34,7 @@ namespace RazorSharp.Experimental
 #if WIN32
             return (((int)handle) & 1) != 0;
 #else
-			return (((long) handle) & 1) != 0;
+			return ((long) handle & 1) != 0;
 #endif
 		}
 
@@ -43,7 +43,7 @@ namespace RazorSharp.Experimental
 #if WIN32
            return new IntPtr(((int)handle) | 1);
 #else
-			return new IntPtr(((long) handle) | 1L);
+			return new IntPtr((long) handle | 1L);
 #endif
 		}
 
