@@ -108,7 +108,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		public ProtectionLevel Protection => (ProtectionLevel) ProtectionInt;
 
 		/// <summary>
+		/// <remarks>
 		/// Address-sensitive
+		/// </remarks>
 		/// </summary>
 		public int Size {
 			get {
@@ -164,7 +166,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <summary>
 		/// Slower than using Reflection
 		///
+		/// <remarks>
 		/// Address-sensitive
+		/// </remarks>
 		/// </summary>
 		public string Name {
 			get {
@@ -182,7 +186,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
+		/// <remarks>
 		/// Address-sensitive
+		/// </remarks>
 		/// </summary>
 		public MethodTable* MethodTableOfEnclosingClass {
 			get {

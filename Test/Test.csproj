@@ -204,6 +204,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Testing\Benchmarking\CollectionsBenchmarking.cs" />
+      <Compile Include="Testing\Benchmarking\DllBenchmarking.cs"/>
     <Compile Include="Testing\Benchmarking\SigScanningBenchmarking.cs" />
     <Compile Include="Testing\Benchmarking\LitePointerBenchmarking.cs" />
     <Compile Include="Testing\Benchmarking\MarshalBenchmarking.cs" />

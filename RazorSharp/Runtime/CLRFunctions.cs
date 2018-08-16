@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using RazorInvoke;
 using RazorSharp.Memory;
 using RazorSharp.Runtime.CLRTypes;
 
@@ -36,6 +37,7 @@ namespace RazorSharp.Runtime
 			Functions = new Dictionary<string, Delegate>();
 		}
 
+
 		private static void AddFunction<TDelegate>(string name, string signature) where TDelegate : Delegate
 		{
 			Functions.Add(name, Scanner.GetDelegate<TDelegate>(signature));
@@ -49,6 +51,7 @@ namespace RazorSharp.Runtime
 			internal delegate void* AllocateObjectDelegate(MethodTable* mt, bool fHandleCom = true);
 
 			internal static readonly AllocateObjectDelegate AllocateObject;
+
 
 			static ObjectFunctions()
 			{

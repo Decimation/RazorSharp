@@ -111,7 +111,9 @@
     <Compile Include="Analysis\ObjectLayout.cs" />
     <Compile Include="Analysis\RefInspector.cs" />
     <Compile Include="CString.cs" />
+      <Compile Include="Experimental\ObjectPinHandle.cs"/>
     <Compile Include="Experimental\PinHandle.cs" />
+      <Compile Include="Experimental\PinHandleOld.cs"/>
     <Compile Include="Experimental\SmartScanner.cs" />
     <Compile Include="Experimental\StackAllocated.cs" />
     <Compile Include="Experimental\UnmanagedAllocated.cs" />

@@ -2,7 +2,9 @@
 
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.Runtime.CLRTypes;
 
 #endregion
 
@@ -73,6 +75,16 @@ namespace RazorSharp.Analysis
 			return ofsStr;
 		}
 
+		private byte[] TryGetObjHeaderAsBytes()
+		{
+			return typeof(T).IsValueType ? null : Memory.Memory.ReadBytes(m_addr, -IntPtr.Size, sizeof(ObjHeader));
+		}
+
+		private IntPtr TryGetMethodTablePointer()
+		{
+			return typeof(T).IsValueType ? IntPtr.Zero : Marshal.ReadIntPtr(m_addr);
+		}
+
 		private void CreateInternalReferenceTypeInfo()
 		{
 			const string objHeaderType   = "ObjHeader";
@@ -81,9 +93,16 @@ namespace RazorSharp.Analysis
 			const string methodTableName = "(MethodTable ptr)";
 
 			if (!m_fieldsOnly) {
+				var objHeaderMem   = TryGetObjHeaderAsBytes();
+				var methodTablePtr = TryGetMethodTablePointer();
+
+				// ObjHeader
 				Table.AddRow(-IntPtr.Size, Hex.ToHex(m_addr - IntPtr.Size), IntPtr.Size, objHeaderType,
-					objHeaderName, Omitted);
-				Table.AddRow(0, Hex.ToHex(m_addr), IntPtr.Size, methodTableType, methodTableName, Omitted);
+					objHeaderName, objHeaderMem == null ? Omitted.ToString() : Collections.ToString(objHeaderMem));
+
+				// MethodTable*
+				Table.AddRow(0, Hex.ToHex(m_addr), IntPtr.Size, methodTableType, methodTableName,
+					methodTablePtr == IntPtr.Zero ? Omitted.ToString() : Hex.ToHex(methodTablePtr));
 			}
 		}
 

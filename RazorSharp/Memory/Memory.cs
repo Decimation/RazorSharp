@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using RazorInvoke;
+using RazorInvoke.Libraries;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;

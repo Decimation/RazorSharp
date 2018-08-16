@@ -199,19 +199,17 @@ namespace RazorSharp.Analysis
 
 		public class MetadataInfo
 		{
-			public T    Value   { get; }
-			public bool OnStack { get; }
-
-			//public bool IsBlittable { get; }
+			public T    Value       { get; }
+			public bool IsOnStack   { get; }
+			public bool IsBlittable { get; }
 			public bool IsValueType { get; }
 
 			protected internal MetadataInfo(ref T t)
 			{
-				Value = t;
-
-				//IsBlittable = Runtime.Runtime.IsBlittable<T>();
+				Value       = t;
+				IsBlittable = Runtime.Runtime.IsBlittable<T>();
 				IsValueType = typeof(T).IsValueType;
-				OnStack     = Memory.Memory.IsOnStack(ref t);
+				IsOnStack   = Memory.Memory.IsOnStack(ref t);
 			}
 
 
@@ -219,11 +217,13 @@ namespace RazorSharp.Analysis
 			{
 				var table = new ConsoleTable("Info", "Value");
 				table.AddRow("Value",
-					typeof(T).IsIListType() ? Collections.ListToString((IList) Value) : Value.ToString());
+					typeof(T).IsIListType()
+						? String.Format("[{0}]", Collections.ListToString((IList) Value))
+						: Value.ToString());
 
-				//table.AddRow("Blittable", IsBlittable ? StringUtils.Check : StringUtils.BallotX);
+				table.AddRow("Blittable", IsBlittable ? StringUtils.Check : StringUtils.BallotX);
 				table.AddRow("Value type", IsValueType ? StringUtils.Check : StringUtils.BallotX);
-				table.AddRow("On stack", OnStack ? StringUtils.Check : StringUtils.BallotX);
+				table.AddRow("On stack", IsOnStack ? StringUtils.Check : StringUtils.BallotX);
 				return table;
 			}
 
@@ -235,6 +235,7 @@ namespace RazorSharp.Analysis
 
 		public class AddressInfo
 		{
+			// Address is the also the address of fields for value types
 			public IntPtr Address { get; }
 
 			protected internal AddressInfo(ref T t)
@@ -246,6 +247,10 @@ namespace RazorSharp.Analysis
 			{
 				var table = new ConsoleTable(String.Empty, "Address");
 				table.AddRow("Address", Hex.ToHex(Address));
+				if (typeof(T).IsValueType) {
+					table.AttachColumn("Fields", Hex.ToHex(Address));
+				}
+
 				return table;
 			}
 
@@ -257,17 +262,17 @@ namespace RazorSharp.Analysis
 
 		public class SizeInfo
 		{
-			public int Size           { get; }
-			public int Native         { get; }
-			public int BaseFieldsSize { get; }
-			public int Managed { get; }
+			public int Size       { get; }
+			public int Native     { get; }
+			public int BaseFields { get; }
+			public int Managed    { get; }
 
 			protected internal SizeInfo()
 			{
-				Size           = Unsafe.SizeOf<T>();
-				Native         = Unsafe.NativeSizeOf<T>();
-				BaseFieldsSize = Unsafe.BaseFieldsSize<T>();
-				Managed = Unsafe.ManagedSizeOf<T>();
+				Size       = Unsafe.SizeOf<T>();
+				Native     = Unsafe.NativeSizeOf<T>();
+				BaseFields = Unsafe.BaseFieldsSize<T>();
+				Managed    = Unsafe.ManagedSizeOf<T>();
 			}
 
 			protected virtual ConsoleTable ToTable()
@@ -279,7 +284,7 @@ namespace RazorSharp.Analysis
 				table.AddRow("Size value", Size);
 				table.AttachColumn("Native size", Native);
 				table.AttachColumn("Managed size", Managed);
-				table.AttachColumn("Base fields size", BaseFieldsSize);
+				table.AttachColumn($"Base fields size <{typeof(T).Name}>", BaseFields);
 
 
 				return table;

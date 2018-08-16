@@ -317,6 +317,12 @@ namespace RazorSharp.Runtime
 		/// <summary>
 		/// Determines whether a type is blittable; that is, they don't
 		/// require conversion between managed and unmanaged code.
+		/// <remarks>
+		/// <para>Returned from <see cref="MethodTable.IsBlittable"/></para>
+		/// <para>Note: If the type is an array or <c>string</c>, <see cref="MethodTable.IsBlittable"/> determines it unblittable,
+		/// but <see cref="IsBlittable{T}"/> returns <c>true</c>, as <see cref="GCHandle"/> determines it blittable.
+		/// </para>
+		/// </remarks>
 		/// </summary>
 		public static bool IsBlittable<T>()
 		{

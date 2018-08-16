@@ -16,7 +16,7 @@ namespace RazorSharp.Runtime
 	public static unsafe class Constants
 	{
 		/// <summary>
-		/// Minimum GC object heap size <para></para>
+		/// <para>Minimum GC object heap size</para>
 		/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/object.h#L119
 		/// </summary>
 		internal static readonly int MinObjectSize = 2 * IntPtr.Size + sizeof(ObjHeader);
@@ -756,14 +756,11 @@ namespace RazorSharp.Runtime
 		NotTightlyPacked = 0x10000000,
 
 		// True if methoddesc on this class have any real (non-interface) methodimpls
-		ContainsMethodImpls = 0x20000000,
-
-		MarshalingTypeMask = 0xc0000000,
-
+		ContainsMethodImpls        = 0x20000000,
+		MarshalingTypeMask         = 0xc0000000,
 		MarshalingTypeInhibit      = 0x40000000,
 		MarshalingTypeFreeThreaded = 0x80000000,
 		MarshalingTypeStandard     = 0xc0000000,
-
 	}
 
 }

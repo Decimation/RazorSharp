@@ -9,6 +9,7 @@ using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorInvoke;
+using RazorInvoke.Libraries;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime.CLRTypes;
 

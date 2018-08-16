@@ -4,6 +4,7 @@ using System;
 using System.Text;
 using RazorCommon;
 using RazorInvoke;
+using RazorInvoke.Libraries;
 
 #endregion
 

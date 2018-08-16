@@ -22,8 +22,6 @@ namespace RazorSharp.Runtime.CLRTypes
 
 	#endregion
 
-//probably, maybe
-
 
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct EEClassLayoutInfo
@@ -65,12 +63,12 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// </summary>
 		internal uint ManagedSize => m_cbManagedSize;
 
-		public LayoutFlags Flags => (LayoutFlags) m_bFlags;
+		internal LayoutFlags Flags => (LayoutFlags) m_bFlags;
 
 
-		public bool ZeroSized => Flags.HasFlag(LayoutFlags.ZeroSized);
+		internal bool ZeroSized => Flags.HasFlag(LayoutFlags.ZeroSized);
 
-		public bool IsBlittable => Flags.HasFlag(LayoutFlags.Blittable);
+		internal bool IsBlittable => Flags.HasFlag(LayoutFlags.Blittable);
 
 		public override string ToString()
 		{

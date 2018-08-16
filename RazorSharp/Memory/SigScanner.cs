@@ -1,13 +1,9 @@
-#region
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using RazorInvoke;
-
-#endregion
+using RazorInvoke.Libraries;
 
 namespace RazorSharp.Memory
 {
@@ -15,37 +11,36 @@ namespace RazorSharp.Memory
 	/// <summary>
 	/// Edited by Decimation (not original)
 	/// </summary>
-	public unsafe class SigScanner
+	public class SigScanner
 	{
-		private IntPtr g_hProcess        { get; set; }
-		private byte[] g_arrModuleBuffer { get; set; }
-		private IntPtr g_lpModuleBase    { get; set; }
-
-		private Dictionary<string, string> g_dictStringPatterns { get; }
+		private IntPtr                     m_hProcess           { get; set; }
+		private byte[]                     m_rgModuleBuffer     { get; set; }
+		private IntPtr                     m_lpModuleBase       { get; set; }
+		private Dictionary<string, string> m_dictStringPatterns { get; }
 
 		public SigScanner(Process proc) : this(proc.Handle) { }
 
 		public SigScanner(IntPtr hProc)
 		{
-			g_hProcess           = hProc;
-			g_dictStringPatterns = new Dictionary<string, string>();
+			m_hProcess           = hProc;
+			m_dictStringPatterns = new Dictionary<string, string>();
 		}
 
 		public bool SelectModule(ProcessModule targetModule)
 		{
-			g_lpModuleBase    = targetModule.BaseAddress;
-			g_arrModuleBuffer = new byte[targetModule.ModuleMemorySize];
+			m_lpModuleBase   = targetModule.BaseAddress;
+			m_rgModuleBuffer = new byte[targetModule.ModuleMemorySize];
 
-			g_dictStringPatterns.Clear();
+			m_dictStringPatterns.Clear();
 			ulong lpNumberOfBytesRead = 0;
 
-			return Kernel32.ReadProcessMemory(g_hProcess, g_lpModuleBase, g_arrModuleBuffer,
+			return Kernel32.ReadProcessMemory(m_hProcess, m_lpModuleBase, m_rgModuleBuffer,
 				(uint) targetModule.ModuleMemorySize, ref lpNumberOfBytesRead);
 		}
 
 		public void AddPattern(string szPatternName, string szPattern)
 		{
-			g_dictStringPatterns.Add(szPatternName, szPattern);
+			m_dictStringPatterns.Add(szPatternName, szPattern);
 		}
 
 		private bool PatternCheck(int nOffset, byte[] arrPattern)
@@ -54,7 +49,7 @@ namespace RazorSharp.Memory
 				if (arrPattern[i] == 0x0)
 					continue;
 
-				if (arrPattern[i] != this.g_arrModuleBuffer[nOffset + i])
+				if (arrPattern[i] != this.m_rgModuleBuffer[nOffset + i])
 					return false;
 			}
 
@@ -63,20 +58,20 @@ namespace RazorSharp.Memory
 
 		public IntPtr FindPattern(string szPattern, out long lTime)
 		{
-			if (g_arrModuleBuffer == null || g_lpModuleBase == IntPtr.Zero)
+			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero)
 				throw new Exception("Selected module is null");
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
 
 			byte[] arrPattern = ParsePatternString(szPattern);
 
-			for (int nModuleIndex = 0; nModuleIndex < g_arrModuleBuffer.Length; nModuleIndex++) {
-				if (this.g_arrModuleBuffer[nModuleIndex] != arrPattern[0])
+			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
+				if (this.m_rgModuleBuffer[nModuleIndex] != arrPattern[0])
 					continue;
 
 				if (PatternCheck(nModuleIndex, arrPattern)) {
 					lTime = stopwatch.ElapsedMilliseconds;
-					return g_lpModuleBase + nModuleIndex;
+					return m_lpModuleBase + nModuleIndex;
 				}
 			}
 
@@ -86,8 +81,9 @@ namespace RazorSharp.Memory
 
 		public TDelegate GetDelegate<TDelegate>(string opcodes) where TDelegate : Delegate
 		{
-			IntPtr addr = FindPattern(opcodes, out long time);
-			Debug.Assert(addr != IntPtr.Zero);
+			IntPtr addr = FindPattern(opcodes, out _);
+			if (addr == IntPtr.Zero)
+				throw new Exception($"Could not find function with opcodes {opcodes}");
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
 		}
 
@@ -103,26 +99,26 @@ namespace RazorSharp.Memory
 
 		public Dictionary<string, IntPtr> FindPatterns(out long lTime)
 		{
-			if (g_arrModuleBuffer == null || g_lpModuleBase == IntPtr.Zero)
+			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero)
 				throw new Exception("Selected module is null");
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
 
-			byte[][] arrBytePatterns = new byte[g_dictStringPatterns.Count][];
-			IntPtr[] arrResult       = new IntPtr[g_dictStringPatterns.Count];
+			byte[][] arrBytePatterns = new byte[m_dictStringPatterns.Count][];
+			IntPtr[] arrResult       = new IntPtr[m_dictStringPatterns.Count];
 
 			// PARSE PATTERNS
-			for (int nIndex = 0; nIndex < g_dictStringPatterns.Count; nIndex++)
-				arrBytePatterns[nIndex] = ParsePatternString(g_dictStringPatterns.ElementAt(nIndex).Value);
+			for (int nIndex = 0; nIndex < m_dictStringPatterns.Count; nIndex++)
+				arrBytePatterns[nIndex] = ParsePatternString(m_dictStringPatterns.ElementAt(nIndex).Value);
 
 			// SCAN FOR PATTERNS
-			for (int nModuleIndex = 0; nModuleIndex < g_arrModuleBuffer.Length; nModuleIndex++) {
+			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
 				for (int nPatternIndex = 0; nPatternIndex < arrBytePatterns.Length; nPatternIndex++) {
 					if (arrResult[nPatternIndex] != IntPtr.Zero)
 						continue;
 
 					if (this.PatternCheck(nModuleIndex, arrBytePatterns[nPatternIndex]))
-						arrResult[nPatternIndex] = g_lpModuleBase + nModuleIndex;
+						arrResult[nPatternIndex] = m_lpModuleBase + nModuleIndex;
 				}
 			}
 
@@ -130,7 +126,7 @@ namespace RazorSharp.Memory
 
 			// FORMAT PATTERNS
 			for (int nPatternIndex = 0; nPatternIndex < arrBytePatterns.Length; nPatternIndex++)
-				dictResultFormatted[g_dictStringPatterns.ElementAt(nPatternIndex).Key] = arrResult[nPatternIndex];
+				dictResultFormatted[m_dictStringPatterns.ElementAt(nPatternIndex).Key] = arrResult[nPatternIndex];
 
 			lTime = stopwatch.ElapsedMilliseconds;
 			return dictResultFormatted;

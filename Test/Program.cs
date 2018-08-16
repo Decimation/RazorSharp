@@ -4,18 +4,25 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
+using BenchmarkDotNet.Running;
 using RazorCommon;
 using RazorCommon.Strings;
+using RazorInvoke;
+using RazorSharp;
 using RazorSharp.Analysis;
+using RazorSharp.Experimental;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;
 using Test.Testing;
+using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
+using Point = Test.Testing.Point;
+using Unsafe = System.Runtime.CompilerServices.Unsafe;
 
 #endregion
 
@@ -72,9 +79,13 @@ namespace Test
 
 		public static void Main(string[] args)
 		{
-
-			TestTypes();
+			string s = "foo";
+			WriteOut(ref s);
+			lock (s) {
+				WriteOut(ref s);
+			}
 		}
+
 
 		private static void TestTypes()
 		{
@@ -94,7 +105,7 @@ namespace Test
 			 * Type:		reference
 			 */
 			int[] arr = {1, 2, 3};
-			WriteOut(ref arr,true);
+			WriteOut(ref arr, true);
 
 			/**
 			 * string[]
@@ -144,9 +155,9 @@ namespace Test
 		}
 
 
-		private static void WriteOutVal<T>(ref T t) where T : struct
+		private static void WriteOutVal<T>(ref T t, bool printStructures = false) where T : struct
 		{
-			Inspector<T>.Write(ref t, !true);
+			Inspector<T>.Write(ref t, printStructures);
 		}
 
 		private static void WriteOut<T>(ref T t, bool printStructures = false) where T : class

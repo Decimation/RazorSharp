@@ -84,16 +84,18 @@ namespace RazorSharp.Runtime.CLRTypes
 		public TypeAttributes TypeAttributes => (TypeAttributes) Attributes;
 
 		/// <summary>
-		/// Number of bytes to subtract from code:MethodTable::GetBaseSize() to get the actual number of bytes
+		/// Number of bytes to subtract from <see cref="CLRTypes.MethodTable.BaseSize"/> to get the actual number of bytes
 		/// of instance fields stored in the object on the GC heap.
 		/// </summary>
 		public byte BaseSizePadding => m_cbBaseSizePadding;
 
 		/// <summary>
-		/// Abstracted to Unsafe.NativeSizeOf<para></para>
-		/// Valid only if EEClass::IsBlittable() or EEClass::HasLayout() is true; 0 otherwise<para></para>
-		/// Size of fixed portion in bytes <para></para>
-		/// Corresponds to Marshal.SizeOf<para></para>
+		/// <para>Size of fixed portion in bytes </para>
+		/// <para>Valid only if <see cref="IsBlittable"/> or <see cref="HasLayout"/> is true; 0 otherwise</para>
+		///
+		/// <remarks>
+		/// <para>Abstracted to <see cref="Unsafe.NativeSizeOf{T}"/></para>
+		/// </remarks>
 		/// </summary>
 		internal int NativeSize => (int) m_cbNativeSize;
 
@@ -102,7 +104,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		public CorElementType NormalType => (CorElementType) m_NormType;
 
 		/// <summary>
+		/// <remarks>
 		/// Address-sensitive
+		/// </remarks>
 		/// </summary>
 		internal EEClassLayoutInfo* LayoutInfo {
 			get {
@@ -118,7 +122,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <summary>
 		/// Abstracted to MethodTable
 		///
-		/// For use with Runtime.IsBlittable
+		/// For use with <see cref="Runtime.IsBlittable{T}"/>
 		/// </summary>
 		internal bool IsBlittable => HasLayout && LayoutInfo->IsBlittable;
 
@@ -151,7 +155,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
+		/// <remarks>
 		/// Address-sensitive
+		/// </remarks>
 		/// </summary>
 		private PackedDWORDFields* PackedFields =>
 			(PackedDWORDFields*) PointerUtils.Add(Unsafe.AddressOf(ref this), m_cbFixedEEClassFields);
@@ -177,7 +183,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
+		/// <remarks>
 		/// Address-sensitive
+		/// </remarks>
 		/// </summary>
 		internal FieldDesc* FieldDescList {
 
@@ -193,7 +201,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
+		/// <remarks>
 		/// Address-sensitive
+		/// </remarks>
 		/// </summary>
 		internal MethodDescChunk* MethodDescChunkList {
 			//todo: verify

@@ -67,16 +67,17 @@ namespace RazorSharp.Runtime.CLRTypes
 		#endregion
 
 		/// <summary>
-		/// The size of an individual element when this type is an array or string. <para></para>
-		///
-		/// (i.e. This size will be 2 with strings (sizeof(char)).)
+		/// <para>The size of an individual element when this type is an array or string.</para>
+		/// <example>
+		/// If this type is a <c>string</c>, the component size will be 2. (<c>sizeof(char)</c>)
+		/// </example>
 		/// </summary>
 		public WORD ComponentSize => HasComponentSize ? m_dwFlags.ComponentSize : (ushort) 0;
 
 		/// <summary>
 		/// The base size of this class when allocated on the heap. Note that for value types
-		/// GetBaseSize returns the size of instance fields for a boxed value, and
-		/// GetNumInstanceFieldsBytes for an unboxed value.
+		/// <see cref="BaseSize"/> returns the size of instance fields for a boxed value, and
+		/// <see cref="NumInstanceFieldBytes"/> for an unboxed value.
 		/// </summary>
 		public DWORD BaseSize => m_BaseSize;
 
@@ -86,7 +87,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		public WORD Token => m_wToken;
 
 		/// <summary>
-		/// The number of virtual methods in this type (4 by default; from Object)
+		/// The number of virtual methods in this type (4 by default; from <see cref="Object"/>)
 		/// </summary>
 		public WORD NumVirtuals => m_wNumVirtuals;
 
@@ -106,20 +107,19 @@ namespace RazorSharp.Runtime.CLRTypes
 			// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
 			// for enum_flag_HasIndirectParentMethodTable.
 			get {
-				if (!TableFlags.HasFlag(MethodTableFlags.HasIndirectParent)) {
+			    if (!TableFlags.HasFlag(MethodTableFlags.HasIndirectParent)) {
 					return m_pParentMethodTable;
 				}
-				else {
-					throw new NotImplementedException("Parent is indirect");
-				}
+
+			    throw new NotImplementedException("Parent is indirect");
 			}
 		}
 
 		public Module* Module => m_pLoaderModule;
 
 		/// <summary>
-		/// The corresponding EEClass to this MethodTable.<para></para>
-		/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L22 <para></para>
+		/// <para>The corresponding EEClass to this MethodTable.</para>
+		/// <para>Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L22</para>
 		///
 		/// </summary>
 		/// <exception cref="NotImplementedException">If the union type is not EEClass or MethodTable</exception>
@@ -137,11 +137,14 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
-		/// The canonical MethodTable.<para></para>
+		/// <para>The canonical MethodTable.</para>
 		///
-		/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L1145 <para></para>
+		/// <para>Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L1145</para>
+		/// <remarks>
+		/// Address-sensitive
+		/// </remarks>
 		///
-		/// Address-sensitive <para></para>
+		/// <exception cref="RuntimeException">If the <see cref="get_UnionType"/> is not <see cref="LowBits.MethodTable"/> or <see cref="LowBits.EEClass"/> </exception>
 		/// </summary>
 		public MethodTable* Canon {
 			get {
@@ -183,7 +186,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		public int NumInstanceFields => EEClass->NumInstanceFields;
 
 		/// <summary>
-		/// The number of static fields in this type.
+		/// The number of <c>static</c> fields in this type.
 		/// </summary>
 		public int NumStaticFields => EEClass->NumStaticFields;
 
@@ -195,7 +198,8 @@ namespace RazorSharp.Runtime.CLRTypes
 		public int NumMethods => EEClass->NumMethods;
 
 		/// <summary>
-		/// The size of the instance fields in this type.
+		/// The size of the instance fields in this type. This is the unboxed size of the type if the object is boxed.
+		/// minus padding and overhead of the base size.
 		/// </summary>
 		public int NumInstanceFieldBytes => (int) BaseSize - EEClass->BaseSizePadding;
 
@@ -205,7 +209,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		public FieldDesc* FieldDescList => EEClass->FieldDescList;
 
 		/// <summary>
-		/// Length of the FieldDecList
+		/// Length of the <see cref="FieldDescList"/>
 		/// </summary>
 		public int FieldDescListLength => EEClass->FieldDescListLength;
 
@@ -250,9 +254,10 @@ namespace RazorSharp.Runtime.CLRTypes
 			var table = new ConsoleTable("Field", "Value");
 
 //			table.AddRow("Name", TypeInfo.Name);
+
+			table.AddRow("Base size", m_BaseSize);
 			if (HasComponentSize)
 				table.AddRow("Component size", m_dwFlags.ComponentSize);
-			table.AddRow("Base size", m_BaseSize);
 			table.AddRow("Flags", $"{Flags} ({TableFlags.Join()})");
 			table.AddRow("Flags 2", $"{Flags2} ({TableFlags2.Join()})");
 			table.AddRow("Low flags", $"{LowFlags} ({TableFlagsLow})");
@@ -296,7 +301,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("Blittable", EEClass->IsBlittable ? StringUtils.Check : StringUtils.BallotX);
 
 
-			table.RemoveFromRows(0, "0x0");
+//			table.RemoveFromRows(0, "0x0", (ushort) 0, (uint) 0);
 			return table.ToMarkDownString();
 		}
 

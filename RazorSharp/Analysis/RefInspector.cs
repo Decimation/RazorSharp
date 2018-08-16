@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Diagnostics;
 using RazorCommon;
 using RazorSharp.Runtime.CLRTypes;
 
@@ -57,13 +58,18 @@ namespace RazorSharp.Analysis
 
 		public sealed class ReferenceSizeInfo : SizeInfo
 		{
-			public int Heap         { get; }
-			public int BaseInstance { get; }
+			public int Heap              { get; }
+			public int BaseInstance      { get; }
+			public int BaseFieldsUnboxed { get; }
+
+			private readonly string m_typeName;
 
 			internal ReferenceSizeInfo(ref T t)
 			{
-				Heap         = Unsafe.HeapSize(ref t);
-				BaseInstance = Unsafe.BaseInstanceSize<T>();
+				Heap              = Unsafe.HeapSize(ref t);
+				BaseInstance      = Unsafe.BaseInstanceSize<T>();
+				BaseFieldsUnboxed = Unsafe.BaseFieldsSize(ref t);
+				m_typeName        = t.GetType().Name;
 			}
 
 			protected override ConsoleTable ToTable()
@@ -75,10 +81,14 @@ namespace RazorSharp.Analysis
 				return table;*/
 
 				var table = base.ToTable();
+
+				// todo: if the value is boxed
+				if (m_typeName != typeof(T).Name) {
+					table.AttachColumn($"Base fields size <{m_typeName}>", BaseFieldsUnboxed);
+				}
+
 				table.AttachColumn("Heap size", Heap);
 				table.AttachColumn("Base instance size", BaseInstance);
-
-				//table.AttachColumn("Base fields size", BaseFieldsSize);
 
 
 				table.DetachFromColumns(Unsafe.InvalidValue);

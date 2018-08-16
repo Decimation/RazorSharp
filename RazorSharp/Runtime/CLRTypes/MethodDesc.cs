@@ -109,7 +109,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <summary>
 		/// Slightly slower than using MethodHandle.GetFunctionPointer
 		///
+		/// <remarks>
 		/// Address-sensitive
+		/// </remarks>
 		/// </summary>
 		public IntPtr Function {
 			get {
@@ -126,7 +128,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		/// <summary>
 		/// Slower than using Reflection
 		///
+		/// <remarks>
 		/// Address-sensitive
+		/// </remarks>
 		/// </summary>
 		public string Name {
 			get {
