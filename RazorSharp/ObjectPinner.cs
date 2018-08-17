@@ -9,9 +9,8 @@ namespace RazorSharp
 {
 
 	/// <summary>
-	/// Pins an object in memory even if the type is unblittable.
-	///
-	/// Source: https://www.reddit.com/r/csharp/comments/917tyq/pinning_unblittable_objects/
+	///     Pins an object in memory even if the type is unblittable.
+	///     Source: https://www.reddit.com/r/csharp/comments/917tyq/pinning_unblittable_objects/
 	/// </summary>
 	public static class ObjectPinner
 	{
@@ -19,13 +18,13 @@ namespace RazorSharp
 
 		private static Action<object, Action<object>> CreatePinImpl()
 		{
-			var method = new DynamicMethod("InvokeWhilePinnedImpl", typeof(void),
+			DynamicMethod method = new DynamicMethod("InvokeWhilePinnedImpl", typeof(void),
 				new[] {typeof(object), typeof(Action<object>)}, typeof(ObjectPinner).Module);
-			var il = method.GetILGenerator();
+			ILGenerator il = method.GetILGenerator();
 
 			// create a pinned local variable of type object
 			// this wouldn't be valid in C#, but the runtime doesn't complain about the IL
-			var local = il.DeclareLocal(typeof(object), pinned: true);
+			LocalBuilder local = il.DeclareLocal(typeof(object), true);
 
 
 			// store first argument obj in the pinned local variable
@@ -43,7 +42,7 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		/// Pins an object in memory, preventing the GC from moving it.
+		///     Pins an object in memory, preventing the GC from moving it.
 		/// </summary>
 		/// <param name="obj">Object to pin</param>
 		/// <param name="action">The action during which the object will be pinned</param>

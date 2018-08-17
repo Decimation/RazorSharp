@@ -4,14 +4,37 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
+// ReSharper disable ConvertToAutoProperty
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+
 #endregion
 
 namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 {
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/a6c2f7834d338e08bf3dcf9dedb48b2a0c08fcfa/src/vm/object.h#L743
-	/// Should be used with Runtime.GetArrayObject and double indirection
+	///     <para>Represents the layout of an array in heap memory.</para>
+	///     <para>Corresponding files:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/object.h</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/object.cpp</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/object.inl</description>
+	///         </item>
+	///     </list>
+	///     <para>Lines of interest:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/object.h: 743</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Should be used with <see cref="Runtime.GetArrayObject{T}" /> and double indirection.
+	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct ArrayObject : IHeapObject
@@ -26,20 +49,16 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 		public uint Length => m_numComponents;
 
 		/// <summary>
-		/// Address-sensitive
+		///     Address-sensitive
 		/// </summary>
 		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
 
 		public MethodTable* MethodTable => m_methodTablePtr;
 
-		/// <summary>
-		/// Only present if the method table is shared among many types (arrays of pointers)
-		/// </summary>
 
-		//public RuntimeTypeHandle Handle => m_handle;
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Header*", Hex.ToHex(Header));
 			table.AddRow("MethodTable*", Hex.ToHex(m_methodTablePtr));
 			table.AddRow("Length", Length);

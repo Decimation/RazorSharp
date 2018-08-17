@@ -23,10 +23,25 @@ namespace RazorSharp.Runtime.CLRTypes
 
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp<para></para>
-	/// Source 2: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.h#L43<para></para>
-	/// DO NOT DEREFERENCE <para></para>
-	/// Internal representation: FieldHandle.Value
+	///     <para>Internal representation: <see cref="RuntimeFieldHandle.Value" /></para>
+	///     <para>Corresponding files:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/field.h</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/field.cpp</description>
+	///         </item>
+	///     </list>
+	///     <para>Lines of interest:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/field.h: 43</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Do not dereference.
+	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct FieldDesc
@@ -44,18 +59,18 @@ namespace RazorSharp.Runtime.CLRTypes
 		// unsigned m_isRVA               	: 1;
 		// unsigned m_prot                	: 3;
 		// unsigned m_requiresFullMbValue 	: 1;
-		[FieldOffset(8)] private readonly unsigned m_dword1;
+		[FieldOffset(8)] private readonly uint m_dword1;
 
 		// unsigned m_dwOffset         		: 27;
 		// unsigned m_type             		: 5;
-		[FieldOffset(12)] private readonly unsigned m_dword2;
+		[FieldOffset(12)] private readonly uint m_dword2;
 
 		#endregion
 
 		#region Accessors
 
 		/// <summary>
-		/// MemberDef
+		///     MemberDef
 		/// </summary>
 		private int MB => (int) (m_dword1 & 0xFFFFFF);
 
@@ -71,46 +86,44 @@ namespace RazorSharp.Runtime.CLRTypes
 
 
 		/// <summary>
-		/// Offset in heap memory
+		///     Offset in heap memory
 		/// </summary>
 		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
 
 		/// <summary>
-		/// Field type
+		///     Field type
 		/// </summary>
 		private int Type => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
 
-		public CorElementType CorType {
-			get => (CorElementType) Type;
-		}
+		public CorElementType CorType => (CorElementType) Type;
 
 
 		/// <summary>
-		/// Whether the field is static
+		///     Whether the field is static
 		/// </summary>
 		public bool IsStatic => Memory.Memory.ReadBit(m_dword1, 24);
 
 		/// <summary>
-		/// Whether the field is decorated with a ThreadStatic attribute
+		///     Whether the field is decorated with a ThreadStatic attribute
 		/// </summary>
 		public bool IsThreadLocal => Memory.Memory.ReadBit(m_dword1, 25);
 
 		/// <summary>
-		/// Unknown
+		///     Unknown
 		/// </summary>
 		public bool IsRVA => Memory.Memory.ReadBit(m_dword1, 26);
 
 		/// <summary>
-		/// Access level
+		///     Access level
 		/// </summary>
 		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
 
 		public ProtectionLevel Protection => (ProtectionLevel) ProtectionInt;
 
 		/// <summary>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		public int Size {
 			get {
@@ -134,41 +147,42 @@ namespace RazorSharp.Runtime.CLRTypes
 		public FieldInfo FieldInfo => Runtime.FieldMap[this];
 
 		/// <summary>
-		/// Returns the address of the field in the specified type.<para></para>
-		///
-		/// Source 1: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp#L516 <para></para>
-		/// Source 2: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp#L489 <para></para>
-		/// Source 3: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp#L467 <para></para>
-		///
-		/// <exception cref="RuntimeException">If the field is static</exception>
+		///     Returns the address of the field in the specified type.
+		///     <para></para>
+		///     Source 1: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp#L516
+		///     <para></para>
+		///     Source 2: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp#L489
+		///     <para></para>
+		///     Source 3: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp#L467
+		///     <para></para>
+		///     <exception cref="RuntimeException">If the field is static</exception>
 		/// </summary>
 		public IntPtr GetAddress<TInstance>(ref TInstance t)
 		{
-			if (IsStatic)
+			if (IsStatic) {
 				throw new RuntimeException("You cannot get the address of a static field (yet)");
+			}
 
 			Debug.Assert(Runtime.ReadMethodTable(ref t) == MethodTableOfEnclosingClass);
 			Debug.Assert(Offset != FieldOffsetNewEnC);
 
-			var data = Unsafe.AddressOf(ref t);
+			IntPtr data = Unsafe.AddressOf(ref t);
 			if (typeof(TInstance).IsValueType) {
 				return data + Offset;
 			}
-			else {
-				data =  Marshal.ReadIntPtr(data);
-				data += IntPtr.Size + Offset;
 
-				return data;
-			}
+			data =  Marshal.ReadIntPtr(data);
+			data += IntPtr.Size + Offset;
+
+			return data;
 		}
 
 
 		/// <summary>
-		/// Slower than using Reflection
-		///
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
+		///     Slower than using Reflection
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		public string Name {
 			get {
@@ -186,15 +200,12 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
-		public MethodTable* MethodTableOfEnclosingClass {
-			get {
-				return (MethodTable*) PointerUtils.Add(Unsafe.AddressOf(ref this).ToPointer(), m_pMTOfEnclosingClass);
-			}
-		}
+		public MethodTable* MethodTableOfEnclosingClass =>
+			(MethodTable*) PointerUtils.Add(Unsafe.AddressOf(ref this).ToPointer(), m_pMTOfEnclosingClass);
 
 		public bool RequiresFullMBValue => Memory.Memory.ReadBit(m_dword1, 31);
 
@@ -206,10 +217,9 @@ namespace RazorSharp.Runtime.CLRTypes
 			return rid | (int) tktype;
 		}
 
-
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 
 			// !NOTE NOTE NOTE!
 			// this->ToString() must be used to view this
@@ -237,7 +247,6 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			return table.ToMarkDownString();
 		}
-
 	}
 
 

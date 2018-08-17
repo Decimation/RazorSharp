@@ -10,7 +10,24 @@ namespace RazorSharp.Runtime.CLRTypes
 
 	//todo: verify
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/method.hpp#L1949
+	///     <para>Corresponding files:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/method.hpp</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/method.cpp</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/method.inl</description>
+	///         </item>
+	///     </list>
+	///     <para>Lines of interest:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/method.hpp: 1949</description>
+	///         </item>
+	///     </list>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct MethodDescChunk
@@ -19,12 +36,12 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(8)] private readonly MethodDescChunk* m_next;
 
 		/// <summary>
-		/// The size of this chunk minus 1 (in multiples of MethodDesc::ALIGNMENT)
+		///     The size of this chunk minus 1 (in multiples of MethodDesc::ALIGNMENT)
 		/// </summary>
 		[FieldOffset(16)] private readonly byte m_size;
 
 		/// <summary>
-		/// The number of MethodDescs in this chunk minus 1
+		///     The number of MethodDescs in this chunk minus 1
 		/// </summary>
 		[FieldOffset(17)] private readonly byte m_count;
 
@@ -39,7 +56,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("MethodTable", Hex.ToHex(m_methodTable));
 			table.AddRow("Next chunk", Hex.ToHex(m_next));
 			table.AddRow("Size", m_size);

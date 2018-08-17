@@ -29,14 +29,14 @@ namespace Test.Testing.Tests
 			/**
 			 * Size:		26 bytes
 			 */
-			var blank = "";
+			string blank = "";
 			AssertHeapSize(ref blank, 26);
 
 			/**
 			 * Size:        32(0x20) bytes
 			 * sizeof(00000183c0a72f18) = 32 (0x20) bytes (System.String)
 			 */
-			var foo = "foo";
+			string foo = "foo";
 			AssertHeapSize(ref foo, 32);
 
 
@@ -44,7 +44,7 @@ namespace Test.Testing.Tests
 			 * Size:        46(0x2e) bytes
 			 * sizeof(00000183c0a8f078) = 48 (0x30) bytes (System.String)
 			 */
-			var randStr = new string(' ', 10);
+			string randStr = new string(' ', 10);
 			AssertHeapSize(ref randStr, 46);
 
 
@@ -60,21 +60,21 @@ namespace Test.Testing.Tests
 			 * Size:        40(0x28) bytes
 			 * sizeof(0000026d80047588) = 96 (0x60) bytes (System.Collections.Generic.List`1[[System.Int32, mscorlib]])
 			 */
-			var list = new List<int> {1, 2, 3, 4, 5};
+			List<int> list = new List<int> {1, 2, 3, 4, 5};
 			AssertHeapSize(ref list, 40);
 
 			/**
 			 * Size:        44(0x2c) bytes
 			 * sizeof(000001c88d89f9b8) = 48 (0x30) bytes (System.Int32[])
 			 */
-			var arr = new[] {1, 2, 3, 4, 5};
+			int[] arr = new[] {1, 2, 3, 4, 5};
 			AssertHeapSize(ref arr, 44);
 
 			/**
 			 * Size:        64(0x40) bytes
 			 * sizeof(0000019a05bc4180) = 64 (0x40) bytes (System.Int64[])
 			 */
-			var longArr = new[] {1L, 2L, 3L, 4L, 5L};
+			long[] longArr = new[] {1L, 2L, 3L, 4L, 5L};
 			AssertHeapSize(ref longArr, 64);
 
 
@@ -82,7 +82,7 @@ namespace Test.Testing.Tests
 			 * Size:        64(0x40) bytes
 			 * sizeof(1FA80067F28) = 264 (0x108) bytes (System.String[])
 			 */
-			var strArr = new[] {"foo", "bar", "abcdef", new string(' ', 5), new string(' ', 15)};
+			string[] strArr = new[] {"foo", "bar", "abcdef", new string(' ', 5), new string(' ', 15)};
 			AssertHeapSize(ref strArr, 64);
 		}
 

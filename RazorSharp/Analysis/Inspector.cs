@@ -97,8 +97,8 @@ namespace RazorSharp.Analysis
 
 			private ConsoleTable ToTable()
 			{
-				var table = new ConsoleTable("MethodDesc Address", "Function Address", "Name");
-				foreach (var v in MethodDescs) {
+				ConsoleTable table = new ConsoleTable("MethodDesc Address", "Function Address", "Name");
+				foreach (Pointer<MethodDesc> v in MethodDescs) {
 					table.AddRow(Hex.ToHex(v.Address), Hex.ToHex(v.Reference.Function), v.Reference.Name);
 				}
 
@@ -134,11 +134,12 @@ namespace RazorSharp.Analysis
 			{
 				const string omitted = "-";
 
-				var table = new ConsoleTable("Field Offset", "FieldDesc Address", "Field Address", "CorType", "Static",
+				ConsoleTable table = new ConsoleTable("Field Offset", "FieldDesc Address", "Field Address", "CorType",
+					"Static",
 					"Size", "Name", "Value");
 
 				if (FieldDescs != null) {
-					foreach (var v in FieldDescs) {
+					foreach (Pointer<FieldDesc> v in FieldDescs) {
 						string fieldAddrHex =
 							v.Reference.IsStatic ? omitted : Hex.ToHex(v.Reference.GetAddress(ref value));
 
@@ -147,7 +148,6 @@ namespace RazorSharp.Analysis
 							v.Reference.Name, v.Reference.GetValue(value));
 					}
 				}
-
 
 				return table;
 			}
@@ -182,7 +182,7 @@ namespace RazorSharp.Analysis
 
 			protected virtual ConsoleTable ToTable()
 			{
-				var table = new ConsoleTable(String.Empty, MethodTableStr);
+				ConsoleTable table = new ConsoleTable(String.Empty, MethodTableStr);
 				table.AddRow("Address", Hex.ToHex(MethodTable));
 				table.AttachColumn(EEClassStr, Hex.ToHex(EEClass));
 				table.AttachColumn(CanonMTStr, Hex.ToHex(Canon));
@@ -215,7 +215,7 @@ namespace RazorSharp.Analysis
 
 			protected virtual ConsoleTable ToTable()
 			{
-				var table = new ConsoleTable("Info", "Value");
+				ConsoleTable table = new ConsoleTable("Info", "Value");
 				table.AddRow("Value",
 					typeof(T).IsIListType()
 						? String.Format("[{0}]", Collections.ListToString((IList) Value))
@@ -245,7 +245,7 @@ namespace RazorSharp.Analysis
 
 			protected virtual ConsoleTable ToTable()
 			{
-				var table = new ConsoleTable(String.Empty, "Address");
+				ConsoleTable table = new ConsoleTable(String.Empty, "Address");
 				table.AddRow("Address", Hex.ToHex(Address));
 				if (typeof(T).IsValueType) {
 					table.AttachColumn("Fields", Hex.ToHex(Address));
@@ -280,7 +280,7 @@ namespace RazorSharp.Analysis
 				//var table = new ConsoleTable("Size type", "Value");
 				//table.AddRow("Size", Size);
 				//return table;
-				var table = new ConsoleTable(String.Empty, "Size");
+				ConsoleTable table = new ConsoleTable(String.Empty, "Size");
 				table.AddRow("Size value", Size);
 				table.AttachColumn("Native size", Native);
 				table.AttachColumn("Managed size", Managed);
@@ -303,7 +303,7 @@ namespace RazorSharp.Analysis
 
 		public static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.Default)
 		{
-			var inspector = new Inspector<T>(ref t, mode);
+			Inspector<T> inspector = new Inspector<T>(ref t, mode);
 			WriteInspector(inspector, printStructures);
 		}
 
@@ -344,7 +344,7 @@ namespace RazorSharp.Analysis
 
 		public override string ToString()
 		{
-			var sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder();
 
 			if (Mode.HasFlag(InspectorMode.Meta)) {
 				sb.Append(Metadata);

@@ -4,6 +4,9 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
+// ReSharper disable BuiltInTypeReferenceStyle
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+
 #endregion
 
 // ReSharper disable InconsistentNaming
@@ -20,7 +23,7 @@ namespace RazorSharp.Runtime.CLRTypes
 #endif
 		[FieldOffset(4)] private UInt32 m_uSyncBlockValue;
 
-		public UInt32 Bits => m_uSyncBlockValue;
+		public UInt32 SyncBlock => m_uSyncBlockValue;
 
 		public SyncBlockFlags BitsAsFlags => (SyncBlockFlags) m_uSyncBlockValue;
 
@@ -85,7 +88,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		public override bool Equals(object obj)
 		{
 			if (obj.GetType() == GetType()) {
-				var h = (ObjHeader) obj;
+				ObjHeader h = (ObjHeader) obj;
 				return h.m_uSyncBlockValue == m_uSyncBlockValue;
 			}
 

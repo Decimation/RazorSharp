@@ -4,25 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading;
-using BenchmarkDotNet.Running;
 using RazorCommon;
 using RazorCommon.Strings;
-using RazorInvoke;
-using RazorSharp;
 using RazorSharp.Analysis;
-using RazorSharp.Experimental;
-using RazorSharp.Memory;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime;
-using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;
 using Test.Testing;
-using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
-using Point = Test.Testing.Point;
-using Unsafe = System.Runtime.CompilerServices.Unsafe;
 
 #endregion
 
@@ -31,8 +19,7 @@ namespace Test
 
 	#region
 
-	using CSUnsafe = Unsafe;
-	using Unsafe = RazorSharp.Unsafe;
+	using CSUnsafe = System.Runtime.CompilerServices;
 
 	#endregion
 
@@ -77,15 +64,32 @@ namespace Test
 		}
 
 
-		public static void Main(string[] args)
+		struct SStruct
 		{
-			string s = "foo";
-			WriteOut(ref s);
-			lock (s) {
-				WriteOut(ref s);
-			}
+			public static string Static;
+			public        string Instance;
+
 		}
 
+		class CClass
+		{
+			public        string Instance;
+			public static string Static;
+		}
+
+		public static void Main(string[] args)
+		{
+			SStruct ss;
+			ss.Instance    = "bar";
+			SStruct.Static = "foo";
+
+			WriteOutVal(ref ss, true);
+
+			CClass cc = new CClass();
+			WriteOut(ref cc, true);
+
+			Console.ReadLine();
+		}
 
 		private static void TestTypes()
 		{
@@ -154,7 +158,6 @@ namespace Test
 			WriteOutVal(ref pt);
 		}
 
-
 		private static void WriteOutVal<T>(ref T t, bool printStructures = false) where T : struct
 		{
 			Inspector<T>.Write(ref t, printStructures);
@@ -168,12 +171,11 @@ namespace Test
 
 		private static void TableMethods<T>()
 		{
-			var table = new ConsoleTable("Function", "MethodDesc", "Name", "Virtual");
-			foreach (var v in typeof(T).GetMethods(BindingFlags.Instance | BindingFlags.Public |
-			                                       BindingFlags.NonPublic)) {
+			ConsoleTable table = new ConsoleTable("Function", "MethodDesc", "Name", "Virtual");
+			foreach (MethodInfo v in typeof(T).GetMethods(BindingFlags.Instance | BindingFlags.Public |
+			                                              BindingFlags.NonPublic))
 				table.AddRow(Hex.ToHex(v.MethodHandle.GetFunctionPointer()), Hex.ToHex(v.MethodHandle.Value),
 					v.Name, v.IsVirtual ? StringUtils.Check : StringUtils.BallotX);
-			}
 
 			Console.WriteLine(table.ToMarkDownString());
 		}

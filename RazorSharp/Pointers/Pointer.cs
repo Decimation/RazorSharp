@@ -20,19 +20,27 @@ namespace RazorSharp.Pointers
 	#endregion
 
 
-	///  <summary>
-	///  A bare-bones, lighter type of ExPointer, equal to the size of IntPtr.<para></para>
-	///  Can be represented as a pointer in memory. <para></para>
-	///  - No bounds checking<para></para>
-	///  - No safety systems<para></para>
-	///  - No type safety <para></para>
-	///  </summary>
-	///  <typeparam name="T">Type to point to</typeparam>
+	/// <summary>
+	///     <para>A bare-bones, lighter type of <see cref="ExPointer{T}" />, equal to <see cref="IntPtr.Size" /></para>
+	///     <para> Can be represented as a pointer in memory. </para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>No bounds checking</description>
+	///         </item>
+	///         <item>
+	///             <description>No safety systems</description>
+	///         </item>
+	///         <item>
+	///             <description>No type safety</description>
+	///         </item>
+	///     </list>
+	/// </summary>
+	/// <typeparam name="T">Type to point to</typeparam>
 	public unsafe struct Pointer<T> : IPointer<T>, IFormattable
 	{
 		/// <summary>
-		/// The address we're pointing to.<para></para>
-		/// We want this to be the only field so it can be represented as a pointer in memory.
+		///     <para>The address we're pointing to.</para>
+		///     <para>We want this to be the only field so it can be represented as a pointer in memory.</para>
 		/// </summary>
 		private void* m_value;
 
@@ -43,9 +51,7 @@ namespace RazorSharp.Pointers
 			set => MMemory.Write(PointerUtils.Offset<T>(m_value, index), 0, value);
 		}*/
 
-		public ref T this[int index] {
-			get { return ref MMemory.AsRef<T>(PointerUtils.Offset<T>(Address, index)); }
-		}
+		public ref T this[int index] => ref MMemory.AsRef<T>(PointerUtils.Offset<T>(Address, index));
 
 		public ref T Reference => ref MMemory.AsRef<T>(Address);
 
@@ -90,7 +96,7 @@ namespace RazorSharp.Pointers
 
 		public IntPtr MoveDown()
 		{
-			var oldAddr = Address;
+			IntPtr oldAddr = Address;
 			Address = Marshal.ReadIntPtr(Address);
 			return oldAddr;
 		}
@@ -123,7 +129,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Add the specified number of bytes to the address
+		///     Add the specified number of bytes to the address
 		/// </summary>
 		/// <param name="bytes">Number of bytes to add</param>
 		public void Add(int bytes)
@@ -132,7 +138,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Subtract the specified number of bytes from the address
+		///     Subtract the specified number of bytes from the address
 		/// </summary>
 		/// <param name="bytes">Number of bytes to subtract</param>
 		public void Subtract(int bytes)
@@ -141,7 +147,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Increment the address by the specified number of elements
+		///     Increment the address by the specified number of elements
 		/// </summary>
 		/// <param name="elemCnt">Number of elements</param>
 		private void Increment(int elemCnt = 1)
@@ -150,7 +156,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Decrement the address by the specified number of elements
+		///     Decrement the address by the specified number of elements
 		/// </summary>
 		/// <param name="elemCnt">Number of elements</param>
 		private void Decrement(int elemCnt = 1)
@@ -217,7 +223,10 @@ namespace RazorSharp.Pointers
 
 		public override bool Equals(object obj)
 		{
-			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(null, obj)) {
+				return false;
+			}
+
 			return obj is Pointer<T> && Equals((Pointer<T>) obj);
 		}
 
@@ -242,8 +251,13 @@ namespace RazorSharp.Pointers
 
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
-			if (String.IsNullOrEmpty(format)) format   = "O";
-			if (formatProvider == null) formatProvider = CultureInfo.CurrentCulture;
+			if (String.IsNullOrEmpty(format)) {
+				format = "O";
+			}
+
+			if (formatProvider == null) {
+				formatProvider = CultureInfo.CurrentCulture;
+			}
 
 
 			/**

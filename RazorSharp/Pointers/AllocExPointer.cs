@@ -21,12 +21,17 @@ namespace RazorSharp.Pointers
 	#endregion
 
 	/// <summary>
-	/// Represents a high-level C/C++ style array using dynamic unmanaged memory allocation<para></para>
-	/// This allows for creation of managed types in unmanaged memory.<para></para>
-	/// This is also similar to C++'s Vector type, as this "array" is not fixed.
-	/// - Bounds checking<para></para>
-	/// - Resizable<para></para>
-	/// - Allocation protection<para></para>
+	///     Represents a high-level C/C++ style array using dynamic unmanaged memory allocation
+	///     <para></para>
+	///     This allows for creation of managed types in unmanaged memory.
+	///     <para></para>
+	///     This is also similar to C++'s Vector type, as this "array" is not fixed.
+	///     - Bounds checking
+	///     <para></para>
+	///     - Resizable
+	///     <para></para>
+	///     - Allocation protection
+	///     <para></para>
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public sealed unsafe class AllocExPointer<T> : ExPointer<T>, IDisposable, IEnumerable<T>
@@ -47,7 +52,7 @@ namespace RazorSharp.Pointers
 		#region Accessors
 
 		/// <summary>
-		/// Returns the heap address of the array's first element
+		///     Returns the heap address of the array's first element
 		/// </summary>
 		public IntPtr FirstElement {
 			//get {
@@ -59,7 +64,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Returns the heap address of the array's last element
+		///     Returns the heap address of the array's last element
 		/// </summary>
 		public IntPtr LastElement {
 			//get { //return FirstElement + ((Count - 1) * ElementSize); }
@@ -68,17 +73,17 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Starting index
+		///     Starting index
 		/// </summary>
 		public int Start => -m_offset;
 
 		/// <summary>
-		/// Ending index
+		///     Ending index
 		/// </summary>
 		public int End => Start + (Count - 1);
 
 		/// <summary>
-		/// Whether or not this pointer is valid
+		///     Whether or not this pointer is valid
 		/// </summary>
 		public bool IsAllocated {
 			get => Metadata.IsAllocated;
@@ -93,14 +98,13 @@ namespace RazorSharp.Pointers
 		private int m_offset;
 
 		/// <summary>
-		/// Offset relative to the first element.
+		///     Offset relative to the first element.
 		/// </summary>
 		public int Offset => m_offset;
 
 		/// <summary>
-		/// Allocated bytes of memory
-		///
-		/// When reallocating, the offset is reset.
+		///     Allocated bytes of memory
+		///     When reallocating, the offset is reset.
 		/// </summary>
 		public int AllocatedSize {
 			get => Metadata.AllocatedSize;
@@ -124,7 +128,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Current address being pointed to
+		///     Current address being pointed to
 		/// </summary>
 		public override IntPtr Address {
 			get => IsAllocated ? base.Address : IntPtr.Zero;
@@ -138,10 +142,10 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Current value being pointed to.
+		///     Current value being pointed to.
 		/// </summary>
 		public override T Value {
-			get { return IsAllocated ? base.Value : default; }
+			get => IsAllocated ? base.Value : default;
 			set {
 				if (IsAllocated) {
 					base.Value = value;
@@ -155,7 +159,9 @@ namespace RazorSharp.Pointers
 					EnsureIndexerBounds(index);
 					return base[index];
 				}
-				else return default;
+				else {
+					return default;
+				}
 			}
 			set {
 				if (IsAllocated) {
@@ -166,7 +172,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Number of currently allocated elements
+		///     Number of currently allocated elements
 		/// </summary>
 		public int Count {
 			get => AllocatedSize / Metadata.ElementSize;
@@ -179,11 +185,10 @@ namespace RazorSharp.Pointers
 
 		public int IndexOf(T t)
 		{
-			for (int i = Start; i <= End; i++) {
+			for (int i = Start; i <= End; i++)
 				if (this[i].Equals(t)) {
 					return i;
 				}
-			}
 
 			return -1;
 		}
@@ -215,24 +220,24 @@ namespace RazorSharp.Pointers
 		private enum FixType
 		{
 			/// <summary>
-			/// Offset was 1 past the bounds, so we moved back
+			///     Offset was 1 past the bounds, so we moved back
 			/// </summary>
 			BounceBack,
 
 			/// <summary>
-			/// Offset is >1 out of bounds
+			///     Offset is >1 out of bounds
 			/// </summary>
 			OutOfBounds,
 
 			/// <summary>
-			/// Offset is OK
+			///     Offset is OK
 			/// </summary>
 			Verified
 		}
 
 		/// <summary>
-		/// Determines whether the specified address is in the allocated address
-		/// space.
+		///     Determines whether the specified address is in the allocated address
+		///     space.
 		/// </summary>
 		/// <param name="p"></param>
 		/// <returns></returns>
@@ -268,18 +273,18 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// If the increment is 1 element over or under bounds,
-		/// we'll automatically revert to the beginning or end offset.<para></para>
-		///
-		/// This is because when incrementing a pointer in a branching statement such as a for
-		/// loop or while loop, the pointer typically goes out of bounds by 1. For convenience,
-		/// we won't throw an exception, just revert the offset.<para></para>
-		///
-		/// However if the pointer is offset out of bounds more than 1 offset, we will throw an exception.
+		///     If the increment is 1 element over or under bounds,
+		///     we'll automatically revert to the beginning or end offset.
+		///     <para></para>
+		///     This is because when incrementing a pointer in a branching statement such as a for
+		///     loop or while loop, the pointer typically goes out of bounds by 1. For convenience,
+		///     we won't throw an exception, just revert the offset.
+		///     <para></para>
+		///     However if the pointer is offset out of bounds more than 1 offset, we will throw an exception.
 		/// </summary>
 		private FixType EnsureOffsetBounds(int requestedOffset = 1)
 		{
-			var reqAddr = PointerUtils.Offset<T>(Address, requestedOffset);
+			IntPtr reqAddr = PointerUtils.Offset<T>(Address, requestedOffset);
 			if (!AddressInBounds(reqAddr)) {
 				// This is for isolated incidents when iterators
 				// and pointer arithmetic move past the end by 1 element.
@@ -325,8 +330,8 @@ namespace RazorSharp.Pointers
 		#region Constructors
 
 		/// <summary>
-		/// Allocates a block of memory with <![CDATA[Unsafe.SizeOf<T> * elements]]> in
-		/// unmanaged memory.
+		///     Allocates a block of memory with <![CDATA[Unsafe.SizeOf<T> * elements]]> in
+		///     unmanaged memory.
 		/// </summary>
 		/// <param name="elements">Number of elements to allocate</param>
 		public AllocExPointer(int elements) : this(Marshal.AllocHGlobal(elements * Unsafe.SizeOf<T>()),
@@ -379,7 +384,7 @@ namespace RazorSharp.Pointers
 		#region Overrides and methods
 
 		/// <summary>
-		/// Initialize memory with default values.
+		///     Initialize memory with default values.
 		/// </summary>
 		private void Init(T value = default)
 		{
@@ -393,18 +398,16 @@ namespace RazorSharp.Pointers
 				this[start] = value;
 			}
 
-			for (int i = start; i <= end; i++) {
-				this[i] = value;
-			}
+			for (int i = start; i <= end; i++) this[i] = value;
 		}
 
 		public void Init(params T[] args)
 		{
-			if (args.Length > Count) throw new ArgumentOutOfRangeException();
-
-			for (int i = 0; i < args.Length; i++) {
-				this[i] = args[i];
+			if (args.Length > Count) {
+				throw new ArgumentOutOfRangeException();
 			}
+
+			for (int i = 0; i < args.Length; i++) this[i] = args[i];
 		}
 
 		protected override void Increment(int cnt = 1)
@@ -443,7 +446,7 @@ namespace RazorSharp.Pointers
 
 		protected override ConsoleTable ToTable()
 		{
-			var table = base.ToTable();
+			ConsoleTable table = base.ToTable();
 			table.AddRow("Allocated", IsAllocated);
 			table.AddRow("Allocated bytes", AllocatedSize);
 			table.AddRow("Count", Count);
@@ -468,7 +471,7 @@ namespace RazorSharp.Pointers
 
 
 			for (int i = Start; i <= End; i++) {
-				var addr = PointerUtils.Offset<T>(Address, i);
+				IntPtr addr = PointerUtils.Offset<T>(Address, i);
 				if (!AddressInBounds(addr)) {
 					break;
 				}
@@ -494,7 +497,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Free the allocated memory
+		///     Free the allocated memory
 		/// </summary>
 		public void Dispose()
 		{
@@ -538,9 +541,7 @@ namespace RazorSharp.Pointers
 
 		public IEnumerator<T> GetEnumerator()
 		{
-			for (int i = 0; i < Count; i++) {
-				yield return this[i];
-			}
+			for (int i = 0; i < Count; i++) yield return this[i];
 		}
 
 		public override string ToString()

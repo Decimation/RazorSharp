@@ -4,8 +4,10 @@ using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using RazorCommon;
-using RazorInvoke;
 using RazorInvoke.Libraries;
+using static RazorInvoke.Enumerations;
+using static RazorInvoke.Enumerations.AllocationType;
+using static RazorInvoke.Enumerations.MemoryProtection;
 
 #endregion
 
@@ -19,7 +21,7 @@ namespace RazorSharp.Memory
 	#endregion
 
 	/// <summary>
-	/// Class for executing Assembly code
+	///     Class for executing Assembly code
 	/// </summary>
 	public static unsafe class Asm
 	{
@@ -28,22 +30,22 @@ namespace RazorSharp.Memory
 		private delegate IntPtr GetValue();
 
 		/// <summary>
-		/// Execute arbitrary Assembly opcodes
+		///     Execute arbitrary Assembly opcodes
 		/// </summary>
 		/// <param name="memory">Opcodes</param>
 		public static void asm(params byte[] memory)
 		{
-			IntPtr buf = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) memory.Length, Enumerations.AllocationType.Commit,
-				Enumerations.MemoryProtection.ExecuteReadWrite);
+			IntPtr buf = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) memory.Length, Commit,
+				ExecuteReadWrite);
 			Marshal.Copy(memory, 0, buf, memory.Length);
 			Marshal.GetDelegateForFunctionPointer<Exec>(buf)();
-			if (!Kernel32.VirtualFree(buf, (uint) memory.Length, Enumerations.FreeTypes.Decommit)) {
+			if (!Kernel32.VirtualFree(buf, (uint) memory.Length, FreeTypes.Decommit)) {
 				Logger.Log(Level.Error, Flags.Memory, "Asm::asm failed to free memory");
 			}
 		}
 
 		/// <summary>
-		/// Execute arbitrary Assembly opcodes and return the result.
+		///     Execute arbitrary Assembly opcodes and return the result.
 		/// </summary>
 		/// <param name="hex">String of hexadecimal opcodes, in the format of "0x??"</param>
 		/// <typeparam name="T">Type to return</typeparam>
@@ -55,8 +57,10 @@ namespace RazorSharp.Memory
 
 			for (int i = 0; i < mem.Length; i++) {
 				bytestrs[i] = bytestrs[i].Replace("0x", "");
-				if (bytestrs[i] == "0")
+				if (bytestrs[i] == "0") {
 					bytestrs[i] += "0";
+				}
+
 				mem[i] = Byte.Parse(bytestrs[i], NumberStyles.HexNumber);
 			}
 
@@ -70,20 +74,22 @@ namespace RazorSharp.Memory
 		}
 
 		/// <summary>
-		/// Execute arbitrary Assembly opcodes and return the result.
+		///     Execute arbitrary Assembly opcodes and return the result.
 		/// </summary>
 		/// <param name="memory">Byte array of opcodes</param>
 		/// <typeparam name="T">Type to return</typeparam>
 		/// <returns>The value returned by the execution</returns>
 		public static T asm<T>(params byte[] memory)
 		{
-			IntPtr buf = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) memory.Length, Enumerations.AllocationType.Commit,
-				Enumerations.MemoryProtection.ExecuteReadWrite);
+			IntPtr buf = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) memory.Length, Commit,
+				ExecuteReadWrite);
 			Marshal.Copy(memory, 0, buf, memory.Length);
-			var p = Marshal.GetDelegateForFunctionPointer<GetValue>(buf)();
+			IntPtr p = Marshal.GetDelegateForFunctionPointer<GetValue>(buf)();
 
-			if (!Kernel32.VirtualFree(buf, (uint) memory.Length, Enumerations.FreeTypes.Decommit))
+			if (!Kernel32.VirtualFree(buf, (uint) memory.Length, FreeTypes.Decommit)) {
 				Logger.Log(Level.Error, Flags.Memory, "Asm::asm failed to free memory");
+			}
+
 			return CSUnsafe.Read<T>(&p);
 		}
 

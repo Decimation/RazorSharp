@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using RazorInvoke;
 using RazorSharp.Memory;
 using RazorSharp.Runtime.CLRTypes;
 
@@ -22,7 +21,7 @@ namespace RazorSharp.Runtime
 
 
 	/// <summary>
-	/// Some CLR functions are too complex to replicate in C# so we'll use sigscanning to execute them
+	///     Some CLR functions are too complex to replicate in C# so we'll use sigscanning to execute them
 	/// </summary>
 	public static unsafe class CLRFunctions
 	{
@@ -98,8 +97,8 @@ namespace RazorSharp.Runtime
 			internal delegate void* GetMultiCallableAddrOfCodeDelegate(MethodDesc* __this);
 
 			/// <summary>
-			/// https://github.com/dotnet/coreclr/blob/fcb04373e2015ae12b55f33fdd0dd4580110db98/src/vm/runtimehandles.cpp#L1732
-			/// https://github.com/dotnet/coreclr/blob/c10efe004d8720a799bf666d3fac3b800f204848/src/vm/method.cpp#L2067
+			///     https://github.com/dotnet/coreclr/blob/fcb04373e2015ae12b55f33fdd0dd4580110db98/src/vm/runtimehandles.cpp#L1732
+			///     https://github.com/dotnet/coreclr/blob/c10efe004d8720a799bf666d3fac3b800f204848/src/vm/method.cpp#L2067
 			/// </summary>
 			internal static readonly GetMultiCallableAddrOfCodeDelegate GetMultiCallableAddrOfCode;
 

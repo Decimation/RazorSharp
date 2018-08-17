@@ -18,7 +18,7 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void CollectionsToString_Bytes()
 		{
-			Collections.ToString(mem: Bytes);
+			Collections.ToString(Bytes);
 		}
 
 		public static void StringJoin() { }

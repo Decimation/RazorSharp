@@ -7,7 +7,6 @@ using RazorSharp.Runtime.CLRTypes;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable IdentifierTypo
-
 // ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Runtime
@@ -16,8 +15,13 @@ namespace RazorSharp.Runtime
 	public static unsafe class Constants
 	{
 		/// <summary>
-		/// <para>Minimum GC object heap size</para>
-		/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/object.h#L119
+		///     <para>Minimum GC object heap size</para>
+		///     <para>Sources:</para>
+		///     <list type="bullet">
+		///         <item>
+		///             <description>/src/vm/object.h: 119</description>
+		///         </item>
+		///     </list>
 		/// </summary>
 		internal static readonly int MinObjectSize = 2 * IntPtr.Size + sizeof(ObjHeader);
 
@@ -25,7 +29,13 @@ namespace RazorSharp.Runtime
 		private const uint GC_MARKED = 0x1;
 
 		/// <summary>
-		/// Source: https://github.com/dotnet/coreclr/blob/de586767f51432e5d89f6fcffee07c488fdeeb7b/src/vm/siginfo.cpp#L63
+		///     <para>Sources:</para>
+		///     <list type="bullet">
+		///         <item>
+		///             <description>src/vm/siginfo.cpp: 63</description>
+		///         </item>
+		///     </list>
+		///     <exception cref="Exception">If size is unknown</exception>
 		/// </summary>
 		internal static int SizeOfCorElementType(CorElementType t)
 		{
@@ -156,36 +166,41 @@ namespace RazorSharp.Runtime
 	}
 
 	/// <summary>
-	/// The value of lowest two bits describe what the union contains
+	///     The value of lowest two bits describe what the union contains
+	///     <remarks>
+	///         Use with <see cref="RazorSharp.Runtime.CLRTypes.MethodTable.UnionType" />
+	///     </remarks>
 	/// </summary>
 	[Flags]
 	public enum LowBits
 	{
 		/// <summary>
-		/// 0 - pointer to EEClass.
-		/// This MethodTable is the canonical method table.
+		///     0 - pointer to EEClass.
+		///     This MethodTable is the canonical method table.
 		/// </summary>
 		EEClass = 0,
 
 		/// <summary>
-		/// 1 - not used
+		///     1 - not used
 		/// </summary>
 		Invalid = 1,
 
 		/// <summary>
-		/// 2 - pointer to canonical MethodTable.
+		///     2 - pointer to canonical MethodTable.
 		/// </summary>
 		MethodTable = 2,
 
 		/// <summary>
-		/// 3 - pointer to indirection cell that points to canonical MethodTable.
-		/// (used only if FEATURE_PREJIT is defined)
+		///     3 - pointer to indirection cell that points to canonical MethodTable.
+		///     (used only if FEATURE_PREJIT is defined)
 		/// </summary>
 		Indirection = 3
 	}
 
 	/// <summary>
-	/// Use with: FieldDesc::ProtectionInt
+	///     <remarks>
+	///         Use with <see cref="FieldDesc.ProtectionInt" />
+	///     </remarks>
 	/// </summary>
 	public enum ProtectionLevel
 	{
@@ -199,7 +214,12 @@ namespace RazorSharp.Runtime
 
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L1476
+	///     <para>Sources:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/inc/corhdr.h: 1476</description>
+	///         </item>
+	///     </list>
 	/// </summary>
 	internal enum CorTokenType
 	{
@@ -235,11 +255,27 @@ namespace RazorSharp.Runtime
 	}
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/f31097f14560b193e76a7b2e1e61af9870b5356b/src/System.Private.CoreLib/src/System/Reflection/MdImport.cs#L22 <para></para>
-	/// Source 2: https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L863 <para></para>
-	/// For sizes: https://github.com/dotnet/coreclr/blob/de586767f51432e5d89f6fcffee07c488fdeeb7b/src/vm/siginfo.cpp#L63 <para></para>
-	///
-	/// Use with: FieldDesc::Type
+	///     <para>Sources:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>
+	///                 /src/System.Private.CoreLib/src/System/Reflection/MdImport.cs: 22
+	///             </description>
+	///         </item>
+	///         <item>
+	///             <description>
+	///                 /src/inc/corhdr.h: 863
+	///             </description>
+	///         </item>
+	///         <item>
+	///             <description>
+	///                 /src/vm/siginfo.cpp: 63
+	///             </description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Use with <see cref="FieldDesc.Type" />
+	///     </remarks>
 	/// </summary>
 	public enum CorElementType : byte
 	{
@@ -247,67 +283,67 @@ namespace RazorSharp.Runtime
 		Void = 0x01,
 
 		/// <summary>
-		/// bool
+		///     bool
 		/// </summary>
 		Boolean = 0x02,
 
 		/// <summary>
-		/// char
+		///     char
 		/// </summary>
 		Char = 0x03,
 
 		/// <summary>
-		/// sbyte
+		///     sbyte
 		/// </summary>
 		I1 = 0x04,
 
 		/// <summary>
-		/// byte
+		///     byte
 		/// </summary>
 		U1 = 0x05,
 
 		/// <summary>
-		/// short
+		///     short
 		/// </summary>
 		I2 = 0x06,
 
 		/// <summary>
-		/// ushort
+		///     ushort
 		/// </summary>
 		U2 = 0x07,
 
 		/// <summary>
-		/// int
+		///     int
 		/// </summary>
 		I4 = 0x08,
 
 		/// <summary>
-		/// uint
+		///     uint
 		/// </summary>
 		U4 = 0x09,
 
 		/// <summary>
-		/// long
+		///     long
 		/// </summary>
 		I8 = 0x0A,
 
 		/// <summary>
-		/// ulong
+		///     ulong
 		/// </summary>
 		U8 = 0x0B,
 
 		/// <summary>
-		/// float
+		///     float
 		/// </summary>
 		R4 = 0x0C,
 
 		/// <summary>
-		/// double
+		///     double
 		/// </summary>
 		R8 = 0x0D,
 
 		/// <summary>
-		/// Note: strings don't actually map to this. They map to Class.
+		///     Note: strings don't actually map to this. They map to <see cref="Class" />
 		/// </summary>
 		String = 0x0E,
 
@@ -315,12 +351,12 @@ namespace RazorSharp.Runtime
 		ByRef = 0x10,
 
 		/// <summary>
-		/// Struct type
+		///     Struct type
 		/// </summary>
 		ValueType = 0x11,
 
 		/// <summary>
-		/// Reference type (i.e. string, object)
+		///     Reference type (i.e. string, object)
 		/// </summary>
 		Class = 0x12,
 
@@ -344,39 +380,53 @@ namespace RazorSharp.Runtime
 	}
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/method.hpp#L1701
-	/// Use with: MethodDesc::m_bFlags2
+	///     <para>Sources:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/method.hpp: 1701</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Use with <see cref="MethodDesc.Flags2" />
+	///     </remarks>
 	/// </summary>
 	[Flags]
 	internal enum MethodDescFlags2 : byte
 	{
 		/// <summary>
-		/// The method entrypoint is stable (either precode or actual code)
+		///     The method entrypoint is stable (either precode or actual code)
 		/// </summary>
 		HasStableEntryPoint = 0x01,
 
 		/// <summary>
-		/// implies that HasStableEntryPoint is set.
-		/// Precode has been allocated for this method
+		///     implies that HasStableEntryPoint is set.
+		///     Precode has been allocated for this method
 		/// </summary>
 		HasPrecode = 0x02,
 
 		IsUnboxingStub = 0x04,
 
 		/// <summary>
-		/// Has slot for native code
+		///     Has slot for native code
 		/// </summary>
 		HasNativeCodeSlot = 0x08,
 
 		/// <summary>
-		/// Jit may expand method as an intrinsic
+		///     Jit may expand method as an intrinsic
 		/// </summary>
 		IsJitIntrinsic = 0x10,
 	}
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/method.hpp#L1686
-	/// Use with: MethodDesc::m_wFlags3AndTokenRemainder
+	///     <para>Sources:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/method.hpp: 1686</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Use with <see cref="MethodDesc.Flags3" />
+	///     </remarks>
 	/// </summary>
 	[Flags]
 	internal enum MethodDescFlags3 : ushort
@@ -389,24 +439,32 @@ namespace RazorSharp.Runtime
 		// #define
 
 		/// <summary>
-		/// Indicates that a type-forwarded type is used as a valuetype parameter (this flag is only valid for ngenned items)
+		///     Indicates that a type-forwarded type is used as a valuetype parameter (this flag is only valid for ngenned items)
 		/// </summary>
 		HasForwardedValuetypeParameter = 0x4000,
 
 		/// <summary>
-		/// Indicates that all typeref's in the signature of the method have been resolved to typedefs (or that process failed) (this flag is only valid for non-ngenned methods)
+		///     Indicates that all typeref's in the signature of the method have been resolved to typedefs (or that process failed)
+		///     (this flag is only valid for non-ngenned methods)
 		/// </summary>
 		ValueTypeParametersWalked = 0x4000,
 
 		/// <summary>
-		/// Indicates that we have verified that there are no equivalent valuetype parameters for this method
+		///     Indicates that we have verified that there are no equivalent valuetype parameters for this method
 		/// </summary>
 		DoesNotHaveEquivalentValuetypeParameters = 0x8000,
 	}
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.h#L3969
-	/// Use with: MethodTable::m_dwFlags
+	///     <para>Sources:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/methodtable.h: 3969</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Use with <see cref="MethodTable.Flags" />
+	///     </remarks>
 	/// </summary>
 	[Flags]
 	public enum MethodTableFlags : uint
@@ -418,7 +476,7 @@ namespace RazorSharp.Runtime
 		MarshalByRef     = 0x00020000,
 
 		/// <summary>
-		/// sub-category of MarshalByRef
+		///     sub-category of MarshalByRef
 		/// </summary>
 		Contextful = 0x00030000,
 
@@ -426,17 +484,17 @@ namespace RazorSharp.Runtime
 		ValueTypeMask = 0x000C0000,
 
 		/// <summary>
-		/// sub-category of ValueType
+		///     sub-category of ValueType
 		/// </summary>
 		Nullable = 0x00050000,
 
 		/// <summary>
-		/// sub-category of ValueType, Enum or primitive value type
+		///     sub-category of ValueType, Enum or primitive value type
 		/// </summary>
 		PrimitiveValueType = 0x00060000,
 
 		/// <summary>
-		/// sub-category of ValueType, Primitive (ELEMENT_TYPE_I, etc.)
+		///     sub-category of ValueType, Primitive (ELEMENT_TYPE_I, etc.)
 		/// </summary>
 		TruePrimitive = 0x00070000,
 
@@ -444,7 +502,7 @@ namespace RazorSharp.Runtime
 		ArrayMask = 0x000C0000,
 
 		/// <summary>
-		/// sub-category of Array
+		///     sub-category of Array
 		/// </summary>
 		IfArrayThenSzArray = 0x00020000,
 
@@ -454,48 +512,48 @@ namespace RazorSharp.Runtime
 		AsyncPin         = 0x000F0000,
 
 		/// <summary>
-		/// bits that matter for element type mask
+		///     bits that matter for element type mask
 		/// </summary>
 		ElementTypeMask = 0x000E0000,
 
 		/// <summary>
-		/// instances require finalization
+		///     instances require finalization
 		/// </summary>
 		HasFinalizer = 0x00100000,
 
 		/// <summary>
-		/// Is this type marshalable by the pinvoke marshalling layer
+		///     Is this type marshalable by the pinvoke marshalling layer
 		/// </summary>
 		IfNotInterfaceThenMarshalable = 0x00200000,
 
 		/// <summary>
-		/// Does the type has optional GuidInfo
+		///     Does the type has optional GuidInfo
 		/// </summary>
 		IfInterfaceThenHasGuidInfo = 0x00200000,
 
 		/// <summary>
-		/// class implements ICastable interface
+		///     class implements ICastable interface
 		/// </summary>
 		ICastable = 0x00400000,
 
 		/// <summary>
-		/// m_pParentMethodTable has double indirection
+		///     m_pParentMethodTable has double indirection
 		/// </summary>
 		HasIndirectParent = 0x00800000,
 		ContainsPointers = 0x01000000,
 
 		/// <summary>
-		/// can be equivalent to another type
+		///     can be equivalent to another type
 		/// </summary>
 		HasTypeEquivalence = 0x02000000,
 
 		/// <summary>
-		/// has optional pointer to RCWPerTypeData
+		///     has optional pointer to RCWPerTypeData
 		/// </summary>
 		HasRCWPerTypeData = 0x04000000,
 
 		/// <summary>
-		/// finalizer must be run on Appdomain Unload
+		///     finalizer must be run on Appdomain Unload
 		/// </summary>
 		HasCriticalFinalizer = 0x08000000,
 
@@ -503,17 +561,17 @@ namespace RazorSharp.Runtime
 		ContainsGenericVariables = 0x20000000,
 
 		/// <summary>
-		/// class is a com object
+		///     class is a com object
 		/// </summary>
 		ComObject = 0x40000000,
 
 		/// <summary>
-		/// This is set if component size is used for flags.
+		///     This is set if component size is used for flags.
 		/// </summary>
 		HasComponentSize = 0x80000000,
 
 		/// <summary>
-		/// Types that require non-trivial interface cast have this bit set in the category
+		///     Types that require non-trivial interface cast have this bit set in the category
 		/// </summary>
 		NonTrivialInterfaceCast = Array
 		                          | ComObject
@@ -522,7 +580,9 @@ namespace RazorSharp.Runtime
 	}
 
 	/// <summary>
-	/// Use with: ObjHeader::m_uSyncBlockValue
+	///     <remarks>
+	///         Use with <see cref="ObjHeader.SyncBlock" />
+	///     </remarks>
 	/// </summary>
 	[Flags]
 	public enum SyncBlockFlags : uint
@@ -556,7 +616,9 @@ namespace RazorSharp.Runtime
 	}
 
 	/// <summary>
-	/// Use with: MethodTable::m_dwFlags.Flags
+	///     <remarks>
+	///         Use with <see cref="MethodTable.LowFlags" />
+	///     </remarks>
 	/// </summary>
 	[Flags]
 	public enum MethodTableFlagsLow : ushort
@@ -617,17 +679,24 @@ namespace RazorSharp.Runtime
 		UnusedComponentSize6 = 0x00004000,
 		UnusedComponentSize7 = 0x00008000,
 
-		StringArrayValues = StaticsMask_NonDynamic & 0xFFFF |
-		                    NotInPZM & 0 |
-		                    GenericsMask_NonGeneric & 0xFFFF |
-		                    HasVariance & 0 |
-		                    HasDefaultCtor & 0 |
-		                    HasPreciseInitCctors & 0
+		StringArrayValues = (StaticsMask_NonDynamic & 0xFFFF) |
+		                    (NotInPZM & 0) |
+		                    (GenericsMask_NonGeneric & 0xFFFF) |
+		                    (HasVariance & 0) |
+		                    (HasDefaultCtor & 0) |
+		                    (HasPreciseInitCctors & 0)
 	}
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/methodtable.h#L4049
-	/// Use with: MethodTable::m_wFlags2
+	///     <para>Sources:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/methodtable.h: 4049</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Use with <see cref="MethodTable.Flags2" />
+	///     </remarks>
 	/// </summary>
 	[Flags]
 	public enum MethodTableFlags2 : ushort
@@ -647,7 +716,7 @@ namespace RazorSharp.Runtime
 		HasCCWTemplate           = 0x0800,
 
 		/// <summary>
-		/// Type requires 8-byte alignment (only set on platforms that require this and don't get it implicitly)
+		///     Type requires 8-byte alignment (only set on platforms that require this and don't get it implicitly)
 		/// </summary>
 		RequiresAlign8 = 0x1000,
 
@@ -658,40 +727,47 @@ namespace RazorSharp.Runtime
 	}
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/class.h#L396
-	/// Use with: EEClassLayoutInfo::m_bFlags
+	///     <para>Sources:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/class.h: 396</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Use with <see cref="EEClassLayoutInfo.Flags" />
+	///     </remarks>
 	/// </summary>
 	[Flags]
 	public enum LayoutFlags : byte
 	{
 		/// <summary>
-		/// TRUE if the GC layout of the class is bit-for-bit identical
-		/// to its unmanaged counterpart (i.e. no internal reference fields,
-		/// no ansi-unicode char conversions required, etc.) Used to
-		/// optimize marshaling.
+		///     TRUE if the GC layout of the class is bit-for-bit identical
+		///     to its unmanaged counterpart (i.e. no internal reference fields,
+		///     no ansi-unicode char conversions required, etc.) Used to
+		///     optimize marshaling.
 		/// </summary>
 		Blittable = 0x01,
 
 		/// <summary>
-		/// Is this type also sequential in managed memory?
+		///     Is this type also sequential in managed memory?
 		/// </summary>
 		ManagedSequential = 0x02,
 
 		/// <summary>
-		/// When a sequential/explicit type has no fields, it is conceptually
-		/// zero-sized, but actually is 1 byte in length. This holds onto this
-		/// fact and allows us to revert the 1 byte of padding when another
-		/// explicit type inherits from this type.
+		///     When a sequential/explicit type has no fields, it is conceptually
+		///     zero-sized, but actually is 1 byte in length. This holds onto this
+		///     fact and allows us to revert the 1 byte of padding when another
+		///     explicit type inherits from this type.
 		/// </summary>
 		ZeroSized = 0x04,
 
 		/// <summary>
-		/// The size of the struct is explicitly specified in the meta-data.
+		///     The size of the struct is explicitly specified in the meta-data.
 		/// </summary>
 		HasExplicitSize = 0x08,
 
 		/// <summary>
-		/// Whether a native struct is passed in registers.
+		///     Whether a native struct is passed in registers.
 		/// </summary>
 		NativePassInRegisters = 0x10,
 
@@ -700,7 +776,9 @@ namespace RazorSharp.Runtime
 	}
 
 	/// <summary>
-	/// Use with EEClass::VMFlags
+	///     <remarks>
+	///         Use with <see cref="EEClass.VMFlags" />
+	///     </remarks>
 	/// </summary>
 	[Flags]
 	public enum VMFlags : uint

@@ -51,15 +51,12 @@ namespace RazorSharp.Experimental
 
 		public static PinHandleOld<T> Pin(ref T t)
 		{
-			var handle = new PinHandleOld<T>();
+			PinHandleOld<T> handle = new PinHandleOld<T>();
 			if (Runtime.Runtime.IsBlittable<T>()) {
 				handle.m_handle = GCHandle.Alloc(t, GCHandleType.Pinned);
 			}
 			else {
-//				Runtime.Runtime.SpoofMethodTable<T, string>(ref t);
 				handle.m_handle = GCHandle.Alloc(t, GCHandleType.Pinned);
-
-//				Runtime.Runtime.RestoreMethodTable<string, T>(ref t);
 			}
 
 			return handle;

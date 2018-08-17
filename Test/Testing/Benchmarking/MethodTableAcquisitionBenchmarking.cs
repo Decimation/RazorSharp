@@ -16,19 +16,19 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void MethodTable_Read()
 		{
-			var mt = Runtime.ReadMethodTable(ref String);
+			MethodTable* mt = Runtime.ReadMethodTable(ref String);
 		}
 
 		[Benchmark]
 		public void MethodTable_TypeHandle()
 		{
-			var mt = (MethodTable*) typeof(string).TypeHandle.Value;
+			MethodTable* mt = (MethodTable*) typeof(string).TypeHandle.Value;
 		}
 
 		[Benchmark]
 		public void MethodTable_MethodTableOf()
 		{
-			var mt = Runtime.MethodTableOf<string>();
+			MethodTable* mt = Runtime.MethodTableOf<string>();
 		}
 	}
 

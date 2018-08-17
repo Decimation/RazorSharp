@@ -12,14 +12,12 @@ namespace RazorSharp.Pointers
 {
 
 	/// <summary>
-	/// This won't work when:
-	/// 	- A string is changed (i.e. concatenations)
-	/// 	- Reference changes
-	///
-	/// Unlike ExPointer, this supports implicit array-type conversions (decaying)
-	/// but doesn't work with the GC. This requires pinning.
-	///
-	/// - Bounds checking
+	///     This won't work when:
+	///     - A string is changed (i.e. concatenations)
+	///     - Reference changes
+	///     Unlike ExPointer, this supports implicit array-type conversions (decaying)
+	///     but doesn't work with the GC. This requires pinning.
+	///     - Bounds checking
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Obsolete("Use AllocExPointer", true)]
@@ -29,17 +27,17 @@ namespace RazorSharp.Pointers
 		#region Fields and accessors
 
 		/// <summary>
-		/// Original heap address
+		///     Original heap address
 		/// </summary>
 		private readonly IntPtr _origin;
 
 		/// <summary>
-		/// Offset relative to the origin
+		///     Offset relative to the origin
 		/// </summary>
 		private int m_offset;
 
 		/// <summary>
-		/// Number of elements in this array
+		///     Number of elements in this array
 		/// </summary>
 		public int Count { get; }
 
@@ -54,29 +52,22 @@ namespace RazorSharp.Pointers
 		//}
 
 		/// <summary>
-		/// Returns the heap address of the array's first element
+		///     Returns the heap address of the array's first element
 		/// </summary>
-		public IntPtr FirstElement {
-			get {
-				// move back the indexes
-				return Address - m_offset * ElementSize;
-			}
-		}
+		public IntPtr FirstElement => Address - m_offset * ElementSize;
 
 		/// <summary>
-		/// Returns the heap address of the array's last element
+		///     Returns the heap address of the array's last element
 		/// </summary>
-		private IntPtr LastElement {
-			get { return FirstElement + (Count - 1) * ElementSize; }
-		}
+		private IntPtr LastElement => FirstElement + (Count - 1) * ElementSize;
 
 		/// <summary>
-		/// Starting index
+		///     Starting index
 		/// </summary>
 		public int Start => -m_offset;
 
 		/// <summary>
-		/// Ending index
+		///     Ending index
 		/// </summary>
 		public int End => Start + (Count - 1);
 
@@ -93,12 +84,9 @@ namespace RazorSharp.Pointers
 
 			// Calculate the size ptr
 			if (isString) {
-				// an Int32 is the first field in a string
-				// indicating the number of the elements
 				sizePtr = _origin - sizeof(int);
 			}
 			else {
-				// The lowest DWORD of a QWORD is the length of the array
 				sizePtr = _origin - sizeof(long);
 			}
 
@@ -107,8 +95,8 @@ namespace RazorSharp.Pointers
 
 		private static DecayExPointer<T> CreateDecayedPointer(IntPtr pHeap, bool isString)
 		{
-			PointerMetadata meta = new PointerMetadata(Unsafe.SizeOf<T>(), true);
-			var             p    = new DecayExPointer<T>(pHeap, meta, isString);
+			PointerMetadata   meta = new PointerMetadata(Unsafe.SizeOf<T>(), true);
+			DecayExPointer<T> p    = new DecayExPointer<T>(pHeap, meta, isString);
 
 
 			return p;
@@ -137,17 +125,17 @@ namespace RazorSharp.Pointers
 		private enum FixType
 		{
 			/// <summary>
-			/// Offset was 1 past the bounds, so we moved back
+			///     Offset was 1 past the bounds, so we moved back
 			/// </summary>
 			BounceBack,
 
 			/// <summary>
-			/// Offset is >1 out of bounds
+			///     Offset is >1 out of bounds
 			/// </summary>
 			OutOfBounds,
 
 			/// <summary>
-			/// Offset is OK
+			///     Offset is OK
 			/// </summary>
 			Verified
 		}
@@ -211,9 +199,18 @@ namespace RazorSharp.Pointers
 
 		public override bool Equals(object obj)
 		{
-			if (ReferenceEquals(null, obj)) return false;
-			if (ReferenceEquals(this, obj)) return true;
-			if (obj.GetType() != this.GetType()) return false;
+			if (ReferenceEquals(null, obj)) {
+				return false;
+			}
+
+			if (ReferenceEquals(this, obj)) {
+				return true;
+			}
+
+			if (obj.GetType() != this.GetType()) {
+				return false;
+			}
+
 			return Equals((DecayExPointer<T>) obj);
 		}
 
@@ -296,7 +293,7 @@ namespace RazorSharp.Pointers
 
 		protected override ConsoleTable ToTable()
 		{
-			var table = base.ToTable();
+			ConsoleTable table = base.ToTable();
 			table.AddRow("Start", Start);
 			table.AddRow("End", End);
 			table.AddRow("Offset", m_offset);
@@ -308,11 +305,9 @@ namespace RazorSharp.Pointers
 
 		protected override ConsoleTable ToElementTable(int length)
 		{
-			var table = new ConsoleTable("Address", "Offset", "Value");
+			ConsoleTable table = new ConsoleTable("Address", "Offset", "Value");
 
-			for (int i = Start; i <= End; i++) {
-				table.AddRow(Hex.ToHex(PointerUtils.Offset<T>(Address, i)), i, this[i]);
-			}
+			for (int i = Start; i <= End; i++) table.AddRow(Hex.ToHex(PointerUtils.Offset<T>(Address, i)), i, this[i]);
 
 			return table;
 		}

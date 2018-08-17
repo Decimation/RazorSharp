@@ -11,12 +11,12 @@ using RazorCommon;
 namespace RazorSharp.Utilities
 {
 
-	public static class Assertion
+	internal static class Assertion
 	{
 		internal const string WIPString = "(wip)";
 
 		/// <summary>
-		/// Asserts that TActual is TExpected
+		///     Asserts that TActual is TExpected
 		/// </summary>
 		/// <typeparam name="TExpected">Expected type</typeparam>
 		/// <typeparam name="TActual">Supplied type</typeparam>
@@ -28,29 +28,29 @@ namespace RazorSharp.Utilities
 		}
 
 		/// <summary>
-		/// Inverse of AssertType
+		///     Inverse of AssertType
 		/// </summary>
 		/// <typeparam name="TNegative">Type that TActual can't be</typeparam>
 		/// <typeparam name="TActual">Supplied type</typeparam>
-		public static void NegativeAssertType<TNegative, TActual>()
+		private static void NegativeAssertType<TNegative, TActual>()
 		{
 			if (typeof(TNegative) == typeof(TActual)) {
 				TypeException.Throw<TActual, TNegative>();
 			}
 		}
 
-		public static void AssertNoThrows<TException>(Action action) where TException : Exception
+		internal static void AssertNoThrows<TException>(Action action) where TException : Exception
 		{
 			Debug.Assert(!Throws<TException>(action));
 		}
 
-		public static void AssertThrows<TException>(Action action) where TException : Exception
+		internal static void AssertThrows<TException>(Action action) where TException : Exception
 		{
 			Debug.Assert(Throws<TException>(action));
 		}
 
 		[HandleProcessCorruptedStateExceptions]
-		public static bool Throws<TException>(Action action) where TException : Exception
+		internal static bool Throws<TException>(Action action) where TException : Exception
 		{
 			try {
 				action();
@@ -63,7 +63,7 @@ namespace RazorSharp.Utilities
 		}
 
 		[HandleProcessCorruptedStateExceptions]
-		public static bool Throws<TException1, TException2>(Action action)
+		internal static bool Throws<TException1, TException2>(Action action)
 			where TException1 : Exception where TException2 : Exception
 		{
 			try {
@@ -79,27 +79,24 @@ namespace RazorSharp.Utilities
 			return false;
 		}
 
-		public static void WeakAssertEqual<T>(params T[] values)
+		internal static void WeakAssertEqual<T>(params T[] values)
 		{
-			if (values == null || values.Length == 0)
+			if (values == null || values.Length == 0) {
 				return;
+			}
 
-			if (!values.All(v => v.Equals(values[0])))
+			if (!values.All(v => v.Equals(values[0]))) {
 				Logger.Log(Level.Warning, Flags.Debug,
 					"Equality assertion of {0} failed", Collections.ToString(values));
-		}
-
-		public static void WeakAssert(bool cond)
-		{
-			if (!cond) {
-				Logger.Log(Level.Warning, Flags.Debug, "Assertion failed");
 			}
 		}
 
-		public static void AssertEqual<T>(params T[] values)
+		internal static void AssertEqual<T>(params T[] values)
 		{
-			if (values == null || values.Length == 0)
+			if (values == null || values.Length == 0) {
 				return;
+			}
+
 			Debug.Assert(values.All(v => v.Equals(values[0])));
 		}
 	}

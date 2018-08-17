@@ -110,7 +110,6 @@
     <Compile Include="Analysis\Inspector.cs" />
     <Compile Include="Analysis\ObjectLayout.cs" />
     <Compile Include="Analysis\RefInspector.cs" />
-    <Compile Include="CString.cs" />
       <Compile Include="Experimental\ObjectPinHandle.cs"/>
     <Compile Include="Experimental\PinHandle.cs" />
       <Compile Include="Experimental\PinHandleOld.cs"/>
@@ -152,7 +151,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\Assertion.cs" />
     <Compile Include="Utilities\DataTypes.cs" />
-    <Compile Include="Utilities\MethodTimeLogger.cs" />
     <Compile Include="Utilities\RuntimeException.cs" />
     <Compile Include="Utilities\StandardOut.cs" />
     <Compile Include="Utilities\TypeException.cs" />

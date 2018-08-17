@@ -1,5 +1,6 @@
 #region
 
+using System;
 using System.Reflection;
 using BenchmarkDotNet.Attributes;
 using RazorSharp.Runtime;
@@ -14,37 +15,37 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void ReflectionFunctionPointer()
 		{
-			var p = typeof(Dummy).GetMethod("Increment").MethodHandle.GetFunctionPointer();
+			IntPtr p = typeof(Dummy).GetMethod("Increment").MethodHandle.GetFunctionPointer();
 		}
 
 		[Benchmark]
 		public void SigScanningFunctionPointer()
 		{
-			var p = Runtime.GetMethodDesc<Dummy>("Increment")->Function;
+			IntPtr p = Runtime.GetMethodDesc<Dummy>("Increment")->Function;
 		}
 
 		[Benchmark]
 		public void SigScanningMethodName()
 		{
-			var n = Runtime.GetMethodDesc<Dummy>("DoSomething")->Name;
+			string n = Runtime.GetMethodDesc<Dummy>("DoSomething")->Name;
 		}
 
 		[Benchmark]
 		public void ReflectionMethodName()
 		{
-			var n = typeof(Dummy).GetMethod("DoSomething").Name;
+			string n = typeof(Dummy).GetMethod("DoSomething").Name;
 		}
 
 		[Benchmark]
 		public void ReflectionFieldName()
 		{
-			var n = typeof(Dummy).GetField("_int", BindingFlags.Instance | BindingFlags.NonPublic).Name;
+			string n = typeof(Dummy).GetField("_int", BindingFlags.Instance | BindingFlags.NonPublic).Name;
 		}
 
 		[Benchmark]
 		public void SigScanningFieldName()
 		{
-			var n = Runtime.GetFieldDesc<Dummy>("_int")->Name;
+			string n = Runtime.GetFieldDesc<Dummy>("_int")->Name;
 		}
 
 

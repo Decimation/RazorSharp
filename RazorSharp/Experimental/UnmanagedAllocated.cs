@@ -14,20 +14,22 @@ namespace RazorSharp.Experimental
 {
 
 	/// <summary>
-	/// Creates types in unmanaged memory. AllocExPointer can also be used.<para></para>>
-	///
-	/// Types that cannot be created in unmanaged memory: <para></para>
-	/// - String <para></para>
-	/// - IList <para></para>
-	///
-	/// For that, use ExAllocExPointer.
+	///     Creates types in unmanaged memory. AllocExPointer can also be used.
+	///     <para></para>
+	///     Types that cannot be created in unmanaged memory:
+	///     <para></para>
+	///     - String
+	///     <para></para>
+	///     - IList
+	///     <para></para>
+	///     For that, use ExAllocExPointer.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	internal struct UnmanagedAllocated<T> where T : class
 	{
 		/// <summary>
-		/// Types that can't be created in stack memory
-		/// (out of the types that have been tested)
+		///     Types that can't be created in stack memory
+		///     (out of the types that have been tested)
 		/// </summary>
 		private static readonly Type[] DisallowedTypes =
 		{
@@ -68,7 +70,7 @@ namespace RazorSharp.Experimental
 		private T RewriteUnmanaged(T value)
 		{
 			// Get the memory of the managed object
-			var refMem = Unsafe.MemoryOf(ref value);
+			byte[] refMem = Unsafe.MemoryOf(ref value);
 
 			// Make sure it's the correct size
 			Debug.Assert(refMem.Length == Unsafe.BaseInstanceSize<T>());
@@ -83,7 +85,7 @@ namespace RazorSharp.Experimental
 
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Value", m_dummy);
 			table.AddRow("Unmanaged", Hex.ToHex(m_unmanaged));
 			table.AddRow("Dummy heap pointer", Hex.ToHex(Unsafe.AddressOfHeap(ref m_dummy)));

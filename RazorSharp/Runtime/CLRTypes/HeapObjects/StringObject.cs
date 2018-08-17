@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
@@ -21,8 +22,28 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/a6c2f7834d338e08bf3dcf9dedb48b2a0c08fcfa/src/vm/object.h#L1082
-	/// Should be used with Runtime.GetStringObject and double indirection
+	///     <para>Represents the layout of <see cref="string" /> in heap memory.</para>
+	///     <para>Corresponding files:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/object.h</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/object.cpp</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/object.inl</description>
+	///         </item>
+	///     </list>
+	///     <para>Lines of interest:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/object.h: 1082</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Should be used with <see cref="Runtime.GetStringObject(ref string)" /> and double indirection.
+	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct StringObject : IHeapObject
@@ -33,25 +54,23 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 		[FieldOffset(8)]  private readonly uint         m_stringLength;
 		[FieldOffset(12)] private readonly char         m_firstChar;
 
-
 		public uint Length    => m_stringLength;
 		public char FirstChar => m_firstChar;
 
 		/// <summary>
-		/// Address-sensitive
+		///     Address-sensitive
 		/// </summary>
 		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
 
 		public MethodTable* MethodTable => m_methodTablePtr;
 
 		/// <summary>
-		/// Address-sensitive
+		///     Address-sensitive
 		/// </summary>
-
 		public char this[int index] {
 			get {
-				var __this = (char*) Unsafe.AddressOf(ref this);
-
+				char* __this = (char*) Unsafe.AddressOf(ref this);
+				Debug.Assert(__this != null, nameof(__this) + " != null");
 				return __this[index + RuntimeHelpers.OffsetToStringData / 2];
 			}
 		}
@@ -59,7 +78,7 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Header*", Hex.ToHex(Header));
 			table.AddRow("MethodTable*", Hex.ToHex(m_methodTablePtr));
 			table.AddRow("Length", Length);

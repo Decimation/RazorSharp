@@ -1,8 +1,12 @@
+#region
+
 using System;
 using BenchmarkDotNet.Attributes;
 using RazorInvoke;
 using RazorInvoke.Libraries;
 using RazorSharp;
+
+#endregion
 
 namespace Test.Testing.Benchmarking
 {

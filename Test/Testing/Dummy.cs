@@ -40,8 +40,8 @@ namespace Test.Testing
 		public int    Integer => _int;
 
 		public object Object {
-			get { return _object; }
-			set { _object = value; }
+			get => _object;
+			set => _object = value;
 		}
 
 		public decimal Decimal {

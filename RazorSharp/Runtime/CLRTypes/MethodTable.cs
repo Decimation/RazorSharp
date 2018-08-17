@@ -28,13 +28,32 @@ namespace RazorSharp.Runtime.CLRTypes
 	#endregion
 
 
-	//https://github.com/dotnet/coreclr/blob/db55a1decc1d02538e61eac7db80b7daa351d5b6/src/gc/env/gcenv.object.h
-
-
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.h#L4166
-	/// DO NOT DEREFERENCE<para></para>
-	/// Internal representation: TypeHandle.Value
+	///     <para>Internal representation: <see cref="RuntimeTypeHandle.Value" /></para>
+	///     <para>Corresponding files:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/methodtable.h</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/methodtable.cpp</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/methodtable.inl</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/gc/env/gcenv.object.h</description>
+	///         </item>
+	///     </list>
+	///     <para>Lines of interest:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/methodtable.h: 4166</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Do not dereference.
+	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct MethodTable
@@ -46,7 +65,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public DWORD Flags {
 			get {
-				var dwPtr = Unsafe.AddressOf(ref m_dwFlags);
+				IntPtr dwPtr = Unsafe.AddressOf(ref m_dwFlags);
 				return *(DWORD*) dwPtr;
 			}
 		}
@@ -57,7 +76,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		public MethodTableFlags TableFlags => (MethodTableFlags) Flags;
 
 		/// <summary>
-		/// Note: these may not be accurate
+		///     Note: these may not be accurate
 		/// </summary>
 		public MethodTableFlagsLow TableFlagsLow => (MethodTableFlagsLow) LowFlags;
 
@@ -67,37 +86,38 @@ namespace RazorSharp.Runtime.CLRTypes
 		#endregion
 
 		/// <summary>
-		/// <para>The size of an individual element when this type is an array or string.</para>
-		/// <example>
-		/// If this type is a <c>string</c>, the component size will be 2. (<c>sizeof(char)</c>)
-		/// </example>
+		///     <para>The size of an individual element when this type is an array or string.</para>
+		///     <example>
+		///         If this type is a <c>string</c>, the component size will be 2. (<c>sizeof(char)</c>)
+		///     </example>
 		/// </summary>
 		public WORD ComponentSize => HasComponentSize ? m_dwFlags.ComponentSize : (ushort) 0;
 
 		/// <summary>
-		/// The base size of this class when allocated on the heap. Note that for value types
-		/// <see cref="BaseSize"/> returns the size of instance fields for a boxed value, and
-		/// <see cref="NumInstanceFieldBytes"/> for an unboxed value.
+		///     The base size of this class when allocated on the heap. Note that for value types
+		///     <see cref="BaseSize" /> returns the size of instance fields for a boxed value, and
+		///     <see cref="NumInstanceFieldBytes" /> for an unboxed value.
 		/// </summary>
 		public DWORD BaseSize => m_BaseSize;
 
 		/// <summary>
-		/// Class token if it fits into 16-bits. If this is (WORD)-1, the class token is stored in the TokenOverflow optional member.
+		///     Class token if it fits into 16-bits. If this is (WORD)-1, the class token is stored in the TokenOverflow optional
+		///     member.
 		/// </summary>
 		public WORD Token => m_wToken;
 
 		/// <summary>
-		/// The number of virtual methods in this type (4 by default; from <see cref="Object"/>)
+		///     The number of virtual methods in this type (4 by default; from <see cref="Object" />)
 		/// </summary>
 		public WORD NumVirtuals => m_wNumVirtuals;
 
 		/// <summary>
-		/// The number of interfaces this type implements
+		///     The number of interfaces this type implements
 		/// </summary>
 		public WORD NumInterfaces => m_wNumInterfaces;
 
 		/// <summary>
-		/// The parent type's MethodTable.
+		///     The parent type's MethodTable.
 		/// </summary>
 		/// <exception cref="NotImplementedException">If the type is an indirect parent</exception>
 		public MethodTable* Parent {
@@ -107,20 +127,22 @@ namespace RazorSharp.Runtime.CLRTypes
 			// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
 			// for enum_flag_HasIndirectParentMethodTable.
 			get {
-			    if (!TableFlags.HasFlag(MethodTableFlags.HasIndirectParent)) {
+				if (!TableFlags.HasFlag(MethodTableFlags.HasIndirectParent)) {
 					return m_pParentMethodTable;
 				}
 
-			    throw new NotImplementedException("Parent is indirect");
+				throw new NotImplementedException("Parent is indirect");
 			}
 		}
 
 		public Module* Module => m_pLoaderModule;
 
 		/// <summary>
-		/// <para>The corresponding EEClass to this MethodTable.</para>
-		/// <para>Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L22</para>
-		///
+		///     <para>The corresponding EEClass to this MethodTable.</para>
+		///     <para>
+		///         Source:
+		///         https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L22
+		///     </para>
 		/// </summary>
 		/// <exception cref="NotImplementedException">If the union type is not EEClass or MethodTable</exception>
 		public EEClass* EEClass {
@@ -137,14 +159,18 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
-		/// <para>The canonical MethodTable.</para>
-		///
-		/// <para>Source: https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L1145</para>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
-		///
-		/// <exception cref="RuntimeException">If the <see cref="get_UnionType"/> is not <see cref="LowBits.MethodTable"/> or <see cref="LowBits.EEClass"/> </exception>
+		///     <para>The canonical MethodTable.</para>
+		///     <para>
+		///         Source:
+		///         https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L1145
+		///     </para>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		///     <exception cref="RuntimeException">
+		///         If the <see cref="get_UnionType" /> is not <see cref="LowBits.MethodTable" /> or
+		///         <see cref="LowBits.EEClass" />
+		///     </exception>
 		/// </summary>
 		public MethodTable* Canon {
 			get {
@@ -153,8 +179,9 @@ namespace RazorSharp.Runtime.CLRTypes
 						return (MethodTable*) PointerUtils.Subtract(m_pCanonMT, 2);
 					case LowBits.EEClass:
 					{
-						fixed (MethodTable* mt = &this)
+						fixed (MethodTable* mt = &this) {
 							return mt;
+						}
 					}
 					default:
 						throw new RuntimeException("Canon MT could not be accessed");
@@ -163,14 +190,17 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
-		/// Element type handle of an individual element if this is the MethodTable of an array.
+		///     Element type handle of an individual element if this is the MethodTable of an array.
 		/// </summary>
 		/// <exception cref="RuntimeException">If this is not an array MethodTable.</exception>
 		public MethodTable* ElementTypeHandle {
 			get {
-				if (IsStringOrArray)
+				if (IsStringOrArray) {
 					return (MethodTable*) m_ElementTypeHnd;
-				else throw new RuntimeException("Element type handles cannot be accessed when type is not an array");
+				}
+				else {
+					throw new RuntimeException("Element type handles cannot be accessed when type is not an array");
+				}
 			}
 		}
 
@@ -181,35 +211,35 @@ namespace RazorSharp.Runtime.CLRTypes
 		public bool IsString         => HasComponentSize && !IsArray;
 
 		/// <summary>
-		/// The number of instance fields in this type.
+		///     The number of instance fields in this type.
 		/// </summary>
 		public int NumInstanceFields => EEClass->NumInstanceFields;
 
 		/// <summary>
-		/// The number of <c>static</c> fields in this type.
+		///     The number of <c>static</c> fields in this type.
 		/// </summary>
 		public int NumStaticFields => EEClass->NumStaticFields;
 
 		public int NumNonVirtualSlots => EEClass->NumNonVirtualSlots;
 
 		/// <summary>
-		/// Number of methods in this type.
+		///     Number of methods in this type.
 		/// </summary>
 		public int NumMethods => EEClass->NumMethods;
 
 		/// <summary>
-		/// The size of the instance fields in this type. This is the unboxed size of the type if the object is boxed.
-		/// minus padding and overhead of the base size.
+		///     The size of the instance fields in this type. This is the unboxed size of the type if the object is boxed.
+		///     (Minus padding and overhead of the base size.)
 		/// </summary>
 		public int NumInstanceFieldBytes => (int) BaseSize - EEClass->BaseSizePadding;
 
 		/// <summary>
-		/// Array of FieldDescs for this type.
+		///     Array of FieldDescs for this type.
 		/// </summary>
 		public FieldDesc* FieldDescList => EEClass->FieldDescList;
 
 		/// <summary>
-		/// Length of the <see cref="FieldDescList"/>
+		///     Length of the <see cref="FieldDescList" />
 		/// </summary>
 		public int FieldDescListLength => EEClass->FieldDescListLength;
 
@@ -251,20 +281,23 @@ namespace RazorSharp.Runtime.CLRTypes
 		{
 			//var lowFlags = String.Join(", ", TableFlagsLow.GetFlags().Distinct());
 
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 
 //			table.AddRow("Name", TypeInfo.Name);
 
 			table.AddRow("Base size", m_BaseSize);
-			if (HasComponentSize)
+			if (HasComponentSize) {
 				table.AddRow("Component size", m_dwFlags.ComponentSize);
+			}
+
 			table.AddRow("Flags", $"{Flags} ({TableFlags.Join()})");
 			table.AddRow("Flags 2", $"{Flags2} ({TableFlags2.Join()})");
 			table.AddRow("Low flags", $"{LowFlags} ({TableFlagsLow})");
 			table.AddRow("Token", m_wToken);
 
-			if (m_pParentMethodTable != null)
+			if (m_pParentMethodTable != null) {
 				table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));
+			}
 
 			table.AddRow("Module", Hex.ToHex(m_pLoaderModule));
 
@@ -274,8 +307,9 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow("EEClass", Hex.ToHex(EEClass));
 			table.AddRow("Canon MT", Hex.ToHex(Canon));
 
-			if (IsArray)
+			if (IsArray) {
 				table.AddRow("Element type handle", Hex.ToHex(m_ElementTypeHnd));
+			}
 
 
 			//table.AddRow("Multipurpose slot 2", Hex.ToHex(m_pMultipurposeSlot2));
@@ -358,7 +392,10 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public override bool Equals(object obj)
 		{
-			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(null, obj)) {
+				return false;
+			}
+
 			return obj is MethodTable && Equals((MethodTable) obj);
 		}
 

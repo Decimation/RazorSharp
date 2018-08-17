@@ -11,22 +11,22 @@ namespace RazorSharp.Utilities
 	internal enum NamingStyles
 	{
 		/// <summary>
-		/// WORD, DWORD, QWORD, etc
+		///     WORD, DWORD, QWORD, etc
 		/// </summary>
 		Windows,
 
 		/// <summary>
-		/// MSVC __int8, __int16, __int32, __int64, etc
+		///     MSVC __int8, __int16, __int32, __int64, etc
 		/// </summary>
 		Fixed,
 
 		/// <summary>
-		/// Byte, Int16, Int32, Int64, etc
+		///     Byte, Int16, Int32, Int64, etc
 		/// </summary>
 		CSharp,
 
 		/// <summary>
-		/// byte, short, int, long, etc
+		///     byte, short, int, long, etc
 		/// </summary>
 		CSharpKeyword,
 	}
@@ -49,7 +49,7 @@ namespace RazorSharp.Utilities
 			}
 		}
 
-		public static string GetStyle<T>(NamingStyles style)
+		internal static string GetStyle<T>(NamingStyles style)
 		{
 			switch (style) {
 				case NamingStyles.Windows:

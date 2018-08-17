@@ -20,7 +20,7 @@ namespace RazorSharp.Memory
 	#endregion
 
 	/// <summary>
-	/// Provides a way to interpret memory as different types
+	///     Provides a way to interpret memory as different types
 	/// </summary>
 	public static unsafe class MemoryInspector
 	{
@@ -53,27 +53,28 @@ namespace RazorSharp.Memory
 		public static void Point<T>(IntPtr p, int byteLen, int offset)
 		{
 			// Line 1: Memory
-			var str = Create<T>(p, byteLen);
+			string str = Create<T>(p, byteLen);
 
 			// Adjust the arrow to point to the first char in the sequence
 
 			int[] indexes = str.AllIndexesOf(" ").ToArray();
 
 			int adjOffset;
-			if (offset == 0)
+			if (offset == 0) {
 				adjOffset = 0;
+			}
 			else {
 				adjOffset = indexes[offset] - str.JSubstring(indexes[offset - 1], indexes[offset] - 1).Length;
 			}
 
 			// Line 2: Arrow
-			var pt = new string(' ', adjOffset) + "^";
+			string pt = new string(' ', adjOffset) + "^";
 
 			// Line 3: Address [index]
-			var addr = p.ToInt64() + offset * Unsafe.SizeOf<T>();
+			long addr = p.ToInt64() + offset * Unsafe.SizeOf<T>();
 
 			// [type] [address]
-			var addrStr = String.Format("{0}{1} {2}", new string(' ', adjOffset),
+			string addrStr = String.Format("{0}{1} {2}", new string(' ', adjOffset),
 				DataTypes.GetStyle<T>(NamingStyles.CSharpKeyword), Hex.ToHex(addr));
 
 			Console.WriteLine("{0}\n{1}\n{2} [{3}]", str, pt, addrStr, offset);
@@ -106,10 +107,8 @@ namespace RazorSharp.Memory
 					return s;
 				}
 
-				string[] @out = new string[possibleTypes];
-				for (int i = 0; i < possibleTypes; i++) {
-					@out[i] = OfsAs(i);
-				}
+				string[] @out                                   = new string[possibleTypes];
+				for (int i = 0; i < possibleTypes; i++) @out[i] = OfsAs(i);
 
 				res = Collections.ToString(@out, options & ~ToStringOptions.UseCommas);
 			});

@@ -19,18 +19,21 @@ namespace RazorSharp.Experimental
 	#endregion
 
 	/// <summary>
-	/// Creates types in stack memory.<para></para>
-	///
-	/// Types that cannot be created in stack memory:<para></para>
-	/// - String <para></para>
-	/// - IList <para></para>
+	///     Creates types in stack memory.
+	///     <para></para>
+	///     Types that cannot be created in stack memory:
+	///     <para></para>
+	///     - String
+	///     <para></para>
+	///     - IList
+	///     <para></para>
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	internal unsafe struct StackAllocated<T> where T : class
 	{
 		/// <summary>
-		/// Types that can't be created in stack memory
-		/// (out of the types that have been tested)
+		///     Types that can't be created in stack memory
+		///     (out of the types that have been tested)
 		/// </summary>
 		private static readonly Type[] DisallowedTypes =
 		{
@@ -50,13 +53,11 @@ namespace RazorSharp.Experimental
 
 		private T ReAllocateRefOnStack(ref T refValue)
 		{
-			var refMem    = Unsafe.MemoryOf(ref refValue);
-			var allocSize = Unsafe.BaseInstanceSize<T>();
+			byte[] refMem    = Unsafe.MemoryOf(ref refValue);
+			int    allocSize = Unsafe.BaseInstanceSize<T>();
 			Debug.Assert(refMem.Length == allocSize);
 
-			for (int i = 0; i < allocSize; i++) {
-				m_stackPtr[i] = refMem[i];
-			}
+			for (int i = 0; i < allocSize; i++) m_stackPtr[i] = refMem[i];
 
 			// Skip over ObjHeader
 			Unsafe.WriteReference(ref refValue, m_stackPtr + IntPtr.Size);
@@ -64,8 +65,8 @@ namespace RazorSharp.Experimental
 		}
 
 		/// <summary>
-		/// Use: Use stackalloc to allocate "Unsafe.BaseInstanceSize" bytes on
-		/// the stack. Then pass the byte* pointer.
+		///     Use: Use stackalloc to allocate "Unsafe.BaseInstanceSize" bytes on
+		///     the stack. Then pass the byte* pointer.
 		/// </summary>
 		/// <param name="stackPtr"></param>
 		public StackAllocated(byte* stackPtr)
@@ -83,7 +84,7 @@ namespace RazorSharp.Experimental
 
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Value", Value);
 			table.AddRow("Stack", Hex.ToHex(m_stackPtr));
 			table.AddRow("Dummy heap pointer", Hex.ToHex(Unsafe.AddressOfHeap(ref m_dummy)));

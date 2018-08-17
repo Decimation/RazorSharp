@@ -18,15 +18,14 @@ namespace RazorSharp.Runtime.CLRTypes
 	#endregion
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/32f0f9721afb584b4a14d69135bea7ddc129f755/src/vm/packedfields.inl
-	///
-	/// Used only for EEClass
+	///     Source: https://github.com/dotnet/coreclr/blob/32f0f9721afb584b4a14d69135bea7ddc129f755/src/vm/packedfields.inl
+	///     Used only for EEClass
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct PackedDWORDFields
 	{
 		/// <summary>
-		/// EEClassFieldId::COUNT = 11
+		///     EEClassFieldId::COUNT = 11
 		/// </summary>
 		private const int kLength = 11;
 
@@ -39,8 +38,9 @@ namespace RazorSharp.Runtime.CLRTypes
 		// Get the value of the given field when the structure is in its unpacked state.
 		internal DWORD GetUnpackedField(DWORD dwFieldIndex)
 		{
-			fixed (PackedDWORDFields* p = &this)
+			fixed (PackedDWORDFields* p = &this) {
 				return p->m_rgUnpackedFields[dwFieldIndex];
+			}
 
 			//return m_rgUnpackedFields[dwFieldIndex];
 		}

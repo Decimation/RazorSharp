@@ -37,12 +37,12 @@ namespace RazorSharp.Pointers
 
 
 		/// <summary>
-		/// Offsets a pointer by cnt elements.
+		///     Offsets a pointer by <paramref name="elemCnt" /> elements.
 		/// </summary>
 		/// <param name="p">Pointer</param>
 		/// <param name="elemCnt">Elements to offset by</param>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
+		/// <typeparam name="T">Element type</typeparam>
+		/// <returns>The offset pointer</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static IntPtr Offset<T>(IntPtr p, int elemCnt)
 		{

@@ -1,17 +1,47 @@
 #region
 
+#region
+
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
 #endregion
 
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+
+#endregion
+
 namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 {
 
+
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/a6c2f7834d338e08bf3dcf9dedb48b2a0c08fcfa/src/vm/object.h#L188
-	/// Should be used with Runtime.GetHeapObject and double indirection
+	///     <para>Represents the base layout of <see cref="object" /> in heap memory.</para>
+	///     <para>Corresponding files:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/object.h</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/object.cpp</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/object.inl</description>
+	///         </item>
+	///     </list>
+	///     <para>Lines of interest:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/object.h: 188</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/object.h: 138: Layout info</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Should be used with <see cref="Runtime.GetHeapObject{T}" /> and double indirection.
+	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct HeapObject : IHeapObject
@@ -22,7 +52,7 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 		[FieldOffset(8)] private readonly byte         m_fields;
 
 		/// <summary>
-		/// Address-sensitive
+		///     Address-sensitive
 		/// </summary>
 		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
 
@@ -33,7 +63,7 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Header*", Hex.ToHex(Header));
 			table.AddRow("MethodTable*", Hex.ToHex(m_methodTablePtr));
 

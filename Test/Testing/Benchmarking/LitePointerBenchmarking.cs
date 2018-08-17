@@ -22,13 +22,13 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void Test_Value()
 		{
-			var x = lpString.Value;
+			string x = lpString.Value;
 		}
 
 		[Benchmark]
 		public void Test_Index()
 		{
-			var x = lpString[0];
+			string x = lpString[0];
 		}
 
 		[Benchmark]

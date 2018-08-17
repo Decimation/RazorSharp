@@ -6,6 +6,9 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
+// ReSharper disable BuiltInTypeReferenceStyle
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+
 #endregion
 
 // ReSharper disable InconsistentNaming
@@ -23,29 +26,38 @@ namespace RazorSharp.Runtime.CLRTypes
 	#endregion
 
 	/// <summary>
-	/// Low WORD is component size for array and string types (HasComponentSize() returns true).<para></para>
-	/// Used for flags otherwise.
+	///     <para>
+	///         Low <c>WORD</c> is component size for array and string types (<see cref="MethodTable.HasComponentSize" />
+	///         returns <c>true</c>).
+	///     </para>
+	///     <para>Used for flags otherwise.</para>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	internal struct DWFlags
 	{
+
+		#region Fields
+
 		[FieldOffset(0)] private readonly WORD m_componentSize;
 		[FieldOffset(2)] private readonly WORD m_flags;
 
+		#endregion
+
+
 		/// <summary>
-		/// The size of one component (or element).<para></para>
-		/// Applicable only to strings and arrays.
+		///     <para>The size of one component (or element).</para>
+		///     <para>Applicable only to strings and arrays.</para>
 		/// </summary>
 		internal WORD ComponentSize => m_componentSize;
 
 		/// <summary>
-		/// Flags
+		///     Flags
 		/// </summary>
 		internal WORD Flags => m_flags;
 
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Component size", m_componentSize);
 			table.AddRow("Flags", m_flags);
 
@@ -57,7 +69,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		public override bool Equals(object obj)
 		{
 			if (obj.GetType() == this.GetType()) {
-				var dwOther = (DWFlags) obj;
+				DWFlags dwOther = (DWFlags) obj;
 				return m_componentSize == dwOther.m_componentSize && m_flags == dwOther.m_flags;
 			}
 

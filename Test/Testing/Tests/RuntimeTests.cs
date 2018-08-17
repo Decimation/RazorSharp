@@ -5,6 +5,7 @@ using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.Runtime;
+using RazorSharp.Runtime.CLRTypes;
 
 #endregion
 
@@ -19,8 +20,8 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestString()
 		{
-			string s  = "foo";
-			var    mt = Runtime.ReadMethodTable(ref s);
+			string       s  = "foo";
+			MethodTable* mt = Runtime.ReadMethodTable(ref s);
 
 			Debug.Assert(mt->IsStringOrArray);
 
@@ -103,8 +104,8 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestList()
 		{
-			var list = new List<int>();
-			var mt   = Runtime.ReadMethodTable(ref list);
+			List<int>    list = new List<int>();
+			MethodTable* mt   = Runtime.ReadMethodTable(ref list);
 
 			// Name:        System.Collections.Generic.List`1[[System.Int32, mscorlib]]
 			// MethodTable: 00007ff819d105d8
@@ -171,8 +172,8 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestArray()
 		{
-			int[] arr = new int[5];
-			var   mt  = Runtime.ReadMethodTable(ref arr);
+			int[]        arr = new int[5];
+			MethodTable* mt  = Runtime.ReadMethodTable(ref arr);
 
 
 			// 0:007> !do 0x17500083FB0
@@ -230,8 +231,8 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestPtrArray()
 		{
-			string[] arr = new string[5];
-			var      mt  = Runtime.ReadMethodTable(ref arr);
+			string[]     arr = new string[5];
+			MethodTable* mt  = Runtime.ReadMethodTable(ref arr);
 
 
 			Debug.Assert(mt->ElementTypeHandle == Runtime.MethodTableOf<string>());
@@ -295,16 +296,16 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestPoint()
 		{
-			Point p   = new Point();
-			var   xfd = Runtime.GetFieldDesc<Point>("_x");
+			Point      p   = new Point();
+			FieldDesc* xfd = Runtime.GetFieldDesc<Point>("_x");
 			Debug.Assert(xfd->MemberDef == xfd->FieldInfo.MetadataToken);
 		}
 
 		[Test]
 		public void TestDummy()
 		{
-			Dummy d  = new Dummy();
-			var   mt = Runtime.ReadMethodTable(ref d);
+			Dummy        d  = new Dummy();
+			MethodTable* mt = Runtime.ReadMethodTable(ref d);
 
 
 			// 0:007> !do 0x1750004EEC8

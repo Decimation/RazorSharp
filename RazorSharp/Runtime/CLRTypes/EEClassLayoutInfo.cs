@@ -52,14 +52,20 @@ namespace RazorSharp.Runtime.CLRTypes
 		[FieldOffset(16)] private readonly void* m_pFieldMarshalers;
 
 		/// <summary>
-		/// <para>Size (in bytes) of fixed portion of NStruct.</para>
-		///
-		/// <para>Equal to: Marshal.SizeOf and EEClass.m_cbNativeSize</para>
+		///     <para>Size (in bytes) of fixed portion of NStruct.</para>
+		///     <remarks>
+		///         <para>
+		///             Equal to <see cref="Marshal.SizeOf(Type)" /> and (<see cref="EEClass" />)
+		///             <see cref="EEClass.NativeSize" />
+		///         </para>
+		///     </remarks>
 		/// </summary>
 		internal uint NativeSize => m_cbNativeSize;
 
 		/// <summary>
-		/// Equal to: Unsafe.SizeOf
+		///     <remarks>
+		///         <para>Equal to <see cref="Unsafe.SizeOf{T}" /> </para>
+		///     </remarks>
 		/// </summary>
 		internal uint ManagedSize => m_cbManagedSize;
 
@@ -72,7 +78,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Native size", m_cbNativeSize);
 			table.AddRow("Managed size", m_cbManagedSize);
 			table.AddRow("Largest alignment req of all", m_LargestAlignmentRequirementOfAllMembers);

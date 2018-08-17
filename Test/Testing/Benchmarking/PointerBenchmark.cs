@@ -25,7 +25,7 @@ namespace Test.Testing.Benchmarking
 		public void IteratePtr()
 		{
 			for (int i = 0; i < _arr.Length; i++) {
-				var x = _arrPtr[i];
+				int x = _arrPtr[i];
 			}
 		}
 	}

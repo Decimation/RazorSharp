@@ -18,29 +18,28 @@ namespace RazorSharp.Pointers
 	#endregion
 
 	/// <summary>
-	/// A pointer to any type.
-	/// Supports pointer arithmetic and other pointer operations.<para></para>
-	///
-	/// If <![CDATA[T]]> is a reference type, pinning is not required as
-	/// the pointer contains the stack pointer, meaning the pointer works with the GC.<para></para>
-	///
-	/// However, if this pointer points to heap memory, the pointer may become invalidated when
-	/// the GC compacts the heap.
-	///
-	/// - No bounds checking<para></para>
-	///
+	///     A pointer to any type.
+	///     Supports pointer arithmetic and other pointer operations.
+	///     <para></para>
+	///     If <![CDATA[T]]> is a reference type, pinning is not required as
+	///     the pointer contains the stack pointer, meaning the pointer works with the GC.
+	///     <para></para>
+	///     However, if this pointer points to heap memory, the pointer may become invalidated when
+	///     the GC compacts the heap.
+	///     - No bounds checking
+	///     <para></para>
 	/// </summary>
 	/// <typeparam name="T">Type this pointer points to. If just raw memory, use byte.</typeparam>
-	public unsafe class ExPointer<T> : IFormattable//, IPointer<T>
+	public unsafe class ExPointer<T> : IFormattable //, IPointer<T>
 	{
 		/// <summary>
-		/// Contains metadata for operating ExPointer
+		///     Contains metadata for operating ExPointer
 		/// </summary>
 		protected class PointerMetadata
 		{
 
 			/// <summary>
-			/// The element size (size of type pointed to)
+			///     The element size (size of type pointed to)
 			/// </summary>
 			internal int ElementSize { get; }
 
@@ -76,7 +75,7 @@ namespace RazorSharp.Pointers
 		protected readonly PointerMetadata m_metadata;
 
 		/// <summary>
-		/// The size of the type being pointed to.
+		///     The size of the type being pointed to.
 		/// </summary>
 		public int ElementSize => m_metadata.ElementSize;
 
@@ -85,16 +84,14 @@ namespace RazorSharp.Pointers
 			set => m_addr = value;
 		}
 
-		public ref T Reference {
-			get => ref Memory.Memory.AsRef<T>(Address);
-		}
+		public ref T Reference => ref Memory.Memory.AsRef<T>(Address);
 
 		public bool IsNull => m_addr == IntPtr.Zero;
 
 		/// <summary>
-		/// Returns the value the pointer is currently pointing to.
-		/// This is the equivalent of dereferencing the pointer.
-		/// This is equivalent to this[0].
+		///     Returns the value the pointer is currently pointing to.
+		///     This is the equivalent of dereferencing the pointer.
+		///     This is equivalent to this[0].
 		/// </summary>
 		public virtual T Value {
 			get => Memory.Memory.Read<T>(Address, 0);
@@ -137,11 +134,11 @@ namespace RazorSharp.Pointers
 
 		protected virtual ConsoleTable ToTable()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Address", Hex.ToHex(Address));
-			table.AddRow("Value", Memory.Memory.SafeToString(this));
+			table.AddRow("Value", Value);
 			table.AddRow("Type", typeof(T).Name);
-			table.AddRow("this[0]", Memory.Memory.SafeToString(this, 0));
+			table.AddRow("this[0]", this[0]);
 			table.AddRow("Null", IsNull);
 			table.AddRow("Element size", m_metadata.ElementSize);
 			return table;
@@ -169,10 +166,8 @@ namespace RazorSharp.Pointers
 
 		protected virtual ConsoleTable ToElementTable(int length)
 		{
-			var table = new ConsoleTable("Address", "Index", "Value");
-			for (int i = 0; i < length; i++) {
-				table.AddRow(Hex.ToHex(PointerUtils.Offset<T>(Address, i)), i, this[i]);
-			}
+			ConsoleTable table = new ConsoleTable("Address", "Index", "Value");
+			for (int i = 0; i < length; i++) table.AddRow(Hex.ToHex(PointerUtils.Offset<T>(Address, i)), i, this[i]);
 
 			return table;
 		}
@@ -276,8 +271,13 @@ namespace RazorSharp.Pointers
 		/// <param name="format">O: Object, P: Pointer, T: Table</param>
 		public virtual string ToString(string format, IFormatProvider formatProvider)
 		{
-			if (String.IsNullOrEmpty(format)) format   = "O";
-			if (formatProvider == null) formatProvider = CultureInfo.CurrentCulture;
+			if (String.IsNullOrEmpty(format)) {
+				format = "O";
+			}
+
+			if (formatProvider == null) {
+				formatProvider = CultureInfo.CurrentCulture;
+			}
 
 
 			/**

@@ -1,7 +1,6 @@
 #region
 
 using System;
-using System.Diagnostics;
 using RazorCommon;
 using RazorSharp.Runtime.CLRTypes;
 
@@ -38,7 +37,7 @@ namespace RazorSharp.Analysis
 
 			protected override ConsoleTable ToTable()
 			{
-				var table = base.ToTable();
+				ConsoleTable table = base.ToTable();
 
 				table.AttachColumn("Object Header", Hex.ToHex(Header));
 				return table;
@@ -51,7 +50,7 @@ namespace RazorSharp.Analysis
 
 			protected override ConsoleTable ToTable()
 			{
-				var table = base.ToTable();
+				ConsoleTable table = base.ToTable();
 				return table;
 			}
 		}
@@ -80,7 +79,7 @@ namespace RazorSharp.Analysis
 				table.AddRow("Base fields size", BaseFieldsSize);
 				return table;*/
 
-				var table = base.ToTable();
+				ConsoleTable table = base.ToTable();
 
 				// todo: if the value is boxed
 				if (m_typeName != typeof(T).Name) {
@@ -103,8 +102,8 @@ namespace RazorSharp.Analysis
 			public IntPtr Fields { get; }
 
 			/// <summary>
-			/// String data if the type is a string,
-			/// Array data if the type is an array
+			///     String data if the type is a string,
+			///     Array data if the type is an array
 			/// </summary>
 			public IntPtr HeapMisc { get; }
 
@@ -112,16 +111,20 @@ namespace RazorSharp.Analysis
 			{
 				Heap   = Unsafe.AddressOfHeap(ref t);
 				Fields = Unsafe.AddressOfHeap(ref t, OffsetType.Fields);
-				if (typeof(T).IsArray)
+				if (typeof(T).IsArray) {
 					HeapMisc = Unsafe.AddressOfHeap(ref t, OffsetType.ArrayData);
-				else if (typeof(T) == typeof(string))
-					HeapMisc  = Unsafe.AddressOfHeap(ref t, OffsetType.StringData);
-				else HeapMisc = IntPtr.Zero;
+				}
+				else if (typeof(T) == typeof(string)) {
+					HeapMisc = Unsafe.AddressOfHeap(ref t, OffsetType.StringData);
+				}
+				else {
+					HeapMisc = IntPtr.Zero;
+				}
 			}
 
 			protected override ConsoleTable ToTable()
 			{
-				var table = base.ToTable();
+				ConsoleTable table = base.ToTable();
 				table.AttachColumn("Heap", Hex.ToHex(Heap));
 				table.AttachColumn("Fields", Hex.ToHex(Fields));
 
@@ -142,7 +145,7 @@ namespace RazorSharp.Analysis
 
 		public new static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.Default)
 		{
-			var inspector = new RefInspector<T>(ref t, mode);
+			RefInspector<T> inspector = new RefInspector<T>(ref t, mode);
 			WriteInspector(inspector, printStructures);
 		}
 	}

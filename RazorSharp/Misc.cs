@@ -2,7 +2,6 @@
 
 using System;
 using System.Reflection;
-using RazorCommon;
 using RazorSharp.Pointers;
 
 #endregion
@@ -11,7 +10,7 @@ namespace RazorSharp
 {
 
 	/// <summary>
-	/// Unsorted methods
+	///     Unsorted methods
 	/// </summary>
 	internal static class Misc
 	{

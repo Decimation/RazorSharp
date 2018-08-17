@@ -18,24 +18,36 @@ namespace RazorSharp.Runtime
 {
 
 	/// <summary>
-	/// Provides utilities for manipulating CLR structures<para></para>
-	///
-	/// https://github.com/dotnet/coreclr/blob/fcb04373e2015ae12b55f33fdd0dd4580110db98/src/vm/runtimehandles.h<para></para>
-	/// https://github.com/dotnet/coreclr/blob/fcb04373e2015ae12b55f33fdd0dd4580110db98/src/vm/runtimehandles.cpp<para></para>
+	///     Provides utilities for manipulating CLR structures.
+	///     <para>Related files:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/runtimehandles.h</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/runtimehandles.cpp</description>
+	///         </item>
+	///     </list>
 	/// </summary>
 	public static unsafe class Runtime
 	{
 		/// <summary>
-		/// Heap offset to the first array element.<para></para>
-		///  - +8 for MethodTable*<para></para>
-		///  - +4 for length<para></para>
-		///  - +4 for padding (x64 only)<para></para>
-		///
-		/// (x64 only)
+		///     Heap offset to the first array element.
+		///     <list type="bullet">
+		///         <item>
+		///             <description>+8 for <c>MethodTable*</c> (<see cref="IntPtr.Size" />)</description>
+		///         </item>
+		///         <item>
+		///             <description>+4 for length <c>(uint)</c></description>
+		///         </item>
+		///         <item>
+		///             <description>+4 for padding <c>(uint)</c> (x64 only)</description>
+		///         </item>
+		///     </list>
 		/// </summary>
 		public static readonly int OffsetToArrayData = IntPtr.Size * 2;
 
-		internal static readonly Dictionary<FieldDesc, FieldInfo> FieldMap;
+		internal static readonly Dictionary<FieldDesc, FieldInfo>   FieldMap;
 		internal static readonly Dictionary<MethodDesc, MethodInfo> MethodMap;
 
 		static Runtime()
@@ -62,13 +74,11 @@ namespace RazorSharp.Runtime
 
 		private static void AddField(FieldDesc fd, FieldInfo fi)
 		{
-			//Console.WriteLine("Adding field {0}", fi.Name);
 			AddSet(FieldMap, fd, fi);
 		}
 
 		private static void AddMethod(MethodDesc md, MethodInfo mi)
 		{
-			//Console.WriteLine("Adding method {0}", mi.Name);
 			AddSet(MethodMap, md, mi);
 		}
 
@@ -100,8 +110,8 @@ namespace RazorSharp.Runtime
 		#region Method Table
 
 		/// <summary>
-		/// Manually reads a CLR MethodTable (TypeHandle).<para></para>
-		/// If the type is a value type, the MethodTable will be returned from the TypeHandle.<para></para>
+		///     <para>Manually reads a CLR MethodTable (TypeHandle).</para>
+		///     <para>If the type is a value type, the MethodTable will be returned from the TypeHandle.</para>
 		/// </summary>
 		/// <returns>A pointer to the object type's MethodTable</returns>
 		public static MethodTable* ReadMethodTable<T>(ref T t)
@@ -110,12 +120,12 @@ namespace RazorSharp.Runtime
 
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
 			if (typeof(T).IsValueType) {
-				mt = MethodTableOf<T>();
+				return MethodTableOf<T>();
 			}
 
 			else {
 				// We need to get the heap pointer manually because of type constraints
-				var ptr = Marshal.ReadIntPtr(Unsafe.AddressOf(ref t));
+				IntPtr ptr = Marshal.ReadIntPtr(Unsafe.AddressOf(ref t));
 				mt = *(MethodTable**) ptr;
 			}
 
@@ -131,11 +141,10 @@ namespace RazorSharp.Runtime
 		}
 
 		/// <summary>
-		/// Returns a type's TypeHandle as a MethodTable
-		///
-		/// <exception cref="RuntimeException">If the type is an array</exception>
+		///     Returns a type's TypeHandle as a MethodTable
+		///     <exception cref="RuntimeException">If the type is an array</exception>
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="T">Type to return the corresponding MethodTable for.</typeparam>
 		/// <returns></returns>
 		public static MethodTable* MethodTableOf<T>()
 		{
@@ -143,9 +152,10 @@ namespace RazorSharp.Runtime
 			// they don't have a TypeHandle
 			//Assertion.NegativeAssertType<Array, T>();
 
+			// From https://github.com/dotnet/coreclr/blob/6bb3f84d42b9756c5fa18158db8f724d57796296/src/vm/typehandle.h#L74:
+			// Array MTs are not valid TypeHandles...
 			if (typeof(T).IsArray) {
-				//return null;
-				throw new RuntimeException($"{typeof(T).Name} does not have a TypeHandle.");
+				throw new RuntimeException($"{typeof(T).Name}: Array MethodTables are not valid TypeHandles.");
 			}
 
 			return (MethodTable*) typeof(T).TypeHandle.Value;
@@ -154,7 +164,7 @@ namespace RazorSharp.Runtime
 
 		public static void WriteMethodTable<T>(ref T t, MethodTable* m) where T : class
 		{
-			var addrMt = Unsafe.AddressOfHeap(ref t);
+			IntPtr addrMt = Unsafe.AddressOfHeap(ref t);
 			*((MethodTable**) addrMt) = m;
 
 			//var h = GetHeapObject(ref t);
@@ -180,8 +190,19 @@ namespace RazorSharp.Runtime
 
 		#region FieldDesc
 
+		public static FieldDesc* GetFieldDescForFieldInfo(FieldInfo fi)
+		{
+			if (fi.IsLiteral) {
+				throw new RuntimeException("Const field");
+			}
+
+			FieldDesc* fd = (FieldDesc*) fi.FieldHandle.Value;
+			AddField(*fd, fi);
+			return fd;
+		}
+
 		/// <summary>
-		/// Gets all the FieldDescs from a type's FieldDescList.
+		///     Gets all the <see cref="FieldDesc" /> from <see cref="MethodTable.FieldDescList" />
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -192,27 +213,25 @@ namespace RazorSharp.Runtime
 				throw new RuntimeException("Arrays do not have fields");
 			}
 
-			var mt   = MethodTableOf<T>();
-			var len  = mt->FieldDescListLength;
-			var lpFd = new Pointer<FieldDesc>[len];
+			MethodTable*         mt   = MethodTableOf<T>();
+			int                  len  = mt->FieldDescListLength;
+			Pointer<FieldDesc>[] lpFd = new Pointer<FieldDesc>[len];
 
-			for (int i = 0; i < len; i++) {
+			for (int i = 0; i < len; i++)
 				lpFd[i] = &mt->FieldDescList[i];
-			}
 
-			var fieldHandles = typeof(T).GetFields(DefaultFlags);
+			FieldInfo[] fieldHandles = typeof(T).GetFields(DefaultFlags);
 
 			// Remove all const fields
 			Collections.RemoveAll(ref fieldHandles, x => x.IsLiteral);
 
-			Debug.Assert(fieldHandles.Length == mt->FieldDescListLength);
+			Trace.Assert(fieldHandles.Length == mt->FieldDescListLength);
 
 			fieldHandles = fieldHandles.OrderBy(x => x.FieldHandle.Value.ToInt64()).ToArray();
 			lpFd         = lpFd.OrderBy(x => x.ToInt64()).ToArray();
 
-			for (int i = 0; i < lpFd.Length; i++) {
+			for (int i = 0; i < lpFd.Length; i++)
 				AddField(lpFd[i].Reference, fieldHandles[i]);
-			}
 
 
 			return lpFd;
@@ -223,41 +242,47 @@ namespace RazorSharp.Runtime
 
 
 		/// <summary>
-		/// Gets the corresponding FieldDesc for a specified field
+		///     Gets the corresponding FieldDesc for a specified field
 		/// </summary>
 		/// <param name="t"></param>
 		/// <param name="name"></param>
+		/// <param name="isAutoProperty"></param>
 		/// <param name="flags"></param>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the field is const</exception>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		public static FieldDesc* GetFieldDesc(Type t, string name, bool isAutoProperty = false, BindingFlags flags = DefaultFlags)
+		public static FieldDesc* GetFieldDesc(Type t, string name, bool isAutoProperty = false,
+			BindingFlags flags = DefaultFlags)
 		{
 			if (t.IsArray) {
 				throw new RuntimeException("Arrays do not have fields");
 			}
+
 			if (isAutoProperty) {
 				name = AutoPropertyBackingFieldName(name);
 			}
 
-			var fieldInfo = t.GetField(name, flags);
-			if (fieldInfo.IsLiteral)
-				throw new RuntimeException("Const field");
-			var fieldHandle = fieldInfo.FieldHandle;
-			var fd          = (FieldDesc*) fieldHandle.Value;
+			FieldInfo fieldInfo = t.GetField(name, flags);
 
-			AddField(*fd, fieldInfo);
-			return fd;
+			return GetFieldDescForFieldInfo(fieldInfo);
 		}
 
-		public static FieldDesc* GetFieldDesc<T>(string name, bool isAutoProperty = false,BindingFlags flags = DefaultFlags)
+		public static FieldDesc* GetFieldDesc<T>(string name, bool isAutoProperty = false,
+			BindingFlags flags = DefaultFlags)
 		{
-			return GetFieldDesc(typeof(T), name, isAutoProperty,flags);
+			return GetFieldDesc(typeof(T), name, isAutoProperty, flags);
 		}
 
 		#endregion
 
 		#region MethodDesc
+
+		public static MethodDesc* GetMethodDescForMethodInfo(MethodInfo mi)
+		{
+			MethodDesc* md = (MethodDesc*) mi.MethodHandle.Value;
+			AddMethod(*md, mi);
+			return md;
+		}
 
 		public static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
 		{
@@ -266,29 +291,27 @@ namespace RazorSharp.Runtime
 
 		public static Pointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
 		{
-			var methods = t.GetMethods(flags);
-			var arr     = new Pointer<MethodDesc>[methods.Length];
-			Debug.Assert(arr.Length == methods.Length);
+			MethodInfo[]          methods = t.GetMethods(flags);
+			Pointer<MethodDesc>[] arr     = new Pointer<MethodDesc>[methods.Length];
 
-			for (int i = 0; i < arr.Length; i++) {
+
+			for (int i = 0; i < arr.Length; i++)
 				arr[i] = (MethodDesc*) methods[i].MethodHandle.Value;
-			}
 
 			methods = methods.OrderBy(x => x.MethodHandle.Value.ToInt64()).ToArray();
 			arr     = arr.OrderBy(x => x.ToInt64()).ToArray();
 
-			for (int i = 0; i < arr.Length; i++) {
+			for (int i = 0; i < arr.Length; i++)
 				AddMethod(arr[i].Reference, methods[i]);
-			}
 
 			return arr;
 		}
 
 		public static MethodDesc* GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
 		{
-			var methodInfo   = t.GetMethod(name, flags);
-			var methodHandle = methodInfo.MethodHandle;
-			var md           = (MethodDesc*) methodHandle.Value;
+			MethodInfo          methodInfo   = t.GetMethod(name, flags);
+			RuntimeMethodHandle methodHandle = methodInfo.MethodHandle;
+			MethodDesc*         md           = (MethodDesc*) methodHandle.Value;
 
 			AddMethod(*md, methodInfo);
 			return md;
@@ -303,7 +326,7 @@ namespace RazorSharp.Runtime
 
 
 		/// <summary>
-		/// Reads a reference type's object header.
+		///     Reads a reference type's object header.
 		/// </summary>
 		/// <returns>A pointer to the reference type's header</returns>
 		public static ObjHeader* ReadObjHeader<T>(ref T t) where T : class
@@ -315,28 +338,31 @@ namespace RazorSharp.Runtime
 
 
 		/// <summary>
-		/// Determines whether a type is blittable; that is, they don't
-		/// require conversion between managed and unmanaged code.
-		/// <remarks>
-		/// <para>Returned from <see cref="MethodTable.IsBlittable"/></para>
-		/// <para>Note: If the type is an array or <c>string</c>, <see cref="MethodTable.IsBlittable"/> determines it unblittable,
-		/// but <see cref="IsBlittable{T}"/> returns <c>true</c>, as <see cref="GCHandle"/> determines it blittable.
-		/// </para>
-		/// </remarks>
+		///     Determines whether a type is blittable; that is, they don't
+		///     require conversion between managed and unmanaged code.
+		///     <remarks>
+		///         <para>Returned from <see cref="MethodTable.IsBlittable" /></para>
+		///         <para>
+		///             Note: If the type is an array or <c>string</c>, <see cref="MethodTable.IsBlittable" /> determines it
+		///             unblittable,
+		///             but <see cref="IsBlittable{T}" /> returns <c>true</c>, as <see cref="GCHandle" /> determines it blittable.
+		///         </para>
+		///     </remarks>
 		/// </summary>
 		public static bool IsBlittable<T>()
 		{
 			// We'll say arrays and strings are blittable cause they're
 			// usable with GCHandle
-			if (typeof(T).IsArray || typeof(T) == typeof(string))
+			if (typeof(T).IsArray || typeof(T) == typeof(string)) {
 				return true;
+			}
 
 			return MethodTableOf<T>()->IsBlittable;
 		}
 
 		/// <summary>
-		/// Gets the internal name of an auto-property's backing field.
-		/// <example>If the auto-property's name is X, the backing field name is &lt;X&gt;k__BackingField.</example>
+		///     Gets the internal name of an auto-property's backing field.
+		///     <example>If the auto-property's name is X, the backing field name is &lt;X&gt;k__BackingField.</example>
 		/// </summary>
 		/// <param name="propname">Auto-property's name</param>
 		/// <returns>Internal name of the auto-property's backing field</returns>

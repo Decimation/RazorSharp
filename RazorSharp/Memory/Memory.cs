@@ -3,13 +3,10 @@
 using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using RazorInvoke;
 using RazorInvoke.Libraries;
 using RazorSharp.Pointers;
 using RazorSharp.Runtime.CLRTypes;
-using RazorSharp.Utilities;
 
 #endregion
 
@@ -46,32 +43,6 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-		#region Safe
-
-		[HandleProcessCorruptedStateExceptions]
-		public static string SafeToString<T>(IntPtr ptr, int elemOfs = 0)
-		{
-			string s    = "";
-			IntPtr addr = PointerUtils.Offset<T>(ptr, elemOfs);
-
-			if (Assertion.Throws<AccessViolationException, NullReferenceException>(delegate
-			{
-				s = CSUnsafe.Read<T>(addr.ToPointer()).ToString();
-			})) {
-				return "(sigsegv)";
-			}
-
-			return s;
-		}
-
-		[HandleProcessCorruptedStateExceptions]
-		public static string SafeToString<T>(ExPointer<T> ptr, int elemOfs = 0)
-		{
-			return SafeToString<T>(ptr.Address, elemOfs);
-		}
-
-		#endregion
-
 		#region Array operations
 
 		public static byte[] ReadBytes(IntPtr p, int byteOffset, int size)
@@ -84,9 +55,8 @@ namespace RazorSharp.Memory
 
 		public static void WriteBytes(IntPtr dest, byte[] src)
 		{
-			for (int i = 0; i < src.Length; i++) {
+			for (int i = 0; i < src.Length; i++)
 				Marshal.WriteByte(dest, i, src[i]);
-			}
 		}
 
 		#endregion
@@ -100,9 +70,7 @@ namespace RazorSharp.Memory
 		{
 			T[] arr = new T[elemCount];
 
-			for (int i = 0; i < elemCount; i++) {
-				arr[i] = ptr[i];
-			}
+			for (int i = 0; i < elemCount; i++) arr[i] = ptr[i];
 
 			return arr;
 		}
@@ -120,12 +88,13 @@ namespace RazorSharp.Memory
 
 		public static int ReadBits(int b, int bitIndexBegin, int bitLen)
 		{
-			if (bitLen > Int32Bits) throw new Exception();
+			if (bitLen > Int32Bits) {
+				throw new Exception();
+			}
 
 			bool[] bits = new bool[bitLen];
-			for (int i = 0; i < bitLen; i++) {
+			for (int i = 0; i < bitLen; i++)
 				bits[i] = ReadBit(b, bitIndexBegin + i);
-			}
 
 			BitArray bitArray = new BitArray(bits);
 			int[]    array    = new int[1];
@@ -162,13 +131,13 @@ namespace RazorSharp.Memory
 
 		public static bool IsValid<T>(IntPtr addrOfPtr) where T : class
 		{
-			if (addrOfPtr == IntPtr.Zero) return false;
+			if (addrOfPtr == IntPtr.Zero) {
+				return false;
+			}
 
-			var validMethodTable = Runtime.Runtime.MethodTableOf<T>();
-
-			var mt = Marshal.ReadIntPtr(addrOfPtr);
-
-			var readMethodTable = *(MethodTable**) mt;
+			MethodTable* validMethodTable = Runtime.Runtime.MethodTableOf<T>();
+			IntPtr       mt               = Marshal.ReadIntPtr(addrOfPtr);
+			MethodTable* readMethodTable  = *(MethodTable**) mt;
 
 			return readMethodTable->Equals(*validMethodTable);
 		}
@@ -181,18 +150,17 @@ namespace RazorSharp.Memory
 			Zero(ptr.ToPointer(), length);
 		}
 
-		public static void Zero(void* ptr, int length)
+		private static void Zero(void* ptr, int length)
 		{
 			byte* memptr = (byte*) ptr;
-			for (int i = 0; i < length; i++) {
+			for (int i = 0; i < length; i++)
 				memptr[i] = 0;
-			}
 		}
 
 		#endregion
 
 		/// <summary>
-		/// Determines whether a variable is on the current thread's stack.
+		///     Determines whether a variable is on the current thread's stack.
 		/// </summary>
 		public static bool IsOnStack<T>(ref T t)
 		{
@@ -201,19 +169,19 @@ namespace RazorSharp.Memory
 
 		public static bool IsOnStack(void* v)
 		{
-			var bounds = Kernel32.GetCurrentThreadStackLimits();
+			(IntPtr low, IntPtr high) bounds = Kernel32.GetCurrentThreadStackLimits();
 			return RazorMath.Between(((IntPtr) v).ToInt64(), bounds.low.ToInt64(), bounds.high.ToInt64(), true);
 		}
 
 		/// <summary>
-		/// Allocates a value type in zeroed, unmanaged memory.<para></para>
-		/// Once you are done using the memory, dispose using Marshal.FreeHGlobal.
+		///     <para>Allocates a value type in zeroed, unmanaged memory.</para>
+		///     <para>Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /></para>
 		/// </summary>
 		/// <typeparam name="T">Value type to allocate</typeparam>
 		/// <returns>A pointer to the allocated memory</returns>
 		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1) where T : struct
 		{
-			var    size  = Unsafe.SizeOf<T>() * elemCnt;
+			int    size  = Unsafe.SizeOf<T>() * elemCnt;
 			IntPtr alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
 
@@ -227,7 +195,7 @@ namespace RazorSharp.Memory
 
 		private static bool IsAligned(IntPtr p, int byteAlignment)
 		{
-			return ((p.ToInt64()) & (byteAlignment-1)) == 0;
+			return (p.ToInt64() & (byteAlignment - 1)) == 0;
 		}
 	}
 

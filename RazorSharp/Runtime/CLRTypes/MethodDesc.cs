@@ -19,24 +19,39 @@ namespace RazorSharp.Runtime.CLRTypes
 	#endregion
 
 	//todo: complete
+
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/master/src/vm/method.hpp#L1683
-	///
-	/// Internal representation: MethodHandle.Value
+	///     <para>Internal representation: <see cref="RuntimeMethodHandle.Value" /></para>
+	///     <para>Corresponding files:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/method.hpp</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/method.cpp</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/method.inl</description>
+	///         </item>
+	///     </list>
+	///     <para>Lines of interest:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/method.hpp: 1683</description>
+	///         </item>
+	///     </list>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct MethodDesc
+	public struct MethodDesc
 	{
 
-		[FieldOffset(0)] private readonly UInt16 m_wFlags3AndTokenRemainder;
+		[FieldOffset(0)] private readonly ushort m_wFlags3AndTokenRemainder;
 		[FieldOffset(2)] private readonly byte   m_chunkIndex;
 		[FieldOffset(3)] private readonly byte   m_bFlags2;
-		[FieldOffset(4)] private readonly WORD   m_wSlotNumber;
-		[FieldOffset(6)] private readonly WORD   m_wFlags;
+		[FieldOffset(4)] private readonly ushort m_wSlotNumber;
+		[FieldOffset(6)] private readonly ushort m_wFlags;
 
-		public MethodInfo MethodInfo {
-			get { return Runtime.MethodMap[this]; }
-		}
+		public MethodInfo MethodInfo => Runtime.MethodMap[this];
 
 		public bool Equals(MethodDesc md)
 		{
@@ -52,7 +67,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		public override bool Equals(object obj)
 		{
 			if (obj.GetType() == GetType()) {
-				var md = (MethodDesc) obj;
+				MethodDesc md = (MethodDesc) obj;
 				return md.Equals(this);
 			}
 
@@ -107,11 +122,10 @@ namespace RazorSharp.Runtime.CLRTypes
 		}*/
 
 		/// <summary>
-		/// Slightly slower than using MethodHandle.GetFunctionPointer
-		///
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
+		///     Slightly slower than using MethodHandle.GetFunctionPointer
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		public IntPtr Function {
 			get {
@@ -126,11 +140,10 @@ namespace RazorSharp.Runtime.CLRTypes
 		}
 
 		/// <summary>
-		/// Slower than using Reflection
-		///
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
+		///     Slower than using Reflection
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		public string Name {
 			get {
@@ -150,10 +163,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public override string ToString()
 		{
-			var flags3 = String.Join(", ", Flags3.GetFlags());
-			var flags2 = String.Join(", ", Flags2.GetFlags());
-
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Name", Name);
 			table.AddRow("Function", Hex.ToHex(Function));
 			table.AddRow(nameof(m_wFlags3AndTokenRemainder), m_wFlags3AndTokenRemainder);
@@ -163,8 +173,8 @@ namespace RazorSharp.Runtime.CLRTypes
 			table.AddRow(nameof(m_wFlags), m_wFlags);
 
 
-			table.AddRow("Flags2", flags2);
-			table.AddRow("Flags3", flags3);
+			table.AddRow("Flags2", Flags2.Join());
+			table.AddRow("Flags3", Flags3.Join());
 
 
 			return table.ToMarkDownString();

@@ -30,7 +30,7 @@ namespace Test.Testing.Benchmarking
 		public void IteratePtr()
 		{
 			for (int i = 0; i < m_allocPtr.Count; i++) {
-				var v = m_allocPtr[i];
+				int v = m_allocPtr[i];
 			}
 		}
 	}

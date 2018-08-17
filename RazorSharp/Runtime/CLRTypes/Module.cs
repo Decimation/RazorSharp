@@ -18,7 +18,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 	//todo: fix
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/93955d4b58380068df9d99c58a699de6ad03f532/src/vm/ceeload.h#L1321
+	///     Source: https://github.com/dotnet/coreclr/blob/93955d4b58380068df9d99c58a699de6ad03f532/src/vm/ceeload.h#L1321
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct Module
@@ -36,13 +36,13 @@ namespace RazorSharp.Runtime.CLRTypes
 		{
 			long* addrPtr = (long*) module.ToPointer();
 
-			var assembly                = addrPtr + 6;
-			var typeDefToMethodTableMap = addrPtr + 48;
-			var typeRefToMethodTableMap = typeDefToMethodTableMap + 9;
-			var methodDefToDescMap      = typeRefToMethodTableMap + 9;
-			var fieldDefToDescMap       = methodDefToDescMap + 9;
+			long* assembly                = addrPtr + 6;
+			long* typeDefToMethodTableMap = addrPtr + 48;
+			long* typeRefToMethodTableMap = typeDefToMethodTableMap + 9;
+			long* methodDefToDescMap      = typeRefToMethodTableMap + 9;
+			long* fieldDefToDescMap       = methodDefToDescMap + 9;
 
-			var table = new ConsoleTable("Data", "Address");
+			ConsoleTable table = new ConsoleTable("Data", "Address");
 
 			table.AddRow("Assembly", Hex.ToHex(*assembly));
 			table.AddRow("TypeDefToMethodTableMap", Hex.ToHex(*typeDefToMethodTableMap));
@@ -54,7 +54,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Simple name", Hex.ToHex(m_pSimpleName));
 			table.AddRow("File", Hex.ToHex(m_file));
 			table.AddRow("Dll main", Hex.ToHex(m_pDllMain));

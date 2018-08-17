@@ -18,11 +18,11 @@ namespace Test.Testing
 	internal static unsafe class RAssert
 	{
 		/// <summary>
-		/// Asserts the ExPointer points to the proper array data.
+		///     Asserts the ExPointer points to the proper array data.
 		/// </summary>
 		internal static void Elements<T>(ExPointer<T> ptr, IEnumerable<T> enumer)
 		{
-			var enumerator = enumer.GetEnumerator();
+			IEnumerator<T> enumerator = enumer.GetEnumerator();
 			while (enumerator.MoveNext()) {
 				Assert.That(enumerator.Current, Is.EqualTo(ptr.Value));
 				ptr++;
@@ -33,8 +33,8 @@ namespace Test.Testing
 		private const int MaxObjects = 9000;
 
 		/// <summary>
-		/// Asserts that the heap and stack pointers of a reference type don't change at all
-		/// during GC compaction. This test will pass if the parameter is pinned.
+		///     Asserts that the heap and stack pointers of a reference type don't change at all
+		///     during GC compaction. This test will pass if the parameter is pinned.
 		/// </summary>
 		internal static void Pinning<T>(ref T t) where T : class
 		{
@@ -43,10 +43,8 @@ namespace Test.Testing
 
 			int passes = 0;
 			while (passes++ < MaxPasses) {
-				object[] oArr = new object[MaxObjects];
-				for (int i = 0; i < oArr.Length; i++) {
-					oArr[i] = new object();
-				}
+				object[] oArr                                 = new object[MaxObjects];
+				for (int i = 0; i < oArr.Length; i++) oArr[i] = new object();
 
 				// pass when reference is pinned
 				Assert.That(mem.stackPtr, Is.EqualTo(Unsafe.AddressOf(ref t)));
@@ -61,10 +59,8 @@ namespace Test.Testing
 
 			int passes = 0;
 			while (passes++ < MaxPasses) {
-				object[] oArr = new object[MaxObjects];
-				for (int i = 0; i < oArr.Length; i++) {
-					oArr[i] = new object();
-				}
+				object[] oArr                                 = new object[MaxObjects];
+				for (int i = 0; i < oArr.Length; i++) oArr[i] = new object();
 
 				// pass when reference is pinned
 				if (mem.stackPtr != Unsafe.AddressOf(ref t)) {
@@ -80,16 +76,14 @@ namespace Test.Testing
 		}
 
 		/// <summary>
-		/// Asserts that an ExPointer points to the correct object address during GC pressure
+		///     Asserts that an ExPointer points to the correct object address during GC pressure
 		/// </summary>
 		internal static void Pressure<TPointer, TValue>(ExPointer<TPointer> ptr, ref TValue t)
 		{
 			int passes = 0;
 			while (passes++ < MaxPasses) {
-				object[] oArr = new object[MaxObjects];
-				for (int i = 0; i < oArr.Length; i++) {
-					oArr[i] = new object();
-				}
+				object[] oArr                                 = new object[MaxObjects];
+				for (int i = 0; i < oArr.Length; i++) oArr[i] = new object();
 
 
 				Assert.That(ptr.Value, Is.EqualTo(t));
@@ -127,10 +121,8 @@ namespace Test.Testing
 		{
 			int passes = 0;
 			while (passes++ < MaxPasses) {
-				object[] oArr = new object[MaxObjects];
-				for (int i = 0; i < oArr.Length; i++) {
-					oArr[i] = new object();
-				}
+				object[] oArr                                 = new object[MaxObjects];
+				for (int i = 0; i < oArr.Length; i++) oArr[i] = new object();
 			}
 		}
 	}

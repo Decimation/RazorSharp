@@ -1,23 +1,27 @@
+#region
+
 using System;
 using System.Threading;
+
+#endregion
 
 namespace RazorSharp.Experimental
 {
 
 	/// <inheritdoc />
 	/// <summary>
-	/// An object that pins a reference (so it doesn't change its address).
-	/// <para>Source: https://github.com/IllidanS4/SharpUtils/blob/master/Unsafe/Experimental/PinHandle.cs </para>
+	///     An object that pins a reference (so it doesn't change its address).
+	///     <para>Source: https://github.com/IllidanS4/SharpUtils/blob/master/Unsafe/Experimental/PinHandle.cs </para>
 	/// </summary>
 	public abstract class PinHandle : IDisposable
 	{
 		/// <summary>
-		/// Used to tell the pinning thread to stop pinning the object.
+		///     Used to tell the pinning thread to stop pinning the object.
 		/// </summary>
 		protected AutoResetEvent Reset { get; set; }
 
 		/// <summary>
-		/// Initializes the pin handle.
+		///     Initializes the pin handle.
 		/// </summary>
 		protected PinHandle()
 		{
@@ -25,7 +29,7 @@ namespace RazorSharp.Experimental
 		}
 
 		/// <summary>
-		/// Finalizes the pin handle.
+		///     Finalizes the pin handle.
 		/// </summary>
 		~PinHandle()
 		{
@@ -34,7 +38,7 @@ namespace RazorSharp.Experimental
 
 		/// <inheritdoc />
 		/// <summary>
-		/// Disposes the pin handle.
+		///     Disposes the pin handle.
 		/// </summary>
 		public void Dispose()
 		{
@@ -43,7 +47,7 @@ namespace RazorSharp.Experimental
 		}
 
 		/// <summary>
-		/// Disposes the pin handle.
+		///     Disposes the pin handle.
 		/// </summary>
 		protected virtual void Dispose(bool disposing)
 		{

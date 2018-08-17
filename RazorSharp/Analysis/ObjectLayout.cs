@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.Pointers;
 using RazorSharp.Runtime.CLRTypes;
 
 #endregion
@@ -12,12 +13,11 @@ namespace RazorSharp.Analysis
 {
 
 	/// <summary>
-	/// Displays the layout of objects in memory.<para></para>
-	///
-	/// If a reference type is specified, the heap layout is displayed.<para></para>
-	///
+	///     <para>Displays the layout of objects in memory.</para>
+	///     <para>If a reference type is specified, the heap layout is displayed.</para>
+	///     <para>Does not work with arrays.</para>
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
+	/// <typeparam name="T">Type to get the layout of.</typeparam>
 	public unsafe class ObjectLayout<T>
 	{
 		private readonly IntPtr m_addr;
@@ -26,7 +26,7 @@ namespace RazorSharp.Analysis
 		private readonly bool   m_fieldsOnly;
 
 		/// <summary>
-		/// Whether to include the full byte range of offsets (not included for MethodTable* or Object Header)
+		///     Whether to include the full byte range of offsets (not included for MethodTable* or Object Header)
 		/// </summary>
 		private readonly bool m_fullOffset;
 
@@ -34,10 +34,14 @@ namespace RazorSharp.Analysis
 
 		public ObjectLayout(ref T t, bool fieldsOnly = true, bool fullOffset = false)
 		{
+			if (typeof(T).IsArray) {
+				throw new Exception("You cannot get the layout of an array (yet)");
+			}
+
 			m_fieldsOnly = fieldsOnly;
 			m_fullOffset = fullOffset;
 			m_value      = t;
-			var addr = Unsafe.AddressOf(ref t);
+			IntPtr addr = Unsafe.AddressOf(ref t);
 			m_addr = addr;
 
 			// If we're only displaying fields, we'll display the offset relative to the first field
@@ -50,9 +54,6 @@ namespace RazorSharp.Analysis
 				m_addr = *(IntPtr*) addr;
 			}
 
-			if (typeof(T).IsArray) {
-				throw new Exception("You cannot get the layout of an array (yet)");
-			}
 
 			Create(ref t);
 
@@ -93,8 +94,8 @@ namespace RazorSharp.Analysis
 			const string methodTableName = "(MethodTable ptr)";
 
 			if (!m_fieldsOnly) {
-				var objHeaderMem   = TryGetObjHeaderAsBytes();
-				var methodTablePtr = TryGetMethodTablePointer();
+				byte[] objHeaderMem   = TryGetObjHeaderAsBytes();
+				IntPtr methodTablePtr = TryGetMethodTablePointer();
 
 				// ObjHeader
 				Table.AddRow(-IntPtr.Size, Hex.ToHex(m_addr - IntPtr.Size), IntPtr.Size, objHeaderType,
@@ -109,18 +110,18 @@ namespace RazorSharp.Analysis
 		private void StringCreate()
 		{
 			int       baseOfs    = IntPtr.Size;
-			var       str        = m_value as string;
+			string    str        = m_value as string;
 			const int charOffset = 6;
 
 
 			// ReSharper disable once PossibleNullReferenceException
 			for (int i = 0; i < str.Length - 1; i++) {
-				var rightOfs = baseOfs + charOffset + i * sizeof(char);
-				var leftOfs  = rightOfs + (sizeof(char) - 1);
+				int rightOfs = baseOfs + charOffset + i * sizeof(char);
+				int leftOfs  = rightOfs + (sizeof(char) - 1);
 
 				string ofsStr = GetOffsetString(baseOfs, rightOfs, leftOfs);
 
-				var addr = m_addr + charOffset + i * sizeof(char) + baseOfs;
+				IntPtr addr = m_addr + charOffset + i * sizeof(char) + baseOfs;
 				Table.AddRow(ofsStr, Hex.ToHex(addr), sizeof(char), typeof(char).Name, $"(Character {i + 2})",
 					Memory.Memory.Read<char>(addr));
 			}
@@ -131,7 +132,7 @@ namespace RazorSharp.Analysis
 			const string paddingStr  = "(padding)";
 			const string paddingByte = "Byte";
 
-			var fieldDescs = Runtime.Runtime.GetFieldDescs<T>();
+			Pointer<FieldDesc>[] fieldDescs = Runtime.Runtime.GetFieldDescs<T>();
 			fieldDescs = fieldDescs.OrderBy(x => x.Reference.Offset).ToArray();
 			Collections.RemoveAll(ref fieldDescs, x => x.Reference.IsStatic);
 
@@ -143,9 +144,9 @@ namespace RazorSharp.Analysis
 			}
 
 			for (int i = 0; i < fieldDescs.Length; i++) {
-				var v        = fieldDescs[i];
-				var rightOfs = baseOfs + v.Reference.Offset;
-				var leftOfs  = rightOfs + (v.Reference.Size - 1);
+				Pointer<FieldDesc> v        = fieldDescs[i];
+				int                rightOfs = baseOfs + v.Reference.Offset;
+				int                leftOfs  = rightOfs + (v.Reference.Size - 1);
 
 				string ofsStr = GetOffsetString(baseOfs, rightOfs, leftOfs);
 
@@ -159,13 +160,13 @@ namespace RazorSharp.Analysis
 					nextOffsetOrSize = fieldDescs[i + 1].Reference.Offset;
 				}
 
-				var nextSectOfsCandidate = fieldDescs[i].Reference.Offset + fieldDescs[i].Reference.Size;
+				int nextSectOfsCandidate = fieldDescs[i].Reference.Offset + fieldDescs[i].Reference.Size;
 
 				if (nextSectOfsCandidate < nextOffsetOrSize) {
-					var padSize   = nextOffsetOrSize - nextSectOfsCandidate;
-					var ro        = baseOfs + nextSectOfsCandidate;
-					var lo        = ro + (padSize - 1);
-					var padOffset = nextSectOfsCandidate + baseOfs;
+					int padSize   = nextOffsetOrSize - nextSectOfsCandidate;
+					int ro        = baseOfs + nextSectOfsCandidate;
+					int lo        = ro + (padSize - 1);
+					int padOffset = nextSectOfsCandidate + baseOfs;
 
 
 					Table.AddRow(GetOffsetString(baseOfs, ro, lo), Hex.ToHex(m_addr + padOffset), padSize,

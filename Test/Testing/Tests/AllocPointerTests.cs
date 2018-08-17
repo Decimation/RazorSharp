@@ -18,7 +18,7 @@ namespace Test.Testing.Tests
 		[Test]
 		public void Test()
 		{
-			var alloc = new AllocExPointer<string>(5)
+			AllocExPointer<string> alloc = new AllocExPointer<string>(5)
 			{
 				[0] = "g",
 				[1] = "anime",
@@ -39,36 +39,36 @@ namespace Test.Testing.Tests
 
 			Assertion.AssertThrows<Exception>(delegate
 			{
-				var p = new AllocExPointer<string>(5);
+				AllocExPointer<string> p = new AllocExPointer<string>(5);
 				p += p.Count + 1;
 			});
 
 			Assertion.AssertThrows<Exception>(delegate
 			{
-				var p = new AllocExPointer<string>(5);
+				AllocExPointer<string> p = new AllocExPointer<string>(5);
 				p -= p.Count + 1;
 			});
 
 			Assertion.AssertThrows<Exception>(delegate
 			{
-				var x = alloc[-1];
+				string x = alloc[-1];
 			});
 
 			Assertion.AssertThrows<Exception>(delegate
 			{
-				var x = alloc[alloc.Count];
+				string x = alloc[alloc.Count];
 			});
 
 			Assertion.AssertThrows<Exception>(delegate
 			{
 				alloc++;
-				var x = alloc[-2];
+				string x = alloc[-2];
 			});
 
 			Assertion.AssertNoThrows<Exception>(delegate
 			{
 				alloc--;
-				var x = alloc[0];
+				string x = alloc[0];
 			});
 
 			alloc.Dispose();
@@ -81,17 +81,13 @@ namespace Test.Testing.Tests
 			alloc.MoveToStart();
 
 			for (int i = 0; i < alloc.Count; i++) {
-				for (int j = alloc.Start; j <= alloc.End; j++) {
-					Debug.Assert(alloc.IndexInBounds(j));
-				}
+				for (int j = alloc.Start; j <= alloc.End; j++) Debug.Assert(alloc.IndexInBounds(j));
 
 				alloc++;
 			}
 
 			for (int i = 0; i < alloc.Count; i++) {
-				for (int j = alloc.Start; j <= alloc.End; j++) {
-					Debug.Assert(alloc.IndexInBounds(j));
-				}
+				for (int j = alloc.Start; j <= alloc.End; j++) Debug.Assert(alloc.IndexInBounds(j));
 
 				alloc--;
 			}
@@ -112,7 +108,7 @@ namespace Test.Testing.Tests
 			alloc.Dispose();
 
 
-			var allocI = new AllocExPointer<int>(5)
+			AllocExPointer<int> allocI = new AllocExPointer<int>(5)
 			{
 				[0] = zero,
 				[4] = end

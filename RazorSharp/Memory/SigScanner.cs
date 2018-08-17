@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -5,11 +7,13 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using RazorInvoke.Libraries;
 
+#endregion
+
 namespace RazorSharp.Memory
 {
 
 	/// <summary>
-	/// Edited by Decimation (not original)
+	///     Edited by Decimation (not original)
 	/// </summary>
 	public class SigScanner
 	{
@@ -46,11 +50,13 @@ namespace RazorSharp.Memory
 		private bool PatternCheck(int nOffset, byte[] arrPattern)
 		{
 			for (int i = 0; i < arrPattern.Length; i++) {
-				if (arrPattern[i] == 0x0)
+				if (arrPattern[i] == 0x0) {
 					continue;
+				}
 
-				if (arrPattern[i] != this.m_rgModuleBuffer[nOffset + i])
+				if (arrPattern[i] != this.m_rgModuleBuffer[nOffset + i]) {
 					return false;
+				}
 			}
 
 			return true;
@@ -58,16 +64,18 @@ namespace RazorSharp.Memory
 
 		public IntPtr FindPattern(string szPattern, out long lTime)
 		{
-			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero)
+			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero) {
 				throw new Exception("Selected module is null");
+			}
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
 
 			byte[] arrPattern = ParsePatternString(szPattern);
 
 			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
-				if (this.m_rgModuleBuffer[nModuleIndex] != arrPattern[0])
+				if (this.m_rgModuleBuffer[nModuleIndex] != arrPattern[0]) {
 					continue;
+				}
 
 				if (PatternCheck(nModuleIndex, arrPattern)) {
 					lTime = stopwatch.ElapsedMilliseconds;
@@ -82,25 +90,27 @@ namespace RazorSharp.Memory
 		public TDelegate GetDelegate<TDelegate>(string opcodes) where TDelegate : Delegate
 		{
 			IntPtr addr = FindPattern(opcodes, out _);
-			if (addr == IntPtr.Zero)
+			if (addr == IntPtr.Zero) {
 				throw new Exception($"Could not find function with opcodes {opcodes}");
+			}
+
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
 		}
 
 		public void SelectModule(string name)
 		{
-			foreach (var m in Process.GetCurrentProcess().Modules) {
+			foreach (object m in Process.GetCurrentProcess().Modules)
 				if (((ProcessModule) m).ModuleName == name) {
 					SelectModule((ProcessModule) m);
 					return;
 				}
-			}
 		}
 
 		public Dictionary<string, IntPtr> FindPatterns(out long lTime)
 		{
-			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero)
+			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero) {
 				throw new Exception("Selected module is null");
+			}
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -112,13 +122,14 @@ namespace RazorSharp.Memory
 				arrBytePatterns[nIndex] = ParsePatternString(m_dictStringPatterns.ElementAt(nIndex).Value);
 
 			// SCAN FOR PATTERNS
-			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
-				for (int nPatternIndex = 0; nPatternIndex < arrBytePatterns.Length; nPatternIndex++) {
-					if (arrResult[nPatternIndex] != IntPtr.Zero)
-						continue;
+			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++)
+			for (int nPatternIndex = 0; nPatternIndex < arrBytePatterns.Length; nPatternIndex++) {
+				if (arrResult[nPatternIndex] != IntPtr.Zero) {
+					continue;
+				}
 
-					if (this.PatternCheck(nModuleIndex, arrBytePatterns[nPatternIndex]))
-						arrResult[nPatternIndex] = m_lpModuleBase + nModuleIndex;
+				if (this.PatternCheck(nModuleIndex, arrBytePatterns[nPatternIndex])) {
+					arrResult[nPatternIndex] = m_lpModuleBase + nModuleIndex;
 				}
 			}
 
@@ -136,7 +147,7 @@ namespace RazorSharp.Memory
 		{
 			List<byte> patternbytes = new List<byte>();
 
-			foreach (var szByte in szPattern.Split(' '))
+			foreach (string szByte in szPattern.Split(' '))
 				patternbytes.Add(szByte == "?" ? (byte) 0x0 : Convert.ToByte(szByte, 16));
 
 			return patternbytes.ToArray();

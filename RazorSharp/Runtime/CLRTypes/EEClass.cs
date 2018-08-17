@@ -28,9 +28,27 @@ namespace RazorSharp.Runtime.CLRTypes
 	#endregion
 
 	/// <summary>
-	/// Source: https://github.com/dotnet/coreclr/blob/6bb3f84d42b9756c5fa18158db8f724d57796296/src/vm/class.h#L1901<para></para>
-	///
-	/// DO NOT DEREFERENCE<para></para>
+	///     <para>Corresponding files:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/class.h</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/class.cpp</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/vm/class.inl</description>
+	///         </item>
+	///     </list>
+	///     <para>Lines of interest:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/class.h: 1901</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Do not dereference.
+	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct EEClass
@@ -59,14 +77,13 @@ namespace RazorSharp.Runtime.CLRTypes
 		#region Accessors
 
 		/// <summary>
-		/// Count of bytes of normal fields of this instance (EEClass,
-		/// LayoutEEClass etc.). Doesn't count bytes of "packed" fields
-		///
+		///     Count of bytes of normal fields of this instance (<see cref="EEClass" />,
+		///     <see cref="LayoutEEClass" /> etc.). Doesn't count bytes of "packed" fields
 		/// </summary>
 		internal byte FixedEEClassFields => m_cbFixedEEClassFields;
 
 		/// <summary>
-		/// Corresponding MethodTable of this EEClass
+		///     Corresponding <see cref="MethodTable" /> of this <see cref="EEClass" />
 		/// </summary>
 		public MethodTable* MethodTable => m_pMethodTable;
 
@@ -74,28 +91,30 @@ namespace RazorSharp.Runtime.CLRTypes
 		public bool HasLayout => VMFlags.HasFlag(VMFlags.HasLayout);
 
 		/// <summary>
-		/// DWORD of TypeAttributes
+		///     <c>DWORD</c> of <see cref="TypeAttributes" />
 		/// </summary>
 		public DWORD Attributes => m_dwAttrClass;
 
 		/// <summary>
-		/// Corresponds to Type.TypeAttributes
+		///     <remarks>
+		///         Equal to <see cref="Type.Attributes" />
+		///     </remarks>
 		/// </summary>
 		public TypeAttributes TypeAttributes => (TypeAttributes) Attributes;
 
 		/// <summary>
-		/// Number of bytes to subtract from <see cref="CLRTypes.MethodTable.BaseSize"/> to get the actual number of bytes
-		/// of instance fields stored in the object on the GC heap.
+		///     Number of bytes to subtract from <see cref="CLRTypes.MethodTable.BaseSize" /> to get the actual number of bytes
+		///     of instance fields stored in the object on the GC heap.
 		/// </summary>
 		public byte BaseSizePadding => m_cbBaseSizePadding;
 
 		/// <summary>
-		/// <para>Size of fixed portion in bytes </para>
-		/// <para>Valid only if <see cref="IsBlittable"/> or <see cref="HasLayout"/> is true; 0 otherwise</para>
-		///
-		/// <remarks>
-		/// <para>Abstracted to <see cref="Unsafe.NativeSizeOf{T}"/></para>
-		/// </remarks>
+		///     <para>Size of fixed portion in bytes </para>
+		///     <para>Valid only if <see cref="IsBlittable" /> or <see cref="HasLayout" /> is true; 0 otherwise</para>
+		///     <remarks>
+		///         <para>Equal to (<see cref="EEClassLayoutInfo" />) <see cref="EEClassLayoutInfo.NativeSize" /> </para>
+		///         <para>Abstracted to <see cref="Unsafe.NativeSizeOf{T}" /></para>
+		///     </remarks>
 		/// </summary>
 		internal int NativeSize => (int) m_cbNativeSize;
 
@@ -104,60 +123,61 @@ namespace RazorSharp.Runtime.CLRTypes
 		public CorElementType NormalType => (CorElementType) m_NormType;
 
 		/// <summary>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		internal EEClassLayoutInfo* LayoutInfo {
 			get {
 				//return &((LayoutEEClass *) this)->m_LayoutInfo;
-				if (!HasLayout)
+				if (!HasLayout) {
 					throw new RuntimeException("EEClass does not have LayoutInfo");
+				}
 
-				var thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass));
+				IntPtr thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass));
 				return &((LayoutEEClass*) thisptr)->m_LayoutInfo;
 			}
 		}
 
 		/// <summary>
-		/// Abstracted to MethodTable
-		///
-		/// For use with <see cref="Runtime.IsBlittable{T}"/>
+		///     Abstracted to MethodTable
+		///     <remarks>
+		///         For use with <see cref="Runtime.IsBlittable{T}" />
+		///     </remarks>
 		/// </summary>
 		internal bool IsBlittable => HasLayout && LayoutInfo->IsBlittable;
 
 		/// <summary>
-		/// Abstracted to MethodTable
+		///     Abstracted to MethodTable
 		/// </summary>
 		internal int NumInstanceFields => (int) GetPackableField(EEClassFieldId.NumInstanceFields);
 
 		/// <summary>
-		/// Abstracted to MethodTable
+		///     Abstracted to MethodTable
 		/// </summary>
 		internal int NumStaticFields => (int) GetPackableField(EEClassFieldId.NumStaticFields);
 
 		/// <summary>
-		/// Abstracted to MethodTable
+		///     Abstracted to MethodTable
 		/// </summary>
 		internal int NumMethods => (int) GetPackableField(EEClassFieldId.NumMethods);
 
 		/// <summary>
-		/// Abstracted to MethodTable
+		///     Abstracted to MethodTable
 		/// </summary>
 		internal int NumNonVirtualSlots => (int) GetPackableField(EEClassFieldId.NumNonVirtualSlots);
 
 		private DWORD GetPackableField(EEClassFieldId eField)
 		{
-			//Console.WriteLine(Hex.ToHex(PackedFields));
 			return m_fFieldsArePacked == 1
 				? PackedFields->GetPackedField((DWORD) eField)
 				: PackedFields->GetUnpackedField((DWORD) eField);
 		}
 
 		/// <summary>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		private PackedDWORDFields* PackedFields =>
 			(PackedDWORDFields*) PointerUtils.Add(Unsafe.AddressOf(ref this), m_cbFixedEEClassFields);
@@ -165,7 +185,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		private EEClass* ParentClass => m_pMethodTable->Parent->EEClass;
 
 		/// <summary>
-		/// Abstracted to MethodTable
+		///     Abstracted to MethodTable
 		/// </summary>
 		internal int FieldDescListLength {
 			//There are (m_wNumInstanceFields - GetParentClass()->m_wNumInstanceFields + m_wNumStaticFields) entries
@@ -176,16 +196,18 @@ namespace RazorSharp.Runtime.CLRTypes
 				int          fieldCount = pClass->NumInstanceFields + pClass->NumStaticFields;
 				MethodTable* pParentMT  = m_pMethodTable->Parent;
 
-				if (pParentMT != null)
+				if (pParentMT != null) {
 					fieldCount -= pParentMT->EEClass->NumInstanceFields;
+				}
+
 				return fieldCount;
 			}
 		}
 
 		/// <summary>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		internal FieldDesc* FieldDescList {
 
@@ -193,24 +215,24 @@ namespace RazorSharp.Runtime.CLRTypes
 				const int fieldDescListFieldOffset = 24;
 
 				//PTR_HOST_MEMBER_TADDR(EEClass, this, m_pFieldDescList)
-				var cpy    = (IntPtr) m_pFieldDescList;
-				var __this = Unsafe.AddressOf(ref this);
+				IntPtr cpy    = (IntPtr) m_pFieldDescList;
+				IntPtr __this = Unsafe.AddressOf(ref this);
 				__this += fieldDescListFieldOffset;
 				return (FieldDesc*) PointerUtils.Add(cpy, __this);
 			}
 		}
 
 		/// <summary>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		internal MethodDescChunk* MethodDescChunkList {
 			//todo: verify
 			get {
 				const int chunksFieldOffset = 32;
-				var       cpy               = (IntPtr) m_pChunks;
-				var       __this            = Unsafe.AddressOf(ref this);
+				IntPtr    cpy               = (IntPtr) m_pChunks;
+				IntPtr    __this            = Unsafe.AddressOf(ref this);
 				__this += chunksFieldOffset;
 				return (MethodDescChunk*) PointerUtils.Add(cpy, __this);
 			}
@@ -220,7 +242,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 
 //			table.AddRow(nameof(m_pGuidInfo), Hex.ToHex(m_pGuidInfo));
 //			table.AddRow(nameof(m_rpOptionalFields), Hex.ToHex(m_rpOptionalFields));
