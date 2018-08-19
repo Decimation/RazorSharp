@@ -12,12 +12,10 @@ using RazorSharp.Utilities;
 
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp.Runtime.CLRTypes
+namespace RazorSharp.CLR.Structures
 {
 
 	#region
-
-	using unsigned = UInt32;
 
 	#endregion
 

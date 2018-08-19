@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime;
-using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;
 using static RazorSharp.Utilities.Assertion;
 
@@ -19,7 +19,7 @@ namespace RazorSharp
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-	using RRuntime = Runtime.Runtime;
+	using RRuntime = Runtime;
 	using MMemory = Memory.Memory;
 
 	#endregion
@@ -28,7 +28,8 @@ namespace RazorSharp
 	public enum OffsetType
 	{
 		/// <summary>
-		/// Return the pointer offset by <c>-</c><see cref="IntPtr.Size"/>
+		///     Return the pointer offset by <c>-</c><see cref="IntPtr.Size" />,
+		/// so it points to the object's <see cref="ObjHeader"/>.
 		/// </summary>
 		Header,
 
@@ -37,7 +38,7 @@ namespace RazorSharp
 		///     pointer offset by <see cref="RuntimeHelpers.OffsetToStringData" /> so it
 		///     points to the string's characters.
 		///     <remarks>
-		///         Note: Equivalent to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>.
+		///         Note: Equal to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>.
 		///     </remarks>
 		/// </summary>
 		StringData,
@@ -47,7 +48,7 @@ namespace RazorSharp
 		///     the pointer offset by <see cref="RRuntime.OffsetToArrayData" /> so it points
 		///     to the array's elements.
 		///     <remarks>
-		///         Note: Equivalent to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>
+		///         Note: Equal to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>
 		///     </remarks>
 		/// </summary>
 		ArrayData,
@@ -61,7 +62,7 @@ namespace RazorSharp
 
 		/// <summary>
 		///     Don't offset the heap pointer at all, so it
-		///     points to the <see cref="MethodTable"/>
+		///     points to the <see cref="MethodTable" /> pointer.
 		/// </summary>
 		None
 	}
@@ -110,10 +111,12 @@ namespace RazorSharp
 			// Not using LINQ is faster
 			Pointer<FieldDesc>[] fieldDescsPtrs = RRuntime.GetFieldDescs<TType>();
 			List<FieldDesc>      fieldDescs     = new List<FieldDesc>();
-			foreach (Pointer<FieldDesc> p in fieldDescsPtrs)
+			foreach (Pointer<FieldDesc> p in fieldDescsPtrs) {
 				if (p.Reference.CorType == Constants.TypeToCorType<TMember>()) {
 					fieldDescs.Add(p.Reference);
 				}
+			}
+
 
 			Pointer<TMember> rawMemory = AddressOf(ref type);
 
@@ -138,9 +141,9 @@ namespace RazorSharp
 
 		/// <summary>
 		///     Returns the address of a field in the specified type.
-		/// <remarks>
-		/// Note: This does not pin the reference in memory if it is a reference type.
-		/// </remarks>
+		///     <remarks>
+		///         Note: This does not pin the reference in memory if it is a reference type.
+		///     </remarks>
 		/// </summary>
 		/// <param name="instance">Instance of the enclosing type</param>
 		/// <param name="name">Name of the field</param>
@@ -148,14 +151,15 @@ namespace RazorSharp
 		public static IntPtr AddressOfField<T>(ref T instance, string name, bool isAutoProperty = false)
 		{
 			FieldDesc* fd = RRuntime.GetFieldDesc<T>(name, isAutoProperty);
+
+
 			return fd->GetAddress(ref instance);
 		}
 
 		/// <summary>
 		///     <para>Returns the address of a type in memory.</para>
-		///
 		///     <remarks>
-		///         Equals <see cref="CSUnsafe.AsPointer{T}"/>
+		///         Equals <see cref="CSUnsafe.AsPointer{T}" />
 		///     </remarks>
 		/// </summary>
 		/// <param name="t">Type to return the address of</param>
@@ -292,15 +296,15 @@ namespace RazorSharp
 		///     <para>Calculates the size of a reference type in heap memory.</para>
 		///     <para>This is the most accurate size calculation.</para>
 		///     <para>
-		///         This follows the size formula of: (<see cref="MethodTable.BaseSize" />) + (length) * (
-		///         <see cref="MethodTable.ComponentSize" />)
+		///         This follows the size formula of: (<see cref="MethodTable.BaseSize" />) + (length) *
+		///         (<see cref="MethodTable.ComponentSize" />)
 		///     </para>
 		///     <para>where:</para>
 		///     <list type="bullet">
 		///         <item>
 		///             <description>
 		///                 <see cref="MethodTable.BaseSize" /> = The base instance size of a type (24 (x64) or 12 (x86)
-		///                 by default)
+		///                 by default) (<see cref="Constants.MinObjectSize" />)
 		///             </description>
 		///         </item>
 		///         <item>

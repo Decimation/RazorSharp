@@ -6,10 +6,10 @@ using System.Diagnostics;
 using NUnit.Framework;
 using RazorCommon;
 using RazorSharp;
+using RazorSharp.CLR;
+using RazorSharp.CLR.Structures.HeapObjects;
 using RazorSharp.Pointers;
 using RazorSharp.Pointers.Ex;
-using RazorSharp.Runtime;
-using RazorSharp.Runtime.CLRTypes.HeapObjects;
 
 #endregion
 

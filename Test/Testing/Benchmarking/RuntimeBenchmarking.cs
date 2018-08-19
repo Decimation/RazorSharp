@@ -3,7 +3,7 @@
 using BenchmarkDotNet.Attributes;
 using ObjectLayoutInspector;
 using RazorSharp.Analysis;
-using RazorSharp.Runtime;
+using RazorSharp.CLR;
 
 #endregion
 

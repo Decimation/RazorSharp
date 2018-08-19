@@ -7,14 +7,14 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.CLR.Structures;
+using RazorSharp.CLR.Structures.HeapObjects;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime.CLRTypes;
-using RazorSharp.Runtime.CLRTypes.HeapObjects;
 using RazorSharp.Utilities;
 
 #endregion
 
-namespace RazorSharp.Runtime
+namespace RazorSharp.CLR
 {
 
 	/// <summary>

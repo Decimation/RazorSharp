@@ -16,14 +16,13 @@ using RazorSharp.Utilities;
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable BuiltInTypeReferenceStyle
 
-namespace RazorSharp.Runtime.CLRTypes
+namespace RazorSharp.CLR.Structures
 {
 
 	#region
 
 	using DWORD = UInt32;
 	using WORD = UInt16;
-	using unsigned = UInt32;
 
 	#endregion
 

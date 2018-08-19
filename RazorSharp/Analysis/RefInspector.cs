@@ -3,7 +3,8 @@
 using System;
 using RazorCommon;
 using RazorCommon.Strings;
-using RazorSharp.Runtime.CLRTypes;
+using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
 
 #endregion
 
@@ -33,7 +34,7 @@ namespace RazorSharp.Analysis
 
 			internal ReferenceInternalInfo(ref T t) : base(ref t)
 			{
-				Header = Runtime.Runtime.ReadObjHeader(ref t);
+				Header = Runtime.ReadObjHeader(ref t);
 			}
 
 			protected override ConsoleTable ToTable()

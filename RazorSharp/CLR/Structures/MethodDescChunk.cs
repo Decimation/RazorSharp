@@ -5,7 +5,7 @@ using RazorCommon;
 
 #endregion
 
-namespace RazorSharp.Runtime.CLRTypes
+namespace RazorSharp.CLR.Structures
 {
 
 	//todo: verify

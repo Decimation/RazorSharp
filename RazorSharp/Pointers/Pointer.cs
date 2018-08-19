@@ -145,19 +145,32 @@ namespace RazorSharp.Pointers
 			return oldAddr;
 		}
 
+		/// <summary>
+		/// Write to <see cref="Address"/>
+		/// </summary>
+		/// <param name="t">Value to write</param>
+		/// <param name="elemOffset">Element offset</param>
+		/// <typeparam name="TType">Type to write</typeparam>
 		public void Write<TType>(TType t, int elemOffset = 0)
 		{
 			MMemory.Write(Offset<TType>(elemOffset), 0, t);
 		}
 
+		/// <summary>
+		/// Read from <see cref="Address"/>
+		/// </summary>
+		/// <param name="elemOffset">Element offset</param>
+		/// <typeparam name="TType">Type to read</typeparam>
+		/// <returns>The value read from the offset <see cref="Address"/></returns>
 		public TType Read<TType>(int elemOffset = 0)
 		{
-			return MMemory.Read<TType>(Offset<TType>(elemOffset), 0);
+			return MMemory.Read<TType>(Offset<TType>(elemOffset));
 		}
+
 
 		public ref TType AsRef<TType>(int elemOffset = 0)
 		{
-			return ref MMemory.AsRef<TType>(Offset<TType>(elemOffset), 0);
+			return ref MMemory.AsRef<TType>(Offset<TType>(elemOffset));
 		}
 
 		#region Methods

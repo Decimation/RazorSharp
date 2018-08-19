@@ -1,8 +1,8 @@
 #region
 
 using BenchmarkDotNet.Attributes;
-using RazorSharp.Runtime;
-using RazorSharp.Runtime.CLRTypes;
+using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
 
 #endregion
 

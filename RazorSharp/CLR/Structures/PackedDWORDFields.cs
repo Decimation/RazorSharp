@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 // ReSharper disable InconsistentNaming
 // ReSharper disable BuiltInTypeReferenceStyle
 
-namespace RazorSharp.Runtime.CLRTypes
+namespace RazorSharp.CLR.Structures
 {
 
 	#region

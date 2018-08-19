@@ -15,12 +15,11 @@ using RazorCommon;
 
 #endregion
 
-namespace RazorSharp.Runtime.CLRTypes
+namespace RazorSharp.CLR.Structures
 {
 
 	#region
 
-	using DWORD = UInt32;
 	using WORD = UInt16;
 
 	#endregion

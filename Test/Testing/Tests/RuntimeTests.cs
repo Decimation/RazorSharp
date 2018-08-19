@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
-using RazorSharp.Runtime;
-using RazorSharp.Runtime.CLRTypes;
+using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
 
 #endregion
 

@@ -10,8 +10,9 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorInvoke;
 using RazorInvoke.Libraries;
+using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime.CLRTypes;
 
 #endregion
 
@@ -102,7 +103,7 @@ namespace RazorSharp.Experimental
 		{
 			Debug.Assert(mem.Length == Unsafe.SizeOf<T>());
 			fixed (byte* b = mem) {
-				return *(MethodTable**) b == Runtime.Runtime.MethodTableOf<T>();
+				return *(MethodTable**) b == Runtime.MethodTableOf<T>();
 			}
 		}
 

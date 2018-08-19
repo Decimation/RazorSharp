@@ -7,8 +7,9 @@ using System.Text;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
+using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime.CLRTypes;
 
 #endregion
 
@@ -91,7 +92,7 @@ namespace RazorSharp.Analysis
 
 			internal MethodInfo()
 			{
-				MethodDescs = Runtime.Runtime.GetMethodDescs<T>();
+				MethodDescs = Runtime.GetMethodDescs<T>();
 				MethodDescs = MethodDescs.OrderBy(x => (long) x.Reference.Function).ToArray();
 			}
 
@@ -123,7 +124,7 @@ namespace RazorSharp.Analysis
 					FieldDescs = null;
 				}
 				else {
-					FieldDescs = Runtime.Runtime.GetFieldDescs<T>();
+					FieldDescs = Runtime.GetFieldDescs<T>();
 					FieldDescs = FieldDescs.OrderBy(x => x.Reference.Offset).ToArray();
 				}
 
@@ -175,7 +176,7 @@ namespace RazorSharp.Analysis
 
 			protected internal InternalInfo(ref T t)
 			{
-				MethodTable = Runtime.Runtime.ReadMethodTable(ref t);
+				MethodTable = Runtime.ReadMethodTable(ref t);
 				EEClass     = MethodTable->EEClass;
 				Canon       = MethodTable->Canon;
 			}
@@ -207,7 +208,7 @@ namespace RazorSharp.Analysis
 			protected internal MetadataInfo(ref T t)
 			{
 				Value       = t;
-				IsBlittable = Runtime.Runtime.IsBlittable<T>();
+				IsBlittable = Runtime.IsBlittable<T>();
 				IsValueType = typeof(T).IsValueType;
 				IsOnStack   = Memory.Memory.IsOnStack(ref t);
 			}

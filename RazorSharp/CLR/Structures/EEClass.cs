@@ -13,17 +13,14 @@ using RazorSharp.Utilities;
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp.Runtime.CLRTypes
+namespace RazorSharp.CLR.Structures
 {
 
 	// class.h
 
 	#region
 
-	using BYTE = Byte;
-	using QWORD = UInt64;
 	using DWORD = UInt32;
-	using WORD = UInt16;
 
 	#endregion
 
@@ -103,7 +100,7 @@ namespace RazorSharp.Runtime.CLRTypes
 		public TypeAttributes TypeAttributes => (TypeAttributes) Attributes;
 
 		/// <summary>
-		///     Number of bytes to subtract from <see cref="CLRTypes.MethodTable.BaseSize" /> to get the actual number of bytes
+		///     Number of bytes to subtract from <see cref="Structures.MethodTable.BaseSize" /> to get the actual number of bytes
 		///     of instance fields stored in the object on the GC heap.
 		/// </summary>
 		public byte BaseSizePadding => m_cbBaseSizePadding;

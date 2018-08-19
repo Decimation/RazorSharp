@@ -6,8 +6,9 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorInvoke.Libraries;
+using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime.CLRTypes;
 
 #endregion
 
@@ -71,7 +72,9 @@ namespace RazorSharp.Memory
 		{
 			T[] arr = new T[elemCount];
 
-			for (int i = 0; i < elemCount; i++) arr[i] = ptr[i];
+			for (int i = 0; i < elemCount; i++) {
+				arr[i] = ptr[i];
+			}
 
 			return arr;
 		}
@@ -137,7 +140,7 @@ namespace RazorSharp.Memory
 				return false;
 			}
 
-			MethodTable* validMethodTable = Runtime.Runtime.MethodTableOf<T>();
+			MethodTable* validMethodTable = Runtime.MethodTableOf<T>();
 			IntPtr       mt               = Marshal.ReadIntPtr(addrOfPtr);
 			MethodTable* readMethodTable  = *(MethodTable**) mt;
 

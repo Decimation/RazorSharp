@@ -3,7 +3,7 @@
 using System;
 using System.Reflection;
 using BenchmarkDotNet.Attributes;
-using RazorSharp.Runtime;
+using RazorSharp.CLR;
 
 #endregion
 

@@ -3,14 +3,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
-using RazorSharp.Runtime.CLRTypes;
 
 #endregion
 
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp.Runtime
+namespace RazorSharp.CLR
 {
 
 	#region

@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorSharp.CLR;
 
 #endregion
 
@@ -52,7 +53,7 @@ namespace RazorSharp.Experimental
 		public static PinHandleOld<T> Pin(ref T t)
 		{
 			PinHandleOld<T> handle = new PinHandleOld<T>();
-			if (Runtime.Runtime.IsBlittable<T>()) {
+			if (Runtime.IsBlittable<T>()) {
 				handle.m_handle = GCHandle.Alloc(t, GCHandleType.Pinned);
 			}
 			else {

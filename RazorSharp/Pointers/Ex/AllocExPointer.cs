@@ -32,7 +32,7 @@ namespace RazorSharp.Pointers.Ex
 	///     <para></para>
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public sealed unsafe class AllocExPointer<T> : ExPointer<T>, IDisposable, IEnumerable<T>
+	internal sealed unsafe class AllocExPointer<T> : ExPointer<T>, IDisposable, IEnumerable<T>
 	{
 		private class AllocPointerMetadata : PointerMetadata
 		{

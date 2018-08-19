@@ -7,17 +7,20 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using BenchmarkDotNet.Running;
+using NUnit.Framework.Internal;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Analysis;
+using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
 using RazorSharp.Experimental;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime;
-using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;
 using Test.Testing;
+using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
 
 #endregion
@@ -71,23 +74,7 @@ namespace Test
 			return (T*) AddressOf(ref t);
 		}
 
-		private struct HeapPacket { }
 
-		struct Vector
-		{
-			private float x,
-			              y;
-		}
-
-		private static T* alloc<T>() where T : unmanaged
-		{
-			return (T*) Marshal.AllocHGlobal(sizeof(T));
-		}
-
-		private static void free<T>(T* t) where T : unmanaged
-		{
-			Marshal.FreeHGlobal((IntPtr) t);
-		}
 
 
 		public static void Main(string[] args)
@@ -95,31 +82,7 @@ namespace Test
 			// todo: implement dynamic allocation system
 
 
-			string        l       = "foo";
-			PinHandle pin = new ObjectPinHandle(l);
-			Pointer<byte> lpUInt8 = AddressOfHeap(ref l);
-			Console.WriteLine(Hex.ToHex(lpUInt8.Address));
-			for (int i = 0; i < HeapSize(ref l); i++) {
-				Console.Write("{0:X} ", lpUInt8[i]);
-			}
-
-
-			Console.WriteLine();
-
-			RazorAssert.CreatePressure();
-
-			Console.WriteLine(Hex.ToHex(AddressOfHeap(ref l)));
-
-
-			for (int i = 0; i < HeapSize(ref l); i++) {
-				Console.Write("{0:X} ", lpUInt8[i]);
-			}
-
-			Console.WriteLine();
-			pin.Dispose();
 		}
-
-
 
 
 		private static void DumpArray<T>(ref T[] arr) where T : class

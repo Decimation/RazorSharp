@@ -1,4 +1,4 @@
-namespace RazorSharp.Runtime.CLRTypes.HeapObjects
+namespace RazorSharp.CLR.Structures.HeapObjects
 {
 
 	public unsafe interface IHeapObject

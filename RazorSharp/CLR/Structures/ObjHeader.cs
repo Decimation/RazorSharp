@@ -13,7 +13,7 @@ using RazorCommon;
 
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp.Runtime.CLRTypes
+namespace RazorSharp.CLR.Structures
 {
 
 	[StructLayout(LayoutKind.Explicit)]
@@ -27,7 +27,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public UInt32 SyncBlock => m_uSyncBlockValue;
 
-		public SyncBlockFlags BitsAsFlags => (SyncBlockFlags) m_uSyncBlockValue;
+		public SyncBlockFlags SyncBlockAsFlags => (SyncBlockFlags) m_uSyncBlockValue;
 
 		static ObjHeader()
 		{
@@ -46,6 +46,12 @@ namespace RazorSharp.Runtime.CLRTypes
 			// Should be interlocked
 
 			m_uSyncBlockValue &= ~uBit;
+		}
+
+		public bool IsPinned()
+		{
+			//return !!((((CObjectHeader*)this)->GetHeader()->GetBits()) & BIT_SBLK_GC_RESERVE);
+			return !!((SyncBlock & (uint) SyncBlockFlags.BitSblkGcReserve) != 0);
 		}
 
 		public void SetGCBit()
@@ -70,7 +76,7 @@ namespace RazorSharp.Runtime.CLRTypes
 			}
 
 			sb.Remove(sb.Length - 1, 1);
-			return $"Sync block: {m_uSyncBlockValue} ({BitsAsFlags}) [{Collections.ToString(bytes)}] [{sb}]";
+			return $"Sync block: {m_uSyncBlockValue} ({SyncBlockAsFlags}) [{Collections.ToString(bytes)}] [{sb}]";
 		}
 
 		#region Equality

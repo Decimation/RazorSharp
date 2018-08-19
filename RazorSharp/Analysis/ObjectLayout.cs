@@ -4,8 +4,9 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
-using RazorSharp.Runtime.CLRTypes;
 
 #endregion
 
@@ -132,7 +133,7 @@ namespace RazorSharp.Analysis
 			const string paddingStr  = "(padding)";
 			const string paddingByte = "Byte";
 
-			Pointer<FieldDesc>[] fieldDescs = Runtime.Runtime.GetFieldDescs<T>();
+			Pointer<FieldDesc>[] fieldDescs = Runtime.GetFieldDescs<T>();
 			fieldDescs = fieldDescs.OrderBy(x => x.Reference.Offset).ToArray();
 			Collections.RemoveAll(ref fieldDescs, x => x.Reference.IsStatic);
 

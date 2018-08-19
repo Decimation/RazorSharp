@@ -7,9 +7,10 @@ using System.Threading;
 namespace RazorSharp.Experimental
 {
 
+	/// <inheritdoc />
 	/// <summary>
 	///     <para>Pins an object on the heap, so its address stays unchanged during the lifetime of this object.</para>
-	///     <para> Use only if <see cref="System.Runtime.InteropServices.GCHandle" /> cannot be used for the object.</para>
+	///     <para> Use only if <see cref="T:System.Runtime.InteropServices.GCHandle" /> cannot be used for the object.</para>
 	///     <para>
 	///         Note that this class doesn't provide a way to get the data pointer, like GCHandle does, and that's for the
 	///         same reason a pinned GCHandle cannot be used for some objects.

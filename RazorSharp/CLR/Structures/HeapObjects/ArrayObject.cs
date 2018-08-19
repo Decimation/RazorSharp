@@ -1,28 +1,19 @@
 #region
 
 using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 
-// ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable ConvertToAutoProperty
+// ReSharper disable ConvertToAutoPropertyWhenPossible
 
 #endregion
 
-namespace RazorSharp.Runtime.CLRTypes.HeapObjects
+namespace RazorSharp.CLR.Structures.HeapObjects
 {
 
-	#region
-
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-
-	#endregion
-
-
 	/// <summary>
-	///     <para>Represents the layout of <see cref="string" /> in heap memory.</para>
+	///     <para>Represents the layout of an array in heap memory.</para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
 	///         <item>
@@ -38,24 +29,24 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 	///     <para>Lines of interest:</para>
 	///     <list type="bullet">
 	///         <item>
-	///             <description>/src/vm/object.h: 1082</description>
+	///             <description>/src/vm/object.h: 743</description>
 	///         </item>
 	///     </list>
 	///     <remarks>
-	///         Should be used with <see cref="Runtime.GetStringObject(ref string)" /> and double indirection.
+	///         Should be used with <see cref="Runtime.GetArrayObject{T}" /> and double indirection.
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct StringObject : IHeapObject
+	public unsafe struct ArrayObject : IHeapObject
 	{
 		// [FieldOffset(-8) public ObjHeader _header
 
 		[FieldOffset(0)]  private readonly MethodTable* m_methodTablePtr;
-		[FieldOffset(8)]  private readonly uint         m_stringLength;
-		[FieldOffset(12)] private readonly char         m_firstChar;
+		[FieldOffset(8)]  private readonly uint         m_numComponents;
+		[FieldOffset(12)] private readonly uint         m_pad;
 
-		public uint Length    => m_stringLength;
-		public char FirstChar => m_firstChar;
+
+		public uint Length => m_numComponents;
 
 		/// <summary>
 		///     Address-sensitive
@@ -64,17 +55,6 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 
 		public MethodTable* MethodTable => m_methodTablePtr;
 
-		/// <summary>
-		///     Address-sensitive
-		/// </summary>
-		public char this[int index] {
-			get {
-				char* __this = (char*) Unsafe.AddressOf(ref this);
-				Debug.Assert(__this != null, nameof(__this) + " != null");
-				return __this[index + RuntimeHelpers.OffsetToStringData / 2];
-			}
-		}
-
 
 		public override string ToString()
 		{
@@ -82,7 +62,7 @@ namespace RazorSharp.Runtime.CLRTypes.HeapObjects
 			table.AddRow("Header*", Hex.ToHex(Header));
 			table.AddRow("MethodTable*", Hex.ToHex(m_methodTablePtr));
 			table.AddRow("Length", Length);
-			table.AddRow("First char", FirstChar);
+
 
 			return table.ToMarkDownString();
 		}

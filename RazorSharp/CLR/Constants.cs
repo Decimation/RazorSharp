@@ -1,7 +1,7 @@
 #region
 
 using System;
-using RazorSharp.Runtime.CLRTypes;
+using RazorSharp.CLR.Structures;
 
 #endregion
 
@@ -9,7 +9,7 @@ using RazorSharp.Runtime.CLRTypes;
 // ReSharper disable IdentifierTypo
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp.Runtime
+namespace RazorSharp.CLR
 {
 
 	public static unsafe class Constants
@@ -168,7 +168,7 @@ namespace RazorSharp.Runtime
 	/// <summary>
 	///     The value of lowest two bits describe what the union contains
 	///     <remarks>
-	///         Use with <see cref="RazorSharp.Runtime.CLRTypes.MethodTable.UnionType" />
+	///         Use with <see cref="Structures.MethodTable.UnionType" />
 	///     </remarks>
 	/// </summary>
 	[Flags]
