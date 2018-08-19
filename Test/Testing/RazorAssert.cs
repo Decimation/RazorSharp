@@ -7,6 +7,7 @@ using NUnit.Framework;
 using RazorCommon;
 using RazorSharp;
 using RazorSharp.Pointers;
+using RazorSharp.Pointers.Ex;
 using RazorSharp.Runtime;
 using RazorSharp.Runtime.CLRTypes.HeapObjects;
 
@@ -15,7 +16,7 @@ using RazorSharp.Runtime.CLRTypes.HeapObjects;
 namespace Test.Testing
 {
 
-	internal static unsafe class RAssert
+	internal static unsafe class RazorAssert
 	{
 		/// <summary>
 		///     Asserts the ExPointer points to the proper array data.
@@ -44,7 +45,8 @@ namespace Test.Testing
 			int passes = 0;
 			while (passes++ < MaxPasses) {
 				object[] oArr                                 = new object[MaxObjects];
-				for (int i = 0; i < oArr.Length; i++) oArr[i] = new object();
+				for (int i = 0; i < oArr.Length; i++)
+					oArr[i] = new object();
 
 				// pass when reference is pinned
 				Assert.That(mem.stackPtr, Is.EqualTo(Unsafe.AddressOf(ref t)));
@@ -75,6 +77,16 @@ namespace Test.Testing
 			}
 		}
 
+		internal static void CreatePressure()
+		{
+			int passes = 0;
+			while (passes++ < MaxPasses) {
+				object[] oArr = new object[MaxObjects];
+				for (int i = 0; i < oArr.Length; i++)
+					oArr[i] = new object();
+			}
+		}
+
 		/// <summary>
 		///     Asserts that an ExPointer points to the correct object address during GC pressure
 		/// </summary>
@@ -82,8 +94,9 @@ namespace Test.Testing
 		{
 			int passes = 0;
 			while (passes++ < MaxPasses) {
-				object[] oArr                                 = new object[MaxObjects];
-				for (int i = 0; i < oArr.Length; i++) oArr[i] = new object();
+				object[] oArr = new object[MaxObjects];
+				for (int i = 0; i < oArr.Length; i++)
+					oArr[i] = new object();
 
 
 				Assert.That(ptr.Value, Is.EqualTo(t));
@@ -121,8 +134,9 @@ namespace Test.Testing
 		{
 			int passes = 0;
 			while (passes++ < MaxPasses) {
-				object[] oArr                                 = new object[MaxObjects];
-				for (int i = 0; i < oArr.Length; i++) oArr[i] = new object();
+				object[] oArr = new object[MaxObjects];
+				for (int i = 0; i < oArr.Length; i++)
+					oArr[i] = new object();
 			}
 		}
 	}

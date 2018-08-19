@@ -3,6 +3,8 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
+using RazorCommon;
 
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -29,7 +31,7 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		static ObjHeader()
 		{
-			Debug.Assert(sizeof(ObjHeader) == IntPtr.Size);
+			Trace.Assert(sizeof(ObjHeader) == IntPtr.Size);
 		}
 
 		public void SetBit(uint uBit)
@@ -60,8 +62,18 @@ namespace RazorSharp.Runtime.CLRTypes
 
 		public override string ToString()
 		{
-			return $"Sync block: {m_uSyncBlockValue} ({BitsAsFlags})";
+			byte[]        bytes = BitConverter.GetBytes(m_uSyncBlockValue);
+			StringBuilder sb    = new StringBuilder();
+
+			foreach (byte v in bytes) {
+				sb.AppendFormat("{0} ", Convert.ToString(v, 2));
+			}
+
+			sb.Remove(sb.Length - 1, 1);
+			return $"Sync block: {m_uSyncBlockValue} ({BitsAsFlags}) [{Collections.ToString(bytes)}] [{sb}]";
 		}
+
+		#region Equality
 
 		public static bool operator ==(ObjHeader a, ObjHeader b)
 		{
@@ -94,6 +106,10 @@ namespace RazorSharp.Runtime.CLRTypes
 
 			return false;
 		}
+
+		#endregion
+
+
 	}
 
 }

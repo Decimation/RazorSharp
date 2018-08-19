@@ -4,10 +4,18 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
 using RazorCommon;
 using RazorCommon.Strings;
+using RazorSharp;
 using RazorSharp.Analysis;
+using RazorSharp.Experimental;
+using RazorSharp.Memory;
 using RazorSharp.Pointers;
+using RazorSharp.Runtime;
+using RazorSharp.Runtime.CLRTypes;
 using RazorSharp.Utilities;
 using Test.Testing;
 using static RazorSharp.Unsafe;
@@ -19,7 +27,7 @@ namespace Test
 
 	#region
 
-	using CSUnsafe = System.Runtime.CompilerServices;
+	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
 
@@ -63,32 +71,64 @@ namespace Test
 			return (T*) AddressOf(ref t);
 		}
 
+		private struct HeapPacket { }
 
-		struct SStruct
+		struct Vector
 		{
-			public static string Static;
-			public        string Instance;
-
+			private float x,
+			              y;
 		}
 
-		class CClass
+		private static T* alloc<T>() where T : unmanaged
 		{
-			public        string Instance;
-			public static string Static;
+			return (T*) Marshal.AllocHGlobal(sizeof(T));
 		}
+
+		private static void free<T>(T* t) where T : unmanaged
+		{
+			Marshal.FreeHGlobal((IntPtr) t);
+		}
+
 
 		public static void Main(string[] args)
 		{
-			SStruct ss;
-			ss.Instance    = "bar";
-			SStruct.Static = "foo";
+			// todo: implement dynamic allocation system
 
-			WriteOutVal(ref ss, true);
 
-			CClass cc = new CClass();
-			WriteOut(ref cc, true);
+			string        l       = "foo";
+			PinHandle pin = new ObjectPinHandle(l);
+			Pointer<byte> lpUInt8 = AddressOfHeap(ref l);
+			Console.WriteLine(Hex.ToHex(lpUInt8.Address));
+			for (int i = 0; i < HeapSize(ref l); i++) {
+				Console.Write("{0:X} ", lpUInt8[i]);
+			}
 
-			Console.ReadLine();
+
+			Console.WriteLine();
+
+			RazorAssert.CreatePressure();
+
+			Console.WriteLine(Hex.ToHex(AddressOfHeap(ref l)));
+
+
+			for (int i = 0; i < HeapSize(ref l); i++) {
+				Console.Write("{0:X} ", lpUInt8[i]);
+			}
+
+			Console.WriteLine();
+			pin.Dispose();
+		}
+
+
+
+
+		private static void DumpArray<T>(ref T[] arr) where T : class
+		{
+			Pointer<long> lp_rg = AddressOfHeap(ref arr, OffsetType.ArrayData);
+			for (int i = 0; i < arr.Length; i++) {
+				Console.WriteLine("{0} : {1}", Hex.ToHex(lp_rg.Read<long>()), lp_rg.Read<T>());
+				lp_rg++;
+			}
 		}
 
 		private static void TestTypes()
@@ -156,6 +196,12 @@ namespace Test
 			 */
 			Point pt = new Point();
 			WriteOutVal(ref pt);
+
+			/**
+			 * char
+			 */
+			char c = '\0';
+			WriteOutVal(ref c);
 		}
 
 		private static void WriteOutVal<T>(ref T t, bool printStructures = false) where T : struct

@@ -122,11 +122,11 @@
     <Compile Include="Memory\SigScanner.cs" />
     <Compile Include="Misc.cs" />
     <Compile Include="ObjectPinner.cs" />
-    <Compile Include="Pointers\AllocExPointer.cs" />
-    <Compile Include="Pointers\DecayExPointer.cs" />
+      <Compile Include="Pointers\Ex\AllocExPointer.cs"/>
+      <Compile Include="Pointers\Ex\DecayExPointer.cs"/>
+      <Compile Include="Pointers\Ex\ExPointer.cs"/>
     <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
-    <Compile Include="Pointers\ExPointer.cs" />
     <Compile Include="Pointers\PointerUtils.cs" />
     <Compile Include="RazorMath.cs" />
     <Compile Include="Runtime\CLRFunctions.cs" />

@@ -2,6 +2,7 @@
 
 using BenchmarkDotNet.Attributes;
 using RazorSharp.Pointers;
+using RazorSharp.Pointers.Ex;
 
 #endregion
 

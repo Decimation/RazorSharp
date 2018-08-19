@@ -2,6 +2,7 @@
 
 using System;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorSharp.Runtime.CLRTypes;
 
 #endregion
@@ -82,9 +83,10 @@ namespace RazorSharp.Analysis
 				ConsoleTable table = base.ToTable();
 
 				// todo: if the value is boxed
-				if (m_typeName != typeof(T).Name) {
-					table.AttachColumn($"Base fields size <{m_typeName}>", BaseFieldsUnboxed);
-				}
+				//if (m_typeName != typeof(T).Name) {
+				table.AttachColumn($"Base fields size <{m_typeName}> {StringUtils.Superscript(1)}", BaseFieldsUnboxed);
+
+				//}
 
 				table.AttachColumn("Heap size", Heap);
 				table.AttachColumn("Base instance size", BaseInstance);

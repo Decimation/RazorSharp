@@ -8,7 +8,7 @@ using RazorSharp.Utilities;
 
 #endregion
 
-namespace RazorSharp.Pointers
+namespace RazorSharp.Pointers.Ex
 {
 
 	/// <summary>

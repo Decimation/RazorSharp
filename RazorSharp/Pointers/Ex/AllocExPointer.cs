@@ -11,12 +11,10 @@ using RazorCommon.Strings;
 
 #endregion
 
-namespace RazorSharp.Pointers
+namespace RazorSharp.Pointers.Ex
 {
 
 	#region
-
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
 

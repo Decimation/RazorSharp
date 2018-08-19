@@ -5,6 +5,7 @@ using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.Pointers;
+using RazorSharp.Pointers.Ex;
 using RazorSharp.Utilities;
 
 #endregion

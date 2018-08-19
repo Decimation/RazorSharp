@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorInvoke.Libraries;
@@ -119,10 +120,11 @@ namespace RazorSharp.Memory
 			return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
 		}
 
-		public static ref T AsRef<T>(IntPtr p)
+		public static ref T AsRef<T>(IntPtr p, int byteOffset = 0)
 		{
-			return ref CSUnsafe.AsRef<T>(p.ToPointer());
+			return ref CSUnsafe.AsRef<T>(PointerUtils.Add(p, byteOffset).ToPointer());
 		}
+
 
 		public static T As<T>(object o) where T : class
 		{
@@ -153,8 +155,9 @@ namespace RazorSharp.Memory
 		private static void Zero(void* ptr, int length)
 		{
 			byte* memptr = (byte*) ptr;
-			for (int i = 0; i < length; i++)
+			for (int i = 0; i < length; i++) {
 				memptr[i] = 0;
+			}
 		}
 
 		#endregion
@@ -179,14 +182,16 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <typeparam name="T">Value type to allocate</typeparam>
 		/// <returns>A pointer to the allocated memory</returns>
-		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1) where T : struct
+		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
 		{
+			Trace.Assert(elemCnt > 0, "elemCnt <= 0");
 			int    size  = Unsafe.SizeOf<T>() * elemCnt;
 			IntPtr alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
 
 			return alloc;
 		}
+
 
 		public static bool IsAligned(IntPtr p)
 		{

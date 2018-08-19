@@ -39,10 +39,12 @@ namespace RazorSharp.Pointers
 		/// <summary>
 		///     Offsets a pointer by <paramref name="elemCnt" /> elements.
 		/// </summary>
-		/// <param name="p">Pointer</param>
+		/// <param name="p"><see cref="IntPtr" /> pointer</param>
 		/// <param name="elemCnt">Elements to offset by</param>
 		/// <typeparam name="T">Element type</typeparam>
-		/// <returns>The offset pointer</returns>
+		/// <returns>
+		///     <paramref name="p" /> <c>+</c> <c>(</c><paramref name="elemCnt" /> <c>*</c> <see cref="Unsafe.SizeOf{T}" /><c>)</c>
+		/// </returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static IntPtr Offset<T>(IntPtr p, int elemCnt)
 		{
@@ -51,6 +53,15 @@ namespace RazorSharp.Pointers
 			return p + size;
 		}
 
+		/// <summary>
+		///     Offsets a pointer by <paramref name="elemCnt" /> elements.
+		/// </summary>
+		/// <param name="p"><c>void*</c> pointer</param>
+		/// <param name="elemCnt">Elements to offset by</param>
+		/// <typeparam name="T">Element type</typeparam>
+		/// <returns>
+		///     <paramref name="p" /> <c>+</c> <c>(</c><paramref name="elemCnt" /> <c>*</c> <see cref="Unsafe.SizeOf{T}" /><c>)</c>
+		/// </returns>
 		public static IntPtr Offset<T>(void* p, int elemCnt)
 		{
 			return Offset<T>((IntPtr) p, elemCnt);

@@ -2,10 +2,14 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Extensions;
+using RazorSharp.Experimental;
+using RazorSharp.Pointers.Ex;
 
 #endregion
 
@@ -51,13 +55,13 @@ namespace RazorSharp.Pointers
 			set => MMemory.Write(PointerUtils.Offset<T>(m_value, index), 0, value);
 		}*/
 
-		public ref T this[int index] => ref MMemory.AsRef<T>(PointerUtils.Offset<T>(Address, index));
+		public ref T this[int index] => ref MMemory.AsRef<T>(Offset(index));
 
 		public ref T Reference => ref MMemory.AsRef<T>(Address);
 
 		public T Value {
-			get => MMemory.Read<T>((IntPtr) m_value, 0);
-			set => MMemory.Write((IntPtr) m_value, 0, value);
+			get => Read<T>();
+			set => Write(value);
 		}
 
 		public IntPtr Address {
@@ -94,6 +98,46 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private IntPtr Offset(int elemCnt)
+		{
+			return PointerUtils.Offset<T>(Address, elemCnt);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private IntPtr Offset<TType>(int elemCnt)
+		{
+			return PointerUtils.Offset<TType>(Address, elemCnt);
+		}
+
+		public ConsoleTable ToTable(int elemCnt)
+		{
+			ConsoleTable table;
+
+			if (typeof(T).IsValueType) {
+				table = new ConsoleTable("Address", "Offset", "Value");
+			}
+			else {
+				table = new ConsoleTable("Address", "Offset", "Pointer", "Value");
+			}
+
+			for (int i = 0; i < elemCnt; i++) {
+				table.AddRow(Hex.ToHex(Offset(i)), i, Hex.ToHex(Read<long>(i)), this[i]);
+			}
+
+			return table;
+
+		}
+
+		public void Init(params T[] values)
+		{
+			for (int i = 0; i < values.Length; i++) {
+				this[i] = values[i];
+			}
+		}
+
 		public IntPtr MoveDown()
 		{
 			IntPtr oldAddr = Address;
@@ -101,14 +145,19 @@ namespace RazorSharp.Pointers
 			return oldAddr;
 		}
 
-		public void Write<TType>(TType t, int byteOffset = 0)
+		public void Write<TType>(TType t, int elemOffset = 0)
 		{
-			MMemory.Write(Address, byteOffset, t);
+			MMemory.Write(Offset<TType>(elemOffset), 0, t);
 		}
 
-		public TType Read<TType>(int byteOffset = 0)
+		public TType Read<TType>(int elemOffset = 0)
 		{
-			return MMemory.Read<TType>(Address, byteOffset);
+			return MMemory.Read<TType>(Offset<TType>(elemOffset), 0);
+		}
+
+		public ref TType AsRef<TType>(int elemOffset = 0)
+		{
+			return ref MMemory.AsRef<TType>(Offset<TType>(elemOffset), 0);
 		}
 
 		#region Methods
@@ -129,7 +178,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		///     Add the specified number of bytes to the address
+		///     Increment the <see cref="Address" /> by the specified number of bytes
 		/// </summary>
 		/// <param name="bytes">Number of bytes to add</param>
 		public void Add(int bytes)
@@ -138,7 +187,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		///     Subtract the specified number of bytes from the address
+		///     Decrement <see cref="Address" /> by the specified number of bytes
 		/// </summary>
 		/// <param name="bytes">Number of bytes to subtract</param>
 		public void Subtract(int bytes)
@@ -147,19 +196,19 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		///     Increment the address by the specified number of elements
+		///     Increment the <see cref="Address" /> by the specified number of elements
 		/// </summary>
 		/// <param name="elemCnt">Number of elements</param>
-		private void Increment(int elemCnt = 1)
+		public void Increment(int elemCnt = 1)
 		{
 			m_value = PointerUtils.Offset<T>(m_value, elemCnt).ToPointer();
 		}
 
 		/// <summary>
-		///     Decrement the address by the specified number of elements
+		///     Decrement the <see cref="Address" /> by the specified number of elements
 		/// </summary>
 		/// <param name="elemCnt">Number of elements</param>
-		private void Decrement(int elemCnt = 1)
+		public void Decrement(int elemCnt = 1)
 		{
 			m_value = PointerUtils.Offset<T>(m_value, -elemCnt).ToPointer();
 		}
@@ -186,24 +235,58 @@ namespace RazorSharp.Pointers
 
 		#region Arithmetic
 
+		/// <summary>
+		///     Increments the <see cref="Address" /> by the specified number of elements.
+		///     <remarks>
+		///         Equal to <see cref="Pointer{T}.Increment" />
+		///     </remarks>
+		/// </summary>
+		/// <param name="p">
+		///     <see cref="Pointer{T}" />
+		/// </param>
+		/// <param name="i">Number of elements (<see cref="ElementSize" />)</param>
 		public static Pointer<T> operator +(Pointer<T> p, int i)
 		{
 			p.Increment(i);
 			return p;
 		}
 
+		/// <summary>
+		///     Decrements the <see cref="Address" /> by the specified number of elements.
+		///     <remarks>
+		///         Equal to <see cref="Pointer{T}.Decrement" />
+		///     </remarks>
+		/// </summary>
+		/// <param name="p">
+		///     <see cref="Pointer{T}" />
+		/// </param>
+		/// <param name="i">Number of elements (<see cref="ElementSize" />)</param>
 		public static Pointer<T> operator -(Pointer<T> p, int i)
 		{
 			p.Decrement(i);
 			return p;
 		}
 
+		/// <summary>
+		///     Increments the <see cref="Pointer{T}" /> by one element.
+		/// </summary>
+		/// <param name="p">
+		///     <see cref="Pointer{T}" />
+		/// </param>
+		/// <returns>The offset <see cref="Address" /></returns>
 		public static Pointer<T> operator ++(Pointer<T> p)
 		{
 			p.Increment();
 			return p;
 		}
 
+		/// <summary>
+		///     Decrements the <see cref="Pointer{T}" /> by one element.
+		/// </summary>
+		/// <param name="p">
+		///     <see cref="Pointer{T}" />
+		/// </param>
+		/// <returns>The offset <see cref="Address" /></returns>
 		public static Pointer<T> operator --(Pointer<T> p)
 		{
 			p.Decrement();
@@ -234,6 +317,8 @@ namespace RazorSharp.Pointers
 		{
 			return unchecked((int) (long) m_value);
 		}
+
+
 
 		public static bool operator ==(Pointer<T> left, Pointer<T> right)
 		{
@@ -277,6 +362,8 @@ namespace RazorSharp.Pointers
 					goto case "O";
 			}
 		}
+
+
 
 		public override string ToString()
 		{

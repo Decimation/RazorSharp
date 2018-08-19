@@ -28,6 +28,11 @@ namespace RazorSharp
 	public enum OffsetType
 	{
 		/// <summary>
+		/// Return the pointer offset by <c>-</c><see cref="IntPtr.Size"/>
+		/// </summary>
+		Header,
+
+		/// <summary>
 		///     If the type is a <c>string</c>, return the
 		///     pointer offset by <see cref="RuntimeHelpers.OffsetToStringData" /> so it
 		///     points to the string's characters.
@@ -41,6 +46,9 @@ namespace RazorSharp
 		///     If the type is an array, return
 		///     the pointer offset by <see cref="RRuntime.OffsetToArrayData" /> so it points
 		///     to the array's elements.
+		///     <remarks>
+		///         Note: Equivalent to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>
+		///     </remarks>
 		/// </summary>
 		ArrayData,
 
@@ -53,7 +61,7 @@ namespace RazorSharp
 
 		/// <summary>
 		///     Don't offset the heap pointer at all, so it
-		///     points to the <c>MethodTable*</c>.
+		///     points to the <see cref="MethodTable"/>
 		/// </summary>
 		None
 	}
@@ -130,6 +138,9 @@ namespace RazorSharp
 
 		/// <summary>
 		///     Returns the address of a field in the specified type.
+		/// <remarks>
+		/// Note: This does not pin the reference in memory if it is a reference type.
+		/// </remarks>
 		/// </summary>
 		/// <param name="instance">Instance of the enclosing type</param>
 		/// <param name="name">Name of the field</param>
@@ -141,10 +152,10 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		///     Returns the address of a type in memory.
-		///     <para></para>
+		///     <para>Returns the address of a type in memory.</para>
+		///
 		///     <remarks>
-		///         Note: This does not pin the reference in memory if it is a reference type.
+		///         Equals <see cref="CSUnsafe.AsPointer{T}"/>
 		///     </remarks>
 		/// </summary>
 		/// <param name="t">Type to return the address of</param>
@@ -208,6 +219,9 @@ namespace RazorSharp
 				case OffsetType.None:
 					return AddressOfHeap(ref t);
 
+				case OffsetType.Header:
+					return AddressOfHeap(ref t) - IntPtr.Size;
+					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(offset), offset, null);
 			}
@@ -221,7 +235,7 @@ namespace RazorSharp
 		///     Returns the managed size of an object.
 		/// </summary>
 		/// <remarks>
-		///     Returned from <see cref="EEClass.LayoutInfo.ManagedSize" />
+		///     Returned from <see cref="EEClassLayoutInfo.ManagedSize" />
 		/// </remarks>
 		/// <returns>-1 if <typeparamref name="T" /> is an array; managed size otherwise</returns>
 		public static int ManagedSizeOf<T>()
@@ -298,10 +312,10 @@ namespace RazorSharp
 		///     </list>
 		/// </summary>
 		/// <remarks>
-		///     <para>Source: /src/vm/object.inl line 45</para>
+		///     <para>Source: /src/vm/object.inl: 45</para>
 		///     <para>Equals the Son Of Strike "!do" command.</para>
 		///     <para>Equals <see cref="Unsafe.BaseInstanceSize{T}()" /> for objects that aren't arrays or strings.</para>
-		///     <para>Note: This also includes padding.</para>
+		///     <para>Note: This also includes padding and overhead.</para>
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		public static int HeapSize<T>(ref T t) where T : class
