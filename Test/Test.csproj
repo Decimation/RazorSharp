@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+      <DefineConstants>DEBUG;TRACE;CONTRACTS_FULL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -31,7 +31,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
+      <DefineConstants>TRACE;CONTRACTS_FULL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -214,7 +214,7 @@
     <Compile Include="Testing\Benchmarking\UnsafeBenchmarking.cs" />
     <Compile Include="Testing\GenericDummy.cs" />
     <Compile Include="Testing\Point.cs" />
-      <Compile Include="Testing\RazorAssert.cs"/>
+      <Compile Include="Testing\TestingUtil.cs"/>
     <Compile Include="Testing\Benchmarking\AllocPointerBenchmarking.cs" />
     <Compile Include="Testing\Dummy.cs" />
     <Compile Include="Testing\Tests\AllocPointerTests.cs" />
@@ -222,6 +222,7 @@
     <Compile Include="Testing\Tests\OffsetOfTests.cs" />
     <Compile Include="Testing\Tests\PinningTests.cs" />
     <Compile Include="Testing\Tests\PointerTests.cs" />
+      <Compile Include="Testing\Tests\PointerTests2.cs"/>
     <Compile Include="Testing\Tests\RuntimeTests.cs" />
     <Compile Include="Testing\Tests\SizeTests.cs" />
     <Compile Include="Testing\Tests\UnsafeTests.cs" />

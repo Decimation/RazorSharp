@@ -17,7 +17,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
+      <DefineConstants>TRACE;CONTRACTS_FULL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -30,7 +30,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+      <DefineConstants>DEBUG;TRACE;CONTRACTS_FULL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -110,6 +110,8 @@
     <Compile Include="Analysis\Inspector.cs" />
     <Compile Include="Analysis\ObjectLayout.cs" />
     <Compile Include="Analysis\RefInspector.cs" />
+      <Compile Include="CLR\GCHeap.cs"/>
+      <Compile Include="Experimental\FunctionHooker.cs"/>
       <Compile Include="Experimental\ObjectPinHandle.cs"/>
     <Compile Include="Experimental\PinHandle.cs" />
       <Compile Include="Experimental\PinHandleOld.cs"/>
@@ -119,6 +121,7 @@
     <Compile Include="Memory\Asm.cs" />
     <Compile Include="Memory\Memory.cs" />
     <Compile Include="Memory\MemoryInspector.cs" />
+      <Compile Include="Memory\Segments.cs"/>
     <Compile Include="Memory\SigScanner.cs" />
     <Compile Include="Misc.cs" />
     <Compile Include="ObjectPinner.cs" />

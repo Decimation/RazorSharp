@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorSharp.CLR.Structures;
@@ -47,13 +48,20 @@ namespace RazorSharp.CLR
 		/// </summary>
 		public static readonly int OffsetToArrayData = IntPtr.Size * 2;
 
-		internal static readonly Dictionary<FieldDesc, FieldInfo>   FieldMap;
-		internal static readonly Dictionary<MethodDesc, MethodInfo> MethodMap;
+		/// <summary>
+		///     Map of the address of a <see cref="FieldDesc" /> and its corresponding <see cref="FieldInfo" />
+		/// </summary>
+		internal static readonly Dictionary<IntPtr, FieldInfo> FieldAddrMap;
+
+		/// <summary>
+		///     Map of the address of a <see cref="MethodDesc" /> and its corresponding <see cref="MethodInfo" />
+		/// </summary>
+		internal static readonly Dictionary<IntPtr, MethodInfo> MethodAddrMap;
 
 		static Runtime()
 		{
-			FieldMap  = new Dictionary<FieldDesc, FieldInfo>();
-			MethodMap = new Dictionary<MethodDesc, MethodInfo>();
+			FieldAddrMap  = new Dictionary<IntPtr, FieldInfo>();
+			MethodAddrMap = new Dictionary<IntPtr, MethodInfo>();
 		}
 
 		private static void AddSet<TKey, TValue>(Dictionary<TKey, TValue> dict, TKey tk, TValue tv)
@@ -72,16 +80,22 @@ namespace RazorSharp.CLR
 			}
 		}
 
-		private static void AddField(FieldDesc fd, FieldInfo fi)
+		private static void AddField(FieldDesc* fd, FieldInfo fi)
 		{
-			AddSet(FieldMap, fd, fi);
+			AddSet(FieldAddrMap, (IntPtr) fd, fi);
 		}
 
-		private static void AddMethod(MethodDesc md, MethodInfo mi)
+		private static void AddMethod(MethodDesc* md, MethodInfo mi)
 		{
-			AddSet(MethodMap, md, mi);
+			AddSet(MethodAddrMap, (IntPtr) md, mi);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static string CreateFlagsString(object num, Enum e)
+		{
+			string join = e.Join();
+			return join == String.Empty ? $"{num}" : $"{num} ({e.Join()})";
+		}
 
 		#region HeapObjects
 
@@ -197,7 +211,7 @@ namespace RazorSharp.CLR
 			}
 
 			FieldDesc* fd = (FieldDesc*) fi.FieldHandle.Value;
-			AddField(*fd, fi);
+			AddField(fd, fi);
 			return fd;
 		}
 
@@ -231,7 +245,7 @@ namespace RazorSharp.CLR
 			lpFd         = lpFd.OrderBy(x => x.ToInt64()).ToArray();
 
 			for (int i = 0; i < lpFd.Length; i++)
-				AddField(lpFd[i].Reference, fieldHandles[i]);
+				AddField((FieldDesc*) lpFd[i].Address, fieldHandles[i]);
 
 
 			return lpFd;
@@ -280,7 +294,7 @@ namespace RazorSharp.CLR
 		public static MethodDesc* GetMethodDescForMethodInfo(MethodInfo mi)
 		{
 			MethodDesc* md = (MethodDesc*) mi.MethodHandle.Value;
-			AddMethod(*md, mi);
+			AddMethod(md, mi);
 			return md;
 		}
 
@@ -295,25 +309,33 @@ namespace RazorSharp.CLR
 			Pointer<MethodDesc>[] arr     = new Pointer<MethodDesc>[methods.Length];
 
 
-			for (int i = 0; i < arr.Length; i++)
+			for (int i = 0; i < arr.Length; i++) {
 				arr[i] = (MethodDesc*) methods[i].MethodHandle.Value;
+
+//				RuntimeHelpers.PrepareMethod(methods[i].MethodHandle);
+			}
+
 
 			methods = methods.OrderBy(x => x.MethodHandle.Value.ToInt64()).ToArray();
 			arr     = arr.OrderBy(x => x.ToInt64()).ToArray();
 
 			for (int i = 0; i < arr.Length; i++)
-				AddMethod(arr[i].Reference, methods[i]);
+				AddMethod((MethodDesc*) arr[i].Address, methods[i]);
 
 			return arr;
 		}
 
 		public static MethodDesc* GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
 		{
-			MethodInfo          methodInfo   = t.GetMethod(name, flags);
+			MethodInfo methodInfo = t.GetMethod(name, flags);
+			Debug.Assert(methodInfo != null, nameof(methodInfo) + " != null");
 			RuntimeMethodHandle methodHandle = methodInfo.MethodHandle;
 			MethodDesc*         md           = (MethodDesc*) methodHandle.Value;
 
-			AddMethod(*md, methodInfo);
+			// JIT the method
+//			RuntimeHelpers.PrepareMethod(methodHandle);
+
+			AddMethod(md, methodInfo);
 			return md;
 		}
 

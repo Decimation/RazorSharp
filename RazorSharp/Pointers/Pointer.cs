@@ -2,13 +2,11 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Extensions;
-using RazorSharp.Experimental;
 using RazorSharp.Pointers.Ex;
 
 #endregion
@@ -99,7 +97,6 @@ namespace RazorSharp.Pointers
 		#endregion
 
 
-
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private IntPtr Offset(int elemCnt)
 		{
@@ -128,7 +125,6 @@ namespace RazorSharp.Pointers
 			}
 
 			return table;
-
 		}
 
 		public void Init(params T[] values)
@@ -146,7 +142,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Write to <see cref="Address"/>
+		///     Write to <see cref="Address" />
 		/// </summary>
 		/// <param name="t">Value to write</param>
 		/// <param name="elemOffset">Element offset</param>
@@ -157,11 +153,11 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Read from <see cref="Address"/>
+		///     Read from <see cref="Address" />
 		/// </summary>
 		/// <param name="elemOffset">Element offset</param>
 		/// <typeparam name="TType">Type to read</typeparam>
-		/// <returns>The value read from the offset <see cref="Address"/></returns>
+		/// <returns>The value read from the offset <see cref="Address" /></returns>
 		public TType Read<TType>(int elemOffset = 0)
 		{
 			return MMemory.Read<TType>(Offset<TType>(elemOffset));
@@ -332,7 +328,6 @@ namespace RazorSharp.Pointers
 		}
 
 
-
 		public static bool operator ==(Pointer<T> left, Pointer<T> right)
 		{
 			return left.Equals(right);
@@ -375,7 +370,6 @@ namespace RazorSharp.Pointers
 					goto case "O";
 			}
 		}
-
 
 
 		public override string ToString()

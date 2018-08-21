@@ -48,11 +48,17 @@ namespace RazorSharp.Analysis
 
 		public sealed class ReferenceMetadataInfo : MetadataInfo
 		{
-			internal ReferenceMetadataInfo(ref T t) : base(ref t) { }
+			public bool IsHeapPointer { get; }
+
+			internal ReferenceMetadataInfo(ref T t) : base(ref t)
+			{
+				IsHeapPointer = GCHeap.IsHeapPointer(t);
+			}
 
 			protected override ConsoleTable ToTable()
 			{
 				ConsoleTable table = base.ToTable();
+				table.AddRow("Heap pointer", IsHeapPointer ? StringUtils.Check : StringUtils.BallotX);
 				return table;
 			}
 		}

@@ -17,15 +17,15 @@ namespace Test.Testing.Tests
 		{
 			object       x = "foo";
 			HeapObject** h = Runtime.GetHeapObject(ref x);
-			RazorAssert.HeapObject(ref x, h);
+			TestingUtil.HeapObject(ref x, h);
 
 			string         s      = "foo";
 			StringObject** strObj = Runtime.GetStringObject(ref s);
-			RazorAssert.StringObject(ref s, strObj);
+			TestingUtil.StringObject(ref s, strObj);
 
 			int[]         arr    = {1, 2, 3};
 			ArrayObject** arrObj = Runtime.GetArrayObject(ref arr);
-			RazorAssert.ArrayObject(ref arr, arrObj);
+			TestingUtil.ArrayObject(ref arr, arrObj);
 
 			s += " bar";
 			Assert.That(s.Length, Is.EqualTo((**strObj).Length));

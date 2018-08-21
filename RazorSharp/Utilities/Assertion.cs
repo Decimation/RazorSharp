@@ -4,7 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.ExceptionServices;
-using RazorCommon;
+using RazorSharp.CLR;
 
 #endregion
 
@@ -13,7 +13,7 @@ namespace RazorSharp.Utilities
 
 	internal static class Assertion
 	{
-		internal const string WIPString = "(wip)";
+
 
 		/// <summary>
 		///     Asserts that TActual is TExpected
@@ -27,26 +27,14 @@ namespace RazorSharp.Utilities
 			}
 		}
 
-		/// <summary>
-		///     Inverse of AssertType
-		/// </summary>
-		/// <typeparam name="TNegative">Type that TActual can't be</typeparam>
-		/// <typeparam name="TActual">Supplied type</typeparam>
-		private static void NegativeAssertType<TNegative, TActual>()
-		{
-			if (typeof(TNegative) == typeof(TActual)) {
-				TypeException.Throw<TActual, TNegative>();
-			}
-		}
-
 		internal static void AssertNoThrows<TException>(Action action) where TException : Exception
 		{
-			Debug.Assert(!Throws<TException>(action));
+			Trace.Assert(!Throws<TException>(action));
 		}
 
 		internal static void AssertThrows<TException>(Action action) where TException : Exception
 		{
-			Debug.Assert(Throws<TException>(action));
+			Trace.Assert(Throws<TException>(action));
 		}
 
 		[HandleProcessCorruptedStateExceptions]
@@ -62,42 +50,27 @@ namespace RazorSharp.Utilities
 			return false;
 		}
 
-		[HandleProcessCorruptedStateExceptions]
-		internal static bool Throws<TException1, TException2>(Action action)
-			where TException1 : Exception where TException2 : Exception
-		{
-			try {
-				action();
-			}
-			catch (TException1) {
-				return true;
-			}
-			catch (TException2) {
-				return true;
-			}
-
-			return false;
-		}
-
-		internal static void WeakAssertEqual<T>(params T[] values)
-		{
-			if (values == null || values.Length == 0) {
-				return;
-			}
-
-			if (!values.All(v => v.Equals(values[0]))) {
-				Logger.Log(Level.Warning, Flags.Debug,
-					"Equality assertion of {0} failed", Collections.ToString(values));
-			}
-		}
-
 		internal static void AssertEqual<T>(params T[] values)
 		{
 			if (values == null || values.Length == 0) {
 				return;
 			}
 
-			Debug.Assert(values.All(v => v.Equals(values[0])));
+			Trace.Assert(values.All(v => v.Equals(values[0])));
+		}
+
+		internal static void AssertFieldDescAddress(IntPtr __this)
+		{
+			if (!Runtime.FieldAddrMap.ContainsKey(__this)) {
+				throw new RuntimeException("FieldDesc* has incorrect address. Is the FieldDesc* dereferenced?");
+			}
+		}
+
+		internal static void AssertMethodDescAddress(IntPtr __this)
+		{
+			if (!Runtime.MethodAddrMap.ContainsKey(__this)) {
+				throw new RuntimeException("MethodDesc* has incorrect address. Is the MethodDesc* dereferenced?");
+			}
 		}
 	}
 

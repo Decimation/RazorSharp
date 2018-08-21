@@ -2,6 +2,10 @@
 
 using System;
 
+// ReSharper disable ConvertToAutoProperty
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+// ReSharper disable FieldCanBeMadeReadOnly.Local
+
 #endregion
 
 // ReSharper disable UnusedMember.Global

@@ -29,7 +29,7 @@ namespace RazorSharp
 	{
 		/// <summary>
 		///     Return the pointer offset by <c>-</c><see cref="IntPtr.Size" />,
-		/// so it points to the object's <see cref="ObjHeader"/>.
+		///     so it points to the object's <see cref="ObjHeader" />.
 		/// </summary>
 		Header,
 
@@ -139,6 +139,11 @@ namespace RazorSharp
 
 		#region Address
 
+		public static IntPtr AddressOfFunction<T>(string fnName)
+		{
+			return Runtime.GetMethodDesc<T>(fnName)->Function;
+		}
+
 		/// <summary>
 		///     Returns the address of a field in the specified type.
 		///     <remarks>
@@ -225,7 +230,6 @@ namespace RazorSharp
 
 				case OffsetType.Header:
 					return AddressOfHeap(ref t) - IntPtr.Size;
-					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(offset), offset, null);
 			}

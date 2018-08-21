@@ -10,6 +10,14 @@ namespace RazorSharp.Pointers
 
 	public static unsafe class PointerUtils
 	{
+		public static IntPtr Subtract(IntPtr a, IntPtr b)
+		{
+			long al = a.ToInt64();
+			long bl = b.ToInt64();
+			long c  = al - bl;
+			return (IntPtr) c;
+		}
+
 		public static IntPtr Subtract(void* v, int bytes)
 		{
 			return (IntPtr) ((long) v - bytes);
@@ -28,6 +36,12 @@ namespace RazorSharp.Pointers
 		public static IntPtr Add(IntPtr p, int bytes)
 		{
 			return p + bytes;
+		}
+
+		public static IntPtr Add(IntPtr p, long l)
+		{
+			long v = p.ToInt64() + l;
+			return (IntPtr) v;
 		}
 
 		public static IntPtr Add(IntPtr p, IntPtr b)

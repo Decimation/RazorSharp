@@ -8,7 +8,6 @@ using RazorCommon;
 using RazorSharp;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures.HeapObjects;
-using RazorSharp.Pointers;
 using RazorSharp.Pointers.Ex;
 
 #endregion
@@ -16,7 +15,7 @@ using RazorSharp.Pointers.Ex;
 namespace Test.Testing
 {
 
-	internal static unsafe class RazorAssert
+	internal static unsafe class TestingUtil
 	{
 		/// <summary>
 		///     Asserts the ExPointer points to the proper array data.
@@ -44,7 +43,7 @@ namespace Test.Testing
 
 			int passes = 0;
 			while (passes++ < MaxPasses) {
-				object[] oArr                                 = new object[MaxObjects];
+				object[] oArr = new object[MaxObjects];
 				for (int i = 0; i < oArr.Length; i++)
 					oArr[i] = new object();
 

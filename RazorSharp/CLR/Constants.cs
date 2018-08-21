@@ -391,7 +391,7 @@ namespace RazorSharp.CLR
 	///     </remarks>
 	/// </summary>
 	[Flags]
-	internal enum MethodDescFlags2 : byte
+	public enum MethodDescFlags2 : byte
 	{
 		/// <summary>
 		///     The method entrypoint is stable (either precode or actual code)
@@ -429,7 +429,7 @@ namespace RazorSharp.CLR
 	///     </remarks>
 	/// </summary>
 	[Flags]
-	internal enum MethodDescFlags3 : ushort
+	public enum MethodDescFlags3 : ushort
 	{
 
 		TokenRemainderMask = 0x3FFF,
@@ -685,6 +685,93 @@ namespace RazorSharp.CLR
 		                    (HasVariance & 0) |
 		                    (HasDefaultCtor & 0) |
 		                    (HasPreciseInitCctors & 0)
+	}
+
+	// Used in MethodDesc
+	public enum MethodClassification
+	{
+		/// <summary>
+		///     IL
+		/// </summary>
+		mcIL = 0,
+
+		/// <summary>
+		///     FCall(also includes tlbimped ctor, Delegate ctor)
+		/// </summary>
+		mcFCall = 1,
+		mcNDirect      = 2, // N/Direct
+		mcEEImpl       = 3, // special method; implementation provided by EE (like Delegate Invoke)
+		mcArray        = 4, // Array ECall
+		mcInstantiated = 5, // Instantiated generic methods, including descriptors
+		// for both shared and unshared code (see InstantiatedMethodDesc)
+
+//#ifdef FEATURE_COMINTEROP
+		// This needs a little explanation.  There are MethodDescs on MethodTables
+		// which are Interfaces.  These have the mdcInterface bit set.  Then there
+		// are MethodDescs on MethodTables that are Classes, where the method is
+		// exposed through an interface.  These do not have the mdcInterface bit set.
+		//
+		// So, today, a dispatch through an 'mdcInterface' MethodDesc is either an
+		// error (someone forgot to look up the method in a class' VTable) or it is
+		// a case of COM Interop.
+
+		mcComInterop = 6,
+
+//#endif                 // FEATURE_COMINTEROP
+		mcDynamic = 7, // for method desc with no metadata behind
+		mcCount,
+	};
+
+	[Flags]
+	public enum MethodDescClassification : ushort
+	{
+
+
+		/// <summary>
+		///     Method is IL, FCall etc., see MethodClassification above.
+		/// </summary>
+		mdcClassification = 0x0007,
+		mdcClassificationCount = mdcClassification + 1,
+
+		// Note that layout of code:MethodDesc::s_ClassificationSizeTable depends on the exact values
+		// of mdcHasNonVtableSlot and mdcMethodImpl
+
+		// Has local slot (vs. has real slot in MethodTable)
+		mdcHasNonVtableSlot = 0x0008,
+
+		// Method is a body for a method impl (MI_MethodDesc, MI_NDirectMethodDesc, etc)
+		// where the function explicitly implements IInterface.foo() instead of foo().
+		mdcMethodImpl = 0x0010,
+
+		/// <summary>
+		///     Method is static
+		/// </summary>
+		mdcStatic = 0x0020,
+
+		// unused                           = 0x0040,
+		// unused                           = 0x0080,
+		// unused                           = 0x0100,
+		// unused                           = 0x0200,
+
+		// Duplicate method. When a method needs to be placed in multiple slots in the
+		// method table, because it could not be packed into one slot. For eg, a method
+		// providing implementation for two interfaces, MethodImpl, etc
+		mdcDuplicate = 0x0400,
+
+		// Has this method been verified?
+		mdcVerifiedState = 0x0800,
+
+		// Is the method verifiable? It needs to be verified first to determine this
+		mdcVerifiable = 0x1000,
+
+		// Is this method ineligible for inlining?
+		mdcNotInline = 0x2000,
+
+		// Is the method synchronized
+		mdcSynchronized = 0x4000,
+
+		// Does the method's slot number require all 16 bits
+		mdcRequiresFullSlotNumber = 0x8000
 	}
 
 	/// <summary>

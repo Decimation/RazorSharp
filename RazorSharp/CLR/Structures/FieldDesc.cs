@@ -84,15 +84,16 @@ namespace RazorSharp.CLR.Structures
 
 
 		/// <summary>
-		///     Offset in heap memory
+		///     Offset in memory
 		/// </summary>
 		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
+
+
+		private int Type => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
 
 		/// <summary>
 		///     Field type
 		/// </summary>
-		private int Type => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
-
 		public CorElementType CorType => (CorElementType) Type;
 
 
@@ -102,12 +103,12 @@ namespace RazorSharp.CLR.Structures
 		public bool IsStatic => Memory.Memory.ReadBit(m_dword1, 24);
 
 		/// <summary>
-		///     Whether the field is decorated with a ThreadStatic attribute
+		///     Whether the field is decorated with a <see cref="ThreadStaticAttribute" /> attribute
 		/// </summary>
 		public bool IsThreadLocal => Memory.Memory.ReadBit(m_dword1, 25);
 
 		/// <summary>
-		///     Unknown
+		///     Unknown (Relative Virtual Address) ?
 		/// </summary>
 		public bool IsRVA => Memory.Memory.ReadBit(m_dword1, 26);
 
@@ -129,6 +130,7 @@ namespace RazorSharp.CLR.Structures
 
 				if (s == -1) {
 					fixed (FieldDesc* __this = &this) {
+						Assertion.AssertFieldDescAddress((IntPtr) __this);
 						return CLRFunctions.FieldDescFunctions.LoadSize(__this);
 					}
 				}
@@ -142,7 +144,33 @@ namespace RazorSharp.CLR.Structures
 			return FieldInfo.GetValue(t);
 		}
 
-		public FieldInfo FieldInfo => Runtime.FieldMap[this];
+		public object GetValue()
+		{
+			return FieldInfo.GetValue(null);
+		}
+
+		public void SetValue(object value)
+		{
+			FieldInfo.SetValue(null, value);
+		}
+
+		public void SetValue<TInstance>(TInstance t, object value)
+		{
+			FieldInfo.SetValue(t, value);
+		}
+
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
+		public FieldInfo FieldInfo {
+			get {
+				IntPtr __this = Unsafe.AddressOf(ref this);
+				Assertion.AssertFieldDescAddress(__this);
+				return Runtime.FieldAddrMap[__this];
+			}
+		}
 
 		/// <summary>
 		///     Returns the address of the field in the specified type.
@@ -157,12 +185,10 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		public IntPtr GetAddress<TInstance>(ref TInstance t)
 		{
-			if (IsStatic) {
-				throw new RuntimeException("You cannot get the address of a static field (yet)");
-			}
+			Trace.Assert(!IsStatic, "You cannot get the address of a static field (yet)");
+			Trace.Assert(Runtime.ReadMethodTable(ref t) == MethodTableOfEnclosingClass);
+			Trace.Assert(Offset != FieldOffsetNewEnC);
 
-			Debug.Assert(Runtime.ReadMethodTable(ref t) == MethodTableOfEnclosingClass);
-			Debug.Assert(Offset != FieldOffsetNewEnC);
 
 			IntPtr data = Unsafe.AddressOf(ref t);
 			if (typeof(TInstance).IsValueType) {
@@ -176,34 +202,22 @@ namespace RazorSharp.CLR.Structures
 		}
 
 
+		public string Name => FieldInfo.Name;
+
 		/// <summary>
-		///     Slower than using Reflection
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public string Name {
+		public MethodTable* MethodTableOfEnclosingClass {
 			get {
-#if SIGSCAN
-				fixed (FieldDesc* __this = &this) {
-					byte* lpcutf8 = CLRFunctions.FieldDescFunctions.GetName(__this);
-					return CLRFunctions.StringFunctions.NewString(lpcutf8);
-				}
-#endif
-				return FieldInfo.Name;
+				IntPtr __this = Unsafe.AddressOf(ref this);
 
-
-//				return Assertion.WIPString;
+				Assertion.AssertFieldDescAddress(__this);
+				return (MethodTable*) PointerUtils.Add(__this.ToPointer(), m_pMTOfEnclosingClass);
 			}
 		}
 
-		/// <summary>
-		///     <remarks>
-		///         Address-sensitive
-		///     </remarks>
-		/// </summary>
-		public MethodTable* MethodTableOfEnclosingClass =>
-			(MethodTable*) PointerUtils.Add(Unsafe.AddressOf(ref this).ToPointer(), m_pMTOfEnclosingClass);
 
 		public bool RequiresFullMBValue => Memory.Memory.ReadBit(m_dword1, 31);
 

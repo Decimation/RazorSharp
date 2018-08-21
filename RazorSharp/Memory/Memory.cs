@@ -128,10 +128,14 @@ namespace RazorSharp.Memory
 			return ref CSUnsafe.AsRef<T>(PointerUtils.Add(p, byteOffset).ToPointer());
 		}
 
-
 		public static T As<T>(object o) where T : class
 		{
 			return CSUnsafe.As<T>(o);
+		}
+
+		public static TTo As<TFrom, TTo>(ref TFrom t)
+		{
+			return CSUnsafe.As<TFrom, TTo>(ref t);
 		}
 
 		public static bool IsValid<T>(IntPtr addrOfPtr) where T : class
@@ -146,7 +150,6 @@ namespace RazorSharp.Memory
 
 			return readMethodTable->Equals(*validMethodTable);
 		}
-
 
 		#region Zero
 
@@ -187,7 +190,7 @@ namespace RazorSharp.Memory
 		/// <returns>A pointer to the allocated memory</returns>
 		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
 		{
-			Trace.Assert(elemCnt > 0, "elemCnt <= 0");
+			Trace.Assert(elemCnt > 0, "elemCnt > 0");
 			int    size  = Unsafe.SizeOf<T>() * elemCnt;
 			IntPtr alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
@@ -195,6 +198,16 @@ namespace RazorSharp.Memory
 			return alloc;
 		}
 
+		public static bool IsAligned<T>(int byteAlignment)
+		{
+			int size = Unsafe.SizeOf<T>();
+			return (size & (byteAlignment - 1)) == 0;
+		}
+
+		public static bool IsAligned<T>()
+		{
+			return IsAligned<T>(IntPtr.Size);
+		}
 
 		public static bool IsAligned(IntPtr p)
 		{

@@ -2,8 +2,11 @@
 
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using RazorCommon;
+using RazorSharp.Utilities;
 
 #endregion
 
@@ -11,6 +14,8 @@ namespace RazorSharp.CLR.Structures
 {
 
 	#region
+
+	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
 
@@ -38,8 +43,10 @@ namespace RazorSharp.CLR.Structures
 	///     </list>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public struct MethodDesc
+	public unsafe struct MethodDesc
 	{
+
+		#region Fields
 
 		[FieldOffset(0)] private readonly ushort m_wFlags3AndTokenRemainder;
 		[FieldOffset(2)] private readonly byte   m_chunkIndex;
@@ -47,7 +54,48 @@ namespace RazorSharp.CLR.Structures
 		[FieldOffset(4)] private readonly ushort m_wSlotNumber;
 		[FieldOffset(6)] private readonly ushort m_wFlags;
 
-		public MethodInfo MethodInfo => Runtime.MethodMap[this];
+		/// <summary>
+		///     Valid only if the function is non-virtual and non-abstract
+		/// </summary>
+		[FieldOffset(8)] private void* m_functionPtr;
+
+		#endregion
+
+		#region Accessors
+
+		public IntPtr Function => MethodInfo.MethodHandle.GetFunctionPointer();
+		public string Name     => MethodInfo.Name;
+
+
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
+		public MethodInfo MethodInfo {
+			get {
+				IntPtr __this = Unsafe.AddressOf(ref this);
+				Assertion.AssertMethodDescAddress(__this);
+				MethodInfo m = Runtime.MethodAddrMap[__this];
+				return m;
+			}
+		}
+
+		#region Flags
+
+		public MethodClassification Classification =>
+			(MethodClassification) (m_wFlags & (ushort) MethodDescClassification.mdcClassification);
+
+		public MethodAttributes         Attributes => MethodInfo.Attributes;
+		public MethodDescClassification Flags      => (MethodDescClassification) m_wFlags;
+		public MethodDescFlags2         Flags2     => (MethodDescFlags2) m_bFlags2;
+		public MethodDescFlags3         Flags3     => (MethodDescFlags3) m_wFlags3AndTokenRemainder;
+
+		#endregion
+
+		#endregion
+
+		#region Equality
 
 		public bool Equals(MethodDesc md)
 		{
@@ -62,7 +110,7 @@ namespace RazorSharp.CLR.Structures
 
 		public override bool Equals(object obj)
 		{
-			if (obj.GetType() == GetType()) {
+			if (obj != null && obj.GetType() == GetType()) {
 				MethodDesc md = (MethodDesc) obj;
 				return md.Equals(this);
 			}
@@ -82,95 +130,127 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
+		#endregion
+
 
 /*		// Note: This doesn't actually seem to be in the source code, but it matches
 		// MethodHandle.GetFunctionPointer for non-virtual functions
-//		[FieldOffset(8)] private readonly void*  m_function;
+//		[FieldOffset(8)] private readonly void*  m_function;*/
 
 
-		public TDelegate GetDelegate<TDelegate>() where TDelegate : Delegate
+		/*public object Invoke<TDelegate>(params object[] args) where TDelegate : Delegate
 		{
-			var del = Marshal.GetDelegateForFunctionPointer<TDelegate>((IntPtr) m_function);
-
-			RuntimeHelpers.PrepareDelegate(del);
-
-			return del;
+			TDelegate d = GetDelegate<TDelegate>();
+			Trace.Assert(MethodInfo.IsStatic && (Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) ||
+			                                     Flags2.HasFlag(MethodDescFlags2.HasPrecode)));
+			return d.DynamicInvoke(args);
 		}
 
 		/// <summary>
-		/// Invokes a non-virtual method that uses the "this" pointer. That is, the method uses instance fields.
+		/// Invokes the target method.
 		/// </summary>
-		/// <param name="instance">Instance to invoke the method upon</param>
+		/// <param name="instance">Instance to invoke the method upon. If the method is static, the parameter is
+		/// ignored</param>
 		/// <param name="args">Parameters for the method, if any</param>
-		public void Invoke<TInstance, TDelegate>(ref TInstance instance, params object[] args) where TDelegate : Delegate
+		public object Invoke<TInstance, TDelegate>(ref TInstance instance, params object[] args)
+			where TDelegate : Delegate
 		{
 			TDelegate d = GetDelegate<TDelegate>();
+
+			Trace.Assert((Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) ||
+			              Flags2.HasFlag(MethodDescFlags2.HasPrecode)));
+
+			if (MethodInfo.IsStatic) {
+				return d.DynamicInvoke(args);
+			}
+
 
 			var __this = Unsafe.AddressOf(ref instance);
 			if (!typeof(TInstance).IsValueType) {
 				__this = Marshal.ReadIntPtr(__this);
 			}
 
-			if (args.Length == 0)
-				d.DynamicInvoke(__this);
-			else
-				d.DynamicInvoke(__this, args);
+			object o = args.Length == 0 ? d.DynamicInvoke(__this) : d.DynamicInvoke(__this, args);
+
+			if (MethodInfo.ReturnType.IsValueType) {
+				return o;
+			}
+			else {
+				IntPtr heapPtr = (IntPtr) Int64.Parse(o.ToString());
+
+				return Misc.InvokeGenericMethod(typeof(CSUnsafe), "Read", MethodInfo.ReturnType, instance,new IntPtr(&heapPtr));
+
+			}
+
+
+			return o;
+		}
+
+		public object IntrinsicInvoke<TDelegate>(params object[] args) where TDelegate : Delegate
+		{
+			TDelegate d = GetDelegate<TDelegate>();
+			return d.DynamicInvoke(args);
 		}*/
 
-		/// <summary>
-		///     Slightly slower than using MethodHandle.GetFunctionPointer
-		///     <remarks>
-		///         Address-sensitive
-		///     </remarks>
-		/// </summary>
-		public IntPtr Function {
-			get {
-#if SIGSCAN
-				fixed (MethodDesc* __this = &this) {
-					return CLRFunctions.MethodDescFunctions.GetMultiCallableAddrOfCode(__this);
-				}
-#endif
-
-				return MethodInfo.MethodHandle.GetFunctionPointer();
+		public void SetFunctionPointer(IntPtr p)
+		{
+			if (Attributes.HasFlag(MethodAttributes.Virtual) || Attributes.HasFlag(MethodAttributes.Abstract)) {
+				throw new RuntimeException("Function is virtual/abstract");
 			}
-		}
 
-		/// <summary>
-		///     Slower than using Reflection
-		///     <remarks>
-		///         Address-sensitive
-		///     </remarks>
-		/// </summary>
-		public string Name {
-			get {
-#if SIGSCAN
-				fixed (MethodDesc* __this = &this) {
-					byte* lpcutf8 = CLRFunctions.MethodDescFunctions.GetName(__this);
-					return CLRFunctions.StringFunctions.NewString(lpcutf8);
-				}
-#endif
-				return MethodInfo.Name;
-			}
+			m_functionPtr = p.ToPointer();
 		}
 
 
-		private MethodDescFlags2 Flags2 => (MethodDescFlags2) m_bFlags2;
-		private MethodDescFlags3 Flags3 => (MethodDescFlags3) m_wFlags3AndTokenRemainder;
+		public TDelegate GetDelegate<TDelegate>() where TDelegate : Delegate
+		{
+			return Marshal.GetDelegateForFunctionPointer<TDelegate>(Function);
+		}
+
+		public void Prepare()
+		{
+			if (!Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) || !Flags2.HasFlag(MethodDescFlags2.HasPrecode)) {
+				RuntimeHelpers.PrepareMethod(MethodInfo.MethodHandle);
+			}
+		}
+
+		private string CreateSignatureString()
+		{
+			ParameterInfo[] param = MethodInfo.GetParameters();
+			if (param.Length == 0) {
+				return String.Format("{0}()", Name);
+			}
+
+			StringBuilder sb = new StringBuilder();
+
+			sb.AppendFormat("{0}(", Name);
+			foreach (ParameterInfo v in param) {
+				sb.AppendFormat("{0} {1}, ", v.ParameterType.Name, v.Name);
+			}
+
+			sb[sb.Length - 2] = ')';
+
+			return sb.ToString();
+		}
 
 		public override string ToString()
 		{
 			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Name", Name);
+			table.AddRow("Signature", CreateSignatureString());
 			table.AddRow("Function", Hex.ToHex(Function));
-			table.AddRow(nameof(m_wFlags3AndTokenRemainder), m_wFlags3AndTokenRemainder);
-			table.AddRow(nameof(m_chunkIndex), m_chunkIndex);
-			table.AddRow(nameof(m_bFlags2), m_bFlags2);
-			table.AddRow(nameof(m_wSlotNumber), m_wSlotNumber);
-			table.AddRow(nameof(m_wFlags), m_wFlags);
+
+			table.AddRow("m_functionPtr", Hex.ToHex(m_functionPtr));
+
+			table.AddRow("Chunk index", m_chunkIndex);
+			table.AddRow("Slot number", m_wSlotNumber);
+			table.AddRow("Attributes", Attributes);
 
 
-			table.AddRow("Flags2", Flags2.Join());
-			table.AddRow("Flags3", Flags3.Join());
+			table.AddRow("Classification", Classification.Join());
+			table.AddRow("Flags", Runtime.CreateFlagsString(m_wFlags, Flags));
+			table.AddRow("Flags 2", Runtime.CreateFlagsString(m_bFlags2, Flags2));
+			table.AddRow("Flags 3", Runtime.CreateFlagsString(m_wFlags3AndTokenRemainder, Flags3));
 
 
 			return table.ToMarkDownString();

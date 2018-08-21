@@ -79,7 +79,10 @@ namespace RazorSharp.Analysis
 
 		private byte[] TryGetObjHeaderAsBytes()
 		{
-			return typeof(T).IsValueType ? null : Memory.Memory.ReadBytes(m_addr, -IntPtr.Size, sizeof(ObjHeader));
+			// Only read the second DWORD; the first DWORD is alignment padding
+			return typeof(T).IsValueType
+				? null
+				: Memory.Memory.ReadBytes(m_addr, -IntPtr.Size / 2, sizeof(ObjHeader) / 2);
 		}
 
 		private IntPtr TryGetMethodTablePointer()
@@ -171,8 +174,7 @@ namespace RazorSharp.Analysis
 
 
 					Table.AddRow(GetOffsetString(baseOfs, ro, lo), Hex.ToHex(m_addr + padOffset), padSize,
-						paddingByte,
-						paddingStr, 0);
+						paddingByte, paddingStr, 0);
 				}
 
 				// end padding

@@ -4,23 +4,16 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using BenchmarkDotNet.Running;
-using NUnit.Framework.Internal;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
-using RazorSharp.CLR.Structures;
-using RazorSharp.Experimental;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing;
-using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
 
 #endregion
@@ -30,7 +23,7 @@ namespace Test
 
 	#region
 
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+	using CSUnsafe = Unsafe;
 
 	#endregion
 
@@ -59,8 +52,8 @@ namespace Test
 		static Program()
 		{
 			StandardOut.ModConsole();
-			Debug.Assert(IntPtr.Size == 8);
-			Debug.Assert(Environment.Is64BitProcess);
+			Trace.Assert(IntPtr.Size == 8);
+			Trace.Assert(Environment.Is64BitProcess);
 
 //			Logger.Log(Flags.Info, "Architecture: x64");
 //			Logger.Log(Flags.Info, "Byte order: {0}", BitConverter.IsLittleEndian ? "Little Endian" : "Big Endian");
@@ -74,12 +67,56 @@ namespace Test
 			return (T*) AddressOf(ref t);
 		}
 
+		private static readonly Thread GCWatcherThread = new Thread(Watch);
 
+		private static void Watch()
+		{
+			while (GCWatcherThread.IsAlive) {
+				bool b = GCHeap.IsGCInProgress();
+
+				Console.Write("\r{0} | {1}", b, GCHeap.GCCount);
+			}
+		}
 
 
 		public static void Main(string[] args)
 		{
 			// todo: implement dynamic allocation system
+
+
+/*			Klass k  = new Klass();
+			var   md = GetMethodDesc<Klass>("increment");
+
+			k.increment();
+			Console.WriteLine("Orig:");
+			Console.WriteLine(md->ToString());
+			var orig = md->Function;
+
+			Action a = delegate { Console.WriteLine("\nHook\n"); };
+			md->SetFunctionPointer(a.Method.MethodHandle.GetFunctionPointer());
+			Console.WriteLine("Hook:");
+			Console.WriteLine(md->ToString());
+			k.increment();
+
+			// todo: fix
+			md->SetFunctionPointer(orig);
+			Console.WriteLine("Restore:");
+			Console.WriteLine(md->ToString());
+			md->Prepare();
+			k.increment();*/
+
+
+			GCWatcherThread.Start();
+
+			for (int i = 0; i < 10; i++) {
+				TestingUtil.CreatePressure();
+			}
+
+			GCWatcherThread.Abort();
+
+			Console.WriteLine();
+
+			Console.WriteLine(GCHeap.GCCount);
 
 
 		}
@@ -235,18 +272,6 @@ namespace Test
 		 * EEClassLayoutInfo.m_cbManagedSize		-											Unsafe.SizeOf, Unsafe.BaseFieldsSize (value types)
 		 */
 
-		/**
-		 * Reflection							CLR
-		 *
-		 * FieldInfo.MetadataToken				FieldDesc.MemberDef
-		 * FieldInfo::FieldHandle.Value			FieldDesc*
-		 * CorElementType						FieldDesc.Type
-		 * MethodInfo::MethodHandle.Value		MethodDesc*
-		 * Type::TypeHandle.Value				MethodTable*
-		 * Type::Attributes						EEClass.m_dwAttrClass
-		 * Marshal::SizeOf						EEClass.m_cbNativeSize
-		 *
-		 */
 
 		/**
 		 * #defines:

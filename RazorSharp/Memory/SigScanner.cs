@@ -30,10 +30,13 @@ namespace RazorSharp.Memory
 			m_dictStringPatterns = new Dictionary<string, string>();
 		}
 
+		public IntPtr BaseAddress => m_lpModuleBase;
+
 		public bool SelectModule(ProcessModule targetModule)
 		{
 			m_lpModuleBase   = targetModule.BaseAddress;
 			m_rgModuleBuffer = new byte[targetModule.ModuleMemorySize];
+
 
 			m_dictStringPatterns.Clear();
 			ulong lpNumberOfBytesRead = 0;
@@ -99,11 +102,12 @@ namespace RazorSharp.Memory
 
 		public void SelectModule(string name)
 		{
-			foreach (object m in Process.GetCurrentProcess().Modules)
+			foreach (object m in Process.GetCurrentProcess().Modules) {
 				if (((ProcessModule) m).ModuleName == name) {
 					SelectModule((ProcessModule) m);
 					return;
 				}
+			}
 		}
 
 		public Dictionary<string, IntPtr> FindPatterns(out long lTime)

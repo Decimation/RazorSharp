@@ -3,7 +3,6 @@
 using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
-using RazorSharp.Pointers;
 using RazorSharp.Pointers.Ex;
 
 #endregion
@@ -26,14 +25,14 @@ namespace Test.Testing.Tests
 
 			string[]          arr     = {"", "foo", "anime"};
 			ExPointer<string> strPtr3 = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData);
-			RazorAssert.Elements(strPtr3, arr);
+			TestingUtil.Elements(strPtr3, arr);
 			strPtr3 -= 3;
 			Debug.Assert(strPtr3.Value == arr[0]);
 			strPtr3++;
 			Debug.Assert(strPtr3.Value == arr[1]);
 
-			RazorAssert.Pressure(strPtr, ref s);
-			RazorAssert.Pressure(strPtr2, ref s);
+			TestingUtil.Pressure(strPtr, ref s);
+			TestingUtil.Pressure(strPtr2, ref s);
 		}
 	}
 
