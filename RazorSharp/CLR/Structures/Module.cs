@@ -17,7 +17,9 @@ namespace RazorSharp.CLR.Structures
 
 	//todo: fix
 	/// <summary>
-	///     Source: https://github.com/dotnet/coreclr/blob/93955d4b58380068df9d99c58a699de6ad03f532/src/vm/ceeload.h#L1321
+	///     <remarks>
+	///         <para>Source: /src/vm/ceeload.h: 1321</para>
+	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct Module

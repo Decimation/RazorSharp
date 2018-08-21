@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorCommon;
@@ -127,9 +128,8 @@ namespace RazorSharp.CLR.Structures
 		internal EEClassLayoutInfo* LayoutInfo {
 			get {
 				//return &((LayoutEEClass *) this)->m_LayoutInfo;
-				if (!HasLayout) {
-					throw new RuntimeException("EEClass does not have LayoutInfo");
-				}
+				Trace.Assert(HasLayout, "EEClass does not have LayoutInfo");
+
 
 				IntPtr thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass));
 				return &((LayoutEEClass*) thisptr)->m_LayoutInfo;

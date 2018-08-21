@@ -10,7 +10,6 @@ using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
-using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing;
@@ -117,8 +116,6 @@ namespace Test
 			Console.WriteLine();
 
 			Console.WriteLine(GCHeap.GCCount);
-
-
 		}
 
 

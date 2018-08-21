@@ -256,7 +256,7 @@ namespace RazorSharp.CLR
 
 
 		/// <summary>
-		///     Gets the corresponding FieldDesc for a specified field
+		///     Gets the corresponding <see cref="FieldDesc"/> for a specified field
 		/// </summary>
 		/// <param name="t"></param>
 		/// <param name="name"></param>

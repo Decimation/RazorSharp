@@ -98,7 +98,7 @@ namespace RazorSharp.CLR.Structures
 
 
 		/// <summary>
-		///     Whether the field is static
+		///     Whether the field is <c>static</c>
 		/// </summary>
 		public bool IsStatic => Memory.Memory.ReadBit(m_dword1, 24);
 
@@ -174,13 +174,9 @@ namespace RazorSharp.CLR.Structures
 
 		/// <summary>
 		///     Returns the address of the field in the specified type.
-		///     <para></para>
-		///     Source 1: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp#L516
-		///     <para></para>
-		///     Source 2: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp#L489
-		///     <para></para>
-		///     Source 3: https://github.com/dotnet/coreclr/blob/59714b683f40fac869050ca08acc5503e84dc776/src/vm/field.cpp#L467
-		///     <para></para>
+		///     <remarks>
+		///         <para>Sources: /src/vm/field.cpp: 516, 489, 467</para>
+		///     </remarks>
 		///     <exception cref="RuntimeException">If the field is static</exception>
 		/// </summary>
 		public IntPtr GetAddress<TInstance>(ref TInstance t)

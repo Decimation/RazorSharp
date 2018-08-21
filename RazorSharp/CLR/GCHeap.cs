@@ -11,12 +11,16 @@ namespace RazorSharp.CLR
 {
 
 	/// <summary>
+	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
 	///         <item>
 	///             <description>/src/vm/gcheaputilities.cpp</description>
 	///         </item>
 	///         <item>
 	///             <description>/src/gc/gcimpl.h</description>
+	///         </item>
+	///         <item>
+	///             <description>/src/gc/gcinterface.h</description>
 	///         </item>
 	///     </list>
 	/// </summary>
@@ -25,6 +29,12 @@ namespace RazorSharp.CLR
 		private static readonly IntPtr g_pGCHeapAddr = new IntPtr(0x7FFAEF324030);
 		private static readonly IntPtr g_pGCHeap;
 
+		/// <summary>
+		///     Returns the number of GC that have occurred.
+		///     <remarks>
+		///         <para>Source: /src/gc/gcinterface.h: 710</para>
+		///     </remarks>
+		/// </summary>
 		public static int GCCount => (int) CLRFunctions.GCFunctions.GetGCCountInternal(g_pGCHeap.ToPointer());
 
 		public static bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
@@ -32,13 +42,44 @@ namespace RazorSharp.CLR
 			return IsHeapPointer(Unsafe.AddressOfHeap(ref t).ToPointer(), smallHeapOnly);
 		}
 
-		// 164
+		/// <summary>
+		///     Returns true if this pointer points into a GC heap, false otherwise.
+		///     <remarks>
+		///         <para>Sources:</para>
+		///         <list type="bullet">
+		///             <item>
+		///                 <description>/src/gc/gcimpl.h: 164</description>
+		///             </item>
+		///             <item>
+		///                 <description>/src/gc/gcinterface.h: 700</description>
+		///             </item>
+		///         </list>
+		///     </remarks>
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <param name="smallHeapOnly"></param>
+		/// <returns></returns>
 		public static bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
 			return CLRFunctions.GCFunctions.IsHeapPointer(g_pGCHeap.ToPointer(), obj, smallHeapOnly);
 		}
 
-		// 163
+		/// <summary>
+		///     Returns whether or not this object resides in an ephemeral generation.
+		///     <remarks>
+		///         <para>Sources:</para>
+		///         <list type="bullet">
+		///             <item>
+		///                 <description>/src/gc/gcimpl.h: 163</description>
+		///             </item>
+		///             <item>
+		///                 <description>/src/gc/gcinterface.h: 717</description>
+		///             </item>
+		///         </list>
+		///     </remarks>
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
 		public static bool IsEphemeral(void* obj)
 		{
 			return CLRFunctions.GCFunctions.IsEphemeral(g_pGCHeap.ToPointer(), obj);

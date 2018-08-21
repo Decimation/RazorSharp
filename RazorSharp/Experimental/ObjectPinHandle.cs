@@ -15,7 +15,9 @@ namespace RazorSharp.Experimental
 	///         Note that this class doesn't provide a way to get the data pointer, like GCHandle does, and that's for the
 	///         same reason a pinned GCHandle cannot be used for some objects.
 	///     </para>
-	///     <para>Source: https://github.com/IllidanS4/SharpUtils/blob/master/Unsafe/Experimental/PinHandle.cs </para>
+	///     <remarks>
+	///         <para>Source: https://github.com/IllidanS4/SharpUtils/blob/master/Unsafe/Experimental/PinHandle.cs </para>
+	///     </remarks>
 	/// </summary>
 	public class ObjectPinHandle : PinHandle
 	{

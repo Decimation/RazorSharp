@@ -18,14 +18,16 @@ namespace RazorSharp.CLR.Structures
 	#endregion
 
 	/// <summary>
-	///     Source: https://github.com/dotnet/coreclr/blob/32f0f9721afb584b4a14d69135bea7ddc129f755/src/vm/packedfields.inl
-	///     Used only for EEClass
+	///     <para>Used only for <see cref="EEClass" /></para>
+	///     <remarks>
+	///         <para>Source: /src/vm/packedfields.inl</para>
+	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct PackedDWORDFields
 	{
 		/// <summary>
-		///     EEClassFieldId::COUNT = 11
+		///     <see cref="EEClassFieldId.COUNT"/> == 11
 		/// </summary>
 		private const int kLength = 11;
 
@@ -41,8 +43,6 @@ namespace RazorSharp.CLR.Structures
 			fixed (PackedDWORDFields* p = &this) {
 				return p->m_rgUnpackedFields[dwFieldIndex];
 			}
-
-			//return m_rgUnpackedFields[dwFieldIndex];
 		}
 
 

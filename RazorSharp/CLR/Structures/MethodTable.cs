@@ -137,13 +137,17 @@ namespace RazorSharp.CLR.Structures
 		public Module* Module => m_pLoaderModule;
 
 		/// <summary>
-		///     <para>The corresponding EEClass to this MethodTable.</para>
-		///     <para>
-		///         Source:
-		///         https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L22
-		///     </para>
+		///     <para>The corresponding <see cref="EEClass" /> to this <see cref="MethodTable" />.</para>
+		///     <remarks>
+		///         <para>
+		///             Source: /src/vm/methodtable.inl: 22
+		///         </para>
+		///     </remarks>
 		/// </summary>
-		/// <exception cref="NotImplementedException">If the union type is not EEClass or MethodTable</exception>
+		/// <exception cref="NotImplementedException">
+		///     If the union type is not <see cref="LowBits.EEClass" /> or
+		///     <see cref="LowBits.MethodTable" />
+		/// </exception>
 		public EEClass* EEClass {
 			get {
 				switch (UnionType) {
@@ -158,13 +162,12 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		/// <summary>
-		///     <para>The canonical MethodTable.</para>
-		///     <para>
-		///         Source:
-		///         https://github.com/dotnet/coreclr/blob/61146b5c5851698e113e936d4e4b51b628095f27/src/vm/methodtable.inl#L1145
-		///     </para>
+		///     <para>The canonical <see cref="MethodTable" />.</para>
 		///     <remarks>
-		///         Address-sensitive
+		///         <para>Address-sensitive</para>
+		///         <para>
+		///             Source: /src/vm/methodtable.inl: 1145
+		///         </para>
 		///     </remarks>
 		///     <exception cref="RuntimeException">
 		///         If the <see cref="get_UnionType" /> is not <see cref="LowBits.MethodTable" /> or

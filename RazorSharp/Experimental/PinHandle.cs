@@ -11,7 +11,9 @@ namespace RazorSharp.Experimental
 	/// <inheritdoc />
 	/// <summary>
 	///     An object that pins a reference (so it doesn't change its address).
-	///     <para>Source: https://github.com/IllidanS4/SharpUtils/blob/master/Unsafe/Experimental/PinHandle.cs </para>
+	///     <remarks>
+	///         <para>Source: https://github.com/IllidanS4/SharpUtils/blob/master/Unsafe/Experimental/PinHandle.cs </para>
+	///     </remarks>
 	/// </summary>
 	public abstract class PinHandle : IDisposable
 	{

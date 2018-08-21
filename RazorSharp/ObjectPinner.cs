@@ -10,7 +10,9 @@ namespace RazorSharp
 
 	/// <summary>
 	///     Pins an object in memory even if the type is unblittable.
-	///     Source: https://www.reddit.com/r/csharp/comments/917tyq/pinning_unblittable_objects/
+	///     <remarks>
+	///         <para>Source: https://www.reddit.com/r/csharp/comments/917tyq/pinning_unblittable_objects/</para>
+	///     </remarks>
 	/// </summary>
 	public static class ObjectPinner
 	{
