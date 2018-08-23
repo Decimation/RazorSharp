@@ -14,16 +14,16 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [x] Pinning unblittable objects
 
 # CLR structures mapping
-- [x] ObjectHeader
-- [x] MethodTable
-- [x] EEClass
-- [x] EEClassLayoutInfo
-- [x] LayoutEEClass
-- [x] FieldDesc
-- [x] MethodDesc
-- [ ] MethodDescChunk
-- [ ] Module
-- [x] PackedDWORDFields
+- [x] `ObjectHeader`
+- [x] `MethodTable`
+- [x] `EEClass`
+- [x] `EEClassLayoutInfo`
+- [x] `LayoutEEClass`
+- [x] `FieldDesc`
+- [x] `MethodDesc`
+- [ ] `MethodDescChunk`
+- [ ] `Module`
+- [x] `PackedDWORDFields`
 
 # Compatibility
 - 32-bit is not fully supported
@@ -33,9 +33,9 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 # todo
 - [ ] `ObjectLayout` for arrays
 - [ ] `MethodDescChunk`
-- [ ] Read MethodDescs without Reflection
+- [ ] Read `MethodDescs` without Reflection
 - [x] Fix Canon MT for pointer arrays
-- [x] Get field names via FieldDesc
-- [x] ObjectLayout without ObjectLayoutInspector TypeLayout (very slow)
-- [x] Fix "Function" field in MethodDesc for virtual functions
-- [ ] Fix InvalidProgramException when using MethodDescs in RefInspector<string>
+- [x] Get field names via `FieldDesc`
+- [x] `ObjectLayout` without `ObjectLayoutInspector` `TypeLayout` (very slow)
+- [x] Fix "Function" field in `MethodDesc` for virtual functions
+- [ ] Fix `InvalidProgramException` when using `MethodDescs` in `RefInspector<string>`
