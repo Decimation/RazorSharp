@@ -25,6 +25,11 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [ ] Module
 - [x] PackedDWORDFields
 
+# Compatibility
+- 32-bit is fully supported
+- Windows only
+- CLR only
+
 # todo
 - [ ] ObjectLayout for arrays
 - [ ] MethodDescChunk
