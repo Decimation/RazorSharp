@@ -26,13 +26,13 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [x] PackedDWORDFields
 
 # Compatibility
-- 32-bit is fully supported
+- 32-bit is not fully supported
 - Windows only
 - CLR only
 
 # todo
-- [ ] ObjectLayout for arrays
-- [ ] MethodDescChunk
+- [ ] `ObjectLayout` for arrays
+- [ ] `MethodDescChunk`
 - [ ] Read MethodDescs without Reflection
 - [x] Fix Canon MT for pointer arrays
 - [x] Get field names via FieldDesc
