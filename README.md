@@ -26,7 +26,7 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [x] `PackedDWORDFields`
 
 # Compatibility
-- 32-bit is not fully supported
+- 64-bit only (32-bit is not fully supported)
 - Windows only
 - CLR only
 
