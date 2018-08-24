@@ -10,7 +10,7 @@ namespace RazorSharp.Pointers
 	public interface IPointer<T>
 	{
 		/// <summary>
-		///     Indexes <see cref="Address"/> as a reference.
+		///     Indexes <see cref="Address" /> as a reference.
 		/// </summary>
 		ref T this[int index] { get; }
 
@@ -35,24 +35,24 @@ namespace RazorSharp.Pointers
 		int ElementSize { get; }
 
 		/// <summary>
-		///     Whether <see cref="Address"/> being pointed to is null.
+		///     Whether <see cref="Address" /> being pointed to is null.
 		/// </summary>
 		bool IsNull { get; }
 
 		/// <summary>
-		///     Whether <see cref="Address"/> is aligned on the current <see cref="IntPtr.Size" /> boundary.
+		///     Whether <see cref="Address" /> is aligned on the current <see cref="IntPtr.Size" /> boundary.
 		/// </summary>
 		bool IsAligned { get; }
 
 
 		/// <summary>
-		///     Converts <see cref="Address"/> to a 32-bit signed integer.
+		///     Converts <see cref="Address" /> to a 32-bit signed integer.
 		/// </summary>
 		/// <returns></returns>
 		int ToInt32();
 
 		/// <summary>
-		///     Converts <see cref="Address"/> to a 64-bit signed integer.
+		///     Converts <see cref="Address" /> to a 64-bit signed integer.
 		/// </summary>
 		/// <returns></returns>
 		long ToInt64();

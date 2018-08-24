@@ -276,7 +276,7 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		///     <para>Returns the native (<see cref="Marshal"/>) size of a type.</para>
+		///     <para>Returns the native (<see cref="Marshal" />) size of a type.</para>
 		/// </summary>
 		/// <remarks>
 		///     <para> Returned from <see cref="EEClass.NativeSize" /> </para>
@@ -310,8 +310,6 @@ namespace RazorSharp
 		}
 
 
-
-
 		/// <summary>
 		///     <para>Calculates the size of a reference type in heap memory.</para>
 		///     <para>This is the most accurate size calculation.</para>
@@ -323,7 +321,8 @@ namespace RazorSharp
 		///     <list type="bullet">
 		///         <item>
 		///             <description>
-		///                 <see cref="MethodTable.BaseSize" /> = The base instance size of a type (<c>24</c> (x64) or <c>12</c> (x86)
+		///                 <see cref="MethodTable.BaseSize" /> = The base instance size of a type (<c>24</c> (x64) or <c>12</c>
+		///                 (x86)
 		///                 by default) (<see cref="Constants.MinObjectSize" />)
 		///             </description>
 		///         </item>
@@ -507,9 +506,9 @@ namespace RazorSharp
 		public static byte[] MemoryOfFields<T>(ref T t) where T : class
 		{
 			// Subtract the size of the ObjHeader and MethodTable*
-			int    fieldSize = HeapSize(ref t) - IntPtr.Size * 2;
+			int fieldSize = HeapSize(ref t) - IntPtr.Size * 2;
 			Console.WriteLine(fieldSize);
-			byte[] fields    = new byte[fieldSize];
+			byte[] fields = new byte[fieldSize];
 
 			// Skip over the MethodTable*
 			Marshal.Copy(AddressOfHeap(ref t) + IntPtr.Size, fields, 0, fieldSize);

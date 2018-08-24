@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
-using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 
 #endregion

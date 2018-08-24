@@ -27,7 +27,7 @@ namespace RazorSharp.CLR.Structures
 	internal unsafe struct PackedDWORDFields
 	{
 		/// <summary>
-		///     <see cref="EEClassFieldId.COUNT"/> == 11
+		///     <see cref="EEClassFieldId.COUNT" /> == 11
 		/// </summary>
 		private const int kLength = 11;
 

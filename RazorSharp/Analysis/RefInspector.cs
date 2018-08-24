@@ -155,7 +155,8 @@ namespace RazorSharp.Analysis
 		}
 
 
-		internal new static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.Default)
+		internal new static void Write(ref T t, bool printStructures = false,
+			InspectorMode mode = InspectorMode.Default)
 		{
 			RefInspector<T> inspector = new RefInspector<T>(ref t, mode);
 			WriteInspector(inspector, printStructures);

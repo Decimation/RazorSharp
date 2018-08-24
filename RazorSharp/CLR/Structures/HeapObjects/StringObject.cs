@@ -1,7 +1,6 @@
 #region
 
 using System;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
@@ -56,20 +55,18 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 		public char FirstChar => m_firstChar;
 
 		/// <summary>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
-		///
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
 
 		public MethodTable* MethodTable => m_methodTablePtr;
 
 		/// <summary>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
-		///
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		public char this[int index] {
 			get {

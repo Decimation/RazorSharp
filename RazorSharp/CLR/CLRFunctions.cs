@@ -28,13 +28,13 @@ namespace RazorSharp.CLR
 	/// </summary>
 	public static unsafe class CLRFunctions
 	{
-		private static readonly Dictionary<string, Delegate> Functions;
-		private static readonly SigScanner                   Scanner;
-		private const           string                       ClrDll = "clr.dll";
+		internal static readonly Dictionary<string, Delegate> Functions;
+		private static readonly  SigScanner                   Scanner;
+		private const            string                       ClrDll = "clr.dll";
 
 		static CLRFunctions()
 		{
-			Scanner = new SigScanner(Process.GetCurrentProcess());
+			Scanner = new SigScanner();
 			Scanner.SelectModule(ClrDll);
 			Functions = new Dictionary<string, Delegate>();
 		}
@@ -42,9 +42,11 @@ namespace RazorSharp.CLR
 //			IntPtr thread = Kernel32.OpenThread(0x4, false, Kernel32.GetCurrentThreadId());
 //			Console.WriteLine(CLRFunctions.ThreadFunctions.GetStackGuarantee(thread));
 
-		private static void AddFunction<TDelegate>(string name, string signature) where TDelegate : Delegate
+		internal static void AddFunction<TDelegate>(string name, string signature) where TDelegate : Delegate
 		{
-			Functions.Add(name, Scanner.GetDelegate<TDelegate>(signature));
+			if (!Functions.ContainsKey(name)) {
+				Functions.Add(name, Scanner.GetDelegate<TDelegate>(signature));
+			}
 		}
 
 
@@ -117,13 +119,6 @@ namespace RazorSharp.CLR
 
 			internal static readonly AllocDelegate Alloc;
 
-			private const string GetContainingObjectSignature =
-				"48 3B 15 D9 50 3C 00 48 8B C2 72 18 48 3B 05 95 CE 3B 00 73 0F 48 8B 15 34 59 3C 00 48 8B C8 E9 EC 94 B1 FF 33 C0 C3";
-
-			internal delegate void* GetContainingObjectDelegate(void* __this, void* obj);
-
-			internal static readonly GetContainingObjectDelegate GetContainingObject;
-
 
 			static GCFunctions()
 			{
@@ -141,9 +136,6 @@ namespace RazorSharp.CLR
 
 				AddFunction<AllocDelegate>("GCHeap::Alloc", AllocSignature);
 				Alloc = (AllocDelegate) Functions["GCHeap::Alloc"];
-
-				AddFunction<GetContainingObjectDelegate>("GCHeap::GetContainingObject", GetContainingObjectSignature);
-				GetContainingObject = (GetContainingObjectDelegate) Functions["GCHeap::GetContainingObject"];
 			}
 		}
 

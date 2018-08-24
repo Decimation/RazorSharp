@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using RazorCommon;
+using RazorSharp.Memory;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 
@@ -61,8 +62,7 @@ namespace RazorSharp.CLR.Structures
 		[FieldOffset(6)] private readonly ushort m_wFlags;
 
 		/// <summary>
-		///     Valid only if the function is non-virtual and non-abstract (<see cref="SizeOf"/> <c>== 16</c>)
-		///
+		///     Valid only if the function is non-virtual and non-abstract (<see cref="SizeOf" /> <c>== 16</c>)
 		/// </summary>
 		[FieldOffset(8)] private void* m_functionPtr;
 
@@ -70,9 +70,25 @@ namespace RazorSharp.CLR.Structures
 
 		#region Accessors
 
+		static MethodDesc()
+		{
+			SignatureCall.Transpile<MethodDesc>();
+		}
+
 		public IntPtr Function => MethodInfo.MethodHandle.GetFunctionPointer();
 		public string Name     => MethodInfo.Name;
 
+		public bool IsCtor {
+			[Sigcall("clr.dll",
+				"48 89 5C 24 08 57 48 83 EC 20 48 8B F9 E8 4E 32 F6 FF 33 DB 0F BA E0 0C 0F 82 39 BA 0F 00")]
+			get => throw new NotTranspiledException();
+		}
+
+		public bool IsPointingToNativeCode {
+			[Sigcall("clr.dll",
+				"48 89 5C 24 08 57 48 83 EC 20 8A 41 03 48 8B F9 A8 01 0F 85 FC C5 F6 FF 33 C0 EB 01 CC")]
+			get => throw new NotTranspiledException();
+		}
 
 		/// <summary>
 		///     <remarks>
@@ -210,9 +226,9 @@ namespace RazorSharp.CLR.Structures
 		}*/
 
 		/// <summary>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		public int SizeOf {
 			get {
@@ -224,7 +240,7 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		/// <summary>
-		/// Use at your own risk!
+		///     Use at your own risk!
 		/// </summary>
 		/// <param name="p">New function pointer</param>
 		/// <exception cref="MethodDescException">If this function is <c>virtual</c> or <c>abstract</c></exception>
@@ -254,6 +270,7 @@ namespace RazorSharp.CLR.Structures
 		private string CreateSignatureString()
 		{
 			ParameterInfo[] param = MethodInfo.GetParameters();
+
 			if (param.Length == 0) {
 				return String.Format("{0}()", Name);
 			}

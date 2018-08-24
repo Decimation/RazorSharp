@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -124,10 +123,13 @@ namespace RazorSharp.CLR
 		#region Method Table
 
 		/// <summary>
-		///     <para>Manually reads a CLR <see cref="MethodTable"/> (TypeHandle).</para>
-		///     <para>If the type is a value type, the <see cref="MethodTable"/> will be returned from <see cref="Type.TypeHandle"/></para>
+		///     <para>Manually reads a CLR <see cref="MethodTable" /> (TypeHandle).</para>
+		///     <para>
+		///         If the type is a value type, the <see cref="MethodTable" /> will be returned from
+		///         <see cref="Type.TypeHandle" />
+		///     </para>
 		/// </summary>
-		/// <returns>A pointer to type <typeparamref name="T"/>'s <see cref="MethodTable"/></returns>
+		/// <returns>A pointer to type <typeparamref name="T" />'s <see cref="MethodTable" /></returns>
 		public static MethodTable* ReadMethodTable<T>(ref T t)
 		{
 			MethodTable* mt;
@@ -168,7 +170,8 @@ namespace RazorSharp.CLR
 
 			// From https://github.com/dotnet/coreclr/blob/6bb3f84d42b9756c5fa18158db8f724d57796296/src/vm/typehandle.h#L74:
 			// Array MTs are not valid TypeHandles...
-			RazorContract.Requires(!typeof(T).IsArray, $"{typeof(T).Name}: Array MethodTables are not valid TypeHandles.");
+			RazorContract.Requires(!typeof(T).IsArray,
+				$"{typeof(T).Name}: Array MethodTables are not valid TypeHandles.");
 
 			return (MethodTable*) typeof(T).TypeHandle.Value;
 		}
@@ -250,7 +253,7 @@ namespace RazorSharp.CLR
 
 
 		/// <summary>
-		///     Gets the corresponding <see cref="FieldDesc"/> for a specified field
+		///     Gets the corresponding <see cref="FieldDesc" /> for a specified field
 		/// </summary>
 		/// <param name="t"></param>
 		/// <param name="name"></param>
@@ -298,9 +301,9 @@ namespace RazorSharp.CLR
 
 		public static Pointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
 		{
-			MethodInfo[]          methods = t.GetMethods(flags);
+			MethodInfo[] methods = t.GetMethods(flags);
 			RazorContract.RequiresNotNull(methods);
-			Pointer<MethodDesc>[] arr     = new Pointer<MethodDesc>[methods.Length];
+			Pointer<MethodDesc>[] arr = new Pointer<MethodDesc>[methods.Length];
 
 
 			for (int i = 0; i < arr.Length; i++) {

@@ -115,6 +115,7 @@
     <Compile Include="Analysis\ObjectLayout.cs" />
     <Compile Include="Analysis\RefInspector.cs" />
       <Compile Include="CLR\GCHeap.cs"/>
+      <Compile Include="CLR\Structures\MethodDescription.cs"/>
       <Compile Include="Experimental\FunctionHooker.cs"/>
       <Compile Include="Experimental\ObjectPinHandle.cs"/>
     <Compile Include="Experimental\PinHandle.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="Memory\MemoryInspector.cs" />
       <Compile Include="Memory\Segments.cs"/>
     <Compile Include="Memory\SigScanner.cs" />
+      <Compile Include="Memory\SignatureCall.cs"/>
     <Compile Include="Misc.cs" />
     <Compile Include="ObjectPinner.cs" />
       <Compile Include="Pointers\Ex\AllocExPointer.cs"/>
@@ -158,6 +160,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
       <Compile Include="Utilities\Exceptions\FieldDescException.cs"/>
       <Compile Include="Utilities\Exceptions\MethodDescException.cs"/>
+      <Compile Include="Utilities\Exceptions\NotTranspiledException.cs"/>
       <Compile Include="Utilities\Exceptions\RuntimeException.cs"/>
       <Compile Include="Utilities\Exceptions\TypeException.cs"/>
       <Compile Include="Utilities\RazorContract.cs"/>

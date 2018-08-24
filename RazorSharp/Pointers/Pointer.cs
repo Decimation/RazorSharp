@@ -2,16 +2,13 @@
 
 using System;
 using System.Collections;
-using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorSharp.Experimental;
 using RazorSharp.Pointers.Ex;
 using RazorSharp.Utilities;
-using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -359,12 +356,11 @@ namespace RazorSharp.Pointers
 		#region Overrides
 
 		/// <summary>
-		///
 		/// </summary>
 		/// <param name="format">
-		/// <para><c>"O"</c>: Object (<see cref="Reference"/>) </para>
-		/// <para><c>"P"</c>: Pointer (<see cref="Address"/>) </para>
-		/// <para><c>"S"</c>: Safe <c>"O"</c> (when <see cref="Reference"/> or <see cref="Address"/> may be <c>null</c>) </para>
+		///     <para><c>"O"</c>: Object (<see cref="Reference" />) </para>
+		///     <para><c>"P"</c>: Pointer (<see cref="Address" />) </para>
+		///     <para><c>"S"</c>: Safe <c>"O"</c> (when <see cref="Reference" /> or <see cref="Address" /> may be <c>null</c>) </para>
 		/// </param>
 		/// <param name="formatProvider"></param>
 		/// <returns></returns>

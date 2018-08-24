@@ -9,7 +9,7 @@ namespace RazorSharp.Utilities.Exceptions
 
 	/// <inheritdoc />
 	/// <summary>
-	/// CLR-related exception
+	///     CLR-related exception
 	/// </summary>
 	internal class RuntimeException : Exception
 	{

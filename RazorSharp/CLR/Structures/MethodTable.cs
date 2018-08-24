@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp.Pointers;
-using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 
 #endregion
@@ -90,13 +89,11 @@ namespace RazorSharp.CLR.Structures
 		///     <example>
 		///         If this type is a <c>string</c>, the component size will be 2. (<c>sizeof(char)</c>)
 		///     </example>
-		/// <returns>
-		/// <c>-1</c> if <c>!</c><see cref="HasComponentSize"/>, component size otherwise
-		/// </returns>
+		///     <returns>
+		///         <c>-1</c> if <c>!</c><see cref="HasComponentSize" />, component size otherwise
+		///     </returns>
 		/// </summary>
-		public short ComponentSize {
-			get { return HasComponentSize ? (short) m_dwFlags.ComponentSize : (short) -1; }
-		}
+		public short ComponentSize => HasComponentSize ? (short) m_dwFlags.ComponentSize : (short) -1;
 
 		/// <summary>
 		///     The base size of this class when allocated on the heap. Note that for value types
@@ -122,7 +119,7 @@ namespace RazorSharp.CLR.Structures
 		public WORD NumInterfaces => m_wNumInterfaces;
 
 		/// <summary>
-		///     The parent type's <see cref="MethodTable"/>.
+		///     The parent type's <see cref="MethodTable" />.
 		/// </summary>
 		/// <exception cref="NotImplementedException">If the type is an indirect parent</exception>
 		public MethodTable* Parent {
@@ -132,7 +129,6 @@ namespace RazorSharp.CLR.Structures
 			// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
 			// for enum_flag_HasIndirectParentMethodTable.
 			get {
-
 				if (!Flags.HasFlag(MethodTableFlags.HasIndirectParent)) {
 					return m_pParentMethodTable;
 				}
@@ -200,9 +196,9 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		/// <summary>
-		///     Element type handle of an individual element if this is the <see cref="MethodTable"/> of an array.
+		///     Element type handle of an individual element if this is the <see cref="MethodTable" /> of an array.
 		/// </summary>
-		/// <exception cref="RuntimeException">If this is not an array <see cref="MethodTable"/>.</exception>
+		/// <exception cref="RuntimeException">If this is not an array <see cref="MethodTable" />.</exception>
 		public MethodTable* ElementTypeHandle {
 			get {
 				if (IsArray) {
@@ -243,7 +239,7 @@ namespace RazorSharp.CLR.Structures
 		public int NumInstanceFieldBytes => (int) BaseSize - EEClass->BaseSizePadding;
 
 		/// <summary>
-		///     Array of <see cref="FieldDesc"/>s for this type.
+		///     Array of <see cref="FieldDesc" />s for this type.
 		/// </summary>
 		public FieldDesc* FieldDescList => EEClass->FieldDescList;
 

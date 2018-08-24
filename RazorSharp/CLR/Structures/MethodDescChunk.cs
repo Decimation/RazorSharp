@@ -45,12 +45,12 @@ namespace RazorSharp.CLR.Structures
 
 
 		/// <summary>
-		///     The size of this chunk minus 1 (in multiples of <see cref="MethodDesc.ALIGNMENT"/>)
+		///     The size of this chunk minus 1 (in multiples of <see cref="MethodDesc.ALIGNMENT" />)
 		/// </summary>
 		public byte Size => m_size;
 
 		/// <summary>
-		///     The number of <see cref="MethodDesc"/>s in this chunk minus 1
+		///     The number of <see cref="MethodDesc" />s in this chunk minus 1
 		/// </summary>
 		public byte Count => m_count; //(byte) (m_count + 1);
 

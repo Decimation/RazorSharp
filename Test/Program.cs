@@ -1,23 +1,32 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using BenchmarkDotNet.Running;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 using Test.Testing;
+using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
 using Unsafe = RazorSharp.Unsafe;
 using static RazorSharp.Analysis.InspectorHelper;
+using static RazorSharp.Memory.SignatureCall;
 
 #endregion
 
@@ -196,6 +205,8 @@ namespace Test
 			private float _x,
 			              _y;
 
+			public CVec2() { }
+
 			public void fnOrig(int i)
 			{
 				var cpy  = this;
@@ -212,19 +223,56 @@ namespace Test
 		}
 
 
+		[Sigcall("clr.dll", "48 8B 05 59 F5 82 00 48 89 44 24 10 48 8B 44 24 10 C3")]
+		private static uint GetGCCount_sc(void* __this)
+		{
+			throw new NotImplementedException();
+		}
+
+		struct GCHeap_t
+		{
+
+			static GCHeap_t()
+			{
+				Transpile<GCHeap_t>();
+			}
+
+			public uint GCCount_prop {
+				[Sigcall("clr.dll", "48 8B 05 59 F5 82 00 48 89 44 24 10 48 8B 44 24 10 C3")]
+				get => throw new NotImplementedException();
+			}
+
+//			public uint GCCount_prop_rg {
+//				[SigcallRange("clr.dll", 0x48, 0x89, 0x5C, 0x24, 0x08, 0x48, 0x89, 0x74, 0x24, 0x10, 0x57, 0x48, 0x83, 0xEC, 0x20, 0x48, 0x8B, 0x3D, 0xDE, 0xF3, 0x93, 0x00, 0x33, 0xC0)]
+//				get => throw new NotTranspiledException();
+//			}
+
+			[Sigcall("clr.dll", "48 8B 05 59 F5 82 00 48 89 44 24 10 48 8B 44 24 10 C3")]
+			public uint GetGCCount_sc__this()
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+
 		public static void Main(string[] args)
 		{
 			// todo: implement dynamic allocation system
 
 
-			string          str   = "foo";
-			Pointer<string> lpStr = Unsafe.AddressOf(ref str);
-			Console.WriteLine(Hex.ToHex(lpStr.Address));
-
-			Pointer<char> strMem = Unsafe.AddressOfHeap(ref str, OffsetType.StringData);
 
 
-			Console.WriteLine(GCHeap.GCCount);
+
+			/*Transpile(typeof(Program), "GetGCCount_sc");
+			Console.WriteLine(GetGCCount_sc(GCHeap.Heap.ToPointer()));
+
+			Transpile<GCHeap_t>();
+			GCHeap_t* gc = (GCHeap_t*) GCHeap.Heap;
+
+			Console.WriteLine(gc->GetGCCount_sc__this());
+
+			Console.WriteLine(gc->GCCount_prop);*/
+
 		}
 
 
@@ -243,14 +291,6 @@ namespace Test
 		private static void hk_intercept(void* __this, int i)
 		{
 			Console.WriteLine("Hook {0} | {1}", Hex.ToHex(__this), i);
-		}
-
-		private static void inline() { }
-
-		[Conditional("DEBUG")]
-		static void __break()
-		{
-			Console.ReadLine();
 		}
 
 

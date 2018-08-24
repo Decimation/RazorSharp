@@ -51,20 +51,18 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 		[FieldOffset(8)] private readonly byte         m_fields;
 
 
-
 		/// <summary>
-		/// Equal to GC_MARKED in /src/gc/gc.cpp
-		/// <remarks>
-		/// Source: /src/vm/object.h: 198
-		/// </remarks>
+		///     Equal to GC_MARKED in /src/gc/gc.cpp
+		///     <remarks>
+		///         Source: /src/vm/object.h: 198
+		///     </remarks>
 		/// </summary>
 		private const int MARKED_BIT = 0x1;
 
 		/// <summary>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
-		///
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
 
@@ -76,9 +74,7 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 		// object.h: 198
 		// We should always use GetGCSafeMethodTable() if we're running during a GC.
 		// If the mark bit is set then we're running during a GC
-		public bool IsMarked {
-			get { return (((ulong) (m_methodTablePtr)) & (MARKED_BIT)) == 0; }
-		}
+		public bool IsMarked => ((ulong) m_methodTablePtr & MARKED_BIT) == 0;
 
 
 		public MethodTable* GetGCSafeMethodTable()
@@ -88,7 +84,7 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 			// significant bit for marked objects, and the second to least significant
 			// bit is reserved.  So if we want the actual MT pointer during a GC
 			// we must zero out the lowest 2 bits.
-			return (MethodTable*) (((ulong) (m_methodTablePtr)) & ~((uint) 3));
+			return (MethodTable*) ((ulong) m_methodTablePtr & ~(uint) 3);
 		}
 
 		public override string ToString()

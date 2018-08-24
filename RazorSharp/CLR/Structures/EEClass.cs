@@ -1,13 +1,11 @@
 #region
 
 using System;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
-using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -88,12 +86,12 @@ namespace RazorSharp.CLR.Structures
 
 
 		/// <summary>
-		/// Whether this <see cref="EEClass"/> has a <see cref="EEClassLayoutInfo"/>
+		///     Whether this <see cref="EEClass" /> has a <see cref="EEClassLayoutInfo" />
 		/// </summary>
 		public bool HasLayout => VMFlags.HasFlag(VMFlags.HasLayout);
 
 		/// <summary>
-		///     <see cref="DWORD"/> of <see cref="TypeAttributes" />
+		///     <see cref="DWORD" /> of <see cref="TypeAttributes" />
 		/// </summary>
 		public DWORD Attributes => m_dwAttrClass;
 

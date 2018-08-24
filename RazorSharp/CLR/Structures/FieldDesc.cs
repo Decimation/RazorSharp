@@ -1,7 +1,6 @@
 #region
 
 using System;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorCommon;
@@ -120,12 +119,12 @@ namespace RazorSharp.CLR.Structures
 		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
 
 		/// <summary>
-		/// Access level of the field
+		///     Access level of the field
 		/// </summary>
 		public ProtectionLevel Protection => (ProtectionLevel) ProtectionInt;
 
 		/// <summary>
-		/// <para>Size of the field</para>
+		///     <para>Size of the field</para>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
@@ -201,7 +200,6 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		#endregion
-
 
 
 		/// <summary>

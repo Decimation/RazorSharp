@@ -48,10 +48,9 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 		public uint Length => m_numComponents;
 
 		/// <summary>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
-		///
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
 

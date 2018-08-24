@@ -1,7 +1,6 @@
 #region
 
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using RazorCommon;
@@ -37,7 +36,6 @@ namespace RazorSharp.CLR.Structures
 		public SyncBlockFlags SyncBlockAsFlags => (SyncBlockFlags) m_uSyncBlockValue;
 
 		#endregion
-
 
 
 		static ObjHeader()

@@ -21,6 +21,14 @@ namespace RazorSharp.Memory
 		private byte[]                     m_rgModuleBuffer     { get; set; }
 		private IntPtr                     m_lpModuleBase       { get; set; }
 		private Dictionary<string, string> m_dictStringPatterns { get; }
+		private string                     m_moduleName;
+
+		public IntPtr BaseAddress => m_lpModuleBase;
+
+		public SigScanner() : this(Process.GetCurrentProcess())
+		{
+
+		}
 
 		public SigScanner(Process proc) : this(proc.Handle) { }
 
@@ -30,10 +38,14 @@ namespace RazorSharp.Memory
 			m_dictStringPatterns = new Dictionary<string, string>();
 		}
 
-		public IntPtr BaseAddress => m_lpModuleBase;
 
 		public bool SelectModule(ProcessModule targetModule)
 		{
+			// Module already selected
+			if (targetModule.ModuleName == m_moduleName) {
+				return true;
+			}
+
 			m_lpModuleBase   = targetModule.BaseAddress;
 			m_rgModuleBuffer = new byte[targetModule.ModuleMemorySize];
 
@@ -41,6 +53,7 @@ namespace RazorSharp.Memory
 			m_dictStringPatterns.Clear();
 			ulong lpNumberOfBytesRead = 0;
 
+			m_moduleName = targetModule.ModuleName;
 			return Kernel32.ReadProcessMemory(m_hProcess, m_lpModuleBase, m_rgModuleBuffer,
 				(uint) targetModule.ModuleMemorySize, ref lpNumberOfBytesRead);
 		}
@@ -52,12 +65,13 @@ namespace RazorSharp.Memory
 
 		private bool PatternCheck(int nOffset, byte[] arrPattern)
 		{
+			// ReSharper disable once LoopCanBeConvertedToQuery
 			for (int i = 0; i < arrPattern.Length; i++) {
 				if (arrPattern[i] == 0x0) {
 					continue;
 				}
 
-				if (arrPattern[i] != this.m_rgModuleBuffer[nOffset + i]) {
+				if (arrPattern[i] != m_rgModuleBuffer[nOffset + i]) {
 					return false;
 				}
 			}
@@ -65,18 +79,51 @@ namespace RazorSharp.Memory
 			return true;
 		}
 
-		public IntPtr FindPattern(string szPattern, out long lTime)
+		private void ModuleCheck()
 		{
 			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero) {
 				throw new Exception("Selected module is null");
 			}
+		}
+
+		public IntPtr FindPattern(byte[] rgPattern)
+		{
+			ModuleCheck();
+
+			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
+				if (m_rgModuleBuffer[nModuleIndex] != rgPattern[0]) {
+					continue;
+				}
+
+				if (PatternCheck(nModuleIndex, rgPattern)) {
+					return m_lpModuleBase + nModuleIndex;
+				}
+			}
+
+
+			return IntPtr.Zero;
+		}
+
+		public IntPtr FindPattern(string szPattern)
+		{
+			ModuleCheck();
+
+
+			byte[] arrPattern = ParsePatternString(szPattern);
+
+			return FindPattern(arrPattern);
+		}
+
+		/*public IntPtr FindPattern(string szPattern, out long lTime)
+		{
+			ModuleCheck();
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
 
 			byte[] arrPattern = ParsePatternString(szPattern);
 
 			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
-				if (this.m_rgModuleBuffer[nModuleIndex] != arrPattern[0]) {
+				if (m_rgModuleBuffer[nModuleIndex] != arrPattern[0]) {
 					continue;
 				}
 
@@ -88,11 +135,11 @@ namespace RazorSharp.Memory
 
 			lTime = stopwatch.ElapsedMilliseconds;
 			return IntPtr.Zero;
-		}
+		}*/
 
 		public TDelegate GetDelegate<TDelegate>(string opcodes) where TDelegate : Delegate
 		{
-			IntPtr addr = FindPattern(opcodes, out _);
+			IntPtr addr = FindPattern(opcodes);
 			if (addr == IntPtr.Zero) {
 				throw new Exception($"Could not find function with opcodes {opcodes}");
 			}
@@ -102,9 +149,14 @@ namespace RazorSharp.Memory
 
 		public void SelectModule(string name)
 		{
-			foreach (object m in Process.GetCurrentProcess().Modules) {
-				if (((ProcessModule) m).ModuleName == name) {
-					SelectModule((ProcessModule) m);
+			// Module already selected
+			if (name == m_moduleName) {
+				return;
+			}
+
+			foreach (ProcessModule m in Process.GetCurrentProcess().Modules) {
+				if (m.ModuleName == name) {
+					SelectModule(m);
 					return;
 				}
 			}

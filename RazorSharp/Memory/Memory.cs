@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorInvoke.Libraries;
@@ -10,7 +9,6 @@ using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
-using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -191,7 +189,10 @@ namespace RazorSharp.Memory
 
 		/// <summary>
 		///     <para>Allocates a value type in zeroed, unmanaged memory.</para>
-		/// <para>If <typeparamref name="T"/> is a reference type, a managed pointer of type <typeparamref name="T"/> will be created in unmanaged memory.</para>
+		///     <para>
+		///         If <typeparamref name="T" /> is a reference type, a managed pointer of type <typeparamref name="T" /> will be
+		///         created in unmanaged memory.
+		///     </para>
 		///     <para>Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /></para>
 		/// </summary>
 		/// <typeparam name="T">Value type to allocate</typeparam>

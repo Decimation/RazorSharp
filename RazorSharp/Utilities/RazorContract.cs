@@ -15,17 +15,21 @@ using RazorSharp.Utilities.Exceptions;
 namespace RazorSharp.Utilities
 {
 
+	#region
+
 	using AsrtCnd = AssertionConditionAttribute;
 	using AsrtCndType = AssertionConditionType;
 
+	#endregion
+
 	/// <summary>
-	/// Poor man's <see cref="System.Diagnostics.Contracts.Contract"/> because
-	/// <see cref="System.Diagnostics.Contracts.Contract"/> doesn't work with JetBrains Rider
+	///     Poor man's <see cref="System.Diagnostics.Contracts.Contract" /> because
+	///     <see cref="System.Diagnostics.Contracts.Contract" /> doesn't work with JetBrains Rider
 	/// </summary>
 	internal static class RazorContract
 	{
 		/// <summary>
-		/// Call to <see cref="Trace.Assert(bool, string)"/>
+		///     Call to <see cref="Trace.Assert(bool, string)" />
 		/// </summary>
 		/// <param name="cond">Condition to assert</param>
 		/// <param name="msg"></param>
@@ -37,7 +41,7 @@ namespace RazorSharp.Utilities
 		}
 
 		/// <summary>
-		/// Call to <see cref="Trace.Assert(bool)"/>
+		///     Call to <see cref="Trace.Assert(bool)" />
 		/// </summary>
 		/// <param name="cond">Condition to assert</param>
 		[AssertionMethod]
@@ -71,8 +75,8 @@ namespace RazorSharp.Utilities
 		}
 
 		/// <summary>
-		/// Checks to see if <paramref name="cond"/> is <c>true</c>. If <paramref name="cond"/> is <c>false</c>, throws
-		/// <typeparamref name="TException"/>
+		///     Checks to see if <paramref name="cond" /> is <c>true</c>. If <paramref name="cond" /> is <c>false</c>, throws
+		///     <typeparamref name="TException" />
 		/// </summary>
 		/// <param name="cond">Condition</param>
 		/// <param name="msg">Optional message for <typeparamref name="TException"></typeparamref> </param>
@@ -93,11 +97,11 @@ namespace RazorSharp.Utilities
 					}
 
 					// TException better have a constructor with a string parameter
-					var ctor = typeof(TException).GetConstructor(
-						bindingAttr: BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null,
-						CallingConventions.HasThis, types: new[] {typeof(string)}, null);
-					var exception = ctor.Invoke(new object[] {msg});
-					var exc       = (TException) exception;
+					ConstructorInfo ctor = typeof(TException).GetConstructor(
+						BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null,
+						CallingConventions.HasThis, new[] {typeof(string)}, null);
+					object     exception = ctor.Invoke(new object[] {msg});
+					TException exc       = (TException) exception;
 					throw exc;
 				}
 			}
@@ -105,13 +109,13 @@ namespace RazorSharp.Utilities
 
 
 		/// <summary>
-		/// <para>Asserts that <typeparamref name="TExpected"/>  is <typeparamref name="TActual"/>.</para>
-		///
-		///
+		///     <para>Asserts that <typeparamref name="TExpected" />  is <typeparamref name="TActual" />.</para>
 		/// </summary>
 		/// <typeparam name="TExpected">Expected type</typeparam>
 		/// <typeparam name="TActual">Supplied type</typeparam>
-		/// <exception cref="TypeException">If <typeparamref name="TExpected"/> is not <typeparamref name="TActual"/> </exception>
+		/// <exception cref="TypeException">
+		///     If <typeparamref name="TExpected" /> is not <typeparamref name="TActual" />
+		/// </exception>
 		internal static void RequiresType<TExpected, TActual>()
 		{
 			if (typeof(TExpected) == typeof(Array)) {
@@ -148,7 +152,7 @@ namespace RazorSharp.Utilities
 		}
 
 		/// <summary>
-		/// Call to <see cref="Trace.Assert(bool)"/>
+		///     Call to <see cref="Trace.Assert(bool)" />
 		/// </summary>
 		/// <param name="values"></param>
 		/// <typeparam name="T"></typeparam>
@@ -162,10 +166,11 @@ namespace RazorSharp.Utilities
 		}
 
 		/// <summary>
-		///
 		/// </summary>
-		/// <param name="__this"> <see cref="RazorSharp.CLR.Structures.FieldDesc"/> address</param>
-		/// <exception cref="FieldDescException">If <see cref="Runtime.FieldAddrMap"/> does not contain <paramref name="__this"/> </exception>
+		/// <param name="__this"> <see cref="RazorSharp.CLR.Structures.FieldDesc" /> address</param>
+		/// <exception cref="FieldDescException">
+		///     If <see cref="Runtime.FieldAddrMap" /> does not contain <paramref name="__this" />
+		/// </exception>
 		internal static void RequiresFieldDescAddress(IntPtr __this)
 		{
 			const string fieldDescException = "FieldDesc* has incorrect address. Is the FieldDesc* dereferenced?";
@@ -173,10 +178,12 @@ namespace RazorSharp.Utilities
 		}
 
 		/// <summary>
-		///
 		/// </summary>
-		/// <param name="__this"> <see cref="RazorSharp.CLR.Structures.MethodDesc"/> address</param>
-		/// <exception cref="MethodDescException">If <see cref="Runtime.MethodAddrMap"/> does not contain <paramref name="__this"/> </exception>
+		/// <param name="__this"> <see cref="RazorSharp.CLR.Structures.MethodDesc" /> address</param>
+		/// <exception cref="MethodDescException">
+		///     If <see cref="Runtime.MethodAddrMap" /> does not contain
+		///     <paramref name="__this" />
+		/// </exception>
 		internal static void RequiresMethodDescAddress(IntPtr __this)
 		{
 			const string methodDescException = "MethodDesc* has incorrect address. Is the MethodDesc* dereferenced?";

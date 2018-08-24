@@ -28,15 +28,17 @@ namespace RazorSharp.CLR
 	public static unsafe class GCHeap
 	{
 		/// <summary>
-		/// Address of <see cref="g_pGCHeap"/>
+		///     Address of <see cref="g_pGCHeap" />
 		/// </summary>
 		private static readonly IntPtr g_pGCHeapAddr;
 
 		/// <summary>
-		/// <para>Global CLR variable <c>g_pGCHeap</c></para>
-		/// <para>Global VM GC</para>
+		///     <para>Global CLR variable <c>g_pGCHeap</c></para>
+		///     <para>Global VM GC</para>
 		/// </summary>
 		private static readonly IntPtr g_pGCHeap;
+
+		public static IntPtr Heap => g_pGCHeap;
 
 		/// <summary>
 		///     Returns the number of GCs that have occurred.
@@ -126,8 +128,8 @@ namespace RazorSharp.CLR
 			 * Circumvent ASLR
 			 */
 
-			long strMt              = (long) Runtime.MethodTableOf<string>();
-			var  g_pStringClassAddr = Segments.ScanSegment(".data", "clr.dll", BitConverter.GetBytes(strMt));
+			long   strMt              = (long) Runtime.MethodTableOf<string>();
+			IntPtr g_pStringClassAddr = Segments.ScanSegment(".data", "clr.dll", BitConverter.GetBytes(strMt));
 			g_pGCHeapAddr = g_pStringClassAddr + IntPtr.Size * 2;
 			g_pGCHeap     = Marshal.ReadIntPtr(g_pGCHeapAddr);
 
