@@ -12,7 +12,7 @@ using RazorSharp.CLR.Structures;
 namespace RazorSharp.CLR
 {
 
-	public static unsafe class Constants
+	internal static unsafe class Constants
 	{
 		/// <summary>
 		///     <para>Minimum GC object heap size</para>
@@ -26,7 +26,7 @@ namespace RazorSharp.CLR
 		internal static readonly int MinObjectSize = 2 * IntPtr.Size + sizeof(ObjHeader);
 
 		//todo
-		private const uint GC_MARKED = 0x1;
+//		private const uint GC_MARKED = 0x1;
 
 		/// <summary>
 		///     <para>Sources:</para>

@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorSharp.Memory;
 
 #endregion
 
@@ -26,11 +27,19 @@ namespace RazorSharp.CLR
 	/// </summary>
 	public static unsafe class GCHeap
 	{
-		private static readonly IntPtr g_pGCHeapAddr = new IntPtr(0x7FFAEF324030);
+		/// <summary>
+		/// Address of <see cref="g_pGCHeap"/>
+		/// </summary>
+		private static readonly IntPtr g_pGCHeapAddr;
+
+		/// <summary>
+		/// <para>Global CLR variable <c>g_pGCHeap</c></para>
+		/// <para>Global VM GC</para>
+		/// </summary>
 		private static readonly IntPtr g_pGCHeap;
 
 		/// <summary>
-		///     Returns the number of GC that have occurred.
+		///     Returns the number of GCs that have occurred.
 		///     <remarks>
 		///         <para>Source: /src/gc/gcinterface.h: 710</para>
 		///     </remarks>
@@ -91,6 +100,16 @@ namespace RazorSharp.CLR
 			return CLRFunctions.GCFunctions.IsGCInProgress(bConsiderGCStart);
 		}
 
+		//constants for the flags parameter to the gc call back
+
+		// #define GC_CALL_INTERIOR            0x1
+		// #define GC_CALL_PINNED              0x2
+		// #define GC_CALL_CHECK_APP_DOMAIN    0x4
+		public static void* Alloc(ulong size, uint flags)
+		{
+			return CLRFunctions.GCFunctions.Alloc(g_pGCHeap.ToPointer(), size, flags);
+		}
+
 
 		static GCHeap()
 		{
@@ -103,11 +122,14 @@ namespace RazorSharp.CLR
 			// 	   .data:0000000180944030                               ; class GCHeap * g_pGCHeap
 			// >>> .data:0000000180944030 00 00 00 00 00 00 00 00       ?g_pGCHeap@@3PEAVGCHeap@@EA dq 0        ; DATA XREF: GCHeap::IsGCInProgress(int)+F↑r
 
-//			long   strMt              = (long) Runtime.MethodTableOf<string>();
-//			var    g_pStringClassAddr = Segments.ScanSegment(".data", "clr.dll", BitConverter.GetBytes(strMt));
-//			IntPtr g_pGCHeapAddr      = g_pStringClassAddr + IntPtr.Size * 2;
+			/**
+			 * Circumvent ASLR
+			 */
 
-			g_pGCHeap = Marshal.ReadIntPtr(g_pGCHeapAddr);
+			long strMt              = (long) Runtime.MethodTableOf<string>();
+			var  g_pStringClassAddr = Segments.ScanSegment(".data", "clr.dll", BitConverter.GetBytes(strMt));
+			g_pGCHeapAddr = g_pStringClassAddr + IntPtr.Size * 2;
+			g_pGCHeap     = Marshal.ReadIntPtr(g_pGCHeapAddr);
 
 //			Console.WriteLine("g_pGCHeap address: {0}", Hex.ToHex(g_pGCHeapAddr));
 //			Console.WriteLine("g_pGCHeap: {0}", Hex.ToHex(g_pGCHeap));

@@ -22,7 +22,7 @@ namespace RazorSharp.CLR.Structures
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct Module
+	internal unsafe struct Module
 	{
 		[FieldOffset(0)]  private readonly void*       m_pSimpleName;
 		[FieldOffset(8)]  private readonly void*       m_file;

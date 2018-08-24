@@ -1,19 +1,23 @@
 ﻿#region
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using RazorCommon;
+using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
+using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using RazorSharp.Utilities.Exceptions;
 using Test.Testing;
 using static RazorSharp.Unsafe;
+using Unsafe = RazorSharp.Unsafe;
+using static RazorSharp.Analysis.InspectorHelper;
 
 #endregion
 
@@ -22,7 +26,7 @@ namespace Test
 
 	#region
 
-	using CSUnsafe = Unsafe;
+	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
 
@@ -51,8 +55,18 @@ namespace Test
 		static Program()
 		{
 			StandardOut.ModConsole();
-			Trace.Assert(IntPtr.Size == 8);
-			Trace.Assert(Environment.Is64BitProcess);
+
+			/**
+			 * RazorSharp is only compatible on:
+			 *
+			 * - x64
+			 * - Windows
+			 * - CLR
+			 *
+			 */
+			RazorContract.Assert(IntPtr.Size == 8);
+			RazorContract.Assert(Environment.Is64BitProcess);
+			RazorContract.Assert(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
 //			Logger.Log(Flags.Info, "Architecture: x64");
 //			Logger.Log(Flags.Info, "Byte order: {0}", BitConverter.IsLittleEndian ? "Little Endian" : "Big Endian");
@@ -66,14 +80,134 @@ namespace Test
 			return (T*) AddressOf(ref t);
 		}
 
-		private static readonly Thread GCWatcherThread = new Thread(Watch);
-
-		private static void Watch()
+		private class AddressEventArgs : EventArgs
 		{
-			while (GCWatcherThread.IsAlive) {
-				bool b = GCHeap.IsGCInProgress();
 
-				Console.Write("\r{0} | {1}", b, GCHeap.GCCount);
+			public IntPtr OldAddrOfData { get; }
+
+			public IntPtr NewAddrOfData { get; }
+
+			internal AddressEventArgs(IntPtr oldAddrOfData, IntPtr newAddrOfData)
+			{
+				OldAddrOfData = oldAddrOfData;
+				NewAddrOfData = newAddrOfData;
+			}
+
+		}
+
+		private class ObjectSentinel : IDisposable
+		{
+
+			/// <summary>
+			///     Used to tell the pinning thread to stop pinning the object.
+			/// </summary>
+			private readonly Thread m_thread;
+
+			private          IntPtr     m_origHeapAddr;
+			private readonly IntPtr     m_ptrAddr;
+			private volatile bool       m_keepAlive;
+			public event AddressChanged Event;
+			public IntPtr               PtrAddr => m_ptrAddr;
+
+			public delegate void AddressChanged(object sender, AddressEventArgs e);
+
+			private void Watch()
+			{
+				while (m_keepAlive) {
+					var heap = *(IntPtr*) m_ptrAddr;
+					if (heap != m_origHeapAddr) {
+						OnRaiseCustomEvent(new AddressEventArgs(m_origHeapAddr, heap));
+					}
+				}
+			}
+
+			// Wrap event invocations inside a protected virtual method
+			// to allow derived classes to override the event invocation behavior
+			protected virtual void OnRaiseCustomEvent(AddressEventArgs e)
+			{
+				// Make a temporary copy of the event to avoid possibility of
+				// a race condition if the last subscriber unsubscribes
+				// immediately after the null check and before the event is raised.
+				var handler = Event;
+
+				// Event will be null if there are no subscribers
+				if (handler != null) {
+					// Use the () operator to raise the event.
+					handler(this, e);
+				}
+
+				m_origHeapAddr = e.NewAddrOfData;
+			}
+
+			public static ObjectSentinel Create<T>(ref T t)
+			{
+				return new ObjectSentinel(AddressOf(ref t));
+			}
+
+			private ObjectSentinel(IntPtr ptrAddr)
+			{
+				m_ptrAddr      = ptrAddr;
+				m_origHeapAddr = Marshal.ReadIntPtr(m_ptrAddr);
+
+				m_keepAlive = true;
+				m_thread = new Thread(Watch)
+				{
+					IsBackground = true
+				};
+
+				m_thread.Start();
+			}
+
+			public void Dispose()
+			{
+				m_keepAlive = false;
+				m_thread.Join();
+			}
+
+
+		}
+
+		struct Vec2
+		{
+			private float x,
+			              y;
+
+			public float X => x;
+
+			public float Y => y;
+
+			public void doSomething() { }
+
+			public static Vec2 operator ++(Vec2 v)
+			{
+				v.x++;
+				v.y++;
+				return v;
+			}
+
+			public override string ToString()
+			{
+				return $"{nameof(x)}: {x}, {nameof(y)}: {y}";
+			}
+		}
+
+		class CVec2
+		{
+			private float _x,
+			              _y;
+
+			public void fnOrig(int i)
+			{
+				var cpy  = this;
+				var heap = AddressOfHeap(ref cpy).ToPointer();
+				Console.WriteLine("Orig {0} | {1}", Hex.ToHex(heap), i);
+			}
+
+			public static CVec2 operator ++(CVec2 v)
+			{
+				v._x++;
+				v._y++;
+				return v;
 			}
 		}
 
@@ -83,144 +217,89 @@ namespace Test
 			// todo: implement dynamic allocation system
 
 
-/*			Klass k  = new Klass();
-			var   md = GetMethodDesc<Klass>("increment");
+			string          str   = "foo";
+			Pointer<string> lpStr = Unsafe.AddressOf(ref str);
+			Console.WriteLine(Hex.ToHex(lpStr.Address));
 
-			k.increment();
-			Console.WriteLine("Orig:");
-			Console.WriteLine(md->ToString());
-			var orig = md->Function;
+			Pointer<char> strMem = Unsafe.AddressOfHeap(ref str, OffsetType.StringData);
 
-			Action a = delegate { Console.WriteLine("\nHook\n"); };
-			md->SetFunctionPointer(a.Method.MethodHandle.GetFunctionPointer());
-			Console.WriteLine("Hook:");
-			Console.WriteLine(md->ToString());
-			k.increment();
-
-			// todo: fix
-			md->SetFunctionPointer(orig);
-			Console.WriteLine("Restore:");
-			Console.WriteLine(md->ToString());
-			md->Prepare();
-			k.increment();*/
-
-
-			GCWatcherThread.Start();
-
-			for (int i = 0; i < 10; i++) {
-				TestingUtil.CreatePressure();
-			}
-
-			GCWatcherThread.Abort();
-
-			Console.WriteLine();
 
 			Console.WriteLine(GCHeap.GCCount);
 		}
 
 
-		private static void DumpArray<T>(ref T[] arr) where T : class
+		private static void Hook<TOrig, TNew>(string origFn, string newFn)
 		{
-			Pointer<long> lp_rg = AddressOfHeap(ref arr, OffsetType.ArrayData);
-			for (int i = 0; i < arr.Length; i++) {
-				Console.WriteLine("{0} : {1}", Hex.ToHex(lp_rg.Read<long>()), lp_rg.Read<T>());
-				lp_rg++;
+			Hook(typeof(TOrig), origFn, typeof(TNew), newFn);
+		}
+
+		private static void Hook(Type tOrig, string origFn, Type tNew, string newFn)
+		{
+			var origMd = Runtime.GetMethodDesc(tOrig, origFn);
+			var newMd  = Runtime.GetMethodDesc(tNew, newFn);
+			origMd->SetFunctionPointer(newMd->Function);
+		}
+
+		private static void hk_intercept(void* __this, int i)
+		{
+			Console.WriteLine("Hook {0} | {1}", Hex.ToHex(__this), i);
+		}
+
+		private static void inline() { }
+
+		[Conditional("DEBUG")]
+		static void __break()
+		{
+			Console.ReadLine();
+		}
+
+
+		struct UObj<T> : IDisposable
+		{
+			private IntPtr m_addr;
+
+			public IntPtr Address => m_addr;
+
+			internal UObj(IntPtr p)
+			{
+				m_addr = p;
+			}
+
+			/// <summary>
+			/// Don't create a new instance using this
+			/// </summary>
+			public ref T Reference {
+				get {
+					IntPtr ptrPtr = AddressOf(ref m_addr);
+					return ref Memory.AsRef<T>(ptrPtr);
+				}
+			}
+
+			public void Dispose()
+			{
+				Marshal.FreeHGlobal(m_addr - IntPtr.Size);
+			}
+
+			public override string ToString()
+			{
+				return Reference.ToString();
 			}
 		}
 
-		private static void TestTypes()
+
+		static UObj<T> New<T>() where T : class
 		{
-			/**
-			 * string
-			 *
-			 * Generic:		no
-			 * Type:		reference
-			 */
-			string s = "foo";
-			WriteOut(ref s);
-
-			/**
-			 * int[]
-			 *
-			 * Generic:		no
-			 * Type:		reference
-			 */
-			int[] arr = {1, 2, 3};
-			WriteOut(ref arr, true);
-
-			/**
-			 * string[]
-			 *
-			 * Generic:		no
-			 * Type:		reference
-			 */
-			string[] ptrArr = {"foo", "bar", "desu"};
-			WriteOut(ref ptrArr);
-
-			/**
-			 * int
-			 *
-			 * Generic:		no
-			 * Type:		value
-			 */
-			int i = 0xFF;
-			WriteOutVal(ref i);
-
-			/**
-			 * Dummy
-			 *
-			 * Generic:		no
-			 * Type:		reference
-			 */
-			Dummy d = new Dummy();
-			WriteOut(ref d);
-
-			/**
-			 * List<int>
-			 *
-			 * Generic:		yes
-			 * Type:		reference
-			 */
-			List<int> ls = new List<int>();
-			WriteOut(ref ls);
-
-			/**
-			 * Point
-			 *
-			 * Generic:		no
-			 * Type:		value
-			 *
-			 */
-			Point pt = new Point();
-			WriteOutVal(ref pt);
-
-			/**
-			 * char
-			 */
-			char c = '\0';
-			WriteOutVal(ref c);
-		}
-
-		private static void WriteOutVal<T>(ref T t, bool printStructures = false) where T : struct
-		{
-			Inspector<T>.Write(ref t, printStructures);
-		}
-
-		private static void WriteOut<T>(ref T t, bool printStructures = false) where T : class
-		{
-			RefInspector<T>.Write(ref t, printStructures);
-		}
+			RazorContract.Assert(!typeof(T).IsArray);
+			RazorContract.Assert(typeof(T) != typeof(string));
+			RazorContract.Assert(!typeof(T).IsIListType());
 
 
-		private static void TableMethods<T>()
-		{
-			ConsoleTable table = new ConsoleTable("Function", "MethodDesc", "Name", "Virtual");
-			foreach (MethodInfo v in typeof(T).GetMethods(BindingFlags.Instance | BindingFlags.Public |
-			                                              BindingFlags.NonPublic))
-				table.AddRow(Hex.ToHex(v.MethodHandle.GetFunctionPointer()), Hex.ToHex(v.MethodHandle.Value),
-					v.Name, v.IsVirtual ? StringUtils.Check : StringUtils.BallotX);
+			var lpMem = Memory.AllocUnmanaged<byte>(Unsafe.BaseInstanceSize<T>());
+			lpMem.Increment(sizeof(long));
+			lpMem.Write((long) Runtime.MethodTableOf<T>());
 
-			Console.WriteLine(table.ToMarkDownString());
+
+			return new UObj<T>(lpMem.Address);
 		}
 
 

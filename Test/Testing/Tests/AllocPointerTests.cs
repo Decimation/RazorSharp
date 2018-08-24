@@ -37,35 +37,35 @@ namespace Test.Testing.Tests
 
 			// Bounds checking
 
-			Assertion.AssertThrows<Exception>(delegate
+			RazorContract.AssertThrows<Exception>(delegate
 			{
 				AllocExPointer<string> p = new AllocExPointer<string>(5);
 				p += p.Count + 1;
 			});
 
-			Assertion.AssertThrows<Exception>(delegate
+			RazorContract.AssertThrows<Exception>(delegate
 			{
 				AllocExPointer<string> p = new AllocExPointer<string>(5);
 				p -= p.Count + 1;
 			});
 
-			Assertion.AssertThrows<Exception>(delegate
+			RazorContract.AssertThrows<Exception>(delegate
 			{
 				string x = alloc[-1];
 			});
 
-			Assertion.AssertThrows<Exception>(delegate
+			RazorContract.AssertThrows<Exception>(delegate
 			{
 				string x = alloc[alloc.Count];
 			});
 
-			Assertion.AssertThrows<Exception>(delegate
+			RazorContract.AssertThrows<Exception>(delegate
 			{
 				alloc++;
 				string x = alloc[-2];
 			});
 
-			Assertion.AssertNoThrows<Exception>(delegate
+			RazorContract.AssertNoThrows<Exception>(delegate
 			{
 				alloc--;
 				string x = alloc[0];

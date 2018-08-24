@@ -14,7 +14,7 @@ using RazorSharp.Pointers;
 namespace RazorSharp.Memory
 {
 
-	public static class Segments
+	public static unsafe class Segments
 	{
 
 		private const string RAZOR_NATIVE_DLL =
@@ -22,6 +22,7 @@ namespace RazorSharp.Memory
 
 		private const int SEGMENT_ARR_DEFAULT_SIZE = 10;
 		private const int IMAGE_SIZEOF_SHORT_NAME  = 8;
+
 
 		[DllImport(RAZOR_NATIVE_DLL, EntryPoint = "PrintPESectionInfo")]
 		private static extern void PrintPESectionInfo(IntPtr hModule);
@@ -134,7 +135,7 @@ namespace RazorSharp.Memory
 		public enum SegmentType
 		{
 			/// <summary>
-			///     Const data; readonly of <see cref="data" />
+			///     <c>const</c> data; readonly of <see cref="data" />
 			/// </summary>
 			rdata,
 

@@ -32,24 +32,27 @@ namespace RazorSharp.CLR.Structures
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct MethodDescChunk
 	{
-		[FieldOffset(0)] private readonly MethodTable*     m_methodTable;
-		[FieldOffset(8)] private readonly MethodDescChunk* m_next;
+
+		#region Fields
+
+		[FieldOffset(0)]  private readonly MethodTable*     m_methodTable;
+		[FieldOffset(8)]  private readonly MethodDescChunk* m_next;
+		[FieldOffset(16)] private readonly byte             m_size;
+		[FieldOffset(17)] private readonly byte             m_count;
+		[FieldOffset(18)] private readonly ushort           m_flagsAndTokenRange;
+
+		#endregion
+
 
 		/// <summary>
-		///     The size of this chunk minus 1 (in multiples of MethodDesc::ALIGNMENT)
+		///     The size of this chunk minus 1 (in multiples of <see cref="MethodDesc.ALIGNMENT"/>)
 		/// </summary>
-		[FieldOffset(16)] private readonly byte m_size;
+		public byte Size => m_size;
 
 		/// <summary>
-		///     The number of MethodDescs in this chunk minus 1
+		///     The number of <see cref="MethodDesc"/>s in this chunk minus 1
 		/// </summary>
-		[FieldOffset(17)] private readonly byte m_count;
-
-		[FieldOffset(18)] private readonly ushort m_flagsAndTokenRange;
-
-		// wtf? Why do I need to cast lol
-		// m_count is a byte??
-		public byte Count => (byte) (m_count + 1);
+		public byte Count => m_count; //(byte) (m_count + 1);
 
 		public MethodTable* MethodTable => m_methodTable;
 

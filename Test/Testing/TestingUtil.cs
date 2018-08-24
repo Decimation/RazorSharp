@@ -3,11 +3,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using NUnit.Framework;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorSharp;
+using RazorSharp.Analysis;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures.HeapObjects;
+using RazorSharp.Pointers;
 using RazorSharp.Pointers.Ex;
 
 #endregion
@@ -76,7 +80,7 @@ namespace Test.Testing
 			}
 		}
 
-		internal static void CreatePressure()
+		internal static void CreateGCPressure()
 		{
 			int passes = 0;
 			while (passes++ < MaxPasses) {
@@ -137,6 +141,99 @@ namespace Test.Testing
 				for (int i = 0; i < oArr.Length; i++)
 					oArr[i] = new object();
 			}
+		}
+
+		internal static void DumpArray<T>(ref T[] arr) where T : class
+		{
+			Pointer<long> lp_rg = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData);
+			for (int i = 0; i < arr.Length; i++) {
+				Console.WriteLine("{0} : {1}", Hex.ToHex(lp_rg.Read<long>()), lp_rg.Read<T>());
+				lp_rg++;
+			}
+		}
+
+		public static void TestTypes()
+		{
+			/**
+			 * string
+			 *
+			 * Generic:		no
+			 * Type:		reference
+			 */
+			string s = "foo";
+			InspectorHelper.Inspect(ref s);
+
+			/**
+			 * int[]
+			 *
+			 * Generic:		no
+			 * Type:		reference
+			 */
+			int[] arr = {1, 2, 3};
+			InspectorHelper.Inspect(ref arr, true);
+
+			/**
+			 * string[]
+			 *
+			 * Generic:		no
+			 * Type:		reference
+			 */
+			string[] ptrArr = {"foo", "bar", "desu"};
+			InspectorHelper.Inspect(ref ptrArr);
+
+			/**
+			 * int
+			 *
+			 * Generic:		no
+			 * Type:		value
+			 */
+			int i = 0xFF;
+			InspectorHelper.InspectVal(ref i);
+
+			/**
+			 * Dummy
+			 *
+			 * Generic:		no
+			 * Type:		reference
+			 */
+			Dummy d = new Dummy();
+			InspectorHelper.Inspect(ref d);
+
+			/**
+			 * List<int>
+			 *
+			 * Generic:		yes
+			 * Type:		reference
+			 */
+			List<int> ls = new List<int>();
+			InspectorHelper.Inspect(ref ls);
+
+			/**
+			 * Point
+			 *
+			 * Generic:		no
+			 * Type:		value
+			 *
+			 */
+			Point pt = new Point();
+			InspectorHelper.InspectVal(ref pt);
+
+			/**
+			 * char
+			 */
+			char c = '\0';
+			InspectorHelper.InspectVal(ref c);
+		}
+
+		internal static void TableMethods<T>()
+		{
+			ConsoleTable table = new ConsoleTable("Function", "MethodDesc", "Name", "Virtual");
+			foreach (MethodInfo v in typeof(T).GetMethods(BindingFlags.Instance | BindingFlags.Public |
+			                                              BindingFlags.NonPublic))
+				table.AddRow(Hex.ToHex(v.MethodHandle.GetFunctionPointer()), Hex.ToHex(v.MethodHandle.Value),
+					v.Name, v.IsVirtual ? StringUtils.Check : StringUtils.BallotX);
+
+			Console.WriteLine(table.ToMarkDownString());
 		}
 	}
 

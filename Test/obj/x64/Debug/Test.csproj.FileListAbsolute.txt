@@ -47,8 +47,6 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Memory.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Buffers.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Memory.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Numerics.Vectors.xml
-C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\ObjectLayoutInspector.dll
-C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\ObjectLayoutInspector.pdb
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\cs\Microsoft.CodeAnalysis.resources.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\de\Microsoft.CodeAnalysis.resources.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\es\Microsoft.CodeAnalysis.resources.dll
@@ -75,3 +73,5 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\ru\Microsoft.CodeAnal
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\tr\Microsoft.CodeAnalysis.CSharp.resources.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
+C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\JetBrains.Annotations.dll
+C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\JetBrains.Annotations.xml

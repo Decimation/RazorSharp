@@ -39,6 +39,8 @@ namespace RazorSharp.CLR
 			Functions = new Dictionary<string, Delegate>();
 		}
 
+//			IntPtr thread = Kernel32.OpenThread(0x4, false, Kernel32.GetCurrentThreadId());
+//			Console.WriteLine(CLRFunctions.ThreadFunctions.GetStackGuarantee(thread));
 
 		private static void AddFunction<TDelegate>(string name, string signature) where TDelegate : Delegate
 		{
@@ -106,6 +108,22 @@ namespace RazorSharp.CLR
 
 			#endregion
 
+			private const string AllocSignature =
+				"56 57 41 54 41 56 41 57 48 83 EC 30 48 C7 44 24 20 FE FF FF FF 48 89 5C 24 60 48 89 6C 24 70 45 8B E0 4C 8B F2 E9 00 01 00 00 33 F6 E9 E3 00 00 00";
+
+			// size_t size, DWORD flags
+			//struct Object *WKS::GCHeap::Alloc(WKS::GCHeap *__hidden this, unsigned __int64, unsigned int)
+			internal delegate void* AllocDelegate(void* __this, ulong size, uint flags);
+
+			internal static readonly AllocDelegate Alloc;
+
+			private const string GetContainingObjectSignature =
+				"48 3B 15 D9 50 3C 00 48 8B C2 72 18 48 3B 05 95 CE 3B 00 73 0F 48 8B 15 34 59 3C 00 48 8B C8 E9 EC 94 B1 FF 33 C0 C3";
+
+			internal delegate void* GetContainingObjectDelegate(void* __this, void* obj);
+
+			internal static readonly GetContainingObjectDelegate GetContainingObject;
+
 
 			static GCFunctions()
 			{
@@ -120,6 +138,29 @@ namespace RazorSharp.CLR
 
 				AddFunction<GetGCCountDelegate>("GCHeap::GetGCCount", GetGCCountSignature);
 				GetGCCountInternal = (GetGCCountDelegate) Functions["GCHeap::GetGCCount"];
+
+				AddFunction<AllocDelegate>("GCHeap::Alloc", AllocSignature);
+				Alloc = (AllocDelegate) Functions["GCHeap::Alloc"];
+
+				AddFunction<GetContainingObjectDelegate>("GCHeap::GetContainingObject", GetContainingObjectSignature);
+				GetContainingObject = (GetContainingObjectDelegate) Functions["GCHeap::GetContainingObject"];
+			}
+		}
+
+
+		internal static class MethodDescFunctions
+		{
+			private const string SizeOfSignature =
+				"0F B7 41 06 4C 8D 05 45 6D 6F 00 8B D0 83 E2 1F";
+
+			internal delegate ulong SizeOfDelegate(MethodDesc* __this);
+
+			internal static readonly SizeOfDelegate SizeOf;
+
+			static MethodDescFunctions()
+			{
+				AddFunction<SizeOfDelegate>("MethodDesc::SizeOf", SizeOfSignature);
+				SizeOf = (SizeOfDelegate) Functions["MethodDesc::SizeOf"];
 			}
 		}
 
@@ -132,11 +173,20 @@ namespace RazorSharp.CLR
 
 			internal static readonly AllocateObjectDelegate AllocateObject;
 
+			private const string GetSizeSignature =
+				"4C 8B 01 49 83 E0 FC 41 F7 00 00 00 00 80 41 8B 40 04 74 0E 8B 51 08 41 0F B7 08 48 0F AF D1";
+
+			internal delegate ulong GetSizeDelegate(void* __this);
+
+			internal static readonly GetSizeDelegate GetSize;
 
 			static ObjectFunctions()
 			{
 				AddFunction<AllocateObjectDelegate>("AllocateObject", AllocateObjectSignature);
 				AllocateObject = (AllocateObjectDelegate) Functions["AllocateObject"];
+
+				AddFunction<GetSizeDelegate>("GetSize", GetSizeSignature);
+				GetSize = (GetSizeDelegate) Functions["GetSize"];
 			}
 
 		}
@@ -173,10 +223,19 @@ namespace RazorSharp.CLR
 
 			internal static readonly LoadSizeDelegate LoadSize;
 
+			private const string GetStaticAddressSignature = "53 48 83 EC 20 48 8B D9 E8 8F BC 05 00 8B 53 0C";
+
+			internal delegate void* GetStaticAddressDelegate(FieldDesc* __this, void* @base);
+
+			internal static readonly GetStaticAddressDelegate GetStaticAddress;
+
 			static FieldDescFunctions()
 			{
 				AddFunction<LoadSizeDelegate>("FieldDesc::LoadSize", LoadSizeSignature);
 				LoadSize = (LoadSizeDelegate) Functions["FieldDesc::LoadSize"];
+
+				AddFunction<GetStaticAddressDelegate>("FieldDesc::GetStaticAddress", GetStaticAddressSignature);
+				GetStaticAddress = (GetStaticAddressDelegate) Functions["FieldDesc::GetStaticAddress"];
 			}
 		}
 

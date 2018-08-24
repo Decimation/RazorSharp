@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-      <DefineConstants>DEBUG;TRACE;CONTRACTS_FULL</DefineConstants>
+      <DefineConstants>DEBUG;TRACE;JETBRAINS_ANNOTATIONS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -31,7 +31,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-      <DefineConstants>TRACE;CONTRACTS_FULL</DefineConstants>
+      <DefineConstants>TRACE;JETBRAINS_ANNOTATIONS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -47,6 +47,10 @@
     </Reference>
       <Reference Include="CommandLine, Version=2.3.0.0, Culture=neutral, PublicKeyToken=de6f01bd326f8c32">
           <HintPath>..\packages\CommandLineParser.2.3.0\lib\net45\CommandLine.dll</HintPath>
+          <Private>True</Private>
+      </Reference>
+      <Reference Include="JetBrains.Annotations, Version=2018.2.1.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
+          <HintPath>..\packages\JetBrains.Annotations.2018.2.1\lib\net20\JetBrains.Annotations.dll</HintPath>
       <Private>True</Private>
     </Reference>
       <Reference Include="Microsoft.CodeAnalysis, Version=2.9.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
@@ -69,9 +73,6 @@
     <Reference Include="nunit.framework, Version=3.10.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb">
       <HintPath>..\packages\NUnit.3.10.1\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="ObjectLayoutInspector, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\ObjectLayoutInspector\ObjectLayoutInspector\bin\x64\Release\ObjectLayoutInspector.dll</HintPath>
     </Reference>
     <Reference Include="RazorCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\RazorCommon\RazorCommon\bin\x64\Release\RazorCommon.dll</HintPath>
@@ -210,7 +211,6 @@
     <Compile Include="Testing\Benchmarking\MarshalBenchmarking.cs" />
     <Compile Include="Testing\Benchmarking\MethodTableAcquisitionBenchmarking.cs" />
     <Compile Include="Testing\Benchmarking\PointerBenchmark.cs" />
-    <Compile Include="Testing\Benchmarking\RuntimeBenchmarking.cs" />
     <Compile Include="Testing\Benchmarking\UnsafeBenchmarking.cs" />
     <Compile Include="Testing\GenericDummy.cs" />
     <Compile Include="Testing\Point.cs" />

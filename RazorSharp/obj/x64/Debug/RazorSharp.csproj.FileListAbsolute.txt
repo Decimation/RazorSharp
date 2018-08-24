@@ -20,3 +20,5 @@ C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Numerics
 C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Buffers.xml
 C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Memory.xml
 C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Numerics.Vectors.xml
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\JetBrains.Annotations.dll
+C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\JetBrains.Annotations.xml

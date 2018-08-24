@@ -10,7 +10,7 @@ using static RazorSharp.CLR.Runtime;
 namespace RazorSharp.Experimental
 {
 
-	public static unsafe class FunctionHooker
+	internal static unsafe class FunctionHooker
 	{
 		private struct PointerPair
 		{

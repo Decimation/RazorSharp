@@ -75,7 +75,7 @@ namespace RazorSharp.Memory
 
 			// [type] [address]
 			string addrStr = String.Format("{0}{1} {2}", new string(' ', adjOffset),
-				DataTypes.GetStyle<T>(NamingStyles.CSharpKeyword), Hex.ToHex(addr));
+				typeof(T).Name, Hex.ToHex(addr));
 
 			Console.WriteLine("{0}\n{1}\n{2} [{3}]", str, pt, addrStr, offset);
 		}

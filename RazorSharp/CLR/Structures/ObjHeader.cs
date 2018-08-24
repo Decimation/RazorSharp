@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using RazorCommon;
+using RazorSharp.Utilities;
 
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -20,18 +21,28 @@ namespace RazorSharp.CLR.Structures
 	public unsafe struct ObjHeader
 	{
 
+		#region Fields
+
 #if !WIN32
 		[FieldOffset(0)] private readonly UInt32 m_uAlignpad;
 #endif
 		[FieldOffset(4)] private UInt32 m_uSyncBlockValue;
 
-		public UInt32 SyncBlock => m_uSyncBlockValue;
+		#endregion
 
+
+		#region Accessors
+
+		public UInt32         SyncBlock        => m_uSyncBlockValue;
 		public SyncBlockFlags SyncBlockAsFlags => (SyncBlockFlags) m_uSyncBlockValue;
+
+		#endregion
+
+
 
 		static ObjHeader()
 		{
-			Trace.Assert(sizeof(ObjHeader) == IntPtr.Size);
+			RazorContract.Assert(sizeof(ObjHeader) == IntPtr.Size);
 		}
 
 		public void SetBit(uint uBit)
@@ -48,8 +59,10 @@ namespace RazorSharp.CLR.Structures
 			m_uSyncBlockValue &= ~uBit;
 		}
 
+		// todo
 		public bool IsPinned()
 		{
+			//BIT_SBLK_GC_RESERVE
 			//return !!((((CObjectHeader*)this)->GetHeader()->GetBits()) & BIT_SBLK_GC_RESERVE);
 			return !!((SyncBlock & (uint) SyncBlockFlags.BitSblkGcReserve) != 0);
 		}
@@ -105,9 +118,9 @@ namespace RazorSharp.CLR.Structures
 
 		public override bool Equals(object obj)
 		{
-			if (obj.GetType() == GetType()) {
+			if (obj?.GetType() == GetType()) {
 				ObjHeader h = (ObjHeader) obj;
-				return h.m_uSyncBlockValue == m_uSyncBlockValue;
+				return Equals(h);
 			}
 
 			return false;

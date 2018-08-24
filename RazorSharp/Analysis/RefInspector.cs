@@ -109,6 +109,7 @@ namespace RazorSharp.Analysis
 		{
 			public IntPtr Heap   { get; }
 			public IntPtr Fields { get; }
+			public IntPtr Header { get; }
 
 			/// <summary>
 			///     String data if the type is a string,
@@ -120,6 +121,7 @@ namespace RazorSharp.Analysis
 			{
 				Heap   = Unsafe.AddressOfHeap(ref t);
 				Fields = Unsafe.AddressOfHeap(ref t, OffsetType.Fields);
+				Header = (IntPtr) Runtime.ReadObjHeader(ref t);
 				if (typeof(T).IsArray) {
 					HeapMisc = Unsafe.AddressOfHeap(ref t, OffsetType.ArrayData);
 				}
@@ -136,6 +138,7 @@ namespace RazorSharp.Analysis
 				ConsoleTable table = base.ToTable();
 				table.AttachColumn("Heap", Hex.ToHex(Heap));
 				table.AttachColumn("Fields", Hex.ToHex(Fields));
+				table.AttachColumn("Header", Hex.ToHex(Header));
 
 
 				if (typeof(T).IsArray) {
@@ -152,7 +155,7 @@ namespace RazorSharp.Analysis
 		}
 
 
-		public new static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.Default)
+		internal new static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.Default)
 		{
 			RefInspector<T> inspector = new RefInspector<T>(ref t, mode);
 			WriteInspector(inspector, printStructures);

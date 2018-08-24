@@ -9,6 +9,8 @@ using RazorInvoke.Libraries;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
+using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -79,6 +81,8 @@ namespace RazorSharp.Memory
 			return arr;
 		}
 
+		#region Bits
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool ReadBit(int b, int bitIndex)
 		{
@@ -110,6 +114,9 @@ namespace RazorSharp.Memory
 		{
 			return ReadBits((int) b, bitIndexBegin, bitLen);
 		}
+
+		#endregion
+
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Write<T>(IntPtr p, int byteOffset, T t)
@@ -184,13 +191,14 @@ namespace RazorSharp.Memory
 
 		/// <summary>
 		///     <para>Allocates a value type in zeroed, unmanaged memory.</para>
+		/// <para>If <typeparamref name="T"/> is a reference type, a managed pointer of type <typeparamref name="T"/> will be created in unmanaged memory.</para>
 		///     <para>Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /></para>
 		/// </summary>
 		/// <typeparam name="T">Value type to allocate</typeparam>
 		/// <returns>A pointer to the allocated memory</returns>
 		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
 		{
-			Trace.Assert(elemCnt > 0, "elemCnt > 0");
+			RazorContract.Requires(elemCnt > 0, "elemCnt <= 0");
 			int    size  = Unsafe.SizeOf<T>() * elemCnt;
 			IntPtr alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
@@ -198,7 +206,7 @@ namespace RazorSharp.Memory
 			return alloc;
 		}
 
-		public static bool IsAligned<T>(int byteAlignment)
+		/*public static bool IsAligned<T>(int byteAlignment)
 		{
 			int size = Unsafe.SizeOf<T>();
 			return (size & (byteAlignment - 1)) == 0;
@@ -207,7 +215,7 @@ namespace RazorSharp.Memory
 		public static bool IsAligned<T>()
 		{
 			return IsAligned<T>(IntPtr.Size);
-		}
+		}*/
 
 		public static bool IsAligned(IntPtr p)
 		{

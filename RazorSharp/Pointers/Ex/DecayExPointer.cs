@@ -261,7 +261,7 @@ namespace RazorSharp.Pointers.Ex
 
 		public static implicit operator DecayExPointer<T>(string s)
 		{
-			Assertion.AssertType<char, T>();
+			RazorContract.RequiresType<char, T>();
 
 
 			return CreateDecayedPointer(Unsafe.AddressOfHeap(ref s, OffsetType.StringData),

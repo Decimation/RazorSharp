@@ -4,10 +4,14 @@ using System;
 using System.Collections;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Extensions;
+using RazorSharp.Experimental;
 using RazorSharp.Pointers.Ex;
+using RazorSharp.Utilities;
+using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -53,9 +57,9 @@ namespace RazorSharp.Pointers
 			set => MMemory.Write(PointerUtils.Offset<T>(m_value, index), 0, value);
 		}*/
 
-		public ref T this[int index] => ref MMemory.AsRef<T>(Offset(index));
+		public ref T this[int index] => ref AsRef<T>(index);
 
-		public ref T Reference => ref MMemory.AsRef<T>(Address);
+		public ref T Reference => ref AsRef<T>();
 
 		public T Value {
 			get => Read<T>();
@@ -95,6 +99,13 @@ namespace RazorSharp.Pointers
 		}
 
 		#endregion
+
+
+		public PinHandle Pin()
+		{
+			RazorContract.Requires(!typeof(T).IsValueType, "Value types do not need to be pinned");
+			return new ObjectPinHandle(Value);
+		}
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -174,6 +185,11 @@ namespace RazorSharp.Pointers
 		public Pointer<TNew> Reinterpret<TNew>()
 		{
 			return new Pointer<TNew>(Address);
+		}
+
+		public void* ToPointer()
+		{
+			return m_value;
 		}
 
 		public int ToInt32()
@@ -342,21 +358,27 @@ namespace RazorSharp.Pointers
 
 		#region Overrides
 
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="format">
+		/// <para><c>"O"</c>: Object (<see cref="Reference"/>) </para>
+		/// <para><c>"P"</c>: Pointer (<see cref="Address"/>) </para>
+		/// <para><c>"S"</c>: Safe <c>"O"</c> (when <see cref="Reference"/> or <see cref="Address"/> may be <c>null</c>) </para>
+		/// </param>
+		/// <param name="formatProvider"></param>
+		/// <returns></returns>
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
-			if (String.IsNullOrEmpty(format)) {
-				format = "O";
-			}
+//			if (String.IsNullOrEmpty(format)) {
+//				format = "O";
+//			}
 
-			if (formatProvider == null) {
-				formatProvider = CultureInfo.CurrentCulture;
-			}
+//			if (formatProvider == null) {
+//				formatProvider = CultureInfo.CurrentCulture;
+//			}
 
 
-			/**
-			 * @O	Object
-			 * @P	Pointer
-			 */
 			switch (format.ToUpperInvariant()) {
 				case "O":
 					if (typeof(T).IsIListType()) {
@@ -366,15 +388,39 @@ namespace RazorSharp.Pointers
 					return Reference.ToString();
 				case "P":
 					return Hex.ToHex(Address);
+				case "S":
+					if (Reference == null || IsNull) {
+						return "(null)";
+					}
+					else {
+						goto case "O";
+					}
 				default:
-					goto case "O";
+					goto case "P";
 			}
 		}
+
+		/*[HandleProcessCorruptedStateExceptions]
+		public T TryRead()
+		{
+			T t;
+			try {
+				t = Read<T>();
+			}
+			catch (AccessViolationException) {
+				return default;
+			}
+			catch (NullReferenceException) {
+				return default;
+			}
+
+			return t;
+		}*/
 
 
 		public override string ToString()
 		{
-			return Reference.ToString();
+			return ToString("O", null);
 		}
 
 		#endregion

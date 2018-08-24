@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -86,10 +87,13 @@ namespace RazorSharp.CLR.Structures
 		public MethodTable* MethodTable => m_pMethodTable;
 
 
+		/// <summary>
+		/// Whether this <see cref="EEClass"/> has a <see cref="EEClassLayoutInfo"/>
+		/// </summary>
 		public bool HasLayout => VMFlags.HasFlag(VMFlags.HasLayout);
 
 		/// <summary>
-		///     <c>DWORD</c> of <see cref="TypeAttributes" />
+		///     <see cref="DWORD"/> of <see cref="TypeAttributes" />
 		/// </summary>
 		public DWORD Attributes => m_dwAttrClass;
 
@@ -128,7 +132,7 @@ namespace RazorSharp.CLR.Structures
 		internal EEClassLayoutInfo* LayoutInfo {
 			get {
 				//return &((LayoutEEClass *) this)->m_LayoutInfo;
-				Trace.Assert(HasLayout, "EEClass does not have LayoutInfo");
+				RazorContract.Requires(HasLayout, "EEClass does not have LayoutInfo");
 
 
 				IntPtr thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass));

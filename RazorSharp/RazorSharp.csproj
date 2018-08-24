@@ -17,7 +17,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-      <DefineConstants>TRACE;CONTRACTS_FULL</DefineConstants>
+      <DefineConstants>TRACE;JETBRAINS_ANNOTATIONS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -30,7 +30,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-      <DefineConstants>DEBUG;TRACE;CONTRACTS_FULL</DefineConstants>
+      <DefineConstants>DEBUG;TRACE;JETBRAINS_ANNOTATIONS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -40,6 +40,10 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+      <Reference Include="JetBrains.Annotations, Version=2018.2.1.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
+          <HintPath>..\packages\JetBrains.Annotations.2018.2.1\lib\net20\JetBrains.Annotations.dll</HintPath>
+          <Private>True</Private>
+      </Reference>
     <Reference Include="Microsoft.DotNet.PlatformAbstractions, Version=2.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
       <HintPath>..\packages\Microsoft.DotNet.PlatformAbstractions.2.1.0\lib\net45\Microsoft.DotNet.PlatformAbstractions.dll</HintPath>
       <Private>True</Private>
@@ -152,11 +156,12 @@
       <Compile Include="CLR\Runtime.cs"/>
     <Compile Include="Unsafe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\Assertion.cs" />
-    <Compile Include="Utilities\DataTypes.cs" />
-    <Compile Include="Utilities\RuntimeException.cs" />
+      <Compile Include="Utilities\Exceptions\FieldDescException.cs"/>
+      <Compile Include="Utilities\Exceptions\MethodDescException.cs"/>
+      <Compile Include="Utilities\Exceptions\RuntimeException.cs"/>
+      <Compile Include="Utilities\Exceptions\TypeException.cs"/>
+      <Compile Include="Utilities\RazorContract.cs"/>
     <Compile Include="Utilities\StandardOut.cs" />
-    <Compile Include="Utilities\TypeException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

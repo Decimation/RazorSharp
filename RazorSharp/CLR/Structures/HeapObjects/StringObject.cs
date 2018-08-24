@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.Utilities;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable ConvertToAutoProperty
@@ -55,19 +56,26 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 		public char FirstChar => m_firstChar;
 
 		/// <summary>
-		///     Address-sensitive
+		/// <remarks>
+		/// Address-sensitive
+		/// </remarks>
+		///
 		/// </summary>
 		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
 
 		public MethodTable* MethodTable => m_methodTablePtr;
 
 		/// <summary>
-		///     Address-sensitive
+		/// <remarks>
+		/// Address-sensitive
+		/// </remarks>
+		///
 		/// </summary>
 		public char this[int index] {
 			get {
 				char* __this = (char*) Unsafe.AddressOf(ref this);
-				Debug.Assert(__this != null, nameof(__this) + " != null");
+				RazorContract.RequiresNotNull(__this);
+
 				return __this[index + RuntimeHelpers.OffsetToStringData / 2];
 			}
 		}

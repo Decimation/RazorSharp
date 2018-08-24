@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace RazorSharp.Utilities
+namespace RazorSharp.Utilities.Exceptions
 {
 
 	internal class TypeException : Exception

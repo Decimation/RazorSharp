@@ -12,6 +12,7 @@ using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.HeapObjects;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -101,9 +102,8 @@ namespace RazorSharp.CLR
 
 		public static ArrayObject** GetArrayObject<T>(ref T t) where T : class
 		{
-			if (!typeof(T).IsArray) {
-				TypeException.Throw<Array, T>();
-			}
+			RazorContract.RequiresType<Array, T>();
+
 
 			return (ArrayObject**) Unsafe.AddressOf(ref t);
 		}
@@ -124,10 +124,10 @@ namespace RazorSharp.CLR
 		#region Method Table
 
 		/// <summary>
-		///     <para>Manually reads a CLR MethodTable (TypeHandle).</para>
-		///     <para>If the type is a value type, the MethodTable will be returned from the TypeHandle.</para>
+		///     <para>Manually reads a CLR <see cref="MethodTable"/> (TypeHandle).</para>
+		///     <para>If the type is a value type, the <see cref="MethodTable"/> will be returned from <see cref="Type.TypeHandle"/></para>
 		/// </summary>
-		/// <returns>A pointer to the object type's MethodTable</returns>
+		/// <returns>A pointer to type <typeparamref name="T"/>'s <see cref="MethodTable"/></returns>
 		public static MethodTable* ReadMethodTable<T>(ref T t)
 		{
 			MethodTable* mt;
@@ -168,9 +168,7 @@ namespace RazorSharp.CLR
 
 			// From https://github.com/dotnet/coreclr/blob/6bb3f84d42b9756c5fa18158db8f724d57796296/src/vm/typehandle.h#L74:
 			// Array MTs are not valid TypeHandles...
-			if (typeof(T).IsArray) {
-				throw new RuntimeException($"{typeof(T).Name}: Array MethodTables are not valid TypeHandles.");
-			}
+			RazorContract.Requires(!typeof(T).IsArray, $"{typeof(T).Name}: Array MethodTables are not valid TypeHandles.");
 
 			return (MethodTable*) typeof(T).TypeHandle.Value;
 		}
@@ -206,9 +204,7 @@ namespace RazorSharp.CLR
 
 		public static FieldDesc* GetFieldDescForFieldInfo(FieldInfo fi)
 		{
-			if (fi.IsLiteral) {
-				throw new RuntimeException("Const field");
-			}
+			RazorContract.Requires(!fi.IsLiteral, "Const field");
 
 			FieldDesc* fd = (FieldDesc*) fi.FieldHandle.Value;
 			AddField(fd, fi);
@@ -223,9 +219,7 @@ namespace RazorSharp.CLR
 		/// <exception cref="RuntimeException">If the type is an array</exception>
 		public static Pointer<FieldDesc>[] GetFieldDescs<T>()
 		{
-			if (typeof(T).IsArray) {
-				throw new RuntimeException("Arrays do not have fields");
-			}
+			RazorContract.Requires(!typeof(T).IsArray, "Arrays do not have fields");
 
 			MethodTable*         mt   = MethodTableOf<T>();
 			int                  len  = mt->FieldDescListLength;
@@ -239,7 +233,7 @@ namespace RazorSharp.CLR
 			// Remove all const fields
 			Collections.RemoveAll(ref fieldHandles, x => x.IsLiteral);
 
-			Trace.Assert(fieldHandles.Length == mt->FieldDescListLength);
+			RazorContract.Assert(fieldHandles.Length == mt->FieldDescListLength);
 
 			fieldHandles = fieldHandles.OrderBy(x => x.FieldHandle.Value.ToInt64()).ToArray();
 			lpFd         = lpFd.OrderBy(x => x.ToInt64()).ToArray();
@@ -268,9 +262,8 @@ namespace RazorSharp.CLR
 		public static FieldDesc* GetFieldDesc(Type t, string name, bool isAutoProperty = false,
 			BindingFlags flags = DefaultFlags)
 		{
-			if (t.IsArray) {
-				throw new RuntimeException("Arrays do not have fields");
-			}
+			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
+
 
 			if (isAutoProperty) {
 				name = AutoPropertyBackingFieldName(name);
@@ -306,6 +299,7 @@ namespace RazorSharp.CLR
 		public static Pointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
 		{
 			MethodInfo[]          methods = t.GetMethods(flags);
+			RazorContract.RequiresNotNull(methods);
 			Pointer<MethodDesc>[] arr     = new Pointer<MethodDesc>[methods.Length];
 
 
@@ -328,7 +322,7 @@ namespace RazorSharp.CLR
 		public static MethodDesc* GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
 		{
 			MethodInfo methodInfo = t.GetMethod(name, flags);
-			Debug.Assert(methodInfo != null, nameof(methodInfo) + " != null");
+			RazorContract.RequiresNotNull(methodInfo);
 			RuntimeMethodHandle methodHandle = methodInfo.MethodHandle;
 			MethodDesc*         md           = (MethodDesc*) methodHandle.Value;
 

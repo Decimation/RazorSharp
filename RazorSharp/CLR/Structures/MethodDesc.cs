@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using RazorCommon;
 using RazorSharp.Utilities;
+using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -46,6 +47,11 @@ namespace RazorSharp.CLR.Structures
 	public unsafe struct MethodDesc
 	{
 
+		// method.hpp: 213
+		private const int ALIGNMENT_SHIFT = 3;
+		private const int ALIGNMENT       = 1 << ALIGNMENT_SHIFT;
+		private const int ALIGNMENT_MASK  = ALIGNMENT - 1;
+
 		#region Fields
 
 		[FieldOffset(0)] private readonly ushort m_wFlags3AndTokenRemainder;
@@ -55,7 +61,8 @@ namespace RazorSharp.CLR.Structures
 		[FieldOffset(6)] private readonly ushort m_wFlags;
 
 		/// <summary>
-		///     Valid only if the function is non-virtual and non-abstract
+		///     Valid only if the function is non-virtual and non-abstract (<see cref="SizeOf"/> <c>== 16</c>)
+		///
 		/// </summary>
 		[FieldOffset(8)] private void* m_functionPtr;
 
@@ -75,7 +82,7 @@ namespace RazorSharp.CLR.Structures
 		public MethodInfo MethodInfo {
 			get {
 				IntPtr __this = Unsafe.AddressOf(ref this);
-				Assertion.AssertMethodDescAddress(__this);
+				RazorContract.RequiresMethodDescAddress(__this);
 				MethodInfo m = Runtime.MethodAddrMap[__this];
 				return m;
 			}
@@ -92,6 +99,16 @@ namespace RazorSharp.CLR.Structures
 		public MethodDescFlags3         Flags3     => (MethodDescFlags3) m_wFlags3AndTokenRemainder;
 
 		#endregion
+
+		// method.hpp: 2188
+		/*public MethodDescChunk* MethodDescChunk {
+			get {
+				fixed (MethodDesc* __this = &this) {
+					long taddr = (long) __this;
+					return (MethodDescChunk*) (taddr - sizeof(MethodDescChunk) + (m_chunkIndex * ALIGNMENT));
+				}
+			}
+		}*/
 
 		#endregion
 
@@ -141,7 +158,7 @@ namespace RazorSharp.CLR.Structures
 		/*public object Invoke<TDelegate>(params object[] args) where TDelegate : Delegate
 		{
 			TDelegate d = GetDelegate<TDelegate>();
-			Trace.Assert(MethodInfo.IsStatic && (Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) ||
+			RazorContract.Assert(MethodInfo.IsStatic && (Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) ||
 			                                     Flags2.HasFlag(MethodDescFlags2.HasPrecode)));
 			return d.DynamicInvoke(args);
 		}
@@ -157,7 +174,7 @@ namespace RazorSharp.CLR.Structures
 		{
 			TDelegate d = GetDelegate<TDelegate>();
 
-			Trace.Assert((Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) ||
+			RazorContract.Assert((Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) ||
 			              Flags2.HasFlag(MethodDescFlags2.HasPrecode)));
 
 			if (MethodInfo.IsStatic) {
@@ -192,11 +209,31 @@ namespace RazorSharp.CLR.Structures
 			return d.DynamicInvoke(args);
 		}*/
 
+		/// <summary>
+		/// <remarks>
+		/// Address-sensitive
+		/// </remarks>
+		/// </summary>
+		public int SizeOf {
+			get {
+				fixed (MethodDesc* __this = &this) {
+					RazorContract.RequiresMethodDescAddress((IntPtr) __this);
+					return (int) CLRFunctions.MethodDescFunctions.SizeOf(__this);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Use at your own risk!
+		/// </summary>
+		/// <param name="p">New function pointer</param>
+		/// <exception cref="MethodDescException">If this function is <c>virtual</c> or <c>abstract</c></exception>
 		public void SetFunctionPointer(IntPtr p)
 		{
-			if (Attributes.HasFlag(MethodAttributes.Virtual) || Attributes.HasFlag(MethodAttributes.Abstract)) {
-				throw new RuntimeException("Function is virtual/abstract");
-			}
+			RazorContract.Requires<MethodDescException>(
+				!(Attributes.HasFlag(MethodAttributes.Virtual) || Attributes.HasFlag(MethodAttributes.Abstract)),
+				"Function is virtual/abstract");
+
 
 			m_functionPtr = p.ToPointer();
 		}
@@ -240,7 +277,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Signature", CreateSignatureString());
 			table.AddRow("Function", Hex.ToHex(Function));
 
-			table.AddRow("m_functionPtr", Hex.ToHex(m_functionPtr));
+			table.AddRow("Non-MI FuncPtr", Hex.ToHex(m_functionPtr));
 
 			table.AddRow("Chunk index", m_chunkIndex);
 			table.AddRow("Slot number", m_wSlotNumber);
@@ -251,6 +288,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Flags", Runtime.CreateFlagsString(m_wFlags, Flags));
 			table.AddRow("Flags 2", Runtime.CreateFlagsString(m_bFlags2, Flags2));
 			table.AddRow("Flags 3", Runtime.CreateFlagsString(m_wFlags3AndTokenRemainder, Flags3));
+			table.AddRow("SizeOf", SizeOf);
 
 
 			return table.ToMarkDownString();

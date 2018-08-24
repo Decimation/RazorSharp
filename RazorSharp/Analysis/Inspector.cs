@@ -33,6 +33,44 @@ namespace RazorSharp.Analysis
 		Default = Meta | Address | Size | Internal | Layout | FieldDescs
 	}
 
+	public static class InspectorHelper
+	{
+
+		#region Value types
+
+		public static void InspectVal<T>(ref T t,
+			InspectorMode mode) where T : struct
+		{
+			Inspector<T>.Write(ref t, false, mode);
+		}
+
+		public static void InspectVal<T>(ref T t, bool printStructures = false,
+			InspectorMode mode = InspectorMode.Default) where T : struct
+		{
+			Inspector<T>.Write(ref t, printStructures, mode);
+		}
+
+		#endregion
+
+		#region Reference types
+
+		public static void Inspect<T>(ref T t,
+			InspectorMode mode) where T : class
+		{
+			RefInspector<T>.Write(ref t, false, mode);
+		}
+
+		public static void Inspect<T>(ref T t, bool printStructures = false,
+			InspectorMode mode = InspectorMode.Default) where T : class
+		{
+			RefInspector<T>.Write(ref t, printStructures, mode);
+		}
+
+		#endregion
+
+
+	}
+
 	public unsafe class Inspector<T>
 	{
 		public MetadataInfo Metadata  { get; protected set; }
@@ -213,7 +251,6 @@ namespace RazorSharp.Analysis
 				IsOnStack   = Memory.Memory.IsOnStack(ref t);
 			}
 
-
 			protected virtual ConsoleTable ToTable()
 			{
 				ConsoleTable table = new ConsoleTable("Info", "Value");
@@ -302,7 +339,7 @@ namespace RazorSharp.Analysis
 			return String.Format("\n{0}\n{1}\n", ANSI.BoldString(label), table.ToMarkDownString());
 		}
 
-		public static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.Default)
+		internal static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.Default)
 		{
 			Inspector<T> inspector = new Inspector<T>(ref t, mode);
 			WriteInspector(inspector, printStructures);

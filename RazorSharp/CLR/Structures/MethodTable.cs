@@ -8,6 +8,7 @@ using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -62,25 +63,25 @@ namespace RazorSharp.CLR.Structures
 
 		#region Flags
 
-		public DWORD Flags {
+		private DWORD FlagsValue {
 			get {
 				IntPtr dwPtr = Unsafe.AddressOf(ref m_dwFlags);
 				return *(DWORD*) dwPtr;
 			}
 		}
 
-		public WORD LowFlags => m_dwFlags.Flags;
-		public WORD Flags2   => m_wFlags2;
+		private WORD LowFlagsValue => m_dwFlags.Flags;
+		private WORD Flags2Value   => m_wFlags2;
 
-		public MethodTableFlags TableFlags => (MethodTableFlags) Flags;
+		public MethodTableFlags Flags => (MethodTableFlags) FlagsValue;
 
 		/// <summary>
 		///     Note: these may not be accurate
 		/// </summary>
-		public MethodTableFlagsLow TableFlagsLow => (MethodTableFlagsLow) LowFlags;
+		public MethodTableFlagsLow FlagsLow => (MethodTableFlagsLow) LowFlagsValue;
 
 
-		public MethodTableFlags2 TableFlags2 => (MethodTableFlags2) Flags2;
+		public MethodTableFlags2 Flags2 => (MethodTableFlags2) Flags2Value;
 
 		#endregion
 
@@ -89,8 +90,13 @@ namespace RazorSharp.CLR.Structures
 		///     <example>
 		///         If this type is a <c>string</c>, the component size will be 2. (<c>sizeof(char)</c>)
 		///     </example>
+		/// <returns>
+		/// <c>-1</c> if <c>!</c><see cref="HasComponentSize"/>, component size otherwise
+		/// </returns>
 		/// </summary>
-		public WORD ComponentSize => HasComponentSize ? m_dwFlags.ComponentSize : (ushort) 0;
+		public short ComponentSize {
+			get { return HasComponentSize ? (short) m_dwFlags.ComponentSize : (short) -1; }
+		}
 
 		/// <summary>
 		///     The base size of this class when allocated on the heap. Note that for value types
@@ -116,7 +122,7 @@ namespace RazorSharp.CLR.Structures
 		public WORD NumInterfaces => m_wNumInterfaces;
 
 		/// <summary>
-		///     The parent type's MethodTable.
+		///     The parent type's <see cref="MethodTable"/>.
 		/// </summary>
 		/// <exception cref="NotImplementedException">If the type is an indirect parent</exception>
 		public MethodTable* Parent {
@@ -126,7 +132,8 @@ namespace RazorSharp.CLR.Structures
 			// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
 			// for enum_flag_HasIndirectParentMethodTable.
 			get {
-				if (!TableFlags.HasFlag(MethodTableFlags.HasIndirectParent)) {
+
+				if (!Flags.HasFlag(MethodTableFlags.HasIndirectParent)) {
 					return m_pParentMethodTable;
 				}
 
@@ -134,7 +141,8 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
-		public Module* Module => m_pLoaderModule;
+		// todo
+		public void* Module => m_pLoaderModule;
 
 		/// <summary>
 		///     <para>The corresponding <see cref="EEClass" /> to this <see cref="MethodTable" />.</para>
@@ -169,8 +177,8 @@ namespace RazorSharp.CLR.Structures
 		///             Source: /src/vm/methodtable.inl: 1145
 		///         </para>
 		///     </remarks>
-		///     <exception cref="RuntimeException">
-		///         If the <see cref="get_UnionType" /> is not <see cref="LowBits.MethodTable" /> or
+		///     <exception cref="NotImplementedException">
+		///         If <see cref="get_UnionType" /> is not <see cref="LowBits.MethodTable" /> or
 		///         <see cref="LowBits.EEClass" />
 		///     </exception>
 		/// </summary>
@@ -186,28 +194,27 @@ namespace RazorSharp.CLR.Structures
 						}
 					}
 					default:
-						throw new RuntimeException("Canon MT could not be accessed");
+						throw new NotImplementedException("Canon MT could not be accessed");
 				}
 			}
 		}
 
 		/// <summary>
-		///     Element type handle of an individual element if this is the MethodTable of an array.
+		///     Element type handle of an individual element if this is the <see cref="MethodTable"/> of an array.
 		/// </summary>
-		/// <exception cref="RuntimeException">If this is not an array MethodTable.</exception>
+		/// <exception cref="RuntimeException">If this is not an array <see cref="MethodTable"/>.</exception>
 		public MethodTable* ElementTypeHandle {
 			get {
-				if (IsStringOrArray) {
+				if (IsArray) {
 					return (MethodTable*) m_ElementTypeHnd;
 				}
-				else {
-					throw new RuntimeException("Element type handles cannot be accessed when type is not an array");
-				}
+
+				throw new RuntimeException("Element type handles cannot be accessed when type is not an array");
 			}
 		}
 
-		public bool HasComponentSize => TableFlags.HasFlag(MethodTableFlags.HasComponentSize);
-		public bool IsArray          => TableFlags.HasFlag(MethodTableFlags.Array);
+		public bool HasComponentSize => Flags.HasFlag(MethodTableFlags.HasComponentSize);
+		public bool IsArray          => Flags.HasFlag(MethodTableFlags.Array);
 		public bool IsStringOrArray  => HasComponentSize;
 		public bool IsBlittable      => EEClass->IsBlittable;
 		public bool IsString         => HasComponentSize && !IsArray;
@@ -236,7 +243,7 @@ namespace RazorSharp.CLR.Structures
 		public int NumInstanceFieldBytes => (int) BaseSize - EEClass->BaseSizePadding;
 
 		/// <summary>
-		///     Array of FieldDescs for this type.
+		///     Array of <see cref="FieldDesc"/>s for this type.
 		/// </summary>
 		public FieldDesc* FieldDescList => EEClass->FieldDescList;
 
@@ -245,6 +252,7 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		public int FieldDescListLength => EEClass->FieldDescListLength;
 
+		// todo
 		public MethodDescChunk* MethodDescChunkList => EEClass->MethodDescChunkList;
 
 		#endregion
@@ -292,9 +300,9 @@ namespace RazorSharp.CLR.Structures
 				table.AddRow("Component size", m_dwFlags.ComponentSize);
 			}
 
-			table.AddRow("Flags", $"{Flags} ({TableFlags.Join()})");
-			table.AddRow("Flags 2", $"{Flags2} ({TableFlags2.Join()})");
-			table.AddRow("Low flags", $"{LowFlags} ({TableFlagsLow})");
+			table.AddRow("Flags", $"{FlagsValue} ({Flags.Join()})");
+			table.AddRow("Flags 2", $"{Flags2Value} ({Flags2.Join()})");
+			table.AddRow("Low flags", $"{LowFlagsValue} ({FlagsLow})");
 			table.AddRow("Token", m_wToken);
 
 			if (m_pParentMethodTable != null) {

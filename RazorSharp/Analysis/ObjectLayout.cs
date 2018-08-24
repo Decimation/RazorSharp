@@ -7,6 +7,8 @@ using RazorCommon;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
+using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -35,9 +37,8 @@ namespace RazorSharp.Analysis
 
 		public ObjectLayout(ref T t, bool fieldsOnly = true, bool fullOffset = false)
 		{
-			if (typeof(T).IsArray) {
-				throw new Exception("You cannot get the layout of an array (yet)");
-			}
+			RazorContract.Requires(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");
+
 
 			m_fieldsOnly = fieldsOnly;
 			m_fullOffset = fullOffset;
