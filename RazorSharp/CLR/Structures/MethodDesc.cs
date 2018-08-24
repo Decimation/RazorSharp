@@ -231,12 +231,8 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public int SizeOf {
-			get {
-				fixed (MethodDesc* __this = &this) {
-					RazorContract.RequiresMethodDescAddress((IntPtr) __this);
-					return (int) CLRFunctions.MethodDescFunctions.SizeOf(__this);
-				}
-			}
+			[Sigcall("clr.dll", "0F B7 41 06 4C 8D 05 45 6D 6F 00 8B D0 83 E2 1F")]
+			get => throw new NotTranspiledException();
 		}
 
 		/// <summary>
@@ -294,7 +290,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Signature", CreateSignatureString());
 			table.AddRow("Function", Hex.ToHex(Function));
 
-			table.AddRow("Non-MI FuncPtr", Hex.ToHex(m_functionPtr));
+			table.AddRow("Non-MI Function", Hex.ToHex(m_functionPtr));
 
 			table.AddRow("Chunk index", m_chunkIndex);
 			table.AddRow("Slot number", m_wSlotNumber);

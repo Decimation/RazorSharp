@@ -94,10 +94,10 @@ namespace RazorSharp.Experimental
 		// Base function
 		public static void HookFunction<TType>(string fnName, IntPtr fn)
 		{
-			MethodDesc* md = GetMethodDesc<TType>(fnName);
+			var md = GetMethodDesc<TType>(fnName);
 
 //			AddFunction(md->MethodInfo, fn);
-			md->SetFunctionPointer(fn);
+			md.Reference.SetFunctionPointer(fn);
 		}
 	}
 

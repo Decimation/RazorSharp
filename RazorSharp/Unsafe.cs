@@ -87,7 +87,7 @@ namespace RazorSharp
 		/// <returns>Field offset</returns>
 		public static int OffsetOf<TType>(string fieldName)
 		{
-			return Runtime.GetFieldDesc<TType>(fieldName)->Offset;
+			return Runtime.GetFieldDesc<TType>(fieldName).Reference.Offset;
 		}
 
 		/// <summary>
@@ -139,7 +139,7 @@ namespace RazorSharp
 
 		public static IntPtr AddressOfFunction<T>(string fnName)
 		{
-			return Runtime.GetMethodDesc<T>(fnName)->Function;
+			return Runtime.GetMethodDesc<T>(fnName).Reference.Function;
 		}
 
 		/// <summary>
@@ -150,10 +150,10 @@ namespace RazorSharp
 		/// <param name="isAutoProperty">Whether the field is an auto-property</param>
 		public static IntPtr AddressOfField<T>(ref T instance, string name, bool isAutoProperty = false)
 		{
-			FieldDesc* fd = Runtime.GetFieldDesc<T>(name, isAutoProperty);
+			var fd = Runtime.GetFieldDesc<T>(name, isAutoProperty);
 
 
-			return fd->GetAddress(ref instance);
+			return fd.Reference.GetAddress(ref instance);
 		}
 
 		/// <summary>

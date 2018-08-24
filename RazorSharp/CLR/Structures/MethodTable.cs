@@ -74,6 +74,8 @@ namespace RazorSharp.CLR.Structures
 
 		public MethodTableFlags Flags => (MethodTableFlags) FlagsValue;
 
+
+
 		/// <summary>
 		///     Note: these may not be accurate
 		/// </summary>

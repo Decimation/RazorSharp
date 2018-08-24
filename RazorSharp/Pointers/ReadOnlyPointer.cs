@@ -1,17 +1,12 @@
-#region
-
 using System;
 using System.Collections;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorSharp.Experimental;
 using RazorSharp.Pointers.Ex;
 using RazorSharp.Utilities;
-
-#endregion
 
 namespace RazorSharp.Pointers
 {
@@ -23,10 +18,11 @@ namespace RazorSharp.Pointers
 
 	#endregion
 
-
 	/// <summary>
 	///     <para>A bare-bones, lighter type of <see cref="ExPointer{T}" />, equal to <see cref="IntPtr.Size" /></para>
 	///     <para> Can be represented as a pointer in memory. </para>
+	/// <para>Compared to <see cref="Pointer{T}"/>, <see cref="Address"/> is <c>readonly</c>. </para>
+	/// <para>Similar to <code>T *const ptr = &amp;var </code>in C/C++.</para>
 	///     <list type="bullet">
 	///         <item>
 	///             <description>No bounds checking</description>
@@ -38,15 +34,16 @@ namespace RazorSharp.Pointers
 	///             <description>No type safety</description>
 	///         </item>
 	///     </list>
+	///
 	/// </summary>
 	/// <typeparam name="T">Type to point to</typeparam>
-	public unsafe struct Pointer<T> : IPointer<T>
+	public unsafe struct ReadOnlyPointer<T> : IPointer<T>
 	{
 		/// <summary>
 		///     <para>The address we're pointing to.</para>
 		///     <para>We want this to be the only field so it can be represented as a pointer in memory.</para>
 		/// </summary>
-		private void* m_value;
+		private readonly void* m_value;
 
 		#region Properties
 
@@ -66,7 +63,10 @@ namespace RazorSharp.Pointers
 
 		public IntPtr Address {
 			get => (IntPtr) m_value;
-			set => m_value = (void*) value;
+			set {
+				// not implemented
+				throw new Exception();
+			}
 		}
 
 		public int ElementSize => Unsafe.SizeOf<T>();
@@ -79,19 +79,19 @@ namespace RazorSharp.Pointers
 
 		#region Constructors
 
-		public Pointer(IntPtr p) : this(p.ToPointer()) { }
+		public ReadOnlyPointer(IntPtr p) : this(p.ToPointer()) { }
 
-		public Pointer(void* v)
+		public ReadOnlyPointer(void* v)
 		{
 			m_value = v;
 		}
 
-		public Pointer(long v)
+		public ReadOnlyPointer(long v)
 		{
 			m_value = (void*) v;
 		}
 
-		public Pointer(ref T t)
+		public ReadOnlyPointer(ref T t)
 		{
 			m_value = Unsafe.AddressOf(ref t).ToPointer();
 		}
@@ -183,123 +183,24 @@ namespace RazorSharp.Pointers
 			return (long) m_value;
 		}
 
-		/// <summary>
-		///     Increment the <see cref="Address" /> by the specified number of bytes
-		/// </summary>
-		/// <param name="bytes">Number of bytes to add</param>
-		public void Add(int bytes)
-		{
-			m_value = PointerUtils.Add(m_value, bytes).ToPointer();
-		}
-
-		/// <summary>
-		///     Decrement <see cref="Address" /> by the specified number of bytes
-		/// </summary>
-		/// <param name="bytes">Number of bytes to subtract</param>
-		public void Subtract(int bytes)
-		{
-			m_value = PointerUtils.Subtract(m_value, bytes).ToPointer();
-		}
-
-		/// <summary>
-		///     Increment the <see cref="Address" /> by the specified number of elements
-		/// </summary>
-		/// <param name="elemCnt">Number of elements</param>
-		public void Increment(int elemCnt = 1)
-		{
-			m_value = PointerUtils.Offset<T>(m_value, elemCnt).ToPointer();
-		}
-
-		/// <summary>
-		///     Decrement the <see cref="Address" /> by the specified number of elements
-		/// </summary>
-		/// <param name="elemCnt">Number of elements</param>
-		public void Decrement(int elemCnt = 1)
-		{
-			m_value = PointerUtils.Offset<T>(m_value, -elemCnt).ToPointer();
-		}
-
 		#endregion
 
 		#region Operators
 
-		public static implicit operator Pointer<T>(void* v)
+		public static implicit operator ReadOnlyPointer<T>(void* v)
 		{
-			return new Pointer<T>(v);
+			return new ReadOnlyPointer<T>(v);
 		}
 
-		public static implicit operator Pointer<T>(IntPtr p)
+		public static implicit operator ReadOnlyPointer<T>(IntPtr p)
 		{
-			return new Pointer<T>(p.ToPointer());
+			return new ReadOnlyPointer<T>(p.ToPointer());
 		}
 
-		public static explicit operator void*(Pointer<T> ptr)
+		public static explicit operator void*(ReadOnlyPointer<T> ptr)
 		{
 			return ptr.Address.ToPointer();
 		}
-
-
-		#region Arithmetic
-
-		/// <summary>
-		///     Increments the <see cref="Address" /> by the specified number of elements.
-		///     <remarks>
-		///         Equal to <see cref="Pointer{T}.Increment" />
-		///     </remarks>
-		/// </summary>
-		/// <param name="p">
-		///     <see cref="Pointer{T}" />
-		/// </param>
-		/// <param name="i">Number of elements (<see cref="ElementSize" />)</param>
-		public static Pointer<T> operator +(Pointer<T> p, int i)
-		{
-			p.Increment(i);
-			return p;
-		}
-
-		/// <summary>
-		///     Decrements the <see cref="Address" /> by the specified number of elements.
-		///     <remarks>
-		///         Equal to <see cref="Pointer{T}.Decrement" />
-		///     </remarks>
-		/// </summary>
-		/// <param name="p">
-		///     <see cref="Pointer{T}" />
-		/// </param>
-		/// <param name="i">Number of elements (<see cref="ElementSize" />)</param>
-		public static Pointer<T> operator -(Pointer<T> p, int i)
-		{
-			p.Decrement(i);
-			return p;
-		}
-
-		/// <summary>
-		///     Increments the <see cref="Pointer{T}" /> by one element.
-		/// </summary>
-		/// <param name="p">
-		///     <see cref="Pointer{T}" />
-		/// </param>
-		/// <returns>The offset <see cref="Address" /></returns>
-		public static Pointer<T> operator ++(Pointer<T> p)
-		{
-			p.Increment();
-			return p;
-		}
-
-		/// <summary>
-		///     Decrements the <see cref="Pointer{T}" /> by one element.
-		/// </summary>
-		/// <param name="p">
-		///     <see cref="Pointer{T}" />
-		/// </param>
-		/// <returns>The offset <see cref="Address" /></returns>
-		public static Pointer<T> operator --(Pointer<T> p)
-		{
-			p.Decrement();
-			return p;
-		}
-
-		#endregion
 
 		#endregion
 
@@ -316,7 +217,7 @@ namespace RazorSharp.Pointers
 				return false;
 			}
 
-			return obj is Pointer<T> && Equals((Pointer<T>) obj);
+			return obj is ReadOnlyPointer<T> && Equals((ReadOnlyPointer<T>) obj);
 		}
 
 		public override int GetHashCode()
@@ -325,12 +226,12 @@ namespace RazorSharp.Pointers
 		}
 
 
-		public static bool operator ==(Pointer<T> left, Pointer<T> right)
+		public static bool operator ==(ReadOnlyPointer<T> left, ReadOnlyPointer<T> right)
 		{
 			return left.Equals(right);
 		}
 
-		public static bool operator !=(Pointer<T> left, Pointer<T> right)
+		public static bool operator !=(ReadOnlyPointer<T> left, ReadOnlyPointer<T> right)
 		{
 			return !left.Equals(right);
 		}

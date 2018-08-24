@@ -21,13 +21,13 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void SigScanningFunctionPointer()
 		{
-			IntPtr p = Runtime.GetMethodDesc<Dummy>("Increment")->Function;
+			IntPtr p = Runtime.GetMethodDesc<Dummy>("Increment").Reference.Function;
 		}
 
 		[Benchmark]
 		public void SigScanningMethodName()
 		{
-			string n = Runtime.GetMethodDesc<Dummy>("DoSomething")->Name;
+			string n = Runtime.GetMethodDesc<Dummy>("DoSomething").Reference.Name;
 		}
 
 		[Benchmark]
@@ -45,7 +45,7 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void SigScanningFieldName()
 		{
-			string n = Runtime.GetFieldDesc<Dummy>("_int")->Name;
+			string n = Runtime.GetFieldDesc<Dummy>("_int").Reference.Name;
 		}
 
 

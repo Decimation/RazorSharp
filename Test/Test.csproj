@@ -206,6 +206,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Testing\Benchmarking\CollectionsBenchmarking.cs" />
       <Compile Include="Testing\Benchmarking\DllBenchmarking.cs"/>
+      <Compile Include="Testing\Benchmarking\FieldDescsBenchmarking.cs"/>
       <Compile Include="Testing\Benchmarking\SignatureCallBenchmarking.cs"/>
     <Compile Include="Testing\Benchmarking\SigScanningBenchmarking.cs" />
     <Compile Include="Testing\Benchmarking\LitePointerBenchmarking.cs" />

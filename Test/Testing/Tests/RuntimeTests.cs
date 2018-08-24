@@ -296,8 +296,8 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestPoint()
 		{
-			FieldDesc* xfd = Runtime.GetFieldDesc<Point>("_x");
-			Debug.Assert(xfd->MemberDef == xfd->FieldInfo.MetadataToken);
+			var xfd = Runtime.GetFieldDesc<Point>("_x");
+			Debug.Assert(xfd.Reference.MemberDef == xfd.Reference.FieldInfo.MetadataToken);
 		}
 
 		[Test]

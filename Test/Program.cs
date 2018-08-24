@@ -27,6 +27,7 @@ using static RazorSharp.Unsafe;
 using Unsafe = RazorSharp.Unsafe;
 using static RazorSharp.Analysis.InspectorHelper;
 using static RazorSharp.Memory.SignatureCall;
+using Module = System.Reflection.Module;
 
 #endregion
 
@@ -178,89 +179,86 @@ namespace Test
 
 		struct Vec2
 		{
-			private float x,
-			              y;
-
-			public float X => x;
-
-			public float Y => y;
-
-			public void doSomething() { }
-
-			public static Vec2 operator ++(Vec2 v)
-			{
-				v.x++;
-				v.y++;
-				return v;
-			}
-
-			public override string ToString()
-			{
-				return $"{nameof(x)}: {x}, {nameof(y)}: {y}";
-			}
-		}
-
-		class CVec2
-		{
 			private float _x,
 			              _y;
 
-			public CVec2() { }
-
-			public void fnOrig(int i)
+			public void doSomething()
 			{
-				var cpy  = this;
-				var heap = AddressOfHeap(ref cpy).ToPointer();
-				Console.WriteLine("Orig {0} | {1}", Hex.ToHex(heap), i);
-			}
-
-			public static CVec2 operator ++(CVec2 v)
-			{
-				v._x++;
-				v._y++;
-				return v;
+				Console.WriteLine("foo");
 			}
 		}
 
-
-		[Sigcall("clr.dll", "48 8B 05 59 F5 82 00 48 89 44 24 10 48 8B 44 24 10 C3")]
-		private static uint GetGCCount_sc(void* __this)
+		class CMethodDesc
 		{
-			throw new NotImplementedException();
+			static CMethodDesc()
+			{
+				Transpile<CMethodDesc>();
+			}
+
+			public int SizeOf {
+				[Sigcall("clr.dll", "0F B7 41 06 4C 8D 05 45 6D 6F 00 8B D0 83 E2 1F")]
+				get => throw new NotTranspiledException();
+			}
 		}
 
-		struct GCHeap_t
+		class CFieldDesc
 		{
-
-			static GCHeap_t()
+			static CFieldDesc()
 			{
-				Transpile<GCHeap_t>();
+				Transpile<CFieldDesc>();
 			}
 
-			public uint GCCount_prop {
-				[Sigcall("clr.dll", "48 8B 05 59 F5 82 00 48 89 44 24 10 48 8B 44 24 10 C3")]
-				get => throw new NotImplementedException();
-			}
-
-//			public uint GCCount_prop_rg {
-//				[SigcallRange("clr.dll", 0x48, 0x89, 0x5C, 0x24, 0x08, 0x48, 0x89, 0x74, 0x24, 0x10, 0x57, 0x48, 0x83, 0xEC, 0x20, 0x48, 0x8B, 0x3D, 0xDE, 0xF3, 0x93, 0x00, 0x33, 0xC0)]
-//				get => throw new NotTranspiledException();
-//			}
-
-			[Sigcall("clr.dll", "48 8B 05 59 F5 82 00 48 89 44 24 10 48 8B 44 24 10 C3")]
-			public uint GetGCCount_sc__this()
-			{
-				throw new NotImplementedException();
+			public int Size {
+				[Sigcall("clr.dll", "48 83 EC 28 8B 51 0C 48 8D 05 4A 25 63 00 C1 EA 1B")]
+				get => throw new NotTranspiledException();
 			}
 		}
-
 
 		public static void Main(string[] args)
 		{
 			// todo: implement dynamic allocation system
 
 
+			/*var md = Runtime.GetMethodDesc<Vec2>("doSomething");
+			Console.WriteLine(md);
 
+			var fd = Runtime.GetFieldDesc<Vec2>("_x");
+			Console.WriteLine(fd);
+
+			Console.WriteLine(fd.Reference.getFieldInfo());
+			Debug.Assert(fd.Reference.getFieldInfo() == (fd.Reference.FieldInfo));
+
+
+			var f = typeof(Vec2).Module.ModuleHandle.ResolveFieldHandle(fd.Reference.MemberDef);
+			Console.WriteLine("-> {0}", FieldInfo.GetFieldFromHandle(f));
+			var x = fd.Reference.GetModule();
+			Console.WriteLine(Hex.ToHex(x));
+
+
+			Console.WriteLine(GCHeap.GCCount);*/
+
+
+
+			var fd = Runtime.GetFieldDesc<Vec2>("_x");
+			var x  = fd.Reference.GetModule();
+			Console.WriteLine(fd.Reference.RuntimeType.Module.ResolveField(fd.Reference.MemberDef));
+
+
+			Console.WriteLine(Hex.ToHex(x));
+
+
+			var mt = Runtime.MethodTableOf<Vec2>();
+			Type o =(Type) CLRFunctions.JIT_GetRuntimeType(mt);
+			Console.WriteLine(o.Name);
+			Console.WriteLine(mt->ToString());
+
+			Debug.Assert(typeof(Vec2).MetadataToken ==
+			             Constants.TokenFromRid(Runtime.MethodTableOf<Vec2>()->Token, CorTokenType.mdtTypeDef));
+
+			__break();
+
+
+//			BenchmarkRunner.Run<FieldDescsBenchmarking>();
 
 
 			/*Transpile(typeof(Program), "GetGCCount_sc");
@@ -272,9 +270,12 @@ namespace Test
 			Console.WriteLine(gc->GetGCCount_sc__this());
 
 			Console.WriteLine(gc->GCCount_prop);*/
-
 		}
 
+		static void __break()
+		{
+			Console.ReadLine();
+		}
 
 		private static void Hook<TOrig, TNew>(string origFn, string newFn)
 		{
@@ -285,7 +286,7 @@ namespace Test
 		{
 			var origMd = Runtime.GetMethodDesc(tOrig, origFn);
 			var newMd  = Runtime.GetMethodDesc(tNew, newFn);
-			origMd->SetFunctionPointer(newMd->Function);
+			origMd.Reference.SetFunctionPointer(newMd.Reference.Function);
 		}
 
 		private static void hk_intercept(void* __this, int i)

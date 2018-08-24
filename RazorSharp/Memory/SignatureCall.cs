@@ -119,11 +119,11 @@ namespace RazorSharp.Memory
 				name = "get_" + name;
 			}
 
-			MethodDesc*      md   = Runtime.GetMethodDesc(t, name);
-			SigcallAttribute attr = md->MethodInfo.GetCustomAttribute<SigcallAttribute>();
+			var      md   = Runtime.GetMethodDesc(t, name);
+			SigcallAttribute attr = md.Reference.MethodInfo.GetCustomAttribute<SigcallAttribute>();
 			SigScanner.SelectModule(attr.Module);
 			IntPtr fn = SigScanner.FindPattern(attr.Signature);
-			md->SetFunctionPointer(fn);
+			md.Reference.SetFunctionPointer(fn);
 		}
 	}
 

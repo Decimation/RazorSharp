@@ -163,6 +163,10 @@ namespace RazorSharp.CLR
 		}
 
 
+		public static int TokenFromRid(int rid, CorTokenType tktype)
+		{
+			return rid | (int) tktype;
+		}
 	}
 
 	/// <summary>

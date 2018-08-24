@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
+using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -37,6 +38,7 @@ namespace RazorSharp.CLR
 			Scanner = new SigScanner();
 			Scanner.SelectModule(ClrDll);
 			Functions = new Dictionary<string, Delegate>();
+			SignatureCall.Transpile(typeof(CLRFunctions), "JIT_GetRuntimeType");
 		}
 
 //			IntPtr thread = Kernel32.OpenThread(0x4, false, Kernel32.GetCurrentThreadId());
@@ -102,6 +104,8 @@ namespace RazorSharp.CLR
 
 			#region GetGCCount
 
+			// Could not find function with opcodes 48 83 EC 28 48 3B 15 2D 4F 3B 00 48 8B C2 73 20 todo
+			// 48 8B 05 59 F5 82 00 48 89 44 24 10 48 8B 44 24 10 C3
 			private const string GetGCCountSignature = "48 8B 05 59 F5 82 00 48 89 44 24 10 48 8B 44 24 10 C3";
 
 			internal delegate uint GetGCCountDelegate(void* __this);
@@ -232,6 +236,11 @@ namespace RazorSharp.CLR
 		}
 
 
+		[Sigcall("clr.dll", "48 83 EC 28 4C 8B C1 F6 C1 02 75 2E 48 8B 41 20 48 8B 50 08 F6 C2 01 74 09 48 8B 42 FF")]
+		public static Type JIT_GetRuntimeType(void* __struct)
+		{
+			throw new NotTranspiledException();
+		}
 	}
 
 }

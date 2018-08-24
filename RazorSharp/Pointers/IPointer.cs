@@ -7,7 +7,7 @@ using System;
 namespace RazorSharp.Pointers
 {
 
-	public interface IPointer<T>
+	public unsafe interface IPointer<T> : IFormattable
 	{
 		/// <summary>
 		///     Indexes <see cref="Address" /> as a reference.
@@ -56,6 +56,34 @@ namespace RazorSharp.Pointers
 		/// </summary>
 		/// <returns></returns>
 		long ToInt64();
+
+		void* ToPointer();
+
+		/// <summary>
+		///     Read from <see cref="Address" />
+		/// </summary>
+		/// <param name="elemOffset">Element offset</param>
+		/// <typeparam name="TType">Type to read</typeparam>
+		/// <returns>The value read from the offset <see cref="Address" /></returns>
+		TType Read<TType>(int elemOffset = 0);
+
+		/// <summary>
+		///     Write to <see cref="Address" />
+		/// </summary>
+		/// <param name="t">Value to write</param>
+		/// <param name="elemOffset">Element offset</param>
+		/// <typeparam name="TType">Type to write</typeparam>
+		void Write<TType>(TType t, int elemOffset = 0);
+
+
+		ref TType AsRef<TType>(int elemOffset = 0);
+
+		bool Equals(IPointer<T> other);
+
+
+		Pointer<TNew> Reinterpret<TNew>();
+
+
 	}
 
 }
