@@ -48,20 +48,11 @@ namespace RazorSharp.CLR
 		/// </summary>
 		public static readonly int OffsetToArrayData = IntPtr.Size * 2;
 
-		/// <summary>
-		///     Map of the address of a <see cref="FieldDesc" /> and its corresponding <see cref="FieldInfo" />
-		/// </summary>
-		internal static readonly Dictionary<IntPtr, FieldInfo> FieldAddrMap;
 
-		/// <summary>
-		///     Map of the address of a <see cref="MethodDesc" /> and its corresponding <see cref="MethodInfo" />
-		/// </summary>
-		internal static readonly Dictionary<IntPtr, MethodInfo> MethodAddrMap;
 
 		static Runtime()
 		{
-			FieldAddrMap  = new Dictionary<IntPtr, FieldInfo>();
-			MethodAddrMap = new Dictionary<IntPtr, MethodInfo>();
+
 		}
 
 		private static void AddSet<TKey, TValue>(Dictionary<TKey, TValue> dict, TKey tk, TValue tv)
@@ -80,15 +71,7 @@ namespace RazorSharp.CLR
 			}
 		}
 
-		private static void AddField(FieldDesc* fd, FieldInfo fi)
-		{
-			AddSet(FieldAddrMap, (IntPtr) fd, fi);
-		}
 
-		private static void AddMethod(MethodDesc* md, MethodInfo mi)
-		{
-			AddSet(MethodAddrMap, (IntPtr) md, mi);
-		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static string CreateFlagsString(object num, Enum e)
@@ -191,33 +174,12 @@ namespace RazorSharp.CLR
 			//(**h).MethodTable = m;
 		}
 
-//		internal static void SpoofMethodTable<TOrig, TSpoof>(ref TOrig t) where TOrig : class
-//		{
-//			IntPtr handle = typeof(TSpoof) == typeof(string) ? StringHandle.Value : typeof(TSpoof).TypeHandle.Value;
-//			WriteMethodTable(ref t, (MethodTable*) handle);
-//		}
 
-//		internal static void RestoreMethodTable<TSpoof, TOrig>(ref TOrig t) where TOrig : class
-//		{
-//			// Make sure it was spoofed in the first place
-//			Debug.Assert(t.GetType() == typeof(TSpoof));
-//
-//			WriteMethodTable(ref t, (MethodTable*) typeof(TOrig).TypeHandle.Value);
-//		}
 
 		#endregion
 
 
 		#region FieldDesc
-
-		internal static FieldDesc* GetFieldDescForFieldInfo(FieldInfo fi)
-		{
-			RazorContract.Requires(!fi.IsLiteral, "Const field");
-
-			FieldDesc* fd = (FieldDesc*) fi.FieldHandle.Value;
-			AddField(fd, fi);
-			return fd;
-		}
 
 		/// <summary>
 		///     Gets all the <see cref="FieldDesc" /> from <see cref="MethodTable.FieldDescList" />
@@ -236,24 +198,25 @@ namespace RazorSharp.CLR
 			for (int i = 0; i < len; i++)
 				lpFd[i] = &mt->FieldDescList[i];
 
-			FieldInfo[] fieldHandles = typeof(T).GetFields(DefaultFlags);
+//			FieldInfo[] fieldInfos = typeof(T).GetFields(DefaultFlags);
 
 			// Remove all const fields
-			Collections.RemoveAll(ref fieldHandles, x => x.IsLiteral);
+//			Collections.RemoveAll(ref fieldInfos, x => x.IsLiteral);
 
-			RazorContract.Assert(fieldHandles.Length == mt->FieldDescListLength);
+//			RazorContract.Assert(fieldInfos.Length == mt->FieldDescListLength);
 
-			fieldHandles = fieldHandles.OrderBy(x => x.FieldHandle.Value.ToInt64()).ToArray();
-			lpFd         = lpFd.OrderBy(x => x.ToInt64()).ToArray();
+//			fieldInfos = fieldInfos.OrderBy(x => x.FieldHandle.Value.ToInt64()).ToArray();
+			lpFd = lpFd.OrderBy(x => x.ToInt64()).ToArray();
 
-			for (int i = 0; i < lpFd.Length; i++)
-				AddField((FieldDesc*) lpFd[i].Address, fieldHandles[i]);
+//			for (int i = 0; i < fieldInfos.Length; i++) {
+//				RazorContract.Assert(fieldInfos[i] == lpFd[i].Reference.Info);
+//			}
 
 
 			return lpFd;
 		}
 
-		private const BindingFlags DefaultFlags =
+		public const BindingFlags DefaultFlags =
 			BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
 
 
@@ -278,8 +241,11 @@ namespace RazorSharp.CLR
 			}
 
 			FieldInfo fieldInfo = t.GetField(name, flags);
+			RazorContract.RequiresNotNull(fieldInfo);
+			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
+			RazorContract.Assert(fieldDesc.Reference.Info == fieldInfo);
 
-			return GetFieldDescForFieldInfo(fieldInfo);
+			return fieldDesc;
 		}
 
 		public static Pointer<FieldDesc> GetFieldDesc<T>(string name, bool isAutoProperty = false,
@@ -291,13 +257,6 @@ namespace RazorSharp.CLR
 		#endregion
 
 		#region MethodDesc
-
-		internal static MethodDesc* GetMethodDescForMethodInfo(MethodInfo mi)
-		{
-			MethodDesc* md = (MethodDesc*) mi.MethodHandle.Value;
-			AddMethod(md, mi);
-			return md;
-		}
 
 		public static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
 		{
@@ -313,18 +272,27 @@ namespace RazorSharp.CLR
 
 			for (int i = 0; i < arr.Length; i++) {
 				arr[i] = (MethodDesc*) methods[i].MethodHandle.Value;
-
-//				RuntimeHelpers.PrepareMethod(methods[i].MethodHandle);
 			}
 
-
-			methods = methods.OrderBy(x => x.MethodHandle.Value.ToInt64()).ToArray();
-			arr     = arr.OrderBy(x => x.ToInt64()).ToArray();
-
-			for (int i = 0; i < arr.Length; i++)
-				AddMethod((MethodDesc*) arr[i].Address, methods[i]);
+//			arr = arr.OrderBy(x => x.ToInt64()).ToArray();
 
 			return arr;
+		}
+
+		internal static void SetFunctionPointer(MethodInfo info, IntPtr fn)
+		{
+			RazorContract.Requires<RuntimeException>(!info.IsVirtual && !info.IsAbstract);
+			Marshal.WriteIntPtr(info.MethodHandle.Value, IntPtr.Size, fn);
+		}
+
+		internal static MethodInfo[] GetMethods<T>(BindingFlags flags = DefaultFlags)
+		{
+			return GetMethods(typeof(T));
+		}
+
+		internal static MethodInfo[] GetMethods(Type t, BindingFlags flags = DefaultFlags)
+		{
+			return t.GetMethods(flags);
 		}
 
 		public static Pointer<MethodDesc> GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
@@ -333,11 +301,6 @@ namespace RazorSharp.CLR
 			RazorContract.RequiresNotNull(methodInfo);
 			RuntimeMethodHandle methodHandle = methodInfo.MethodHandle;
 			MethodDesc*         md           = (MethodDesc*) methodHandle.Value;
-
-			// JIT the method
-//			RuntimeHelpers.PrepareMethod(methodHandle);
-
-			AddMethod(md, methodInfo);
 			return md;
 		}
 

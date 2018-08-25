@@ -3,7 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorInvoke.Libraries;
 
@@ -25,10 +27,7 @@ namespace RazorSharp.Memory
 
 		public IntPtr BaseAddress => m_lpModuleBase;
 
-		public SigScanner() : this(Process.GetCurrentProcess())
-		{
-
-		}
+		public SigScanner() : this(Process.GetCurrentProcess()) { }
 
 		public SigScanner(Process proc) : this(proc.Handle) { }
 
@@ -38,6 +37,21 @@ namespace RazorSharp.Memory
 			m_dictStringPatterns = new Dictionary<string, string>();
 		}
 
+		public void SelectModuleBySegment(string moduleName, string segmentName)
+		{
+			// Module already selected
+			if (moduleName == m_moduleName) {
+				return;
+			}
+
+			var segment = Segments.GetSegment(segmentName, moduleName);
+
+			m_rgModuleBuffer = new byte[segment.SectionSize];
+			m_lpModuleBase = segment.SectionAddress;
+			m_dictStringPatterns.Clear();
+			m_moduleName = moduleName;
+			Marshal.Copy(m_lpModuleBase, m_rgModuleBuffer, 0, segment.SectionSize);
+		}
 
 		public bool SelectModule(ProcessModule targetModule)
 		{
@@ -48,6 +62,7 @@ namespace RazorSharp.Memory
 
 			m_lpModuleBase   = targetModule.BaseAddress;
 			m_rgModuleBuffer = new byte[targetModule.ModuleMemorySize];
+
 
 
 			m_dictStringPatterns.Clear();
@@ -79,6 +94,7 @@ namespace RazorSharp.Memory
 			return true;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void ModuleCheck()
 		{
 			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero) {
@@ -86,6 +102,11 @@ namespace RazorSharp.Memory
 			}
 		}
 
+		/// <summary>
+		/// Use <c>0x00</c> for <c>"?"</c>
+		/// </summary>
+		/// <param name="rgPattern"></param>
+		/// <returns></returns>
 		public IntPtr FindPattern(byte[] rgPattern)
 		{
 			ModuleCheck();
@@ -113,6 +134,7 @@ namespace RazorSharp.Memory
 
 			return FindPattern(arrPattern);
 		}
+
 
 		/*public IntPtr FindPattern(string szPattern, out long lTime)
 		{
@@ -201,12 +223,21 @@ namespace RazorSharp.Memory
 
 		private static byte[] ParsePatternString(string szPattern)
 		{
-			List<byte> patternbytes = new List<byte>();
+//			List<byte> patternbytes = new List<byte>();
 
-			foreach (string szByte in szPattern.Split(' '))
-				patternbytes.Add(szByte == "?" ? (byte) 0x0 : Convert.ToByte(szByte, 16));
 
-			return patternbytes.ToArray();
+//			foreach (string szByte in szPattern.Split(' '))
+//				patternbytes.Add(szByte == "?" ? (byte) 0x0 : Convert.ToByte(szByte, 16));
+//			return patternbytes.ToArray();
+
+			var    strByteArr    = szPattern.Split(' ');
+			byte[] patternBytes = new byte[strByteArr.Length];
+			for (var i = 0; i < strByteArr.Length; i++) {
+				patternBytes[i] = strByteArr[i] == "?" ? (byte) 0x0 : Byte.Parse(strByteArr[i], NumberStyles.HexNumber);
+			}
+
+
+			return patternBytes;
 		}
 	}
 

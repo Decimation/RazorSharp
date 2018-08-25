@@ -297,7 +297,7 @@ namespace Test.Testing.Tests
 		public void TestPoint()
 		{
 			var xfd = Runtime.GetFieldDesc<Point>("_x");
-			Debug.Assert(xfd.Reference.MemberDef == xfd.Reference.FieldInfo.MetadataToken);
+			Debug.Assert(xfd.Reference.MemberDef == xfd.Reference.Info.MetadataToken);
 		}
 
 		[Test]

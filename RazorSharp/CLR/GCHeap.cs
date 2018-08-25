@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Memory;
+using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -25,7 +26,7 @@ namespace RazorSharp.CLR
 	///         </item>
 	///     </list>
 	/// </summary>
-	public static unsafe class GCHeap
+	public unsafe struct GCHeap
 	{
 		/// <summary>
 		///     Address of <see cref="g_pGCHeap" />
@@ -40,15 +41,21 @@ namespace RazorSharp.CLR
 
 		public static IntPtr Heap => g_pGCHeap;
 
+		public static GCHeap* GlobalHeap {
+			get { return (GCHeap*) Heap; }
+		}
+
 		/// <summary>
 		///     Returns the number of GCs that have occurred.
 		///     <remarks>
 		///         <para>Source: /src/gc/gcinterface.h: 710</para>
 		///     </remarks>
 		/// </summary>
-		public static int GCCount => (int) CLRFunctions.GCFunctions.GetGCCountInternal(g_pGCHeap.ToPointer());
+		public int GCCount {
+			[CLRSigcall] get => throw new NotTranspiledException();
+		}
 
-		public static bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
+		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
 		{
 			return IsHeapPointer(Unsafe.AddressOfHeap(ref t).ToPointer(), smallHeapOnly);
 		}
@@ -70,10 +77,12 @@ namespace RazorSharp.CLR
 		/// <param name="obj"></param>
 		/// <param name="smallHeapOnly"></param>
 		/// <returns></returns>
-		public static bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
+		[CLRSigcall]
+		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
-			return CLRFunctions.GCFunctions.IsHeapPointer(g_pGCHeap.ToPointer(), obj, smallHeapOnly);
+			throw new NotTranspiledException();
 		}
+
 
 		/// <summary>
 		///     Returns whether or not this object resides in an ephemeral generation.
@@ -91,15 +100,17 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
-		public static bool IsEphemeral(void* obj)
+		[CLRSigcall]
+		public bool IsEphemeral(void* obj)
 		{
-			return CLRFunctions.GCFunctions.IsEphemeral(g_pGCHeap.ToPointer(), obj);
+			throw new NotTranspiledException();
 		}
 
 		// 85
-		public static bool IsGCInProgress(bool bConsiderGCStart = false)
+		[CLRSigcall]
+		public bool IsGCInProgress(bool bConsiderGCStart = false)
 		{
-			return CLRFunctions.GCFunctions.IsGCInProgress(bConsiderGCStart);
+			throw new NotTranspiledException();
 		}
 
 		//constants for the flags parameter to the gc call back
@@ -129,9 +140,11 @@ namespace RazorSharp.CLR
 			 */
 
 			long   strMt              = (long) Runtime.MethodTableOf<string>();
-			IntPtr g_pStringClassAddr = Segments.ScanSegment(".data", "clr.dll", BitConverter.GetBytes(strMt));
+			IntPtr g_pStringClassAddr = Segments.ScanSegment(".data", CLRFunctions.ClrDll, BitConverter.GetBytes(strMt));
 			g_pGCHeapAddr = g_pStringClassAddr + IntPtr.Size * 2;
 			g_pGCHeap     = Marshal.ReadIntPtr(g_pGCHeapAddr);
+
+			SignatureCall.Transpile<GCHeap>();
 
 //			Console.WriteLine("g_pGCHeap address: {0}", Hex.ToHex(g_pGCHeapAddr));
 //			Console.WriteLine("g_pGCHeap: {0}", Hex.ToHex(g_pGCHeap));

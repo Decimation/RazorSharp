@@ -155,7 +155,7 @@ namespace RazorSharp.Analysis
 				string ofsStr = GetOffsetString(baseOfs, rightOfs, leftOfs);
 
 				Table.AddRow(ofsStr, Hex.ToHex(v.Reference.GetAddress(ref t)), v.Reference.Size,
-					v.Reference.FieldInfo.FieldType.Name, v.Reference.Name, v.Reference.GetValue(t));
+					v.Reference.Info.FieldType.Name, v.Reference.Name, v.Reference.GetValue(t));
 
 
 				// start padding

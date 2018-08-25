@@ -32,7 +32,7 @@ namespace Test.Testing.Benchmarking
 				lpFd[i] = &mt->FieldDescList[i];
 
 			for (int i = 0; i < len; i++) {
-				var fi = lpFd[i].Reference.getFieldInfo();
+				var fi = lpFd[i].Reference.Info;
 			}
 
 
@@ -51,8 +51,6 @@ namespace Test.Testing.Benchmarking
 				lpFd[i] = &mt->FieldDescList[i];
 
 
-
-
 			return lpFd;
 		}
 
@@ -67,7 +65,7 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void getFieldInfo()
 		{
-			FD_getFieldInfo.Reference.getFieldInfo();
+			var x = FD_getFieldInfo.Reference.Info;
 		}
 
 		[Benchmark]
@@ -75,11 +73,10 @@ namespace Test.Testing.Benchmarking
 		{
 			var fds = GetFieldDescsNoGetFI(typeof(VectorOf3));
 			for (int i = 0; i < fds.Length; i++) {
-				if (fds[i].Reference.getFieldInfo().Name == "a") {
+				if (fds[i].Reference.Info.Name == "a") {
 					return;
 				}
 			}
-
 		}
 
 //		[Benchmark]
@@ -88,7 +85,7 @@ namespace Test.Testing.Benchmarking
 			GetFieldDescs(typeof(VectorOf3));
 		}
 
-//		[Benchmark]
+		[Benchmark]
 		public void All()
 		{
 			Runtime.GetFieldDescs<VectorOf3>();

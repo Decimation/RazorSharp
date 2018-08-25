@@ -185,39 +185,24 @@ namespace Test
 			public void doSomething()
 			{
 				Console.WriteLine("foo");
+				_x++;
+				_y++;
 			}
 		}
 
-		class CMethodDesc
-		{
-			static CMethodDesc()
-			{
-				Transpile<CMethodDesc>();
-			}
 
-			public int SizeOf {
-				[Sigcall("clr.dll", "0F B7 41 06 4C 8D 05 45 6D 6F 00 8B D0 83 E2 1F")]
-				get => throw new NotTranspiledException();
-			}
-		}
-
-		class CFieldDesc
-		{
-			static CFieldDesc()
-			{
-				Transpile<CFieldDesc>();
-			}
-
-			public int Size {
-				[Sigcall("clr.dll", "48 83 EC 28 8B 51 0C 48 8D 05 4A 25 63 00 C1 EA 1B")]
-				get => throw new NotTranspiledException();
-			}
-		}
 
 		public static void Main(string[] args)
 		{
 			// todo: implement dynamic allocation system
 
+
+			Console.WriteLine(GCHeap.GlobalHeap->GCCount);
+
+
+
+
+//			BenchmarkRunner.Run<SignatureCallBenchmarking>();
 
 			/*var md = Runtime.GetMethodDesc<Vec2>("doSomething");
 			Console.WriteLine(md);
@@ -239,7 +224,7 @@ namespace Test
 
 
 
-			var fd = Runtime.GetFieldDesc<Vec2>("_x");
+			/*var fd = Runtime.GetFieldDesc<Vec2>("_x");
 			var x  = fd.Reference.GetModule();
 			Console.WriteLine(fd.Reference.RuntimeType.Module.ResolveField(fd.Reference.MemberDef));
 
@@ -253,10 +238,12 @@ namespace Test
 			Console.WriteLine(mt->ToString());
 
 			Debug.Assert(typeof(Vec2).MetadataToken ==
-			             Constants.TokenFromRid(Runtime.MethodTableOf<Vec2>()->Token, CorTokenType.mdtTypeDef));
+			             Constants.TokenFromRid(Runtime.MethodTableOf<Vec2>()->Token, CorTokenType.mdtTypeDef));*/
 
-			__break();
 
+
+
+//			var fd = Runtime.GetFieldDesc<Vec2>("_x");
 
 //			BenchmarkRunner.Run<FieldDescsBenchmarking>();
 

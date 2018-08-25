@@ -165,30 +165,7 @@ namespace RazorSharp.Utilities
 			Trace.Assert(values.All(v => v.Equals(values[0])));
 		}
 
-		/// <summary>
-		/// </summary>
-		/// <param name="__this"> <see cref="RazorSharp.CLR.Structures.FieldDesc" /> address</param>
-		/// <exception cref="FieldDescException">
-		///     If <see cref="Runtime.FieldAddrMap" /> does not contain <paramref name="__this" />
-		/// </exception>
-		internal static void RequiresFieldDescAddress(IntPtr __this)
-		{
-			const string fieldDescException = "FieldDesc* has incorrect address. Is the FieldDesc* dereferenced?";
-			Requires<FieldDescException>(Runtime.FieldAddrMap.ContainsKey(__this), fieldDescException);
-		}
 
-		/// <summary>
-		/// </summary>
-		/// <param name="__this"> <see cref="RazorSharp.CLR.Structures.MethodDesc" /> address</param>
-		/// <exception cref="MethodDescException">
-		///     If <see cref="Runtime.MethodAddrMap" /> does not contain
-		///     <paramref name="__this" />
-		/// </exception>
-		internal static void RequiresMethodDescAddress(IntPtr __this)
-		{
-			const string methodDescException = "MethodDesc* has incorrect address. Is the MethodDesc* dereferenced?";
-			Requires<MethodDescException>(Runtime.MethodAddrMap.ContainsKey(__this), methodDescException);
-		}
 	}
 
 }

@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorSharp.Memory;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
@@ -72,59 +73,40 @@ namespace RazorSharp.CLR.Structures
 
 		static MethodDesc()
 		{
-			SignatureCall.Transpile<MethodDesc>();
+//			SignatureCall.TranspileIndependent<MethodDesc>();
 		}
 
-		public IntPtr Function => MethodInfo.MethodHandle.GetFunctionPointer();
-		public string Name     => MethodInfo.Name;
+		public IntPtr Function => Info.MethodHandle.GetFunctionPointer();
+		public string Name     => Info.Name;
 
 		public bool IsCtor {
-			[Sigcall("clr.dll",
-				"48 89 5C 24 08 57 48 83 EC 20 48 8B F9 E8 4E 32 F6 FF 33 DB 0F BA E0 0C 0F 82 39 BA 0F 00")]
-			get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new NotTranspiledException();
 		}
+
+		public Type       RuntimeType => CLRFunctions.JIT_GetRuntimeType(MethodTable);
+		public MethodBase Info        => RuntimeType.Module.ResolveMethod(MemberDef);
+
+		public int MemberDef {
+			[CLRSigcall] get => throw new NotTranspiledException();
+		}
+
 
 		public bool IsPointingToNativeCode {
-			[Sigcall("clr.dll",
-				"48 89 5C 24 08 57 48 83 EC 20 8A 41 03 48 8B F9 A8 01 0F 85 FC C5 F6 FF 33 C0 EB 01 CC")]
-			get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new NotTranspiledException();
 		}
 
-		/// <summary>
-		///     <remarks>
-		///         Address-sensitive
-		///     </remarks>
-		/// </summary>
-		public MethodInfo MethodInfo {
-			get {
-				IntPtr __this = Unsafe.AddressOf(ref this);
-				RazorContract.RequiresMethodDescAddress(__this);
-				MethodInfo m = Runtime.MethodAddrMap[__this];
-				return m;
-			}
-		}
 
 		#region Flags
 
 		public MethodClassification Classification =>
 			(MethodClassification) (m_wFlags & (ushort) MethodDescClassification.mdcClassification);
 
-		public MethodAttributes         Attributes => MethodInfo.Attributes;
+		public MethodAttributes         Attributes => Info.Attributes;
 		public MethodDescClassification Flags      => (MethodDescClassification) m_wFlags;
 		public MethodDescFlags2         Flags2     => (MethodDescFlags2) m_bFlags2;
 		public MethodDescFlags3         Flags3     => (MethodDescFlags3) m_wFlags3AndTokenRemainder;
 
 		#endregion
-
-		// method.hpp: 2188
-		/*public MethodDescChunk* MethodDescChunk {
-			get {
-				fixed (MethodDesc* __this = &this) {
-					long taddr = (long) __this;
-					return (MethodDescChunk*) (taddr - sizeof(MethodDescChunk) + (m_chunkIndex * ALIGNMENT));
-				}
-			}
-		}*/
 
 		#endregion
 
@@ -164,11 +146,6 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		#endregion
-
-
-/*		// Note: This doesn't actually seem to be in the source code, but it matches
-		// MethodHandle.GetFunctionPointer for non-virtual functions
-//		[FieldOffset(8)] private readonly void*  m_function;*/
 
 
 		/*public object Invoke<TDelegate>(params object[] args) where TDelegate : Delegate
@@ -231,8 +208,13 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public int SizeOf {
-			[Sigcall("clr.dll", "0F B7 41 06 4C 8D 05 45 6D 6F 00 8B D0 83 E2 1F")]
-			get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new NotTranspiledException();
+		}
+
+		[CLRSigcall]
+		public void Reset()
+		{
+			throw new NotTranspiledException();
 		}
 
 		/// <summary>
@@ -251,6 +233,11 @@ namespace RazorSharp.CLR.Structures
 		}
 
 
+		public MethodTable* MethodTable {
+			[CLRSigcall] get => throw new NotTranspiledException("MethodTable");
+
+		}
+
 		public TDelegate GetDelegate<TDelegate>() where TDelegate : Delegate
 		{
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(Function);
@@ -259,42 +246,26 @@ namespace RazorSharp.CLR.Structures
 		public void Prepare()
 		{
 			if (!Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) || !Flags2.HasFlag(MethodDescFlags2.HasPrecode)) {
-				RuntimeHelpers.PrepareMethod(MethodInfo.MethodHandle);
+				RuntimeHelpers.PrepareMethod(Info.MethodHandle);
 			}
 		}
 
-		private string CreateSignatureString()
-		{
-			ParameterInfo[] param = MethodInfo.GetParameters();
-
-			if (param.Length == 0) {
-				return String.Format("{0}()", Name);
-			}
-
-			StringBuilder sb = new StringBuilder();
-
-			sb.AppendFormat("{0}(", Name);
-			foreach (ParameterInfo v in param) {
-				sb.AppendFormat("{0} {1}, ", v.ParameterType.Name, v.Name);
-			}
-
-			sb[sb.Length - 2] = ')';
-
-			return sb.ToString();
-		}
 
 		public override string ToString()
 		{
 			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Name", Name);
-			table.AddRow("Signature", CreateSignatureString());
-			table.AddRow("Function", Hex.ToHex(Function));
+			table.AddRow("MethodTable", Hex.ToHex(MethodTable));
+			table.AddRow("Signature", Info);
 
+			table.AddRow("Function", Hex.ToHex(Function));
 			table.AddRow("Non-MI Function", Hex.ToHex(m_functionPtr));
 
 			table.AddRow("Chunk index", m_chunkIndex);
 			table.AddRow("Slot number", m_wSlotNumber);
 			table.AddRow("Attributes", Attributes);
+
+			table.AddRow("Pointing to native code", IsPointingToNativeCode ? StringUtils.Check : StringUtils.BallotX);
 
 
 			table.AddRow("Classification", Classification.Join());

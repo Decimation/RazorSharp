@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using RazorCommon;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Utilities.Exceptions;
@@ -31,14 +32,23 @@ namespace RazorSharp.CLR
 	{
 		internal static readonly Dictionary<string, Delegate> Functions;
 		private static readonly  SigScanner                   Scanner;
-		private const            string                       ClrDll = "clr.dll";
+		internal const           string                       ClrDll = "clr.dll";
+
+		internal static readonly Dictionary<string, byte[]> FunctionMap;
 
 		static CLRFunctions()
 		{
 			Scanner = new SigScanner();
 			Scanner.SelectModule(ClrDll);
-			Functions = new Dictionary<string, Delegate>();
-			SignatureCall.Transpile(typeof(CLRFunctions), "JIT_GetRuntimeType");
+			Functions   = new Dictionary<string, Delegate>();
+			FunctionMap = new Dictionary<string, byte[]>();
+
+			MethodDescFunctions.AddFunctions();
+			FieldDescFunctions.AddFunctions();
+			GCFunctions.AddFunctions();
+
+
+//			SignatureCall.TranspileIndependent(typeof(CLRFunctions));
 		}
 
 //			IntPtr thread = Kernel32.OpenThread(0x4, false, Kernel32.GetCurrentThreadId());
@@ -55,64 +65,32 @@ namespace RazorSharp.CLR
 		internal static class GCFunctions
 		{
 
-			#region IsHeapPointer
-
-			private const string IsHeapPointerSignature = "48 83 EC 28 48 3B 15 2D 4F 3B 00 48 8B C2 73 20";
-
-			private delegate int IsHeapPointerDelegate(void* __this, void* obj, int smallHeapOnly);
-
-			private static readonly IsHeapPointerDelegate IsHeapPointerInternal;
-
-			internal static bool IsHeapPointer(void* __this, void* obj, bool smallHeapOnly)
+			internal static void AddFunctions()
 			{
-				return IsHeapPointerInternal(__this, obj, smallHeapOnly ? 1 : 0) > 0;
+				FunctionMap.Add("IsHeapPointer", Functions[0]);
+				FunctionMap.Add("IsEphemeral", Functions[1]);
+				FunctionMap.Add("IsGCInProgress", Functions[2]);
+				FunctionMap.Add("get_GCCount", Functions[3]);
 			}
 
-			#endregion
-
-			#region IsEphemeral
-
-			private const string IsEphemeralSignature =
-				"48 3B 15 09 A1 81 00 72 0F 48 3B 15 F8 A0 81 00 73 06 B8 01 00 00 00 C3";
-
-			private delegate long IsEphemeralDelegate(void* __this, void* obj);
-
-			private static readonly IsEphemeralDelegate IsEphemeralInternal;
-
-			internal static bool IsEphemeral(void* __this, void* obj)
+			private static readonly byte[][] Functions =
 			{
-				return IsEphemeralInternal(__this, obj) > 0;
-			}
+				/* IsHeapPointer */
+				new byte[]
+					{ 0x48, 0x83, 0xEC, 0x28, 0x48, 0x3B, 0x15, 0x2D, 0x4F, 0x3B, 0x00, 0x48, 0x8B, 0xC2, 0x73, 0x20 },
 
-			#endregion
+				/* IsEphemeral */
+				new byte[]{ 0x48, 0x3B, 0x15, 0x09, 0xA1, 0x81, 0x00, 0x72, 0x0F, 0x48, 0x3B, 0x15, 0xF8, 0xA0, 0x81, 0x00, 0x73, 0x06, 0xB8, 0x01, 0x00, 0x00, 0x00, 0xC3 },
 
-			#region IsGCInProgress
+				/* IsGCInProgress */
+				new byte[]{ 0x48, 0x89, 0x5C, 0x24, 0x08, 0x48, 0x89, 0x74, 0x24, 0x10, 0x57, 0x48, 0x83, 0xEC, 0x20, 0x48, 0x8B, 0x3D, 0xDE, 0xF3, 0x93, 0x00, 0x33, 0xC0 },
 
-			private const string IsGCInProgressSignature =
-				"48 89 5C 24 08 48 89 74 24 10 57 48 83 EC 20 48 8B 3D DE F3 93 00 33 C0";
+				/* GetGCCount */
+				new byte[]{ 0x48, 0x8B, 0x05, 0x59, 0xF5, 0x82, 0x00, 0x48, 0x89, 0x44, 0x24, 0x10, 0x48, 0x8B, 0x44, 0x24, 0x10, 0xC3 },
 
-			private delegate long IsGCInProgressDelegate(int bConsiderGCStart = 0);
+			};
 
-			private static readonly IsGCInProgressDelegate IsGCInProgressInternal;
 
-			internal static bool IsGCInProgress(bool bConsiderGCStart = false)
-			{
-				return IsGCInProgressInternal(bConsiderGCStart ? 1 : 0) > 0;
-			}
-
-			#endregion
-
-			#region GetGCCount
-
-			// Could not find function with opcodes 48 83 EC 28 48 3B 15 2D 4F 3B 00 48 8B C2 73 20 todo
-			// 48 8B 05 59 F5 82 00 48 89 44 24 10 48 8B 44 24 10 C3
-			private const string GetGCCountSignature = "48 8B 05 59 F5 82 00 48 89 44 24 10 48 8B 44 24 10 C3";
-
-			internal delegate uint GetGCCountDelegate(void* __this);
-
-			internal static readonly GetGCCountDelegate GetGCCountInternal;
-
-			#endregion
 
 			private const string AllocSignature =
 				"56 57 41 54 41 56 41 57 48 83 EC 30 48 C7 44 24 20 FE FF FF FF 48 89 5C 24 60 48 89 6C 24 70 45 8B E0 4C 8B F2 E9 00 01 00 00 33 F6 E9 E3 00 00 00";
@@ -124,41 +102,9 @@ namespace RazorSharp.CLR
 			internal static readonly AllocDelegate Alloc;
 
 
-			static GCFunctions()
-			{
-				AddFunction<IsHeapPointerDelegate>("GCHeap::IsHeapPointer", IsHeapPointerSignature);
-				IsHeapPointerInternal = (IsHeapPointerDelegate) Functions["GCHeap::IsHeapPointer"];
 
-				AddFunction<IsEphemeralDelegate>("GCHeap::IsEphemeral", IsEphemeralSignature);
-				IsEphemeralInternal = (IsEphemeralDelegate) Functions["GCHeap::IsEphemeral"];
-
-				AddFunction<IsGCInProgressDelegate>("GCHeap::IsGCInProgress", IsGCInProgressSignature);
-				IsGCInProgressInternal = (IsGCInProgressDelegate) Functions["GCHeap::IsGCInProgress"];
-
-				AddFunction<GetGCCountDelegate>("GCHeap::GetGCCount", GetGCCountSignature);
-				GetGCCountInternal = (GetGCCountDelegate) Functions["GCHeap::GetGCCount"];
-
-				AddFunction<AllocDelegate>("GCHeap::Alloc", AllocSignature);
-				Alloc = (AllocDelegate) Functions["GCHeap::Alloc"];
-			}
 		}
 
-
-		internal static class MethodDescFunctions
-		{
-			private const string SizeOfSignature =
-				"0F B7 41 06 4C 8D 05 45 6D 6F 00 8B D0 83 E2 1F";
-
-			internal delegate ulong SizeOfDelegate(MethodDesc* __this);
-
-			internal static readonly SizeOfDelegate SizeOf;
-
-			static MethodDescFunctions()
-			{
-				AddFunction<SizeOfDelegate>("MethodDesc::SizeOf", SizeOfSignature);
-				SizeOf = (SizeOfDelegate) Functions["MethodDesc::SizeOf"];
-			}
-		}
 
 		internal static class ObjectFunctions
 		{
@@ -188,6 +134,112 @@ namespace RazorSharp.CLR
 		}
 
 
+		internal static class FieldDescFunctions
+		{
+			internal static void AddFunctions()
+			{
+				FunctionMap.Add("GetModule", Functions[0]);
+				FunctionMap.Add("get_LoadSize", Functions[1]);
+				FunctionMap.Add("GetStubFieldInfo", Functions[2]);
+				FunctionMap.Add("get_MethodTableOfEnclosingClass", Functions[3]);
+			}
+
+			private static readonly byte[][] Functions =
+			{
+				/* 0 GetModule */
+				new byte[]
+				{
+					0x48, 0x83, 0xEC, 0x28, 0xE8, 0x37, 0x08, 0xC1, 0xFF, 0x48, 0x8B, 0xC8, 0x48, 0x83, 0xC4, 0x28,
+					0xE9, 0x47, 0xEB, 0xBF, 0xFF, 0xCC, 0x90, 0x90
+				},
+
+				/* 1 LoadSize */
+				new byte[]
+				{
+					0x48, 0x83, 0xEC, 0x28, 0x8B, 0x51, 0x0C, 0x48, 0x8D, 0x05, 0x4A, 0x25, 0x63, 0x00, 0xC1, 0xEA, 0x1B
+				},
+
+				/* 2 GetStubFieldInfo */
+				new byte[]
+				{
+					0x48, 0x89, 0x5C, 0x24, 0x10, 0x57, 0x48, 0x83, 0xEC, 0x60, 0x48, 0x8B, 0x05, 0x07, 0x0F, 0x84,
+					0x00, 0x33, 0xDB, 0x48, 0x8B, 0xF9, 0x48, 0x8B, 0x80, 0x78, 0x03, 0x00, 0x00, 0x48, 0x85, 0xC0,
+					0x0F, 0x84, 0x72, 0x4C, 0x08, 0x00
+				},
+
+				/* 3 MethodTableOfEnclosingClass */
+				new byte[]
+				{
+					0x53, 0x48, 0x83, 0xEC, 0x20, 0x83, 0x3D, 0x30, 0x1F, 0x92, 0x00, 0x00, 0x48, 0x8B, 0xD9, 0x0F,
+					0x85, 0x33, 0x64, 0x2D, 0x00, 0x48, 0x8B, 0x03, 0x48, 0x03, 0xC3
+				},
+			};
+		}
+
+		internal static class MethodDescFunctions
+		{
+
+
+			internal static void AddFunctions()
+			{
+				FunctionMap.Add("get_IsCtor", Functions[0]);
+				FunctionMap.Add("get_MemberDef", Functions[1]);
+				FunctionMap.Add("get_IsPointingToNativeCode", Functions[2]);
+				FunctionMap.Add("get_SizeOf", Functions[3]);
+				FunctionMap.Add("Reset", Functions[4]);
+				FunctionMap.Add("get_MethodTable", Functions[5]);
+			}
+
+			private static readonly byte[][] Functions =
+			{
+				/* 0 IsCtor */
+				new byte[]
+				{
+					0x48, 0x89, 0x5C, 0x24, 0x08, 0x57, 0x48, 0x83, 0xEC, 0x20, 0x48, 0x8B, 0xF9, 0xE8, 0x4E, 0x32,
+					0xF6, 0xFF, 0x33, 0xDB, 0x0F, 0xBA, 0xE0, 0x0C, 0x0F, 0x82, 0x39, 0xBA, 0x0F, 0x00
+				},
+
+				/* 1 MemberDef */
+				new byte[]
+				{
+					0x53, 0x48, 0x83, 0xEC, 0x20, 0x83, 0x3D, 0x34, 0x09, 0x93, 0x00, 0x00, 0x48, 0x8B, 0xD9, 0x0F,
+					0x85, 0x43, 0xC3, 0x2D, 0x00, 0x0F, 0xB6, 0x43, 0x02, 0x0F, 0xB7, 0x0B
+				},
+
+				/* 2 IsPointingToNativeCode */
+				new byte[]
+				{
+					0x48, 0x89, 0x5C, 0x24, 0x08, 0x57, 0x48, 0x83, 0xEC, 0x20, 0x8A, 0x41, 0x03, 0x48, 0x8B, 0xF9,
+					0xA8, 0x01, 0x0F, 0x85, 0xFC, 0xC5, 0xF6, 0xFF, 0x33, 0xC0, 0xEB, 0x01, 0xCC
+				},
+
+				/* 3 SizeOf */
+				new byte[]
+				{
+					0x0F, 0xB7, 0x41, 0x06, 0x4C, 0x8D, 0x05, 0x45, 0x6D, 0x6F, 0x00, 0x8B, 0xD0, 0x83, 0xE2, 0x1F
+				},
+
+				/* 4 Reset */
+				new byte[]
+				{
+					0x48, 0x89, 0x5C, 0x24, 0x08, 0x57, 0x48, 0x83, 0xEC, 0x20, 0xBA, 0x00, 0x18, 0x00, 0x00, 0x45,
+					0x33, 0xC0, 0x48, 0x8B, 0xF9, 0xE8, 0xD2, 0x34, 0xD8, 0xFF, 0xBA, 0x00, 0x20, 0x00, 0x00, 0x45,
+					0x33, 0xC0, 0x48, 0x8B, 0xCF
+				},
+
+				/* 5 MethodTable */
+				new byte[]
+				{
+					0x53, 0x48, 0x83, 0xEC, 0x20, 0x83, 0x3D, 0xE4, 0x8E, 0x93, 0x00, 0x00, 0x48, 0x8B, 0xD9, 0x0F,
+					0x85, 0xFC, 0x47, 0x2E, 0x00, 0x0F, 0xB6, 0x43, 0x02, 0xC1, 0xE0, 0x03, 0x48, 0x63, 0xD0, 0x48,
+					0x2B, 0xDA, 0x48, 0x83, 0xEB, 0x18, 0x48, 0x8B, 0x03, 0x48, 0x03, 0xC3, 0xA8, 0x01, 0x0F, 0x85, 0xE7
+				}
+			};
+
+
+		}
+
+
 		internal static class StringFunctions
 		{
 			private const string NewStringSignature =
@@ -211,34 +263,11 @@ namespace RazorSharp.CLR
 			}
 		}
 
-		internal static class FieldDescFunctions
-		{
-			private const string LoadSizeSignature = "48 83 EC 28 8B 51 0C 48 8D 05 4A 25 63 00 C1 EA 1B";
 
-			internal delegate int LoadSizeDelegate(FieldDesc* __this);
-
-			internal static readonly LoadSizeDelegate LoadSize;
-
-			private const string GetStaticAddressSignature = "53 48 83 EC 20 48 8B D9 E8 8F BC 05 00 8B 53 0C";
-
-			internal delegate void* GetStaticAddressDelegate(FieldDesc* __this, void* @base);
-
-			internal static readonly GetStaticAddressDelegate GetStaticAddress;
-
-			static FieldDescFunctions()
-			{
-				AddFunction<LoadSizeDelegate>("FieldDesc::LoadSize", LoadSizeSignature);
-				LoadSize = (LoadSizeDelegate) Functions["FieldDesc::LoadSize"];
-
-				AddFunction<GetStaticAddressDelegate>("FieldDesc::GetStaticAddress", GetStaticAddressSignature);
-				GetStaticAddress = (GetStaticAddressDelegate) Functions["FieldDesc::GetStaticAddress"];
-			}
-		}
-
-
-		[Sigcall("clr.dll", "48 83 EC 28 4C 8B C1 F6 C1 02 75 2E 48 8B 41 20 48 8B 50 08 F6 C2 01 74 09 48 8B 42 FF")]
+		[CLRSigcall("48 83 EC 28 4C 8B C1 F6 C1 02 75 2E 48 8B 41 20 48 8B 50 08 F6 C2 01 74 09 48 8B 42 FF")]
 		public static Type JIT_GetRuntimeType(void* __struct)
 		{
+			//return Memory.Memory.Read<Type>((IntPtr)LowLevelFunctions.JIT_GetRuntimeType(__struct));
 			throw new NotTranspiledException();
 		}
 	}
