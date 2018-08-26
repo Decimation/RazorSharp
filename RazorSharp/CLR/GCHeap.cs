@@ -5,12 +5,16 @@ using System.Runtime.InteropServices;
 using RazorSharp.Memory;
 using RazorSharp.Utilities.Exceptions;
 
+// ReSharper disable MemberCanBeMadeStatic.Global
+
 #endregion
 
 // ReSharper disable InconsistentNaming
 
 namespace RazorSharp.CLR
 {
+
+
 
 	/// <summary>
 	///     <para>Corresponding files:</para>
@@ -39,11 +43,8 @@ namespace RazorSharp.CLR
 		/// </summary>
 		private static readonly IntPtr g_pGCHeap;
 
-		public static IntPtr Heap => g_pGCHeap;
 
-		public static GCHeap* GlobalHeap {
-			get { return (GCHeap*) Heap; }
-		}
+		public static GCHeap* GlobalHeap => (GCHeap*) g_pGCHeap;
 
 		/// <summary>
 		///     Returns the number of GCs that have occurred.
@@ -52,7 +53,7 @@ namespace RazorSharp.CLR
 		///     </remarks>
 		/// </summary>
 		public int GCCount {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall(OffsetGuess = 0x123C60)] get => throw new NotTranspiledException();
 		}
 
 		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
@@ -77,7 +78,7 @@ namespace RazorSharp.CLR
 		/// <param name="obj"></param>
 		/// <param name="smallHeapOnly"></param>
 		/// <returns></returns>
-		[CLRSigcall]
+		[CLRSigcall(OffsetGuess = 0x58E260)]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
 			throw new NotTranspiledException();
@@ -100,14 +101,14 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
-		[CLRSigcall]
+		[CLRSigcall(OffsetGuess = 0x129100)]
 		public bool IsEphemeral(void* obj)
 		{
 			throw new NotTranspiledException();
 		}
 
 		// 85
-		[CLRSigcall]
+		[CLRSigcall(OffsetGuess = 0x3C3C)]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
 		{
 			throw new NotTranspiledException();
@@ -118,10 +119,6 @@ namespace RazorSharp.CLR
 		// #define GC_CALL_INTERIOR            0x1
 		// #define GC_CALL_PINNED              0x2
 		// #define GC_CALL_CHECK_APP_DOMAIN    0x4
-		public static void* Alloc(ulong size, uint flags)
-		{
-			return CLRFunctions.GCFunctions.Alloc(g_pGCHeap.ToPointer(), size, flags);
-		}
 
 
 		static GCHeap()
@@ -139,8 +136,9 @@ namespace RazorSharp.CLR
 			 * Circumvent ASLR
 			 */
 
-			long   strMt              = (long) Runtime.MethodTableOf<string>();
-			IntPtr g_pStringClassAddr = Segments.ScanSegment(".data", CLRFunctions.ClrDll, BitConverter.GetBytes(strMt));
+			long strMt = (long) Runtime.MethodTableOf<string>();
+			IntPtr g_pStringClassAddr =
+				Segments.ScanSegment(".data", CLRFunctions.ClrDll, BitConverter.GetBytes(strMt));
 			g_pGCHeapAddr = g_pStringClassAddr + IntPtr.Size * 2;
 			g_pGCHeap     = Marshal.ReadIntPtr(g_pGCHeapAddr);
 

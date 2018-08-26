@@ -13,13 +13,13 @@ namespace Test.Testing.Benchmarking
 
 	public class DllBenchmarking
 	{
-		private int    i;
+		private int    _i;
 		private IntPtr m_addr;
 
 		[GlobalSetup]
 		public void Setup()
 		{
-			m_addr = Unsafe.AddressOf(ref i);
+			m_addr = Unsafe.AddressOf(ref _i);
 		}
 
 		[Benchmark]

@@ -4,7 +4,6 @@ using System;
 using System.Collections;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorSharp.Experimental;
@@ -236,6 +235,11 @@ namespace RazorSharp.Pointers
 		public static explicit operator void*(Pointer<T> ptr)
 		{
 			return ptr.Address.ToPointer();
+		}
+
+		public static explicit operator long(Pointer<T> ptr)
+		{
+			return ptr.ToInt64();
 		}
 
 

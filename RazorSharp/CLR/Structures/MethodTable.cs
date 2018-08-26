@@ -75,7 +75,6 @@ namespace RazorSharp.CLR.Structures
 		public MethodTableFlags Flags => (MethodTableFlags) FlagsValue;
 
 
-
 		/// <summary>
 		///     Note: these may not be accurate
 		/// </summary>
@@ -216,6 +215,7 @@ namespace RazorSharp.CLR.Structures
 		public bool IsStringOrArray  => HasComponentSize;
 		public bool IsBlittable      => EEClass->IsBlittable;
 		public bool IsString         => HasComponentSize && !IsArray;
+		public Type RuntimeType      => CLRFunctions.JIT_GetRuntimeType(Unsafe.AddressOf(ref this).ToPointer());
 
 		/// <summary>
 		///     The number of instance fields in this type.
@@ -291,7 +291,7 @@ namespace RazorSharp.CLR.Structures
 
 			ConsoleTable table = new ConsoleTable("Field", "Value");
 
-//			table.AddRow("Name", TypeInfo.Name);
+			table.AddRow("Name", RuntimeType.Name);
 
 			table.AddRow("Base size", m_BaseSize);
 			if (HasComponentSize) {

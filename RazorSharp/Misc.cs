@@ -23,6 +23,17 @@ namespace RazorSharp
 			});
 		}
 
+		internal static void Set(this string str, string s)
+		{
+			ObjectPinner.InvokeWhilePinned(str, delegate
+			{
+				Pointer<char> lpChar = Unsafe.AddressOfHeap(ref str, OffsetType.StringData);
+				for (int i = 0; i < str.Length; i++) {
+					lpChar[i] = s[i];
+				}
+			});
+		}
+
 		internal static object InvokeGenericMethod(Type t, string name, Type typeArgs, object instance,
 			params object[] args)
 		{

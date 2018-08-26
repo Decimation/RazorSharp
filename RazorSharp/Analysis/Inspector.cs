@@ -207,24 +207,24 @@ namespace RazorSharp.Analysis
 		{
 			// Value types have a MethodTable, but not a
 			// MethodTable*.
-			public MethodTable* MethodTable { get; }
-			public EEClass*     EEClass     { get; }
-			public MethodTable* Canon       { get; }
+			public Pointer<MethodTable> MethodTable { get; }
+			public Pointer<EEClass>     EEClass     { get; }
+			public Pointer<MethodTable> Canon       { get; }
 
 
 			protected internal InternalInfo(ref T t)
 			{
 				MethodTable = Runtime.ReadMethodTable(ref t);
-				EEClass     = MethodTable->EEClass;
-				Canon       = MethodTable->Canon;
+				EEClass     = MethodTable.Reference.EEClass;
+				Canon       = MethodTable.Reference.Canon;
 			}
 
 			protected virtual ConsoleTable ToTable()
 			{
 				ConsoleTable table = new ConsoleTable(String.Empty, MethodTableStr);
-				table.AddRow("Address", Hex.ToHex(MethodTable));
-				table.AttachColumn(EEClassStr, Hex.ToHex(EEClass));
-				table.AttachColumn(CanonMTStr, Hex.ToHex(Canon));
+				table.AddRow("Address", Hex.ToHex(MethodTable.Address));
+				table.AttachColumn(EEClassStr, Hex.ToHex(EEClass.Address));
+				table.AttachColumn(CanonMTStr, Hex.ToHex(Canon.Address));
 
 
 				return table;
@@ -363,19 +363,19 @@ namespace RazorSharp.Analysis
 			const char colon = ':';
 
 			Console.WriteLine(ANSI.BoldString(MethodTableStr + colon));
-			Console.WriteLine(inspector.Internal.MethodTable->ToString());
+			Console.WriteLine(inspector.Internal.MethodTable);
 
 			Console.WriteLine(ANSI.BoldString(EEClassStr + colon));
-			Console.WriteLine(inspector.Internal.EEClass->ToString());
+			Console.WriteLine(inspector.Internal.EEClass);
 
 			if (inspector.Internal.Canon != inspector.Internal.MethodTable) {
 				Console.WriteLine(ANSI.BoldString(CanonMTStr + colon));
-				Console.WriteLine(inspector.Internal.MethodTable->Canon->ToString());
+				Console.WriteLine(inspector.Internal.MethodTable.Reference.Canon->ToString());
 			}
 
-			if (inspector.Internal.EEClass->HasLayout) {
+			if (inspector.Internal.EEClass.Reference.HasLayout) {
 				Console.WriteLine(ANSI.BoldString(EEClassLayoutInfoStr + colon));
-				Console.WriteLine(inspector.Internal.EEClass->LayoutInfo->ToString());
+				Console.WriteLine(inspector.Internal.EEClass.Reference.LayoutInfo->ToString());
 			}
 		}
 

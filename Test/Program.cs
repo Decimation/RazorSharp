@@ -1,15 +1,15 @@
 ﻿#region
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using BenchmarkDotNet.Running;
+
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
@@ -21,13 +21,8 @@ using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
-using Test.Testing;
 using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
-using Unsafe = RazorSharp.Unsafe;
-using static RazorSharp.Analysis.InspectorHelper;
-using static RazorSharp.Memory.SignatureCall;
-using Module = System.Reflection.Module;
 
 #endregion
 
@@ -36,6 +31,7 @@ namespace Test
 
 	#region
 
+	using Unsafe = RazorSharp.Unsafe;
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
@@ -124,7 +120,7 @@ namespace Test
 			private void Watch()
 			{
 				while (m_keepAlive) {
-					var heap = *(IntPtr*) m_ptrAddr;
+					IntPtr heap = *(IntPtr*) m_ptrAddr;
 					if (heap != m_origHeapAddr) {
 						OnRaiseCustomEvent(new AddressEventArgs(m_origHeapAddr, heap));
 					}
@@ -138,7 +134,7 @@ namespace Test
 				// Make a temporary copy of the event to avoid possibility of
 				// a race condition if the last subscriber unsubscribes
 				// immediately after the null check and before the event is raised.
-				var handler = Event;
+				AddressChanged handler = Event;
 
 				// Event will be null if there are no subscribers
 				if (handler != null) {
@@ -177,18 +173,16 @@ namespace Test
 
 		}
 
-		struct Vec2
-		{
-			private float _x,
-			              _y;
 
-			public void doSomething()
-			{
-				Console.WriteLine("foo");
-				_x++;
-				_y++;
-			}
+		[DllImport("kernel32.dll")]
+		public static extern void RtlZeroMemory(void* p, int cb);
+
+		interface IInterface
+		{
+			[CLRSigcall]
+			void doSomething();
 		}
+
 
 
 
@@ -196,32 +190,22 @@ namespace Test
 		{
 			// todo: implement dynamic allocation system
 
-
-			Console.WriteLine(GCHeap.GlobalHeap->GCCount);
-
-
+//			string s = "foo";
+//			InspectorHelper.Inspect(ref s);
 
 
-//			BenchmarkRunner.Run<SignatureCallBenchmarking>();
-
-			/*var md = Runtime.GetMethodDesc<Vec2>("doSomething");
-			Console.WriteLine(md);
-
-			var fd = Runtime.GetFieldDesc<Vec2>("_x");
-			Console.WriteLine(fd);
-
-			Console.WriteLine(fd.Reference.getFieldInfo());
-			Debug.Assert(fd.Reference.getFieldInfo() == (fd.Reference.FieldInfo));
 
 
-			var f = typeof(Vec2).Module.ModuleHandle.ResolveFieldHandle(fd.Reference.MemberDef);
-			Console.WriteLine("-> {0}", FieldInfo.GetFieldFromHandle(f));
-			var x = fd.Reference.GetModule();
-			Console.WriteLine(Hex.ToHex(x));
 
 
-			Console.WriteLine(GCHeap.GCCount);*/
 
+			/*var dllfn = Runtime.GetMethodDesc(typeof(Program), "RtlZeroMemory");
+			Console.WriteLine(dllfn);
+			Console.WriteLine(Runtime.GetMethodDesc<Vec2>("GetSize"));
+			SignatureCall.Transpile<Vec2>();
+			Console.WriteLine(Runtime.GetMethodDesc<Vec2>("GetSize"));
+			Vec2 v = new Vec2();
+			Console.WriteLine(v.GetSize());*/
 
 
 			/*var fd = Runtime.GetFieldDesc<Vec2>("_x");
@@ -241,8 +225,6 @@ namespace Test
 			             Constants.TokenFromRid(Runtime.MethodTableOf<Vec2>()->Token, CorTokenType.mdtTypeDef));*/
 
 
-
-
 //			var fd = Runtime.GetFieldDesc<Vec2>("_x");
 
 //			BenchmarkRunner.Run<FieldDescsBenchmarking>();
@@ -259,7 +241,7 @@ namespace Test
 			Console.WriteLine(gc->GCCount_prop);*/
 		}
 
-		static void __break()
+		private static void __break()
 		{
 			Console.ReadLine();
 		}
@@ -271,8 +253,8 @@ namespace Test
 
 		private static void Hook(Type tOrig, string origFn, Type tNew, string newFn)
 		{
-			var origMd = Runtime.GetMethodDesc(tOrig, origFn);
-			var newMd  = Runtime.GetMethodDesc(tNew, newFn);
+			Pointer<MethodDesc> origMd = Runtime.GetMethodDesc(tOrig, origFn);
+			Pointer<MethodDesc> newMd  = Runtime.GetMethodDesc(tNew, newFn);
 			origMd.Reference.SetFunctionPointer(newMd.Reference.Function);
 		}
 
@@ -282,7 +264,7 @@ namespace Test
 		}
 
 
-		struct UObj<T> : IDisposable
+		private struct UObj<T> : IDisposable
 		{
 			private IntPtr m_addr;
 
@@ -294,7 +276,7 @@ namespace Test
 			}
 
 			/// <summary>
-			/// Don't create a new instance using this
+			///     Don't create a new instance using this
 			/// </summary>
 			public ref T Reference {
 				get {
@@ -315,14 +297,14 @@ namespace Test
 		}
 
 
-		static UObj<T> New<T>() where T : class
+		private static UObj<T> New<T>() where T : class
 		{
 			RazorContract.Assert(!typeof(T).IsArray);
 			RazorContract.Assert(typeof(T) != typeof(string));
 			RazorContract.Assert(!typeof(T).IsIListType());
 
 
-			var lpMem = Memory.AllocUnmanaged<byte>(Unsafe.BaseInstanceSize<T>());
+			Pointer<byte> lpMem = Memory.AllocUnmanaged<byte>(BaseInstanceSize<T>());
 			lpMem.Increment(sizeof(long));
 			lpMem.Write((long) Runtime.MethodTableOf<T>());
 

@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Collections;
 using System.Globalization;
@@ -7,6 +9,8 @@ using RazorCommon.Extensions;
 using RazorSharp.Experimental;
 using RazorSharp.Pointers.Ex;
 using RazorSharp.Utilities;
+
+#endregion
 
 namespace RazorSharp.Pointers
 {
@@ -21,8 +25,8 @@ namespace RazorSharp.Pointers
 	/// <summary>
 	///     <para>A bare-bones, lighter type of <see cref="ExPointer{T}" />, equal to <see cref="IntPtr.Size" /></para>
 	///     <para> Can be represented as a pointer in memory. </para>
-	/// <para>Compared to <see cref="Pointer{T}"/>, <see cref="Address"/> is <c>readonly</c>. </para>
-	/// <para>Similar to <code>T *const ptr = &amp;var </code>in C/C++.</para>
+	///     <para>Compared to <see cref="Pointer{T}" />, <see cref="Address" /> is <c>readonly</c>. </para>
+	///     <para>Similar to <code>T *const ptr = &amp;var </code>in C/C++.</para>
 	///     <list type="bullet">
 	///         <item>
 	///             <description>No bounds checking</description>
@@ -34,7 +38,6 @@ namespace RazorSharp.Pointers
 	///             <description>No type safety</description>
 	///         </item>
 	///     </list>
-	///
 	/// </summary>
 	/// <typeparam name="T">Type to point to</typeparam>
 	public unsafe struct ReadOnlyPointer<T> : IPointer<T>
@@ -63,10 +66,7 @@ namespace RazorSharp.Pointers
 
 		public IntPtr Address {
 			get => (IntPtr) m_value;
-			set {
-				// not implemented
-				throw new Exception();
-			}
+			set => throw new Exception();
 		}
 
 		public int ElementSize => Unsafe.SizeOf<T>();

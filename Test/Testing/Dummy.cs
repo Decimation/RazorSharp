@@ -77,7 +77,7 @@ namespace Test.Testing
 			Console.WriteLine("echo");
 		}
 
-		public void DoSomething() { }
+		public void doSomething() { }
 
 		public override string ToString()
 		{

@@ -4,10 +4,10 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using JetBrains.Annotations;
 using RazorCommon;
-using RazorSharp.CLR;
 using RazorSharp.Utilities.Exceptions;
 
 #endregion
@@ -69,6 +69,7 @@ namespace RazorSharp.Utilities
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void Requires([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null)
 		{
 			Requires<RuntimeException>(cond, msg);

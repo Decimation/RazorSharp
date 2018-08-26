@@ -150,9 +150,7 @@ namespace RazorSharp
 		/// <param name="isAutoProperty">Whether the field is an auto-property</param>
 		public static IntPtr AddressOfField<T>(ref T instance, string name, bool isAutoProperty = false)
 		{
-			var fd = Runtime.GetFieldDesc<T>(name, isAutoProperty);
-
-
+			Pointer<FieldDesc> fd = Runtime.GetFieldDesc<T>(name, isAutoProperty);
 			return fd.Reference.GetAddress(ref instance);
 		}
 
@@ -266,8 +264,8 @@ namespace RazorSharp
 				return InvalidValue;
 			}
 
-			MethodTable* mt = Runtime.MethodTableOf<T>();
-			EEClass*     ee = mt->EEClass;
+			Pointer<MethodTable> mt = Runtime.MethodTableOf<T>();
+			EEClass*             ee = mt.Reference.EEClass;
 			if (ee->HasLayout) {
 				return (int) ee->LayoutInfo->ManagedSize;
 			}
@@ -291,9 +289,9 @@ namespace RazorSharp
 				return InvalidValue;
 			}
 
-			MethodTable* mt        = Runtime.MethodTableOf<T>();
-			int          native    = mt->EEClass->NativeSize;
-			int          nativeOut = native == 0 ? InvalidValue : native;
+			Pointer<MethodTable> mt        = Runtime.MethodTableOf<T>();
+			int                  native    = mt.Reference.EEClass->NativeSize;
+			int                  nativeOut = native == 0 ? InvalidValue : native;
 			return nativeOut;
 		}
 
@@ -382,19 +380,19 @@ namespace RazorSharp
 
 			// We have to manually read the MethodTable because if it's an array,
 			// the TypeHandle won't work.
-			MethodTable* methodTable = Runtime.ReadMethodTable(ref t);
+			Pointer<MethodTable> methodTable = Runtime.ReadMethodTable(ref t);
 
 			if (typeof(T).IsArray) {
 				Array arr = t as Array;
 				RazorContract.RequiresNotNull(arr);
-				return (int) methodTable->BaseSize + arr.Length * methodTable->ComponentSize;
+				return (int) methodTable.Reference.BaseSize + arr.Length * methodTable.Reference.ComponentSize;
 			}
 
 			if (t is string str) {
-				return (int) methodTable->BaseSize + str.Length * methodTable->ComponentSize;
+				return (int) methodTable.Reference.BaseSize + str.Length * methodTable.Reference.ComponentSize;
 			}
 
-			return (int) methodTable->BaseSize;
+			return (int) methodTable.Reference.BaseSize;
 		}
 
 
@@ -421,7 +419,7 @@ namespace RazorSharp
 				return Constants.MinObjectSize;
 			}
 
-			return Runtime.MethodTableOf<T>()->NumInstanceFieldBytes;
+			return Runtime.MethodTableOf<T>().Reference.NumInstanceFieldBytes;
 		}
 
 		/// <summary>
@@ -444,7 +442,7 @@ namespace RazorSharp
 		/// </summary>
 		public static int BaseFieldsSize<T>(ref T t) where T : class
 		{
-			return Runtime.ReadMethodTable(ref t)->NumInstanceFieldBytes;
+			return Runtime.ReadMethodTable(ref t).Reference.NumInstanceFieldBytes;
 		}
 
 
@@ -466,7 +464,7 @@ namespace RazorSharp
 				return Constants.MinObjectSize;
 			}
 
-			return (int) Runtime.MethodTableOf<T>()->BaseSize;
+			return (int) Runtime.MethodTableOf<T>().Reference.BaseSize;
 		}
 
 		#endregion

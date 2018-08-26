@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -36,41 +35,20 @@ namespace RazorSharp.CLR
 		///     Heap offset to the first array element.
 		///     <list type="bullet">
 		///         <item>
-		///             <description>+8 for <c>MethodTable*</c> (<see cref="IntPtr.Size" />)</description>
+		///             <description>+ 8 for <c>MethodTable*</c> (<see cref="IntPtr.Size" />)</description>
 		///         </item>
 		///         <item>
-		///             <description>+4 for length <c>(uint)</c></description>
+		///             <description>+ 4 for length (<see cref="UInt32" />) </description>
 		///         </item>
 		///         <item>
-		///             <description>+4 for padding <c>(uint)</c> (x64 only)</description>
+		///             <description>+ 4 for padding (<see cref="UInt32" />) (x64 only)</description>
 		///         </item>
 		///     </list>
 		/// </summary>
 		public static readonly int OffsetToArrayData = IntPtr.Size * 2;
 
 
-
-		static Runtime()
-		{
-
-		}
-
-		private static void AddSet<TKey, TValue>(Dictionary<TKey, TValue> dict, TKey tk, TValue tv)
-		{
-			if (dict.ContainsValue(tv)) {
-				dict.Remove(tk);
-				dict.Add(tk, tv);
-			}
-
-			if (dict.ContainsKey(tk)) {
-				dict[tk] = tv;
-			}
-
-			if (!(dict.ContainsKey(tk) || dict.ContainsValue(tv))) {
-				dict.Add(tk, tv);
-			}
-		}
-
+		static Runtime() { }
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -103,7 +81,7 @@ namespace RazorSharp.CLR
 
 		#endregion
 
-		#region Method Table
+		#region MethodTable
 
 		/// <summary>
 		///     <para>Manually reads a CLR <see cref="MethodTable" /> (TypeHandle).</para>
@@ -113,7 +91,7 @@ namespace RazorSharp.CLR
 		///     </para>
 		/// </summary>
 		/// <returns>A pointer to type <typeparamref name="T" />'s <see cref="MethodTable" /></returns>
-		public static MethodTable* ReadMethodTable<T>(ref T t)
+		public static Pointer<MethodTable> ReadMethodTable<T>(ref T t)
 		{
 			MethodTable* mt;
 
@@ -145,12 +123,12 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <typeparam name="T">Type to return the corresponding MethodTable for.</typeparam>
 		/// <returns></returns>
-		public static MethodTable* MethodTableOf<T>()
+		public static Pointer<MethodTable> MethodTableOf<T>()
 		{
 			return MethodTableOf(typeof(T));
 		}
 
-		public static MethodTable* MethodTableOf(Type t)
+		public static Pointer<MethodTable> MethodTableOf(Type t)
 		{
 			// Array method tables need to be read using ReadMethodTable,
 			// they don't have a TypeHandle
@@ -165,19 +143,20 @@ namespace RazorSharp.CLR
 		}
 
 
-		public static void WriteMethodTable<T>(ref T t, MethodTable* m) where T : class
+		public static void WriteMethodTable<T>(ref T t, Pointer<MethodTable> m) where T : class
 		{
 			IntPtr addrMt = Unsafe.AddressOfHeap(ref t);
-			*((MethodTable**) addrMt) = m;
+			*((MethodTable**) addrMt) = (MethodTable*) m;
 
 			//var h = GetHeapObject(ref t);
 			//(**h).MethodTable = m;
 		}
 
-
-
 		#endregion
 
+
+		private const BindingFlags DefaultFlags =
+			BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
 
 		#region FieldDesc
 
@@ -191,33 +170,20 @@ namespace RazorSharp.CLR
 		{
 			RazorContract.Requires(!typeof(T).IsArray, "Arrays do not have fields");
 
-			MethodTable*         mt   = MethodTableOf<T>();
-			int                  len  = mt->FieldDescListLength;
+			Pointer<MethodTable> mt   = MethodTableOf<T>();
+			int                  len  = mt.Reference.FieldDescListLength;
 			Pointer<FieldDesc>[] lpFd = new Pointer<FieldDesc>[len];
 
 			for (int i = 0; i < len; i++)
-				lpFd[i] = &mt->FieldDescList[i];
+				lpFd[i] = &mt.Reference.FieldDescList[i];
 
-//			FieldInfo[] fieldInfos = typeof(T).GetFields(DefaultFlags);
 
-			// Remove all const fields
-//			Collections.RemoveAll(ref fieldInfos, x => x.IsLiteral);
-
-//			RazorContract.Assert(fieldInfos.Length == mt->FieldDescListLength);
-
-//			fieldInfos = fieldInfos.OrderBy(x => x.FieldHandle.Value.ToInt64()).ToArray();
-			lpFd = lpFd.OrderBy(x => x.ToInt64()).ToArray();
-
-//			for (int i = 0; i < fieldInfos.Length; i++) {
-//				RazorContract.Assert(fieldInfos[i] == lpFd[i].Reference.Info);
-//			}
+			// Adds about 1k ns
+//			lpFd = lpFd.OrderBy(x => x.ToInt64()).ToArray();
 
 
 			return lpFd;
 		}
-
-		public const BindingFlags DefaultFlags =
-			BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
 
 
 		/// <summary>
@@ -228,16 +194,14 @@ namespace RazorSharp.CLR
 		/// <param name="isAutoProperty"></param>
 		/// <param name="flags"></param>
 		/// <returns></returns>
-		/// <exception cref="RuntimeException">If the field is const</exception>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
 		public static Pointer<FieldDesc> GetFieldDesc(Type t, string name, bool isAutoProperty = false,
 			BindingFlags flags = DefaultFlags)
 		{
 			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
 
-
 			if (isAutoProperty) {
-				name = AutoPropertyBackingFieldName(name);
+				name = NameOfAutoPropertyBackingField(name);
 			}
 
 			FieldInfo fieldInfo = t.GetField(name, flags);
@@ -269,9 +233,12 @@ namespace RazorSharp.CLR
 			RazorContract.RequiresNotNull(methods);
 			Pointer<MethodDesc>[] arr = new Pointer<MethodDesc>[methods.Length];
 
-
 			for (int i = 0; i < arr.Length; i++) {
 				arr[i] = (MethodDesc*) methods[i].MethodHandle.Value;
+				RazorContract.Assert(arr[i].Reference.Info.MetadataToken == methods[i].MetadataToken);
+
+				// todo
+//				RazorContract.Assert(arr[i].Reference.Info==methods[i]);
 			}
 
 //			arr = arr.OrderBy(x => x.ToInt64()).ToArray();
@@ -281,13 +248,44 @@ namespace RazorSharp.CLR
 
 		internal static void SetFunctionPointer(MethodInfo info, IntPtr fn)
 		{
-			RazorContract.Requires<RuntimeException>(!info.IsVirtual && !info.IsAbstract);
+			RazorContract.Requires(!info.IsVirtual && !info.IsAbstract);
 			Marshal.WriteIntPtr(info.MethodHandle.Value, IntPtr.Size, fn);
 		}
 
+		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(Type t, BindingFlags flags = DefaultFlags)
+			where TAttribute : Attribute
+		{
+			MethodInfo[]     methods           = t.GetMethods(flags);
+			List<MethodInfo> attributedMethods = new List<MethodInfo>();
+
+			foreach (MethodInfo t1 in methods) {
+				TAttribute attr = t1.GetCustomAttribute<TAttribute>();
+				if (attr != null) {
+					attributedMethods.Add(t1);
+				}
+			}
+
+			return attributedMethods.ToArray();
+		}
+
+		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(Type t, string name,
+			BindingFlags flags = DefaultFlags) where TAttribute : Attribute
+		{
+			MethodInfo[]     methods = GetAnnotatedMethods<TAttribute>(t, flags);
+			List<MethodInfo> matches = new List<MethodInfo>();
+			foreach (MethodInfo v in methods) {
+				if (v.Name == name) {
+					matches.Add(v);
+				}
+			}
+
+			return matches.ToArray();
+		}
+
+
 		internal static MethodInfo[] GetMethods<T>(BindingFlags flags = DefaultFlags)
 		{
-			return GetMethods(typeof(T));
+			return GetMethods(typeof(T), flags);
 		}
 
 		internal static MethodInfo[] GetMethods(Type t, BindingFlags flags = DefaultFlags)
@@ -301,6 +299,11 @@ namespace RazorSharp.CLR
 			RazorContract.RequiresNotNull(methodInfo);
 			RuntimeMethodHandle methodHandle = methodInfo.MethodHandle;
 			MethodDesc*         md           = (MethodDesc*) methodHandle.Value;
+
+			RazorContract.Assert(md->Info.MetadataToken == methodInfo.MetadataToken);
+
+			// todo
+//			RazorContract.Assert(md->Info == methodInfo);
 			return md;
 		}
 
@@ -344,7 +347,7 @@ namespace RazorSharp.CLR
 				return true;
 			}
 
-			return MethodTableOf<T>()->IsBlittable;
+			return MethodTableOf<T>().Reference.IsBlittable;
 		}
 
 		/// <summary>
@@ -353,10 +356,16 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <param name="propname">Auto-property's name</param>
 		/// <returns>Internal name of the auto-property's backing field</returns>
-		private static string AutoPropertyBackingFieldName(string propname)
+		private static string NameOfAutoPropertyBackingField(string propname)
 		{
 			const string backingFieldFormat = "<{0}>k__BackingField";
 			return String.Format(backingFieldFormat, propname);
+		}
+
+		internal static string NameOfGetPropertyMethod(string propname)
+		{
+			const string getPrefix = "get_";
+			return getPrefix + propname;
 		}
 	}
 

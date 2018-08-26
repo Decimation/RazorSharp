@@ -10,37 +10,37 @@ namespace Test.Testing.Benchmarking
 
 	public class LitePointerBenchmarking
 	{
-		private Pointer<string> lpString;
-		private string          value = "foo";
+		private Pointer<string> _lpString;
+		private string          _value = "foo";
 
 		[GlobalSetup]
 		public void Setup()
 		{
-			lpString = new Pointer<string>(ref value);
+			_lpString = new Pointer<string>(ref _value);
 		}
 
 		[Benchmark]
 		public void Test_Value()
 		{
-			string x = lpString.Value;
+			string x = _lpString.Value;
 		}
 
 		[Benchmark]
 		public void Test_Index()
 		{
-			string x = lpString[0];
+			string x = _lpString[0];
 		}
 
 		[Benchmark]
 		public void Test_Increment()
 		{
-			lpString++;
+			_lpString++;
 		}
 
 		[Benchmark]
 		public void Test_Decrement()
 		{
-			lpString--;
+			_lpString--;
 		}
 	}
 

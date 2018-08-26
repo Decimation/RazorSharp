@@ -1,17 +1,18 @@
 #region
 
 using System;
-using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using JetBrains.Annotations;
 using RazorCommon;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
-using static System.Type;
 using static RazorSharp.Memory.Memory;
+
+// ReSharper disable MemberCanBeMadeStatic.Local
+
+// ReSharper disable MemberCanBeMadeStatic.Global
 
 #endregion
 
@@ -51,7 +52,7 @@ namespace RazorSharp.CLR.Structures
 	{
 		static FieldDesc()
 		{
-//			SignatureCall.TranspileIndependent<FieldDesc>();
+			SignatureCall.Transpile<FieldDesc>();
 		}
 
 		private const int FieldOffsetMax    = (1 << 27) - 1;
@@ -83,22 +84,13 @@ namespace RazorSharp.CLR.Structures
 		private int MB => (int) (m_dword1 & 0xFFFFFF);
 
 		/// <summary>
-		/// Field token
+		///     Field token
+		/// <remarks>
+		/// Equal to <see cref="FieldInfo.MetadataToken"/>
+		/// </remarks>
 		/// </summary>
 		public int MemberDef {
-			get {
-				if (RequiresFullMBValue) {
-					return Constants.TokenFromRid(MB & (int) MbMask.PackedMbLayoutMbMask, CorTokenType.mdtFieldDef);
-				}
-
-				return Constants.TokenFromRid(MB, CorTokenType.mdtFieldDef);
-			}
-		}
-
-		[CLRSigcall]
-		public void* GetModule()
-		{
-			throw new NotTranspiledException();
+			[CLRSigcall(OffsetGuess = 0x33AC0)] get => throw new NotTranspiledException();
 		}
 
 
@@ -157,38 +149,41 @@ namespace RazorSharp.CLR.Structures
 
 
 		private int LoadSize {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall(OffsetGuess = 0x102278)] get => throw new NotTranspiledException();
 		}
 
-		public FieldInfo Info => RuntimeType.Module.ResolveField(MemberDef);
+		public FieldInfo Info        => RuntimeType.Module.ResolveField(MemberDef);
+		public string    Name        => Info.Name;
+		public Type      RuntimeType => CLRFunctions.JIT_GetRuntimeType(MethodTableOfEnclosingClass.ToPointer());
 
-		public Type RuntimeType => CLRFunctions.JIT_GetRuntimeType(MethodTableOfEnclosingClass);
-
-
-		// RuntimeFieldInfoStub
-		// ReflectFieldObject
-		[CLRSigcall]
-		public void* GetStubFieldInfo()
-		{
-			throw new NotTranspiledException();
-		}
-
-
-		public string Name => Info.Name;
 
 		/// <summary>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public MethodTable* MethodTableOfEnclosingClass {
-			[CLRSigcall] get => throw new NotTranspiledException();
+		public Pointer<MethodTable> MethodTableOfEnclosingClass {
+			[CLRSigcall(OffsetGuess = 0x21214)] get => throw new NotTranspiledException();
 		}
 
 
 		public bool RequiresFullMBValue => ReadBit(m_dword1, 31);
 
 		#endregion
+
+		[CLRSigcall(OffsetGuess = 0x4109D4)]
+		public void* GetModule()
+		{
+			throw new NotTranspiledException();
+		}
+
+		// RuntimeFieldInfoStub
+		// ReflectFieldObject
+		[CLRSigcall(OffsetGuess = 0x1025A0)]
+		public void* GetStubFieldInfo()
+		{
+			throw new NotTranspiledException();
+		}
 
 		#region Value
 
@@ -251,7 +246,7 @@ namespace RazorSharp.CLR.Structures
 			// this->ToString() must be used to view this
 
 			table.AddRow("Name", Name);
-			table.AddRow("Enclosing MethodTable", Hex.ToHex(MethodTableOfEnclosingClass));
+			table.AddRow("Enclosing MethodTable", Hex.ToHex(MethodTableOfEnclosingClass.ToPointer()));
 
 
 			// Unsigned 1

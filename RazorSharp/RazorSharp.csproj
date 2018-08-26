@@ -136,6 +136,7 @@
     <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
     <Compile Include="Pointers\PointerUtils.cs" />
+      <Compile Include="Pointers\ProtectedPointer.cs"/>
       <Compile Include="Pointers\ReadOnlyPointer.cs"/>
     <Compile Include="RazorMath.cs" />
       <Compile Include="CLR\CLRFunctions.cs"/>

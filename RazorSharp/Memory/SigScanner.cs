@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorInvoke.Libraries;
+using RazorSharp.Pointers;
 
 #endregion
 
@@ -44,10 +45,10 @@ namespace RazorSharp.Memory
 				return;
 			}
 
-			var segment = Segments.GetSegment(segmentName, moduleName);
+			Segments.ImageSectionInfo segment = Segments.GetSegment(segmentName, moduleName);
 
 			m_rgModuleBuffer = new byte[segment.SectionSize];
-			m_lpModuleBase = segment.SectionAddress;
+			m_lpModuleBase   = segment.SectionAddress;
 			m_dictStringPatterns.Clear();
 			m_moduleName = moduleName;
 			Marshal.Copy(m_lpModuleBase, m_rgModuleBuffer, 0, segment.SectionSize);
@@ -64,7 +65,6 @@ namespace RazorSharp.Memory
 			m_rgModuleBuffer = new byte[targetModule.ModuleMemorySize];
 
 
-
 			m_dictStringPatterns.Clear();
 			ulong lpNumberOfBytesRead = 0;
 
@@ -78,7 +78,8 @@ namespace RazorSharp.Memory
 			m_dictStringPatterns.Add(szPatternName, szPattern);
 		}
 
-		private bool PatternCheck(int nOffset, byte[] arrPattern)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private bool PatternCheck(long nOffset, byte[] arrPattern)
 		{
 			// ReSharper disable once LoopCanBeConvertedToQuery
 			for (int i = 0; i < arrPattern.Length; i++) {
@@ -103,13 +104,23 @@ namespace RazorSharp.Memory
 		}
 
 		/// <summary>
-		/// Use <c>0x00</c> for <c>"?"</c>
+		///     Use <c>0x00</c> for <c>"?"</c>
 		/// </summary>
 		/// <param name="rgPattern"></param>
+		/// <param name="ofsGuess"></param>
 		/// <returns></returns>
-		public IntPtr FindPattern(byte[] rgPattern)
+		public IntPtr FindPattern(byte[] rgPattern, long ofsGuess = 0)
 		{
 			ModuleCheck();
+
+			if (ofsGuess != 0) {
+				if (PatternCheck(ofsGuess, rgPattern)) {
+					return PointerUtils.Add(m_lpModuleBase, ofsGuess);
+				}
+				else {
+//					Logger.Log("Offset guess of {0} failed", Hex.ToHex(ofsGuess));
+				}
+			}
 
 			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
 				if (m_rgModuleBuffer[nModuleIndex] != rgPattern[0]) {
@@ -125,14 +136,14 @@ namespace RazorSharp.Memory
 			return IntPtr.Zero;
 		}
 
-		public IntPtr FindPattern(string szPattern)
+		public IntPtr FindPattern(string szPattern, long ofsGuess = 0)
 		{
 			ModuleCheck();
 
 
 			byte[] arrPattern = ParsePatternString(szPattern);
 
-			return FindPattern(arrPattern);
+			return FindPattern(arrPattern, ofsGuess);
 		}
 
 
@@ -230,9 +241,9 @@ namespace RazorSharp.Memory
 //				patternbytes.Add(szByte == "?" ? (byte) 0x0 : Convert.ToByte(szByte, 16));
 //			return patternbytes.ToArray();
 
-			var    strByteArr    = szPattern.Split(' ');
-			byte[] patternBytes = new byte[strByteArr.Length];
-			for (var i = 0; i < strByteArr.Length; i++) {
+			string[] strByteArr   = szPattern.Split(' ');
+			byte[]   patternBytes = new byte[strByteArr.Length];
+			for (int i = 0; i < strByteArr.Length; i++) {
 				patternBytes[i] = strByteArr[i] == "?" ? (byte) 0x0 : Byte.Parse(strByteArr[i], NumberStyles.HexNumber);
 			}
 

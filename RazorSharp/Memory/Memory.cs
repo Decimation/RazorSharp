@@ -5,8 +5,6 @@ using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorInvoke.Libraries;
-using RazorSharp.CLR;
-using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -143,18 +141,6 @@ namespace RazorSharp.Memory
 			return CSUnsafe.As<TFrom, TTo>(ref t);
 		}
 
-		public static bool IsValid<T>(IntPtr addrOfPtr) where T : class
-		{
-			if (addrOfPtr == IntPtr.Zero) {
-				return false;
-			}
-
-			MethodTable* validMethodTable = Runtime.MethodTableOf<T>();
-			IntPtr       mt               = Marshal.ReadIntPtr(addrOfPtr);
-			MethodTable* readMethodTable  = *(MethodTable**) mt;
-
-			return readMethodTable->Equals(*validMethodTable);
-		}
 
 		#region Zero
 

@@ -163,7 +163,7 @@ namespace RazorSharp.CLR
 		}
 
 
-		public static int TokenFromRid(int rid, CorTokenType tktype)
+		internal static int TokenFromRid(int rid, CorTokenType tktype)
 		{
 			return rid | (int) tktype;
 		}
@@ -621,7 +621,7 @@ namespace RazorSharp.CLR
 
 	/// <summary>
 	///     <remarks>
-	///         Use with <see cref="MethodTable.LowFlags" />
+	///         Use with <see cref="MethodTable.FlagsLow" />
 	///     </remarks>
 	/// </summary>
 	[Flags]

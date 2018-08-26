@@ -3,6 +3,7 @@
 using System;
 using System.Reflection;
 using RazorSharp.CLR.Structures;
+using RazorSharp.Pointers;
 using static RazorSharp.CLR.Runtime;
 
 #endregion
@@ -94,7 +95,7 @@ namespace RazorSharp.Experimental
 		// Base function
 		public static void HookFunction<TType>(string fnName, IntPtr fn)
 		{
-			var md = GetMethodDesc<TType>(fnName);
+			Pointer<MethodDesc> md = GetMethodDesc<TType>(fnName);
 
 //			AddFunction(md->MethodInfo, fn);
 			md.Reference.SetFunctionPointer(fn);

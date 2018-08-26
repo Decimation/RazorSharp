@@ -1,15 +1,21 @@
 #region
 
+#region
+
 using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp.Memory;
+using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
+
+#endregion
+
+// ReSharper disable MemberCanBeMadeStatic.Global
 
 #endregion
 
@@ -73,26 +79,31 @@ namespace RazorSharp.CLR.Structures
 
 		static MethodDesc()
 		{
-//			SignatureCall.TranspileIndependent<MethodDesc>();
+			SignatureCall.TranspileIndependent<MethodDesc>();
 		}
 
-		public IntPtr Function => Info.MethodHandle.GetFunctionPointer();
-		public string Name     => Info.Name;
+		public Type       RuntimeType => CLRFunctions.JIT_GetRuntimeType(MethodTable.ToPointer());
+		public MethodInfo Info        => (MethodInfo) RuntimeType.Module.ResolveMethod(MemberDef);
+		public IntPtr     Function    => Info.MethodHandle.GetFunctionPointer();
+		public string     Name        => Info.Name;
 
 		public bool IsCtor {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall(OffsetGuess = 0xAF920)] get => throw new NotTranspiledException();
 		}
 
-		public Type       RuntimeType => CLRFunctions.JIT_GetRuntimeType(MethodTable);
-		public MethodBase Info        => RuntimeType.Module.ResolveMethod(MemberDef);
 
+		/// <summary>
+		///     <remarks>
+		///         Equal to <see cref="Type.MetadataToken" />
+		///     </remarks>
+		/// </summary>
 		public int MemberDef {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall(OffsetGuess = 0x12810)] get => throw new NotTranspiledException();
 		}
 
 
 		public bool IsPointingToNativeCode {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall(OffsetGuess = 0x1A6CC4)] get => throw new NotTranspiledException();
 		}
 
 
@@ -208,10 +219,15 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public int SizeOf {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall(OffsetGuess = 0x390E0)] get => throw new NotTranspiledException();
 		}
 
-		[CLRSigcall]
+		public Pointer<MethodTable> MethodTable {
+			[CLRSigcall(OffsetGuess = 0xA260)] get => throw new NotTranspiledException("MethodTable");
+		}
+
+
+		[CLRSigcall(OffsetGuess = 0x424714)]
 		public void Reset()
 		{
 			throw new NotTranspiledException();
@@ -225,18 +241,13 @@ namespace RazorSharp.CLR.Structures
 		public void SetFunctionPointer(IntPtr p)
 		{
 			RazorContract.Requires<MethodDescException>(
-				!(Attributes.HasFlag(MethodAttributes.Virtual) || Attributes.HasFlag(MethodAttributes.Abstract)),
+				!Attributes.HasFlag(MethodAttributes.Virtual) && !Attributes.HasFlag(MethodAttributes.Abstract),
 				"Function is virtual/abstract");
 
 
 			m_functionPtr = p.ToPointer();
 		}
 
-
-		public MethodTable* MethodTable {
-			[CLRSigcall] get => throw new NotTranspiledException("MethodTable");
-
-		}
 
 		public TDelegate GetDelegate<TDelegate>() where TDelegate : Delegate
 		{
@@ -255,7 +266,7 @@ namespace RazorSharp.CLR.Structures
 		{
 			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Name", Name);
-			table.AddRow("MethodTable", Hex.ToHex(MethodTable));
+			table.AddRow("MethodTable", Hex.ToHex(MethodTable.Address));
 			table.AddRow("Signature", Info);
 
 			table.AddRow("Function", Hex.ToHex(Function));
