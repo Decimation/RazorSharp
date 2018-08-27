@@ -76,12 +76,12 @@ namespace Test.Testing.Tests
 			//                                  >> Domain:Value  0000020aecb433a0:NotInit  <<
 
 //			Debug.Assert(mt.Reference.Module == (void*) 0x00007fff1ba81000);
-			Debug.Assert(mt.Reference.EEClass->Attributes == 0x102101);
+			Debug.Assert(mt.Reference.EEClass.Reference.Attributes == 0x102101);
 
 			// 26 = string's base size
 			// 6 = (sizeof(char) + sizeof(int))
 			// 26 - 6 = 20
-			Debug.Assert(mt.Reference.EEClass->BaseSizePadding == 20);
+			Debug.Assert(mt.Reference.EEClass.Reference.BaseSizePadding == 20);
 			Debug.Assert(Unsafe.BaseFieldsSize<string>() == 6);
 			Debug.Assert(Unsafe.BaseInstanceSize<string>() == 26);
 
@@ -158,11 +158,11 @@ namespace Test.Testing.Tests
 
 
 //			Debug.Assert(mt.Reference.Parent == (MethodTable*) 0x00007ff819616d60);
-//			Debug.Assert(mt.Reference.EEClass->MethodTable == (MethodTable*) 0x00007ff819d105d8);
+//			Debug.Assert(mt.Reference.EEClass.Reference.MethodTable == (MethodTable*) 0x00007ff819d105d8);
 			Debug.Assert(mt.Reference.NumInstanceFields == 4);
 			Debug.Assert(mt.Reference.NumStaticFields == 1);
 
-			Debug.Assert(mt.Reference.EEClass->Attributes == 0x102001);
+			Debug.Assert(mt.Reference.EEClass.Reference.Attributes == 0x102001);
 
 //			Debug.Assert(mt.Reference.EEClass == (EEClass*) 0x00007ff8196d88e0);
 			Debug.Assert(mt.Reference.FieldDescListLength == 5);
@@ -221,8 +221,8 @@ namespace Test.Testing.Tests
 			// NumStaticFields:     0
 
 //			Debug.Assert(mt.Reference.Parent == (MethodTable*) 0x00007ff8196e4838);
-//			Debug.Assert(mt.Reference.EEClass->MethodTable == (MethodTable*) 0x00007ff819d39118);
-			Debug.Assert(mt.Reference.EEClass->Attributes == 0x2101);
+//			Debug.Assert(mt.Reference.EEClass.Reference.MethodTable == (MethodTable*) 0x00007ff819d39118);
+			Debug.Assert(mt.Reference.EEClass.Reference.Attributes == 0x2101);
 			Debug.Assert(mt.Reference.NumInstanceFields == 0);
 			Debug.Assert(mt.Reference.NumStaticFields == 0);
 		}
@@ -286,8 +286,8 @@ namespace Test.Testing.Tests
 //			Assert.That((long)mt.Reference.Parent, Is.EqualTo(0x00007ff8196e4838));
 //			Debug.Assert(mt.Reference.Module == (void*) 0x00007ff819611000);
 
-//			Debug.Assert(mt.Reference.EEClass->MethodTable == (MethodTable*)0x00007ff819d36ea8);
-			Debug.Assert(mt.Reference.EEClass->Attributes == 0x2101);
+//			Debug.Assert(mt.Reference.EEClass.Reference.MethodTable == (MethodTable*)0x00007ff819d36ea8);
+			Debug.Assert(mt.Reference.EEClass.Reference.Attributes == 0x2101);
 			Debug.Assert(mt.Reference.NumInstanceFields == 0);
 			Debug.Assert(mt.Reference.NumStaticFields == 0);
 		}
@@ -349,10 +349,10 @@ namespace Test.Testing.Tests
 			// NumStaticFields:     0
 
 			//Debug.Assert(mt.Reference.Parent == (MethodTable*) 0x00007ff819616d60);
-			//Debug.Assert(mt.Reference.EEClass->MethodTable == (MethodTable*) 0x00007ff7bdce6c18);
+			//Debug.Assert(mt.Reference.EEClass.Reference.MethodTable == (MethodTable*) 0x00007ff7bdce6c18);
 			Debug.Assert(mt.Reference.NumInstanceFields == 17);
 			Debug.Assert(mt.Reference.NumStaticFields == 0);
-			Debug.Assert(mt.Reference.EEClass->Attributes == 0x100001);
+			Debug.Assert(mt.Reference.EEClass.Reference.Attributes == 0x100001);
 		}
 
 	}

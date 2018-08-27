@@ -2,10 +2,9 @@
 
 using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorInvoke;
 using RazorInvoke.Libraries;
-using RazorSharp.Pointers;
 
 #endregion
 
@@ -14,65 +13,16 @@ using RazorSharp.Pointers;
 namespace RazorSharp.Memory
 {
 
+	/// <summary>
+	///     Provides utilities for operating with module data segments.
+	/// </summary>
 	public static unsafe class Segments
 	{
 
-		private const string RAZOR_NATIVE_DLL =
-			@"C:\Users\Viper\CLionProjects\RazorNative\cmake-build-debug\RazorNative.dll";
-
-		private const int SEGMENT_ARR_DEFAULT_SIZE = 10;
-		private const int IMAGE_SIZEOF_SHORT_NAME  = 8;
-
-
-		[DllImport(RAZOR_NATIVE_DLL, EntryPoint = "PrintPESectionInfo")]
-		private static extern void PrintPESectionInfo(IntPtr hModule);
-
-		[DllImport(RAZOR_NATIVE_DLL)]
-		public static extern void GetPESectionInfo(IntPtr hModule, [Out] [MarshalAs(UnmanagedType.LPArray)]
-			ImageSectionInfo[] arr);
-
-		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-		public unsafe struct ImageSectionInfo
-		{
-
-			#region Fields
-
-			private readonly int m_sectionNumber;
-
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = IMAGE_SIZEOF_SHORT_NAME)]
-			private readonly string m_sectionName;
-
-			private readonly void* m_sectionAddress;
-			private readonly int   m_sectionSize;
-
-			#endregion
-
-			#region Accessors
-
-			public int    SectionNumber  => m_sectionNumber;
-			public IntPtr SectionAddress => (IntPtr) m_sectionAddress;
-			public string SectionName    => m_sectionName;
-			public int    SectionSize    => m_sectionSize;
-
-			public IntPtr EndAddress =>
-				PointerUtils.Add(m_sectionAddress, (byte*) m_sectionSize - 1);
-
-			#endregion
-
-
-			public override string ToString()
-			{
-				ConsoleTable table = new ConsoleTable("Section #", "Name", "Address", "End Address", "Size");
-				table.AddRow(m_sectionNumber, m_sectionName, Hex.ToHex(m_sectionAddress), Hex.ToHex(EndAddress),
-					m_sectionSize);
-				return table.ToMarkDownString();
-			}
-		}
 
 		public static SegmentType GetSegment(IntPtr addr, string moduleName = null)
 		{
-			ImageSectionInfo[] sections = new ImageSectionInfo[SEGMENT_ARR_DEFAULT_SIZE];
-			GetPESectionInfo(Kernel32.GetModuleHandle(moduleName), sections);
+			ImageSectionInfo[] sections = DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
 			foreach (ImageSectionInfo s in sections) {
 				if (RazorMath.Between(addr.ToInt64(), s.SectionAddress.ToInt64(), s.EndAddress.ToInt64(), true)) {
 					return Parse(s.SectionName);
@@ -84,8 +34,7 @@ namespace RazorSharp.Memory
 
 		public static ImageSectionInfo GetSegment(string segment, string module)
 		{
-			ImageSectionInfo[] arr = new ImageSectionInfo[SEGMENT_ARR_DEFAULT_SIZE];
-			GetPESectionInfo(Kernel32.GetModuleHandle(module), arr);
+			ImageSectionInfo[] arr = DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(module));
 
 			foreach (ImageSectionInfo t in arr) {
 				if (t.SectionName == segment) {
@@ -170,7 +119,7 @@ namespace RazorSharp.Memory
 			reloc,
 
 			/// <summary>
-			///     Executable code
+			///     Executable code. Also known as the <c>code</c> segment.
 			/// </summary>
 			text,
 

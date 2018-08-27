@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using RazorCommon;
 using RazorCommon.Extensions;
-using RazorSharp.Experimental;
+using RazorSharp.CLR.Fixed;
 using RazorSharp.Pointers.Ex;
 using RazorSharp.Utilities;
 

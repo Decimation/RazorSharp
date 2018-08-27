@@ -1,6 +1,13 @@
 #region
 
+using System;
+using System.Diagnostics;
 using NUnit.Framework;
+using RazorCommon;
+using RazorSharp;
+using RazorSharp.CLR;
+using RazorSharp.CLR.Fixed;
+using RazorSharp.Experimental;
 
 #endregion
 
@@ -8,28 +15,59 @@ namespace Test.Testing.Tests
 {
 
 	[TestFixture]
-	internal class PinningTests
+	internal unsafe class PinningTests
 	{
-		/*[Test]
+		private const int PASSES = 10;
+
+		private static void ApplyPressure_PinHandle<T>(ref T t) where T : class
+		{
+			PinHandle ph       = new ObjectPinHandle(t);
+			IntPtr    origHeap = Unsafe.AddressOfHeap(ref t);
+
+//			Console.WriteLine("Original: {0}", Hex.ToHex(origHeap));
+
+			for (int i = 0; i < PASSES; i++) {
+				TestingUtil.CreateGCPressure();
+				Debug.Assert(origHeap == Unsafe.AddressOfHeap(ref t));
+			}
+
+			Debug.Assert(origHeap == Unsafe.AddressOfHeap(ref t));
+			ph.Dispose();
+		}
+
+		private static void ApplyPressure_PinHelper<T>(ref T t) where T : class
+		{
+			IntPtr origHeap = Unsafe.AddressOfHeap(ref t);
+
+//			Console.WriteLine("Original: {0}", Hex.ToHex(origHeap));
+
+			for (int i = 0; i < PASSES; i++) {
+				fixed (byte* pData = &PinHelper.GetPinningHelper(t).Data) {
+					TestingUtil.CreateGCPressure();
+					Debug.Assert(origHeap == Unsafe.AddressOfHeap(ref t));
+					Debug.Assert(pData == Unsafe.AddressOfHeap(ref t, OffsetType.Fields).ToPointer());
+				}
+			}
+
+			Debug.Assert(origHeap == Unsafe.AddressOfHeap(ref t));
+
+//			Console.WriteLine("After: {0}", Hex.ToHex(Unsafe.AddressOfHeap(ref t)));
+//			Console.WriteLine("GCs: {0}", GCHeap.GlobalHeap->GCCount);
+		}
+
+		[Test]
 		public void TestPinHandle()
 		{
 			string s = "foo";
-			PinHandle<string> p = PinHandle<string>.Pin(ref s);
+			ApplyPressure_PinHandle(ref s);
+		}
 
-			Assertion.AssertPinning(ref s);
-
-			Dummy d = new Dummy();
-			Debug.Assert(!Unsafe.IsBlittable<Dummy>());
-			PinHandle<Dummy> p2 = PinHandle<Dummy>.Pin(ref d);
-			Assertion.AssertPinning(ref d);
-			p.Unpin();
-			p2.Unpin();
-
-			Assert.That(p.IsAllocated, Is.EqualTo(false));
-			Assert.That(p.IsPinned, Is.EqualTo(false));
-			Assert.That(p2.IsAllocated, Is.EqualTo(false));
-			Assert.That(p2.IsPinned, Is.EqualTo(false));
-		}*/
+		[Test]
+		public void TestPinHelper()
+		{
+			string s = "foo";
+			ApplyPressure_PinHelper(ref s);
+		}
 
 
 	}

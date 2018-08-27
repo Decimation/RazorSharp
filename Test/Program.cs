@@ -9,10 +9,11 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using BenchmarkDotNet.Running;
-
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
+using RazorInvoke;
+using RazorInvoke.Libraries;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
@@ -21,6 +22,7 @@ using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
+using Test.Testing;
 using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
 
@@ -67,7 +69,9 @@ namespace Test
 			 *
 			 * - x64
 			 * - Windows
-			 * - CLR
+			 * - .NET CLR
+			 *
+			 * Current target: .NET 4.7.2
 			 *
 			 */
 			RazorContract.Assert(IntPtr.Size == 8);
@@ -174,72 +178,19 @@ namespace Test
 		}
 
 
-		[DllImport("kernel32.dll")]
-		public static extern void RtlZeroMemory(void* p, int cb);
-
-		interface IInterface
-		{
-			[CLRSigcall]
-			void doSomething();
-		}
-
-
-
-
 		public static void Main(string[] args)
 		{
-			// todo: implement dynamic allocation system
+			// MethodDesc::GetMethodTable
+			const long target      = 0x000000018000B260;
+			const long textSegment = 0x0000000180001000;
+			const long ofs         = 0xA260;
+			Debug.Assert(textSegment + ofs == target);
 
-//			string s = "foo";
-//			InspectorHelper.Inspect(ref s);
+			var field = Runtime.GetFieldDesc<string>("m_firstChar");
+			Console.WriteLine(field);
 
-
-
-
-
-
-
-			/*var dllfn = Runtime.GetMethodDesc(typeof(Program), "RtlZeroMemory");
-			Console.WriteLine(dllfn);
-			Console.WriteLine(Runtime.GetMethodDesc<Vec2>("GetSize"));
-			SignatureCall.Transpile<Vec2>();
-			Console.WriteLine(Runtime.GetMethodDesc<Vec2>("GetSize"));
-			Vec2 v = new Vec2();
-			Console.WriteLine(v.GetSize());*/
-
-
-			/*var fd = Runtime.GetFieldDesc<Vec2>("_x");
-			var x  = fd.Reference.GetModule();
-			Console.WriteLine(fd.Reference.RuntimeType.Module.ResolveField(fd.Reference.MemberDef));
-
-
-			Console.WriteLine(Hex.ToHex(x));
-
-
-			var mt = Runtime.MethodTableOf<Vec2>();
-			Type o =(Type) CLRFunctions.JIT_GetRuntimeType(mt);
-			Console.WriteLine(o.Name);
-			Console.WriteLine(mt->ToString());
-
-			Debug.Assert(typeof(Vec2).MetadataToken ==
-			             Constants.TokenFromRid(Runtime.MethodTableOf<Vec2>()->Token, CorTokenType.mdtTypeDef));*/
-
-
-//			var fd = Runtime.GetFieldDesc<Vec2>("_x");
-
-//			BenchmarkRunner.Run<FieldDescsBenchmarking>();
-
-
-			/*Transpile(typeof(Program), "GetGCCount_sc");
-			Console.WriteLine(GetGCCount_sc(GCHeap.Heap.ToPointer()));
-
-			Transpile<GCHeap_t>();
-			GCHeap_t* gc = (GCHeap_t*) GCHeap.Heap;
-
-			Console.WriteLine(gc->GetGCCount_sc__this());
-
-			Console.WriteLine(gc->GCCount_prop);*/
 		}
+
 
 		private static void __break()
 		{
@@ -256,11 +207,6 @@ namespace Test
 			Pointer<MethodDesc> origMd = Runtime.GetMethodDesc(tOrig, origFn);
 			Pointer<MethodDesc> newMd  = Runtime.GetMethodDesc(tNew, newFn);
 			origMd.Reference.SetFunctionPointer(newMd.Reference.Function);
-		}
-
-		private static void hk_intercept(void* __this, int i)
-		{
-			Console.WriteLine("Hook {0} | {1}", Hex.ToHex(__this), i);
 		}
 
 

@@ -5,7 +5,7 @@ using System.Reflection.Emit;
 
 #endregion
 
-namespace RazorSharp
+namespace RazorSharp.CLR.Fixed
 {
 
 	/// <summary>

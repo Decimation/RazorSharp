@@ -181,7 +181,7 @@ namespace RazorSharp.CLR.Structures
 		private PackedDWORDFields* PackedFields =>
 			(PackedDWORDFields*) PointerUtils.Add(Unsafe.AddressOf(ref this), m_cbFixedEEClassFields);
 
-		private EEClass* ParentClass => m_pMethodTable->Parent->EEClass;
+		private Pointer<EEClass> ParentClass => m_pMethodTable->Parent.Reference.EEClass;
 
 		/// <summary>
 		///     Abstracted to MethodTable
@@ -191,12 +191,12 @@ namespace RazorSharp.CLR.Structures
 			//get { return (NumInstanceFields - ParentClass->NumInstanceFields + NumStaticFields); }
 
 			get {
-				EEClass*     pClass     = m_pMethodTable->EEClass;
-				int          fieldCount = pClass->NumInstanceFields + pClass->NumStaticFields;
-				MethodTable* pParentMT  = m_pMethodTable->Parent;
+				Pointer<EEClass>     pClass     = m_pMethodTable->EEClass;
+				int                  fieldCount = pClass.Reference.NumInstanceFields + pClass.Reference.NumStaticFields;
+				Pointer<MethodTable> pParentMT  = m_pMethodTable->Parent;
 
-				if (pParentMT != null) {
-					fieldCount -= pParentMT->EEClass->NumInstanceFields;
+				if (!pParentMT.IsNull) {
+					fieldCount -= pParentMT.Reference.EEClass.Reference.NumInstanceFields;
 				}
 
 				return fieldCount;

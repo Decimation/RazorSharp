@@ -5,12 +5,12 @@ using System.Threading;
 
 #endregion
 
-namespace RazorSharp.Experimental
+namespace RazorSharp.CLR.Fixed
 {
 
 	/// <inheritdoc />
 	/// <summary>
-	///     An object that pins a reference (so it doesn't change its address).
+	///     An object that pins a reference (so it doesn't change its address), at the cost of the overhead of a thread.
 	///     <remarks>
 	///         <para>Source: https://github.com/IllidanS4/SharpUtils/blob/master/Unsafe/Experimental/PinHandle.cs </para>
 	///     </remarks>

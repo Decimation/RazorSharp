@@ -1,5 +1,7 @@
 #region
 
+#region
+
 using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
@@ -7,6 +9,10 @@ using System.Runtime.InteropServices;
 using RazorInvoke.Libraries;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+
+#endregion
+
+// ReSharper disable ConvertToAutoProperty
 
 #endregion
 
@@ -169,17 +175,34 @@ namespace RazorSharp.Memory
 
 		public static bool IsOnStack(void* v)
 		{
-			(IntPtr low, IntPtr high) bounds = Kernel32.GetCurrentThreadStackLimits();
-			return RazorMath.Between(((IntPtr) v).ToInt64(), bounds.low.ToInt64(), bounds.high.ToInt64(), true);
+//			(IntPtr low, IntPtr high) bounds = Kernel32.GetCurrentThreadStackLimits();
+//			return RazorMath.Between(((IntPtr) v).ToInt64(), bounds.low.ToInt64(), bounds.high.ToInt64(), true);
+
+			// https://github.com/dotnet/coreclr/blob/c82bd22d4bab4369c0989a1c2ca2758d29a0da36/src/vm/threads.h
+			// 3620
+			long i = (long) v;
+			return StackLimit.ToInt64() < i && i <= StackBase.ToInt64();
 		}
 
+
+		public static IntPtr StackBase  => Kernel32.GetCurrentThreadStackLimits().high;
+		public static IntPtr StackLimit => Kernel32.GetCurrentThreadStackLimits().low;
+
 		/// <summary>
-		///     <para>Allocates a value type in zeroed, unmanaged memory.</para>
+		///     Should equal <c>4 MB</c> for 64-bit and <c>1 MB</c> for 32-bit
+		/// </summary>
+		public static long StackSize => StackBase.ToInt64() - StackLimit.ToInt64();
+
+
+		/// <summary>
+		///     <para>Allocates a value type in zeroed, unmanaged memory using <see cref="Marshal.AllocHGlobal(int)" />.</para>
 		///     <para>
 		///         If <typeparamref name="T" /> is a reference type, a managed pointer of type <typeparamref name="T" /> will be
 		///         created in unmanaged memory.
 		///     </para>
-		///     <para>Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /></para>
+		///     <para>
+		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free" />
+		///     </para>
 		/// </summary>
 		/// <typeparam name="T">Value type to allocate</typeparam>
 		/// <returns>A pointer to the allocated memory</returns>
@@ -191,6 +214,19 @@ namespace RazorSharp.Memory
 			Zero(alloc, size);
 
 			return alloc;
+		}
+
+		/// <summary>
+		///     <para>Frees memory allocated from <see cref="AllocUnmanaged{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>
+		///     <para>The memory is zeroed before it is freed.</para>
+		/// </summary>
+		/// <param name="p">Pointer to allocated memory</param>
+		public static void Free(IntPtr p)
+		{
+			// AllocHGlobal is a wrapper of LocalAlloc
+			uint size = Kernel32.LocalSize(p.ToPointer());
+			Zero(p, (int) size);
+			Marshal.FreeHGlobal(p);
 		}
 
 		/*public static bool IsAligned<T>(int byteAlignment)

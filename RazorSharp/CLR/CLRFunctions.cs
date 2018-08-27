@@ -48,7 +48,7 @@ namespace RazorSharp.CLR
 
 			AddAll();
 
-			SignatureCall.TranspileIndependent(typeof(CLRFunctions));
+			SignatureCall.Transpile(typeof(CLRFunctions));
 		}
 
 		public static void AddFunction(MethodInfo mi, byte[] rgBytes)

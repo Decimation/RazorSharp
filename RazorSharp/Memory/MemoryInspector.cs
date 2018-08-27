@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using RazorCommon;
 using RazorCommon.Extensions;
+using RazorSharp.CLR.Fixed;
 using RazorSharp.Pointers;
 
 #endregion

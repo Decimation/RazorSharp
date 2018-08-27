@@ -47,6 +47,8 @@ namespace RazorSharp.CLR
 		/// </summary>
 		public static readonly int OffsetToArrayData = IntPtr.Size * 2;
 
+		private const BindingFlags DefaultFlags =
+			BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
 
 		static Runtime() { }
 
@@ -155,9 +157,6 @@ namespace RazorSharp.CLR
 		#endregion
 
 
-		private const BindingFlags DefaultFlags =
-			BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
-
 		#region FieldDesc
 
 		/// <summary>
@@ -246,6 +245,35 @@ namespace RazorSharp.CLR
 			return arr;
 		}
 
+		public static Pointer<MethodDesc> GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
+		{
+			MethodInfo methodInfo = t.GetMethod(name, flags);
+			RazorContract.RequiresNotNull(methodInfo);
+			RuntimeMethodHandle methodHandle = methodInfo.MethodHandle;
+			MethodDesc*         md           = (MethodDesc*) methodHandle.Value;
+
+			RazorContract.Assert(md->Info.MetadataToken == methodInfo.MetadataToken);
+
+			// todo
+//			RazorContract.Assert(md->Info == methodInfo);
+			return md;
+		}
+
+		public static Pointer<MethodDesc> GetMethodDesc<T>(string name, BindingFlags flags = DefaultFlags)
+		{
+			return GetMethodDesc(typeof(T), name, flags);
+		}
+
+		#endregion
+
+		#region Sigcall functions
+
+		/// <summary>
+		///     Same operation as <see cref="MethodDesc.SetFunctionPointer" /> without using a <see cref="MethodDesc" />
+		/// </summary>
+		/// <param name="info">Target method</param>
+		/// <param name="fn">Pointer to new code</param>
+		/// <exception cref="RuntimeException">If the function is <c>virtual</c> or <c>abstract</c></exception>
 		internal static void SetFunctionPointer(MethodInfo info, IntPtr fn)
 		{
 			RazorContract.Requires(!info.IsVirtual && !info.IsAbstract);
@@ -283,33 +311,15 @@ namespace RazorSharp.CLR
 		}
 
 
-		internal static MethodInfo[] GetMethods<T>(BindingFlags flags = DefaultFlags)
+		internal static MethodInfo GetMethod(Type t, string name, BindingFlags flags = DefaultFlags)
 		{
-			return GetMethods(typeof(T), flags);
+			return t.GetMethod(name, flags);
 		}
+
 
 		internal static MethodInfo[] GetMethods(Type t, BindingFlags flags = DefaultFlags)
 		{
 			return t.GetMethods(flags);
-		}
-
-		public static Pointer<MethodDesc> GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
-		{
-			MethodInfo methodInfo = t.GetMethod(name, flags);
-			RazorContract.RequiresNotNull(methodInfo);
-			RuntimeMethodHandle methodHandle = methodInfo.MethodHandle;
-			MethodDesc*         md           = (MethodDesc*) methodHandle.Value;
-
-			RazorContract.Assert(md->Info.MetadataToken == methodInfo.MetadataToken);
-
-			// todo
-//			RazorContract.Assert(md->Info == methodInfo);
-			return md;
-		}
-
-		public static Pointer<MethodDesc> GetMethodDesc<T>(string name, BindingFlags flags = DefaultFlags)
-		{
-			return GetMethodDesc(typeof(T), name, flags);
 		}
 
 		#endregion
@@ -350,6 +360,8 @@ namespace RazorSharp.CLR
 			return MethodTableOf<T>().Reference.IsBlittable;
 		}
 
+		#region Properties
+
 		/// <summary>
 		///     Gets the internal name of an auto-property's backing field.
 		///     <example>If the auto-property's name is X, the backing field name is &lt;X&gt;k__BackingField.</example>
@@ -367,6 +379,10 @@ namespace RazorSharp.CLR
 			const string getPrefix = "get_";
 			return getPrefix + propname;
 		}
+
+		#endregion
+
+
 	}
 
 }

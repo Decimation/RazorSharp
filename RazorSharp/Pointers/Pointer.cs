@@ -2,11 +2,12 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using RazorCommon;
 using RazorCommon.Extensions;
-using RazorSharp.Experimental;
+using RazorSharp.CLR.Fixed;
 using RazorSharp.Pointers.Ex;
 using RazorSharp.Utilities;
 
@@ -119,20 +120,26 @@ namespace RazorSharp.Pointers
 
 		public ConsoleTable ToTable(int elemCnt)
 		{
-			ConsoleTable table;
-
-			if (typeof(T).IsValueType) {
-				table = new ConsoleTable("Address", "Offset", "Value");
-			}
-			else {
-				table = new ConsoleTable("Address", "Offset", "Pointer", "Value");
-			}
+			ConsoleTable table = typeof(T).IsValueType
+				? new ConsoleTable("Address", "Offset", "Value")
+				: new ConsoleTable("Address", "Offset", "Pointer", "Value");
 
 			for (int i = 0; i < elemCnt; i++) {
 				table.AddRow(Hex.ToHex(Offset(i)), i, Hex.ToHex(Read<long>(i)), this[i]);
 			}
 
 			return table;
+		}
+
+		public void Init(IEnumerable<T> enumerable)
+		{
+			int            i          = 0;
+			IEnumerator<T> enumerator = enumerable.GetEnumerator();
+			while (enumerator.MoveNext()) {
+				this[i++] = enumerator.Current;
+			}
+
+			enumerator.Dispose();
 		}
 
 		public void Init(params T[] values)
@@ -367,6 +374,11 @@ namespace RazorSharp.Pointers
 				case "O":
 					if (typeof(T).IsIListType()) {
 						return Collections.ListToString((IList) Reference);
+					}
+
+					/* C-string */
+					if (typeof(T) == typeof(char)) {
+						return new string((char*) ToPointer());
 					}
 
 					return Reference.ToString();

@@ -370,7 +370,7 @@ namespace RazorSharp.Analysis
 
 			if (inspector.Internal.Canon != inspector.Internal.MethodTable) {
 				Console.WriteLine(ANSI.BoldString(CanonMTStr + colon));
-				Console.WriteLine(inspector.Internal.MethodTable.Reference.Canon->ToString());
+				Console.WriteLine(inspector.Internal.MethodTable.Reference.Canon);
 			}
 
 			if (inspector.Internal.EEClass.Reference.HasLayout) {

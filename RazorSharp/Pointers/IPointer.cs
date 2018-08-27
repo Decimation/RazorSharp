@@ -83,7 +83,6 @@ namespace RazorSharp.Pointers
 
 		Pointer<TNew> Reinterpret<TNew>();
 
-
 	}
 
 }

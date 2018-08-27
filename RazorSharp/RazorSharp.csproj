@@ -44,6 +44,7 @@
           <HintPath>..\packages\JetBrains.Annotations.2018.2.1\lib\net20\JetBrains.Annotations.dll</HintPath>
           <Private>True</Private>
       </Reference>
+      <Reference Include="Microsoft.CSharp"/>
     <Reference Include="Microsoft.DotNet.PlatformAbstractions, Version=2.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
       <HintPath>..\packages\Microsoft.DotNet.PlatformAbstractions.2.1.0\lib\net45\Microsoft.DotNet.PlatformAbstractions.dll</HintPath>
       <Private>True</Private>
@@ -114,12 +115,12 @@
     <Compile Include="Analysis\Inspector.cs" />
     <Compile Include="Analysis\ObjectLayout.cs" />
     <Compile Include="Analysis\RefInspector.cs" />
+      <Compile Include="CLR\Fixed\ObjectPinHandle.cs"/>
+      <Compile Include="CLR\Fixed\ObjectPinner.cs"/>
+      <Compile Include="CLR\Fixed\PinHandle.cs"/>
+      <Compile Include="CLR\Fixed\PinHelper.cs"/>
       <Compile Include="CLR\GCHeap.cs"/>
       <Compile Include="Experimental\FunctionHooker.cs"/>
-      <Compile Include="Experimental\ObjectPinHandle.cs"/>
-    <Compile Include="Experimental\PinHandle.cs" />
-      <Compile Include="Experimental\PinHandleOld.cs"/>
-    <Compile Include="Experimental\SmartScanner.cs" />
     <Compile Include="Experimental\StackAllocated.cs" />
     <Compile Include="Experimental\UnmanagedAllocated.cs" />
     <Compile Include="Memory\Asm.cs" />
@@ -129,14 +130,12 @@
     <Compile Include="Memory\SigScanner.cs" />
       <Compile Include="Memory\SignatureCall.cs"/>
     <Compile Include="Misc.cs" />
-    <Compile Include="ObjectPinner.cs" />
       <Compile Include="Pointers\Ex\AllocExPointer.cs"/>
       <Compile Include="Pointers\Ex\DecayExPointer.cs"/>
       <Compile Include="Pointers\Ex\ExPointer.cs"/>
     <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
     <Compile Include="Pointers\PointerUtils.cs" />
-      <Compile Include="Pointers\ProtectedPointer.cs"/>
       <Compile Include="Pointers\ReadOnlyPointer.cs"/>
     <Compile Include="RazorMath.cs" />
       <Compile Include="CLR\CLRFunctions.cs"/>

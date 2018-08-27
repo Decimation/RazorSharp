@@ -79,7 +79,7 @@ namespace RazorSharp.CLR.Structures
 
 		static MethodDesc()
 		{
-			SignatureCall.TranspileIndependent<MethodDesc>();
+			SignatureCall.Transpile<MethodDesc>();
 		}
 
 		public Type       RuntimeType => CLRFunctions.JIT_GetRuntimeType(MethodTable.ToPointer());
@@ -267,6 +267,7 @@ namespace RazorSharp.CLR.Structures
 			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Name", Name);
 			table.AddRow("MethodTable", Hex.ToHex(MethodTable.Address));
+			table.AddRow("Enclosing type", RuntimeType.Name);
 			table.AddRow("Signature", Info);
 
 			table.AddRow("Function", Hex.ToHex(Function));

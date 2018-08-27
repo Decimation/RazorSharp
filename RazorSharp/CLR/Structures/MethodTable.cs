@@ -69,7 +69,7 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
-		private WORD LowFlagsValue => m_dwFlags.Flags;
+		private WORD FlagsLowValue => m_dwFlags.Flags;
 		private WORD Flags2Value   => m_wFlags2;
 
 		public MethodTableFlags Flags => (MethodTableFlags) FlagsValue;
@@ -78,7 +78,7 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     Note: these may not be accurate
 		/// </summary>
-		public MethodTableFlagsLow FlagsLow => (MethodTableFlagsLow) LowFlagsValue;
+		public MethodTableFlagsLow FlagsLow => (MethodTableFlagsLow) FlagsLowValue;
 
 
 		public MethodTableFlags2 Flags2 => (MethodTableFlags2) Flags2Value;
@@ -123,7 +123,7 @@ namespace RazorSharp.CLR.Structures
 		///     The parent type's <see cref="MethodTable" />.
 		/// </summary>
 		/// <exception cref="NotImplementedException">If the type is an indirect parent</exception>
-		public MethodTable* Parent {
+		public Pointer<MethodTable> Parent {
 			// On Linux ARM is a RelativeFixupPointer. Otherwise,
 			// Parent PTR_MethodTable if enum_flag_HasIndirectParent is not set. Pointer to indirection cell
 			// if enum_flag_HasIndirectParent is set. The indirection is offset by offsetof(MethodTable, m_pParentMethodTable).
@@ -153,13 +153,13 @@ namespace RazorSharp.CLR.Structures
 		///     If the union type is not <see cref="LowBits.EEClass" /> or
 		///     <see cref="LowBits.MethodTable" />
 		/// </exception>
-		public EEClass* EEClass {
+		public Pointer<EEClass> EEClass {
 			get {
 				switch (UnionType) {
 					case LowBits.EEClass:
 						return m_pEEClass;
 					case LowBits.MethodTable:
-						return Canon->EEClass;
+						return Canon.Reference.EEClass;
 					default:
 						throw new NotImplementedException("EEClass union type is not implemented");
 				}
@@ -179,7 +179,7 @@ namespace RazorSharp.CLR.Structures
 		///         <see cref="LowBits.EEClass" />
 		///     </exception>
 		/// </summary>
-		public MethodTable* Canon {
+		public Pointer<MethodTable> Canon {
 			get {
 				switch (UnionType) {
 					case LowBits.MethodTable:
@@ -200,7 +200,7 @@ namespace RazorSharp.CLR.Structures
 		///     Element type handle of an individual element if this is the <see cref="MethodTable" /> of an array.
 		/// </summary>
 		/// <exception cref="RuntimeException">If this is not an array <see cref="MethodTable" />.</exception>
-		public MethodTable* ElementTypeHandle {
+		public Pointer<MethodTable> ElementTypeHandle {
 			get {
 				if (IsArray) {
 					return (MethodTable*) m_ElementTypeHnd;
@@ -213,45 +213,45 @@ namespace RazorSharp.CLR.Structures
 		public bool HasComponentSize => Flags.HasFlag(MethodTableFlags.HasComponentSize);
 		public bool IsArray          => Flags.HasFlag(MethodTableFlags.Array);
 		public bool IsStringOrArray  => HasComponentSize;
-		public bool IsBlittable      => EEClass->IsBlittable;
+		public bool IsBlittable      => EEClass.Reference.IsBlittable;
 		public bool IsString         => HasComponentSize && !IsArray;
 		public Type RuntimeType      => CLRFunctions.JIT_GetRuntimeType(Unsafe.AddressOf(ref this).ToPointer());
 
 		/// <summary>
 		///     The number of instance fields in this type.
 		/// </summary>
-		public int NumInstanceFields => EEClass->NumInstanceFields;
+		public int NumInstanceFields => EEClass.Reference.NumInstanceFields;
 
 		/// <summary>
 		///     The number of <c>static</c> fields in this type.
 		/// </summary>
-		public int NumStaticFields => EEClass->NumStaticFields;
+		public int NumStaticFields => EEClass.Reference.NumStaticFields;
 
-		public int NumNonVirtualSlots => EEClass->NumNonVirtualSlots;
+		public int NumNonVirtualSlots => EEClass.Reference.NumNonVirtualSlots;
 
 		/// <summary>
 		///     Number of methods in this type.
 		/// </summary>
-		public int NumMethods => EEClass->NumMethods;
+		public int NumMethods => EEClass.Reference.NumMethods;
 
 		/// <summary>
 		///     The size of the instance fields in this type. This is the unboxed size of the type if the object is boxed.
 		///     (Minus padding and overhead of the base size.)
 		/// </summary>
-		public int NumInstanceFieldBytes => (int) BaseSize - EEClass->BaseSizePadding;
+		public int NumInstanceFieldBytes => (int) BaseSize - EEClass.Reference.BaseSizePadding;
 
 		/// <summary>
 		///     Array of <see cref="FieldDesc" />s for this type.
 		/// </summary>
-		public FieldDesc* FieldDescList => EEClass->FieldDescList;
+		public FieldDesc* FieldDescList => EEClass.Reference.FieldDescList;
 
 		/// <summary>
 		///     Length of the <see cref="FieldDescList" />
 		/// </summary>
-		public int FieldDescListLength => EEClass->FieldDescListLength;
+		public int FieldDescListLength => EEClass.Reference.FieldDescListLength;
 
 		// todo
-		public MethodDescChunk* MethodDescChunkList => EEClass->MethodDescChunkList;
+		public MethodDescChunk* MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
 
 		#endregion
 
@@ -300,7 +300,7 @@ namespace RazorSharp.CLR.Structures
 
 			table.AddRow("Flags", $"{FlagsValue} ({Flags.Join()})");
 			table.AddRow("Flags 2", $"{Flags2Value} ({Flags2.Join()})");
-			table.AddRow("Low flags", $"{LowFlagsValue} ({FlagsLow})");
+			table.AddRow("Low flags", $"{FlagsLowValue} ({FlagsLow})");
 			table.AddRow("Token", m_wToken);
 
 			if (m_pParentMethodTable != null) {
@@ -312,8 +312,8 @@ namespace RazorSharp.CLR.Structures
 			//table.AddRow("m_pWriteableData", Hex.ToHex(m_pWriteableData));
 
 			table.AddRow("Union type", UnionType);
-			table.AddRow("EEClass", Hex.ToHex(EEClass));
-			table.AddRow("Canon MT", Hex.ToHex(Canon));
+			table.AddRow("EEClass", Hex.ToHex(EEClass.Address));
+			table.AddRow("Canon MT", Hex.ToHex(Canon.Address));
 
 			if (IsArray) {
 				table.AddRow("Element type handle", Hex.ToHex(m_ElementTypeHnd));
@@ -340,7 +340,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Number interfaces", m_wNumInterfaces);
 
 			// EEClass field
-			table.AddRow("Blittable", EEClass->IsBlittable ? StringUtils.Check : StringUtils.BallotX);
+			table.AddRow("Blittable", EEClass.Reference.IsBlittable ? StringUtils.Check : StringUtils.BallotX);
 
 
 //			table.RemoveFromRows(0, "0x0", (ushort) 0, (uint) 0);

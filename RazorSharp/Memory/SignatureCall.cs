@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using RazorSharp.CLR;
-using RazorSharp.CLR.Structures;
-using RazorSharp.Pointers;
 
 #endregion
 
@@ -23,8 +21,10 @@ namespace RazorSharp.Memory
 	/// <inheritdoc />
 	/// <summary>
 	///     Indicates that the attributed function is exposed via signature scanning (using
-	///     <see cref="T:RazorSharp.Memory.SigScanner" />
-	///     internally).
+	///     <see cref="T:RazorSharp.Memory.SigScanner" /> internally).
+	///     <remarks>
+	///         <c>virtual</c> and <c>abstract</c> functions cannot be annotated.
+	///     </remarks>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method)]
 	public class SigcallAttribute : Attribute
@@ -44,16 +44,15 @@ namespace RazorSharp.Memory
 		internal bool IsInFunctionMap = false;
 
 		/// <summary>
-		///     Relative to <see cref="SigScanner.BaseAddress" />
+		///     Relative to the module's <see cref="SigScanner.BaseAddress" />
 		/// </summary>
 		public long OffsetGuess = 0x0;
 
 
 		public SigcallAttribute(string module, string signature)
 		{
-			Module    = module;
-			Signature = signature;
-
+			Module          = module;
+			Signature       = signature;
 			IsInFunctionMap = false;
 		}
 
@@ -66,20 +65,9 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public class CLRSigcallAttribute : SigcallAttribute
 	{
-
-
-		/// <summary>
-		///     <para>Assumes:</para>
-		///     <para><see cref="SigcallAttribute.Module" /> is <see cref="CLRFunctions.ClrDll" /></para>
-		///     <para>
-		///         <see cref="SigcallAttribute.Signature" /> is in <see cref="CLRFunctions.FunctionMap" /> as a
-		///         <see cref="T:byte[]" /> and <see cref="SigcallAttribute.FunctionName" /> is the name of the annotated
-		///         function
-		///     </para>
-		/// </summary>
 		public CLRSigcallAttribute() : base(CLRFunctions.ClrDll, null)
 		{
-			base.IsInFunctionMap = true;
+			IsInFunctionMap = true;
 		}
 
 		public CLRSigcallAttribute(string signature) : base(CLRFunctions.ClrDll, signature) { }
@@ -105,6 +93,7 @@ namespace RazorSharp.Memory
 		private const           string     TEXT_SEGMENT = ".text";
 		public static           bool       UseTextSegment { get; set; } = true;
 
+
 		public static bool IsTranspiled<T>()
 		{
 			return IsTranspiled(typeof(T));
@@ -118,22 +107,6 @@ namespace RazorSharp.Memory
 
 		#region Independent
 
-		internal static void TranspileIndependent(Type t)
-		{
-			MethodInfo[] methodInfos = Runtime.GetMethods(t);
-
-			foreach (MethodInfo methodInfo in methodInfos) {
-				ApplySigcallIndependent(methodInfo);
-			}
-
-			TranspiledTypes.Add(t);
-		}
-
-		internal static void TranspileIndependent<T>()
-		{
-			TranspileIndependent(typeof(T));
-		}
-
 		private static void SelectModule(SigcallAttribute attr)
 		{
 			if (UseTextSegment) {
@@ -146,13 +119,9 @@ namespace RazorSharp.Memory
 
 		private static IntPtr GetCorrespondingFunctionPointer(SigcallAttribute attr, MethodInfo methodInfo)
 		{
-			IntPtr fn;
-			if (attr.IsInFunctionMap) {
-				fn = SigScanner.FindPattern(CLRFunctions.FunctionInfoMap[methodInfo], attr.OffsetGuess);
-			}
-			else {
-				fn = SigScanner.FindPattern(attr.Signature, attr.OffsetGuess);
-			}
+			IntPtr fn = attr.IsInFunctionMap
+				? SigScanner.FindPattern(CLRFunctions.FunctionInfoMap[methodInfo], attr.OffsetGuess)
+				: SigScanner.FindPattern(attr.Signature, attr.OffsetGuess);
 
 			return fn;
 		}
@@ -168,7 +137,11 @@ namespace RazorSharp.Memory
 
 				Runtime.SetFunctionPointer(methodInfo, fn);
 
-//				Console.WriteLine("{0} -> {1} | {2}", methodInfo.Name, Hex.ToHex(fn), Hex.ToHex(PointerUtils.Subtract(fn, SigScanner.BaseAddress)));
+#if DEBUG
+
+//				Console.WriteLine("{0} | {1} | {2}", methodInfo.Name, Hex.ToHex(fn),
+//					Hex.ToHex(PointerUtils.Subtract(fn, SigScanner.BaseAddress)));
+#endif
 			}
 		}
 
@@ -176,20 +149,6 @@ namespace RazorSharp.Memory
 
 
 		#region Normal
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static void ApplySigcall(Pointer<MethodDesc> md)
-		{
-			SigcallAttribute attr = md.Reference.Info.GetCustomAttribute<SigcallAttribute>();
-			if (attr != null) {
-				SelectModule(attr);
-
-				IntPtr fn = GetCorrespondingFunctionPointer(attr, md.Reference.Info);
-				md.Reference.SetFunctionPointer(fn);
-
-//				Console.WriteLine("{0} -> {1} | {2}", md.Reference.Name, Hex.ToHex(fn), Hex.ToHex(PointerUtils.Subtract(fn, SigScanner.BaseAddress)));
-			}
-		}
 
 		/// <summary>
 		///     Binds all functions in type <typeparamref name="T" /> attributed with <see cref="SigcallAttribute" />
@@ -207,10 +166,10 @@ namespace RazorSharp.Memory
 		/// <param name="t">Type containing unbound <see cref="SigcallAttribute" /> functions </param>
 		public static void Transpile(Type t)
 		{
-			Pointer<MethodDesc>[] mds = Runtime.GetMethodDescs(t);
+			MethodInfo[] methodInfos = Runtime.GetMethods(t);
 
-			foreach (Pointer<MethodDesc> md in mds) {
-				ApplySigcall(md);
+			foreach (MethodInfo mi in methodInfos) {
+				ApplySigcallIndependent(mi);
 			}
 
 			TranspiledTypes.Add(t);
@@ -241,8 +200,8 @@ namespace RazorSharp.Memory
 				name = Runtime.NameOfGetPropertyMethod(name);
 			}
 
-			Pointer<MethodDesc> md = Runtime.GetMethodDesc(t, name);
-			ApplySigcall(md);
+			MethodInfo mi = Runtime.GetMethod(t, name);
+			ApplySigcallIndependent(mi);
 		}
 
 		#endregion

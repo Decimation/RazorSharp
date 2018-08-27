@@ -85,9 +85,9 @@ namespace RazorSharp.CLR.Structures
 
 		/// <summary>
 		///     Field token
-		/// <remarks>
-		/// Equal to <see cref="FieldInfo.MetadataToken"/>
-		/// </remarks>
+		///     <remarks>
+		///         Equal to <see cref="FieldInfo.MetadataToken" />
+		///     </remarks>
 		/// </summary>
 		public int MemberDef {
 			[CLRSigcall(OffsetGuess = 0x33AC0)] get => throw new NotTranspiledException();
@@ -247,6 +247,7 @@ namespace RazorSharp.CLR.Structures
 
 			table.AddRow("Name", Name);
 			table.AddRow("Enclosing MethodTable", Hex.ToHex(MethodTableOfEnclosingClass.ToPointer()));
+			table.AddRow("Enclosing type", RuntimeType.Name);
 
 
 			// Unsigned 1

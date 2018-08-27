@@ -137,11 +137,6 @@ namespace RazorSharp
 
 		#region Address
 
-		public static IntPtr AddressOfFunction<T>(string fnName)
-		{
-			return Runtime.GetMethodDesc<T>(fnName).Reference.Function;
-		}
-
 		/// <summary>
 		///     Returns the address of a field in the specified type.
 		/// </summary>
@@ -215,8 +210,6 @@ namespace RazorSharp
 
 				case OffsetType.ArrayData:
 					RazorContract.RequiresType<Array, T>();
-
-
 					return AddressOfHeap(ref t) + Runtime.OffsetToArrayData;
 
 				case OffsetType.Fields:
@@ -225,13 +218,13 @@ namespace RazorSharp
 					// todo: ...and if it's a string, should this return StringData?
 
 					// Skip over the MethodTable*
-					return AddressOfHeap(ref t) + IntPtr.Size;
+					return AddressOfHeap(ref t) + sizeof(MethodTable*);
 
 				case OffsetType.None:
 					return AddressOfHeap(ref t);
 
 				case OffsetType.Header:
-					return AddressOfHeap(ref t) - IntPtr.Size;
+					return AddressOfHeap(ref t) - sizeof(ObjHeader);
 				default:
 					throw new ArgumentOutOfRangeException(nameof(offset), offset, null);
 			}
@@ -243,11 +236,7 @@ namespace RazorSharp
 
 		public static int AutoSizeOf<T>(ref T t)
 		{
-			if (typeof(T).IsValueType) {
-				return SizeOf<T>();
-			}
-
-			return HeapSizeInternal(ref t);
+			return typeof(T).IsValueType ? SizeOf<T>() : HeapSizeInternal(ref t);
 		}
 
 		/// <summary>
@@ -265,9 +254,9 @@ namespace RazorSharp
 			}
 
 			Pointer<MethodTable> mt = Runtime.MethodTableOf<T>();
-			EEClass*             ee = mt.Reference.EEClass;
-			if (ee->HasLayout) {
-				return (int) ee->LayoutInfo->ManagedSize;
+			Pointer<EEClass>     ee = mt.Reference.EEClass;
+			if (ee.Reference.HasLayout) {
+				return (int) ee.Reference.LayoutInfo->ManagedSize;
 			}
 
 			return InvalidValue;
@@ -284,13 +273,13 @@ namespace RazorSharp
 		/// <returns>The native size if the type has a native representation; -<c>-1</c> otherwise</returns>
 		public static int NativeSizeOf<T>()
 		{
-			// 0
+			// == 0
 			if (typeof(T).IsArray) {
 				return InvalidValue;
 			}
 
 			Pointer<MethodTable> mt        = Runtime.MethodTableOf<T>();
-			int                  native    = mt.Reference.EEClass->NativeSize;
+			int                  native    = mt.Reference.EEClass.Reference.NativeSize;
 			int                  nativeOut = native == 0 ? InvalidValue : native;
 			return nativeOut;
 		}

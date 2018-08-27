@@ -2,6 +2,7 @@
 
 using System;
 using System.Reflection;
+using RazorSharp.CLR.Fixed;
 using RazorSharp.Pointers;
 
 #endregion

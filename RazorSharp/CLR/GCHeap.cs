@@ -15,7 +15,6 @@ namespace RazorSharp.CLR
 {
 
 
-
 	/// <summary>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">

@@ -7,6 +7,8 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using RazorCommon;
+using RazorInvoke;
 using RazorInvoke.Libraries;
 using RazorSharp.Pointers;
 
@@ -16,7 +18,7 @@ namespace RazorSharp.Memory
 {
 
 	/// <summary>
-	///     Edited by Decimation (not original)
+	///     Edited by Decimation (not entirely original)
 	/// </summary>
 	public class SigScanner
 	{
@@ -28,6 +30,8 @@ namespace RazorSharp.Memory
 
 		public IntPtr BaseAddress => m_lpModuleBase;
 
+		#region Constructors
+
 		public SigScanner() : this(Process.GetCurrentProcess()) { }
 
 		public SigScanner(Process proc) : this(proc.Handle) { }
@@ -38,6 +42,10 @@ namespace RazorSharp.Memory
 			m_dictStringPatterns = new Dictionary<string, string>();
 		}
 
+		#endregion
+
+		#region Module
+
 		public void SelectModuleBySegment(string moduleName, string segmentName)
 		{
 			// Module already selected
@@ -45,7 +53,7 @@ namespace RazorSharp.Memory
 				return;
 			}
 
-			Segments.ImageSectionInfo segment = Segments.GetSegment(segmentName, moduleName);
+			ImageSectionInfo segment = Segments.GetSegment(segmentName, moduleName);
 
 			m_rgModuleBuffer = new byte[segment.SectionSize];
 			m_lpModuleBase   = segment.SectionAddress;
@@ -72,6 +80,24 @@ namespace RazorSharp.Memory
 			return Kernel32.ReadProcessMemory(m_hProcess, m_lpModuleBase, m_rgModuleBuffer,
 				(uint) targetModule.ModuleMemorySize, ref lpNumberOfBytesRead);
 		}
+
+		public void SelectModule(string name)
+		{
+			// Module already selected
+			if (name == m_moduleName) {
+				return;
+			}
+
+			foreach (ProcessModule m in Process.GetCurrentProcess().Modules) {
+				if (m.ModuleName == name) {
+					SelectModule(m);
+					return;
+				}
+			}
+		}
+
+		#endregion
+
 
 		public void AddPattern(string szPatternName, string szPattern)
 		{
@@ -118,7 +144,7 @@ namespace RazorSharp.Memory
 					return PointerUtils.Add(m_lpModuleBase, ofsGuess);
 				}
 				else {
-//					Logger.Log("Offset guess of {0} failed", Hex.ToHex(ofsGuess));
+					Logger.Log("Offset guess of {0} failed", Hex.ToHex(ofsGuess));
 				}
 			}
 
@@ -180,20 +206,6 @@ namespace RazorSharp.Memory
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
 		}
 
-		public void SelectModule(string name)
-		{
-			// Module already selected
-			if (name == m_moduleName) {
-				return;
-			}
-
-			foreach (ProcessModule m in Process.GetCurrentProcess().Modules) {
-				if (m.ModuleName == name) {
-					SelectModule(m);
-					return;
-				}
-			}
-		}
 
 		public Dictionary<string, IntPtr> FindPatterns(out long lTime)
 		{

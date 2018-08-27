@@ -44,8 +44,8 @@ namespace Test.Testing.Benchmarking
 		public void Setup()
 		{
 			CLRFunctions.AddAll();
-			SignatureCall.TranspileIndependent(typeof(CLRFunctions));
-			SignatureCall.TranspileIndependent<MethodDesc>();
+			SignatureCall.Transpile(typeof(CLRFunctions));
+			SignatureCall.Transpile<MethodDesc>();
 			SignatureCall.Transpile<FieldDesc>();
 			SignatureCall.Transpile<GCHeap>();
 

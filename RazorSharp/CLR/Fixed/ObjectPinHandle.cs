@@ -4,7 +4,7 @@ using System.Threading;
 
 #endregion
 
-namespace RazorSharp.Experimental
+namespace RazorSharp.CLR.Fixed
 {
 
 	/// <inheritdoc />
