@@ -4,8 +4,11 @@
 
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using RazorCommon;
+using RazorInvoke;
 using RazorInvoke.Libraries;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -119,6 +122,25 @@ namespace RazorSharp.Memory
 
 		#endregion
 
+		public static void ForceWrite<T>(IntPtr p, int byteOffset, T t)
+		{
+			var hProc = Kernel32.OpenProcess(Process.GetCurrentProcess(), Enumerations.ProcessAccessFlags.All);
+
+			int lpNumberOfBytesWritten = 0;
+			int size = Unsafe.SizeOf<T>();
+			IntPtr targetPtr = PointerUtils.Add(p, byteOffset);
+
+//			bool a = Kernel32.VirtualProtect(targetPtr, (IntPtr) size, Enumerations.MemoryProtection.ExecuteReadWrite, out _);
+//			RazorContract.Assert(a);
+
+			bool b = Kernel32.WriteProcessMemory(hProc, targetPtr,
+				Unsafe.AddressOf(ref t), size, ref lpNumberOfBytesWritten);
+
+			RazorContract.Assert(b);
+			RazorContract.Assert(lpNumberOfBytesWritten == size);
+
+			Kernel32.CloseHandle(hProc);
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Write<T>(IntPtr p, int byteOffset, T t)
@@ -185,7 +207,14 @@ namespace RazorSharp.Memory
 		}
 
 
-		public static IntPtr StackBase  => Kernel32.GetCurrentThreadStackLimits().high;
+		/// <summary>
+		///     Stack Base / Bottom of stack (high address)
+		/// </summary>
+		public static IntPtr StackBase => Kernel32.GetCurrentThreadStackLimits().high;
+
+		/// <summary>
+		///     Stack Limit / Ceiling of stack (low address)
+		/// </summary>
 		public static IntPtr StackLimit => Kernel32.GetCurrentThreadStackLimits().low;
 
 		/// <summary>

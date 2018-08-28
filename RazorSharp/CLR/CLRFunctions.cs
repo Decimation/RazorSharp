@@ -137,7 +137,7 @@ namespace RazorSharp.CLR
 				AddFunction<FieldDesc>("GetModule", Functions[0]);
 				AddFunction<FieldDesc>("get_LoadSize", Functions[1]);
 				AddFunction<FieldDesc>("GetStubFieldInfo", Functions[2]);
-				AddFunction<FieldDesc>("get_MethodTableOfEnclosingClass", Functions[3]);
+				AddFunction<FieldDesc>("get_MethodTable", Functions[3]);
 				AddFunction<FieldDesc>("get_MemberDef", Functions[4]);
 			}
 

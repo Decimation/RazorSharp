@@ -2,7 +2,9 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorInvoke;
 using RazorSharp.Memory;
+using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
 
 // ReSharper disable MemberCanBeMadeStatic.Global
@@ -16,6 +18,7 @@ namespace RazorSharp.CLR
 
 
 	/// <summary>
+	///     <para>Represents the GC. </para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
 	///         <item>
@@ -31,10 +34,7 @@ namespace RazorSharp.CLR
 	/// </summary>
 	public unsafe struct GCHeap
 	{
-		/// <summary>
-		///     Address of <see cref="g_pGCHeap" />
-		/// </summary>
-		private static readonly IntPtr g_pGCHeapAddr;
+
 
 		/// <summary>
 		///     <para>Global CLR variable <c>g_pGCHeap</c></para>
@@ -42,6 +42,24 @@ namespace RazorSharp.CLR
 		/// </summary>
 		private static readonly IntPtr g_pGCHeap;
 
+		/// <summary>
+		///     <para>Global CLR variable <c>g_gc_lowest_address</c></para>
+		/// </summary>
+		private static readonly IntPtr g_lowest_address;
+
+		/// <summary>
+		///     <para>Global CLR variable <c>g_gc_highest_address</c></para>
+		/// </summary>
+		private static readonly IntPtr g_highest_address;
+
+		public static IntPtr LowestAddress => g_lowest_address;
+
+		public static IntPtr HighestAddress => g_highest_address;
+
+		/// <summary>
+		///     Total size of the managed GC heap
+		/// </summary>
+		public static long Size => g_highest_address.ToInt64() - g_lowest_address.ToInt64();
 
 		public static GCHeap* GlobalHeap => (GCHeap*) g_pGCHeap;
 
@@ -135,11 +153,19 @@ namespace RazorSharp.CLR
 			 * Circumvent ASLR
 			 */
 
-			long strMt = (long) Runtime.MethodTableOf<string>();
-			IntPtr g_pStringClassAddr =
-				Segments.ScanSegment(".data", CLRFunctions.ClrDll, BitConverter.GetBytes(strMt));
-			g_pGCHeapAddr = g_pStringClassAddr + IntPtr.Size * 2;
-			g_pGCHeap     = Marshal.ReadIntPtr(g_pGCHeapAddr);
+
+//			const long g_pStringClassOffset    = 32;
+			const long g_pGCHeapOffset         = 48;
+			const long g_lowest_addressOffset  = 40;
+			const long g_highest_addressOffset = 408;
+
+			ImageSectionInfo dataSegment = Segments.GetSegment(".data", CLRFunctions.ClrDll);
+
+
+			g_pGCHeap        = Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_pGCHeapOffset));
+			g_lowest_address = Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_lowest_addressOffset));
+			g_highest_address =
+				Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_highest_addressOffset));
 
 			SignatureCall.Transpile<GCHeap>();
 

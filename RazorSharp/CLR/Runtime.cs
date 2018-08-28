@@ -97,6 +97,7 @@ namespace RazorSharp.CLR
 		{
 			MethodTable* mt;
 
+
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
 			if (typeof(T).IsValueType) {
 				return MethodTableOf<T>();
@@ -160,16 +161,22 @@ namespace RazorSharp.CLR
 		#region FieldDesc
 
 		/// <summary>
-		///     Gets all the <see cref="FieldDesc" /> from <see cref="MethodTable.FieldDescList" />
+		///     Gets all the <see cref="FieldDesc" />s from <see cref="MethodTable.FieldDescList" />
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		public static Pointer<FieldDesc>[] GetFieldDescs<T>()
+		internal static Pointer<FieldDesc>[] GetFieldDescs<T>()
 		{
-			RazorContract.Requires(!typeof(T).IsArray, "Arrays do not have fields");
+			return GetFieldDescs(typeof(T));
+		}
 
-			Pointer<MethodTable> mt   = MethodTableOf<T>();
+
+		internal static Pointer<FieldDesc>[] GetFieldDescs(Type t)
+		{
+			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
+
+			Pointer<MethodTable> mt   = MethodTableOf(t);
 			int                  len  = mt.Reference.FieldDescListLength;
 			Pointer<FieldDesc>[] lpFd = new Pointer<FieldDesc>[len];
 
@@ -194,7 +201,7 @@ namespace RazorSharp.CLR
 		/// <param name="flags"></param>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		public static Pointer<FieldDesc> GetFieldDesc(Type t, string name, bool isAutoProperty = false,
+		internal static Pointer<FieldDesc> GetFieldDesc(Type t, string name, bool isAutoProperty = false,
 			BindingFlags flags = DefaultFlags)
 		{
 			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
@@ -211,7 +218,7 @@ namespace RazorSharp.CLR
 			return fieldDesc;
 		}
 
-		public static Pointer<FieldDesc> GetFieldDesc<T>(string name, bool isAutoProperty = false,
+		internal static Pointer<FieldDesc> GetFieldDesc<T>(string name, bool isAutoProperty = false,
 			BindingFlags flags = DefaultFlags)
 		{
 			return GetFieldDesc(typeof(T), name, isAutoProperty, flags);
@@ -221,12 +228,12 @@ namespace RazorSharp.CLR
 
 		#region MethodDesc
 
-		public static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
 		{
 			return GetMethodDescs(typeof(T), flags);
 		}
 
-		public static Pointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
 		{
 			MethodInfo[] methods = t.GetMethods(flags);
 			RazorContract.RequiresNotNull(methods);
@@ -245,7 +252,7 @@ namespace RazorSharp.CLR
 			return arr;
 		}
 
-		public static Pointer<MethodDesc> GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc> GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
 		{
 			MethodInfo methodInfo = t.GetMethod(name, flags);
 			RazorContract.RequiresNotNull(methodInfo);
@@ -259,7 +266,7 @@ namespace RazorSharp.CLR
 			return md;
 		}
 
-		public static Pointer<MethodDesc> GetMethodDesc<T>(string name, BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc> GetMethodDesc<T>(string name, BindingFlags flags = DefaultFlags)
 		{
 			return GetMethodDesc(typeof(T), name, flags);
 		}

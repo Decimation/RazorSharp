@@ -30,7 +30,7 @@ namespace RazorSharp.Analysis
 		MethodDescs = 32,
 		Layout      = 64,
 
-		Default = Meta | Address | Size | Internal | Layout | FieldDescs
+		Default = Meta | Address | Size | Internal | Layout | FieldDescs,
 	}
 
 	public static class InspectorHelper
@@ -68,7 +68,23 @@ namespace RazorSharp.Analysis
 
 		#endregion
 
+		public static string LayoutString<T>(ref T t, bool fieldsOnly = false, bool fullOffset = false)
+		{
+			var v = new ObjectLayout<T>(ref t, fieldsOnly, fullOffset).Table;
+			return v.ToMarkDownString();
+		}
 
+		public static string LayoutString<T>(bool fieldsOnly = false, bool fullOffset = false)
+		{
+			var v = new ObjectLayout<T>(fieldsOnly, fullOffset).Table;
+			return v.ToMarkDownString();
+		}
+
+
+		internal static string CreateLabelString(string label, ConsoleTable table)
+		{
+			return String.Format("\n{0}\n{1}\n", ANSI.BoldString(label), table.ToMarkDownString());
+		}
 	}
 
 	public unsafe class Inspector<T>
@@ -146,7 +162,7 @@ namespace RazorSharp.Analysis
 
 			public override string ToString()
 			{
-				return CreateLabelString("MethodDescs:", ToTable());
+				return InspectorHelper.CreateLabelString("MethodDescs:", ToTable());
 			}
 		}
 
@@ -193,7 +209,7 @@ namespace RazorSharp.Analysis
 
 			public override string ToString()
 			{
-				return CreateLabelString("FieldDescs:", m_table);
+				return InspectorHelper.CreateLabelString("FieldDescs:", m_table);
 			}
 		}
 
@@ -232,7 +248,7 @@ namespace RazorSharp.Analysis
 
 			public override string ToString()
 			{
-				return CreateLabelString("Internal:", ToTable());
+				return InspectorHelper.CreateLabelString("Internal:", ToTable());
 			}
 		}
 
@@ -267,7 +283,7 @@ namespace RazorSharp.Analysis
 
 			public override string ToString()
 			{
-				return CreateLabelString("Metadata:", ToTable());
+				return InspectorHelper.CreateLabelString("Metadata:", ToTable());
 			}
 		}
 
@@ -294,7 +310,7 @@ namespace RazorSharp.Analysis
 
 			public override string ToString()
 			{
-				return CreateLabelString("Addresses:", ToTable());
+				return InspectorHelper.CreateLabelString("Addresses:", ToTable());
 			}
 		}
 
@@ -330,13 +346,8 @@ namespace RazorSharp.Analysis
 
 			public override string ToString()
 			{
-				return CreateLabelString("Sizes:", ToTable());
+				return InspectorHelper.CreateLabelString("Sizes:", ToTable());
 			}
-		}
-
-		protected internal static string CreateLabelString(string label, ConsoleTable table)
-		{
-			return String.Format("\n{0}\n{1}\n", ANSI.BoldString(label), table.ToMarkDownString());
 		}
 
 		internal static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.Default)
@@ -409,7 +420,7 @@ namespace RazorSharp.Analysis
 			}
 
 			if (Mode.HasFlag(InspectorMode.Layout) && !typeof(T).IsArray) {
-				sb.Append(CreateLabelString("Memory layout:", m_layout));
+				sb.Append(InspectorHelper.CreateLabelString("Memory layout:", m_layout));
 			}
 
 			return sb.ToString();

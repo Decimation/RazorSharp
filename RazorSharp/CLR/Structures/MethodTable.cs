@@ -51,7 +51,7 @@ namespace RazorSharp.CLR.Structures
 	///         </item>
 	///     </list>
 	///     <remarks>
-	///         Do not dereference.
+	///         Do not dereference. This should be kept a pointer and should not be copied.
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
@@ -110,7 +110,7 @@ namespace RazorSharp.CLR.Structures
 		public WORD Token => m_wToken;
 
 		/// <summary>
-		///     The number of virtual methods in this type (4 by default; from <see cref="Object" />)
+		///     The number of virtual methods in this type (<c>4</c> by default; from <see cref="Object" />)
 		/// </summary>
 		public WORD NumVirtuals => m_wNumVirtuals;
 
@@ -139,7 +139,7 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		// todo
-		public void* Module => m_pLoaderModule;
+		internal void* Module => m_pLoaderModule;
 
 		/// <summary>
 		///     <para>The corresponding <see cref="EEClass" /> to this <see cref="MethodTable" />.</para>
@@ -215,7 +215,13 @@ namespace RazorSharp.CLR.Structures
 		public bool IsStringOrArray  => HasComponentSize;
 		public bool IsBlittable      => EEClass.Reference.IsBlittable;
 		public bool IsString         => HasComponentSize && !IsArray;
-		public Type RuntimeType      => CLRFunctions.JIT_GetRuntimeType(Unsafe.AddressOf(ref this).ToPointer());
+
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
+		public Type RuntimeType => CLRFunctions.JIT_GetRuntimeType(Unsafe.AddressOf(ref this).ToPointer());
 
 		/// <summary>
 		///     The number of instance fields in this type.
@@ -229,10 +235,12 @@ namespace RazorSharp.CLR.Structures
 
 		public int NumNonVirtualSlots => EEClass.Reference.NumNonVirtualSlots;
 
+
 		/// <summary>
 		///     Number of methods in this type.
 		/// </summary>
 		public int NumMethods => EEClass.Reference.NumMethods;
+
 
 		/// <summary>
 		///     The size of the instance fields in this type. This is the unboxed size of the type if the object is boxed.
@@ -243,7 +251,7 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     Array of <see cref="FieldDesc" />s for this type.
 		/// </summary>
-		public FieldDesc* FieldDescList => EEClass.Reference.FieldDescList;
+		internal FieldDesc* FieldDescList => EEClass.Reference.FieldDescList;
 
 		/// <summary>
 		///     Length of the <see cref="FieldDescList" />
@@ -251,7 +259,7 @@ namespace RazorSharp.CLR.Structures
 		public int FieldDescListLength => EEClass.Reference.FieldDescListLength;
 
 		// todo
-		public MethodDescChunk* MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
+		internal MethodDescChunk* MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
 
 		#endregion
 

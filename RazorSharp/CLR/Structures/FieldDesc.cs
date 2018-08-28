@@ -86,18 +86,19 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     Field token
 		///     <remarks>
-		///         Equal to <see cref="FieldInfo.MetadataToken" />
+		///         <para>Equal to <see cref="System.Reflection.FieldInfo.MetadataToken" /></para>
+		///         <para>Address-sensitive</para>
 		///     </remarks>
 		/// </summary>
 		public int MemberDef {
 			[CLRSigcall(OffsetGuess = 0x33AC0)] get => throw new NotTranspiledException();
 		}
 
-
 		/// <summary>
 		///     Offset in memory
 		/// </summary>
 		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
+
 
 
 		private int Type => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
@@ -106,7 +107,6 @@ namespace RazorSharp.CLR.Structures
 		///     Field type
 		/// </summary>
 		public CorElementType CorType => (CorElementType) Type;
-
 
 		/// <summary>
 		///     Whether the field is <c>static</c>
@@ -123,9 +123,6 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		public bool IsRVA => ReadBit(m_dword1, 26);
 
-		/// <summary>
-		///     Access level
-		/// </summary>
 		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
 
 		/// <summary>
@@ -147,14 +144,20 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
-
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
 		private int LoadSize {
 			[CLRSigcall(OffsetGuess = 0x102278)] get => throw new NotTranspiledException();
 		}
 
-		public FieldInfo Info        => RuntimeType.Module.ResolveField(MemberDef);
-		public string    Name        => Info.Name;
-		public Type      RuntimeType => CLRFunctions.JIT_GetRuntimeType(MethodTableOfEnclosingClass.ToPointer());
+		public FieldInfo Info => RuntimeType.Module.ResolveField(MemberDef);
+		public string    Name => Info.Name;
+
+
+		public Type RuntimeType => CLRFunctions.JIT_GetRuntimeType(MethodTable.ToPointer());
 
 
 		/// <summary>
@@ -162,26 +165,36 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public Pointer<MethodTable> MethodTableOfEnclosingClass {
+		public Pointer<MethodTable> MethodTable {
 			[CLRSigcall(OffsetGuess = 0x21214)] get => throw new NotTranspiledException();
 		}
 
 
-		public bool RequiresFullMBValue => ReadBit(m_dword1, 31);
+		private bool RequiresFullMBValue => ReadBit(m_dword1, 31);
 
 		#endregion
 
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
 		[CLRSigcall(OffsetGuess = 0x4109D4)]
-		public void* GetModule()
+		internal void* GetModule()
 		{
 			throw new NotTranspiledException();
 		}
 
-		// RuntimeFieldInfoStub
-		// ReflectFieldObject
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
 		[CLRSigcall(OffsetGuess = 0x1025A0)]
-		public void* GetStubFieldInfo()
+		internal void* GetStubFieldInfo()
 		{
+			// RuntimeFieldInfoStub
+			// ReflectFieldObject
 			throw new NotTranspiledException();
 		}
 
@@ -192,15 +205,6 @@ namespace RazorSharp.CLR.Structures
 			return Info.GetValue(t);
 		}
 
-		public object GetValue()
-		{
-			return Info.GetValue(null);
-		}
-
-		public void SetValue(object value)
-		{
-			Info.SetValue(null, value);
-		}
 
 		public void SetValue<TInstance>(TInstance t, object value)
 		{
@@ -220,7 +224,7 @@ namespace RazorSharp.CLR.Structures
 		public IntPtr GetAddress<TInstance>(ref TInstance t)
 		{
 			RazorContract.Requires<FieldDescException>(!IsStatic, "You cannot get the address of a static field (yet)");
-			RazorContract.Assert(Runtime.ReadMethodTable(ref t) == MethodTableOfEnclosingClass);
+			RazorContract.Assert(Runtime.ReadMethodTable(ref t) == MethodTable);
 			RazorContract.Assert(Offset != FieldOffsetNewEnC);
 
 
@@ -246,7 +250,7 @@ namespace RazorSharp.CLR.Structures
 			// this->ToString() must be used to view this
 
 			table.AddRow("Name", Name);
-			table.AddRow("Enclosing MethodTable", Hex.ToHex(MethodTableOfEnclosingClass.ToPointer()));
+			table.AddRow("Enclosing MethodTable", Hex.ToHex(MethodTable.ToPointer()));
 			table.AddRow("Enclosing type", RuntimeType.Name);
 
 

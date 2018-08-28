@@ -14,7 +14,7 @@ namespace RazorSharp.Memory
 {
 
 	/// <summary>
-	///     Provides utilities for operating with module data segments.
+	///     Provides utilities for operating with module (DLL) data segments.
 	/// </summary>
 	public static unsafe class Segments
 	{
@@ -44,6 +44,8 @@ namespace RazorSharp.Memory
 
 			throw new Exception($"Could not find segment: {segment}");
 		}
+
+
 
 		private static SegmentType Parse(string name)
 		{

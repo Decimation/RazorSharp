@@ -98,6 +98,21 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+		public int IndexOf(T value, int length)
+		{
+			return IndexOf(value, 0, length);
+		}
+
+		public int IndexOf(T value, int startIndex, int elemCnt)
+		{
+			for (int i = startIndex; i < elemCnt; i++) {
+				if (this[i].Equals(value)) {
+					return i;
+				}
+			}
+
+			return -1;
+		}
 
 		public PinHandle Pin()
 		{
@@ -125,7 +140,12 @@ namespace RazorSharp.Pointers
 				: new ConsoleTable("Address", "Offset", "Pointer", "Value");
 
 			for (int i = 0; i < elemCnt; i++) {
-				table.AddRow(Hex.ToHex(Offset(i)), i, Hex.ToHex(Read<long>(i)), this[i]);
+				if (!typeof(T).IsValueType) {
+					table.AddRow(Hex.ToHex(Offset(i)), i, Hex.ToHex(Read<long>(i)), this[i]);
+				}
+				else {
+					table.AddRow(Hex.ToHex(Offset(i)), i, this[i]);
+				}
 			}
 
 			return table;
@@ -155,6 +175,10 @@ namespace RazorSharp.Pointers
 			MMemory.Write(Offset<TType>(elemOffset), 0, t);
 		}
 
+		public void ForceWrite<TType>(TType t, int elemOffset = 0)
+		{
+			MMemory.ForceWrite(Offset<TType>(elemOffset), 0, t);
+		}
 
 		public TType Read<TType>(int elemOffset = 0)
 		{

@@ -33,7 +33,7 @@ namespace Test.Testing.Tests
 			Debug.Assert(fieldDesc.Reference.Size == Unsafe.SizeOf<TField>());
 			Debug.Assert(fieldDesc.Reference.RuntimeType == typeof(TType));
 			Debug.Assert(fieldDesc.Reference.MemberDef == fieldActual.MetadataToken);
-			Debug.Assert(fieldDesc.Reference.MethodTableOfEnclosingClass == Runtime.MethodTableOf<TType>());
+			Debug.Assert(fieldDesc.Reference.MethodTable == Runtime.MethodTableOf<TType>());
 		}
 
 		[Test]

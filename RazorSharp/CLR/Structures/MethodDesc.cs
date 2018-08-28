@@ -5,7 +5,9 @@
 using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp.Memory;
@@ -71,7 +73,7 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     Valid only if the function is non-virtual and non-abstract (<see cref="SizeOf" /> <c>== 16</c>)
 		/// </summary>
-		[FieldOffset(8)] private void* m_functionPtr;
+		[FieldOffset(8)] private void* m_pFunction;
 
 		#endregion
 
@@ -87,21 +89,30 @@ namespace RazorSharp.CLR.Structures
 		public IntPtr     Function    => Info.MethodHandle.GetFunctionPointer();
 		public string     Name        => Info.Name;
 
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
 		public bool IsCtor {
 			[CLRSigcall(OffsetGuess = 0xAF920)] get => throw new NotTranspiledException();
 		}
 
-
 		/// <summary>
 		///     <remarks>
-		///         Equal to <see cref="Type.MetadataToken" />
+		///         <para>Equal to <see cref="System.Reflection.MethodInfo.MetadataToken" /></para>
+		///         <para>Address-sensitive</para>
 		///     </remarks>
 		/// </summary>
 		public int MemberDef {
 			[CLRSigcall(OffsetGuess = 0x12810)] get => throw new NotTranspiledException();
 		}
 
-
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
 		public bool IsPointingToNativeCode {
 			[CLRSigcall(OffsetGuess = 0x1A6CC4)] get => throw new NotTranspiledException();
 		}
@@ -214,6 +225,7 @@ namespace RazorSharp.CLR.Structures
 		}*/
 
 		/// <summary>
+		///     Size of the current <see cref="MethodDesc" />
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
@@ -222,11 +234,21 @@ namespace RazorSharp.CLR.Structures
 			[CLRSigcall(OffsetGuess = 0x390E0)] get => throw new NotTranspiledException();
 		}
 
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
 		public Pointer<MethodTable> MethodTable {
 			[CLRSigcall(OffsetGuess = 0xA260)] get => throw new NotTranspiledException("MethodTable");
 		}
 
 
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
 		[CLRSigcall(OffsetGuess = 0x424714)]
 		public void Reset()
 		{
@@ -245,7 +267,7 @@ namespace RazorSharp.CLR.Structures
 				"Function is virtual/abstract");
 
 
-			m_functionPtr = p.ToPointer();
+			m_pFunction = p.ToPointer();
 		}
 
 
@@ -271,7 +293,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Signature", Info);
 
 			table.AddRow("Function", Hex.ToHex(Function));
-			table.AddRow("Non-MI Function", Hex.ToHex(m_functionPtr));
+			table.AddRow("Non-MI Function", Hex.ToHex(m_pFunction));
 
 			table.AddRow("Chunk index", m_chunkIndex);
 			table.AddRow("Slot number", m_wSlotNumber);

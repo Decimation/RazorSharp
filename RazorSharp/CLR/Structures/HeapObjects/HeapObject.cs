@@ -71,10 +71,11 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 			internal set => m_methodTablePtr = value;
 		}
 
-		// object.h: 198
+
 		// We should always use GetGCSafeMethodTable() if we're running during a GC.
 		// If the mark bit is set then we're running during a GC
-		public bool IsMarked => ((ulong) m_methodTablePtr & MARKED_BIT) == 0;
+		// todo: fix
+		public bool IsMarked => ((ulong) m_methodTablePtr & MARKED_BIT) != 0;
 
 
 		public MethodTable* GetGCSafeMethodTable()

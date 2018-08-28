@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -17,6 +18,7 @@ using RazorInvoke.Libraries;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
+using RazorSharp.CLR.Fixed;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
@@ -25,6 +27,7 @@ using RazorSharp.Utilities.Exceptions;
 using Test.Testing;
 using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
+using Module = System.Reflection.Module;
 
 #endregion
 
@@ -77,6 +80,10 @@ namespace Test
 			RazorContract.Assert(IntPtr.Size == 8);
 			RazorContract.Assert(Environment.Is64BitProcess);
 			RazorContract.Assert(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+			RazorContract.Assert(Environment.Version.Major == 4); //todo
+			RazorContract.Assert(!GCSettings.IsServerGC);
+			bool isRunningOnMono = Type.GetType("Mono.Runtime") != null;
+			RazorContract.Assert(!isRunningOnMono);
 
 //			Logger.Log(Flags.Info, "Architecture: x64");
 //			Logger.Log(Flags.Info, "Byte order: {0}", BitConverter.IsLittleEndian ? "Little Endian" : "Big Endian");
@@ -90,105 +97,67 @@ namespace Test
 			return (T*) AddressOf(ref t);
 		}
 
-		private class AddressEventArgs : EventArgs
+		private static void VMMap()
 		{
+			var table = new ConsoleTable("Low address", "High address", "Size");
+			table.AddRow(Hex.ToHex(Memory.StackBase), Hex.ToHex(Memory.StackLimit),
+				String.Format("{0} ({1} K)", Memory.StackSize, Memory.StackSize / 1024));
+			Console.WriteLine(InspectorHelper.CreateLabelString("Stack:", table));
 
-			public IntPtr OldAddrOfData { get; }
+			table.Rows.RemoveAt(0);
 
-			public IntPtr NewAddrOfData { get; }
-
-			internal AddressEventArgs(IntPtr oldAddrOfData, IntPtr newAddrOfData)
-			{
-				OldAddrOfData = oldAddrOfData;
-				NewAddrOfData = newAddrOfData;
-			}
-
+			table.AddRow(Hex.ToHex(GCHeap.LowestAddress), Hex.ToHex(GCHeap.HighestAddress),
+				String.Format("{0} ({1} K)", GCHeap.Size, GCHeap.Size / 1024));
+			Console.WriteLine(InspectorHelper.CreateLabelString("GC:", table));
 		}
 
-		private class ObjectSentinel : IDisposable
+		// Returns number of immediate pointers this object has.
+		// size is only used if you have an array of value types.
+		[CLRSigcall("4C 8B 59 F8 4C 8D 51 E8 45 33 C9 4D 85 DB 7E 25 49 C1 E3 04")]
+		private static int GetNumPointers(Pointer<MethodTable> pMt, ulong objSize, ulong numComponents)
 		{
+			throw new NotTranspiledException();
+		}
 
-			/// <summary>
-			///     Used to tell the pinning thread to stop pinning the object.
-			/// </summary>
-			private readonly Thread m_thread;
+		private static int GetNumPointers(Pointer<MethodTable> pMt, int objSize, int numComponents)
+		{
+			return GetNumPointers(pMt, (ulong) objSize, (ulong) numComponents);
+		}
 
-			private          IntPtr     m_origHeapAddr;
-			private readonly IntPtr     m_ptrAddr;
-			private volatile bool       m_keepAlive;
-			public event AddressChanged Event;
-			public IntPtr               PtrAddr => m_ptrAddr;
+		private struct Struct
+		{
+			public string s;
+			public long   heapaddr;
+		}
 
-			public delegate void AddressChanged(object sender, AddressEventArgs e);
+		private class Class
+		{
+			public string s;
+			public long   heapaddr;
 
-			private void Watch()
+			public Class(string s)
 			{
-				while (m_keepAlive) {
-					IntPtr heap = *(IntPtr*) m_ptrAddr;
-					if (heap != m_origHeapAddr) {
-						OnRaiseCustomEvent(new AddressEventArgs(m_origHeapAddr, heap));
-					}
-				}
+				this.s = s;
 			}
 
-			// Wrap event invocations inside a protected virtual method
-			// to allow derived classes to override the event invocation behavior
-			protected virtual void OnRaiseCustomEvent(AddressEventArgs e)
+			public override string ToString()
 			{
-				// Make a temporary copy of the event to avoid possibility of
-				// a race condition if the last subscriber unsubscribes
-				// immediately after the null check and before the event is raised.
-				AddressChanged handler = Event;
-
-				// Event will be null if there are no subscribers
-				if (handler != null) {
-					// Use the () operator to raise the event.
-					handler(this, e);
-				}
-
-				m_origHeapAddr = e.NewAddrOfData;
+				return String.Format("s -> {0}\n  -> {1}", Hex.ToHex(Unsafe.AddressOfHeap(ref s)), Hex.ToHex(heapaddr));
 			}
-
-			public static ObjectSentinel Create<T>(ref T t)
-			{
-				return new ObjectSentinel(AddressOf(ref t));
-			}
-
-			private ObjectSentinel(IntPtr ptrAddr)
-			{
-				m_ptrAddr      = ptrAddr;
-				m_origHeapAddr = Marshal.ReadIntPtr(m_ptrAddr);
-
-				m_keepAlive = true;
-				m_thread = new Thread(Watch)
-				{
-					IsBackground = true
-				};
-
-				m_thread.Start();
-			}
-
-			public void Dispose()
-			{
-				m_keepAlive = false;
-				m_thread.Join();
-			}
-
-
 		}
 
 
 		public static void Main(string[] args)
 		{
-			// MethodDesc::GetMethodTable
-			const long target      = 0x000000018000B260;
-			const long textSegment = 0x0000000180001000;
-			const long ofs         = 0xA260;
-			Debug.Assert(textSegment + ofs == target);
+			Struct @struct = new Struct();
+			Console.WriteLine(InspectorHelper.LayoutString(ref @struct));
 
-			var field = Runtime.GetFieldDesc<string>("m_firstChar");
-			Console.WriteLine(field);
+			Class @class = new Class("foo");
+			Console.WriteLine(InspectorHelper.LayoutString(ref @class));
+			Console.WriteLine(InspectorHelper.LayoutString<Class>());
 
+			dynamic dyn = "";
+			Console.WriteLine(InspectorHelper.LayoutString<dynamic>(ref dyn));
 		}
 
 

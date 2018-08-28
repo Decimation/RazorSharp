@@ -73,6 +73,7 @@ namespace RazorSharp
 	{
 		internal const int InvalidValue = -1;
 
+		static Unsafe() { }
 
 		#region OffsetOf
 
