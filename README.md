@@ -26,9 +26,11 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [x] `PackedDWORDFields`
 
 # Compatibility
+RazorSharp is tested on:
 - 64-bit only (32-bit is not fully supported)
 - Windows only
-- CLR only
+- .NET CLR only
+- Workstation GC
 
 # todo
 - [ ] `ObjectLayout` for arrays
