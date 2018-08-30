@@ -46,7 +46,6 @@ namespace RazorSharp.Memory
 		}
 
 
-
 		private static SegmentType Parse(string name)
 		{
 			switch (name) {

@@ -85,6 +85,11 @@ namespace RazorSharp.CLR
 
 		#region MethodTable
 
+		public static Type MethodTableToType(Pointer<MethodTable> pMT)
+		{
+			return CLRFunctions.JIT_GetRuntimeType(pMT.ToPointer());
+		}
+
 		/// <summary>
 		///     <para>Manually reads a CLR <see cref="MethodTable" /> (TypeHandle).</para>
 		///     <para>
@@ -166,13 +171,13 @@ namespace RazorSharp.CLR
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		internal static Pointer<FieldDesc>[] GetFieldDescs<T>()
+		public static Pointer<FieldDesc>[] GetFieldDescs<T>()
 		{
 			return GetFieldDescs(typeof(T));
 		}
 
 
-		internal static Pointer<FieldDesc>[] GetFieldDescs(Type t)
+		public static Pointer<FieldDesc>[] GetFieldDescs(Type t)
 		{
 			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
 
@@ -191,6 +196,7 @@ namespace RazorSharp.CLR
 			return lpFd;
 		}
 
+		// todo: add support for getting FieldDesc of fixed buffers (like isAutoProperty) - use an enum probably
 
 		/// <summary>
 		///     Gets the corresponding <see cref="FieldDesc" /> for a specified field
@@ -201,13 +207,13 @@ namespace RazorSharp.CLR
 		/// <param name="flags"></param>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		internal static Pointer<FieldDesc> GetFieldDesc(Type t, string name, bool isAutoProperty = false,
+		public static Pointer<FieldDesc> GetFieldDesc(Type t, string name, bool isAutoProperty = false,
 			BindingFlags flags = DefaultFlags)
 		{
 			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
 
 			if (isAutoProperty) {
-				name = NameOfAutoPropertyBackingField(name);
+				name = SpecialNames.NameOfAutoPropertyBackingField(name);
 			}
 
 			FieldInfo fieldInfo = t.GetField(name, flags);
@@ -218,22 +224,27 @@ namespace RazorSharp.CLR
 			return fieldDesc;
 		}
 
-		internal static Pointer<FieldDesc> GetFieldDesc<T>(string name, bool isAutoProperty = false,
+		public static Pointer<FieldDesc> GetFieldDesc<T>(string name, bool isAutoProperty = false,
 			BindingFlags flags = DefaultFlags)
 		{
 			return GetFieldDesc(typeof(T), name, isAutoProperty, flags);
+		}
+
+		internal static FieldInfo[] GetFields<T>()
+		{
+			return typeof(T).GetFields(DefaultFlags);
 		}
 
 		#endregion
 
 		#region MethodDesc
 
-		internal static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
+		public static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
 		{
 			return GetMethodDescs(typeof(T), flags);
 		}
 
-		internal static Pointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
+		public static Pointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
 		{
 			MethodInfo[] methods = t.GetMethods(flags);
 			RazorContract.RequiresNotNull(methods);
@@ -252,7 +263,7 @@ namespace RazorSharp.CLR
 			return arr;
 		}
 
-		internal static Pointer<MethodDesc> GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
+		public static Pointer<MethodDesc> GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
 		{
 			MethodInfo methodInfo = t.GetMethod(name, flags);
 			RazorContract.RequiresNotNull(methodInfo);
@@ -266,7 +277,7 @@ namespace RazorSharp.CLR
 			return md;
 		}
 
-		internal static Pointer<MethodDesc> GetMethodDesc<T>(string name, BindingFlags flags = DefaultFlags)
+		public static Pointer<MethodDesc> GetMethodDesc<T>(string name, BindingFlags flags = DefaultFlags)
 		{
 			return GetMethodDesc(typeof(T), name, flags);
 		}
@@ -366,28 +377,6 @@ namespace RazorSharp.CLR
 
 			return MethodTableOf<T>().Reference.IsBlittable;
 		}
-
-		#region Properties
-
-		/// <summary>
-		///     Gets the internal name of an auto-property's backing field.
-		///     <example>If the auto-property's name is X, the backing field name is &lt;X&gt;k__BackingField.</example>
-		/// </summary>
-		/// <param name="propname">Auto-property's name</param>
-		/// <returns>Internal name of the auto-property's backing field</returns>
-		private static string NameOfAutoPropertyBackingField(string propname)
-		{
-			const string backingFieldFormat = "<{0}>k__BackingField";
-			return String.Format(backingFieldFormat, propname);
-		}
-
-		internal static string NameOfGetPropertyMethod(string propname)
-		{
-			const string getPrefix = "get_";
-			return getPrefix + propname;
-		}
-
-		#endregion
 
 
 	}

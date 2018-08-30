@@ -7,7 +7,6 @@ using System.Collections;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorCommon;
 using RazorInvoke;
 using RazorInvoke.Libraries;
 using RazorSharp.Pointers;
@@ -124,11 +123,11 @@ namespace RazorSharp.Memory
 
 		public static void ForceWrite<T>(IntPtr p, int byteOffset, T t)
 		{
-			var hProc = Kernel32.OpenProcess(Process.GetCurrentProcess(), Enumerations.ProcessAccessFlags.All);
+			IntPtr hProc = Kernel32.OpenProcess(Process.GetCurrentProcess(), Enumerations.ProcessAccessFlags.All);
 
-			int lpNumberOfBytesWritten = 0;
-			int size = Unsafe.SizeOf<T>();
-			IntPtr targetPtr = PointerUtils.Add(p, byteOffset);
+			int    lpNumberOfBytesWritten = 0;
+			int    size                   = Unsafe.SizeOf<T>();
+			IntPtr targetPtr              = PointerUtils.Add(p, byteOffset);
 
 //			bool a = Kernel32.VirtualProtect(targetPtr, (IntPtr) size, Enumerations.MemoryProtection.ExecuteReadWrite, out _);
 //			RazorContract.Assert(a);
@@ -195,15 +194,20 @@ namespace RazorSharp.Memory
 			return IsOnStack(Unsafe.AddressOf(ref t).ToPointer());
 		}
 
-		public static bool IsOnStack(void* v)
+
+		public static bool IsOnStack(Pointer<byte> ptr)
 		{
 //			(IntPtr low, IntPtr high) bounds = Kernel32.GetCurrentThreadStackLimits();
 //			return RazorMath.Between(((IntPtr) v).ToInt64(), bounds.low.ToInt64(), bounds.high.ToInt64(), true);
 
 			// https://github.com/dotnet/coreclr/blob/c82bd22d4bab4369c0989a1c2ca2758d29a0da36/src/vm/threads.h
 			// 3620
-			long i = (long) v;
-			return StackLimit.ToInt64() < i && i <= StackBase.ToInt64();
+			return IsAddressInRange(StackLimit, ptr.Address, StackBase);
+		}
+
+		public static bool IsAddressInRange(IntPtr max, IntPtr p, IntPtr min)
+		{
+			return max.ToInt64() < p.ToInt64() && p.ToInt64() <= min.ToInt64();
 		}
 
 

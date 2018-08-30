@@ -27,10 +27,9 @@ namespace RazorSharp.CLR
 	///         All functions are WKS, not SVR
 	///     </remarks>
 	/// </summary>
-	public static unsafe class CLRFunctions
+	internal static unsafe class CLRFunctions
 	{
-		internal const           string                         ClrDll = "clr.dll";
-		internal static readonly Dictionary<MethodInfo, byte[]> FunctionInfoMap;
+		internal const string ClrDll = "clr.dll";
 
 
 		internal static void AddAll()
@@ -44,27 +43,8 @@ namespace RazorSharp.CLR
 
 		static CLRFunctions()
 		{
-			FunctionInfoMap = new Dictionary<MethodInfo, byte[]>();
 
-			AddAll();
 
-			SignatureCall.Transpile(typeof(CLRFunctions));
-		}
-
-		public static void AddFunction(MethodInfo mi, byte[] rgBytes)
-		{
-			FunctionInfoMap.Add(mi, rgBytes);
-		}
-
-		public static void AddFunction(Type t, string funcName, byte[] rgBytes)
-		{
-			MethodInfo mi = Runtime.GetAnnotatedMethods<SigcallAttribute>(t, funcName)[0];
-			AddFunction(mi, rgBytes);
-		}
-
-		public static void AddFunction<T>(string funcName, byte[] rgBytes)
-		{
-			AddFunction(typeof(T), funcName, rgBytes);
 		}
 
 
@@ -73,10 +53,10 @@ namespace RazorSharp.CLR
 
 			internal static void AddFunctions()
 			{
-				AddFunction<GCHeap>("IsHeapPointer", Functions[0]);
-				AddFunction<GCHeap>("IsEphemeral", Functions[1]);
-				AddFunction<GCHeap>("IsGCInProgress", Functions[2]);
-				AddFunction<GCHeap>("get_GCCount", Functions[3]);
+				SignatureCall.AddFunction<GCHeap>("IsHeapPointer", Functions[0]);
+				SignatureCall.AddFunction<GCHeap>("IsEphemeral", Functions[1]);
+				SignatureCall.AddFunction<GCHeap>("IsGCInProgress", Functions[2]);
+				SignatureCall.AddFunction<GCHeap>("get_GCCount", Functions[3]);
 			}
 
 			private static readonly byte[][] Functions =
@@ -115,7 +95,7 @@ namespace RazorSharp.CLR
 		{
 			internal static void AddFunctions()
 			{
-				AddFunction(typeof(CLRFunctions), "JIT_GetRuntimeType", Functions[0]);
+				SignatureCall.AddFunction(typeof(CLRFunctions), "JIT_GetRuntimeType", Functions[0]);
 			}
 
 			private static readonly byte[][] Functions =
@@ -134,11 +114,11 @@ namespace RazorSharp.CLR
 		{
 			internal static void AddFunctions()
 			{
-				AddFunction<FieldDesc>("GetModule", Functions[0]);
-				AddFunction<FieldDesc>("get_LoadSize", Functions[1]);
-				AddFunction<FieldDesc>("GetStubFieldInfo", Functions[2]);
-				AddFunction<FieldDesc>("get_MethodTable", Functions[3]);
-				AddFunction<FieldDesc>("get_MemberDef", Functions[4]);
+				SignatureCall.AddFunction<FieldDesc>("GetModule", Functions[0]);
+				SignatureCall.AddFunction<FieldDesc>("get_LoadSize", Functions[1]);
+				SignatureCall.AddFunction<FieldDesc>("GetStubFieldInfo", Functions[2]);
+				SignatureCall.AddFunction<FieldDesc>("get_MethodTable", Functions[3]);
+				SignatureCall.AddFunction<FieldDesc>("get_MemberDef", Functions[4]);
 			}
 
 			private static readonly byte[][] Functions =
@@ -184,12 +164,12 @@ namespace RazorSharp.CLR
 		{
 			internal static void AddFunctions()
 			{
-				AddFunction<MethodDesc>("get_IsCtor", Functions[0]);
-				AddFunction<MethodDesc>("get_MemberDef", Functions[1]);
-				AddFunction<MethodDesc>("get_IsPointingToNativeCode", Functions[2]);
-				AddFunction<MethodDesc>("get_SizeOf", Functions[3]);
-				AddFunction<MethodDesc>("Reset", Functions[4]);
-				AddFunction<MethodDesc>("get_MethodTable", Functions[5]);
+				SignatureCall.AddFunction<MethodDesc>("get_IsCtor", Functions[0]);
+				SignatureCall.AddFunction<MethodDesc>("get_MemberDef", Functions[1]);
+				SignatureCall.AddFunction<MethodDesc>("get_IsPointingToNativeCode", Functions[2]);
+				SignatureCall.AddFunction<MethodDesc>("get_SizeOf", Functions[3]);
+				SignatureCall.AddFunction<MethodDesc>("Reset", Functions[4]);
+				SignatureCall.AddFunction<MethodDesc>("get_MethodTable", Functions[5]);
 			}
 
 			private static readonly byte[][] Functions =
@@ -243,7 +223,7 @@ namespace RazorSharp.CLR
 
 
 		[CLRSigcall(OffsetGuess = 0x104D0)]
-		public static Type JIT_GetRuntimeType(void* __struct)
+		internal static Type JIT_GetRuntimeType(void* __struct)
 		{
 			throw new NotTranspiledException();
 		}

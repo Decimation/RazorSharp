@@ -100,7 +100,6 @@ namespace RazorSharp.CLR.Structures
 		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
 
 
-
 		private int Type => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
 
 		/// <summary>
@@ -157,7 +156,20 @@ namespace RazorSharp.CLR.Structures
 		public string    Name => Info.Name;
 
 
-		public Type RuntimeType => CLRFunctions.JIT_GetRuntimeType(MethodTable.ToPointer());
+		public bool IsFixedBuffer => SpecialNames.NameOfFixedBuffer(Name) == Info.FieldType.Name;
+
+		public bool IsAutoProperty {
+			get {
+				string demangled = SpecialNames.DemangledAutoPropertyName(Name);
+				if (demangled != null) {
+					return SpecialNames.NameOfAutoPropertyBackingField(demangled) == Name;
+				}
+
+				return false;
+			}
+		}
+
+		public Type RuntimeType => Runtime.MethodTableToType(MethodTable);
 
 
 		/// <summary>

@@ -208,11 +208,11 @@
     <Compile Include="Testing\Benchmarking\CollectionsBenchmarking.cs" />
       <Compile Include="Testing\Benchmarking\DllBenchmarking.cs"/>
       <Compile Include="Testing\Benchmarking\MiscBenchmarking.cs"/>
+      <Compile Include="Testing\Benchmarking\RuntimeBenchmarking.cs"/>
       <Compile Include="Testing\Benchmarking\SignatureCallBenchmarking.cs"/>
     <Compile Include="Testing\Benchmarking\SigScanningBenchmarking.cs" />
-    <Compile Include="Testing\Benchmarking\LitePointerBenchmarking.cs" />
+      <Compile Include="Testing\Benchmarking\PointerBenchmarking.cs"/>
     <Compile Include="Testing\Benchmarking\MarshalBenchmarking.cs" />
-    <Compile Include="Testing\Benchmarking\PointerBenchmark.cs" />
     <Compile Include="Testing\Benchmarking\UnsafeBenchmarking.cs" />
     <Compile Include="Testing\GenericDummy.cs" />
     <Compile Include="Testing\Point.cs" />
@@ -243,6 +243,10 @@
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.6.1\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.6.1\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
   </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Net.Compilers" Version="$2.9.0" Condition="'$(MSBuildRuntimeType)' != 'Core'"/>
+        <PackageReference Include="Microsoft.NETCore.Compilers" Version="$2.9.0" Condition="'$(MSBuildRuntimeType)' == 'Core'"/>
+    </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

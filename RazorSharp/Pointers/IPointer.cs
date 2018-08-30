@@ -35,7 +35,7 @@ namespace RazorSharp.Pointers
 		int ElementSize { get; }
 
 		/// <summary>
-		///     Whether <see cref="Address" /> being pointed to is null.
+		///     Whether <see cref="Address" /> is null.
 		/// </summary>
 		bool IsNull { get; }
 
@@ -57,10 +57,14 @@ namespace RazorSharp.Pointers
 		/// <returns></returns>
 		long ToInt64();
 
+		/// <summary>
+		///     Returns <see cref="Address" /> as a pointer.
+		/// </summary>
+		/// <returns></returns>
 		void* ToPointer();
 
 		/// <summary>
-		///     Read from <see cref="Address" />
+		///     Reads a value of type <typeparamref name="TType" /> from <see cref="Address" />
 		/// </summary>
 		/// <param name="elemOffset">Element offset</param>
 		/// <typeparam name="TType">Type to read</typeparam>
@@ -68,7 +72,7 @@ namespace RazorSharp.Pointers
 		TType Read<TType>(int elemOffset = 0);
 
 		/// <summary>
-		///     Write to <see cref="Address" />
+		///     Writes a value of type <typeparamref name="TType" /> to <see cref="Address" />
 		/// </summary>
 		/// <param name="t">Value to write</param>
 		/// <param name="elemOffset">Element offset</param>
@@ -76,12 +80,54 @@ namespace RazorSharp.Pointers
 		void Write<TType>(TType t, int elemOffset = 0);
 
 
+		/// <summary>
+		///     Reinterprets <see cref="Address" /> as a reference to a value of type <typeparamref name="TType" />
+		/// </summary>
+		/// <param name="elemOffset">Element offset</param>
+		/// <typeparam name="TType">Type to reference</typeparam>
+		/// <returns>A reference to a value of type <typeparamref name="TType" /></returns>
 		ref TType AsRef<TType>(int elemOffset = 0);
 
+		/// <summary>
+		///     Checks to see if <see cref="other" /> is equal to the current instance.
+		/// </summary>
+		/// <param name="other">Other <see cref="IPointer{T}" /></param>
+		/// <returns></returns>
 		bool Equals(IPointer<T> other);
 
-
+		/// <summary>
+		///     Creates a new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" />, pointing to <see cref="Address" />
+		/// </summary>
+		/// <typeparam name="TNew">Type to point to</typeparam>
+		/// <returns>A new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" /></returns>
 		Pointer<TNew> Reinterpret<TNew>();
+
+		/// <summary>
+		///     Increment the <see cref="Address" /> by the specified number of bytes
+		/// </summary>
+		/// <param name="bytes">Number of bytes to add</param>
+		void Add(int bytes);
+
+
+		/// <summary>
+		///     Decrement <see cref="Address" /> by the specified number of bytes
+		/// </summary>
+		/// <param name="bytes">Number of bytes to subtract</param>
+		void Subtract(int bytes);
+
+
+		/// <summary>
+		///     Increment the <see cref="Address" /> by the specified number of elements
+		/// </summary>
+		/// <param name="elemCnt">Number of elements</param>
+		void Increment(int elemCnt = 1);
+
+		/// <summary>
+		///     Decrement the <see cref="Address" /> by the specified number of elements
+		/// </summary>
+		/// <param name="elemCnt">Number of elements</param>
+		void Decrement(int elemCnt = 1);
+
 
 	}
 

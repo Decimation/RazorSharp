@@ -22,6 +22,9 @@ namespace RazorSharp.Analysis
 	/// <typeparam name="T">Type to get the layout of.</typeparam>
 	public unsafe class ObjectLayout<T>
 	{
+
+		#region Fields
+
 		private readonly IntPtr m_pAddr;
 		private readonly T      m_value;
 		private const    char   Omitted = '-';
@@ -32,14 +35,19 @@ namespace RazorSharp.Analysis
 		/// </summary>
 		private readonly bool m_bFullOffset;
 
-		public ConsoleTable Table { get; }
-
 
 		/// <summary>
-		/// If a value of type <typeparamref name="T"/> wasn't supplied in the constructor, we pass a value of <c>default</c> of type
-		/// <typeparamref name="T"/> to <see cref="Create"/>. Omit addresses and values in <see cref="Table"/>.
+		///     If a value of type <typeparamref name="T" /> wasn't supplied in the constructor, we pass a value of <c>default</c>
+		///     of type
+		///     <typeparamref name="T" /> to <see cref="Create" />. Omit addresses and values in <see cref="Table" />.
 		/// </summary>
 		private readonly bool m_bIsDefault;
+
+		public ConsoleTable Table { get; }
+
+		#endregion
+
+		#region Constructors
 
 		public ObjectLayout(bool bFieldsOnly = true, bool bFullOffset = false)
 		{
@@ -52,7 +60,7 @@ namespace RazorSharp.Analysis
 
 
 			Table = new ConsoleTable(bFieldsOnly ? "Field Offset" : "Memory Offset", "Address", "Size", "Type", "Name",
-				"Value");
+				"Value", "Unique attributes");
 
 			T def = default;
 			Create(ref def);
@@ -73,7 +81,7 @@ namespace RazorSharp.Analysis
 			// If we're only displaying fields, we'll display the offset relative to the first field
 
 			Table = new ConsoleTable(bFieldsOnly ? "Field Offset" : "Memory Offset", "Address", "Size", "Type", "Name",
-				"Value");
+				"Value", "Unique attributes");
 
 			if (!typeof(T).IsValueType) {
 				// Point to heap
@@ -89,6 +97,9 @@ namespace RazorSharp.Analysis
 				StringCreate();
 			}
 		}
+
+		#endregion
+
 
 		private string GetOffsetString(int baseOfs, int rightOfs, int leftOfs)
 		{
@@ -128,11 +139,11 @@ namespace RazorSharp.Analysis
 				if (m_bIsDefault) {
 					// ObjHeader
 					Table.AddRow(-IntPtr.Size, Omitted, IntPtr.Size, objHeaderType,
-						objHeaderName, Omitted);
+						objHeaderName, Omitted, UniqueAttributes.None);
 
 					// MethodTable*
 					Table.AddRow(0, Omitted, IntPtr.Size, methodTableType, methodTableName,
-						Omitted);
+						Omitted, UniqueAttributes.None);
 
 					return;
 				}
@@ -143,11 +154,11 @@ namespace RazorSharp.Analysis
 
 				// ObjHeader
 				Table.AddRow(-IntPtr.Size, Hex.ToHex(m_pAddr - IntPtr.Size), IntPtr.Size, objHeaderType,
-					objHeaderName, objHeaderMem == null ? Omitted.ToString() : Collections.ToString(objHeaderMem));
+					objHeaderName, objHeaderMem == null ? Omitted.ToString() : Collections.ToString(objHeaderMem), UniqueAttributes.None);
 
 				// MethodTable*
 				Table.AddRow(0, Hex.ToHex(m_pAddr), IntPtr.Size, methodTableType, methodTableName,
-					methodTablePtr == IntPtr.Zero ? Omitted.ToString() : Hex.ToHex(methodTablePtr));
+					methodTablePtr == IntPtr.Zero ? Omitted.ToString() : Hex.ToHex(methodTablePtr), UniqueAttributes.None);
 			}
 		}
 
@@ -167,8 +178,29 @@ namespace RazorSharp.Analysis
 
 				IntPtr addr = m_pAddr + charOffset + i * sizeof(char) + baseOfs;
 				Table.AddRow(ofsStr, Hex.ToHex(addr), sizeof(char), typeof(char).Name, $"(Character {i + 2})",
-					Memory.Memory.Read<char>(addr));
+					Memory.Memory.Read<char>(addr), UniqueAttributes.None);
 			}
+		}
+
+		private enum UniqueAttributes
+		{
+			None,
+			FixedBuffer,
+			AutoProperty,
+			Padding,
+		}
+
+		private static UniqueAttributes FindUniqueAttributes(Pointer<FieldDesc> fd)
+		{
+			if (fd.Reference.IsFixedBuffer) {
+				return UniqueAttributes.FixedBuffer;
+			}
+
+			if (fd.Reference.IsAutoProperty) {
+				return UniqueAttributes.AutoProperty;
+			}
+
+			return UniqueAttributes.None;
 		}
 
 
@@ -197,11 +229,12 @@ namespace RazorSharp.Analysis
 
 				if (m_bIsDefault) {
 					Table.AddRow(ofsStr, Omitted, v.Reference.Size,
-						v.Reference.Info.FieldType.Name, v.Reference.Name, Omitted);
+						v.Reference.Info.FieldType.Name, v.Reference.Name, Omitted, FindUniqueAttributes(v));
 				}
 				else {
 					Table.AddRow(ofsStr, Hex.ToHex(v.Reference.GetAddress(ref t)), v.Reference.Size,
-						v.Reference.Info.FieldType.Name, v.Reference.Name, v.Reference.GetValue(t));
+						v.Reference.Info.FieldType.Name, v.Reference.Name, v.Reference.GetValue(t),
+						FindUniqueAttributes(v));
 				}
 
 
@@ -222,15 +255,20 @@ namespace RazorSharp.Analysis
 
 					if (m_bIsDefault) {
 						Table.AddRow(GetOffsetString(baseOfs, ro, lo), Omitted, padSize,
-							paddingByte, paddingStr, 0);
+							paddingByte, paddingStr, 0, UniqueAttributes.Padding);
 					}
 					else {
 						Table.AddRow(GetOffsetString(baseOfs, ro, lo), Hex.ToHex(m_pAddr + padOffset), padSize,
-							paddingByte, paddingStr, 0);
+							paddingByte, paddingStr, 0, UniqueAttributes.Padding);
 					}
 				}
 
 				// end padding
+			}
+
+			if (m_bIsDefault) {
+				// Remove value and address columns
+				Table.RemoveColumn(1).RemoveColumn(4);
 			}
 		}
 

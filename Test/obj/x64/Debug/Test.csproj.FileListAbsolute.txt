@@ -75,3 +75,4 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\zh-Hans\Microsoft.Cod
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\JetBrains.Annotations.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\JetBrains.Annotations.xml
+C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\RazorSharp.dll.config

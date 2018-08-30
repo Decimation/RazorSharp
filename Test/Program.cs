@@ -20,6 +20,7 @@ using RazorSharp.Analysis;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Fixed;
 using RazorSharp.CLR.Structures;
+using RazorSharp.CLR.Structures.HeapObjects;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -73,6 +74,7 @@ namespace Test
 			 * - x64
 			 * - Windows
 			 * - .NET CLR
+			 * - Workstation GC
 			 *
 			 * Current target: .NET 4.7.2
 			 *
@@ -92,10 +94,22 @@ namespace Test
 #endif
 
 
-		private static T* AddrOf<T>(ref T t) where T : unmanaged
+		/**
+		 * Entry point
+		 */
+		public static void Main(string[] args)
 		{
-			return (T*) AddressOf(ref t);
+			string x = "foo";
+			InspectorHelper.Inspect(ref x);
 		}
+
+
+		private static void __break()
+		{
+			Console.ReadLine();
+		}
+
+		#region todo
 
 		private static void VMMap()
 		{
@@ -111,59 +125,9 @@ namespace Test
 			Console.WriteLine(InspectorHelper.CreateLabelString("GC:", table));
 		}
 
-		// Returns number of immediate pointers this object has.
-		// size is only used if you have an array of value types.
-		[CLRSigcall("4C 8B 59 F8 4C 8D 51 E8 45 33 C9 4D 85 DB 7E 25 49 C1 E3 04")]
-		private static int GetNumPointers(Pointer<MethodTable> pMt, ulong objSize, ulong numComponents)
+		private static T* AddrOf<T>(ref T t) where T : unmanaged
 		{
-			throw new NotTranspiledException();
-		}
-
-		private static int GetNumPointers(Pointer<MethodTable> pMt, int objSize, int numComponents)
-		{
-			return GetNumPointers(pMt, (ulong) objSize, (ulong) numComponents);
-		}
-
-		private struct Struct
-		{
-			public string s;
-			public long   heapaddr;
-		}
-
-		private class Class
-		{
-			public string s;
-			public long   heapaddr;
-
-			public Class(string s)
-			{
-				this.s = s;
-			}
-
-			public override string ToString()
-			{
-				return String.Format("s -> {0}\n  -> {1}", Hex.ToHex(Unsafe.AddressOfHeap(ref s)), Hex.ToHex(heapaddr));
-			}
-		}
-
-
-		public static void Main(string[] args)
-		{
-			Struct @struct = new Struct();
-			Console.WriteLine(InspectorHelper.LayoutString(ref @struct));
-
-			Class @class = new Class("foo");
-			Console.WriteLine(InspectorHelper.LayoutString(ref @class));
-			Console.WriteLine(InspectorHelper.LayoutString<Class>());
-
-			dynamic dyn = "";
-			Console.WriteLine(InspectorHelper.LayoutString<dynamic>(ref dyn));
-		}
-
-
-		private static void __break()
-		{
-			Console.ReadLine();
+			return (T*) AddressOf(ref t);
 		}
 
 		private static void Hook<TOrig, TNew>(string origFn, string newFn)
@@ -226,6 +190,8 @@ namespace Test
 
 			return new UObj<T>(lpMem.Address);
 		}
+
+		#endregion
 
 
 		/**

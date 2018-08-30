@@ -70,13 +70,13 @@ namespace RazorSharp.Analysis
 
 		public static string LayoutString<T>(ref T t, bool fieldsOnly = false, bool fullOffset = false)
 		{
-			var v = new ObjectLayout<T>(ref t, fieldsOnly, fullOffset).Table;
+			ConsoleTable v = new ObjectLayout<T>(ref t, fieldsOnly, fullOffset).Table;
 			return v.ToMarkDownString();
 		}
 
 		public static string LayoutString<T>(bool fieldsOnly = false, bool fullOffset = false)
 		{
-			var v = new ObjectLayout<T>(fieldsOnly, fullOffset).Table;
+			ConsoleTable v = new ObjectLayout<T>(fieldsOnly, fullOffset).Table;
 			return v.ToMarkDownString();
 		}
 

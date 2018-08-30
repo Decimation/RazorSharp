@@ -221,7 +221,7 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public Type RuntimeType => CLRFunctions.JIT_GetRuntimeType(Unsafe.AddressOf(ref this).ToPointer());
+		public Type RuntimeType => Runtime.MethodTableToType(Unsafe.AddressOf(ref this));
 
 		/// <summary>
 		///     The number of instance fields in this type.
@@ -272,11 +272,11 @@ namespace RazorSharp.CLR.Structures
 		[FieldOffset(12)] private readonly WORD         m_wNumVirtuals;
 		[FieldOffset(14)] private readonly WORD         m_wNumInterfaces;
 		[FieldOffset(16)] private readonly MethodTable* m_pParentMethodTable;
-		[FieldOffset(24)] private readonly Module*      m_pLoaderModule;
+		[FieldOffset(24)] private readonly void*        m_pLoaderModule;
 		[FieldOffset(32)] private readonly void*        m_pWriteableData;
 		[FieldOffset(40)] private readonly EEClass*     m_pEEClass;
 		[FieldOffset(40)] private readonly MethodTable* m_pCanonMT;
-		[FieldOffset(48)] private readonly void**       m_pPerInstInfo;
+		[FieldOffset(48)] private readonly void*        m_pPerInstInfo;
 		[FieldOffset(48)] private readonly void*        m_ElementTypeHnd;
 		[FieldOffset(48)] private readonly void*        m_pMultipurposeSlot1;
 		[FieldOffset(56)] private readonly void*        m_pInterfaceMap;

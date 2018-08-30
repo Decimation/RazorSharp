@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using RazorCommon;
 using RazorCommon.Extensions;
+using RazorCommon.Strings;
 using RazorSharp.CLR.Fixed;
 using RazorSharp.Pointers.Ex;
 using RazorSharp.Utilities;
@@ -27,6 +28,7 @@ namespace RazorSharp.Pointers
 	/// <summary>
 	///     <para>A bare-bones, lighter type of <see cref="ExPointer{T}" />, equal to <see cref="IntPtr.Size" /></para>
 	///     <para> Can be represented as a pointer in memory. </para>
+	///     <para>Has identical or better performance than native pointers.</para>
 	///     <list type="bullet">
 	///         <item>
 	///             <description>No bounds checking</description>
@@ -46,14 +48,9 @@ namespace RazorSharp.Pointers
 		///     <para>The address we're pointing to.</para>
 		///     <para>We want this to be the only field so it can be represented as a pointer in memory.</para>
 		/// </summary>
-		private void* m_value;
+		private void* m_pValue;
 
 		#region Properties
-
-		/*public T this[int index] {
-			get => MMemory.Read<T>(PointerUtils.Offset<T>(m_value, index));
-			set => MMemory.Write(PointerUtils.Offset<T>(m_value, index), 0, value);
-		}*/
 
 		public ref T this[int index] => ref AsRef<T>(index);
 
@@ -65,13 +62,13 @@ namespace RazorSharp.Pointers
 		}
 
 		public IntPtr Address {
-			get => (IntPtr) m_value;
-			set => m_value = (void*) value;
+			get => (IntPtr) m_pValue;
+			set => m_pValue = (void*) value;
 		}
 
 		public int ElementSize => Unsafe.SizeOf<T>();
 
-		public bool IsNull => m_value == null;
+		public bool IsNull => m_pValue == null;
 
 		public bool IsAligned => MMemory.IsAligned(Address);
 
@@ -83,20 +80,16 @@ namespace RazorSharp.Pointers
 
 		public Pointer(void* v)
 		{
-			m_value = v;
+			m_pValue = v;
 		}
 
-		public Pointer(long v)
-		{
-			m_value = (void*) v;
-		}
+		public Pointer(long v) : this((void*) v) { }
 
-		public Pointer(ref T t)
-		{
-			m_value = Unsafe.AddressOf(ref t).ToPointer();
-		}
+		public Pointer(ref T t) : this(Unsafe.AddressOf(ref t)) { }
 
 		#endregion
+
+		#region Collection-esque operations
 
 		public int IndexOf(T value, int length)
 		{
@@ -112,43 +105,6 @@ namespace RazorSharp.Pointers
 			}
 
 			return -1;
-		}
-
-		public PinHandle Pin()
-		{
-			RazorContract.Requires(!typeof(T).IsValueType, "Value types do not need to be pinned");
-			return new ObjectPinHandle(Value);
-		}
-
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private IntPtr Offset(int elemCnt)
-		{
-			return PointerUtils.Offset<T>(Address, elemCnt);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private IntPtr Offset<TType>(int elemCnt)
-		{
-			return PointerUtils.Offset<TType>(Address, elemCnt);
-		}
-
-		public ConsoleTable ToTable(int elemCnt)
-		{
-			ConsoleTable table = typeof(T).IsValueType
-				? new ConsoleTable("Address", "Offset", "Value")
-				: new ConsoleTable("Address", "Offset", "Pointer", "Value");
-
-			for (int i = 0; i < elemCnt; i++) {
-				if (!typeof(T).IsValueType) {
-					table.AddRow(Hex.ToHex(Offset(i)), i, Hex.ToHex(Read<long>(i)), this[i]);
-				}
-				else {
-					table.AddRow(Hex.ToHex(Offset(i)), i, this[i]);
-				}
-			}
-
-			return table;
 		}
 
 		public void Init(IEnumerable<T> enumerable)
@@ -169,6 +125,10 @@ namespace RazorSharp.Pointers
 			}
 		}
 
+		#endregion
+
+
+		#region Read / write
 
 		public void Write<TType>(TType t, int elemOffset = 0)
 		{
@@ -191,7 +151,69 @@ namespace RazorSharp.Pointers
 			return ref MMemory.AsRef<TType>(Offset<TType>(elemOffset));
 		}
 
-		#region Methods
+		public T[] Copy(int startIndex, int elemCnt)
+		{
+			return Copy<T>(startIndex, elemCnt);
+		}
+
+		public TType[] Copy<TType>(int startIndex, int elemCnt)
+		{
+			TType[] rg = new TType[elemCnt];
+			for (int i = startIndex; i < elemCnt; i++) {
+				rg[i] = Read<TType>(i);
+			}
+
+			return rg;
+		}
+
+		#endregion
+
+
+		#region Other methods
+
+		public PinHandle Pin()
+		{
+			RazorContract.Requires(!typeof(T).IsValueType, "Value types do not need to be pinned");
+			return new ObjectPinHandle(Value);
+		}
+
+
+		public ConsoleTable ToInfoTable()
+		{
+			ConsoleTable table = typeof(T).IsValueType
+				? new ConsoleTable("Address", "Value", "Aligned", "Null", "Element size")
+				: new ConsoleTable("Address", "Pointer", "Value", "Aligned", "Null", "Element size");
+
+			if (typeof(T).IsValueType) {
+				table.AddRow(Hex.ToHex(m_pValue), Reference, IsAligned ? StringUtils.Check : StringUtils.BallotX,
+					IsNull ? StringUtils.Check : StringUtils.BallotX, ElementSize);
+			}
+			else {
+				table.AddRow(Hex.ToHex(m_pValue), Hex.ToHex(Read<long>()), Reference,
+					IsAligned ? StringUtils.Check : StringUtils.BallotX,
+					IsNull ? StringUtils.Check : StringUtils.BallotX, ElementSize);
+			}
+
+			return table;
+		}
+
+		public ConsoleTable ToTable(int elemCnt)
+		{
+			ConsoleTable table = typeof(T).IsValueType
+				? new ConsoleTable("Address", "Offset", "Value")
+				: new ConsoleTable("Address", "Offset", "Pointer", "Value");
+
+			for (int i = 0; i < elemCnt; i++) {
+				if (!typeof(T).IsValueType) {
+					table.AddRow(Hex.ToHex(Offset(i)), i, Hex.ToHex(Read<long>(i)), this[i]);
+				}
+				else {
+					table.AddRow(Hex.ToHex(Offset(i)), i, this[i]);
+				}
+			}
+
+			return table;
+		}
 
 		public Pointer<TNew> Reinterpret<TNew>()
 		{
@@ -200,53 +222,17 @@ namespace RazorSharp.Pointers
 
 		public void* ToPointer()
 		{
-			return m_value;
+			return m_pValue;
 		}
 
 		public int ToInt32()
 		{
-			return (int) m_value;
+			return (int) m_pValue;
 		}
 
 		public long ToInt64()
 		{
-			return (long) m_value;
-		}
-
-		/// <summary>
-		///     Increment the <see cref="Address" /> by the specified number of bytes
-		/// </summary>
-		/// <param name="bytes">Number of bytes to add</param>
-		public void Add(int bytes)
-		{
-			m_value = PointerUtils.Add(m_value, bytes).ToPointer();
-		}
-
-		/// <summary>
-		///     Decrement <see cref="Address" /> by the specified number of bytes
-		/// </summary>
-		/// <param name="bytes">Number of bytes to subtract</param>
-		public void Subtract(int bytes)
-		{
-			m_value = PointerUtils.Subtract(m_value, bytes).ToPointer();
-		}
-
-		/// <summary>
-		///     Increment the <see cref="Address" /> by the specified number of elements
-		/// </summary>
-		/// <param name="elemCnt">Number of elements</param>
-		public void Increment(int elemCnt = 1)
-		{
-			m_value = PointerUtils.Offset<T>(m_value, elemCnt).ToPointer();
-		}
-
-		/// <summary>
-		///     Decrement the <see cref="Address" /> by the specified number of elements
-		/// </summary>
-		/// <param name="elemCnt">Number of elements</param>
-		public void Decrement(int elemCnt = 1)
-		{
-			m_value = PointerUtils.Offset<T>(m_value, -elemCnt).ToPointer();
+			return (long) m_pValue;
 		}
 
 		#endregion
@@ -275,6 +261,42 @@ namespace RazorSharp.Pointers
 
 
 		#region Arithmetic
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private IntPtr Offset(int elemCnt)
+		{
+			return PointerUtils.Offset<T>(Address, elemCnt);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private IntPtr Offset<TType>(int elemCnt)
+		{
+			return PointerUtils.Offset<TType>(Address, elemCnt);
+		}
+
+
+		public void Add(int bytes)
+		{
+			m_pValue = PointerUtils.Add(m_pValue, bytes).ToPointer();
+		}
+
+
+		public void Subtract(int bytes)
+		{
+			m_pValue = PointerUtils.Subtract(m_pValue, bytes).ToPointer();
+		}
+
+
+		public void Increment(int elemCnt = 1)
+		{
+			m_pValue = PointerUtils.Offset<T>(m_pValue, elemCnt).ToPointer();
+		}
+
+
+		public void Decrement(int elemCnt = 1)
+		{
+			m_pValue = PointerUtils.Offset<T>(m_pValue, -elemCnt).ToPointer();
+		}
 
 		/// <summary>
 		///     Increments the <see cref="Address" /> by the specified number of elements.
@@ -356,7 +378,8 @@ namespace RazorSharp.Pointers
 
 		public override int GetHashCode()
 		{
-			return unchecked((int) (long) m_value);
+			// ReSharper disable once NonReadonlyMemberInGetHashCode
+			return unchecked((int) (long) m_pValue);
 		}
 
 
@@ -380,6 +403,8 @@ namespace RazorSharp.Pointers
 		///     <para><c>"O"</c>: Object (<see cref="Reference" />) </para>
 		///     <para><c>"P"</c>: Pointer (<see cref="Address" />) </para>
 		///     <para><c>"S"</c>: Safe <c>"O"</c> (when <see cref="Reference" /> or <see cref="Address" /> may be <c>null</c>) </para>
+		///     <para><c>"I"</c>: Table of information </para>
+		///     <para><c>"B"</c>: Both <see cref="Address" /> and <see cref="Reference" /></para>
 		/// </param>
 		/// <param name="formatProvider"></param>
 		/// <returns></returns>
@@ -406,6 +431,8 @@ namespace RazorSharp.Pointers
 					}
 
 					return Reference.ToString();
+				case "I":
+					return ToInfoTable().ToMarkDownString();
 				case "P":
 					return Hex.ToHex(Address);
 				case "S":
@@ -415,27 +442,12 @@ namespace RazorSharp.Pointers
 					else {
 						goto case "O";
 					}
+				case "B":
+					return String.Format("Value @ {0}:\n{1}", Hex.ToHex(Address), Reference.ToString());
 				default:
 					goto case "P";
 			}
 		}
-
-		/*[HandleProcessCorruptedStateExceptions]
-		public T TryRead()
-		{
-			T t;
-			try {
-				t = Read<T>();
-			}
-			catch (AccessViolationException) {
-				return default;
-			}
-			catch (NullReferenceException) {
-				return default;
-			}
-
-			return t;
-		}*/
 
 
 		public override string ToString()

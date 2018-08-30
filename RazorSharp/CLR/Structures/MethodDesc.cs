@@ -5,9 +5,7 @@
 using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp.Memory;
@@ -84,10 +82,12 @@ namespace RazorSharp.CLR.Structures
 			SignatureCall.Transpile<MethodDesc>();
 		}
 
-		public Type       RuntimeType => CLRFunctions.JIT_GetRuntimeType(MethodTable.ToPointer());
+		public Type       RuntimeType => Runtime.MethodTableToType(MethodTable);
 		public MethodInfo Info        => (MethodInfo) RuntimeType.Module.ResolveMethod(MemberDef);
 		public IntPtr     Function    => Info.MethodHandle.GetFunctionPointer();
 		public string     Name        => Info.Name;
+
+		public byte ChunkIndex => m_chunkIndex;
 
 		/// <summary>
 		///     <remarks>
@@ -169,6 +169,16 @@ namespace RazorSharp.CLR.Structures
 
 		#endregion
 
+		public Pointer<MethodDescChunk> MethodDescChunk {
+			get {
+				// return
+				//PTR_MethodDescChunk(dac_cast<TADDR>(this) -
+				//                    (sizeof(MethodDescChunk) + (GetMethodDescIndex() * MethodDesc::ALIGNMENT)));
+				Pointer<MethodDescChunk> __this = Unsafe.AddressOf(ref this);
+				__this.Subtract(sizeof(MethodDescChunk) + ChunkIndex * ALIGNMENT);
+				return __this;
+			}
+		}
 
 		/*public object Invoke<TDelegate>(params object[] args) where TDelegate : Delegate
 		{
