@@ -58,7 +58,7 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		// todo
-		public bool IsPinned()
+		internal bool IsPinned()
 		{
 			//BIT_SBLK_GC_RESERVE
 			//return !!((((CObjectHeader*)this)->GetHeader()->GetBits()) & BIT_SBLK_GC_RESERVE);

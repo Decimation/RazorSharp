@@ -91,14 +91,14 @@ namespace RazorSharp.Pointers
 
 		#region Collection-esque operations
 
-		public int IndexOf(T value, int length)
+		public int IndexOf(T value, int searchLength)
 		{
-			return IndexOf(value, 0, length);
+			return IndexOf(value, 0, searchLength);
 		}
 
-		public int IndexOf(T value, int startIndex, int elemCnt)
+		public int IndexOf(T value, int startIndex, int searchLength)
 		{
-			for (int i = startIndex; i < elemCnt; i++) {
+			for (int i = startIndex; i < searchLength; i++) {
 				if (this[i].Equals(value)) {
 					return i;
 				}
@@ -123,6 +123,11 @@ namespace RazorSharp.Pointers
 			for (int i = 0; i < values.Length; i++) {
 				this[i] = values[i];
 			}
+		}
+
+		public bool Contains(T value, int length)
+		{
+			return IndexOf(value, length) != -1;
 		}
 
 		#endregion
@@ -449,6 +454,10 @@ namespace RazorSharp.Pointers
 			}
 		}
 
+		public string ToString(string format)
+		{
+			return ToString(format, CultureInfo.CurrentCulture);
+		}
 
 		public override string ToString()
 		{

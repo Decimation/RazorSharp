@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace Test.Testing
+namespace Test.Testing.Types
 {
 
 	internal class GenericDummy<T>

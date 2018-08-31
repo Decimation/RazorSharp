@@ -4,6 +4,7 @@ using System;
 using System.Reflection;
 using BenchmarkDotNet.Attributes;
 using RazorSharp.CLR;
+using Test.Testing.Types;
 
 #endregion
 

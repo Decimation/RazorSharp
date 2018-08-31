@@ -214,12 +214,11 @@
       <Compile Include="Testing\Benchmarking\PointerBenchmarking.cs"/>
     <Compile Include="Testing\Benchmarking\MarshalBenchmarking.cs" />
     <Compile Include="Testing\Benchmarking\UnsafeBenchmarking.cs" />
-    <Compile Include="Testing\GenericDummy.cs" />
-    <Compile Include="Testing\Point.cs" />
       <Compile Include="Testing\TestingUtil.cs"/>
     <Compile Include="Testing\Benchmarking\AllocPointerBenchmarking.cs" />
-    <Compile Include="Testing\Dummy.cs" />
+      <Compile Include="Testing\Tests\AddrInRangeTests.cs"/>
     <Compile Include="Testing\Tests\AllocPointerTests.cs" />
+      <Compile Include="Testing\Tests\SignatureCallTests.cs"/>
       <Compile Include="Testing\Tests\StructureTests.cs"/>
     <Compile Include="Testing\Tests\HeapObjectTests.cs" />
     <Compile Include="Testing\Tests\OffsetOfTests.cs" />
@@ -229,6 +228,9 @@
     <Compile Include="Testing\Tests\RuntimeTests.cs" />
     <Compile Include="Testing\Tests\SizeTests.cs" />
     <Compile Include="Testing\Tests\UnsafeTests.cs" />
+      <Compile Include="Testing\Types\Dummy.cs"/>
+      <Compile Include="Testing\Types\GenericDummy.cs"/>
+      <Compile Include="Testing\Types\Point.cs"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -57,13 +57,13 @@ namespace RazorSharp.Analysis
 		public static void Inspect<T>(ref T t,
 			InspectorMode mode) where T : class
 		{
-			RefInspector<T>.Write(ref t, false, mode);
+			ReferenceInspector<T>.Write(ref t, false, mode);
 		}
 
 		public static void Inspect<T>(ref T t, bool printStructures = false,
 			InspectorMode mode = InspectorMode.Default) where T : class
 		{
-			RefInspector<T>.Write(ref t, printStructures, mode);
+			ReferenceInspector<T>.Write(ref t, printStructures, mode);
 		}
 
 		#endregion

@@ -12,7 +12,7 @@ using System;
 #pragma warning disable 649
 #pragma warning disable 169
 
-namespace Test.Testing
+namespace Test.Testing.Types
 {
 
 	public unsafe class Dummy

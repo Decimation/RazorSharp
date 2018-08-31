@@ -70,7 +70,7 @@ namespace RazorSharp.CLR
 		///     </remarks>
 		/// </summary>
 		public int GCCount {
-			[CLRSigcall(OffsetGuess = 0x123C60)] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new NotTranspiledException();
 		}
 
 		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
@@ -95,7 +95,7 @@ namespace RazorSharp.CLR
 		/// <param name="obj"></param>
 		/// <param name="smallHeapOnly"></param>
 		/// <returns></returns>
-		[CLRSigcall(OffsetGuess = 0x58E260)]
+		[CLRSigcall]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
 			throw new NotTranspiledException();
@@ -118,14 +118,19 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
-		[CLRSigcall(OffsetGuess = 0x129100)]
+		[CLRSigcall]
 		public bool IsEphemeral(void* obj)
 		{
 			throw new NotTranspiledException();
 		}
 
+		public bool IsEphemeral<T>(T t) where T : class
+		{
+			return IsEphemeral(Unsafe.AddressOfHeap(ref t).ToPointer());
+		}
+
 		// 85
-		[CLRSigcall(OffsetGuess = 0x3C3C)]
+		[CLRSigcall]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
 		{
 			throw new NotTranspiledException();

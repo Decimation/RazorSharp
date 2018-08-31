@@ -29,6 +29,7 @@ using Test.Testing;
 using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
 using Module = System.Reflection.Module;
+using Point = Test.Testing.Types.Point;
 
 #endregion
 
@@ -93,14 +94,28 @@ namespace Test
 		}
 #endif
 
+		// todo: protect address-sensitive functions
 
 		/**
 		 * Entry point
 		 */
 		public static void Main(string[] args)
 		{
-			string x = "foo";
-			InspectorHelper.Inspect(ref x);
+			VMMap();
+			Point p = new Point();
+			InspectorHelper.InspectVal(ref p);
+
+			var fd = Runtime.GetFieldDesc<Struct>("l");
+			var fi = typeof(Struct).GetField("l", BindingFlags.NonPublic | BindingFlags.Instance);
+
+			Debug.Assert(fd.Reference.MemberDef == fi.MetadataToken);
+		}
+
+		struct Struct
+		{
+			private long l;
+			private int  i;
+			public  int  Int => i;
 		}
 
 
@@ -205,6 +220,7 @@ namespace Test
 		 * Test:
 		 *  - RazorCommon
 		 *  - CompilerServices.Unsafe
+		 *  - RazorInvoke
 		 * 	- NUnit
 		 *  - BenchmarkDotNet
 		 */

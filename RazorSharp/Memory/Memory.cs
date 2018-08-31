@@ -76,13 +76,7 @@ namespace RazorSharp.Memory
 
 		public static T[] CopyOut<T>(Pointer<T> ptr, int elemCount)
 		{
-			T[] arr = new T[elemCount];
-
-			for (int i = 0; i < elemCount; i++) {
-				arr[i] = ptr[i];
-			}
-
-			return arr;
+			return ptr.Copy(0, elemCount);
 		}
 
 		#region Bits
@@ -205,9 +199,13 @@ namespace RazorSharp.Memory
 			return IsAddressInRange(StackLimit, ptr.Address, StackBase);
 		}
 
-		public static bool IsAddressInRange(IntPtr max, IntPtr p, IntPtr min)
+		public static bool IsAddressInRange(IntPtr highest, IntPtr p, IntPtr lowest)
 		{
-			return max.ToInt64() < p.ToInt64() && p.ToInt64() <= min.ToInt64();
+			// return m_CacheStackLimit < addr && addr <= m_CacheStackBase;
+			// if (!((object < g_gc_highest_address) && (object >= g_gc_lowest_address)))
+
+			return (p.ToInt64() < highest.ToInt64()) && (p.ToInt64() >= lowest.ToInt64());
+//			return max.ToInt64() < p.ToInt64() && p.ToInt64() <= min.ToInt64();
 		}
 
 

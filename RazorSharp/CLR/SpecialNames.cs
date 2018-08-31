@@ -15,7 +15,7 @@ namespace RazorSharp.CLR
 		private const  string BACKING_FIELD_NAME_SUFFIX = "k__BackingField";
 
 
-		internal static string NameOfFixedBuffer(string fieldName)
+		internal static string TypeNameOfFixedBuffer(string fieldName)
 		{
 			return String.Format(FIXED_BUFFER_NAME, fieldName);
 		}

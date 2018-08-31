@@ -13,6 +13,7 @@ using RazorSharp.CLR;
 using RazorSharp.CLR.Structures.HeapObjects;
 using RazorSharp.Pointers;
 using RazorSharp.Pointers.Ex;
+using Test.Testing.Types;
 
 #endregion
 

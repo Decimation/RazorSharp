@@ -218,7 +218,7 @@
   <ItemGroup>
     <Compile Include="Analysis\Inspector.cs" />
     <Compile Include="Analysis\ObjectLayout.cs" />
-    <Compile Include="Analysis\RefInspector.cs" />
+      <Compile Include="Analysis\ReferenceInspector.cs"/>
       <Compile Include="CLR\Fixed\ObjectPinHandle.cs"/>
       <Compile Include="CLR\Fixed\ObjectPinner.cs"/>
       <Compile Include="CLR\Fixed\PinHandle.cs"/>
@@ -276,7 +276,7 @@
   </ItemGroup>
     <ItemGroup>
         <None Include="app.config"/>
-        <None Include="packages.config" />
+        <None Include="packages.config"/>
     </ItemGroup>
     <ItemGroup>
         <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll"/>

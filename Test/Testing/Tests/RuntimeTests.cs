@@ -7,6 +7,7 @@ using RazorSharp;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
+using Test.Testing.Types;
 
 #endregion
 
@@ -295,8 +296,11 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestPoint()
 		{
-			Pointer<FieldDesc> xfd = Runtime.GetFieldDesc<Point>("X", true);
+			Pointer<FieldDesc> xfd = Runtime.GetFieldDesc<Point>("X", SpecialFieldTypes.AutoProperty);
 			Debug.Assert(xfd.Reference.MemberDef == xfd.Reference.Info.MetadataToken);
+
+			var ffd = Runtime.GetFieldDesc<Point>("FixedBuffer");
+			Debug.Assert(ffd.Reference.MemberDef == ffd.Reference.Info.MetadataToken);
 		}
 
 		[Test]

@@ -17,6 +17,21 @@ using RazorSharp.Utilities.Exceptions;
 namespace RazorSharp.CLR
 {
 
+	public enum SpecialFieldTypes
+	{
+
+
+		/// <summary>
+		/// The field is an auto-property's backing field.
+		/// </summary>
+		AutoProperty,
+
+		/// <summary>
+		/// The field is normal.
+		/// </summary>
+		None,
+	}
+
 	/// <summary>
 	///     Provides utilities for manipulating CLR structures.
 	///     <para>Related files:</para>
@@ -203,18 +218,27 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <param name="t"></param>
 		/// <param name="name"></param>
-		/// <param name="isAutoProperty"></param>
+		/// <param name="fieldTypes"></param>
 		/// <param name="flags"></param>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		public static Pointer<FieldDesc> GetFieldDesc(Type t, string name, bool isAutoProperty = false,
+		public static Pointer<FieldDesc> GetFieldDesc(Type t, string name, SpecialFieldTypes fieldTypes = SpecialFieldTypes.None,
 			BindingFlags flags = DefaultFlags)
 		{
 			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
 
-			if (isAutoProperty) {
-				name = SpecialNames.NameOfAutoPropertyBackingField(name);
+			switch (fieldTypes) {
+				case SpecialFieldTypes.AutoProperty:
+					name = SpecialNames.NameOfAutoPropertyBackingField(name);
+					break;
+
+				case SpecialFieldTypes.None:
+					break;
+					default:
+						break;
 			}
+
+
 
 			FieldInfo fieldInfo = t.GetField(name, flags);
 			RazorContract.RequiresNotNull(fieldInfo);
@@ -224,10 +248,10 @@ namespace RazorSharp.CLR
 			return fieldDesc;
 		}
 
-		public static Pointer<FieldDesc> GetFieldDesc<T>(string name, bool isAutoProperty = false,
+		public static Pointer<FieldDesc> GetFieldDesc<T>(string name, SpecialFieldTypes fieldTypes = SpecialFieldTypes.None,
 			BindingFlags flags = DefaultFlags)
 		{
-			return GetFieldDesc(typeof(T), name, isAutoProperty, flags);
+			return GetFieldDesc(typeof(T), name, fieldTypes, flags);
 		}
 
 		internal static FieldInfo[] GetFields<T>()

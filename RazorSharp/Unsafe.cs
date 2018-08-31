@@ -143,15 +143,15 @@ namespace RazorSharp
 		/// </summary>
 		/// <param name="instance">Instance of the enclosing type</param>
 		/// <param name="name">Name of the field</param>
-		/// <param name="isAutoProperty">Whether the field is an auto-property</param>
-		public static IntPtr AddressOfField<T>(ref T instance, string name, bool isAutoProperty = false)
+		/// <param name="fieldTypes">If the field has unique attributes (i.e. auto-property)</param>
+		public static IntPtr AddressOfField<T>(ref T instance, string name, SpecialFieldTypes fieldTypes = SpecialFieldTypes.None)
 		{
-			Pointer<FieldDesc> fd = Runtime.GetFieldDesc<T>(name, isAutoProperty);
+			Pointer<FieldDesc> fd = Runtime.GetFieldDesc<T>(name, fieldTypes);
 			return fd.Reference.GetAddress(ref instance);
 		}
 
 		/// <summary>
-		///     <para>Returns the address of a type in memory.</para>
+		///     <para>Returns the address of <paramref name="t"/>.</para>
 		///     <remarks>
 		///         <para> Equals <see cref="CSUnsafe.AsPointer{T}" /></para>
 		///     </remarks>
@@ -165,7 +165,7 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		///     Returns the address of a reference type's heap memory.
+		///     Returns the address of reference type <paramref name="t"/>'s heap memory (raw data).
 		///     <remarks>
 		///         <para>
 		///             Note: This does not pin the reference in memory if it is a reference type.
@@ -187,7 +187,7 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		///     Returns the address of a reference type's heap memory, offset by the specified <see cref="OffsetType" />.
+		///     Returns the address of reference type <paramref name="t"/>'s heap memory, offset by the specified <see cref="OffsetType" />.
 		///     <remarks>
 		///         <para>
 		///             Note: This does not pin the reference in memory if it is a reference type.

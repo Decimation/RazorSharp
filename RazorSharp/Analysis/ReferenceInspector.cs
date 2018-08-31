@@ -13,14 +13,14 @@ using RazorSharp.CLR.Structures;
 namespace RazorSharp.Analysis
 {
 
-	public unsafe class RefInspector<T> : Inspector<T> where T : class
+	public unsafe class ReferenceInspector<T> : Inspector<T> where T : class
 	{
 		public new ReferenceSizeInfo     Sizes     => (ReferenceSizeInfo) base.Sizes;
 		public new ReferenceMetadataInfo Metadata  => (ReferenceMetadataInfo) base.Metadata;
 		public new ReferenceAddressInfo  Addresses => (ReferenceAddressInfo) base.Addresses;
 		public new ReferenceInternalInfo Internal  => (ReferenceInternalInfo) base.Internal;
 
-		public RefInspector(ref T t, InspectorMode mode = InspectorMode.Default) : base(ref t, mode)
+		public ReferenceInspector(ref T t, InspectorMode mode = InspectorMode.Default) : base(ref t, mode)
 		{
 			base.Metadata  = new ReferenceMetadataInfo(ref t);
 			base.Sizes     = new ReferenceSizeInfo(ref t);
@@ -158,7 +158,7 @@ namespace RazorSharp.Analysis
 		internal new static void Write(ref T t, bool printStructures = false,
 			InspectorMode mode = InspectorMode.Default)
 		{
-			RefInspector<T> inspector = new RefInspector<T>(ref t, mode);
+			ReferenceInspector<T> inspector = new ReferenceInspector<T>(ref t, mode);
 			WriteInspector(inspector, printStructures);
 		}
 	}

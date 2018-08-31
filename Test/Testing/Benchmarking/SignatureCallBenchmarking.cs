@@ -10,6 +10,7 @@ using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using Test.Testing.Types;
 
 #endregion
 
@@ -49,7 +50,7 @@ namespace Test.Testing.Benchmarking
 			SignatureCall.Transpile<FieldDesc>();
 			SignatureCall.Transpile<GCHeap>();
 
-			SignatureCall.AddFunction<CClass>("doSomething2",
+			SignatureCall.CacheFunction<CClass>("doSomething2",
 				new byte[]
 				{
 					0x4C, 0x8B, 0x01, 0x49, 0x83, 0xE0, 0xFC, 0x41, 0xF7, 0x00, 0x00, 0x00, 0x00, 0x80, 0x41, 0x8B,

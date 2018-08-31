@@ -4,15 +4,17 @@ using System;
 
 #endregion
 
-namespace Test.Testing
+namespace Test.Testing.Types
 {
 
-	internal struct Point
+	internal unsafe struct Point
 	{
 
 		public int X { get; set; }
 
 		public int Y { get; set; }
+
+		public fixed byte FixedBuffer[256];
 
 		public Point(int x, int y)
 		{

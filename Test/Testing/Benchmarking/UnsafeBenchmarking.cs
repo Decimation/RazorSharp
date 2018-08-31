@@ -2,6 +2,7 @@
 
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
+using Test.Testing.Types;
 
 #endregion
 

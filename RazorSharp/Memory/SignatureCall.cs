@@ -89,16 +89,16 @@ namespace RazorSharp.Memory
 		/// </summary>
 		private static readonly ISet<Type> TranspiledTypes = new HashSet<Type>();
 
-		private static readonly  SigScanner                     SigScanner   = new SigScanner();
-		private const            string                         TEXT_SEGMENT = ".text";
-		public static            bool                           UseTextSegment { get; set; } = true;
-		internal static readonly Dictionary<MethodInfo, byte[]> FunctionInfoMap;
+		private static readonly SigScanner                                  SigScanner   = new SigScanner();
+		private const           string                                      TEXT_SEGMENT = ".text";
+		public static           bool                                        UseTextSegment { get; set; } = true;
+		private static readonly Dictionary<MethodInfo, Tuple<byte[], long>> SigcallMethodMap;
 
 		static SignatureCall()
 		{
-			FunctionInfoMap = new Dictionary<MethodInfo, byte[]>();
+			SigcallMethodMap = new Dictionary<MethodInfo, Tuple<byte[], long>>();
 			CLRFunctions.AddAll();
-			SignatureCall.Transpile(typeof(CLRFunctions));
+			Transpile(typeof(CLRFunctions));
 		}
 
 		public static bool IsTranspiled<T>()
@@ -125,7 +125,8 @@ namespace RazorSharp.Memory
 		private static IntPtr GetCorrespondingFunctionPointer(SigcallAttribute attr, MethodInfo methodInfo)
 		{
 			IntPtr fn = attr.IsInFunctionMap
-				? SigScanner.FindPattern(FunctionInfoMap[methodInfo], attr.OffsetGuess)
+				? SigScanner.FindPattern(SigcallMethodMap[methodInfo].Item1,
+					attr.OffsetGuess == 0 ? SigcallMethodMap[methodInfo].Item2 : attr.OffsetGuess)
 				: SigScanner.FindPattern(attr.Signature, attr.OffsetGuess);
 
 			return fn;
@@ -210,20 +211,20 @@ namespace RazorSharp.Memory
 		#endregion
 
 
-		internal static void AddFunction(MethodInfo mi, byte[] rgBytes)
+		public static void CacheFunction(MethodInfo mi, byte[] rgBytes, long offsetGuess = 0)
 		{
-			SignatureCall.FunctionInfoMap.Add(mi, rgBytes);
+			SigcallMethodMap.Add(mi, new Tuple<byte[], long>(rgBytes, offsetGuess));
 		}
 
-		internal static void AddFunction(Type t, string funcName, byte[] rgBytes)
+		public static void CacheFunction(Type t, string funcName, byte[] rgBytes, long offsetGuess = 0)
 		{
 			MethodInfo mi = Runtime.GetAnnotatedMethods<SigcallAttribute>(t, funcName)[0];
-			AddFunction(mi, rgBytes);
+			CacheFunction(mi, rgBytes, offsetGuess);
 		}
 
-		internal static void AddFunction<T>(string funcName, byte[] rgBytes)
+		public static void CacheFunction<T>(string funcName, byte[] rgBytes, long offsetGuess = 0)
 		{
-			AddFunction(typeof(T), funcName, rgBytes);
+			CacheFunction(typeof(T), funcName, rgBytes, offsetGuess);
 		}
 	}
 

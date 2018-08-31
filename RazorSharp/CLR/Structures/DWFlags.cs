@@ -67,7 +67,7 @@ namespace RazorSharp.CLR.Structures
 
 		public override bool Equals(object obj)
 		{
-			if (obj.GetType() == this.GetType()) {
+			if (obj?.GetType() == GetType()) {
 				DWFlags dwOther = (DWFlags) obj;
 				return m_componentSize == dwOther.m_componentSize && m_flags == dwOther.m_flags;
 			}

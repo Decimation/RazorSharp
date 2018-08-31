@@ -81,17 +81,26 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     MemberDef
 		/// </summary>
-		private int MB => (int) (m_dword1 & 0xFFFFFF);
+		public int MB => (int) (m_dword1 & 0xFFFFFF);
 
 		/// <summary>
 		///     Field token
 		///     <remarks>
 		///         <para>Equal to <see cref="System.Reflection.FieldInfo.MetadataToken" /></para>
-		///         <para>Address-sensitive</para>
+		///
 		///     </remarks>
 		/// </summary>
 		public int MemberDef {
-			[CLRSigcall(OffsetGuess = 0x33AC0)] get => throw new NotTranspiledException();
+			//[CLRSigcall] get => throw new NotTranspiledException();
+			get {
+				// Check if this FieldDesc is using the packed mb layout
+				if (!RequiresFullMBValue)
+				{
+					return Constants.TokenFromRid(MB & (int)MbMask.PackedMbLayoutMbMask, CorTokenType.mdtFieldDef);
+				}
+
+				return Constants.TokenFromRid(MB, CorTokenType.mdtFieldDef);
+			}
 		}
 
 		/// <summary>
@@ -149,14 +158,14 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		private int LoadSize {
-			[CLRSigcall(OffsetGuess = 0x102278)] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new NotTranspiledException();
 		}
 
 		public FieldInfo Info => RuntimeType.Module.ResolveField(MemberDef);
 		public string    Name => Info.Name;
 
 
-		public bool IsFixedBuffer => SpecialNames.NameOfFixedBuffer(Name) == Info.FieldType.Name;
+		public bool IsFixedBuffer => SpecialNames.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
 
 		public bool IsAutoProperty {
 			get {
@@ -178,7 +187,7 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public Pointer<MethodTable> MethodTable {
-			[CLRSigcall(OffsetGuess = 0x21214)] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new NotTranspiledException();
 		}
 
 
@@ -186,12 +195,14 @@ namespace RazorSharp.CLR.Structures
 
 		#endregion
 
+		#region Methods
+
 		/// <summary>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		[CLRSigcall(OffsetGuess = 0x4109D4)]
+		[CLRSigcall]
 		internal void* GetModule()
 		{
 			throw new NotTranspiledException();
@@ -202,7 +213,7 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		[CLRSigcall(OffsetGuess = 0x1025A0)]
+		[CLRSigcall]
 		internal void* GetStubFieldInfo()
 		{
 			// RuntimeFieldInfoStub
@@ -250,6 +261,10 @@ namespace RazorSharp.CLR.Structures
 
 			return data;
 		}
+
+			#endregion
+
+
 
 
 		//https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L1512

@@ -179,8 +179,8 @@ namespace RazorSharp.CLR
 	public enum LowBits
 	{
 		/// <summary>
-		///     0 - pointer to EEClass.
-		///     This MethodTable is the canonical method table.
+		///     0 - pointer to <see cref="EEClass"/>
+		///     This <see cref="MethodTable"/> is the canonical method table.
 		/// </summary>
 		EEClass = 0,
 
@@ -190,12 +190,12 @@ namespace RazorSharp.CLR
 		Invalid = 1,
 
 		/// <summary>
-		///     2 - pointer to canonical MethodTable.
+		///     2 - pointer to canonical <see cref="MethodTable"/>.
 		/// </summary>
 		MethodTable = 2,
 
 		/// <summary>
-		///     3 - pointer to indirection cell that points to canonical MethodTable.
+		///     3 - pointer to indirection cell that points to canonical <see cref="MethodTable"/>.
 		///     (used only if FEATURE_PREJIT is defined)
 		/// </summary>
 		Indirection = 3
@@ -691,7 +691,11 @@ namespace RazorSharp.CLR
 		                    (HasPreciseInitCctors & 0)
 	}
 
-	// Used in MethodDesc
+	/// <summary>
+	///     <remarks>
+	///         Use with <see cref="MethodDesc.Classification" />
+	///     </remarks>
+	/// </summary>
 	public enum MethodClassification
 	{
 		/// <summary>
@@ -703,11 +707,30 @@ namespace RazorSharp.CLR
 		///     FCall(also includes tlbimped ctor, Delegate ctor)
 		/// </summary>
 		mcFCall = 1,
-		mcNDirect      = 2, // N/Direct
-		mcEEImpl       = 3, // special method; implementation provided by EE (like Delegate Invoke)
-		mcArray        = 4, // Array ECall
-		mcInstantiated = 5, // Instantiated generic methods, including descriptors
-		// for both shared and unshared code (see InstantiatedMethodDesc)
+
+
+		/// <summary>
+		///     N/Direct
+		/// </summary>
+		mcNDirect = 2,
+
+
+		/// <summary>
+		///     Special method; implementation provided by EE (like Delegate Invoke)
+		/// </summary>
+		mcEEImpl = 3,
+
+		/// <summary>
+		///     Array ECall
+		/// </summary>
+		mcArray = 4,
+
+		/// <summary>
+		///     Instantiated generic methods, including descriptors
+		///     for both shared and unshared code (see InstantiatedMethodDesc)
+		/// </summary>
+		mcInstantiated = 5,
+
 
 //#ifdef FEATURE_COMINTEROP
 		// This needs a little explanation.  There are MethodDescs on MethodTables
@@ -722,10 +745,19 @@ namespace RazorSharp.CLR
 		mcComInterop = 6,
 
 //#endif                 // FEATURE_COMINTEROP
-		mcDynamic = 7, // for method desc with no metadata behind
+
+		/// <summary>
+		///     For <see cref="MethodDesc" /> with no metadata behind
+		/// </summary>
+		mcDynamic = 7,
 		mcCount,
 	};
 
+	/// <summary>
+	///     <remarks>
+	///         Use with <see cref="MethodDesc.m_wFlags" />
+	///     </remarks>
+	/// </summary>
 	[Flags]
 	public enum MethodDescClassification : ushort
 	{
@@ -740,11 +772,15 @@ namespace RazorSharp.CLR
 		// Note that layout of code:MethodDesc::s_ClassificationSizeTable depends on the exact values
 		// of mdcHasNonVtableSlot and mdcMethodImpl
 
-		// Has local slot (vs. has real slot in MethodTable)
+		/// <summary>
+		///     Has local slot (vs. has real slot in MethodTable)
+		/// </summary>
 		mdcHasNonVtableSlot = 0x0008,
 
-		// Method is a body for a method impl (MI_MethodDesc, MI_NDirectMethodDesc, etc)
-		// where the function explicitly implements IInterface.foo() instead of foo().
+		/// <summary>
+		///     Method is a body for a method impl (MI_MethodDesc, MI_NDirectMethodDesc, etc)
+		///     where the function explicitly implements IInterface.foo() instead of foo().
+		/// </summary>
 		mdcMethodImpl = 0x0010,
 
 		/// <summary>
@@ -762,19 +798,29 @@ namespace RazorSharp.CLR
 		// providing implementation for two interfaces, MethodImpl, etc
 		mdcDuplicate = 0x0400,
 
-		// Has this method been verified?
+		/// <summary>
+		///     Has this method been verified?
+		/// </summary>
 		mdcVerifiedState = 0x0800,
 
-		// Is the method verifiable? It needs to be verified first to determine this
+		/// <summary>
+		///     Is the method verifiable? It needs to be verified first to determine this
+		/// </summary>
 		mdcVerifiable = 0x1000,
 
-		// Is this method ineligible for inlining?
+		/// <summary>
+		///     Is this method ineligible for inlining?
+		/// </summary>
 		mdcNotInline = 0x2000,
 
-		// Is the method synchronized
+		/// <summary>
+		///     Is the method synchronized
+		/// </summary>
 		mdcSynchronized = 0x4000,
 
-		// Does the method's slot number require all 16 bits
+		/// <summary>
+		///     Does the method's slot number require all 16 bits
+		/// </summary>
 		mdcRequiresFullSlotNumber = 0x8000
 	}
 

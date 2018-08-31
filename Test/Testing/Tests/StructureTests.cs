@@ -4,6 +4,7 @@ using System.Reflection;
 using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.CLR;
+using Test.Testing.Types;
 
 namespace Test.Testing.Tests
 {

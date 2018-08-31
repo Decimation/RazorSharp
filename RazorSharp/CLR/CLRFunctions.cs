@@ -7,6 +7,8 @@ using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Utilities.Exceptions;
 
+// ReSharper disable IdentifierTypo
+
 #endregion
 
 // ReSharper disable InconsistentNaming
@@ -41,11 +43,7 @@ namespace RazorSharp.CLR
 		}
 
 
-		static CLRFunctions()
-		{
-
-
-		}
+		static CLRFunctions() { }
 
 
 		private static class GCFunctions
@@ -53,11 +51,16 @@ namespace RazorSharp.CLR
 
 			internal static void AddFunctions()
 			{
-				SignatureCall.AddFunction<GCHeap>("IsHeapPointer", Functions[0]);
-				SignatureCall.AddFunction<GCHeap>("IsEphemeral", Functions[1]);
-				SignatureCall.AddFunction<GCHeap>("IsGCInProgress", Functions[2]);
-				SignatureCall.AddFunction<GCHeap>("get_GCCount", Functions[3]);
+				SignatureCall.CacheFunction<GCHeap>("IsHeapPointer", Functions[0], FN_ISHEAPPOINTER_OFFSET);
+				SignatureCall.CacheFunction<GCHeap>("IsEphemeral", Functions[1], FN_ISEPHEMERAL_OFFSET);
+				SignatureCall.CacheFunction<GCHeap>("IsGCInProgress", Functions[2], FN_ISGCINPROGRESS_OFFSET);
+				SignatureCall.CacheFunction<GCHeap>("get_GCCount", Functions[3], FN_GETGCCOUNT_OFFSET);
 			}
+
+			private const long FN_ISHEAPPOINTER_OFFSET  = 0x58E260;
+			private const long FN_ISEPHEMERAL_OFFSET    = 0x129100;
+			private const long FN_ISGCINPROGRESS_OFFSET = 0x3C3C;
+			private const long FN_GETGCCOUNT_OFFSET     = 0x123C60;
 
 			private static readonly byte[][] Functions =
 			{
@@ -95,8 +98,11 @@ namespace RazorSharp.CLR
 		{
 			internal static void AddFunctions()
 			{
-				SignatureCall.AddFunction(typeof(CLRFunctions), "JIT_GetRuntimeType", Functions[0]);
+				SignatureCall.CacheFunction(typeof(CLRFunctions), "JIT_GetRuntimeType", Functions[0],
+					FN_JITGETRUNTIMETYPE_OFFSET);
 			}
+
+			private const long FN_JITGETRUNTIMETYPE_OFFSET = 0x104D0;
 
 			private static readonly byte[][] Functions =
 			{
@@ -114,12 +120,18 @@ namespace RazorSharp.CLR
 		{
 			internal static void AddFunctions()
 			{
-				SignatureCall.AddFunction<FieldDesc>("GetModule", Functions[0]);
-				SignatureCall.AddFunction<FieldDesc>("get_LoadSize", Functions[1]);
-				SignatureCall.AddFunction<FieldDesc>("GetStubFieldInfo", Functions[2]);
-				SignatureCall.AddFunction<FieldDesc>("get_MethodTable", Functions[3]);
-				SignatureCall.AddFunction<FieldDesc>("get_MemberDef", Functions[4]);
+				SignatureCall.CacheFunction<FieldDesc>("GetModule", Functions[0], FN_GETMODULE_OFFSET);
+				SignatureCall.CacheFunction<FieldDesc>("get_LoadSize", Functions[1], FN_GETLOADSIZE_OFFSET);
+				SignatureCall.CacheFunction<FieldDesc>("GetStubFieldInfo", Functions[2], FN_GETSTUBFIELDINFO_OFFSET);
+				SignatureCall.CacheFunction<FieldDesc>("get_MethodTable", Functions[3], FN_GETMETHODTABLE_OFFSET);
+//				SignatureCall.CacheFunction<FieldDesc>("get_MemberDef", Functions[4], FN_GETMEMBERDEF_OFFSET);
 			}
+
+			private const long FN_GETMODULE_OFFSET        = 0x4109D4;
+			private const long FN_GETLOADSIZE_OFFSET      = 0x102278;
+			private const long FN_GETSTUBFIELDINFO_OFFSET = 0x1025A0;
+			private const long FN_GETMETHODTABLE_OFFSET   = 0x21214;
+			private const long FN_GETMEMBERDEF_OFFSET     = 0x33AC0;
 
 			private static readonly byte[][] Functions =
 			{
@@ -144,7 +156,7 @@ namespace RazorSharp.CLR
 					0x0F, 0x84, 0x72, 0x4C, 0x08, 0x00
 				},
 
-				/* 3 MethodTableOfEnclosingClass */
+				/* 3 MethodTable */
 				new byte[]
 				{
 					0x53, 0x48, 0x83, 0xEC, 0x20, 0x83, 0x3D, 0x30, 0x1F, 0x92, 0x00, 0x00, 0x48, 0x8B, 0xD9, 0x0F,
@@ -164,13 +176,21 @@ namespace RazorSharp.CLR
 		{
 			internal static void AddFunctions()
 			{
-				SignatureCall.AddFunction<MethodDesc>("get_IsCtor", Functions[0]);
-				SignatureCall.AddFunction<MethodDesc>("get_MemberDef", Functions[1]);
-				SignatureCall.AddFunction<MethodDesc>("get_IsPointingToNativeCode", Functions[2]);
-				SignatureCall.AddFunction<MethodDesc>("get_SizeOf", Functions[3]);
-				SignatureCall.AddFunction<MethodDesc>("Reset", Functions[4]);
-				SignatureCall.AddFunction<MethodDesc>("get_MethodTable", Functions[5]);
+				SignatureCall.CacheFunction<MethodDesc>("get_IsCtor", Functions[0], FN_GETISCTOR_OFFSET);
+				SignatureCall.CacheFunction<MethodDesc>("get_MemberDef", Functions[1], FN_GETMEMBERDEF_OFFSET);
+				SignatureCall.CacheFunction<MethodDesc>("get_IsPointingToNativeCode", Functions[2],
+					FN_GETISPOINTINGTONATIVECODE_OFFSET);
+				SignatureCall.CacheFunction<MethodDesc>("get_SizeOf", Functions[3], FN_GETSIZEOF_OFFSET);
+				SignatureCall.CacheFunction<MethodDesc>("Reset", Functions[4], FN_RESET_OFFSET);
+				SignatureCall.CacheFunction<MethodDesc>("get_MethodTable", Functions[5], FN_GETMETHODTABLE_OFFSET);
 			}
+
+			private const long FN_GETISCTOR_OFFSET                 = 0xAF920;
+			private const long FN_GETMEMBERDEF_OFFSET              = 0x12810;
+			private const long FN_GETISPOINTINGTONATIVECODE_OFFSET = 0x1A6CC4;
+			private const long FN_GETSIZEOF_OFFSET                 = 0x390E0;
+			private const long FN_RESET_OFFSET                     = 0x424714;
+			private const long FN_GETMETHODTABLE_OFFSET            = 0xA260;
 
 			private static readonly byte[][] Functions =
 			{
@@ -222,7 +242,7 @@ namespace RazorSharp.CLR
 		}
 
 
-		[CLRSigcall(OffsetGuess = 0x104D0)]
+		[CLRSigcall]
 		internal static Type JIT_GetRuntimeType(void* __struct)
 		{
 			throw new NotTranspiledException();

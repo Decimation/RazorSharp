@@ -82,39 +82,57 @@ namespace RazorSharp.CLR.Structures
 			SignatureCall.Transpile<MethodDesc>();
 		}
 
+		/// <summary>
+		/// The enclosing type of this method
+		/// </summary>
 		public Type       RuntimeType => Runtime.MethodTableToType(MethodTable);
+
+		/// <summary>
+		/// The corresponding <see cref="MethodInfo"/> of this <see cref="MethodDesc"/>
+		/// </summary>
 		public MethodInfo Info        => (MethodInfo) RuntimeType.Module.ResolveMethod(MemberDef);
+
+		/// <summary>
+		/// Function pointer
+		/// </summary>
 		public IntPtr     Function    => Info.MethodHandle.GetFunctionPointer();
+
+		/// <summary>
+		/// Name of the method
+		/// </summary>
 		public string     Name        => Info.Name;
 
 		public byte ChunkIndex => m_chunkIndex;
 
 		/// <summary>
+		/// <para>Whether this method is a constructor</para>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
 		public bool IsCtor {
-			[CLRSigcall(OffsetGuess = 0xAF920)] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new NotTranspiledException();
 		}
 
 		/// <summary>
+		/// <para>Metadata token of this method</para>
 		///     <remarks>
 		///         <para>Equal to <see cref="System.Reflection.MethodInfo.MetadataToken" /></para>
 		///         <para>Address-sensitive</para>
 		///     </remarks>
 		/// </summary>
 		public int MemberDef {
-			[CLRSigcall(OffsetGuess = 0x12810)] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new NotTranspiledException();
 		}
 
 		/// <summary>
+		/// <para>Whether this method is pointing to native code</para>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
 		public bool IsPointingToNativeCode {
-			[CLRSigcall(OffsetGuess = 0x1A6CC4)] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new NotTranspiledException();
 		}
 
 
@@ -169,6 +187,11 @@ namespace RazorSharp.CLR.Structures
 
 		#endregion
 
+		/// <summary>
+		/// <remarks>
+		/// Address-sensitive
+		/// </remarks>
+		/// </summary>
 		public Pointer<MethodDescChunk> MethodDescChunk {
 			get {
 				// return
@@ -180,59 +203,7 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
-		/*public object Invoke<TDelegate>(params object[] args) where TDelegate : Delegate
-		{
-			TDelegate d = GetDelegate<TDelegate>();
-			RazorContract.Assert(MethodInfo.IsStatic && (Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) ||
-			                                     Flags2.HasFlag(MethodDescFlags2.HasPrecode)));
-			return d.DynamicInvoke(args);
-		}
 
-		/// <summary>
-		/// Invokes the target method.
-		/// </summary>
-		/// <param name="instance">Instance to invoke the method upon. If the method is static, the parameter is
-		/// ignored</param>
-		/// <param name="args">Parameters for the method, if any</param>
-		public object Invoke<TInstance, TDelegate>(ref TInstance instance, params object[] args)
-			where TDelegate : Delegate
-		{
-			TDelegate d = GetDelegate<TDelegate>();
-
-			RazorContract.Assert((Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) ||
-			              Flags2.HasFlag(MethodDescFlags2.HasPrecode)));
-
-			if (MethodInfo.IsStatic) {
-				return d.DynamicInvoke(args);
-			}
-
-
-			var __this = Unsafe.AddressOf(ref instance);
-			if (!typeof(TInstance).IsValueType) {
-				__this = Marshal.ReadIntPtr(__this);
-			}
-
-			object o = args.Length == 0 ? d.DynamicInvoke(__this) : d.DynamicInvoke(__this, args);
-
-			if (MethodInfo.ReturnType.IsValueType) {
-				return o;
-			}
-			else {
-				IntPtr heapPtr = (IntPtr) Int64.Parse(o.ToString());
-
-				return Misc.InvokeGenericMethod(typeof(CSUnsafe), "Read", MethodInfo.ReturnType, instance,new IntPtr(&heapPtr));
-
-			}
-
-
-			return o;
-		}
-
-		public object IntrinsicInvoke<TDelegate>(params object[] args) where TDelegate : Delegate
-		{
-			TDelegate d = GetDelegate<TDelegate>();
-			return d.DynamicInvoke(args);
-		}*/
 
 		/// <summary>
 		///     Size of the current <see cref="MethodDesc" />
@@ -241,7 +212,7 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public int SizeOf {
-			[CLRSigcall(OffsetGuess = 0x390E0)] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new NotTranspiledException();
 		}
 
 		/// <summary>
@@ -250,16 +221,17 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public Pointer<MethodTable> MethodTable {
-			[CLRSigcall(OffsetGuess = 0xA260)] get => throw new NotTranspiledException("MethodTable");
+			[CLRSigcall] get => throw new NotTranspiledException("MethodTable");
 		}
 
 
 		/// <summary>
+		/// <para>Reset the <see cref="MethodDesc"/> to its original state</para>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		[CLRSigcall(OffsetGuess = 0x424714)]
+		[CLRSigcall]
 		public void Reset()
 		{
 			throw new NotTranspiledException();
@@ -286,6 +258,9 @@ namespace RazorSharp.CLR.Structures
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(Function);
 		}
 
+		/// <summary>
+		/// JIT the method
+		/// </summary>
 		public void Prepare()
 		{
 			if (!Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) || !Flags2.HasFlag(MethodDescFlags2.HasPrecode)) {
@@ -309,7 +284,9 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Slot number", m_wSlotNumber);
 			table.AddRow("Attributes", Attributes);
 
-			table.AddRow("Pointing to native code", IsPointingToNativeCode ? StringUtils.Check : StringUtils.BallotX);
+			table.AddRow("Is Pointing to native code", IsPointingToNativeCode.Prettify());
+			table.AddRow("Is Constructor", IsCtor.Prettify());
+			table.AddRow("MethodDescChunk", MethodDescChunk.ToString("P"));
 
 
 			table.AddRow("Classification", Classification.Join());
