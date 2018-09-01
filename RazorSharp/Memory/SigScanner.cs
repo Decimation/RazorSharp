@@ -11,6 +11,7 @@ using RazorCommon;
 using RazorInvoke;
 using RazorInvoke.Libraries;
 using RazorSharp.Pointers;
+// ReSharper disable InconsistentNaming
 
 #endregion
 
@@ -229,7 +230,7 @@ namespace RazorSharp.Memory
 					continue;
 				}
 
-				if (this.PatternCheck(nModuleIndex, arrBytePatterns[nPatternIndex])) {
+				if (PatternCheck(nModuleIndex, arrBytePatterns[nPatternIndex])) {
 					arrResult[nPatternIndex] = m_lpModuleBase + nModuleIndex;
 				}
 			}

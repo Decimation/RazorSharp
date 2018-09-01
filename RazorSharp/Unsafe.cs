@@ -144,14 +144,15 @@ namespace RazorSharp
 		/// <param name="instance">Instance of the enclosing type</param>
 		/// <param name="name">Name of the field</param>
 		/// <param name="fieldTypes">If the field has unique attributes (i.e. auto-property)</param>
-		public static IntPtr AddressOfField<T>(ref T instance, string name, SpecialFieldTypes fieldTypes = SpecialFieldTypes.None)
+		public static IntPtr AddressOfField<T>(ref T instance, string name,
+			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None)
 		{
 			Pointer<FieldDesc> fd = Runtime.GetFieldDesc<T>(name, fieldTypes);
 			return fd.Reference.GetAddress(ref instance);
 		}
 
 		/// <summary>
-		///     <para>Returns the address of <paramref name="t"/>.</para>
+		///     <para>Returns the address of <paramref name="t" />.</para>
 		///     <remarks>
 		///         <para> Equals <see cref="CSUnsafe.AsPointer{T}" /></para>
 		///     </remarks>
@@ -165,7 +166,7 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		///     Returns the address of reference type <paramref name="t"/>'s heap memory (raw data).
+		///     Returns the address of reference type <paramref name="t" />'s heap memory (raw data).
 		///     <remarks>
 		///         <para>
 		///             Note: This does not pin the reference in memory if it is a reference type.
@@ -187,7 +188,8 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		///     Returns the address of reference type <paramref name="t"/>'s heap memory, offset by the specified <see cref="OffsetType" />.
+		///     Returns the address of reference type <paramref name="t" />'s heap memory, offset by the specified
+		///     <see cref="OffsetType" />.
 		///     <remarks>
 		///         <para>
 		///             Note: This does not pin the reference in memory if it is a reference type.
@@ -271,7 +273,7 @@ namespace RazorSharp
 		///     <para> Equals <see cref="Marshal.SizeOf(Type)" /></para>
 		///     <para> Equals <see cref="StructLayoutAttribute.Size" /> when type isn't zero-sized.</para>
 		/// </remarks>
-		/// <returns>The native size if the type has a native representation; -<c>-1</c> otherwise</returns>
+		/// <returns>The native size if the type has a native representation; <c>-1</c> otherwise</returns>
 		public static int NativeSizeOf<T>()
 		{
 			// == 0

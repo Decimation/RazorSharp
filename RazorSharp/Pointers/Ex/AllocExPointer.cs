@@ -514,7 +514,7 @@ namespace RazorSharp.Pointers.Ex
 
 		public override string ToString(string format)
 		{
-			return this.ToString(format, CultureInfo.CurrentCulture);
+			return ToString(format, CultureInfo.CurrentCulture);
 		}
 
 		/// <inheritdoc />
@@ -544,7 +544,7 @@ namespace RazorSharp.Pointers.Ex
 
 		public override string ToString()
 		{
-			return this.ToString("O");
+			return ToString("O");
 		}
 
 		~AllocExPointer()

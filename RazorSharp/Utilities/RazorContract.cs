@@ -35,6 +35,7 @@ namespace RazorSharp.Utilities
 		/// <param name="msg"></param>
 		[AssertionMethod]
 		[ContractAnnotation("cond:false => halt")]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void Assert([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg)
 		{
 			Trace.Assert(cond, msg);
@@ -46,6 +47,7 @@ namespace RazorSharp.Utilities
 		/// <param name="cond">Condition to assert</param>
 		[AssertionMethod]
 		[ContractAnnotation("cond:false => halt")]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void Assert([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond)
 		{
 			Trace.Assert(cond);
@@ -53,6 +55,7 @@ namespace RazorSharp.Utilities
 
 		[AssertionMethod]
 		[ContractAnnotation("v:null => halt")]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static unsafe void RequiresNotNull([AsrtCnd(AsrtCndType.IS_NOT_NULL)] void* v)
 		{
 			if (v == null) {
@@ -62,6 +65,7 @@ namespace RazorSharp.Utilities
 
 		[AssertionMethod]
 		[ContractAnnotation("t:null => halt")]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] in T t) where T : class
 		{
 			if (t == null) {
@@ -72,6 +76,10 @@ namespace RazorSharp.Utilities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void Requires([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null)
 		{
+			if (cond) {
+				return;
+			}
+
 			Requires<RuntimeException>(cond, msg);
 		}
 
@@ -87,6 +95,10 @@ namespace RazorSharp.Utilities
 		internal static void Requires<TException>([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null)
 			where TException : Exception, new()
 		{
+			if (cond) {
+				return;
+			}
+
 			if (!cond) {
 				if (msg == null) {
 					throw new TException();

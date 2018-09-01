@@ -1,8 +1,6 @@
 #region
 
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Utilities.Exceptions;
@@ -33,17 +31,27 @@ namespace RazorSharp.CLR
 	{
 		internal const string ClrDll = "clr.dll";
 
+		private static bool m_bFunctionsCached = false;
 
 		internal static void AddAll()
 		{
-			MethodDescFunctions.AddFunctions();
-			FieldDescFunctions.AddFunctions();
-			GCFunctions.AddFunctions();
-			JITFunctions.AddFunctions();
+			if (!m_bFunctionsCached) {
+				MethodDescFunctions.AddFunctions();
+				FieldDescFunctions.AddFunctions();
+				GCFunctions.AddFunctions();
+				JITFunctions.AddFunctions();
+				m_bFunctionsCached = true;
+			}
+
+
 		}
 
 
-		static CLRFunctions() { }
+		static CLRFunctions()
+		{
+			AddAll();
+			SignatureCall.DynamicBind(typeof(CLRFunctions));
+		}
 
 
 		private static class GCFunctions
@@ -124,6 +132,7 @@ namespace RazorSharp.CLR
 				SignatureCall.CacheFunction<FieldDesc>("get_LoadSize", Functions[1], FN_GETLOADSIZE_OFFSET);
 				SignatureCall.CacheFunction<FieldDesc>("GetStubFieldInfo", Functions[2], FN_GETSTUBFIELDINFO_OFFSET);
 				SignatureCall.CacheFunction<FieldDesc>("get_MethodTable", Functions[3], FN_GETMETHODTABLE_OFFSET);
+
 //				SignatureCall.CacheFunction<FieldDesc>("get_MemberDef", Functions[4], FN_GETMEMBERDEF_OFFSET);
 			}
 
@@ -245,7 +254,7 @@ namespace RazorSharp.CLR
 		[CLRSigcall]
 		internal static Type JIT_GetRuntimeType(void* __struct)
 		{
-			throw new NotTranspiledException();
+			throw new SigcallException();
 		}
 	}
 

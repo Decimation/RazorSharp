@@ -101,21 +101,24 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			VMMap();
-			Point p = new Point();
-			InspectorHelper.InspectVal(ref p);
+//			int[] rg = new int[0];
+//			Console.WriteLine(Runtime.ReadMethodTable(ref rg));
 
-			var fd = Runtime.GetFieldDesc<Struct>("l");
-			var fi = typeof(Struct).GetField("l", BindingFlags.NonPublic | BindingFlags.Instance);
+			Pointer<byte> pAlloc = Memory.AllocUnmanaged<byte>(10);
 
-			Debug.Assert(fd.Reference.MemberDef == fi.MetadataToken);
+
+			for (int i = 0; i < 10; i++) {
+				Debug.Assert(Memory.IsAddressInRange(pAlloc.Address + (10-i), pAlloc.Address, pAlloc.Address));
+				pAlloc++;
+			}
+
+			pAlloc -= (10);
+			Memory.Free(pAlloc.Address);
 		}
 
-		struct Struct
+		private static void RunBenchmark<T>()
 		{
-			private long l;
-			private int  i;
-			public  int  Int => i;
+			BenchmarkRunner.Run<T>();
 		}
 
 

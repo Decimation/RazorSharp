@@ -24,17 +24,18 @@ namespace RazorSharp.Memory
 		{
 			ImageSectionInfo[] sections = DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
 			foreach (ImageSectionInfo s in sections) {
-				if (RazorMath.Between(addr.ToInt64(), s.SectionAddress.ToInt64(), s.EndAddress.ToInt64(), true)) {
+				if (Memory.IsAddressInRange(s.EndAddress, addr, s.SectionAddress)) {
 					return Parse(s.SectionName);
 				}
+
 			}
 
 			throw new Exception($"Could not find corresponding segment for {Hex.ToHex(addr)}");
 		}
 
-		public static ImageSectionInfo GetSegment(string segment, string module)
+		public static ImageSectionInfo GetSegment(string segment, string moduleName = null)
 		{
-			ImageSectionInfo[] arr = DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(module));
+			ImageSectionInfo[] arr = DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
 
 			foreach (ImageSectionInfo t in arr) {
 				if (t.SectionName == segment) {
@@ -42,7 +43,7 @@ namespace RazorSharp.Memory
 				}
 			}
 
-			throw new Exception($"Could not find segment: {segment}");
+			throw new Exception($"Could not find segment: \"{segment}\". Try prefixing \"{segment}\" with a period: (e.g. \".{segment}\")");
 		}
 
 

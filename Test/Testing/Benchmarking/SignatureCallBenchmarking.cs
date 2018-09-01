@@ -45,10 +45,10 @@ namespace Test.Testing.Benchmarking
 		public void Setup()
 		{
 			CLRFunctions.AddAll();
-			SignatureCall.Transpile(typeof(CLRFunctions));
-			SignatureCall.Transpile<MethodDesc>();
-			SignatureCall.Transpile<FieldDesc>();
-			SignatureCall.Transpile<GCHeap>();
+			SignatureCall.DynamicBind(typeof(CLRFunctions));
+			SignatureCall.DynamicBind<MethodDesc>();
+			SignatureCall.DynamicBind<FieldDesc>();
+			SignatureCall.DynamicBind<GCHeap>();
 
 			SignatureCall.CacheFunction<CClass>("doSomething2",
 				new byte[]
@@ -68,13 +68,13 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void TranspileSingleInline()
 		{
-			SignatureCall.Transpile<CClass>("doSomething");
+			SignatureCall.DynamicBind<CClass>("doSomething");
 		}
 
 		[Benchmark]
 		public void TranspileSingleCached()
 		{
-			SignatureCall.Transpile<CClass>("doSomething2");
+			SignatureCall.DynamicBind<CClass>("doSomething2");
 		}
 
 	}

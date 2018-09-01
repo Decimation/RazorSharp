@@ -82,7 +82,7 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     Corresponding <see cref="MethodTable" /> of this <see cref="EEClass" />
 		/// </summary>
-		public MethodTable* MethodTable => m_pMethodTable;
+		public Pointer<MethodTable> MethodTable => m_pMethodTable;
 
 
 		/// <summary>

@@ -52,7 +52,7 @@ namespace RazorSharp.CLR.Structures
 	{
 		static FieldDesc()
 		{
-			SignatureCall.Transpile<FieldDesc>();
+			SignatureCall.DynamicBind<FieldDesc>();
 		}
 
 		private const int FieldOffsetMax    = (1 << 27) - 1;
@@ -79,24 +79,22 @@ namespace RazorSharp.CLR.Structures
 		#region Accessors
 
 		/// <summary>
-		///     MemberDef
+		///     Unprocessed <see cref="MemberDef"/>
 		/// </summary>
-		public int MB => (int) (m_dword1 & 0xFFFFFF);
+		private int MB => (int) (m_dword1 & 0xFFFFFF);
 
 		/// <summary>
-		///     Field token
+		///     Field metadata token
 		///     <remarks>
 		///         <para>Equal to <see cref="System.Reflection.FieldInfo.MetadataToken" /></para>
-		///
 		///     </remarks>
 		/// </summary>
 		public int MemberDef {
 			//[CLRSigcall] get => throw new NotTranspiledException();
 			get {
 				// Check if this FieldDesc is using the packed mb layout
-				if (!RequiresFullMBValue)
-				{
-					return Constants.TokenFromRid(MB & (int)MbMask.PackedMbLayoutMbMask, CorTokenType.mdtFieldDef);
+				if (!RequiresFullMBValue) {
+					return Constants.TokenFromRid(MB & (int) MbMask.PackedMbLayoutMbMask, CorTokenType.mdtFieldDef);
 				}
 
 				return Constants.TokenFromRid(MB, CorTokenType.mdtFieldDef);
@@ -109,12 +107,12 @@ namespace RazorSharp.CLR.Structures
 		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
 
 
-		private int Type => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
+		private int TypeInt => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
 
 		/// <summary>
 		///     Field type
 		/// </summary>
-		public CorElementType CorType => (CorElementType) Type;
+		public CorElementType CorType => (CorElementType) TypeInt;
 
 		/// <summary>
 		///     Whether the field is <c>static</c>
@@ -158,11 +156,18 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		private int LoadSize {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new SigcallException();
 		}
 
+		/// <summary>
+		/// The corresponding <see cref="FieldInfo"/> of this <see cref="FieldDesc"/>
+		/// </summary>
 		public FieldInfo Info => RuntimeType.Module.ResolveField(MemberDef);
-		public string    Name => Info.Name;
+
+		/// <summary>
+		/// Name of this field
+		/// </summary>
+		public string Name => Info.Name;
 
 
 		public bool IsFixedBuffer => SpecialNames.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
@@ -178,6 +183,9 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
+		/// <summary>
+		/// Enclosing type of this <see cref="FieldDesc"/>
+		/// </summary>
 		public Type RuntimeType => Runtime.MethodTableToType(MethodTable);
 
 
@@ -187,7 +195,7 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public Pointer<MethodTable> MethodTable {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new SigcallException();
 		}
 
 
@@ -205,7 +213,7 @@ namespace RazorSharp.CLR.Structures
 		[CLRSigcall]
 		internal void* GetModule()
 		{
-			throw new NotTranspiledException();
+			throw new SigcallException();
 		}
 
 		/// <summary>
@@ -218,7 +226,7 @@ namespace RazorSharp.CLR.Structures
 		{
 			// RuntimeFieldInfoStub
 			// ReflectFieldObject
-			throw new NotTranspiledException();
+			throw new SigcallException();
 		}
 
 		#region Value
@@ -262,9 +270,7 @@ namespace RazorSharp.CLR.Structures
 			return data;
 		}
 
-			#endregion
-
-
+		#endregion
 
 
 		//https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L1512

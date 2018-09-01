@@ -84,31 +84,32 @@ namespace RazorSharp.Memory
 
 
 		/// <summary>
-		///     Fully transpiled types
+		///     Fully bound types
 		///     Not including individual methods
 		/// </summary>
-		private static readonly ISet<Type> TranspiledTypes = new HashSet<Type>();
+		private static readonly ISet<Type> BoundTypes = new HashSet<Type>();
 
 		private static readonly SigScanner                                  SigScanner   = new SigScanner();
 		private const           string                                      TEXT_SEGMENT = ".text";
 		public static           bool                                        UseTextSegment { get; set; } = true;
 		private static readonly Dictionary<MethodInfo, Tuple<byte[], long>> SigcallMethodMap;
 
+
 		static SignatureCall()
 		{
 			SigcallMethodMap = new Dictionary<MethodInfo, Tuple<byte[], long>>();
 			CLRFunctions.AddAll();
-			Transpile(typeof(CLRFunctions));
 		}
 
-		public static bool IsTranspiled<T>()
+
+		public static bool IsBound<T>()
 		{
-			return IsTranspiled(typeof(T));
+			return IsBound(typeof(T));
 		}
 
-		public static bool IsTranspiled(Type t)
+		public static bool IsBound(Type t)
 		{
-			return TranspiledTypes.Contains(t);
+			return BoundTypes.Contains(t);
 		}
 
 
@@ -158,9 +159,9 @@ namespace RazorSharp.Memory
 		///     Binds all functions in type <typeparamref name="T" /> attributed with <see cref="SigcallAttribute" />
 		/// </summary>
 		/// <typeparam name="T">Type containing unbound <see cref="SigcallAttribute" /> functions</typeparam>
-		public static void Transpile<T>()
+		public static void DynamicBind<T>()
 		{
-			Transpile(typeof(T));
+			DynamicBind(typeof(T));
 		}
 
 
@@ -168,15 +169,17 @@ namespace RazorSharp.Memory
 		///     Binds all functions in <see cref="Type" /> <paramref name="t" /> attributed with <see cref="SigcallAttribute" />
 		/// </summary>
 		/// <param name="t">Type containing unbound <see cref="SigcallAttribute" /> functions </param>
-		public static void Transpile(Type t)
+		public static void DynamicBind(Type t)
 		{
+			if (IsBound(t))
+				return;
 			MethodInfo[] methodInfos = Runtime.GetMethods(t);
 
 			foreach (MethodInfo mi in methodInfos) {
 				ApplySigcallIndependent(mi);
 			}
 
-			TranspiledTypes.Add(t);
+			BoundTypes.Add(t);
 		}
 
 		/// <summary>
@@ -187,9 +190,9 @@ namespace RazorSharp.Memory
 		/// <typeparam name="T">
 		///     Type containing unbound <see cref="SigcallAttribute" /> function <paramref name="name" />
 		/// </typeparam>
-		public static void Transpile<T>(string name, bool isGetProperty = false)
+		public static void DynamicBind<T>(string name, bool isGetProperty = false)
 		{
-			Transpile(typeof(T), name, isGetProperty);
+			DynamicBind(typeof(T), name, isGetProperty);
 		}
 
 		/// <summary>
@@ -198,7 +201,7 @@ namespace RazorSharp.Memory
 		/// <param name="t">Type containing the unbound <see cref="SigcallAttribute" /> function</param>
 		/// <param name="name">Name of the unbound <see cref="SigcallAttribute" /> function </param>
 		/// <param name="isGetProperty">Whether the function is a <c>get</c> function of a property </param>
-		public static void Transpile(Type t, string name, bool isGetProperty = false)
+		public static void DynamicBind(Type t, string name, bool isGetProperty = false)
 		{
 			if (isGetProperty) {
 				name = SpecialNames.NameOfGetPropertyMethod(name);

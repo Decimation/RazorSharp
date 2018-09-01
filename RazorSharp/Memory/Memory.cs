@@ -185,7 +185,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		public static bool IsOnStack<T>(ref T t)
 		{
-			return IsOnStack(Unsafe.AddressOf(ref t).ToPointer());
+			return IsOnStack(Unsafe.AddressOf(ref t));
 		}
 
 
@@ -196,15 +196,23 @@ namespace RazorSharp.Memory
 
 			// https://github.com/dotnet/coreclr/blob/c82bd22d4bab4369c0989a1c2ca2758d29a0da36/src/vm/threads.h
 			// 3620
-			return IsAddressInRange(StackLimit, ptr.Address, StackBase);
+			return IsAddressInRange(StackBase, ptr.Address, StackLimit);
 		}
 
+		/// <summary>
+		/// Checks whether an address is in range.
+		/// </summary>
+		/// <param name="highest">The end address</param>
+		/// <param name="p">Address to check</param>
+		/// <param name="lowest">The start address</param>
+		/// <returns><c>true</c> if the address is in range; <c>false</c> otherwise</returns>
 		public static bool IsAddressInRange(IntPtr highest, IntPtr p, IntPtr lowest)
 		{
 			// return m_CacheStackLimit < addr && addr <= m_CacheStackBase;
 			// if (!((object < g_gc_highest_address) && (object >= g_gc_lowest_address)))
 
-			return (p.ToInt64() < highest.ToInt64()) && (p.ToInt64() >= lowest.ToInt64());
+			return p.ToInt64() < highest.ToInt64() && p.ToInt64() >= lowest.ToInt64();
+
 //			return max.ToInt64() < p.ToInt64() && p.ToInt64() <= min.ToInt64();
 		}
 

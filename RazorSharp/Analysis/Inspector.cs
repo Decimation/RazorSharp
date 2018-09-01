@@ -68,15 +68,15 @@ namespace RazorSharp.Analysis
 
 		#endregion
 
-		public static string LayoutString<T>(ref T t, bool fieldsOnly = false, bool fullOffset = false)
+		public static string LayoutString<T>(ref T t, bool fieldsOnly = false)
 		{
-			ConsoleTable v = new ObjectLayout<T>(ref t, fieldsOnly, fullOffset).Table;
+			ConsoleTable v = new ObjectLayout<T>(ref t, fieldsOnly).Table;
 			return v.ToMarkDownString();
 		}
 
-		public static string LayoutString<T>(bool fieldsOnly = false, bool fullOffset = false)
+		public static string LayoutString<T>(bool fieldsOnly = false)
 		{
-			ConsoleTable v = new ObjectLayout<T>(fieldsOnly, fullOffset).Table;
+			ConsoleTable v = new ObjectLayout<T>(fieldsOnly).Table;
 			return v.ToMarkDownString();
 		}
 
@@ -104,10 +104,6 @@ namespace RazorSharp.Analysis
 
 		public Inspector(ref T t, InspectorMode mode = InspectorMode.Default)
 		{
-			if (!typeof(T).IsValueType) {
-				//throw new Exception("Use RefInspector for reference types");
-			}
-
 			Mode = mode;
 
 			if (Mode.HasFlag(InspectorMode.Meta)) {

@@ -79,60 +79,60 @@ namespace RazorSharp.CLR.Structures
 
 		static MethodDesc()
 		{
-			SignatureCall.Transpile<MethodDesc>();
+			SignatureCall.DynamicBind<MethodDesc>();
 		}
 
 		/// <summary>
-		/// The enclosing type of this method
+		///     The enclosing type of this <see cref="MethodDesc"/>
 		/// </summary>
-		public Type       RuntimeType => Runtime.MethodTableToType(MethodTable);
+		public Type RuntimeType => Runtime.MethodTableToType(MethodTable);
 
 		/// <summary>
-		/// The corresponding <see cref="MethodInfo"/> of this <see cref="MethodDesc"/>
+		///     The corresponding <see cref="MethodInfo" /> of this <see cref="MethodDesc" />
 		/// </summary>
-		public MethodInfo Info        => (MethodInfo) RuntimeType.Module.ResolveMethod(MemberDef);
+		public MethodInfo Info => (MethodInfo) RuntimeType.Module.ResolveMethod(MemberDef);
 
 		/// <summary>
-		/// Function pointer
+		///     Function pointer
 		/// </summary>
-		public IntPtr     Function    => Info.MethodHandle.GetFunctionPointer();
+		public IntPtr Function => Info.MethodHandle.GetFunctionPointer();
 
 		/// <summary>
-		/// Name of the method
+		///     Name of this method
 		/// </summary>
-		public string     Name        => Info.Name;
+		public string Name => Info.Name;
 
 		public byte ChunkIndex => m_chunkIndex;
 
 		/// <summary>
-		/// <para>Whether this method is a constructor</para>
+		///     <para>Whether this method is a constructor</para>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
 		public bool IsCtor {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new SigcallException();
 		}
 
 		/// <summary>
-		/// <para>Metadata token of this method</para>
+		///     <para>Metadata token of this method</para>
 		///     <remarks>
 		///         <para>Equal to <see cref="System.Reflection.MethodInfo.MetadataToken" /></para>
 		///         <para>Address-sensitive</para>
 		///     </remarks>
 		/// </summary>
 		public int MemberDef {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new SigcallException();
 		}
 
 		/// <summary>
-		/// <para>Whether this method is pointing to native code</para>
+		///     <para>Whether this method is pointing to native code</para>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
 		public bool IsPointingToNativeCode {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new SigcallException();
 		}
 
 
@@ -188,9 +188,9 @@ namespace RazorSharp.CLR.Structures
 		#endregion
 
 		/// <summary>
-		/// <remarks>
-		/// Address-sensitive
-		/// </remarks>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
 		/// </summary>
 		public Pointer<MethodDescChunk> MethodDescChunk {
 			get {
@@ -204,7 +204,6 @@ namespace RazorSharp.CLR.Structures
 		}
 
 
-
 		/// <summary>
 		///     Size of the current <see cref="MethodDesc" />
 		///     <remarks>
@@ -212,7 +211,7 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public int SizeOf {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new SigcallException();
 		}
 
 		/// <summary>
@@ -221,12 +220,12 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public Pointer<MethodTable> MethodTable {
-			[CLRSigcall] get => throw new NotTranspiledException("MethodTable");
+			[CLRSigcall] get => throw new SigcallException("MethodTable");
 		}
 
 
 		/// <summary>
-		/// <para>Reset the <see cref="MethodDesc"/> to its original state</para>
+		///     <para>Reset the <see cref="MethodDesc" /> to its original state</para>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
@@ -234,7 +233,7 @@ namespace RazorSharp.CLR.Structures
 		[CLRSigcall]
 		public void Reset()
 		{
-			throw new NotTranspiledException();
+			throw new SigcallException();
 		}
 
 		/// <summary>
@@ -259,7 +258,7 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		/// <summary>
-		/// JIT the method
+		///     JIT the method
 		/// </summary>
 		public void Prepare()
 		{

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -19,15 +20,13 @@ namespace RazorSharp.CLR
 
 	public enum SpecialFieldTypes
 	{
-
-
 		/// <summary>
-		/// The field is an auto-property's backing field.
+		///     The field is an auto-property's backing field.
 		/// </summary>
 		AutoProperty,
 
 		/// <summary>
-		/// The field is normal.
+		///     The field is normal.
 		/// </summary>
 		None,
 	}
@@ -60,7 +59,7 @@ namespace RazorSharp.CLR
 		///         </item>
 		///     </list>
 		/// </summary>
-		public static readonly int OffsetToArrayData = IntPtr.Size * 2;
+		public static readonly int OffsetToArrayData = sizeof(MethodTable*) + sizeof(uint) + sizeof(uint);
 
 		private const BindingFlags DefaultFlags =
 			BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
@@ -100,9 +99,9 @@ namespace RazorSharp.CLR
 
 		#region MethodTable
 
-		public static Type MethodTableToType(Pointer<MethodTable> pMT)
+		public static Type MethodTableToType(Pointer<MethodTable> pMt)
 		{
-			return CLRFunctions.JIT_GetRuntimeType(pMT.ToPointer());
+			return CLRFunctions.JIT_GetRuntimeType(pMt.ToPointer());
 		}
 
 		/// <summary>
@@ -122,10 +121,12 @@ namespace RazorSharp.CLR
 			if (typeof(T).IsValueType) {
 				return MethodTableOf<T>();
 			}
-
+			else if (!typeof(T).IsArray) {
+				return typeof(T).TypeHandle.Value;
+			}
 			else {
 				// We need to get the heap pointer manually because of type constraints
-				IntPtr ptr = Marshal.ReadIntPtr(Unsafe.AddressOf(ref t));
+				IntPtr ptr = *(IntPtr*) Unsafe.AddressOf(ref t);
 				mt = *(MethodTable**) ptr;
 			}
 
@@ -146,11 +147,13 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <typeparam name="T">Type to return the corresponding MethodTable for.</typeparam>
 		/// <returns></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<MethodTable> MethodTableOf<T>()
 		{
 			return MethodTableOf(typeof(T));
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<MethodTable> MethodTableOf(Type t)
 		{
 			// Array method tables need to be read using ReadMethodTable,
@@ -159,10 +162,12 @@ namespace RazorSharp.CLR
 
 			// From https://github.com/dotnet/coreclr/blob/6bb3f84d42b9756c5fa18158db8f724d57796296/src/vm/typehandle.h#L74:
 			// Array MTs are not valid TypeHandles...
-			RazorContract.Requires(!t.IsArray,
-				$"{t.Name}: Array MethodTables are not valid TypeHandles.");
+//			RazorContract.Requires(!t.IsArray, $"{t.Name}: Array MethodTables are not valid TypeHandles.");
 
-			return (MethodTable*) t.TypeHandle.Value;
+			// + 10ns
+			Trace.Assert(!t.IsArray, $"{t.Name}: Array MethodTables are not valid TypeHandles.");
+
+			return t.TypeHandle.Value;
 		}
 
 
@@ -194,7 +199,7 @@ namespace RazorSharp.CLR
 
 		public static Pointer<FieldDesc>[] GetFieldDescs(Type t)
 		{
-			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
+//			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
 
 			Pointer<MethodTable> mt   = MethodTableOf(t);
 			int                  len  = mt.Reference.FieldDescListLength;
@@ -222,7 +227,8 @@ namespace RazorSharp.CLR
 		/// <param name="flags"></param>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		public static Pointer<FieldDesc> GetFieldDesc(Type t, string name, SpecialFieldTypes fieldTypes = SpecialFieldTypes.None,
+		public static Pointer<FieldDesc> GetFieldDesc(Type t, string name,
+			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None,
 			BindingFlags flags = DefaultFlags)
 		{
 			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
@@ -234,10 +240,9 @@ namespace RazorSharp.CLR
 
 				case SpecialFieldTypes.None:
 					break;
-					default:
-						break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(fieldTypes), fieldTypes, null);
 			}
-
 
 
 			FieldInfo fieldInfo = t.GetField(name, flags);
@@ -248,7 +253,8 @@ namespace RazorSharp.CLR
 			return fieldDesc;
 		}
 
-		public static Pointer<FieldDesc> GetFieldDesc<T>(string name, SpecialFieldTypes fieldTypes = SpecialFieldTypes.None,
+		public static Pointer<FieldDesc> GetFieldDesc<T>(string name,
+			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None,
 			BindingFlags flags = DefaultFlags)
 		{
 			return GetFieldDesc(typeof(T), name, fieldTypes, flags);

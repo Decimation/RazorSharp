@@ -70,7 +70,7 @@ namespace RazorSharp.CLR
 		///     </remarks>
 		/// </summary>
 		public int GCCount {
-			[CLRSigcall] get => throw new NotTranspiledException();
+			[CLRSigcall] get => throw new SigcallException();
 		}
 
 		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
@@ -98,7 +98,7 @@ namespace RazorSharp.CLR
 		[CLRSigcall]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
-			throw new NotTranspiledException();
+			throw new SigcallException();
 		}
 
 
@@ -121,7 +121,7 @@ namespace RazorSharp.CLR
 		[CLRSigcall]
 		public bool IsEphemeral(void* obj)
 		{
-			throw new NotTranspiledException();
+			throw new SigcallException();
 		}
 
 		public bool IsEphemeral<T>(T t) where T : class
@@ -133,7 +133,7 @@ namespace RazorSharp.CLR
 		[CLRSigcall]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
 		{
-			throw new NotTranspiledException();
+			throw new SigcallException();
 		}
 
 		//constants for the flags parameter to the gc call back
@@ -172,7 +172,7 @@ namespace RazorSharp.CLR
 			g_highest_address =
 				Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_highest_addressOffset));
 
-			SignatureCall.Transpile<GCHeap>();
+			SignatureCall.DynamicBind<GCHeap>();
 
 //			Console.WriteLine("g_pGCHeap address: {0}", Hex.ToHex(g_pGCHeapAddr));
 //			Console.WriteLine("g_pGCHeap: {0}", Hex.ToHex(g_pGCHeap));

@@ -49,12 +49,12 @@ namespace RazorSharp.Pointers.Ex
 
 			protected bool Equals(PointerMetadata m)
 			{
-				return this.ElementSize == m.ElementSize;
+				return ElementSize == m.ElementSize;
 			}
 
 			public override bool Equals(object obj)
 			{
-				if (obj.GetType() == this.GetType()) {
+				if (obj.GetType() == GetType()) {
 					return Equals((PointerMetadata) obj);
 				}
 
@@ -228,9 +228,9 @@ namespace RazorSharp.Pointers.Ex
 
 		public override bool Equals(object obj)
 		{
-			if (obj?.GetType() == this.GetType()) {
+			if (obj?.GetType() == GetType()) {
 				ExPointer<object> ptr = (ExPointer<object>) obj;
-				return ptr.Address == this.Address;
+				return ptr.Address == Address;
 			}
 
 			return false;
@@ -262,7 +262,7 @@ namespace RazorSharp.Pointers.Ex
 
 		public virtual string ToString(string format)
 		{
-			return this.ToString(format, CultureInfo.CurrentCulture);
+			return ToString(format, CultureInfo.CurrentCulture);
 		}
 
 		/// <inheritdoc />
