@@ -31,19 +31,17 @@ namespace RazorSharp.CLR
 	{
 		internal const string ClrDll = "clr.dll";
 
-		private static bool m_bFunctionsCached = false;
+		private static bool s_bFunctionsCached = false;
 
 		internal static void AddAll()
 		{
-			if (!m_bFunctionsCached) {
+			if (!s_bFunctionsCached) {
 				MethodDescFunctions.AddFunctions();
 				FieldDescFunctions.AddFunctions();
 				GCFunctions.AddFunctions();
 				JITFunctions.AddFunctions();
-				m_bFunctionsCached = true;
+				s_bFunctionsCached = true;
 			}
-
-
 		}
 
 

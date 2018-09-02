@@ -78,8 +78,10 @@ namespace RazorSharp.CLR.Structures
 
 		#region Accessors
 
+
+
 		/// <summary>
-		///     Unprocessed <see cref="MemberDef"/>
+		///     Unprocessed <see cref="MemberDef" />
 		/// </summary>
 		private int MB => (int) (m_dword1 & 0xFFFFFF);
 
@@ -160,12 +162,12 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		/// <summary>
-		/// The corresponding <see cref="FieldInfo"/> of this <see cref="FieldDesc"/>
+		///     The corresponding <see cref="FieldInfo" /> of this <see cref="FieldDesc" />
 		/// </summary>
 		public FieldInfo Info => RuntimeType.Module.ResolveField(MemberDef);
 
 		/// <summary>
-		/// Name of this field
+		///     Name of this field
 		/// </summary>
 		public string Name => Info.Name;
 
@@ -184,7 +186,7 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		/// <summary>
-		/// Enclosing type of this <see cref="FieldDesc"/>
+		///     Enclosing type of this <see cref="FieldDesc" />
 		/// </summary>
 		public Type RuntimeType => Runtime.MethodTableToType(MethodTable);
 

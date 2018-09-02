@@ -156,12 +156,12 @@ namespace RazorSharp.Pointers
 			return ref MMemory.AsRef<TType>(Offset<TType>(elemOffset));
 		}
 
-		public T[] Copy(int startIndex, int elemCnt)
+		public T[] CopyOut(int startIndex, int elemCnt)
 		{
-			return Copy<T>(startIndex, elemCnt);
+			return CopyOut<T>(startIndex, elemCnt);
 		}
 
-		public TType[] Copy<TType>(int startIndex, int elemCnt)
+		public TType[] CopyOut<TType>(int startIndex, int elemCnt)
 		{
 			TType[] rg = new TType[elemCnt];
 			for (int i = startIndex; i < elemCnt; i++) {

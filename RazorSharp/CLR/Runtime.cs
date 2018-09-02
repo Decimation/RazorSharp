@@ -99,6 +99,11 @@ namespace RazorSharp.CLR
 
 		#region MethodTable
 
+		/// <summary>
+		///     Gets the corresponding <see cref="Type" /> of <see cref="MethodTable" /> <paramref name="pMt" />.
+		/// </summary>
+		/// <param name="pMt"><see cref="MethodTable" /> to get the <see cref="Type" /> of</param>
+		/// <returns>The <see cref="Type" /> of the specified <see cref="MethodTable" /></returns>
 		public static Type MethodTableToType(Pointer<MethodTable> pMt)
 		{
 			return CLRFunctions.JIT_GetRuntimeType(pMt.ToPointer());
@@ -142,11 +147,11 @@ namespace RazorSharp.CLR
 		}
 
 		/// <summary>
-		///     Returns a type's TypeHandle as a MethodTable
+		///     Returns a type's TypeHandle as a <see cref="MethodTable" />
 		///     <exception cref="RuntimeException">If the type is an array</exception>
 		/// </summary>
-		/// <typeparam name="T">Type to return the corresponding MethodTable for.</typeparam>
-		/// <returns></returns>
+		/// <typeparam name="T">Type to return the corresponding <see cref="MethodTable" /> for.</typeparam>
+		/// <returns>A <see cref="Pointer{T}" /> to type <typeparamref name="T" />'s <see cref="MethodTable" /></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<MethodTable> MethodTableOf<T>()
 		{
@@ -164,7 +169,7 @@ namespace RazorSharp.CLR
 			// Array MTs are not valid TypeHandles...
 //			RazorContract.Requires(!t.IsArray, $"{t.Name}: Array MethodTables are not valid TypeHandles.");
 
-			// + 10ns
+			// + ~10ns
 			Trace.Assert(!t.IsArray, $"{t.Name}: Array MethodTables are not valid TypeHandles.");
 
 			return t.TypeHandle.Value;

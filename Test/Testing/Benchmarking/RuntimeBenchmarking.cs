@@ -17,6 +17,8 @@ namespace Test.Testing.Benchmarking
 	//   GetFields_ByReflection | 170.8 ns | 0.3591 ns | 0.3183 ns |
 	public class RuntimeBenchmarking
 	{
+
+
 		[Benchmark]
 		public void GetFields_ByMT_Check()
 		{

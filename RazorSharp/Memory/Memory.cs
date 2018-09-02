@@ -9,6 +9,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorInvoke;
 using RazorInvoke.Libraries;
+using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -55,10 +57,12 @@ namespace RazorSharp.Memory
 
 		public static byte[] ReadBytes(IntPtr p, int byteOffset, int size)
 		{
-			byte[] b = new byte[size];
-			for (int i = 0; i < size; i++)
-				b[i] = Marshal.ReadByte(p, byteOffset + i);
-			return b;
+			byte[] rg = new byte[size];
+			fixed (byte* b = rg) {
+				Copy<byte>(p, byteOffset, b, size);
+			}
+
+			return rg;
 		}
 
 		public static void WriteBytes(IntPtr dest, byte[] src)
@@ -69,15 +73,6 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-		public static T[] CopyOut<T>(IntPtr addr, int elemCount)
-		{
-			return CopyOut((Pointer<T>) addr, elemCount);
-		}
-
-		public static T[] CopyOut<T>(Pointer<T> ptr, int elemCount)
-		{
-			return ptr.Copy(0, elemCount);
-		}
 
 		#region Bits
 
@@ -170,7 +165,7 @@ namespace RazorSharp.Memory
 			Zero(ptr.ToPointer(), length);
 		}
 
-		private static void Zero(void* ptr, int length)
+		public static void Zero(void* ptr, int length)
 		{
 			byte* memptr = (byte*) ptr;
 			for (int i = 0; i < length; i++) {
@@ -180,6 +175,8 @@ namespace RazorSharp.Memory
 
 		#endregion
 
+		#region Stack
+
 		/// <summary>
 		///     Determines whether a variable is on the current thread's stack.
 		/// </summary>
@@ -187,7 +184,6 @@ namespace RazorSharp.Memory
 		{
 			return IsOnStack(Unsafe.AddressOf(ref t));
 		}
-
 
 		public static bool IsOnStack(Pointer<byte> ptr)
 		{
@@ -200,7 +196,37 @@ namespace RazorSharp.Memory
 		}
 
 		/// <summary>
-		/// Checks whether an address is in range.
+		///     Stack Base / Bottom of stack (high address)
+		/// </summary>
+		public static IntPtr StackBase => Kernel32.GetCurrentThreadStackLimits().high;
+
+		/// <summary>
+		///     Stack Limit / Ceiling of stack (low address)
+		/// </summary>
+		public static IntPtr StackLimit => Kernel32.GetCurrentThreadStackLimits().low;
+
+		/// <summary>
+		///     Should equal <c>4 MB</c> for 64-bit and <c>1 MB</c> for 32-bit
+		/// </summary>
+		public static long StackSize => StackBase.ToInt64() - StackLimit.ToInt64();
+
+		internal static void StackInit<T>(ref byte* b)
+		{
+			// ObjHeader
+			Zero(b, sizeof(ObjHeader));
+
+			// MethodTable*
+			b += sizeof(MethodTable*);
+			Pointer<MethodTable> mt  = Runtime.MethodTableOf<T>();
+			Pointer<MethodTable> pMt = b;
+			pMt.Write(mt);
+		}
+
+		#endregion
+
+
+		/// <summary>
+		///     Checks whether an address is in range.
 		/// </summary>
 		/// <param name="highest">The end address</param>
 		/// <param name="p">Address to check</param>
@@ -218,26 +244,48 @@ namespace RazorSharp.Memory
 
 
 		/// <summary>
-		///     Stack Base / Bottom of stack (high address)
+		/// Allocates basic reference types in the unmanaged heap.
 		/// </summary>
-		public static IntPtr StackBase => Kernel32.GetCurrentThreadStackLimits().high;
+		/// <typeparam name="T">Type to allocate; cannot be <c>string</c> or an array type</typeparam>
+		/// <returns>A pointer to a pointer to the unmanaged instance.</returns>
+		public static Pointer<T> AllocUnmanagedInstance<T>() where T : class
+		{
+			Trace.Assert(!typeof(T).IsArray, "Use AllocUnmanaged for arrays");
+			Trace.Assert(typeof(T) != typeof(string));
 
-		/// <summary>
-		///     Stack Limit / Ceiling of stack (low address)
-		/// </summary>
-		public static IntPtr StackLimit => Kernel32.GetCurrentThreadStackLimits().low;
 
-		/// <summary>
-		///     Should equal <c>4 MB</c> for 64-bit and <c>1 MB</c> for 32-bit
-		/// </summary>
-		public static long StackSize => StackBase.ToInt64() - StackLimit.ToInt64();
+			// Minimum size required for an instance
+			var baseSize = Unsafe.BaseInstanceSize<T>();
 
+			// We'll allocate extra bytes (+ IntPtr.Size) for a pointer and write the address of
+			// the unmanaged "instance" there, as the CLR can only interpret
+			// reference types as a pointer.
+			var alloc       = AllocUnmanaged<byte>(baseSize + IntPtr.Size);
+			var methodTable = Runtime.MethodTableOf<T>();
+
+			// Write the pointer in the extra allocated bytes,
+			// pointing to the MethodTable* (skip over the extra pointer and the ObjHeader)
+			alloc.Write(alloc.Address + sizeof(MethodTable*) * 2);
+
+			// Write the ObjHeader
+			// (this'll already be zeroed anyways, but this is just self-documentation)
+			// +4 int (sync block)
+			// +4 int (padding, x64)
+			alloc.Write(0L, 1);
+
+			// Write the MethodTable
+			// Managed pointers point to the MethodTable* in the GC heap
+			alloc.Write(methodTable, 2);
+
+
+			return alloc.Reinterpret<T>();
+		}
 
 		/// <summary>
 		///     <para>Allocates a value type in zeroed, unmanaged memory using <see cref="Marshal.AllocHGlobal(int)" />.</para>
 		///     <para>
 		///         If <typeparamref name="T" /> is a reference type, a managed pointer of type <typeparamref name="T" /> will be
-		///         created in unmanaged memory.
+		///         created in unmanaged memory, rather than the instance itself.
 		///     </para>
 		///     <para>
 		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free" />
@@ -255,6 +303,7 @@ namespace RazorSharp.Memory
 			return alloc;
 		}
 
+
 		/// <summary>
 		///     <para>Frees memory allocated from <see cref="AllocUnmanaged{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>
 		///     <para>The memory is zeroed before it is freed.</para>
@@ -267,6 +316,34 @@ namespace RazorSharp.Memory
 			Zero(p, (int) size);
 			Marshal.FreeHGlobal(p);
 		}
+
+		#region Copy
+
+		public static void Copy<T>(Pointer<T> dest, int startOfs, Pointer<T> src, int elemCnt)
+		{
+			for (int i = startOfs; i < elemCnt; i++) {
+				dest[i] = src[i];
+			}
+		}
+
+		public static void Copy<T>(Pointer<T> dest, Pointer<T> src, int elemCnt)
+		{
+			Copy(dest, 0, src, elemCnt);
+		}
+
+
+
+		public static void Copy(Pointer<byte> dest, byte[] src)
+		{
+			fixed (byte* b = src) {
+				Copy(dest, 0, b, src.Length);
+			}
+		}
+
+		#endregion
+
+
+		#region Alignment
 
 		/*public static bool IsAligned<T>(int byteAlignment)
 		{
@@ -288,6 +365,10 @@ namespace RazorSharp.Memory
 		{
 			return (p.ToInt64() & (byteAlignment - 1)) == 0;
 		}
+
+		#endregion
+
+
 	}
 
 }

@@ -12,6 +12,7 @@ using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
+// ReSharper disable ConvertToAutoPropertyWhenPossible
 
 #endregion
 
@@ -83,7 +84,7 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		/// <summary>
-		///     The enclosing type of this <see cref="MethodDesc"/>
+		///     The enclosing type of this <see cref="MethodDesc" />
 		/// </summary>
 		public Type RuntimeType => Runtime.MethodTableToType(MethodTable);
 
@@ -283,7 +284,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Slot number", m_wSlotNumber);
 			table.AddRow("Attributes", Attributes);
 
-			table.AddRow("Is Pointing to native code", IsPointingToNativeCode.Prettify());
+			table.AddRow("Is pointing to native code", IsPointingToNativeCode.Prettify());
 			table.AddRow("Is Constructor", IsCtor.Prettify());
 			table.AddRow("MethodDescChunk", MethodDescChunk.ToString("P"));
 

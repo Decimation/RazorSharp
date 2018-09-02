@@ -1,5 +1,7 @@
 #region
 
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,6 +13,9 @@ using RazorCommon;
 using RazorInvoke;
 using RazorInvoke.Libraries;
 using RazorSharp.Pointers;
+
+#endregion
+
 // ReSharper disable InconsistentNaming
 
 #endregion

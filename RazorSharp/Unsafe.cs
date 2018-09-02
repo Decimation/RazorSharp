@@ -389,7 +389,7 @@ namespace RazorSharp
 
 
 		/// <summary>
-		///     <para>Returns the base size of the fields in the heap.</para>
+		///     <para>Returns the base size of the fields (data) in the heap.</para>
 		///     <para>This follows the formula of:</para>
 		///     <para><see cref="MethodTable.BaseSize" /> - <see cref="EEClass.BaseSizePadding" /></para>
 		///     <remarks>
@@ -415,7 +415,7 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		///     <para>Returns the base size of the fields in the heap.</para>
+		///     <para>Returns the base size of the fields (data) in the heap.</para>
 		///     <para>This follows the formula of:</para>
 		///     <para><see cref="MethodTable.BaseSize" /> - <see cref="EEClass.BaseSizePadding" /></para>
 		///     <para>

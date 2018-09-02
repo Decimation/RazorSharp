@@ -1,10 +1,12 @@
 ﻿#region
 
 using System;
+using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -75,7 +77,7 @@ namespace Test
 			 * - x64
 			 * - Windows
 			 * - .NET CLR
-			 * - Workstation GC
+			 * - Workstation Concurrent GC
 			 *
 			 * Current target: .NET 4.7.2
 			 *
@@ -101,20 +103,55 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-//			int[] rg = new int[0];
-//			Console.WriteLine(Runtime.ReadMethodTable(ref rg));
+			// get { return (ushort)((g_i >> 5) & 0x7F); }
+			// set { g_i = (ushort)((g_i & ~(0x7F << 5)) | (value & 0x7F) << 5); }
 
-			Pointer<byte> pAlloc = Memory.AllocUnmanaged<byte>(10);
+			Pointer<CPoint> ptr = Memory.AllocUnmanagedInstance<CPoint>();
+			ptr.Reference.X++;
+			ptr.Reference.Y++;
+			Console.WriteLine(ptr);
+			Memory.Free(ptr.Address);
 
+			byte[] rg = {0xDE, 0xAD, 0xBE, 0xEF};
+			byte[] x  = Memory.ReadBytes(AddressOfHeap(ref rg, OffsetType.ArrayData), 0, rg.Length);
+			Debug.Assert(x.SequenceEqual(rg));
+		}
 
-			for (int i = 0; i < 10; i++) {
-				Debug.Assert(Memory.IsAddressInRange(pAlloc.Address + (10-i), pAlloc.Address, pAlloc.Address));
-				pAlloc++;
+		class CPoint
+		{
+			private float m_fX,
+			              m_fY;
+
+			public float X {
+				get => m_fX;
+				set => m_fX = value;
 			}
 
-			pAlloc -= (10);
-			Memory.Free(pAlloc.Address);
+			public float Y {
+				get => m_fY;
+				set => m_fY = value;
+			}
+
+			public override string ToString()
+			{
+				return String.Format("x = {0}, y = {1}", m_fX, m_fY);
+			}
 		}
+
+
+		private static long ReadBitsAsInt64(ulong u, int bitIndex, int bits)
+		{
+			long value = 0;
+
+			// Calculate a bitmask of the desired length
+			long mask = 0;
+			for (int i = 0; i < bits; i++)
+				mask |= 1 << i;
+
+			value |= ((uint) u & mask) << bitIndex;
+			return value;
+		}
+
 
 		private static void RunBenchmark<T>()
 		{
@@ -132,7 +169,7 @@ namespace Test
 		private static void VMMap()
 		{
 			var table = new ConsoleTable("Low address", "High address", "Size");
-			table.AddRow(Hex.ToHex(Memory.StackBase), Hex.ToHex(Memory.StackLimit),
+			table.AddRow(Hex.ToHex(Memory.StackLimit), Hex.ToHex(Memory.StackBase),
 				String.Format("{0} ({1} K)", Memory.StackSize, Memory.StackSize / 1024));
 			Console.WriteLine(InspectorHelper.CreateLabelString("Stack:", table));
 
@@ -158,55 +195,6 @@ namespace Test
 			Pointer<MethodDesc> origMd = Runtime.GetMethodDesc(tOrig, origFn);
 			Pointer<MethodDesc> newMd  = Runtime.GetMethodDesc(tNew, newFn);
 			origMd.Reference.SetFunctionPointer(newMd.Reference.Function);
-		}
-
-
-		private struct UObj<T> : IDisposable
-		{
-			private IntPtr m_addr;
-
-			public IntPtr Address => m_addr;
-
-			internal UObj(IntPtr p)
-			{
-				m_addr = p;
-			}
-
-			/// <summary>
-			///     Don't create a new instance using this
-			/// </summary>
-			public ref T Reference {
-				get {
-					IntPtr ptrPtr = AddressOf(ref m_addr);
-					return ref Memory.AsRef<T>(ptrPtr);
-				}
-			}
-
-			public void Dispose()
-			{
-				Marshal.FreeHGlobal(m_addr - IntPtr.Size);
-			}
-
-			public override string ToString()
-			{
-				return Reference.ToString();
-			}
-		}
-
-
-		private static UObj<T> New<T>() where T : class
-		{
-			RazorContract.Assert(!typeof(T).IsArray);
-			RazorContract.Assert(typeof(T) != typeof(string));
-			RazorContract.Assert(!typeof(T).IsIListType());
-
-
-			Pointer<byte> lpMem = Memory.AllocUnmanaged<byte>(BaseInstanceSize<T>());
-			lpMem.Increment(sizeof(long));
-			lpMem.Write((long) Runtime.MethodTableOf<T>());
-
-
-			return new UObj<T>(lpMem.Address);
 		}
 
 		#endregion

@@ -19,11 +19,6 @@ namespace Test.Testing.Benchmarking
 
 	public unsafe class SignatureCallBenchmarking
 	{
-
-
-		private Dummy _d = new Dummy();
-
-
 		//                 Method |     Mean |    Error |   StdDev |
 		// ---------------------- |---------:|---------:|---------:|
 		//  TranspileSingleInline | 885.2 us | 2.511 us | 2.349 us |
@@ -44,8 +39,8 @@ namespace Test.Testing.Benchmarking
 		[GlobalSetup]
 		public void Setup()
 		{
-			CLRFunctions.AddAll();
-			SignatureCall.DynamicBind(typeof(CLRFunctions));
+
+
 			SignatureCall.DynamicBind<MethodDesc>();
 			SignatureCall.DynamicBind<FieldDesc>();
 			SignatureCall.DynamicBind<GCHeap>();
@@ -59,20 +54,15 @@ namespace Test.Testing.Benchmarking
 				});
 		}
 
-		[Benchmark]
-		public void TranspileAll()
-		{
-
-		}
 
 		[Benchmark]
-		public void TranspileSingleInline()
+		public void BindSingleInline()
 		{
 			SignatureCall.DynamicBind<CClass>("doSomething");
 		}
 
 		[Benchmark]
-		public void TranspileSingleCached()
+		public void BindSingleCached()
 		{
 			SignatureCall.DynamicBind<CClass>("doSomething2");
 		}

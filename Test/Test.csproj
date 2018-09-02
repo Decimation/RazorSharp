@@ -219,6 +219,7 @@
       <Compile Include="Testing\Tests\AddrInRangeTests.cs"/>
     <Compile Include="Testing\Tests\AllocPointerTests.cs" />
       <Compile Include="Testing\Tests\SignatureCallTests.cs"/>
+      <Compile Include="Testing\Tests\StackAllocateTests.cs"/>
       <Compile Include="Testing\Tests\StructureTests.cs"/>
     <Compile Include="Testing\Tests\HeapObjectTests.cs" />
     <Compile Include="Testing\Tests\OffsetOfTests.cs" />

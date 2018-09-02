@@ -27,7 +27,6 @@ namespace RazorSharp.Memory
 				if (Memory.IsAddressInRange(s.EndAddress, addr, s.SectionAddress)) {
 					return Parse(s.SectionName);
 				}
-
 			}
 
 			throw new Exception($"Could not find corresponding segment for {Hex.ToHex(addr)}");
@@ -43,7 +42,8 @@ namespace RazorSharp.Memory
 				}
 			}
 
-			throw new Exception($"Could not find segment: \"{segment}\". Try prefixing \"{segment}\" with a period: (e.g. \".{segment}\")");
+			throw new Exception(
+				$"Could not find segment: \"{segment}\". Try prefixing \"{segment}\" with a period: (e.g. \".{segment}\")");
 		}
 
 

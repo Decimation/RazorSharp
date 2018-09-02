@@ -66,7 +66,7 @@ namespace RazorSharp.Analysis
 			m_bIsArray    = bIsArray;
 			m_bIsDefault  = bIsDefault;
 
-			if (!typeof(T).IsValueType) {
+			if (!typeof(T).IsValueType && !m_bIsDefault) {
 				// Point to heap
 				m_pAddr = *(IntPtr*) pAddr;
 			}

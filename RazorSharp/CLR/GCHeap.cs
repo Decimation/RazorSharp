@@ -6,6 +6,7 @@ using RazorInvoke;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
+using static RazorSharp.Memory.Memory;
 
 // ReSharper disable MemberCanBeMadeStatic.Global
 
@@ -127,6 +128,17 @@ namespace RazorSharp.CLR
 		public bool IsEphemeral<T>(T t) where T : class
 		{
 			return IsEphemeral(Unsafe.AddressOfHeap(ref t).ToPointer());
+		}
+
+		public static bool IsInGCHeap<T>(ref T t)
+		{
+			IntPtr addr = Unsafe.AddressOf(ref t);
+			return IsInGCHeap(addr);
+		}
+
+		public static bool IsInGCHeap(IntPtr p)
+		{
+			return IsAddressInRange(g_highest_address, p, g_lowest_address);
 		}
 
 		// 85
