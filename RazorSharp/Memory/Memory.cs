@@ -32,7 +32,8 @@ namespace RazorSharp.Memory
 
 	public static unsafe class Memory
 	{
-		private const byte Int32Bits = 32;
+		private const  byte Int32Bits       = 32;
+		internal const int  BytesInKilobyte = 1024;
 
 		#region Swap
 
@@ -55,17 +56,17 @@ namespace RazorSharp.Memory
 
 		#region Array operations
 
-		public static byte[] ReadBytes(IntPtr p, int byteOffset, int size)
+		public static byte[] ReadBytes(Pointer<byte> p, int byteOffset, int size)
 		{
 			byte[] rg = new byte[size];
 			fixed (byte* b = rg) {
-				Copy<byte>(p, byteOffset, b, size);
+				Copy(b, byteOffset, p, size);
 			}
 
 			return rg;
 		}
 
-		public static void WriteBytes(IntPtr dest, byte[] src)
+		public static void WriteBytes(Pointer<byte> dest, byte[] src)
 		{
 			for (int i = 0; i < src.Length; i++)
 				Marshal.WriteByte(dest, i, src[i]);
@@ -116,7 +117,7 @@ namespace RazorSharp.Memory
 
 			int    lpNumberOfBytesWritten = 0;
 			int    size                   = Unsafe.SizeOf<T>();
-			IntPtr targetPtr              = PointerUtils.Add(p, byteOffset);
+			IntPtr targetPtr              = PointerUtils.Add(p, byteOffset).Address;
 
 //			bool a = Kernel32.VirtualProtect(targetPtr, (IntPtr) size, Enumerations.MemoryProtection.ExecuteReadWrite, out _);
 //			RazorContract.Assert(a);
@@ -244,7 +245,7 @@ namespace RazorSharp.Memory
 
 
 		/// <summary>
-		/// Allocates basic reference types in the unmanaged heap.
+		///     Allocates basic reference types in the unmanaged heap.
 		/// </summary>
 		/// <typeparam name="T">Type to allocate; cannot be <c>string</c> or an array type</typeparam>
 		/// <returns>A pointer to a pointer to the unmanaged instance.</returns>
@@ -255,13 +256,13 @@ namespace RazorSharp.Memory
 
 
 			// Minimum size required for an instance
-			var baseSize = Unsafe.BaseInstanceSize<T>();
+			int baseSize = Unsafe.BaseInstanceSize<T>();
 
 			// We'll allocate extra bytes (+ IntPtr.Size) for a pointer and write the address of
 			// the unmanaged "instance" there, as the CLR can only interpret
 			// reference types as a pointer.
-			var alloc       = AllocUnmanaged<byte>(baseSize + IntPtr.Size);
-			var methodTable = Runtime.MethodTableOf<T>();
+			Pointer<byte>        alloc       = AllocUnmanaged<byte>(baseSize + IntPtr.Size);
+			Pointer<MethodTable> methodTable = Runtime.MethodTableOf<T>();
 
 			// Write the pointer in the extra allocated bytes,
 			// pointing to the MethodTable* (skip over the extra pointer and the ObjHeader)
@@ -330,7 +331,6 @@ namespace RazorSharp.Memory
 		{
 			Copy(dest, 0, src, elemCnt);
 		}
-
 
 
 		public static void Copy(Pointer<byte> dest, byte[] src)

@@ -23,6 +23,7 @@ namespace RazorSharp.Analysis
 	/// <typeparam name="T">Type to get the layout of.</typeparam>
 	public unsafe class ObjectLayout<T>
 	{
+		// todo: add option to inline value types
 
 		#region Fields
 

@@ -21,8 +21,9 @@ namespace RazorSharp.Memory
 	/// <inheritdoc />
 	/// <summary>
 	///     Indicates that the attributed function is exposed via signature scanning (using
-	///     <see cref="T:RazorSharp.Memory.SigScanner" /> internally). The original function pointer (<see cref="RuntimeMethodHandle.GetFunctionPointer"/>) will be overwritten
-	///  with a pointer to the matched signature found by <see cref="SigScanner"/>.
+	///     <see cref="T:RazorSharp.Memory.SigScanner" /> internally). The original function pointer (
+	///     <see cref="RuntimeMethodHandle.GetFunctionPointer" />) will be overwritten
+	///     with a pointer to the matched signature found by <see cref="SigScanner" />.
 	///     <remarks>
 	///         <c>virtual</c> and <c>abstract</c> functions cannot be annotated.
 	///     </remarks>

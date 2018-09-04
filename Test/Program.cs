@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using BenchmarkDotNet.Running;
+using JetBrains.Annotations;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
@@ -72,23 +73,34 @@ namespace Test
 			StandardOut.ModConsole();
 
 			/**
-			 * RazorSharp is only compatible on:
+			 * RazorSharp is tested on and targets:
 			 *
 			 * - x64
 			 * - Windows
-			 * - .NET CLR
+			 * - .NET CLR 4.7.2
 			 * - Workstation Concurrent GC
 			 *
-			 * Current target: .NET 4.7.2
 			 *
 			 */
 			RazorContract.Assert(IntPtr.Size == 8);
 			RazorContract.Assert(Environment.Is64BitProcess);
 			RazorContract.Assert(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
-			RazorContract.Assert(Environment.Version.Major == 4); //todo
+
+			/**
+			 * 4.0.30319.42000
+			 * The version we've been testing and targeting.
+			 * Other versions will probably work but we're just making sure
+			 * todo - determine compatibility
+			 */
+			RazorContract.Assert(Environment.Version.Major == 4);
+			RazorContract.Assert(Environment.Version.Minor == 0);
+			RazorContract.Assert(Environment.Version.Build == 30319);
+			RazorContract.Assert(Environment.Version.Revision == 42000);
+
 			RazorContract.Assert(!GCSettings.IsServerGC);
 			bool isRunningOnMono = Type.GetType("Mono.Runtime") != null;
 			RazorContract.Assert(!isRunningOnMono);
+			Console.WriteLine(Environment.Version);
 
 //			Logger.Log(Flags.Info, "Architecture: x64");
 //			Logger.Log(Flags.Info, "Byte order: {0}", BitConverter.IsLittleEndian ? "Little Endian" : "Big Endian");
@@ -106,16 +118,13 @@ namespace Test
 			// get { return (ushort)((g_i >> 5) & 0x7F); }
 			// set { g_i = (ushort)((g_i & ~(0x7F << 5)) | (value & 0x7F) << 5); }
 
-			Pointer<CPoint> ptr = Memory.AllocUnmanagedInstance<CPoint>();
-			ptr.Reference.X++;
-			ptr.Reference.Y++;
-			Console.WriteLine(ptr);
-			Memory.Free(ptr.Address);
 
-			byte[] rg = {0xDE, 0xAD, 0xBE, 0xEF};
-			byte[] x  = Memory.ReadBytes(AddressOfHeap(ref rg, OffsetType.ArrayData), 0, rg.Length);
-			Debug.Assert(x.SequenceEqual(rg));
+			VMMap();
+			Segments.DumpSegments("clr.dll");
+
+			__break();
 		}
+
 
 		class CPoint
 		{
@@ -169,14 +178,17 @@ namespace Test
 		private static void VMMap()
 		{
 			var table = new ConsoleTable("Low address", "High address", "Size");
+
+			// Stack of current thread
 			table.AddRow(Hex.ToHex(Memory.StackLimit), Hex.ToHex(Memory.StackBase),
-				String.Format("{0} ({1} K)", Memory.StackSize, Memory.StackSize / 1024));
+				String.Format("{0} ({1} K)", Memory.StackSize, Memory.StackSize / Memory.BytesInKilobyte));
 			Console.WriteLine(InspectorHelper.CreateLabelString("Stack:", table));
 
 			table.Rows.RemoveAt(0);
 
+			// GC heap
 			table.AddRow(Hex.ToHex(GCHeap.LowestAddress), Hex.ToHex(GCHeap.HighestAddress),
-				String.Format("{0} ({1} K)", GCHeap.Size, GCHeap.Size / 1024));
+				String.Format("{0} ({1} K)", GCHeap.Size, GCHeap.Size / Memory.BytesInKilobyte));
 			Console.WriteLine(InspectorHelper.CreateLabelString("GC:", table));
 		}
 

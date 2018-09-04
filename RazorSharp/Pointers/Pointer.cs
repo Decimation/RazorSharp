@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using RazorCommon;
 using RazorCommon.Extensions;
@@ -27,8 +28,11 @@ namespace RazorSharp.Pointers
 
 	/// <summary>
 	///     <para>A bare-bones, lighter type of <see cref="ExPointer{T}" />, equal to <see cref="IntPtr.Size" /></para>
-	///     <para> Can be represented as a pointer in memory. </para>
+	///     <para>Can be represented as a pointer in memory. </para>
 	///     <para>Has identical or better performance than native pointers.</para>
+	///     <para>
+	///         Supports pointer arithmetic and reading/writing different types other than type <typeparamref name="T" />
+	///     </para>
 	///     <list type="bullet">
 	///         <item>
 	///             <description>No bounds checking</description>
@@ -37,11 +41,14 @@ namespace RazorSharp.Pointers
 	///             <description>No safety systems</description>
 	///         </item>
 	///         <item>
-	///             <description>No type safety</description>
+	///             <description>Minimum type safety</description>
 	///         </item>
 	///     </list>
+	///     <remarks>
+	///         Note: <c>Pointer&lt;byte&gt;</c> is used as an opaque pointer where applicable.
+	///     </remarks>
 	/// </summary>
-	/// <typeparam name="T">Type to point to</typeparam>
+	/// <typeparam name="T">Element type to point to</typeparam>
 	public unsafe struct Pointer<T> : IPointer<T>
 	{
 		/// <summary>
@@ -76,26 +83,56 @@ namespace RazorSharp.Pointers
 
 		#region Constructors
 
+		/// <summary>
+		///     Creates a new <see cref="Pointer{T}" /> pointing to the address <paramref name="p" />
+		/// </summary>
+		/// <param name="p">Address to point to</param>
 		public Pointer(IntPtr p) : this(p.ToPointer()) { }
 
+		/// <summary>
+		///     Creates a new <see cref="Pointer{T}" /> pointing to the address <paramref name="v" />
+		/// </summary>
+		/// <param name="v">Address to point to</param>
 		public Pointer(void* v)
 		{
 			m_pValue = v;
 		}
 
+		/// <summary>
+		///     Creates a new <see cref="Pointer{T}" /> pointing to the address <paramref name="v" /> represented as an
+		///     <see cref="Int64" />
+		/// </summary>
+		/// <param name="v">Address to point to</param>
 		public Pointer(long v) : this((void*) v) { }
 
+		/// <summary>
+		///     Creates a new <see cref="Pointer{T}" /> pointing to the address of <paramref name="t" />
+		/// </summary>
+		/// <param name="t">Variable whose address will be pointed to</param>
 		public Pointer(ref T t) : this(Unsafe.AddressOf(ref t)) { }
 
 		#endregion
 
 		#region Collection-esque operations
 
+		/// <summary>
+		///     Retrieves the index of the specified element <paramref name="value" />
+		/// </summary>
+		/// <param name="value">Value to retrieve the index of</param>
+		/// <param name="searchLength">How many elements to search, starting from the current index</param>
+		/// <returns>The index of the element if it was found; <c>-1</c> if the element was not found</returns>
 		public int IndexOf(T value, int searchLength)
 		{
 			return IndexOf(value, 0, searchLength);
 		}
 
+		/// <summary>
+		///     Retrieves the index of the specified element <paramref name="value" />
+		/// </summary>
+		/// <param name="value">Value to retrieve the index of</param>
+		/// <param name="startIndex">Index to start searching from</param>
+		/// <param name="searchLength">How many elements to search, starting from the current index</param>
+		/// <returns>The index of the element if it was found; <c>-1</c> if the element was not found</returns>
 		public int IndexOf(T value, int startIndex, int searchLength)
 		{
 			for (int i = startIndex; i < searchLength; i++) {
@@ -107,6 +144,10 @@ namespace RazorSharp.Pointers
 			return -1;
 		}
 
+		/// <summary>
+		///     Writes all elements of <paramref name="enumerable" /> to the current pointer.
+		/// </summary>
+		/// <param name="enumerable">Values to write</param>
 		public void Init(IEnumerable<T> enumerable)
 		{
 			int            i          = 0;
@@ -118,6 +159,10 @@ namespace RazorSharp.Pointers
 			enumerator.Dispose();
 		}
 
+		/// <summary>
+		///     Writes all elements of <paramref name="values" /> to the current pointer.
+		/// </summary>
+		/// <param name="values">Values to write</param>
 		public void Init(params T[] values)
 		{
 			for (int i = 0; i < values.Length; i++) {
@@ -125,9 +170,20 @@ namespace RazorSharp.Pointers
 			}
 		}
 
-		public bool Contains(T value, int length)
+		/// <summary>
+		///     Determines whether the pointer contains <paramref name="value" /> from the range specified.
+		/// </summary>
+		/// <param name="value">Value to search for</param>
+		/// <param name="searchLength">Number of elements to search (range)</param>
+		/// <returns><c>true</c> if the value was found within the range specified, <c>false</c> otherwise</returns>
+		public bool Contains(T value, int searchLength)
 		{
-			return IndexOf(value, length) != -1;
+			return IndexOf(value, searchLength) != -1;
+		}
+
+		public bool SequenceEqual(T[] values)
+		{
+			return CopyOut(values.Length).SequenceEqual(values);
 		}
 
 		#endregion
@@ -156,11 +212,44 @@ namespace RazorSharp.Pointers
 			return ref MMemory.AsRef<TType>(Offset<TType>(elemOffset));
 		}
 
+		/// <summary>
+		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="T" />.
+		/// </summary>
+		/// <param name="elemCnt">Number of elements to copy</param>
+		/// <returns>
+		///     An array of length <paramref name="elemCnt" /> of type <typeparamref name="T" /> copied from
+		///     the current pointer
+		/// </returns>
+		public T[] CopyOut(int elemCnt)
+		{
+			return CopyOut(0, elemCnt);
+		}
+
+		/// <summary>
+		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="T" />, starting from
+		///     index <paramref name="startIndex" />
+		/// </summary>
+		/// <param name="startIndex">Index to begin copying from</param>
+		/// <param name="elemCnt">Number of elements to copy</param>
+		/// <returns>
+		///     An array of length <paramref name="elemCnt" /> of type <typeparamref name="T" /> copied from
+		///     the current pointer
+		/// </returns>
 		public T[] CopyOut(int startIndex, int elemCnt)
 		{
 			return CopyOut<T>(startIndex, elemCnt);
 		}
 
+		/// <summary>
+		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="TType" />, starting from
+		///     index <paramref name="startIndex" />
+		/// </summary>
+		/// <param name="startIndex">Index to begin copying from</param>
+		/// <param name="elemCnt">Number of elements to copy</param>
+		/// <returns>
+		///     An array of length <paramref name="elemCnt" /> of type <typeparamref name="TType" /> copied from
+		///     the current pointer
+		/// </returns>
 		public TType[] CopyOut<TType>(int startIndex, int elemCnt)
 		{
 			TType[] rg = new TType[elemCnt];
@@ -176,7 +265,12 @@ namespace RazorSharp.Pointers
 
 		#region Other methods
 
-		public PinHandle Pin()
+		public void Zero(int byteCnt)
+		{
+			MMemory.Zero(m_pValue, byteCnt);
+		}
+
+		public PinHandle TryPin()
 		{
 			RazorContract.Requires(!typeof(T).IsValueType, "Value types do not need to be pinned");
 			return new ObjectPinHandle(Value);
@@ -220,6 +314,11 @@ namespace RazorSharp.Pointers
 			return table;
 		}
 
+		/// <summary>
+		///     Creates a new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" />, pointing to <see cref="Address" />
+		/// </summary>
+		/// <typeparam name="TNew">Type to point to</typeparam>
+		/// <returns>A new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" /></returns>
 		public Pointer<TNew> Reinterpret<TNew>()
 		{
 			return new Pointer<TNew>(Address);
@@ -264,6 +363,11 @@ namespace RazorSharp.Pointers
 			return ptr.ToInt64();
 		}
 
+		public static explicit operator Pointer<T>(long l)
+		{
+			return new Pointer<T>(l);
+		}
+
 
 		#region Arithmetic
 
@@ -280,24 +384,40 @@ namespace RazorSharp.Pointers
 		}
 
 
-		public void Add(int bytes)
+		/// <summary>
+		///     Increment <see cref="Address" /> by the specified number of bytes
+		/// </summary>
+		/// <param name="bytes">Number of bytes to add</param>
+		public void Add(long bytes)
 		{
-			m_pValue = PointerUtils.Add(m_pValue, bytes).ToPointer();
+			m_pValue = PointerUtils.Add(Address, bytes).ToPointer();
 		}
 
 
-		public void Subtract(int bytes)
+		/// <summary>
+		///     Decrement <see cref="Address" /> by the specified number of bytes
+		/// </summary>
+		/// <param name="bytes">Number of bytes to subtract</param>
+		public void Subtract(long bytes)
 		{
-			m_pValue = PointerUtils.Subtract(m_pValue, bytes).ToPointer();
+			m_pValue = PointerUtils.Subtract(Address, bytes).ToPointer();
 		}
 
 
+		/// <summary>
+		///     Increment <see cref="Address" /> by the specified number of elements
+		/// </summary>
+		/// <param name="elemCnt">Number of elements</param>
 		public void Increment(int elemCnt = 1)
 		{
 			m_pValue = PointerUtils.Offset<T>(m_pValue, elemCnt).ToPointer();
 		}
 
 
+		/// <summary>
+		///     Decrement <see cref="Address" /> by the specified number of elements
+		/// </summary>
+		/// <param name="elemCnt">Number of elements</param>
 		public void Decrement(int elemCnt = 1)
 		{
 			m_pValue = PointerUtils.Offset<T>(m_pValue, -elemCnt).ToPointer();
@@ -361,13 +481,23 @@ namespace RazorSharp.Pointers
 			return p;
 		}
 
+		public static bool operator >(Pointer<T> left, Pointer<T> right)
+		{
+			return left.ToInt64() > right.ToInt64();
+		}
+
+		public static bool operator <(Pointer<T> left, Pointer<T> right)
+		{
+			return left.ToInt64() < right.ToInt64();
+		}
+
 		#endregion
 
 		#endregion
 
 		#region Equality operators
 
-		public bool Equals(IPointer<T> other)
+		public bool Equals(Pointer<T> other)
 		{
 			return Address == other.Address;
 		}
@@ -402,14 +532,21 @@ namespace RazorSharp.Pointers
 
 		#region Overrides
 
+		/// <inheritdoc />
 		/// <summary>
 		/// </summary>
 		/// <param name="format">
-		///     <para><c>"O"</c>: Object (<see cref="Reference" />) </para>
-		///     <para><c>"P"</c>: Pointer (<see cref="Address" />) </para>
-		///     <para><c>"S"</c>: Safe <c>"O"</c> (when <see cref="Reference" /> or <see cref="Address" /> may be <c>null</c>) </para>
+		///     <para><c>"O"</c>: Object (<see cref="P:RazorSharp.Pointers.Pointer`1.Reference" />) </para>
+		///     <para><c>"P"</c>: Pointer (<see cref="P:RazorSharp.Pointers.Pointer`1.Address" />) </para>
+		///     <para>
+		///         <c>"S"</c>: Safe <c>"O"</c> (when <see cref="P:RazorSharp.Pointers.Pointer`1.Reference" /> or
+		///         <see cref="P:RazorSharp.Pointers.Pointer`1.Address" /> may be <c>null</c>)
+		///     </para>
 		///     <para><c>"I"</c>: Table of information </para>
-		///     <para><c>"B"</c>: Both <see cref="Address" /> and <see cref="Reference" /></para>
+		///     <para>
+		///         <c>"B"</c>: Both <see cref="P:RazorSharp.Pointers.Pointer`1.Address" /> and
+		///         <see cref="P:RazorSharp.Pointers.Pointer`1.Reference" />
+		///     </para>
 		/// </param>
 		/// <param name="formatProvider"></param>
 		/// <returns></returns>

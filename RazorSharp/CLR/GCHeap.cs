@@ -8,6 +8,8 @@ using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
 using static RazorSharp.Memory.Memory;
 
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+
 // ReSharper disable MemberCanBeMadeStatic.Global
 
 #endregion
@@ -19,7 +21,7 @@ namespace RazorSharp.CLR
 
 
 	/// <summary>
-	///     <para>Represents the GC. </para>
+	///     <para>Represents the entire GC heap. This includes Gen 0, 1, 2, LOH, and other segments.</para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
 	///         <item>
@@ -179,10 +181,11 @@ namespace RazorSharp.CLR
 			ImageSectionInfo dataSegment = Segments.GetSegment(".data", CLRFunctions.ClrDll);
 
 
-			g_pGCHeap        = Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_pGCHeapOffset));
-			g_lowest_address = Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_lowest_addressOffset));
+			g_pGCHeap = Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_pGCHeapOffset).Address);
+			g_lowest_address =
+				Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_lowest_addressOffset).Address);
 			g_highest_address =
-				Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_highest_addressOffset));
+				Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_highest_addressOffset).Address);
 
 			SignatureCall.DynamicBind<GCHeap>();
 

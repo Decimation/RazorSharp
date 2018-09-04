@@ -92,6 +92,9 @@ namespace RazorSharp.CLR.Structures
 
 		/// <summary>
 		///     <see cref="DWORD" /> of <see cref="TypeAttributes" />
+		/// <remarks>
+		/// Equal to WinDbg's <c>!DumpClass</c> <c>"Class Attributes"</c> value in hexadecimal format.
+		/// </remarks>
 		/// </summary>
 		public DWORD Attributes => m_dwAttrClass;
 
@@ -133,7 +136,7 @@ namespace RazorSharp.CLR.Structures
 				RazorContract.Requires(HasLayout, "EEClass does not have LayoutInfo");
 
 
-				IntPtr thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass));
+				IntPtr thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass)).Address;
 				return &((LayoutEEClass*) thisptr)->m_LayoutInfo;
 			}
 		}

@@ -12,6 +12,7 @@ using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
+
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 
 #endregion

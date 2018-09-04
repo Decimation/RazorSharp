@@ -78,8 +78,6 @@ namespace RazorSharp.CLR.Structures
 
 		#region Accessors
 
-
-
 		/// <summary>
 		///     Unprocessed <see cref="MemberDef" />
 		/// </summary>

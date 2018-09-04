@@ -45,7 +45,7 @@ namespace RazorSharp.CLR.Fixed
 		public sealed class PinningHelper
 		{
 			/// <summary>
-			/// Represents the first field in an object, such as <see cref="OffsetType.Fields"/>.
+			///     Represents the first field in an object, such as <see cref="OffsetType.Fields" />.
 			/// </summary>
 			public byte Data;
 

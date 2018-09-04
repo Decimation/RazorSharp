@@ -278,7 +278,7 @@ namespace RazorSharp.CLR
 	///         </item>
 	///     </list>
 	///     <remarks>
-	///         Use with <see cref="FieldDesc.Type" />
+	///         Use with <see cref="FieldDesc.CorType" />
 	///     </remarks>
 	/// </summary>
 	public enum CorElementType : byte

@@ -171,7 +171,7 @@ namespace RazorSharp
 		///         <para>
 		///             Note: This does not pin the reference in memory if it is a reference type.
 		///             This may require pinning to prevent the GC from moving the object.
-		///             If the GC compacts the heap, this pointer may become invalid if the corresponding reference moves.
+		///             If the GC compacts the heap, this pointer may become invalid.
 		///         </para>
 		///     </remarks>
 		/// </summary>
@@ -194,7 +194,7 @@ namespace RazorSharp
 		///         <para>
 		///             Note: This does not pin the reference in memory if it is a reference type.
 		///             This may require pinning to prevent the GC from moving the object.
-		///             If the GC compacts the heap, this pointer may become invalid if the corresponding reference moves.
+		///             If the GC compacts the heap, this pointer may become invalid.
 		///         </para>
 		///     </remarks>
 		/// </summary>

@@ -8,47 +8,59 @@ using System.Runtime.CompilerServices;
 namespace RazorSharp.Pointers
 {
 
+	/// <summary>
+	///     Provides utilities for pointer arithmetic
+	/// </summary>
 	public static unsafe class PointerUtils
 	{
-		public static IntPtr Subtract(IntPtr a, IntPtr b)
+		/// <summary>
+		///     Subtracts <paramref name="right" /> bytes from <paramref name="left" />'s <see cref="Pointer{T}.Address" />
+		/// </summary>
+		/// <param name="left">Left <see cref="Pointer{T}" /></param>
+		/// <param name="right">Number of bytes to subtract</param>
+		/// <returns><paramref name="left" /> with <paramref name="right" /> bytes subtracted</returns>
+		public static Pointer<byte> Subtract(Pointer<byte> left, long right)
 		{
-			long al = a.ToInt64();
-			long bl = b.ToInt64();
-			long c  = al - bl;
-			return (IntPtr) c;
+			long val = left.ToInt64() - right;
+			return new Pointer<byte>(val);
 		}
 
-		public static IntPtr Subtract(void* v, int bytes)
+		/// <summary>
+		///     Adds <paramref name="right" /> bytes to <paramref name="left" />'s <see cref="Pointer{T}.Address" />
+		/// </summary>
+		/// <param name="left">Left <see cref="Pointer{T}" /></param>
+		/// <param name="right">Number of bytes to add</param>
+		/// <returns><paramref name="left" /> with <paramref name="right" /> bytes added</returns>
+		public static Pointer<byte> Add(Pointer<byte> left, long right)
 		{
-			return (IntPtr) ((long) v - bytes);
+			long val = left.ToInt64() + right;
+			return new Pointer<byte>(val);
 		}
 
-		public static IntPtr Add(void* v, int bytes)
+
+		/// <summary>
+		///     Subtracts <paramref name="right" />'s <see cref="Pointer{T}.Address" /> from <paramref name="left" />'s
+		///     <see cref="Pointer{T}.Address" />
+		/// </summary>
+		/// <param name="left">Left <see cref="Pointer{T}" /></param>
+		/// <param name="right">Right <see cref="Pointer{T}" /></param>
+		/// <returns><paramref name="left" /> with <paramref name="right" />'s <see cref="Pointer{T}.Address" /> subtracted</returns>
+		public static Pointer<byte> Subtract(Pointer<byte> left, Pointer<byte> right)
 		{
-			return (IntPtr) ((long) v + bytes);
+			return Subtract(left, right.ToInt64());
 		}
 
-		public static IntPtr Add(void* a, void* b)
+		/// <summary>
+		///     Adds <paramref name="right" />'s <see cref="Pointer{T}.Address" /> address to <paramref name="left" />'s
+		///     <see cref="Pointer{T}.Address" />
+		/// </summary>
+		/// <param name="left">Left <see cref="Pointer{T}" /></param>
+		/// <param name="right">Right <see cref="Pointer{T}" /></param>
+		/// <returns><paramref name="left" /> with <paramref name="right" />'s <see cref="Pointer{T}.Address" /> added</returns>
+		public static Pointer<byte> Add(Pointer<byte> left, Pointer<byte> right)
 		{
-			return Add((IntPtr) a, (IntPtr) b);
+			return Add(left, right.ToInt64());
 		}
-
-		public static IntPtr Add(IntPtr p, int bytes)
-		{
-			return p + bytes;
-		}
-
-		public static IntPtr Add(IntPtr p, long l)
-		{
-			long v = p.ToInt64() + l;
-			return (IntPtr) v;
-		}
-
-		public static IntPtr Add(IntPtr p, IntPtr b)
-		{
-			return (IntPtr) ((long) p + b.ToInt64());
-		}
-
 
 		/// <summary>
 		///     Offsets a pointer by <paramref name="elemCnt" /> elements.

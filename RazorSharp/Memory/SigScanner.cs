@@ -9,7 +9,6 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorCommon;
 using RazorInvoke;
 using RazorInvoke.Libraries;
 using RazorSharp.Pointers;
@@ -147,10 +146,10 @@ namespace RazorSharp.Memory
 
 			if (ofsGuess != 0) {
 				if (PatternCheck(ofsGuess, rgPattern)) {
-					return PointerUtils.Add(m_lpModuleBase, ofsGuess);
+					return PointerUtils.Add(m_lpModuleBase, ofsGuess).Address;
 				}
 				else {
-					Logger.Log("Offset guess of {0} failed", Hex.ToHex(ofsGuess));
+//					Logger.Log("Offset guess of {0} failed", Hex.ToHex(ofsGuess));
 				}
 			}
 
