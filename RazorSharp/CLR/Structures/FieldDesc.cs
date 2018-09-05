@@ -87,6 +87,7 @@ namespace RazorSharp.CLR.Structures
 		///     Field metadata token
 		///     <remarks>
 		///         <para>Equal to <see cref="System.Reflection.FieldInfo.MetadataToken" /></para>
+		/// <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Field"</c> column in hexadecimal format.</para>
 		///     </remarks>
 		/// </summary>
 		public int MemberDef {
@@ -103,6 +104,9 @@ namespace RazorSharp.CLR.Structures
 
 		/// <summary>
 		///     Offset in memory
+		/// <remarks>
+		/// <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Offset"</c> column in hexadecimal format.</para>
+		/// </remarks>
 		/// </summary>
 		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
 
@@ -188,8 +192,19 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		public Type RuntimeType => Runtime.MethodTableToType(MethodTable);
 
+		public Pointer<MethodTable> TypeMethodTable {
+			get {
+				if (Info.FieldType.IsArray) {
+					return new Pointer<MethodTable>(-1);
+				}
+				var ptr = Runtime.MethodTableOf(Info.FieldType);
+				return ptr;
+			}
+		}
+
 
 		/// <summary>
+		/// The enclosing type's <see cref="MethodTable"/>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>

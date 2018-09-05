@@ -30,6 +30,7 @@ using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 using Test.Testing;
 using Test.Testing.Benchmarking;
+using Test.Testing.Types;
 using static RazorSharp.Unsafe;
 using Module = System.Reflection.Module;
 using Point = Test.Testing.Types.Point;
@@ -100,7 +101,6 @@ namespace Test
 			RazorContract.Assert(!GCSettings.IsServerGC);
 			bool isRunningOnMono = Type.GetType("Mono.Runtime") != null;
 			RazorContract.Assert(!isRunningOnMono);
-			Console.WriteLine(Environment.Version);
 
 //			Logger.Log(Flags.Info, "Architecture: x64");
 //			Logger.Log(Flags.Info, "Byte order: {0}", BitConverter.IsLittleEndian ? "Little Endian" : "Big Endian");
@@ -119,10 +119,88 @@ namespace Test
 			// set { g_i = (ushort)((g_i & ~(0x7F << 5)) | (value & 0x7F) << 5); }
 
 
-			VMMap();
+			int[] rg = new[] {0};
+			InspectorHelper.Inspect(ref rg, true);
+			WinDbg.DumpObj(ref rg);
+
 			Segments.DumpSegments("clr.dll");
 
-			__break();
+//			__break();
+		}
+
+		static class WinDbg
+		{
+			public static void DumpObj<T>(ref T t)
+			{
+				Console.WriteLine(DumpObjInfo.Get(ref t));
+			}
+
+			private struct DumpObjInfo
+			{
+				private readonly string               m_szName;
+				private readonly Pointer<MethodTable> m_pMT;
+				private readonly Pointer<EEClass>     m_pEEClass;
+				private readonly int                  m_cbSize;
+				private readonly string               m_szStringValue;
+				private readonly Pointer<FieldDesc>[] m_rgpFieldDescs;
+
+				private ConsoleTable m_fieldTable;
+
+
+				public static DumpObjInfo Get<T>(ref T t)
+				{
+					var mt = Runtime.ReadMethodTable(ref t);
+					var sz = t is string s ? s : "-";
+
+					var dump = new DumpObjInfo(mt.Reference.Name, mt, mt.Reference.EEClass, AutoSizeOf(ref t), sz,
+						Runtime.GetFieldDescs<T>());
+					dump.m_fieldTable = dump.FieldsTable(ref t);
+
+					return dump;
+				}
+
+
+				private DumpObjInfo(string szName, Pointer<MethodTable> pMt, Pointer<EEClass> pEEClass, int cbSize,
+					string szStringValue, Pointer<FieldDesc>[] rgpFieldDescs)
+				{
+					m_szName        = szName;
+					m_pMT           = pMt;
+					m_pEEClass      = pEEClass;
+					m_cbSize        = cbSize;
+					m_szStringValue = szStringValue;
+					m_rgpFieldDescs = rgpFieldDescs;
+					m_fieldTable    = null;
+				}
+
+				private ConsoleTable FieldsTable<T>(ref T t)
+				{
+					// A few differences:
+					// - FieldInfo.Attributes is used for the Attr column; I don't know what WinDbg uses
+					var table = new ConsoleTable("MT", "Field", "Offset", "Type", "VT", "Attr", "Value", "Name");
+					foreach (var v in m_rgpFieldDescs) {
+						table.AddRow(Hex.ToHex(v.Reference.TypeMethodTable.Address), Hex.ToHex(v.Reference.MemberDef),
+							v.Reference.Offset,
+							v.Reference.Info.FieldType.Name, v.Reference.Info.FieldType.IsValueType,
+							v.Reference.Info.Attributes, v.Reference.GetValue(t),
+							v.Reference.Name);
+					}
+
+					return table;
+				}
+
+				public override string ToString()
+				{
+					var table = new ConsoleTable("Attribute", "Value");
+					table.AddRow("Name", m_szName);
+					table.AddRow("MethodTable", Hex.ToHex(m_pMT.Address));
+					table.AddRow("EEClass", Hex.ToHex(m_pEEClass.Address));
+					table.AddRow("Size", String.Format("{0} ({1}) bytes", m_cbSize, Hex.ToHex(m_cbSize)));
+					table.AddRow("String", m_szStringValue);
+
+					return String.Format("{0}\nFields:\n{1}", table.ToMarkDownString(),
+						m_fieldTable.ToMarkDownString());
+				}
+			}
 		}
 
 

@@ -261,6 +261,8 @@ namespace RazorSharp.CLR.Structures
 		// todo
 		internal MethodDescChunk* MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
 
+		public string Name => RuntimeType.Name;
+
 		#endregion
 
 		#region Fields
@@ -370,6 +372,8 @@ namespace RazorSharp.CLR.Structures
 		public override int GetHashCode()
 		{
 			unchecked {
+				// ReSharper disable once NonReadonlyMemberInGetHashCode
+				// m_dwFlags will never change despite not being readonly
 				int hashCode = m_dwFlags.GetHashCode();
 				hashCode = (hashCode * 397) ^ (int) m_BaseSize;
 				hashCode = (hashCode * 397) ^ m_wFlags2.GetHashCode();

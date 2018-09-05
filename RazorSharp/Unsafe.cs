@@ -253,7 +253,7 @@ namespace RazorSharp
 		{
 			// No layout
 			if (typeof(T).IsArray) {
-				return InvalidValue;
+	//			return InvalidValue;
 			}
 
 			Pointer<MethodTable> mt = Runtime.MethodTableOf<T>();
@@ -278,7 +278,7 @@ namespace RazorSharp
 		{
 			// == 0
 			if (typeof(T).IsArray) {
-				return InvalidValue;
+//				return InvalidValue;
 			}
 
 			Pointer<MethodTable> mt        = Runtime.MethodTableOf<T>();
@@ -408,7 +408,7 @@ namespace RazorSharp
 			// When an array MethodTable* is read, its NumInstanceFieldBytes
 			// is actually equal to Constants.MinObjectSize although arrays don't have "fields"
 			if (typeof(T).IsArray) {
-				return Constants.MinObjectSize;
+//				return Constants.MinObjectSize;
 			}
 
 			return Runtime.MethodTableOf<T>().Reference.NumInstanceFieldBytes;
@@ -453,7 +453,7 @@ namespace RazorSharp
 			// MethodTable* manually. We obviously can't do that here because
 			// this method is parameterless.
 			if (typeof(T).IsArray) {
-				return Constants.MinObjectSize;
+//				return Constants.MinObjectSize;
 			}
 
 			return (int) Runtime.MethodTableOf<T>().Reference.BaseSize;

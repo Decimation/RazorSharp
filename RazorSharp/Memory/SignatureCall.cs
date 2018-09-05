@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using RazorCommon;
 using RazorSharp.CLR;
 
 #endregion
@@ -146,6 +147,7 @@ namespace RazorSharp.Memory
 
 				Runtime.SetFunctionPointer(methodInfo, fn);
 
+//				Console.WriteLine("Bind {0} @ {1}", methodInfo.Name, Hex.ToHex(fn));
 #if DEBUG
 
 //				Console.WriteLine("{0} | {1} | {2}", methodInfo.Name, Hex.ToHex(fn),
@@ -217,10 +219,17 @@ namespace RazorSharp.Memory
 
 		#endregion
 
+		private static void AddToMap(MethodInfo mi, byte[] rgBytes, long offsetGuess = 0)
+		{
+			if (!SigcallMethodMap.ContainsKey(mi)) {
+				SigcallMethodMap.Add(mi, new Tuple<byte[], long>(rgBytes, offsetGuess));
+			}
+		}
 
 		public static void CacheFunction(MethodInfo mi, byte[] rgBytes, long offsetGuess = 0)
 		{
-			SigcallMethodMap.Add(mi, new Tuple<byte[], long>(rgBytes, offsetGuess));
+
+			AddToMap(mi, rgBytes, offsetGuess);
 		}
 
 		public static void CacheFunction(Type t, string funcName, byte[] rgBytes, long offsetGuess = 0)

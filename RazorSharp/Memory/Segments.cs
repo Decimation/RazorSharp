@@ -87,11 +87,11 @@ namespace RazorSharp.Memory
 		{
 			ImageSectionInfo[] segments = GetSegments(moduleName);
 			foreach (ImageSectionInfo v in segments) {
-				ConsoleTable table = new ConsoleTable("Number", "Name", "Size", "Address", "End Address");
+				ConsoleTable table = new ConsoleTable("Number", "Name", "Size", "Address", "End Address", "Characteristics");
 				table.AddRow(v.SectionNumber, v.SectionName,
 					string.Format("{0} ({1} K)", v.SectionSize, v.SectionSize / Memory.BytesInKilobyte),
 					Hex.ToHex(v.SectionAddress),
-					Hex.ToHex(v.EndAddress));
+					Hex.ToHex(v.EndAddress), v.SectionHeader.Characteristics);
 				Console.WriteLine(table.ToMarkDownString());
 			}
 		}

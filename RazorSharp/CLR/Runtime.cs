@@ -170,9 +170,16 @@ namespace RazorSharp.CLR
 //			RazorContract.Requires(!t.IsArray, $"{t.Name}: Array MethodTables are not valid TypeHandles.");
 
 			// + ~10ns
-			Trace.Assert(!t.IsArray, $"{t.Name}: Array MethodTables are not valid TypeHandles.");
+//			Trace.Assert(!t.IsArray, $"{t.Name}: Array MethodTables are not valid TypeHandles.");
 
-			return t.TypeHandle.Value;
+			var typeHandle = t.TypeHandle.Value;
+
+			// 00 00 00 00 00 00 18 91 C6 83 F9 7F
+			if (t.IsArray) {
+				return Marshal.ReadIntPtr(typeHandle, 6);
+			}
+
+			return typeHandle;
 		}
 
 

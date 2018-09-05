@@ -201,9 +201,19 @@ namespace RazorSharp.Memory
 			return IntPtr.Zero;
 		}*/
 
-		public TDelegate GetDelegate<TDelegate>(string opcodes) where TDelegate : Delegate
+		public TDelegate GetDelegate<TDelegate>(byte[] opcodes, long ofsGuess = 0) where TDelegate : Delegate
 		{
-			IntPtr addr = FindPattern(opcodes);
+			IntPtr addr = FindPattern(opcodes, ofsGuess);
+			if (addr == IntPtr.Zero) {
+				throw new Exception($"Could not find function with opcodes {opcodes}");
+			}
+
+			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
+		}
+
+		public TDelegate GetDelegate<TDelegate>(string opcodes, long ofsGuess = 0) where TDelegate : Delegate
+		{
+			IntPtr addr = FindPattern(opcodes, ofsGuess);
 			if (addr == IntPtr.Zero) {
 				throw new Exception($"Could not find function with opcodes {opcodes}");
 			}

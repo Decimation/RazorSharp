@@ -92,9 +92,9 @@ namespace RazorSharp.CLR.Structures
 
 		/// <summary>
 		///     <see cref="DWORD" /> of <see cref="TypeAttributes" />
-		/// <remarks>
-		/// Equal to WinDbg's <c>!DumpClass</c> <c>"Class Attributes"</c> value in hexadecimal format.
-		/// </remarks>
+		///     <remarks>
+		///         Equal to WinDbg's <c>!DumpClass</c> <c>"Class Attributes"</c> value in hexadecimal format.
+		///     </remarks>
 		/// </summary>
 		public DWORD Attributes => m_dwAttrClass;
 

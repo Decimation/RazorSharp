@@ -162,6 +162,17 @@ namespace RazorSharp.CLR
 			return TypeToCorType(typeof(T));
 		}
 
+		internal static int RidFromToken(int tk)
+		{
+			// #define RidFromToken(tk) ((RID) ((tk) & 0x00ffffff))
+			return tk & 0x00ffffff;
+		}
+
+		internal static long TypeFromToken(int tk)
+		{
+			// #define TypeFromToken(tk) ((ULONG32)((tk) & 0xff000000))
+			return tk & 0xff000000;
+		}
 
 		internal static int TokenFromRid(int rid, CorTokenType tktype)
 		{
@@ -281,7 +292,7 @@ namespace RazorSharp.CLR
 	///         Use with <see cref="FieldDesc.CorType" />
 	///     </remarks>
 	/// </summary>
-	public enum CorElementType : byte
+	public enum CorElementType : int
 	{
 		End  = 0x00,
 		Void = 0x01,
