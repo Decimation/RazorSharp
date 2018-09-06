@@ -40,7 +40,7 @@ namespace Test.Testing.Tests
 
 //			Debug.Assert(mt == (MethodTable*) 0x00007fff1c1a6830);
 //			Debug.Assert(mt.Reference.EEClass == (void*) 0x00007fff1ba86cb8);
-			Debug.Assert(Unsafe.HeapSize(ref s) == 32);
+			Debug.Assert(Unsafe.HeapSize(in s) == 32);
 
 			// Note: SOS's BaseSize is wrong here
 
@@ -137,7 +137,7 @@ namespace Test.Testing.Tests
 
 //			Debug.Assert(mt.Reference.Module == (void*) 0x00007ff819611000);
 			Debug.Assert(mt.Reference.BaseSize == 40);
-			Debug.Assert(Unsafe.HeapSize(ref list) == 40);
+			Debug.Assert(Unsafe.HeapSize(in list) == 40);
 
 //			Debug.Assert(mt == (MethodTable*) 0x00007ff819d105d8);
 			Debug.Assert(mt.Reference.ComponentSize == -1);
@@ -187,7 +187,7 @@ namespace Test.Testing.Tests
 
 //			Debug.Assert(mt == (MethodTable*) 0x00007ff819d39118);
 //			Debug.Assert(mt.Reference.EEClass == (EEClass*) 0x00007ff8196e4668);
-			Debug.Assert(Unsafe.HeapSize(ref arr) == 44);
+			Debug.Assert(Unsafe.HeapSize(in arr) == 44);
 
 			// 0:007> !DumpMT /d 00007ff819d39118
 			// EEClass:         00007ff8196e4668
@@ -249,7 +249,7 @@ namespace Test.Testing.Tests
 //			Debug.Assert(mt == (MethodTable*)0x00007ff819d1eb08);
 //			Assert.That((long) mt, Is.EqualTo(0x00007ff819d1eb08));
 //			Debug.Assert(mt.Reference.EEClass == (EEClass*) 0x00007ff8196e3ca0);
-			Debug.Assert(Unsafe.HeapSize(ref arr) == 64);
+			Debug.Assert(Unsafe.HeapSize(in arr) == 64);
 
 			// !DumpMT /d 00007ff819d1eb08
 			// EEClass:         00007ff8196e3ca0
@@ -320,7 +320,7 @@ namespace Test.Testing.Tests
 
 			//Debug.Assert(mt == (MethodTable*) 0x00007ff7bdce6c18);
 			//Debug.Assert(mt.Reference.EEClass == (EEClass*) 0x00007ff7bdcd8ab0);
-			Debug.Assert(Unsafe.HeapSize(ref d) == 112);
+			Debug.Assert(Unsafe.HeapSize(in d) == 128);
 
 			// 0:007> !DumpMT /d 00007ff7bdce6c18
 			// EEClass:         00007ff7bdcd8ab0
@@ -334,7 +334,7 @@ namespace Test.Testing.Tests
 			// Number of IFaces in IFaceMap: 0
 
 			//Debug.Assert(mt.Reference.Module==(void*) 0x00007ff7bdb34118);
-			Debug.Assert(mt.Reference.BaseSize == 0x70);
+			Debug.Assert(mt.Reference.BaseSize == 0x80);
 			Debug.Assert(mt.Reference.ComponentSize == -1);
 			Debug.Assert(mt.Reference.NumInterfaces == 0);
 
@@ -354,7 +354,7 @@ namespace Test.Testing.Tests
 
 			//Debug.Assert(mt.Reference.Parent == (MethodTable*) 0x00007ff819616d60);
 			//Debug.Assert(mt.Reference.EEClass.Reference.MethodTable == (MethodTable*) 0x00007ff7bdce6c18);
-			Debug.Assert(mt.Reference.NumInstanceFields == 17);
+			Debug.Assert(mt.Reference.NumInstanceFields == 19);
 			Debug.Assert(mt.Reference.NumStaticFields == 0);
 			Debug.Assert(mt.Reference.EEClass.Reference.Attributes == 0x100001);
 		}

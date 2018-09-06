@@ -76,7 +76,7 @@ namespace RazorSharp.Experimental
 			Debug.Assert(refMem.Length == Unsafe.BaseInstanceSize<T>());
 
 			// Write the copied memory into unmanaged memory
-			Memory.Memory.WriteBytes(m_unmanaged, refMem);
+			Memory.Mem.WriteBytes(m_unmanaged, refMem);
 
 			// Set the reference to unmanaged memory (+IntPtr.Size to skip over the object header)
 			Unsafe.WriteReference(ref value, m_unmanaged + IntPtr.Size);

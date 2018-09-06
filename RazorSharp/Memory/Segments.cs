@@ -38,7 +38,7 @@ namespace RazorSharp.Memory
 		{
 			ImageSectionInfo[] sections = DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
 			foreach (ImageSectionInfo s in sections) {
-				if (Memory.IsAddressInRange(s.EndAddress, addr.Address, s.SectionAddress)) {
+				if (Mem.IsAddressInRange(s.EndAddress, addr.Address, s.SectionAddress)) {
 					return Parse(s.SectionName);
 				}
 			}
@@ -89,7 +89,7 @@ namespace RazorSharp.Memory
 			foreach (ImageSectionInfo v in segments) {
 				ConsoleTable table = new ConsoleTable("Number", "Name", "Size", "Address", "End Address", "Characteristics");
 				table.AddRow(v.SectionNumber, v.SectionName,
-					string.Format("{0} ({1} K)", v.SectionSize, v.SectionSize / Memory.BytesInKilobyte),
+					string.Format("{0} ({1} K)", v.SectionSize, v.SectionSize / Mem.BytesInKilobyte),
 					Hex.ToHex(v.SectionAddress),
 					Hex.ToHex(v.EndAddress), v.SectionHeader.Characteristics);
 				Console.WriteLine(table.ToMarkDownString());
@@ -184,7 +184,7 @@ namespace RazorSharp.Memory
 		internal static IntPtr ScanSegment(string segment, string module, byte[] mem)
 		{
 			ImageSectionInfo s      = GetSegment(segment, module);
-			byte[]           segMem = Memory.ReadBytes(s.SectionAddress, 0, s.SectionSize);
+			byte[]           segMem = Mem.ReadBytes(s.SectionAddress, 0, s.SectionSize);
 			for (int i = 0; i < s.SectionSize; i += IntPtr.Size) {
 				if (new ArraySegment<byte>(segMem, i, IntPtr.Size).SequenceEqual(
 					mem)) {

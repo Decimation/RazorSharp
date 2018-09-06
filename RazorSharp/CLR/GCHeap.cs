@@ -6,7 +6,7 @@ using RazorInvoke;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
-using static RazorSharp.Memory.Memory;
+using static RazorSharp.Memory.Mem;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 

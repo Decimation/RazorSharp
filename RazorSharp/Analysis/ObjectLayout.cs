@@ -8,7 +8,7 @@ using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
-using static RazorSharp.Memory.Memory;
+using static RazorSharp.Memory.Mem;
 
 #endregion
 

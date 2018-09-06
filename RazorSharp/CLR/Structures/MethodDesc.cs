@@ -87,12 +87,12 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     The enclosing type of this <see cref="MethodDesc" />
 		/// </summary>
-		public Type RuntimeType => Runtime.MethodTableToType(MethodTable);
+		public Type EnclosingType => Runtime.MethodTableToType(EnclosingMethodTable);
 
 		/// <summary>
 		///     The corresponding <see cref="MethodInfo" /> of this <see cref="MethodDesc" />
 		/// </summary>
-		public MethodInfo Info => (MethodInfo) RuntimeType.Module.ResolveMethod(MemberDef);
+		public MethodInfo Info => (MethodInfo) EnclosingType.Module.ResolveMethod(MemberDef);
 
 		/// <summary>
 		///     Function pointer
@@ -221,7 +221,7 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public Pointer<MethodTable> MethodTable {
+		public Pointer<MethodTable> EnclosingMethodTable {
 			[CLRSigcall] get => throw new SigcallException("MethodTable");
 		}
 
@@ -274,8 +274,8 @@ namespace RazorSharp.CLR.Structures
 		{
 			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Name", Name);
-			table.AddRow("MethodTable", Hex.ToHex(MethodTable.Address));
-			table.AddRow("Enclosing type", RuntimeType.Name);
+			table.AddRow("MethodTable", Hex.ToHex(EnclosingMethodTable.Address));
+			table.AddRow("Enclosing type", EnclosingType.Name);
 			table.AddRow("Signature", Info);
 
 			table.AddRow("Function", Hex.ToHex(Function));

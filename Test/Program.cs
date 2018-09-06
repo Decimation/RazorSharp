@@ -115,18 +115,14 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			// get { return (ushort)((g_i >> 5) & 0x7F); }
-			// set { g_i = (ushort)((g_i & ~(0x7F << 5)) | (value & 0x7F) << 5); }
-
-
-			int[] rg = new[] {0};
-			InspectorHelper.Inspect(ref rg, true);
-			WinDbg.DumpObj(ref rg);
-
-			Segments.DumpSegments("clr.dll");
-
-//			__break();
+			var alloc = Mem.AllocUnmanaged<byte>(BaseInstanceSize<CPoint>());
 		}
+
+		static TTo reinterpret_cast<TFrom, TTo>(TFrom tf)
+		{
+			return CSUnsafe.Read<TTo>(Unsafe.AddressOf(ref tf).ToPointer());
+		}
+
 
 		static class WinDbg
 		{
@@ -152,7 +148,7 @@ namespace Test
 					var mt = Runtime.ReadMethodTable(ref t);
 					var sz = t is string s ? s : "-";
 
-					var dump = new DumpObjInfo(mt.Reference.Name, mt, mt.Reference.EEClass, AutoSizeOf(ref t), sz,
+					var dump = new DumpObjInfo(mt.Reference.Name, mt, mt.Reference.EEClass, AutoSizeOf(in t), sz,
 						Runtime.GetFieldDescs<T>());
 					dump.m_fieldTable = dump.FieldsTable(ref t);
 
@@ -258,15 +254,15 @@ namespace Test
 			var table = new ConsoleTable("Low address", "High address", "Size");
 
 			// Stack of current thread
-			table.AddRow(Hex.ToHex(Memory.StackLimit), Hex.ToHex(Memory.StackBase),
-				String.Format("{0} ({1} K)", Memory.StackSize, Memory.StackSize / Memory.BytesInKilobyte));
+			table.AddRow(Hex.ToHex(Mem.StackLimit), Hex.ToHex(Mem.StackBase),
+				String.Format("{0} ({1} K)", Mem.StackSize, Mem.StackSize / Mem.BytesInKilobyte));
 			Console.WriteLine(InspectorHelper.CreateLabelString("Stack:", table));
 
 			table.Rows.RemoveAt(0);
 
 			// GC heap
 			table.AddRow(Hex.ToHex(GCHeap.LowestAddress), Hex.ToHex(GCHeap.HighestAddress),
-				String.Format("{0} ({1} K)", GCHeap.Size, GCHeap.Size / Memory.BytesInKilobyte));
+				String.Format("{0} ({1} K)", GCHeap.Size, GCHeap.Size / Mem.BytesInKilobyte));
 			Console.WriteLine(InspectorHelper.CreateLabelString("GC:", table));
 		}
 

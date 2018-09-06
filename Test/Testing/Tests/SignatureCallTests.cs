@@ -18,7 +18,7 @@ namespace Test.Testing.Tests
 			var memberDef = md.Reference.MemberDef;
 			var isPointingToNativeCode = md.Reference.IsPointingToNativeCode;
 			var size = md.Reference.SizeOf;
-			var mt = md.Reference.MethodTable;
+			var mt = md.Reference.EnclosingMethodTable;
 			md.Reference.Reset();
 
 		}
@@ -30,7 +30,7 @@ namespace Test.Testing.Tests
 			var module = fd.Reference.GetModule();
 			var size = fd.Reference.Size;
 			var stub = fd.Reference.GetStubFieldInfo();
-			var mt = fd.Reference.MethodTable;
+			var mt = fd.Reference.EnclosingMethodTable;
 			var memberDef = fd.Reference.MemberDef;
 		}
 

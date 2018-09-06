@@ -10,6 +10,7 @@ using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp.CLR.Fixed;
+using RazorSharp.Memory;
 using RazorSharp.Pointers.Ex;
 using RazorSharp.Utilities;
 
@@ -21,7 +22,6 @@ namespace RazorSharp.Pointers
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-	using MMemory = Memory.Memory;
 
 	#endregion
 
@@ -77,7 +77,7 @@ namespace RazorSharp.Pointers
 
 		public bool IsNull => m_pValue == null;
 
-		public bool IsAligned => MMemory.IsAligned(Address);
+		public bool IsAligned => Mem.IsAligned(Address);
 
 		#endregion
 
@@ -189,27 +189,44 @@ namespace RazorSharp.Pointers
 		#endregion
 
 
+		#region Bitwise operations
+
+		public void And(long l)
+		{
+			var newAddr = ToInt64() & l;
+			Address = new IntPtr(newAddr);
+		}
+
+		public void Or(long l)
+		{
+			var newAddr = ToInt64() | l;
+			Address = new IntPtr(newAddr);
+		}
+
+		#endregion
+
+
 		#region Read / write
 
 		public void Write<TType>(TType t, int elemOffset = 0)
 		{
-			MMemory.Write(Offset<TType>(elemOffset), 0, t);
+			Mem.Write(Offset<TType>(elemOffset), 0, t);
 		}
 
 		public void ForceWrite<TType>(TType t, int elemOffset = 0)
 		{
-			MMemory.ForceWrite(Offset<TType>(elemOffset), 0, t);
+			Mem.ForceWrite(Offset<TType>(elemOffset), 0, t);
 		}
 
 		public TType Read<TType>(int elemOffset = 0)
 		{
-			return MMemory.Read<TType>(Offset<TType>(elemOffset));
+			return Mem.Read<TType>(Offset<TType>(elemOffset));
 		}
 
 
 		public ref TType AsRef<TType>(int elemOffset = 0)
 		{
-			return ref MMemory.AsRef<TType>(Offset<TType>(elemOffset));
+			return ref Mem.AsRef<TType>(Offset<TType>(elemOffset));
 		}
 
 		/// <summary>
@@ -267,7 +284,7 @@ namespace RazorSharp.Pointers
 
 		public void Zero(int byteCnt)
 		{
-			MMemory.Zero(m_pValue, byteCnt);
+			Mem.Zero(m_pValue, byteCnt);
 		}
 
 		public PinHandle TryPin()
@@ -285,12 +302,12 @@ namespace RazorSharp.Pointers
 
 			if (typeof(T).IsValueType) {
 				table.AddRow(Hex.ToHex(m_pValue), Reference, IsAligned ? StringUtils.Check : StringUtils.BallotX,
-					IsNull ? StringUtils.Check : StringUtils.BallotX, ElementSize);
+					IsNull.Prettify(), ElementSize);
 			}
 			else {
 				table.AddRow(Hex.ToHex(m_pValue), Hex.ToHex(Read<long>()), Reference,
 					IsAligned ? StringUtils.Check : StringUtils.BallotX,
-					IsNull ? StringUtils.Check : StringUtils.BallotX, ElementSize);
+					IsNull.Prettify(), ElementSize);
 			}
 
 			return table;
@@ -343,6 +360,24 @@ namespace RazorSharp.Pointers
 
 		#region Operators
 
+		#region Bitwise operators
+
+		public static Pointer<T> operator &(Pointer<T> ptr, long l)
+		{
+			ptr.And(l);
+			return ptr;
+		}
+
+		public static Pointer<T> operator |(Pointer<T> ptr, long l)
+		{
+			ptr.Or(l);
+			return ptr;
+		}
+
+		#endregion
+
+		#region Implicit and explicit conversions
+
 		public static implicit operator Pointer<T>(void* v)
 		{
 			return new Pointer<T>(v);
@@ -367,6 +402,8 @@ namespace RazorSharp.Pointers
 		{
 			return new Pointer<T>(l);
 		}
+
+		#endregion
 
 
 		#region Arithmetic

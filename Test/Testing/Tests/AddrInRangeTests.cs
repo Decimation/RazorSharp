@@ -14,15 +14,15 @@ namespace Test.Testing.Tests
 		[Test]
 		public void Test()
 		{
-			Debug.Assert(Memory.IsAddressInRange(Memory.StackBase, Memory.StackLimit, Memory.StackLimit));
-			Debug.Assert(Memory.IsAddressInRange(GCHeap.HighestAddress, GCHeap.LowestAddress, GCHeap.LowestAddress));
+			Debug.Assert(Mem.IsAddressInRange(Mem.StackBase, Mem.StackLimit, Mem.StackLimit));
+			Debug.Assert(Mem.IsAddressInRange(GCHeap.HighestAddress, GCHeap.LowestAddress, GCHeap.LowestAddress));
 			int[]        rg    = {1, 2, 3, 4, 5};
-			Pointer<int> rgPtr = Memory.AllocUnmanaged<int>(5);
+			Pointer<int> rgPtr = Mem.AllocUnmanaged<int>(5);
 			rgPtr.Init(1, 2, 3, 4, 5);
 
 			Debug.Assert(rgPtr.Contains(1, 5));
 
-			Memory.Free(rgPtr.Address);
+			Mem.Free(rgPtr.Address);
 
 			IntPtr orig = rgPtr.Address;
 
@@ -38,7 +38,7 @@ namespace Test.Testing.Tests
 
 			bool InRange(IntPtr p)
 			{
-				return Memory.IsAddressInRange(PointerUtils.Offset<int>(orig, 5), p, orig);
+				return Mem.IsAddressInRange(PointerUtils.Offset<int>(orig, 5), p, orig);
 			}
 		}
 	}

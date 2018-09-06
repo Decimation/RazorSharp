@@ -41,7 +41,7 @@ namespace RazorSharp.CLR
 				FieldDescFunctions.AddFunctions();
 				GCFunctions.AddFunctions();
 				JITFunctions.AddFunctions();
-				ArrayFunctions.AddFunctions();
+
 				s_bFunctionsCached = true;
 			}
 		}
@@ -53,30 +53,6 @@ namespace RazorSharp.CLR
 			SignatureCall.DynamicBind(typeof(CLRFunctions));
 		}
 
-
-		private static class ArrayFunctions
-		{
-			internal static void AddFunctions()
-			{
-				SignatureCall.CacheFunction(typeof(CLRFunctions), "LoadArrayType", Functions[0],
-					0);
-			}
-
-			private static readonly byte[][] Functions =
-			{
-				new byte[]
-				{
-					0x48, 0x89, 0x5C, 0x24, 0x18, 0x48, 0x89, 0x54, 0x24, 0x10, 0x55, 0x56, 0x57, 0x41, 0x56, 0x41,
-					0x57, 0x48, 0x8B, 0xEC, 0x48, 0x83, 0xEC, 0x70, 0x48, 0x8B, 0x05, 0xF1, 0x4E, 0x93, 0x00, 0x48,
-					0x33, 0xC4, 0x48, 0x89, 0x45, 0xF0, 0x33, 0xFF, 0x4C, 0x8D, 0x3D, 0xF1, 0x5B, 0x93, 0x00, 0x41,
-					0x8B, 0xF1, 0x45, 0x8B, 0xF0, 0x48, 0x8B, 0xD9, 0x41, 0x83, 0xF8, 0x1D, 0x0F, 0x85, 0xEE, 0xDA,
-					0x19, 0x00, 0xF6, 0xC2, 0x02, 0x0F, 0x85, 0x08, 0x3D, 0x0F, 0x00, 0x48, 0x8B, 0xCA, 0xE8, 0x39,
-					0xC7, 0xFF, 0xFF, 0x48, 0x8B, 0x55, 0x38, 0x8B, 0xF8, 0x83, 0xFF, 0x0D, 0x0F, 0x8E, 0x77, 0x50,
-					0x10, 0x00, 0x48, 0x3B, 0x15, 0xC7, 0x59, 0x93, 0x00, 0x0F, 0x85, 0xFF, 0xD9, 0x19, 0x00, 0x48,
-					0x8B, 0x05, 0x8A, 0x5C, 0x93, 0x00, 0x48, 0x85, 0xC0, 0x0F, 0x84, 0x7E, 0xA6, 0x07, 0x00
-				}
-			};
-		}
 
 		private static class GCFunctions
 		{
@@ -155,7 +131,7 @@ namespace RazorSharp.CLR
 				SignatureCall.CacheFunction<FieldDesc>("GetModule", Functions[0], FN_GETMODULE_OFFSET);
 				SignatureCall.CacheFunction<FieldDesc>("get_LoadSize", Functions[1], FN_GETLOADSIZE_OFFSET);
 				SignatureCall.CacheFunction<FieldDesc>("GetStubFieldInfo", Functions[2], FN_GETSTUBFIELDINFO_OFFSET);
-				SignatureCall.CacheFunction<FieldDesc>("get_MethodTable", Functions[3], FN_GETMETHODTABLE_OFFSET);
+				SignatureCall.CacheFunction<FieldDesc>("get_EnclosingMethodTable", Functions[3], FN_GETMETHODTABLE_OFFSET);
 
 //				SignatureCall.CacheFunction<FieldDesc>("get_MemberDef", Functions[4], FN_GETMEMBERDEF_OFFSET);
 			}
@@ -215,7 +191,7 @@ namespace RazorSharp.CLR
 					FN_GETISPOINTINGTONATIVECODE_OFFSET);
 				SignatureCall.CacheFunction<MethodDesc>("get_SizeOf", Functions[3], FN_GETSIZEOF_OFFSET);
 				SignatureCall.CacheFunction<MethodDesc>("Reset", Functions[4], FN_RESET_OFFSET);
-				SignatureCall.CacheFunction<MethodDesc>("get_MethodTable", Functions[5], FN_GETMETHODTABLE_OFFSET);
+				SignatureCall.CacheFunction<MethodDesc>("get_EnclosingMethodTable", Functions[5], FN_GETMETHODTABLE_OFFSET);
 			}
 
 			private const long FN_GETISCTOR_OFFSET                 = 0xAF920;
@@ -274,47 +250,6 @@ namespace RazorSharp.CLR
 
 		}
 
-
-		/**
-		 * static TypeHandle LoadArrayTypeThrowing(TypeHandle baseType,
-                                            CorElementType typ = ELEMENT_TYPE_SZARRAY,
-                                            unsigned rank = 0,
-                                            LoadTypesFlag fLoadTypes = LoadTypes,
-                                            ClassLoadLevel level = CLASS_LOADED);
-		 */
-
-		internal enum LoadTypesFlag
-		{
-			LoadTypes,
-			DontLoadTypes
-		}
-
-		internal enum ClassLoadLevel
-		{
-			CLASS_LOAD_BEGIN,
-			CLASS_LOAD_UNRESTOREDTYPEKEY,
-			CLASS_LOAD_UNRESTORED,
-			CLASS_LOAD_APPROXPARENTS,
-			CLASS_LOAD_EXACTPARENTS,
-			CLASS_DEPENDENCIES_LOADED,
-			CLASS_LOADED,
-
-			CLASS_LOAD_LEVEL_FINAL = CLASS_LOADED,
-		};
-
-		// todo
-		internal static long LoadArrayType(IntPtr baseType)
-		{
-			return LoadArrayType(baseType, CorElementType.SzArray, 0,
-				LoadTypesFlag.LoadTypes, ClassLoadLevel.CLASS_LOADED);
-		}
-
-		[CLRSigcall]
-		internal static long LoadArrayType(IntPtr baseType, CorElementType type, uint rank,
-			LoadTypesFlag fLoadTypes, ClassLoadLevel level)
-		{
-			throw new SigcallException();
-		}
 
 		[CLRSigcall]
 		internal static Type JIT_GetRuntimeType(void* __struct)

@@ -73,7 +73,7 @@ namespace RazorSharp.Analysis
 
 			internal ReferenceSizeInfo(ref T t)
 			{
-				Heap              = Unsafe.HeapSize(ref t);
+				Heap              = Unsafe.HeapSize(in t);
 				BaseInstance      = Unsafe.BaseInstanceSize<T>();
 				BaseFieldsUnboxed = Unsafe.BaseFieldsSize(ref t);
 				m_typeName        = t.GetType().Name;

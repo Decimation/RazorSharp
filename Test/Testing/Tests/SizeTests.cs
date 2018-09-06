@@ -88,7 +88,7 @@ namespace Test.Testing.Tests
 
 		private static void AssertHeapSize<T>(ref T t, int heapSize) where T : class
 		{
-			Assert.That(heapSize, Is.EqualTo(Unsafe.HeapSize(ref t)));
+			Assert.That(heapSize, Is.EqualTo(Unsafe.HeapSize(in t)));
 		}
 	}
 

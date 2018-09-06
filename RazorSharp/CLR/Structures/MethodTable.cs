@@ -107,7 +107,7 @@ namespace RazorSharp.CLR.Structures
 		///     Class token if it fits into 16-bits. If this is (WORD)-1, the class token is stored in the TokenOverflow optional
 		///     member.
 		/// </summary>
-		public WORD Token => m_wToken;
+		private WORD Token => m_wToken;
 
 		/// <summary>
 		///     The number of virtual methods in this type (<c>4</c> by default; from <see cref="Object" />)
@@ -116,6 +116,10 @@ namespace RazorSharp.CLR.Structures
 
 		/// <summary>
 		///     The number of interfaces this type implements
+		/// <remarks>
+		/// <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>Number of IFaces in IFaceMap</c> value.</para>
+		///
+		/// </remarks>
 		/// </summary>
 		public WORD NumInterfaces => m_wNumInterfaces;
 
@@ -160,8 +164,10 @@ namespace RazorSharp.CLR.Structures
 						return m_pEEClass;
 					case LowBits.MethodTable:
 						return Canon.Reference.EEClass;
+					case LowBits.Invalid:
+					case LowBits.Indirection:
 					default:
-						throw new NotImplementedException("EEClass union type is not implemented");
+						throw new NotImplementedException($"Union type {UnionType} is not implemented");
 				}
 			}
 		}
@@ -183,18 +189,33 @@ namespace RazorSharp.CLR.Structures
 			get {
 				switch (UnionType) {
 					case LowBits.MethodTable:
-						return (MethodTable*) PointerUtils.Subtract(m_pCanonMT, 2);
+						Pointer<MethodTable> pCanon = m_pCanonMT;
+						pCanon.Subtract(CANON_MT_UNION_MT_OFFSET);
+						return pCanon;
 					case LowBits.EEClass:
 					{
 						fixed (MethodTable* mt = &this) {
 							return mt;
 						}
 					}
+					case LowBits.Invalid:
+					case LowBits.Indirection:
 					default:
 						throw new NotImplementedException("Canon MT could not be accessed");
 				}
 			}
 		}
+
+
+		/// <summary>
+		/// How many bytes to subtract from <see cref="m_pCanonMT"/> if <see cref="UnionType"/> is
+		/// <see cref="LowBits.MethodTable"/>
+		///
+		/// <remarks>
+		/// <para>Source: /src/vm/methodtable.inl: 1180</para>
+		/// </remarks>
+		/// </summary>
+		private const int CANON_MT_UNION_MT_OFFSET = 2;
 
 		/// <summary>
 		///     Element type handle of an individual element if this is the <see cref="MethodTable" /> of an array.
@@ -217,6 +238,15 @@ namespace RazorSharp.CLR.Structures
 		public bool IsString         => HasComponentSize && !IsArray;
 
 		/// <summary>
+		/// Metadata token
+		/// <remarks>
+		/// <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>"mdToken"</c> value in hexadecimal format.</para>
+		/// </remarks>
+		/// </summary>
+		public int MDToken => Constants.TokenFromRid(Token, CorTokenType.mdtTypeDef);
+
+		/// <summary>
+		/// <para>Corresponding <see cref="Type"/> of this <see cref="MethodTable"/></para>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
@@ -284,12 +314,19 @@ namespace RazorSharp.CLR.Structures
 		[FieldOffset(56)] private readonly void*        m_pInterfaceMap;
 		[FieldOffset(56)] private readonly void*        m_pMultipurposeSlot2;
 
-		private const long UnionMask = 3;
+		/// <summary>
+		/// Bit mask for <see cref="UnionType"/>
+		/// </summary>
+		private const long UNION_MASK = 3;
 
+		/// <summary>
+		/// Describes what the union at offset <c>40</c> (<see cref="m_pEEClass"/>, <see cref="m_pCanonMT"/>)
+		/// contains.
+		/// </summary>
 		private LowBits UnionType {
 			get {
 				long l = (long) m_pEEClass;
-				return (LowBits) (l & UnionMask);
+				return (LowBits) (l & UNION_MASK);
 			}
 		}
 
@@ -311,7 +348,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Flags", $"{FlagsValue} ({Flags.Join()})");
 			table.AddRow("Flags 2", $"{Flags2Value} ({Flags2.Join()})");
 			table.AddRow("Low flags", $"{FlagsLowValue} ({FlagsLow})");
-			table.AddRow("Token", m_wToken);
+			table.AddRow("Token", MDToken);
 
 			if (m_pParentMethodTable != null) {
 				table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));

@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
+using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -18,7 +19,6 @@ namespace RazorSharp
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-	using MMemory = Memory.Memory;
 
 	#endregion
 
@@ -237,9 +237,9 @@ namespace RazorSharp
 
 		#region Sizes
 
-		public static int AutoSizeOf<T>(ref T t)
+		public static int AutoSizeOf<T>(in T t)
 		{
-			return typeof(T).IsValueType ? SizeOf<T>() : HeapSizeInternal(ref t);
+			return typeof(T).IsValueType ? SizeOf<T>() : HeapSizeInternal(in t);
 		}
 
 		/// <summary>
@@ -331,7 +331,7 @@ namespace RazorSharp
 		///     <para>Note: This also includes padding and overhead.</para>
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
-		public static int HeapSize<T>(ref T t) where T : class
+		public static int HeapSize<T>(in T t) where T : class
 		{
 			/**
 			 * Type			x86 size				x64 size
@@ -362,17 +362,16 @@ namespace RazorSharp
 			 *
 			 */
 
-			return HeapSizeInternal(ref t);
+			return HeapSizeInternal(in t);
 		}
 
-		private static int HeapSizeInternal<T>(ref T t)
+		private static int HeapSizeInternal<T>(in T t)
 		{
 			// No need to assert, we already know it's not a value type
 //			RazorContract.Assert(!typeof(T).IsValueType);
 
-			// We have to manually read the MethodTable because if it's an array,
-			// the TypeHandle won't work.
-			Pointer<MethodTable> methodTable = Runtime.ReadMethodTable(ref t);
+
+			Pointer<MethodTable> methodTable = Runtime.MethodTableOf<T>();
 
 			if (typeof(T).IsArray) {
 				Array arr = t as Array;
@@ -405,11 +404,7 @@ namespace RazorSharp
 			//	return(GetBaseSize() - GetClass()->GetBaseSizePadding());
 			//}
 
-			// When an array MethodTable* is read, its NumInstanceFieldBytes
-			// is actually equal to Constants.MinObjectSize although arrays don't have "fields"
-			if (typeof(T).IsArray) {
-//				return Constants.MinObjectSize;
-			}
+
 
 			return Runtime.MethodTableOf<T>().Reference.NumInstanceFieldBytes;
 		}
@@ -472,12 +467,17 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		///     Copy a managed type's memory into a byte array.
+		/// Copies the memory of <paramref name="t"/> into a <see cref="Byte"/> array.
+		///<remarks>
+		/// This includes the <see cref="MethodTable"/> pointer and <see cref="ObjHeader"/>
+		/// </remarks>
 		/// </summary>
-		/// <returns>A byte array containing the managed type's raw memory</returns>
+		/// <param name="t">Value to copy the memory of</param>
+		/// <typeparam name="T">Reference type</typeparam>
+		/// <returns>An array of <see cref="Byte"/>s containing the raw memory of <paramref name="t"/></returns>
 		public static byte[] MemoryOf<T>(ref T t) where T : class
 		{
-			int    heapSize = HeapSize(ref t);
+			int    heapSize = HeapSize(in t);
 			byte[] alloc    = new byte[heapSize];
 
 			// Need to include the ObjHeader
@@ -485,6 +485,12 @@ namespace RazorSharp
 			return alloc;
 		}
 
+		/// <summary>
+		/// Copies the memory of <paramref name="t"/> into a <see cref="Byte"/> array.
+		/// </summary>
+		/// <param name="t">Value to copy the memory of</param>
+		/// <typeparam name="T">Value type</typeparam>
+		/// <returns>An array of <see cref="Byte"/>s containing the raw memory of <paramref name="t"/></returns>
 		public static byte[] MemoryOfVal<T>(ref T t) where T : struct
 		{
 			int    size  = SizeOf<T>();
@@ -496,7 +502,7 @@ namespace RazorSharp
 		public static byte[] MemoryOfFields<T>(ref T t) where T : class
 		{
 			// Subtract the size of the ObjHeader and MethodTable*
-			int fieldSize = HeapSize(ref t) - IntPtr.Size * 2;
+			int fieldSize = HeapSize(in t) - IntPtr.Size * 2;
 			Console.WriteLine(fieldSize);
 			byte[] fields = new byte[fieldSize];
 
@@ -512,9 +518,9 @@ namespace RazorSharp
 		{
 			byte[] heapBytes = MemoryOf(ref t);
 
-			Debug.Assert(heapBytes.Length == HeapSize(ref t));
-			MMemory.Zero(AddressOfHeap(ref t) - IntPtr.Size, HeapSize(ref t));
-			MMemory.WriteBytes(newHeapAddr, heapBytes);
+			Debug.Assert(heapBytes.Length == HeapSize(in t));
+			Mem.Zero(AddressOfHeap(ref t) - IntPtr.Size, HeapSize(in t));
+			Mem.WriteBytes(newHeapAddr, heapBytes);
 			IntPtr newAddr = newHeapAddr + IntPtr.Size;
 			Marshal.WriteIntPtr(AddressOf(ref t), newAddr);
 		}

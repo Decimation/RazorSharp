@@ -31,13 +31,13 @@ namespace Test.Testing.Tests
 			 * Stack allocate a reference type
 			 */
 			byte* b = stackalloc byte[Unsafe.BaseInstanceSize<Klass>()];
-			Memory.StackInit<Klass>(ref b);
+			Mem.StackInit<Klass>(ref b);
 			Pointer<Klass> k = &b;
 
 
 			// Make sure it's on the stack
-			Debug.Assert(Memory.IsOnStack(ref k.Reference));
-			Debug.Assert(Memory.IsOnStack(k.Address));
+			Debug.Assert(Mem.IsOnStack(ref k.Reference));
+			Debug.Assert(Mem.IsOnStack(k.Address));
 
 			// Make sure it's not in the GC heap
 			Debug.Assert(!GCHeap.IsInGCHeap(ref k.Reference));

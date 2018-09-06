@@ -229,7 +229,7 @@
     <Compile Include="Experimental\StackAllocated.cs" />
     <Compile Include="Experimental\UnmanagedAllocated.cs" />
     <Compile Include="Memory\Asm.cs" />
-    <Compile Include="Memory\Memory.cs" />
+      <Compile Include="Memory\Mem.cs"/>
     <Compile Include="Memory\MemoryInspector.cs" />
       <Compile Include="Memory\Segments.cs"/>
     <Compile Include="Memory\SigScanner.cs" />
@@ -242,6 +242,7 @@
     <Compile Include="Pointers\Pointer.cs" />
     <Compile Include="Pointers\PointerUtils.cs" />
       <Compile Include="Pointers\ReadOnlyPointer.cs"/>
+      <Compile Include="Pointers\TaggedPointer.cs"/>
     <Compile Include="RazorMath.cs" />
       <Compile Include="CLR\CLRFunctions.cs"/>
       <Compile Include="CLR\Structures\DWFlags.cs"/>

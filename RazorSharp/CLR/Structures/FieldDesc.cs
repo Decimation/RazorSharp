@@ -8,7 +8,7 @@ using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
-using static RazorSharp.Memory.Memory;
+using static RazorSharp.Memory.Mem;
 
 // ReSharper disable MemberCanBeMadeStatic.Local
 
@@ -87,7 +87,7 @@ namespace RazorSharp.CLR.Structures
 		///     Field metadata token
 		///     <remarks>
 		///         <para>Equal to <see cref="System.Reflection.FieldInfo.MetadataToken" /></para>
-		/// <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Field"</c> column in hexadecimal format.</para>
+		///         <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Field"</c> column in hexadecimal format.</para>
 		///     </remarks>
 		/// </summary>
 		public int MemberDef {
@@ -104,9 +104,9 @@ namespace RazorSharp.CLR.Structures
 
 		/// <summary>
 		///     Offset in memory
-		/// <remarks>
-		/// <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Offset"</c> column in hexadecimal format.</para>
-		/// </remarks>
+		///     <remarks>
+		///         <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Offset"</c> column in hexadecimal format.</para>
+		///     </remarks>
 		/// </summary>
 		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
 
@@ -166,7 +166,7 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     The corresponding <see cref="FieldInfo" /> of this <see cref="FieldDesc" />
 		/// </summary>
-		public FieldInfo Info => RuntimeType.Module.ResolveField(MemberDef);
+		public FieldInfo Info => EnclosingType.Module.ResolveField(MemberDef);
 
 		/// <summary>
 		///     Name of this field
@@ -190,26 +190,21 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     Enclosing type of this <see cref="FieldDesc" />
 		/// </summary>
-		public Type RuntimeType => Runtime.MethodTableToType(MethodTable);
+		public Type EnclosingType => Runtime.MethodTableToType(EnclosingMethodTable);
 
-		public Pointer<MethodTable> TypeMethodTable {
-			get {
-				if (Info.FieldType.IsArray) {
-					return new Pointer<MethodTable>(-1);
-				}
-				var ptr = Runtime.MethodTableOf(Info.FieldType);
-				return ptr;
-			}
-		}
+		/// <summary>
+		/// <see cref="MethodTable"/> of this field's type
+		/// </summary>
+		public Pointer<MethodTable> TypeMethodTable => Runtime.MethodTableOf(Info.FieldType);
 
 
 		/// <summary>
-		/// The enclosing type's <see cref="MethodTable"/>
+		///     The enclosing type's <see cref="EnclosingMethodTable" />
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public Pointer<MethodTable> MethodTable {
+		public Pointer<MethodTable> EnclosingMethodTable {
 			[CLRSigcall] get => throw new SigcallException();
 		}
 
@@ -270,7 +265,7 @@ namespace RazorSharp.CLR.Structures
 		public IntPtr GetAddress<TInstance>(ref TInstance t)
 		{
 			RazorContract.Requires<FieldDescException>(!IsStatic, "You cannot get the address of a static field (yet)");
-			RazorContract.Assert(Runtime.ReadMethodTable(ref t) == MethodTable);
+			RazorContract.Assert(Runtime.ReadMethodTable(ref t) == EnclosingMethodTable);
 			RazorContract.Assert(Offset != FieldOffsetNewEnC);
 
 
@@ -298,8 +293,8 @@ namespace RazorSharp.CLR.Structures
 			// this->ToString() must be used to view this
 
 			table.AddRow("Name", Name);
-			table.AddRow("Enclosing MethodTable", Hex.ToHex(MethodTable.ToPointer()));
-			table.AddRow("Enclosing type", RuntimeType.Name);
+			table.AddRow("Enclosing MethodTable", Hex.ToHex(EnclosingMethodTable.ToPointer()));
+			table.AddRow("Enclosing type", EnclosingType.Name);
 
 
 			// Unsigned 1

@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.HeapObjects;
+using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
@@ -61,8 +62,18 @@ namespace RazorSharp.CLR
 		/// </summary>
 		public static readonly int OffsetToArrayData = sizeof(MethodTable*) + sizeof(uint) + sizeof(uint);
 
+		/// <summary>
+		/// These specific <see cref="BindingFlags"/> are used because they correspond with the metadata and structures
+		/// in CLR structures such as <see cref="MethodTable"/>
+		/// </summary>
 		private const BindingFlags DefaultFlags =
 			BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
+
+		/// <summary>
+		/// The offset, in bytes, of an array's actual <see cref="MethodTable"/> pointer, relative to the address pointed to by
+		/// an array type's <see cref="RuntimeTypeHandle.Value"/>
+		/// </summary>
+		private const int ARRAY_MT_PTR_OFFSET = 6;
 
 		static Runtime() { }
 
@@ -113,27 +124,20 @@ namespace RazorSharp.CLR
 		///     <para>Manually reads a CLR <see cref="MethodTable" /> (TypeHandle).</para>
 		///     <para>
 		///         If the type is a value type, the <see cref="MethodTable" /> will be returned from
-		///         <see cref="Type.TypeHandle" />
+		///         <see cref="RuntimeTypeHandle.Value" />
 		///     </para>
 		/// </summary>
 		/// <returns>A pointer to type <typeparamref name="T" />'s <see cref="MethodTable" /></returns>
 		public static Pointer<MethodTable> ReadMethodTable<T>(ref T t)
 		{
-			MethodTable* mt;
-
-
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
 			if (typeof(T).IsValueType) {
 				return MethodTableOf<T>();
 			}
-			else if (!typeof(T).IsArray) {
-				return typeof(T).TypeHandle.Value;
-			}
-			else {
-				// We need to get the heap pointer manually because of type constraints
-				IntPtr ptr = *(IntPtr*) Unsafe.AddressOf(ref t);
-				mt = *(MethodTable**) ptr;
-			}
+
+			// We need to get the heap pointer manually because of type constraints
+			IntPtr ptr = *(IntPtr*) Unsafe.AddressOf(ref t);
+			MethodTable* mt = *(MethodTable**) ptr;
 
 
 			return mt;
@@ -147,8 +151,8 @@ namespace RazorSharp.CLR
 		}
 
 		/// <summary>
-		///     Returns a type's TypeHandle as a <see cref="MethodTable" />
-		///     <exception cref="RuntimeException">If the type is an array</exception>
+		///     Returns a pointer to a type's TypeHandle as a <see cref="MethodTable" />
+		///
 		/// </summary>
 		/// <typeparam name="T">Type to return the corresponding <see cref="MethodTable" /> for.</typeparam>
 		/// <returns>A <see cref="Pointer{T}" /> to type <typeparamref name="T" />'s <see cref="MethodTable" /></returns>
@@ -158,6 +162,13 @@ namespace RazorSharp.CLR
 			return MethodTableOf(typeof(T));
 		}
 
+
+
+		/// <summary>
+		/// Returns a pointer to a type's TypeHandle as a <see cref="MethodTable" />
+		/// </summary>
+		/// <param name="t">Type to return the corresponding <see cref="MethodTable" /> for.</param>
+		/// <returns>A <see cref="Pointer{T}" /> to type <paramref name="t"/>'s <see cref="MethodTable" /></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<MethodTable> MethodTableOf(Type t)
 		{
@@ -174,12 +185,15 @@ namespace RazorSharp.CLR
 
 			var typeHandle = t.TypeHandle.Value;
 
-			// 00 00 00 00 00 00 18 91 C6 83 F9 7F
-			if (t.IsArray) {
-				return Marshal.ReadIntPtr(typeHandle, 6);
-			}
 
-			return typeHandle;
+			// Special case:
+			// If an object is an array, its actual MethodTable* is stored at the address pointed to by its
+			// given MethodTable* returned from TypeHandle.Value (which is invalid), offset by ARRAY_MT_PTR_OFFSET bytes.
+
+			// Example:
+			// 00 00 00 00 00 00 18 91 C6 83 F9 7F
+			//				     ^
+			return t.IsArray ? Mem.ReadPointer<MethodTable>(typeHandle, ARRAY_MT_PTR_OFFSET) : typeHandle;
 		}
 
 
@@ -202,7 +216,6 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		/// <exception cref="RuntimeException">If the type is an array</exception>
 		public static Pointer<FieldDesc>[] GetFieldDescs<T>()
 		{
 			return GetFieldDescs(typeof(T));
@@ -240,8 +253,7 @@ namespace RazorSharp.CLR
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
 		public static Pointer<FieldDesc> GetFieldDesc(Type t, string name,
-			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None,
-			BindingFlags flags = DefaultFlags)
+			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None, BindingFlags flags = DefaultFlags)
 		{
 			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
 
@@ -266,8 +278,7 @@ namespace RazorSharp.CLR
 		}
 
 		public static Pointer<FieldDesc> GetFieldDesc<T>(string name,
-			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None,
-			BindingFlags flags = DefaultFlags)
+			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None, BindingFlags flags = DefaultFlags)
 		{
 			return GetFieldDesc(typeof(T), name, fieldTypes, flags);
 		}

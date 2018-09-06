@@ -30,7 +30,10 @@ namespace RazorSharp.Memory
 	#endregion
 
 
-	public static unsafe class Memory
+	/// <summary>
+	/// Provides functions for interacting with memory.
+	/// </summary>
+	public static unsafe class Mem
 	{
 		private const  byte Int32Bits       = 32;
 		internal const int  BytesInKilobyte = 1024;
@@ -74,7 +77,6 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-
 		#region Bits
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -111,7 +113,15 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-		public static void ForceWrite<T>(IntPtr p, int byteOffset, T t)
+		#region Read / write
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Pointer<T> ReadPointer<T>(Pointer<byte> ptr, int byteOffset)
+		{
+			return *(IntPtr*) (ptr.Address + byteOffset);
+		}
+
+		public static void ForceWrite<T>(Pointer<byte> p, int byteOffset, T t)
 		{
 			IntPtr hProc = Kernel32.OpenProcess(Process.GetCurrentProcess(), Enumerations.ProcessAccessFlags.All);
 
@@ -132,31 +142,23 @@ namespace RazorSharp.Memory
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Write<T>(IntPtr p, int byteOffset, T t)
+		public static void Write<T>(Pointer<byte> p, int byteOffset, T t)
 		{
 			CSUnsafe.Write((p + byteOffset).ToPointer(), t);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T Read<T>(IntPtr p, int byteOffset = 0)
+		public static T Read<T>(Pointer<byte> p, int byteOffset = 0)
 		{
 			return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
 		}
 
-		public static ref T AsRef<T>(IntPtr p, int byteOffset = 0)
+		public static ref T AsRef<T>(Pointer<byte> p, int byteOffset = 0)
 		{
 			return ref CSUnsafe.AsRef<T>(PointerUtils.Add(p, byteOffset).ToPointer());
 		}
 
-		public static T As<T>(object o) where T : class
-		{
-			return CSUnsafe.As<T>(o);
-		}
-
-		public static TTo As<TFrom, TTo>(ref TFrom t)
-		{
-			return CSUnsafe.As<TFrom, TTo>(ref t);
-		}
+		#endregion
 
 
 		#region Zero
@@ -286,7 +288,7 @@ namespace RazorSharp.Memory
 		///     <para>Allocates a value type in zeroed, unmanaged memory using <see cref="Marshal.AllocHGlobal(int)" />.</para>
 		///     <para>
 		///         If <typeparamref name="T" /> is a reference type, a managed pointer of type <typeparamref name="T" /> will be
-		///         created in unmanaged memory, rather than the instance itself.
+		///         created in unmanaged memory, rather than the instance itself. For that, use <see cref="AllocUnmanagedInstance{T}"/>.
 		///     </para>
 		///     <para>
 		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free" />

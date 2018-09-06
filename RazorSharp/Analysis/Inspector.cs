@@ -260,7 +260,7 @@ namespace RazorSharp.Analysis
 				Value       = t;
 				IsBlittable = Runtime.IsBlittable<T>();
 				IsValueType = typeof(T).IsValueType;
-				IsOnStack   = Memory.Memory.IsOnStack(ref t);
+				IsOnStack   = Memory.Mem.IsOnStack(ref t);
 			}
 
 			protected virtual ConsoleTable ToTable()

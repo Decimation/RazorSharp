@@ -120,7 +120,7 @@ namespace RazorSharp.Memory
 
 		public static string Create<T>(IntPtr p, int byteLen, ToStringOptions options = ToStringOptions.ZeroPadHex)
 		{
-			return Create<T>(Memory.ReadBytes(p, 0, byteLen), options);
+			return Create<T>(Mem.ReadBytes(p, 0, byteLen), options);
 		}
 	}
 

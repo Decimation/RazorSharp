@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using RazorSharp.Memory;
 
 #endregion
 
@@ -11,7 +12,6 @@ namespace RazorSharp.Pointers
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-	using MMemory = Memory.Memory;
 
 	#endregion
 
@@ -47,7 +47,7 @@ namespace RazorSharp.Pointers
 
 		public bool IsNull => m_pValue == null;
 
-		public bool IsAligned => MMemory.IsAligned(Address);
+		public bool IsAligned => Mem.IsAligned(Address);
 
 		#endregion
 
@@ -91,23 +91,23 @@ namespace RazorSharp.Pointers
 
 		public void Write<TType>(TType t, int elemOffset = 0)
 		{
-			MMemory.Write(Offset<TType>(elemOffset), 0, t);
+			Mem.Write(Offset<TType>(elemOffset), 0, t);
 		}
 
 		public void ForceWrite<TType>(TType t, int elemOffset = 0)
 		{
-			MMemory.ForceWrite(Offset<TType>(elemOffset), 0, t);
+			Mem.ForceWrite(Offset<TType>(elemOffset), 0, t);
 		}
 
 		public TType Read<TType>(int elemOffset = 0)
 		{
-			return MMemory.Read<TType>(Offset<TType>(elemOffset));
+			return Mem.Read<TType>(Offset<TType>(elemOffset));
 		}
 
 
 		public ref TType AsRef<TType>(int elemOffset = 0)
 		{
-			return ref MMemory.AsRef<TType>(Offset<TType>(elemOffset));
+			return ref Mem.AsRef<TType>(Offset<TType>(elemOffset));
 		}
 
 		public bool Equals(Pointer<T> other)
