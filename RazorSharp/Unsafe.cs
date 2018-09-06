@@ -67,7 +67,7 @@ namespace RazorSharp
 
 
 	/// <summary>
-	///     Provides utilities for manipulating pointers, memory and types
+	///     Provides utilities for manipulating pointers, memory, and types
 	/// </summary>
 	public static unsafe class Unsafe
 	{

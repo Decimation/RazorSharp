@@ -31,7 +31,7 @@ namespace RazorSharp.Memory
 
 
 	/// <summary>
-	/// Provides functions for interacting with memory.
+	///     Provides functions for interacting with memory.
 	/// </summary>
 	public static unsafe class Mem
 	{
@@ -71,8 +71,9 @@ namespace RazorSharp.Memory
 
 		public static void WriteBytes(Pointer<byte> dest, byte[] src)
 		{
-			for (int i = 0; i < src.Length; i++)
-				Marshal.WriteByte(dest, i, src[i]);
+			for (int i = 0; i < src.Length; i++) {
+				dest[i] = src[i];
+			}
 		}
 
 		#endregion
@@ -115,10 +116,12 @@ namespace RazorSharp.Memory
 
 		#region Read / write
 
+
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Pointer<T> ReadPointer<T>(Pointer<byte> ptr, int byteOffset)
+		public static Pointer<T> ReadPointer<T>(Pointer<byte> ptr, long byteOffset)
 		{
-			return *(IntPtr*) (ptr.Address + byteOffset);
+			return *(IntPtr*) PointerUtils.Add(ptr, byteOffset);
 		}
 
 		public static void ForceWrite<T>(Pointer<byte> p, int byteOffset, T t)
@@ -248,9 +251,15 @@ namespace RazorSharp.Memory
 
 		/// <summary>
 		///     Allocates basic reference types in the unmanaged heap.
+		///     <para>
+		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free" />
+		///     </para>
 		/// </summary>
-		/// <typeparam name="T">Type to allocate; cannot be <c>string</c> or an array type</typeparam>
-		/// <returns>A pointer to a pointer to the unmanaged instance.</returns>
+		/// <typeparam name="T">
+		///     Type to allocate; cannot be <c>string</c> or an array type (for that, use
+		///     <see cref="AllocUnmanaged{T}" />.)
+		/// </typeparam>
+		/// <returns>A double indirection pointer to the unmanaged instance.</returns>
 		public static Pointer<T> AllocUnmanagedInstance<T>() where T : class
 		{
 			Trace.Assert(!typeof(T).IsArray, "Use AllocUnmanaged for arrays");
@@ -271,7 +280,7 @@ namespace RazorSharp.Memory
 			alloc.Write(alloc.Address + sizeof(MethodTable*) * 2);
 
 			// Write the ObjHeader
-			// (this'll already be zeroed anyways, but this is just self-documentation)
+			// (this'll already be zeroed, but this is just self-documentation)
 			// +4 int (sync block)
 			// +4 int (padding, x64)
 			alloc.Write(0L, 1);
@@ -285,16 +294,20 @@ namespace RazorSharp.Memory
 		}
 
 		/// <summary>
-		///     <para>Allocates a value type in zeroed, unmanaged memory using <see cref="Marshal.AllocHGlobal(int)" />.</para>
+		///     <para>
+		///         Allocates <paramref name="elemCnt" /> elements of type <typeparamref name="T" /> in zeroed, unmanaged memory
+		///         using <see cref="Marshal.AllocHGlobal(int)" />.
+		///     </para>
 		///     <para>
 		///         If <typeparamref name="T" /> is a reference type, a managed pointer of type <typeparamref name="T" /> will be
-		///         created in unmanaged memory, rather than the instance itself. For that, use <see cref="AllocUnmanagedInstance{T}"/>.
+		///         created in unmanaged memory, rather than the instance itself. For that, use
+		///         <see cref="AllocUnmanagedInstance{T}" />.
 		///     </para>
 		///     <para>
 		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free" />
 		///     </para>
 		/// </summary>
-		/// <typeparam name="T">Value type to allocate</typeparam>
+		/// <typeparam name="T">Element type to allocate</typeparam>
 		/// <returns>A pointer to the allocated memory</returns>
 		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
 		{
@@ -334,7 +347,6 @@ namespace RazorSharp.Memory
 			Copy(dest, 0, src, elemCnt);
 		}
 
-
 		public static void Copy(Pointer<byte> dest, byte[] src)
 		{
 			fixed (byte* b = src) {
@@ -343,7 +355,6 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
-
 
 		#region Alignment
 

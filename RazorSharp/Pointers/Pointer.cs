@@ -27,7 +27,7 @@ namespace RazorSharp.Pointers
 
 
 	/// <summary>
-	///     <para>A bare-bones, lighter type of <see cref="ExPointer{T}" />, equal to <see cref="IntPtr.Size" /></para>
+	///     <para>Represents a native pointer. Equals the size of <see cref="IntPtr.Size"/>.</para>
 	///     <para>Can be represented as a pointer in memory. </para>
 	///     <para>Has identical or better performance than native pointers.</para>
 	///     <para>

@@ -1,6 +1,8 @@
 #region
 
 using System;
+using System.Diagnostics;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using RazorInvoke;
 using RazorSharp.Memory;
@@ -55,8 +57,14 @@ namespace RazorSharp.CLR
 		/// </summary>
 		private static readonly IntPtr g_highest_address;
 
+		/// <summary>
+		///     The lowest address of the global GC heap.
+		/// </summary>
 		public static IntPtr LowestAddress => g_lowest_address;
 
+		/// <summary>
+		/// The highest address of the global GC heap.
+		/// </summary>
 		public static IntPtr HighestAddress => g_highest_address;
 
 		/// <summary>
@@ -64,7 +72,7 @@ namespace RazorSharp.CLR
 		/// </summary>
 		public static long Size => g_highest_address.ToInt64() - g_lowest_address.ToInt64();
 
-		public static GCHeap* GlobalHeap => (GCHeap*) g_pGCHeap;
+		public static Pointer<GCHeap> GlobalHeap => (GCHeap*) g_pGCHeap;
 
 		/// <summary>
 		///     Returns the number of GCs that have occurred.
@@ -95,9 +103,9 @@ namespace RazorSharp.CLR
 		///         </list>
 		///     </remarks>
 		/// </summary>
-		/// <param name="obj"></param>
-		/// <param name="smallHeapOnly"></param>
-		/// <returns></returns>
+		/// <param name="obj">Pointer to an object in the GC heap</param>
+		/// <param name="smallHeapOnly">Whether to include small GC heaps only</param>
+		/// <returns><c>true</c> if <paramref name="obj"/> is a heap pointer; <c>false</c> otherwise</returns>
 		[CLRSigcall]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
@@ -119,7 +127,7 @@ namespace RazorSharp.CLR
 		///         </list>
 		///     </remarks>
 		/// </summary>
-		/// <param name="obj"></param>
+		/// <param name="obj">Pointer to an object in the GC heap</param>
 		/// <returns></returns>
 		[CLRSigcall]
 		public bool IsEphemeral(void* obj)
@@ -132,12 +140,23 @@ namespace RazorSharp.CLR
 			return IsEphemeral(Unsafe.AddressOfHeap(ref t).ToPointer());
 		}
 
+		/// <summary>
+		/// Returns true if the address of <paramref name="t"/> is in the GC heap.
+		/// </summary>
+		/// <param name="t">Reference to check</param>
+		/// <typeparam name="T">Type of <paramref name="t"/></typeparam>
+		/// <returns><c>true</c> if the address of <paramref name="t"/> is in the GC heap; <c>false</c> otherwise</returns>
 		public static bool IsInGCHeap<T>(ref T t)
 		{
 			IntPtr addr = Unsafe.AddressOf(ref t);
 			return IsInGCHeap(addr);
 		}
 
+		/// <summary>
+		/// Returns <c>true</c> if <paramref name="p"/> is in the GC heap.
+		/// </summary>
+		/// <param name="p">Pointer</param>
+		/// <returns><c>true</c> if <paramref name="p"/> is in the GC heap; <c>false</c> otherwise</returns>
 		public static bool IsInGCHeap(IntPtr p)
 		{
 			return IsAddressInRange(g_highest_address, p, g_lowest_address);
@@ -172,20 +191,21 @@ namespace RazorSharp.CLR
 			 * Circumvent ASLR
 			 */
 
+			Trace.Assert(!GCSettings.IsServerGC);
 
 //			const long g_pStringClassOffset    = 32;
 			const long g_pGCHeapOffset         = 48;
 			const long g_lowest_addressOffset  = 40;
 			const long g_highest_addressOffset = 408;
 
+			// Retrieve the global variables from the data segment of the CLR DLL
+
 			ImageSectionInfo dataSegment = Segments.GetSegment(".data", CLRFunctions.ClrDll);
 
 
-			g_pGCHeap = Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_pGCHeapOffset).Address);
-			g_lowest_address =
-				Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_lowest_addressOffset).Address);
-			g_highest_address =
-				Marshal.ReadIntPtr(PointerUtils.Add(dataSegment.SectionAddress, g_highest_addressOffset).Address);
+			g_pGCHeap         = ReadPointer<byte>(dataSegment.SectionAddress, g_pGCHeapOffset).Address;
+			g_lowest_address  = ReadPointer<byte>(dataSegment.SectionAddress, g_lowest_addressOffset).Address;
+			g_highest_address = ReadPointer<byte>(dataSegment.SectionAddress, g_highest_addressOffset).Address;
 
 			SignatureCall.DynamicBind<GCHeap>();
 

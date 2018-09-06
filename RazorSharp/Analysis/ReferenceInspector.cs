@@ -52,7 +52,7 @@ namespace RazorSharp.Analysis
 
 			internal ReferenceMetadataInfo(ref T t) : base(ref t)
 			{
-				IsHeapPointer = GCHeap.GlobalHeap->IsHeapPointer(t);
+				IsHeapPointer = GCHeap.GlobalHeap.Reference.IsHeapPointer(t);
 			}
 
 			protected override ConsoleTable ToTable()

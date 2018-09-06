@@ -44,8 +44,8 @@ namespace Test.Testing.Tests
 			Debug.Assert(!GCHeap.IsInGCHeap(k.Address));
 
 			// Make sure it's not a GC heap pointer
-			Debug.Assert(!GCHeap.GlobalHeap->IsHeapPointer(k.Reference));
-			Debug.Assert(!GCHeap.GlobalHeap->IsHeapPointer(k.ToPointer()));
+			Debug.Assert(!GCHeap.GlobalHeap.Reference.IsHeapPointer(k.Reference));
+			Debug.Assert(!GCHeap.GlobalHeap.Reference.IsHeapPointer(k.ToPointer()));
 			/* << - >> */
 		}
 	}

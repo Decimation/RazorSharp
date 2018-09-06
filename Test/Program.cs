@@ -115,7 +115,9 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			var alloc = Mem.AllocUnmanaged<byte>(BaseInstanceSize<CPoint>());
+
+
+
 		}
 
 		static TTo reinterpret_cast<TFrom, TTo>(TFrom tf)

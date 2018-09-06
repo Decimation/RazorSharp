@@ -43,9 +43,9 @@ namespace Test.Testing.Tests
 			// todo: weird DivideByZeroException here, passes fine without unit testing
 //			bool isHeapPtr = gc->IsHeapPointer(o);
 
-			bool isEphemeral = gc->IsEphemeral(o);
-			bool isGcInProg = gc->IsGCInProgress();
-			int gcCount = gc->GCCount;
+			bool isEphemeral = gc.Reference.IsEphemeral(o);
+			bool isGcInProg = gc.Reference.IsGCInProgress();
+			int gcCount = gc.Reference.GCCount;
 		}
 
 		[Test]
