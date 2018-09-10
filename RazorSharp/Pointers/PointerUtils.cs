@@ -37,7 +37,6 @@ namespace RazorSharp.Pointers
 			return new Pointer<byte>(val);
 		}
 
-
 		/// <summary>
 		///     Subtracts <paramref name="right" />'s <see cref="Pointer{T}.Address" /> from <paramref name="left" />'s
 		///     <see cref="Pointer{T}.Address" />
@@ -91,6 +90,19 @@ namespace RazorSharp.Pointers
 		public static IntPtr Offset<T>(void* p, int elemCnt)
 		{
 			return Offset<T>((IntPtr) p, elemCnt);
+		}
+
+		/// <summary>
+		/// Returns the element index of a pointer relative to <paramref name="orig"/>
+		/// </summary>
+		/// <param name="orig">Origin pointer (low address)</param>
+		/// <param name="current">Current pointer (high address)</param>
+		/// <typeparam name="TElement">Element type</typeparam>
+		/// <returns>The index</returns>
+		public static int OffsetIndex<TElement>(IntPtr orig, IntPtr current)
+		{
+			var byteDelta = current.ToInt64() - orig.ToInt64();
+			return (int) byteDelta / Unsafe.SizeOf<TElement>();
 		}
 	}
 

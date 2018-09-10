@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,7 @@ using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using JetBrains.Annotations;
 using RazorCommon;
@@ -111,14 +113,23 @@ namespace Test
 		// todo: protect address-sensitive functions
 
 		/**
-		 * Entry point
+		 * >> Entry point
 		 */
 		public static void Main(string[] args)
 		{
 
+			Pointer<char> cstr = stackalloc char[3];
+			Console.WriteLine(cstr.ToTable(3).ToMarkDownString());
+			cstr.Init("foo");
+			Console.WriteLine(cstr.ToTable(3).ToMarkDownString());
+			Console.WriteLine(cstr);
 
-
+			Debug.Assert(cstr.ToString() == "foo");
+			Debug.Assert(cstr.SequenceEqual("foo".ToCharArray()));
 		}
+
+
+
 
 		static TTo reinterpret_cast<TFrom, TTo>(TFrom tf)
 		{

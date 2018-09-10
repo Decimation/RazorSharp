@@ -10,22 +10,6 @@ namespace RazorSharp.Pointers
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 
-	public static class PointerSettings
-	{
-		/// <summary>
-		/// When <c>true</c>, <see cref="TaggedPointer{T}.Tag"/> will retain its value
-		/// when the pointer <see cref="TaggedPointer{T}.Pointer"/> is changed. When
-		/// <c>false</c>, <see cref="TaggedPointer{T}.Tag"/> will be set to <c>0</c>
-		/// when the pointer <see cref="TaggedPointer{T}.Pointer"/> is changed.
-		/// </summary>
-		public static bool RetainTagValue;
-
-		static PointerSettings()
-		{
-			RetainTagValue = false;
-		}
-	}
-
 	// todo
 	/// <summary>
 	/// https://nikic.github.io/2012/02/02/Pointer-magic-for-efficient-dynamic-value-representations.html

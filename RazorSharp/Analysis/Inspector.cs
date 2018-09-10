@@ -186,8 +186,7 @@ namespace RazorSharp.Analysis
 				const string omitted = "-";
 
 				ConsoleTable table = new ConsoleTable("Field Offset", "FieldDesc Address", "Field Address", "CorType",
-					"Static",
-					"Size", "Name", "Value");
+					"Static","Size", "Name", "Value", "Metadata Token");
 
 				if (FieldDescs != null) {
 					foreach (Pointer<FieldDesc> v in FieldDescs) {
@@ -196,7 +195,7 @@ namespace RazorSharp.Analysis
 
 						table.AddRow(v.Reference.Offset, Hex.ToHex(v.Address), fieldAddrHex, v.Reference.CorType,
 							v.Reference.IsStatic ? StringUtils.Check : StringUtils.BallotX, v.Reference.Size,
-							v.Reference.Name, v.Reference.GetValue(value));
+							v.Reference.Name, v.Reference.GetValue(value), Hex.ToHex(v.Reference.MemberDef));
 					}
 				}
 

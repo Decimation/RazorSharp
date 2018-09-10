@@ -228,6 +228,8 @@
       <Compile Include="Experimental\FunctionHooker.cs"/>
     <Compile Include="Experimental\StackAllocated.cs" />
     <Compile Include="Experimental\UnmanagedAllocated.cs" />
+      <Compile Include="Memory\AllocCollection.cs"/>
+      <Compile Include="Memory\AllocPool.cs"/>
     <Compile Include="Memory\Asm.cs" />
       <Compile Include="Memory\Mem.cs"/>
     <Compile Include="Memory\MemoryInspector.cs" />
@@ -240,6 +242,7 @@
       <Compile Include="Pointers\Ex\ExPointer.cs"/>
     <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
+      <Compile Include="Pointers\PointerSettings.cs"/>
     <Compile Include="Pointers\PointerUtils.cs" />
       <Compile Include="Pointers\ReadOnlyPointer.cs"/>
       <Compile Include="Pointers\TaggedPointer.cs"/>

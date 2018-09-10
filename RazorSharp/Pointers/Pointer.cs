@@ -11,7 +11,6 @@ using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp.CLR.Fixed;
 using RazorSharp.Memory;
-using RazorSharp.Pointers.Ex;
 using RazorSharp.Utilities;
 
 #endregion
@@ -27,11 +26,11 @@ namespace RazorSharp.Pointers
 
 
 	/// <summary>
-	///     <para>Represents a native pointer. Equals the size of <see cref="IntPtr.Size"/>.</para>
-	///     <para>Can be represented as a pointer in memory. </para>
+	///     <para>Represents a native pointer. Equals the size of <see cref="IntPtr.Size" />.</para>
+	///     <para>Can be represented as a native pointer in memory. </para>
 	///     <para>Has identical or better performance than native pointers.</para>
 	///     <para>
-	///         Supports pointer arithmetic and reading/writing different types other than type <typeparamref name="T" />
+	///         Supports pointer arithmetic, reading/writing different types other than type <typeparamref name="T" />, and bitwise operations.
 	///     </para>
 	///     <list type="bullet">
 	///         <item>
@@ -84,7 +83,7 @@ namespace RazorSharp.Pointers
 		#region Constructors
 
 		/// <summary>
-		///     Creates a new <see cref="Pointer{T}" /> pointing to the address <paramref name="p" />
+		///     Creates a new <see cref="T:RazorSharp.Pointers.Pointer`1" /> pointing to the address <paramref name="p" />
 		/// </summary>
 		/// <param name="p">Address to point to</param>
 		public Pointer(IntPtr p) : this(p.ToPointer()) { }
@@ -98,15 +97,18 @@ namespace RazorSharp.Pointers
 			m_pValue = v;
 		}
 
+
 		/// <summary>
-		///     Creates a new <see cref="Pointer{T}" /> pointing to the address <paramref name="v" /> represented as an
-		///     <see cref="Int64" />
+		///     Creates a new <see cref="T:RazorSharp.Pointers.Pointer`1" /> pointing to the address <paramref name="v" />
+		///     represented as an
+		///     <see cref="T:System.Int64" />
 		/// </summary>
 		/// <param name="v">Address to point to</param>
 		public Pointer(long v) : this((void*) v) { }
 
+
 		/// <summary>
-		///     Creates a new <see cref="Pointer{T}" /> pointing to the address of <paramref name="t" />
+		///     Creates a new <see cref="T:RazorSharp.Pointers.Pointer`1" /> pointing to the address of <paramref name="t" />
 		/// </summary>
 		/// <param name="t">Variable whose address will be pointed to</param>
 		public Pointer(ref T t) : this(Unsafe.AddressOf(ref t)) { }
@@ -193,13 +195,13 @@ namespace RazorSharp.Pointers
 
 		public void And(long l)
 		{
-			var newAddr = ToInt64() & l;
+			long newAddr = ToInt64() & l;
 			Address = new IntPtr(newAddr);
 		}
 
 		public void Or(long l)
 		{
-			var newAddr = ToInt64() | l;
+			long newAddr = ToInt64() | l;
 			Address = new IntPtr(newAddr);
 		}
 
@@ -301,13 +303,12 @@ namespace RazorSharp.Pointers
 				: new ConsoleTable("Address", "Pointer", "Value", "Aligned", "Null", "Element size");
 
 			if (typeof(T).IsValueType) {
-				table.AddRow(Hex.ToHex(m_pValue), Reference, IsAligned ? StringUtils.Check : StringUtils.BallotX,
+				table.AddRow(Hex.ToHex(m_pValue), Reference, IsAligned.Prettify(),
 					IsNull.Prettify(), ElementSize);
 			}
 			else {
 				table.AddRow(Hex.ToHex(m_pValue), Hex.ToHex(Read<long>()), Reference,
-					IsAligned ? StringUtils.Check : StringUtils.BallotX,
-					IsNull.Prettify(), ElementSize);
+					IsAligned.Prettify(), IsNull.Prettify(), ElementSize);
 			}
 
 			return table;
@@ -390,7 +391,7 @@ namespace RazorSharp.Pointers
 
 		public static explicit operator void*(Pointer<T> ptr)
 		{
-			return ptr.Address.ToPointer();
+			return ptr.ToPointer();
 		}
 
 		public static explicit operator long(Pointer<T> ptr)
@@ -411,13 +412,13 @@ namespace RazorSharp.Pointers
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private IntPtr Offset(int elemCnt)
 		{
-			return PointerUtils.Offset<T>(Address, elemCnt);
+			return PointerUtils.Offset<T>(m_pValue, elemCnt);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private IntPtr Offset<TType>(int elemCnt)
 		{
-			return PointerUtils.Offset<TType>(Address, elemCnt);
+			return PointerUtils.Offset<TType>(m_pValue, elemCnt);
 		}
 
 
@@ -427,7 +428,7 @@ namespace RazorSharp.Pointers
 		/// <param name="bytes">Number of bytes to add</param>
 		public void Add(long bytes)
 		{
-			m_pValue = PointerUtils.Add(Address, bytes).ToPointer();
+			m_pValue = PointerUtils.Add(m_pValue, bytes).ToPointer();
 		}
 
 
@@ -437,7 +438,7 @@ namespace RazorSharp.Pointers
 		/// <param name="bytes">Number of bytes to subtract</param>
 		public void Subtract(long bytes)
 		{
-			m_pValue = PointerUtils.Subtract(Address, bytes).ToPointer();
+			m_pValue = PointerUtils.Subtract(m_pValue, bytes).ToPointer();
 		}
 
 
@@ -545,7 +546,7 @@ namespace RazorSharp.Pointers
 				return false;
 			}
 
-			return obj is Pointer<T> && Equals((Pointer<T>) obj);
+			return obj is Pointer<T> pointer && Equals(pointer);
 		}
 
 		public override int GetHashCode()
@@ -573,7 +574,10 @@ namespace RazorSharp.Pointers
 		/// <summary>
 		/// </summary>
 		/// <param name="format">
-		///     <para><c>"O"</c>: Object (<see cref="P:RazorSharp.Pointers.Pointer`1.Reference" />) </para>
+		///     <para>
+		///         <c>"O"</c>: Object (<see cref="P:RazorSharp.Pointers.Pointer`1.Reference" />). If <typeparamref name="T" />
+		///         is <see cref="Char" />, it will be printed as a C-string.
+		///     </para>
 		///     <para><c>"P"</c>: Pointer (<see cref="P:RazorSharp.Pointers.Pointer`1.Address" />) </para>
 		///     <para>
 		///         <c>"S"</c>: Safe <c>"O"</c> (when <see cref="P:RazorSharp.Pointers.Pointer`1.Reference" /> or
@@ -590,7 +594,7 @@ namespace RazorSharp.Pointers
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			if (String.IsNullOrEmpty(format)) {
-				format = "O";
+				format = PointerSettings.FMT_O;
 			}
 
 			if (formatProvider == null) {
@@ -599,32 +603,32 @@ namespace RazorSharp.Pointers
 
 
 			switch (format.ToUpperInvariant()) {
-				case "O":
+				case PointerSettings.FMT_O:
 					if (typeof(T).IsIListType()) {
 						return Collections.ListToString((IList) Reference);
 					}
 
-					/* C-string */
+					/* Special support for C-string */
 					if (typeof(T) == typeof(char)) {
-						return new string((char*) ToPointer());
+						return new string((char*) m_pValue);
 					}
 
 					return Reference.ToString();
-				case "I":
+				case PointerSettings.FMT_I:
 					return ToInfoTable().ToMarkDownString();
-				case "P":
+				case PointerSettings.FMT_P:
 					return Hex.ToHex(Address);
-				case "S":
+				case PointerSettings.FMT_S:
 					if (Reference == null || IsNull) {
-						return "(null)";
+						return PointerSettings.NULLPTR;
 					}
 					else {
-						goto case "O";
+						goto case PointerSettings.FMT_O;
 					}
-				case "B":
+				case PointerSettings.FMT_B:
 					return String.Format("Value @ {0}:\n{1}", Hex.ToHex(Address), Reference.ToString());
 				default:
-					goto case "P";
+					goto case PointerSettings.FMT_O;
 			}
 		}
 
@@ -635,7 +639,7 @@ namespace RazorSharp.Pointers
 
 		public override string ToString()
 		{
-			return ToString("O", null);
+			return ToString(PointerSettings.FMT_O, null);
 		}
 
 		#endregion

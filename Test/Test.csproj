@@ -205,7 +205,8 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-      <Compile Include="Testing\Benchmarking\AllocationBenchmarking.cs"/>
+      <Compile Include="Testing\Benchmarking\AllocPoolBenchmarking.cs"/>
+      <Compile Include="Testing\Benchmarking\CollectionBenchmarking.cs"/>
     <Compile Include="Testing\Benchmarking\CollectionsBenchmarking.cs" />
       <Compile Include="Testing\Benchmarking\DllBenchmarking.cs"/>
       <Compile Include="Testing\Benchmarking\MiscBenchmarking.cs"/>
@@ -219,6 +220,7 @@
     <Compile Include="Testing\Benchmarking\AllocPointerBenchmarking.cs" />
       <Compile Include="Testing\Tests\AddrInRangeTests.cs"/>
     <Compile Include="Testing\Tests\AllocPointerTests.cs" />
+      <Compile Include="Testing\Tests\AllocPoolTests.cs"/>
       <Compile Include="Testing\Tests\SignatureCallTests.cs"/>
       <Compile Include="Testing\Tests\StackAllocateTests.cs"/>
       <Compile Include="Testing\Tests\StructureTests.cs"/>

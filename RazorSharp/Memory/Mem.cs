@@ -116,8 +116,6 @@ namespace RazorSharp.Memory
 
 		#region Read / write
 
-
-
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<T> ReadPointer<T>(Pointer<byte> ptr, long byteOffset)
 		{
@@ -319,17 +317,26 @@ namespace RazorSharp.Memory
 			return alloc;
 		}
 
+		public static Pointer<T> ReAllocUnmanaged<T>(Pointer<T> ptr, int elemCnt = 1)
+		{
+			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) (elemCnt * Unsafe.SizeOf<T>()));
+		}
+
 
 		/// <summary>
 		///     <para>Frees memory allocated from <see cref="AllocUnmanaged{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>
 		///     <para>The memory is zeroed before it is freed.</para>
 		/// </summary>
 		/// <param name="p">Pointer to allocated memory</param>
-		public static void Free(IntPtr p)
+		/// <param name="bZero">Whether to zero the memory before freeing</param>
+		public static void Free(IntPtr p, bool bZero = false)
 		{
-			// AllocHGlobal is a wrapper of LocalAlloc
-			uint size = Kernel32.LocalSize(p.ToPointer());
-			Zero(p, (int) size);
+			if (bZero) {
+				// AllocHGlobal is a wrapper of LocalAlloc
+				uint size = Kernel32.LocalSize(p.ToPointer());
+				Zero(p, (int) size);
+			}
+
 			Marshal.FreeHGlobal(p);
 		}
 
