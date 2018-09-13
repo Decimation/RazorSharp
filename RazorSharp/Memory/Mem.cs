@@ -7,6 +7,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using RazorCommon;
 using RazorInvoke;
 using RazorInvoke.Libraries;
 using RazorSharp.CLR;
@@ -216,6 +217,7 @@ namespace RazorSharp.Memory
 
 		internal static void StackInit<T>(ref byte* b)
 		{
+			Trace.Assert(IsOnStack(b));
 			// ObjHeader
 			Zero(b, sizeof(ObjHeader));
 
@@ -344,8 +346,10 @@ namespace RazorSharp.Memory
 
 		public static void Copy<T>(Pointer<T> dest, int startOfs, Pointer<T> src, int elemCnt)
 		{
-			for (int i = startOfs; i < elemCnt; i++) {
-				dest[i] = src[i];
+
+			for (int i = startOfs; i < elemCnt + startOfs; i++) {
+
+				dest[i-startOfs] = src[i];
 			}
 		}
 

@@ -25,7 +25,6 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\Microsoft.DotNet.Plat
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\Microsoft.Win32.Registry.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Collections.Immutable.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Reflection.Metadata.dll
-C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Reflection.TypeExtensions.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Security.AccessControl.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Security.Principal.Windows.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Text.Encoding.CodePages.dll

@@ -276,8 +276,9 @@
     <Compile Include="Utilities\StandardOut.cs" />
   </ItemGroup>
   <ItemGroup>
-      <PackageReference Include="Microsoft.Net.Compilers" Version="$2.9.0" Condition="'$(MSBuildRuntimeType)' != 'Core'"/>
-      <PackageReference Include="Microsoft.NETCore.Compilers" Version="$2.9.0" Condition="'$(MSBuildRuntimeType)' == 'Core'"/>
+      <PackageReference Include="Microsoft.Net.Compilers" Version="2.9.0" Condition="'$(MSBuildRuntimeType)' != 'Core'"/>
+      <PackageReference Include="Microsoft.NETCore.Compilers" Version="2.9.0"
+                        Condition="'$(MSBuildRuntimeType)' == 'Core'"/>
   </ItemGroup>
     <ItemGroup>
         <None Include="app.config"/>

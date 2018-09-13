@@ -79,6 +79,8 @@ namespace RazorSharp.CLR.Structures
 
 		#region Accessors
 
+		public void* LocalFn => m_pFunction;
+
 		static MethodDesc()
 		{
 			SignatureCall.DynamicBind<MethodDesc>();
@@ -137,6 +139,7 @@ namespace RazorSharp.CLR.Structures
 			[CLRSigcall] get => throw new SigcallException();
 		}
 
+		public bool HasThis => Info.CallingConvention.HasFlag(CallingConventions.HasThis);
 
 		#region Flags
 
@@ -269,6 +272,11 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
+		[CLRSigcall("48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20")]
+		public long SetStableEntryPointInterlocked(void* pcode)
+		{
+			throw new SigcallException();
+		}
 
 		public override string ToString()
 		{
@@ -286,7 +294,8 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Attributes", Attributes);
 
 			table.AddRow("Is pointing to native code", IsPointingToNativeCode.Prettify());
-			table.AddRow("Is Constructor", IsCtor.Prettify());
+			table.AddRow("Is constructor", IsCtor.Prettify());
+			table.AddRow("Has this", HasThis.Prettify());
 			table.AddRow("MethodDescChunk", MethodDescChunk.ToString("P"));
 
 

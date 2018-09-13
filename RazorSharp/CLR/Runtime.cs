@@ -3,9 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+
 using RazorCommon;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.HeapObjects;
@@ -292,6 +294,16 @@ namespace RazorSharp.CLR
 
 		#region MethodDesc
 
+		public static void ReplaceMethod(Type target, string targetName, Type src, string srcName)
+		{
+			SetFunctionPointer(GetMethod(target, targetName), GetMethod(src, srcName).MethodHandle.GetFunctionPointer());
+		}
+
+		public static void ReplaceMethod<TTarget, TSource>(string target, string src)
+		{
+			SetFunctionPointer(GetMethod(typeof(TTarget), target), GetMethod(typeof(TSource), src).MethodHandle.GetFunctionPointer());
+		}
+
 		public static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
 		{
 			return GetMethodDescs(typeof(T), flags);
@@ -319,7 +331,9 @@ namespace RazorSharp.CLR
 		public static Pointer<MethodDesc> GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
 		{
 			MethodInfo methodInfo = t.GetMethod(name, flags);
+
 			RazorContract.RequiresNotNull(methodInfo);
+
 			RuntimeMethodHandle methodHandle = methodInfo.MethodHandle;
 			MethodDesc*         md           = (MethodDesc*) methodHandle.Value;
 

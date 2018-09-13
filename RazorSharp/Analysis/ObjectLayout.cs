@@ -59,6 +59,7 @@ namespace RazorSharp.Analysis
 
 		#region Constructors
 
+		// Base constructor
 		private ObjectLayout(IntPtr pAddr, T value, bool bFieldsOnly, bool bIsArray, bool bIsDefault)
 		{
 			m_pAddr       = pAddr;
@@ -153,13 +154,14 @@ namespace RazorSharp.Analysis
 		private byte[] TryGetObjHeaderAsBytes()
 		{
 			if (m_bIsArray) {
-				return ReadBytes(m_pAddr, -IntPtr.Size / 2, sizeof(ObjHeader) / 2);
+				return ReadBytes(m_pAddr, -IntPtr.Size, size: sizeof(uint));
 			}
 
 			// Only read the second DWORD; the first DWORD is alignment padding
-			return typeof(T).IsValueType
-				? null
-				: ReadBytes(m_pAddr, -IntPtr.Size / 2, sizeof(ObjHeader) / 2);
+			byte[] mem = typeof(T).IsValueType ? null : ReadBytes(m_pAddr, -IntPtr.Size, size: sizeof(uint));
+
+
+			return mem;
 		}
 
 		private IntPtr TryGetMethodTablePointer()
@@ -193,7 +195,10 @@ namespace RazorSharp.Analysis
 
 				// ObjHeader
 				Table.AddRow(-IntPtr.Size, Hex.ToHex(m_pAddr - IntPtr.Size), IntPtr.Size, OBJHEADER_TYPE_STR,
-					OBJHEADER_NAME_STR, objHeaderMem == null ? Omitted.ToString() : Collections.ToString(objHeaderMem),
+					OBJHEADER_NAME_STR,
+					objHeaderMem == null
+						? Omitted.ToString()
+						: String.Format("[{0}]", Collections.ToString(objHeaderMem)),
 					UniqueAttributes.None);
 
 				// MethodTable*

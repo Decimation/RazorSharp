@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -112,23 +113,56 @@ namespace Test
 
 		// todo: protect address-sensitive functions
 
+
 		/**
 		 * >> Entry point
 		 */
 		public static void Main(string[] args)
 		{
-
+/*
+			// Method Address = Method Virtual Address + base address of class that declares this member..
+			SignatureCall.DynamicBind(typeof(Program), "setObjRef");
 			Pointer<char> cstr = stackalloc char[3];
 			Console.WriteLine(cstr.ToTable(3).ToMarkDownString());
 			cstr.Init("foo");
 			Console.WriteLine(cstr.ToTable(3).ToMarkDownString());
-			Console.WriteLine(cstr);
+
 
 			Debug.Assert(cstr.ToString() == "foo");
-			Debug.Assert(cstr.SequenceEqual("foo".ToCharArray()));
+			Debug.Assert(cstr.SequenceEqual("foo"));
+
+
+			byte* b = stackalloc byte[BaseInstanceSize<CPoint>()];
+			Mem.StackInit<CPoint>(ref b);
+			Pointer<CPoint> lpMem = &b;
+			Console.WriteLine(InspectorHelper.LayoutString(ref lpMem.Reference));
+
+
+			var ptr = lpMem.Read<Pointer<byte>>();
+//			ptr.Write("foo", 1);
+
+			Console.WriteLine(GCHeap.GlobalHeap.Reference.GCCount);
+			__break();
+			GC.Collect();
+			Console.WriteLine(GCHeap.GlobalHeap.Reference.GCCount);
+			Console.WriteLine(lpMem);
+
+			__break();
+*/
+			object o = new object();
+			InspectorHelper.Inspect(ref o, InspectorMode.Address);
+			__break();
+			Console.WriteLine(GCHeap.GlobalHeap.Reference.GCCount);
+			GC.Collect();
+			__break();
+			Console.WriteLine(GCHeap.GlobalHeap.Reference.GCCount);
 		}
 
 
+
+
+		[CLRSigcall("48 89 11 E9 10 CA ED FF")]
+		static void setObjRef(void** dst, void* src) { }
 
 
 		static TTo reinterpret_cast<TFrom, TTo>(TFrom tf)
@@ -137,7 +171,7 @@ namespace Test
 		}
 
 
-		static class WinDbg
+		private static class WinDbg
 		{
 			public static void DumpObj<T>(ref T t)
 			{
@@ -218,6 +252,10 @@ namespace Test
 			private float m_fX,
 			              m_fY;
 
+
+			public string String { get; set; }
+
+
 			public float X {
 				get => m_fX;
 				set => m_fX = value;
@@ -230,7 +268,7 @@ namespace Test
 
 			public override string ToString()
 			{
-				return String.Format("x = {0}, y = {1}", m_fX, m_fY);
+				return String.Format("x = {0}, y = {1}, String = {2}", m_fX, m_fY, String);
 			}
 		}
 

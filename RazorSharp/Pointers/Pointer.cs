@@ -188,6 +188,21 @@ namespace RazorSharp.Pointers
 			return CopyOut(values.Length).SequenceEqual(values);
 		}
 
+		public bool SequenceEqual(IEnumerable<T> enumerable)
+		{
+			var enumerator = enumerable.GetEnumerator();
+			int i = 0;
+			while (enumerator.MoveNext()) {
+				if (!enumerator.Current.Equals(this[i++])) {
+					enumerator.Dispose();
+					return false;
+				}
+			}
+
+			enumerator.Dispose();
+			return true;
+		}
+
 		#endregion
 
 
