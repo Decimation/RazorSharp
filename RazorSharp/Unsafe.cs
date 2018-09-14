@@ -248,12 +248,12 @@ namespace RazorSharp
 		/// <remarks>
 		///     Returned from <see cref="EEClassLayoutInfo.ManagedSize" />
 		/// </remarks>
-		/// <returns><c>-1</c> if <typeparamref name="T" /> is an array; managed size otherwise</returns>
+		/// <returns>Managed size if the type has an <see cref="EEClassLayoutInfo"/>; <c>-1</c> otherwise</returns>
 		public static int ManagedSizeOf<T>()
 		{
 			// No layout
 			if (typeof(T).IsArray) {
-	//			return InvalidValue;
+				//			return InvalidValue;
 			}
 
 			Pointer<MethodTable> mt = Runtime.MethodTableOf<T>();
@@ -405,7 +405,6 @@ namespace RazorSharp
 			//}
 
 
-
 			return Runtime.MethodTableOf<T>().Reference.NumInstanceFieldBytes;
 		}
 
@@ -441,16 +440,9 @@ namespace RazorSharp
 		/// <remarks>
 		///     <para>Returned from <see cref="MethodTable.BaseSize" /></para>
 		/// </remarks>
-		/// <returns><see cref="Constants.MinObjectSize" /> if type is array, base instance size otherwise</returns>
+		/// <returns><see cref="MethodTable.BaseSize"/></returns>
 		public static int BaseInstanceSize<T>() where T : class
 		{
-			// Arrays don't have a TypeHandle, so we have to read the
-			// MethodTable* manually. We obviously can't do that here because
-			// this method is parameterless.
-			if (typeof(T).IsArray) {
-//				return Constants.MinObjectSize;
-			}
-
 			return (int) Runtime.MethodTableOf<T>().Reference.BaseSize;
 		}
 
@@ -503,7 +495,7 @@ namespace RazorSharp
 		{
 			// Subtract the size of the ObjHeader and MethodTable*
 			int fieldSize = HeapSize(in t) - IntPtr.Size * 2;
-			Console.WriteLine(fieldSize);
+
 			byte[] fields = new byte[fieldSize];
 
 			// Skip over the MethodTable*
@@ -511,19 +503,6 @@ namespace RazorSharp
 			return fields;
 		}
 
-		/// <summary>
-		///     Moves a managed type's data in heap memory.
-		/// </summary>
-		public static void Move<T>(ref T t, IntPtr newHeapAddr) where T : class
-		{
-			byte[] heapBytes = MemoryOf(ref t);
-
-			Debug.Assert(heapBytes.Length == HeapSize(in t));
-			Mem.Zero(AddressOfHeap(ref t) - IntPtr.Size, HeapSize(in t));
-			Mem.WriteBytes(newHeapAddr, heapBytes);
-			IntPtr newAddr = newHeapAddr + IntPtr.Size;
-			Marshal.WriteIntPtr(AddressOf(ref t), newAddr);
-		}
 
 		public static void WriteReference<T>(ref T t, IntPtr newHeapAddr)
 		{

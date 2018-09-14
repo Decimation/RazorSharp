@@ -244,6 +244,9 @@ namespace RazorSharp.CLR.Structures
 		/// </remarks>
 		/// </summary>
 		public int MDToken => Constants.TokenFromRid(Token, CorTokenType.mdtTypeDef);
+		// internal name: GetTypeDefRid
+
+		// todo: Rename MDToken to MemberDef? or vise versa
 
 		/// <summary>
 		/// <para>Corresponding <see cref="Type"/> of this <see cref="MethodTable"/></para>

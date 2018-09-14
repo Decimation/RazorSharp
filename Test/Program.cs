@@ -112,6 +112,7 @@ namespace Test
 #endif
 
 		// todo: protect address-sensitive functions
+		// todo: replace native pointers* with Pointer<T> for consistency
 
 
 		/**
@@ -149,20 +150,8 @@ namespace Test
 
 			__break();
 */
-			object o = new object();
-			InspectorHelper.Inspect(ref o, InspectorMode.Address);
-			__break();
-			Console.WriteLine(GCHeap.GlobalHeap.Reference.GCCount);
-			GC.Collect();
-			__break();
-			Console.WriteLine(GCHeap.GlobalHeap.Reference.GCCount);
+
 		}
-
-
-
-
-		[CLRSigcall("48 89 11 E9 10 CA ED FF")]
-		static void setObjRef(void** dst, void* src) { }
 
 
 		static TTo reinterpret_cast<TFrom, TTo>(TFrom tf)
@@ -293,11 +282,6 @@ namespace Test
 		}
 
 
-		private static void __break()
-		{
-			Console.ReadLine();
-		}
-
 		#region todo
 
 		private static void VMMap()
@@ -320,18 +304,6 @@ namespace Test
 		private static T* AddrOf<T>(ref T t) where T : unmanaged
 		{
 			return (T*) AddressOf(ref t);
-		}
-
-		private static void Hook<TOrig, TNew>(string origFn, string newFn)
-		{
-			Hook(typeof(TOrig), origFn, typeof(TNew), newFn);
-		}
-
-		private static void Hook(Type tOrig, string origFn, Type tNew, string newFn)
-		{
-			Pointer<MethodDesc> origMd = Runtime.GetMethodDesc(tOrig, origFn);
-			Pointer<MethodDesc> newMd  = Runtime.GetMethodDesc(tNew, newFn);
-			origMd.Reference.SetFunctionPointer(newMd.Reference.Function);
 		}
 
 		#endregion

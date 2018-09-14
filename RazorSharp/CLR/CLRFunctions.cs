@@ -63,12 +63,14 @@ namespace RazorSharp.CLR
 				SignatureCall.CacheFunction<GCHeap>("IsEphemeral", Functions[1], FN_ISEPHEMERAL_OFFSET);
 				SignatureCall.CacheFunction<GCHeap>("IsGCInProgress", Functions[2], FN_ISGCINPROGRESS_OFFSET);
 				SignatureCall.CacheFunction<GCHeap>("get_GCCount", Functions[3], FN_GETGCCOUNT_OFFSET);
+
 			}
 
 			private const long FN_ISHEAPPOINTER_OFFSET  = 0x58E260;
 			private const long FN_ISEPHEMERAL_OFFSET    = 0x129100;
 			private const long FN_ISGCINPROGRESS_OFFSET = 0x3C3C;
 			private const long FN_GETGCCOUNT_OFFSET     = 0x123C60;
+
 
 			private static readonly byte[][] Functions =
 			{
@@ -98,6 +100,8 @@ namespace RazorSharp.CLR
 					0x48, 0x8B, 0x05, 0x59, 0xF5, 0x82, 0x00, 0x48, 0x89, 0x44, 0x24, 0x10, 0x48, 0x8B, 0x44, 0x24,
 					0x10, 0xC3
 				},
+
+
 			};
 
 		}

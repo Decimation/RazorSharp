@@ -82,6 +82,7 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 				char* __this = (char*) Unsafe.AddressOf(ref this);
 				__this += RuntimeHelpers.OffsetToStringData / sizeof(char);
 				return new string(__this);
+				// get { return ref System.Runtime.CompilerServices.Unsafe.AsRef<string>(Unsafe.AddressOf(ref this).ToPointer()); }
 			}
 		}
 
@@ -91,8 +92,8 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Header*", Hex.ToHex(Header));
 			table.AddRow("MethodTable*", Hex.ToHex(m_methodTablePtr));
-			table.AddRow("Length", Length);
-			table.AddRow("First char", FirstChar);
+			table.AddRow("Length", m_stringLength);
+			table.AddRow("First char", m_firstChar);
 
 			return table.ToMarkDownString();
 		}

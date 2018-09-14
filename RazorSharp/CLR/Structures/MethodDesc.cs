@@ -79,7 +79,7 @@ namespace RazorSharp.CLR.Structures
 
 		#region Accessors
 
-		public void* LocalFn => m_pFunction;
+
 
 		static MethodDesc()
 		{
@@ -272,11 +272,7 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
-		[CLRSigcall("48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20")]
-		public long SetStableEntryPointInterlocked(void* pcode)
-		{
-			throw new SigcallException();
-		}
+
 
 		public override string ToString()
 		{

@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using RazorCommon;
 using RazorSharp.CLR;
+using RazorSharp.Pointers;
 
 #endregion
 
@@ -151,7 +152,7 @@ namespace RazorSharp.Memory
 #if DEBUG
 
 //				Console.WriteLine("{0} | {1} | {2}", methodInfo.Name, Hex.ToHex(fn),
-//					Hex.ToHex(PointerUtils.Subtract(fn, SigScanner.BaseAddress)));
+//					Hex.ToHex(PointerUtils.Subtract(fn, SigScanner.BaseAddress).Address));
 #endif
 			}
 		}
