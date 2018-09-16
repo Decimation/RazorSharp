@@ -16,6 +16,7 @@ using System.Threading;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using JetBrains.Annotations;
+using Microsoft.Diagnostics.Runtime;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
@@ -33,10 +34,12 @@ using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 using Test.Testing;
 using Test.Testing.Benchmarking;
+using Test.Testing.Tests;
 using Test.Testing.Types;
 using static RazorSharp.Unsafe;
 using Module = System.Reflection.Module;
 using Point = Test.Testing.Types.Point;
+using Runtime = RazorSharp.CLR.Runtime;
 
 #endregion
 
@@ -151,6 +154,54 @@ namespace Test
 			__break();
 */
 
+
+
+
+
+
+//			VMMap();
+//			regions();
+
+
+		}
+
+
+
+		static void threads()
+		{
+			foreach (var thread in GetRuntime().Threads) {
+				Console.WriteLine("{0} [{1} {2}]", Hex.ToHex(thread.Address), Hex.ToHex(thread.StackBase),
+					Hex.ToHex(thread.StackLimit));
+
+				foreach (var o in thread.EnumerateStackObjects()) {
+					Console.WriteLine(o);
+				}
+
+				foreach (var stackFrame in thread.EnumerateStackTrace()) {
+					Console.WriteLine(stackFrame.ModuleName);
+				}
+			}
+		}
+
+		static void regions()
+		{
+			var table = new ConsoleTable("Address", "Size", "Type", "Segment");
+
+			foreach (var region in GetRuntime().EnumerateMemoryRegions()) {
+				table.AddRow(Hex.ToHex(region.Address), region.Size, region.Type,
+					region.Type == ClrMemoryRegionType.GCSegment ? region.GCSegmentType.ToString() : "-");
+			}
+
+
+			Console.WriteLine(table.ToMarkDownString());
+		}
+
+
+		static ClrRuntime GetRuntime()
+		{
+			var dataTarget =
+				DataTarget.AttachToProcess(Process.GetCurrentProcess().Id, UInt32.MaxValue, AttachFlag.Passive);
+			return dataTarget.ClrVersions.Single().CreateRuntime();
 		}
 
 
@@ -210,7 +261,7 @@ namespace Test
 					// - FieldInfo.Attributes is used for the Attr column; I don't know what WinDbg uses
 					var table = new ConsoleTable("MT", "Field", "Offset", "Type", "VT", "Attr", "Value", "Name");
 					foreach (var v in m_rgpFieldDescs) {
-						table.AddRow(Hex.ToHex(v.Reference.TypeMethodTable.Address), Hex.ToHex(v.Reference.MemberDef),
+						table.AddRow(Hex.ToHex(v.Reference.TypeMethodTable.Address), Hex.ToHex(v.Reference.Token),
 							v.Reference.Offset,
 							v.Reference.Info.FieldType.Name, v.Reference.Info.FieldType.IsValueType,
 							v.Reference.Info.Attributes, v.Reference.GetValue(t),
@@ -253,6 +304,11 @@ namespace Test
 			public float Y {
 				get => m_fY;
 				set => m_fY = value;
+			}
+
+			public int getInt32()
+			{
+				return 1;
 			}
 
 			public override string ToString()

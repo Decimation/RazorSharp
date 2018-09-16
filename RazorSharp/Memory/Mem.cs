@@ -7,7 +7,6 @@ using System.Collections;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorCommon;
 using RazorInvoke;
 using RazorInvoke.Libraries;
 using RazorSharp.CLR;
@@ -39,6 +38,7 @@ namespace RazorSharp.Memory
 		private const  byte Int32Bits       = 32;
 		internal const int  BytesInKilobyte = 1024;
 
+
 		#region Swap
 
 		public static void Swap<T>(void* a, void* b)
@@ -59,6 +59,11 @@ namespace RazorSharp.Memory
 		#endregion
 
 		#region Array operations
+
+		public static byte[] ReadBytes(Pointer<byte> b, int size)
+		{
+			return ReadBytes(b, 0, size);
+		}
 
 		public static byte[] ReadBytes(Pointer<byte> p, int byteOffset, int size)
 		{
@@ -218,6 +223,7 @@ namespace RazorSharp.Memory
 		internal static void StackInit<T>(ref byte* b)
 		{
 			Trace.Assert(IsOnStack(b));
+
 			// ObjHeader
 			Zero(b, sizeof(ObjHeader));
 
@@ -346,10 +352,8 @@ namespace RazorSharp.Memory
 
 		public static void Copy<T>(Pointer<T> dest, int startOfs, Pointer<T> src, int elemCnt)
 		{
-
 			for (int i = startOfs; i < elemCnt + startOfs; i++) {
-
-				dest[i-startOfs] = src[i];
+				dest[i - startOfs] = src[i];
 			}
 		}
 

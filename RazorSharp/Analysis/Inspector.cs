@@ -9,6 +9,7 @@ using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
+using RazorSharp.Memory;
 using RazorSharp.Pointers;
 
 #endregion
@@ -186,7 +187,7 @@ namespace RazorSharp.Analysis
 				const string omitted = "-";
 
 				ConsoleTable table = new ConsoleTable("Field Offset", "FieldDesc Address", "Field Address", "CorType",
-					"Static","Size", "Name", "Value", "Metadata Token");
+					"Static", "Size", "Name", "Value", "Metadata Token");
 
 				if (FieldDescs != null) {
 					foreach (Pointer<FieldDesc> v in FieldDescs) {
@@ -195,7 +196,7 @@ namespace RazorSharp.Analysis
 
 						table.AddRow(v.Reference.Offset, Hex.ToHex(v.Address), fieldAddrHex, v.Reference.CorType,
 							v.Reference.IsStatic ? StringUtils.Check : StringUtils.BallotX, v.Reference.Size,
-							v.Reference.Name, v.Reference.GetValue(value), Hex.ToHex(v.Reference.MemberDef));
+							v.Reference.Name, v.Reference.GetValue(value), Hex.ToHex(v.Reference.Token));
 					}
 				}
 
@@ -259,7 +260,7 @@ namespace RazorSharp.Analysis
 				Value       = t;
 				IsBlittable = Runtime.IsBlittable<T>();
 				IsValueType = typeof(T).IsValueType;
-				IsOnStack   = Memory.Mem.IsOnStack(ref t);
+				IsOnStack   = Mem.IsOnStack(ref t);
 			}
 
 			protected virtual ConsoleTable ToTable()

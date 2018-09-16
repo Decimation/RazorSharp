@@ -8,12 +8,10 @@ namespace RazorSharp.Pointers
 {
 
 	/// <summary>
-	/// <para>The interface for a Pointer. This interface is kept <c>internal</c> because we don't</para>
-	/// <para>want to cause accidental boxing allocations. All Pointer types should be <c>struct</c> types</para>
-	/// <para>so they can equal the size and layout of a native pointer in memory.</para>
-	/// <para>Therefore, this interface just serves as a static contract and shouldn't be used in runtime.</para>
-	///
-	///
+	///     <para>The interface for a Pointer. This interface is kept <c>internal</c> because we don't</para>
+	///     <para>want to cause accidental boxing allocations. All Pointer types should be <c>struct</c> types</para>
+	///     <para>so they can equal the size and layout of a native pointer in memory.</para>
+	///     <para>Therefore, this interface just serves as a static contract and shouldn't be used in runtime.</para>
 	/// </summary>
 	/// <typeparam name="T">Element type</typeparam>
 	internal unsafe interface IPointer<T> : IFormattable

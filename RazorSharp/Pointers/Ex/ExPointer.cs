@@ -5,6 +5,7 @@ using System.Collections;
 using System.Globalization;
 using RazorCommon;
 using RazorCommon.Extensions;
+using RazorSharp.Memory;
 
 #endregion
 
@@ -82,7 +83,7 @@ namespace RazorSharp.Pointers.Ex
 			set => m_addr = value;
 		}
 
-		public ref T Reference => ref Memory.Mem.AsRef<T>(Address);
+		public ref T Reference => ref Mem.AsRef<T>(Address);
 
 		public bool IsNull => m_addr == IntPtr.Zero;
 
@@ -92,13 +93,13 @@ namespace RazorSharp.Pointers.Ex
 		///     This is equivalent to this[0].
 		/// </summary>
 		public virtual T Value {
-			get => Memory.Mem.Read<T>(Address, 0);
-			set => Memory.Mem.Write(Address, 0, value);
+			get => Mem.Read<T>(Address, 0);
+			set => Mem.Write(Address, 0, value);
 		}
 
 		public virtual T this[int index] {
-			get => Memory.Mem.Read<T>(PointerUtils.Offset<T>(Address, index), 0);
-			set => Memory.Mem.Write(PointerUtils.Offset<T>(Address, index), 0, value);
+			get => Mem.Read<T>(PointerUtils.Offset<T>(Address, index), 0);
+			set => Mem.Write(PointerUtils.Offset<T>(Address, index), 0, value);
 		}
 
 		#region Constructors
@@ -122,7 +123,7 @@ namespace RazorSharp.Pointers.Ex
 
 		public TNew Peek<TNew>()
 		{
-			return Memory.Mem.Read<TNew>(Address);
+			return Mem.Read<TNew>(Address);
 		}
 
 		public ExPointer<TNew> Reinterpret<TNew>()

@@ -3,7 +3,6 @@
 using System;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
-using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
 
 // ReSharper disable IdentifierTypo
@@ -63,7 +62,6 @@ namespace RazorSharp.CLR
 				SignatureCall.CacheFunction<GCHeap>("IsEphemeral", Functions[1], FN_ISEPHEMERAL_OFFSET);
 				SignatureCall.CacheFunction<GCHeap>("IsGCInProgress", Functions[2], FN_ISGCINPROGRESS_OFFSET);
 				SignatureCall.CacheFunction<GCHeap>("get_GCCount", Functions[3], FN_GETGCCOUNT_OFFSET);
-
 			}
 
 			private const long FN_ISHEAPPOINTER_OFFSET  = 0x58E260;
@@ -100,8 +98,6 @@ namespace RazorSharp.CLR
 					0x48, 0x8B, 0x05, 0x59, 0xF5, 0x82, 0x00, 0x48, 0x89, 0x44, 0x24, 0x10, 0x48, 0x8B, 0x44, 0x24,
 					0x10, 0xC3
 				},
-
-
 			};
 
 		}
@@ -135,7 +131,8 @@ namespace RazorSharp.CLR
 				SignatureCall.CacheFunction<FieldDesc>("GetModule", Functions[0], FN_GETMODULE_OFFSET);
 				SignatureCall.CacheFunction<FieldDesc>("get_LoadSize", Functions[1], FN_GETLOADSIZE_OFFSET);
 				SignatureCall.CacheFunction<FieldDesc>("GetStubFieldInfo", Functions[2], FN_GETSTUBFIELDINFO_OFFSET);
-				SignatureCall.CacheFunction<FieldDesc>("get_EnclosingMethodTable", Functions[3], FN_GETMETHODTABLE_OFFSET);
+				SignatureCall.CacheFunction<FieldDesc>("get_EnclosingMethodTable", Functions[3],
+					FN_GETMETHODTABLE_OFFSET);
 
 //				SignatureCall.CacheFunction<FieldDesc>("get_MemberDef", Functions[4], FN_GETMEMBERDEF_OFFSET);
 			}
@@ -189,17 +186,18 @@ namespace RazorSharp.CLR
 		{
 			internal static void AddFunctions()
 			{
-				SignatureCall.CacheFunction<MethodDesc>("get_IsCtor", Functions[0], FN_GETISCTOR_OFFSET);
-				SignatureCall.CacheFunction<MethodDesc>("get_MemberDef", Functions[1], FN_GETMEMBERDEF_OFFSET);
+				SignatureCall.CacheFunction<MethodDesc>("get_IsConstructor", Functions[0], FN_GETISCTOR_OFFSET);
+				SignatureCall.CacheFunction<MethodDesc>("get_Token", Functions[1], FN_GETTOKEN_OFFSET);
 				SignatureCall.CacheFunction<MethodDesc>("get_IsPointingToNativeCode", Functions[2],
 					FN_GETISPOINTINGTONATIVECODE_OFFSET);
 				SignatureCall.CacheFunction<MethodDesc>("get_SizeOf", Functions[3], FN_GETSIZEOF_OFFSET);
 				SignatureCall.CacheFunction<MethodDesc>("Reset", Functions[4], FN_RESET_OFFSET);
-				SignatureCall.CacheFunction<MethodDesc>("get_EnclosingMethodTable", Functions[5], FN_GETMETHODTABLE_OFFSET);
+				SignatureCall.CacheFunction<MethodDesc>("get_EnclosingMethodTable", Functions[5],
+					FN_GETMETHODTABLE_OFFSET);
 			}
 
 			private const long FN_GETISCTOR_OFFSET                 = 0xAF920;
-			private const long FN_GETMEMBERDEF_OFFSET              = 0x12810;
+			private const long FN_GETTOKEN_OFFSET                  = 0x12810;
 			private const long FN_GETISPOINTINGTONATIVECODE_OFFSET = 0x1A6CC4;
 			private const long FN_GETSIZEOF_OFFSET                 = 0x390E0;
 			private const long FN_RESET_OFFSET                     = 0x424714;

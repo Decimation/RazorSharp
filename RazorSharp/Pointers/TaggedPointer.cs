@@ -1,24 +1,31 @@
+#region
+
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using RazorCommon;
+
+#endregion
 
 namespace RazorSharp.Pointers
 {
 
+	#region
+
 	using intptr_t = Int64;
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+	#endregion
 
 
 	// todo
 	/// <summary>
-	/// https://nikic.github.io/2012/02/02/Pointer-magic-for-efficient-dynamic-value-representations.html
+	///     https://nikic.github.io/2012/02/02/Pointer-magic-for-efficient-dynamic-value-representations.html
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public unsafe struct TaggedPointer<T>
 	{
 		/// <summary>
-		/// <c>8</c> for 64-bit
+		///     <c>8</c> for 64-bit
 		/// </summary>
 		private const int ALIGNED_TO = 8;
 
@@ -78,7 +85,7 @@ namespace RazorSharp.Pointers
 
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Pointer", "Tag");
+			ConsoleTable table = new ConsoleTable("Pointer", "Tag");
 			table.AddRow(Hex.ToHex(Pointer.Address), Tag);
 			return table.ToMarkDownString();
 		}

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.Memory;
 using RazorSharp.Utilities.Exceptions;
 
 #endregion
@@ -76,7 +77,7 @@ namespace RazorSharp.Experimental
 			Debug.Assert(refMem.Length == Unsafe.BaseInstanceSize<T>());
 
 			// Write the copied memory into unmanaged memory
-			Memory.Mem.WriteBytes(m_unmanaged, refMem);
+			Mem.WriteBytes(m_unmanaged, refMem);
 
 			// Set the reference to unmanaged memory (+IntPtr.Size to skip over the object header)
 			Unsafe.WriteReference(ref value, m_unmanaged + IntPtr.Size);

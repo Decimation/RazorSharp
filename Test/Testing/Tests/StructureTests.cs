@@ -33,7 +33,7 @@ namespace Test.Testing.Tests
 			Debug.Assert(fieldDesc.Reference.Name == fieldName);
 			Debug.Assert(fieldDesc.Reference.Size == Unsafe.SizeOf<TField>());
 			Debug.Assert(fieldDesc.Reference.EnclosingType == typeof(TType));
-			Debug.Assert(fieldDesc.Reference.MemberDef == fieldActual.MetadataToken);
+			Debug.Assert(fieldDesc.Reference.Token == fieldActual.MetadataToken);
 			Debug.Assert(fieldDesc.Reference.EnclosingMethodTable == Runtime.MethodTableOf<TType>());
 		}
 
@@ -62,8 +62,8 @@ namespace Test.Testing.Tests
 
 			Debug.Assert(methodDesc.Reference.Info == methodInfoActual);
 			Debug.Assert(methodDesc.Reference.EnclosingMethodTable == Runtime.MethodTableOf<TType>());
-			Debug.Assert(methodDesc.Reference.MemberDef == methodInfoActual.MetadataToken);
-			Debug.Assert(!methodDesc.Reference.IsCtor);
+			Debug.Assert(methodDesc.Reference.Token == methodInfoActual.MetadataToken);
+			Debug.Assert(!methodDesc.Reference.IsConstructor);
 
 		}
 	}

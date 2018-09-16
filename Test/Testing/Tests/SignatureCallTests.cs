@@ -14,8 +14,8 @@ namespace Test.Testing.Tests
 		{
 			var md = Runtime.GetMethodDesc<Dummy>("doSomething");
 
-			bool isCtor = md.Reference.IsCtor;
-			var memberDef = md.Reference.MemberDef;
+			bool isCtor = md.Reference.IsConstructor;
+			var memberDef = md.Reference.Token;
 			var isPointingToNativeCode = md.Reference.IsPointingToNativeCode;
 			var size = md.Reference.SizeOf;
 			var mt = md.Reference.EnclosingMethodTable;
@@ -31,7 +31,7 @@ namespace Test.Testing.Tests
 			var size = fd.Reference.Size;
 			var stub = fd.Reference.GetStubFieldInfo();
 			var mt = fd.Reference.EnclosingMethodTable;
-			var memberDef = fd.Reference.MemberDef;
+			var memberDef = fd.Reference.Token;
 		}
 
 		[Test]

@@ -30,7 +30,8 @@ namespace RazorSharp.Pointers
 	///     <para>Can be represented as a native pointer in memory. </para>
 	///     <para>Has identical or better performance than native pointers.</para>
 	///     <para>
-	///         Supports pointer arithmetic, reading/writing different types other than type <typeparamref name="T" />, and bitwise operations.
+	///         Supports pointer arithmetic, reading/writing different types other than type <typeparamref name="T" />, and
+	///         bitwise operations.
 	///     </para>
 	///     <list type="bullet">
 	///         <item>
@@ -190,8 +191,8 @@ namespace RazorSharp.Pointers
 
 		public bool SequenceEqual(IEnumerable<T> enumerable)
 		{
-			var enumerator = enumerable.GetEnumerator();
-			int i = 0;
+			IEnumerator<T> enumerator = enumerable.GetEnumerator();
+			int            i          = 0;
 			while (enumerator.MoveNext()) {
 				if (!enumerator.Current.Equals(this[i++])) {
 					enumerator.Dispose();
@@ -372,6 +373,16 @@ namespace RazorSharp.Pointers
 			return (long) m_pValue;
 		}
 
+		public ulong ToUInt64()
+		{
+			return (ulong) m_pValue;
+		}
+
+		public uint ToUInt32()
+		{
+			return (uint) m_pValue;
+		}
+
 		#endregion
 
 		#region Operators
@@ -404,6 +415,11 @@ namespace RazorSharp.Pointers
 			return new Pointer<T>(p.ToPointer());
 		}
 
+		public static implicit operator Pointer<T>(long l)
+		{
+			return new Pointer<T>(l);
+		}
+
 		public static explicit operator void*(Pointer<T> ptr)
 		{
 			return ptr.ToPointer();
@@ -412,11 +428,6 @@ namespace RazorSharp.Pointers
 		public static explicit operator long(Pointer<T> ptr)
 		{
 			return ptr.ToInt64();
-		}
-
-		public static explicit operator Pointer<T>(long l)
-		{
-			return new Pointer<T>(l);
 		}
 
 		#endregion

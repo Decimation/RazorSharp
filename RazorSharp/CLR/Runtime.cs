@@ -2,12 +2,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
 using RazorCommon;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.HeapObjects;
@@ -65,15 +62,16 @@ namespace RazorSharp.CLR
 		public static readonly int OffsetToArrayData = sizeof(MethodTable*) + sizeof(uint) + sizeof(uint);
 
 		/// <summary>
-		/// These specific <see cref="BindingFlags"/> are used because they correspond with the metadata and structures
-		/// in CLR structures such as <see cref="MethodTable"/>
+		///     These specific <see cref="BindingFlags" /> are used because they correspond with the metadata and structures
+		///     in CLR structures such as <see cref="MethodTable" />
 		/// </summary>
 		private const BindingFlags DefaultFlags =
 			BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
 
 		/// <summary>
-		/// The offset, in bytes, of an array's actual <see cref="MethodTable"/> pointer, relative to the address pointed to by
-		/// an array type's <see cref="RuntimeTypeHandle.Value"/>
+		///     The offset, in bytes, of an array's actual <see cref="MethodTable" /> pointer, relative to the address pointed to
+		///     by
+		///     an array type's <see cref="RuntimeTypeHandle.Value" />
 		/// </summary>
 		private const int ARRAY_MT_PTR_OFFSET = 6;
 
@@ -138,8 +136,8 @@ namespace RazorSharp.CLR
 			}
 
 			// We need to get the heap pointer manually because of type constraints
-			IntPtr ptr = *(IntPtr*) Unsafe.AddressOf(ref t);
-			MethodTable* mt = *(MethodTable**) ptr;
+			IntPtr       ptr = *(IntPtr*) Unsafe.AddressOf(ref t);
+			MethodTable* mt  = *(MethodTable**) ptr;
 
 
 			return mt;
@@ -154,7 +152,6 @@ namespace RazorSharp.CLR
 
 		/// <summary>
 		///     Returns a pointer to a type's TypeHandle as a <see cref="MethodTable" />
-		///
 		/// </summary>
 		/// <typeparam name="T">Type to return the corresponding <see cref="MethodTable" /> for.</typeparam>
 		/// <returns>A <see cref="Pointer{T}" /> to type <typeparamref name="T" />'s <see cref="MethodTable" /></returns>
@@ -165,12 +162,11 @@ namespace RazorSharp.CLR
 		}
 
 
-
 		/// <summary>
-		/// Returns a pointer to a type's TypeHandle as a <see cref="MethodTable" />
+		///     Returns a pointer to a type's TypeHandle as a <see cref="MethodTable" />
 		/// </summary>
 		/// <param name="t">Type to return the corresponding <see cref="MethodTable" /> for.</param>
-		/// <returns>A <see cref="Pointer{T}" /> to type <paramref name="t"/>'s <see cref="MethodTable" /></returns>
+		/// <returns>A <see cref="Pointer{T}" /> to type <paramref name="t" />'s <see cref="MethodTable" /></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<MethodTable> MethodTableOf(Type t)
 		{
@@ -185,7 +181,7 @@ namespace RazorSharp.CLR
 			// + ~10ns
 //			Trace.Assert(!t.IsArray, $"{t.Name}: Array MethodTables are not valid TypeHandles.");
 
-			var typeHandle = t.TypeHandle.Value;
+			IntPtr typeHandle = t.TypeHandle.Value;
 
 
 			// Special case:
@@ -212,6 +208,20 @@ namespace RazorSharp.CLR
 
 
 		#region FieldDesc
+
+		public static Pointer<FieldDesc>[] GetFieldDescs<T>(ref T t)
+		{
+			Pointer<MethodTable> mt   = ReadMethodTable(ref t);
+			int                  len  = mt.Reference.FieldDescListLength;
+			Pointer<FieldDesc>[] lpFd = new Pointer<FieldDesc>[len];
+
+			for (int i = 0; i < len; i++) {
+				lpFd[i] = &mt.Reference.FieldDescList[i];
+			}
+
+			return lpFd;
+		}
+
 
 		/// <summary>
 		///     Gets all the <see cref="FieldDesc" />s from <see cref="MethodTable.FieldDescList" />
@@ -296,12 +306,14 @@ namespace RazorSharp.CLR
 
 		public static void ReplaceMethod(Type target, string targetName, Type src, string srcName)
 		{
-			SetFunctionPointer(GetMethod(target, targetName), GetMethod(src, srcName).MethodHandle.GetFunctionPointer());
+			SetFunctionPointer(GetMethod(target, targetName),
+				GetMethod(src, srcName).MethodHandle.GetFunctionPointer());
 		}
 
 		public static void ReplaceMethod<TTarget, TSource>(string target, string src)
 		{
-			SetFunctionPointer(GetMethod(typeof(TTarget), target), GetMethod(typeof(TSource), src).MethodHandle.GetFunctionPointer());
+			SetFunctionPointer(GetMethod(typeof(TTarget), target),
+				GetMethod(typeof(TSource), src).MethodHandle.GetFunctionPointer());
 		}
 
 		public static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)

@@ -1,10 +1,15 @@
+#region
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using RazorSharp.Pointers;
 
+#endregion
+
 namespace RazorSharp.Memory
 {
+
 	// todo: WIP
 	public class AllocCollection<T> : IDisposable, IEnumerable<T>
 	{
@@ -14,13 +19,9 @@ namespace RazorSharp.Memory
 
 		public int Size => m_cb;
 
-		public int Count {
-			get { return m_cb / m_elemSize; }
-		}
+		public int Count => m_cb / m_elemSize;
 
-		private Pointer<T> AllocEnd {
-			get { return m_pAlloc + m_cb; }
-		}
+		private Pointer<T> AllocEnd => m_pAlloc + m_cb;
 
 		public int ElementSize => m_elemSize;
 

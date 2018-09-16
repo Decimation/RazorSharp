@@ -79,8 +79,6 @@ namespace RazorSharp.CLR.Structures
 
 		#region Accessors
 
-
-
 		static MethodDesc()
 		{
 			SignatureCall.DynamicBind<MethodDesc>();
@@ -94,7 +92,7 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     The corresponding <see cref="MethodInfo" /> of this <see cref="MethodDesc" />
 		/// </summary>
-		public MethodInfo Info => (MethodInfo) EnclosingType.Module.ResolveMethod(MemberDef);
+		public MethodInfo Info => (MethodInfo) EnclosingType.Module.ResolveMethod(Token);
 
 		/// <summary>
 		///     Function pointer
@@ -114,7 +112,7 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public bool IsCtor {
+		public bool IsConstructor {
 			[CLRSigcall] get => throw new SigcallException();
 		}
 
@@ -125,7 +123,7 @@ namespace RazorSharp.CLR.Structures
 		///         <para>Address-sensitive</para>
 		///     </remarks>
 		/// </summary>
-		public int MemberDef {
+		public int Token {
 			[CLRSigcall] get => throw new SigcallException();
 		}
 
@@ -273,7 +271,6 @@ namespace RazorSharp.CLR.Structures
 		}
 
 
-
 		public override string ToString()
 		{
 			ConsoleTable table = new ConsoleTable("Field", "Value");
@@ -290,7 +287,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Attributes", Attributes);
 
 			table.AddRow("Is pointing to native code", IsPointingToNativeCode.Prettify());
-			table.AddRow("Is constructor", IsCtor.Prettify());
+			table.AddRow("Is constructor", IsConstructor.Prettify());
 			table.AddRow("Has this", HasThis.Prettify());
 			table.AddRow("MethodDescChunk", MethodDescChunk.ToString("P"));
 

@@ -1,9 +1,6 @@
 #region
 
 using System;
-using System.Diagnostics;
-using System.Runtime;
-using System.Runtime.InteropServices;
 using RazorInvoke;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
@@ -63,7 +60,7 @@ namespace RazorSharp.CLR
 		public static IntPtr LowestAddress => g_lowest_address;
 
 		/// <summary>
-		/// The highest address of the global GC heap.
+		///     The highest address of the global GC heap.
 		/// </summary>
 		public static IntPtr HighestAddress => g_highest_address;
 
@@ -105,7 +102,7 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <param name="obj">Pointer to an object in the GC heap</param>
 		/// <param name="smallHeapOnly">Whether to include small GC heaps only</param>
-		/// <returns><c>true</c> if <paramref name="obj"/> is a heap pointer; <c>false</c> otherwise</returns>
+		/// <returns><c>true</c> if <paramref name="obj" /> is a heap pointer; <c>false</c> otherwise</returns>
 		[CLRSigcall]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
@@ -141,11 +138,11 @@ namespace RazorSharp.CLR
 		}
 
 		/// <summary>
-		/// Returns true if the address of <paramref name="t"/> is in the GC heap.
+		///     Returns true if the address of <paramref name="t" /> is in the GC heap.
 		/// </summary>
 		/// <param name="t">Reference to check</param>
-		/// <typeparam name="T">Type of <paramref name="t"/></typeparam>
-		/// <returns><c>true</c> if the address of <paramref name="t"/> is in the GC heap; <c>false</c> otherwise</returns>
+		/// <typeparam name="T">Type of <paramref name="t" /></typeparam>
+		/// <returns><c>true</c> if the address of <paramref name="t" /> is in the GC heap; <c>false</c> otherwise</returns>
 		public static bool IsInGCHeap<T>(ref T t)
 		{
 			IntPtr addr = Unsafe.AddressOf(ref t);
@@ -153,10 +150,10 @@ namespace RazorSharp.CLR
 		}
 
 		/// <summary>
-		/// Returns <c>true</c> if <paramref name="p"/> is in the GC heap.
+		///     Returns <c>true</c> if <paramref name="p" /> is in the GC heap.
 		/// </summary>
 		/// <param name="p">Pointer</param>
-		/// <returns><c>true</c> if <paramref name="p"/> is in the GC heap; <c>false</c> otherwise</returns>
+		/// <returns><c>true</c> if <paramref name="p" /> is in the GC heap; <c>false</c> otherwise</returns>
 		public static bool IsInGCHeap(IntPtr p)
 		{
 			return IsAddressInRange(g_highest_address, p, g_lowest_address);
@@ -168,7 +165,6 @@ namespace RazorSharp.CLR
 		{
 			throw new SigcallException();
 		}
-
 
 
 		//constants for the flags parameter to the gc call back
@@ -192,8 +188,10 @@ namespace RazorSharp.CLR
 			/**
 			 * Circumvent ASLR
 			 */
+#if !UNIT_TEST
+			Trace.Assert(!GCSettings.IsServerGC, "Server GC");
+#endif
 
-			Trace.Assert(!GCSettings.IsServerGC);
 
 //			const long g_pStringClassOffset    = 32;
 			const long g_pGCHeapOffset         = 48;

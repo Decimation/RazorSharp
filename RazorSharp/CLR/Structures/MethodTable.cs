@@ -94,7 +94,7 @@ namespace RazorSharp.CLR.Structures
 		///         <c>-1</c> if <c>!</c><see cref="HasComponentSize" />, component size otherwise
 		///     </returns>
 		/// </summary>
-		public short ComponentSize => HasComponentSize ? (short) m_dwFlags.ComponentSize : (short) -1;
+		public short ComponentSize => HasComponentSize ? (short) m_dwFlags.ComponentSize : (short) 0;
 
 		/// <summary>
 		///     The base size of this class when allocated on the heap. Note that for value types
@@ -116,10 +116,9 @@ namespace RazorSharp.CLR.Structures
 
 		/// <summary>
 		///     The number of interfaces this type implements
-		/// <remarks>
-		/// <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>Number of IFaces in IFaceMap</c> value.</para>
-		///
-		/// </remarks>
+		///     <remarks>
+		///         <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>Number of IFaces in IFaceMap</c> value.</para>
+		///     </remarks>
 		/// </summary>
 		public WORD NumInterfaces => m_wNumInterfaces;
 
@@ -144,6 +143,7 @@ namespace RazorSharp.CLR.Structures
 
 		// todo
 		internal void* Module => m_pLoaderModule;
+
 
 		/// <summary>
 		///     <para>The corresponding <see cref="EEClass" /> to this <see cref="MethodTable" />.</para>
@@ -208,12 +208,11 @@ namespace RazorSharp.CLR.Structures
 
 
 		/// <summary>
-		/// How many bytes to subtract from <see cref="m_pCanonMT"/> if <see cref="UnionType"/> is
-		/// <see cref="LowBits.MethodTable"/>
-		///
-		/// <remarks>
-		/// <para>Source: /src/vm/methodtable.inl: 1180</para>
-		/// </remarks>
+		///     How many bytes to subtract from <see cref="m_pCanonMT" /> if <see cref="UnionType" /> is
+		///     <see cref="LowBits.MethodTable" />
+		///     <remarks>
+		///         <para>Source: /src/vm/methodtable.inl: 1180</para>
+		///     </remarks>
 		/// </summary>
 		private const int CANON_MT_UNION_MT_OFFSET = 2;
 
@@ -236,20 +235,22 @@ namespace RazorSharp.CLR.Structures
 		public bool IsStringOrArray  => HasComponentSize;
 		public bool IsBlittable      => EEClass.Reference.IsBlittable;
 		public bool IsString         => HasComponentSize && !IsArray;
+		public bool ContainsPointers => Flags.HasFlag(MethodTableFlags.ContainsPointers);
 
 		/// <summary>
-		/// Metadata token
-		/// <remarks>
-		/// <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>"mdToken"</c> value in hexadecimal format.</para>
-		/// </remarks>
+		///     Metadata token
+		///     <remarks>
+		///         <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>"mdToken"</c> value in hexadecimal format.</para>
+		///     </remarks>
 		/// </summary>
 		public int MDToken => Constants.TokenFromRid(Token, CorTokenType.mdtTypeDef);
+
 		// internal name: GetTypeDefRid
 
 		// todo: Rename MDToken to MemberDef? or vise versa
 
 		/// <summary>
-		/// <para>Corresponding <see cref="Type"/> of this <see cref="MethodTable"/></para>
+		///     <para>Corresponding <see cref="Type" /> of this <see cref="MethodTable" /></para>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
@@ -318,13 +319,13 @@ namespace RazorSharp.CLR.Structures
 		[FieldOffset(56)] private readonly void*        m_pMultipurposeSlot2;
 
 		/// <summary>
-		/// Bit mask for <see cref="UnionType"/>
+		///     Bit mask for <see cref="UnionType" />
 		/// </summary>
 		private const long UNION_MASK = 3;
 
 		/// <summary>
-		/// Describes what the union at offset <c>40</c> (<see cref="m_pEEClass"/>, <see cref="m_pCanonMT"/>)
-		/// contains.
+		///     Describes what the union at offset <c>40</c> (<see cref="m_pEEClass" />, <see cref="m_pCanonMT" />)
+		///     contains.
 		/// </summary>
 		private LowBits UnionType {
 			get {

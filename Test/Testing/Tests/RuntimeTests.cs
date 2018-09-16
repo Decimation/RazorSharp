@@ -140,7 +140,7 @@ namespace Test.Testing.Tests
 			Debug.Assert(Unsafe.HeapSize(in list) == 40);
 
 //			Debug.Assert(mt == (MethodTable*) 0x00007ff819d105d8);
-			Debug.Assert(mt.Reference.ComponentSize == -1);
+			Debug.Assert(mt.Reference.ComponentSize == 0);
 			Debug.Assert(mt.Reference.NumInterfaces == 8);
 
 			// 0:007> !DumpClass /d 00007ff8196d88e0
@@ -297,10 +297,10 @@ namespace Test.Testing.Tests
 		public void TestPoint()
 		{
 			Pointer<FieldDesc> xfd = Runtime.GetFieldDesc<Point>("X", SpecialFieldTypes.AutoProperty);
-			Debug.Assert(xfd.Reference.MemberDef == xfd.Reference.Info.MetadataToken);
+			Debug.Assert(xfd.Reference.Token == xfd.Reference.Info.MetadataToken);
 
 			var ffd = Runtime.GetFieldDesc<Point>("FixedBuffer");
-			Debug.Assert(ffd.Reference.MemberDef == ffd.Reference.Info.MetadataToken);
+			Debug.Assert(ffd.Reference.Token == ffd.Reference.Info.MetadataToken);
 		}
 
 		[Test]
@@ -335,7 +335,7 @@ namespace Test.Testing.Tests
 
 			//Debug.Assert(mt.Reference.Module==(void*) 0x00007ff7bdb34118);
 			Debug.Assert(mt.Reference.BaseSize == 0x80);
-			Debug.Assert(mt.Reference.ComponentSize == -1);
+			Debug.Assert(mt.Reference.ComponentSize == 0);
 			Debug.Assert(mt.Reference.NumInterfaces == 0);
 
 

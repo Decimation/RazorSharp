@@ -82,6 +82,7 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 				char* __this = (char*) Unsafe.AddressOf(ref this);
 				__this += RuntimeHelpers.OffsetToStringData / sizeof(char);
 				return new string(__this);
+
 				// get { return ref System.Runtime.CompilerServices.Unsafe.AsRef<string>(Unsafe.AddressOf(ref this).ToPointer()); }
 			}
 		}

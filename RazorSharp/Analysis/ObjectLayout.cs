@@ -154,11 +154,11 @@ namespace RazorSharp.Analysis
 		private byte[] TryGetObjHeaderAsBytes()
 		{
 			if (m_bIsArray) {
-				return ReadBytes(m_pAddr, -IntPtr.Size, size: sizeof(uint));
+				return ReadBytes(m_pAddr, -IntPtr.Size, sizeof(uint));
 			}
 
 			// Only read the second DWORD; the first DWORD is alignment padding
-			byte[] mem = typeof(T).IsValueType ? null : ReadBytes(m_pAddr, -IntPtr.Size, size: sizeof(uint));
+			byte[] mem = typeof(T).IsValueType ? null : ReadBytes(m_pAddr, -IntPtr.Size, sizeof(uint));
 
 
 			return mem;

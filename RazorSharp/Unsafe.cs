@@ -2,12 +2,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
-using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -248,7 +246,7 @@ namespace RazorSharp
 		/// <remarks>
 		///     Returned from <see cref="EEClassLayoutInfo.ManagedSize" />
 		/// </remarks>
-		/// <returns>Managed size if the type has an <see cref="EEClassLayoutInfo"/>; <c>-1</c> otherwise</returns>
+		/// <returns>Managed size if the type has an <see cref="EEClassLayoutInfo" />; <c>-1</c> otherwise</returns>
 		public static int ManagedSizeOf<T>()
 		{
 			// No layout
@@ -440,7 +438,9 @@ namespace RazorSharp
 		/// <remarks>
 		///     <para>Returned from <see cref="MethodTable.BaseSize" /></para>
 		/// </remarks>
-		/// <returns><see cref="MethodTable.BaseSize"/></returns>
+		/// <returns>
+		///     <see cref="MethodTable.BaseSize" />
+		/// </returns>
 		public static int BaseInstanceSize<T>() where T : class
 		{
 			return (int) Runtime.MethodTableOf<T>().Reference.BaseSize;
@@ -459,14 +459,14 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		/// Copies the memory of <paramref name="t"/> into a <see cref="Byte"/> array.
-		///<remarks>
-		/// This includes the <see cref="MethodTable"/> pointer and <see cref="ObjHeader"/>
-		/// </remarks>
+		///     Copies the memory of <paramref name="t" /> into a <see cref="Byte" /> array.
+		///     <remarks>
+		///         This includes the <see cref="MethodTable" /> pointer and <see cref="ObjHeader" />
+		///     </remarks>
 		/// </summary>
 		/// <param name="t">Value to copy the memory of</param>
 		/// <typeparam name="T">Reference type</typeparam>
-		/// <returns>An array of <see cref="Byte"/>s containing the raw memory of <paramref name="t"/></returns>
+		/// <returns>An array of <see cref="Byte" />s containing the raw memory of <paramref name="t" /></returns>
 		public static byte[] MemoryOf<T>(ref T t) where T : class
 		{
 			int    heapSize = HeapSize(in t);
@@ -478,11 +478,11 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		/// Copies the memory of <paramref name="t"/> into a <see cref="Byte"/> array.
+		///     Copies the memory of <paramref name="t" /> into a <see cref="Byte" /> array.
 		/// </summary>
 		/// <param name="t">Value to copy the memory of</param>
 		/// <typeparam name="T">Value type</typeparam>
-		/// <returns>An array of <see cref="Byte"/>s containing the raw memory of <paramref name="t"/></returns>
+		/// <returns>An array of <see cref="Byte" />s containing the raw memory of <paramref name="t" /></returns>
 		public static byte[] MemoryOfVal<T>(ref T t) where T : struct
 		{
 			int    size  = SizeOf<T>();

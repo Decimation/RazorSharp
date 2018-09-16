@@ -11,6 +11,8 @@ namespace Test.Testing.Tests
 	[TestFixture]
 	public class AddrInRangeTests
 	{
+
+
 		[Test]
 		public void Test()
 		{
@@ -28,7 +30,6 @@ namespace Test.Testing.Tests
 
 			for (int i = 0; i < 5; i++) {
 				Debug.Assert(InRange(rgPtr.Address));
-
 				rgPtr++;
 			}
 

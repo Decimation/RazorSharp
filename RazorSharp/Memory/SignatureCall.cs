@@ -6,9 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using RazorCommon;
 using RazorSharp.CLR;
-using RazorSharp.Pointers;
 
 #endregion
 
@@ -229,7 +227,6 @@ namespace RazorSharp.Memory
 
 		public static void CacheFunction(MethodInfo mi, byte[] rgBytes, long offsetGuess = 0)
 		{
-
 			AddToMap(mi, rgBytes, offsetGuess);
 		}
 

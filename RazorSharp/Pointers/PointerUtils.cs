@@ -93,7 +93,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Returns the element index of a pointer relative to <paramref name="orig"/>
+		///     Returns the element index of a pointer relative to <paramref name="orig" />
 		/// </summary>
 		/// <param name="orig">Origin pointer (low address)</param>
 		/// <param name="current">Current pointer (high address)</param>
@@ -101,7 +101,7 @@ namespace RazorSharp.Pointers
 		/// <returns>The index</returns>
 		public static int OffsetIndex<TElement>(IntPtr orig, IntPtr current)
 		{
-			var byteDelta = current.ToInt64() - orig.ToInt64();
+			long byteDelta = current.ToInt64() - orig.ToInt64();
 			return (int) byteDelta / Unsafe.SizeOf<TElement>();
 		}
 	}

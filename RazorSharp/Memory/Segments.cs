@@ -87,7 +87,8 @@ namespace RazorSharp.Memory
 		{
 			ImageSectionInfo[] segments = GetSegments(moduleName);
 			foreach (ImageSectionInfo v in segments) {
-				ConsoleTable table = new ConsoleTable("Number", "Name", "Size", "Address", "End Address", "Characteristics");
+				ConsoleTable table =
+					new ConsoleTable("Number", "Name", "Size", "Address", "End Address", "Characteristics");
 				table.AddRow(v.SectionNumber, v.SectionName,
 					string.Format("{0} ({1} K)", v.SectionSize, v.SectionSize / Mem.BytesInKilobyte),
 					Hex.ToHex(v.SectionAddress),

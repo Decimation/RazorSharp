@@ -114,6 +114,12 @@ namespace RazorSharp.CLR
 			throw new Exception($"Size for CorElementType {t} is unknown");
 		}
 
+		internal static bool IsPrimitive(CorElementType cet)
+		{
+			return cet >= CorElementType.Boolean && cet <= CorElementType.R8
+			       || cet == CorElementType.I || cet == CorElementType.U
+			       || cet == CorElementType.Ptr || cet == CorElementType.FnPtr;
+		}
 
 		private static CorElementType TypeToCorType(Type t)
 		{
@@ -269,6 +275,7 @@ namespace RazorSharp.CLR
 			0x72000000, // Leave this on the high end value. This does not correspond to metadata table
 	}
 
+
 	/// <summary>
 	///     <para>Sources:</para>
 	///     <list type="bullet">
@@ -292,7 +299,7 @@ namespace RazorSharp.CLR
 	///         Use with <see cref="FieldDesc.CorType" />
 	///     </remarks>
 	/// </summary>
-	public enum CorElementType : int
+	public enum CorElementType
 	{
 		End  = 0x00,
 		Void = 0x01,
@@ -874,7 +881,8 @@ namespace RazorSharp.CLR
 
 	}
 
-	public enum TokenType : uint {
+	public enum TokenType : uint
+	{
 		Module                 = 0x00000000,
 		TypeRef                = 0x01000000,
 		TypeDef                = 0x02000000,

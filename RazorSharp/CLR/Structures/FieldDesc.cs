@@ -79,7 +79,7 @@ namespace RazorSharp.CLR.Structures
 		#region Accessors
 
 		/// <summary>
-		///     Unprocessed <see cref="MemberDef" />
+		///     Unprocessed <see cref="Token" />
 		/// </summary>
 		private int MB => (int) (m_dword1 & 0xFFFFFF);
 
@@ -90,8 +90,7 @@ namespace RazorSharp.CLR.Structures
 		///         <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Field"</c> column in hexadecimal format.</para>
 		///     </remarks>
 		/// </summary>
-		public int MemberDef {
-			//[CLRSigcall] get => throw new NotTranspiledException();
+		public int Token {
 			get {
 				// Check if this FieldDesc is using the packed mb layout
 				if (!RequiresFullMBValue) {
@@ -110,8 +109,15 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
 
+		public bool IsPublic            => Protection.HasFlag(ProtectionLevel.Public);
+		public bool IsPrivate           => Protection.HasFlag(ProtectionLevel.Private);
+		public bool IsInternal          => Protection.HasFlag(ProtectionLevel.Internal);
+		public bool IsPrivateProtected  => Protection.HasFlag(ProtectionLevel.PrivateProtected);
+		public bool IsProtectedInternal => Protection.HasFlag(ProtectionLevel.ProtectedInternal);
 
-		private int TypeInt => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
+		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
+		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
+
 
 		/// <summary>
 		///     Field type
@@ -133,7 +139,6 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		public bool IsRVA => ReadBit(m_dword1, 26);
 
-		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
 
 		/// <summary>
 		///     Access level of the field
@@ -166,7 +171,7 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     The corresponding <see cref="FieldInfo" /> of this <see cref="FieldDesc" />
 		/// </summary>
-		public FieldInfo Info => EnclosingType.Module.ResolveField(MemberDef);
+		public FieldInfo Info => EnclosingType.Module.ResolveField(Token);
 
 		/// <summary>
 		///     Name of this field
@@ -193,7 +198,7 @@ namespace RazorSharp.CLR.Structures
 		public Type EnclosingType => Runtime.MethodTableToType(EnclosingMethodTable);
 
 		/// <summary>
-		/// <see cref="MethodTable"/> of this field's type
+		///     <see cref="MethodTable" /> of this field's type
 		/// </summary>
 		public Pointer<MethodTable> TypeMethodTable => Runtime.MethodTableOf(Info.FieldType);
 
@@ -299,7 +304,7 @@ namespace RazorSharp.CLR.Structures
 
 			// Unsigned 1
 			table.AddRow("MB", MB);
-			table.AddRow("MemberDef", MemberDef);
+			table.AddRow("MemberDef", Token);
 
 
 			table.AddRow("Offset", Offset);
