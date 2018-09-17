@@ -71,7 +71,6 @@ namespace RazorSharp
 	{
 		internal const int InvalidValue = -1;
 
-		static Unsafe() { }
 
 		#region OffsetOf
 
@@ -135,8 +134,6 @@ namespace RazorSharp
 		#endregion
 
 		#region Address
-
-
 
 		/// <summary>
 		///     Returns the address of a field in the specified type.

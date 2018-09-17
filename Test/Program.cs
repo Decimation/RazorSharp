@@ -170,112 +170,7 @@ namespace Test
 			Console.WriteLine(Mem.Read<byte>(clrMethod.IL.Address, 1).ToString("X"));
 		}
 
-		interface ICLRDataTarget
-		{
-			int GetCurrentThreadID(out uint threadID);
-			int GetImageBase(string imagePath, out ulong baseAddress);
-			int GetMachineType(out ulong machineType);
-			int GetPointerSize(out ulong pointerSize);
-			int GetThreadContext(uint threadID, uint contextFlags, uint contextSize, out byte context);
-			int GetTLSValue(uint threadID, uint index, out ulong value);
-			int ReadVirtual(ulong address, out byte buffer, uint bytesRequested, out uint bytesRead);
-			int Request(uint reqCode, uint inBufferSize, ref byte inBuffer, uint outBufferSize, out byte outBuffer);
-			int SetThreadContext(uint threadID, uint contextSize, ref byte context);
-			int SetTLSValue(uint threadID, uint index, ulong value);
-			int WriteVirtual(ulong address, ref byte buffer, uint bytesRequested, out uint bytesWritten);
-		}
 
-		internal struct CodeHeaderData
-		{
-			public ulong GCInfo;
-			public uint  JITType;
-			public ulong MethodDescPtr;
-			public ulong MethodStart;
-			public uint  MethodSize;
-			public ulong ColdRegionStart;
-			public uint  ColdRegionSize;
-			public uint  HotRegionSize;
-		}
-
-		internal struct V45MethodDescData
-		{
-			private uint  _bHasNativeCode;
-			private uint  _bIsDynamic;
-			private short _wSlotNumber;
-
-			internal ulong NativeCodeAddr;
-
-			// Useful for breaking when a method is jitted.
-			private ulong _addressOfNativeCodeSlot;
-
-			internal ulong MethodDescPtr;
-			internal ulong MethodTablePtr;
-			internal ulong ModulePtr;
-
-			internal uint  MDToken;
-			public   ulong GCInfo;
-			private  ulong _GCStressCodeCopy;
-
-			// This is only valid if bIsDynamic is true
-			private ulong _managedDynamicMethodObject;
-
-			private ulong _requestedIP;
-
-			// Gives info for the single currently active version of a method
-			private V45ReJitData _rejitDataCurrent;
-
-			// Gives info corresponding to requestedIP (for !ip2md)
-			private V45ReJitData _rejitDataRequested;
-
-			// Total number of rejit versions that have been jitted
-			private uint _cJittedRejitVersions;
-		}
-
-		internal struct V45ReJitData
-		{
-			private ulong _rejitID;
-			private uint  _flags;
-			private ulong _nativeCodeAddr;
-		}
-
-
-		[ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("436f00f2-b42a-4b9f-870c-e73db66ae930")]
-		internal interface ISOSDac
-		{
-			[PreserveSig]
-			int GetMethodDescData(ulong methodDesc, ulong ip, out V45MethodDescData data, uint cRevertedRejitVersions,
-				V45ReJitData[] rgRevertedRejitData, out ulong pcNeededRevertedRejitData);
-		}
-
-
-		static void threads()
-		{
-			foreach (var thread in GetRuntime().Threads) {
-				Console.WriteLine("{0} [{1} {2}]", Hex.ToHex(thread.Address), Hex.ToHex(thread.StackBase),
-					Hex.ToHex(thread.StackLimit));
-
-				foreach (var o in thread.EnumerateStackObjects()) {
-					Console.WriteLine(o);
-				}
-
-				foreach (var stackFrame in thread.EnumerateStackTrace()) {
-					Console.WriteLine(stackFrame.ModuleName);
-				}
-			}
-		}
-
-		static void regions()
-		{
-			var table = new ConsoleTable("Address", "Size", "Type", "Segment");
-
-			foreach (var region in GetRuntime().EnumerateMemoryRegions()) {
-				table.AddRow(Hex.ToHex(region.Address), region.Size, region.Type,
-					region.Type == ClrMemoryRegionType.GCSegment ? region.GCSegmentType.ToString() : "-");
-			}
-
-
-			Console.WriteLine(table.ToMarkDownString());
-		}
 
 
 		static ClrRuntime GetRuntime()
@@ -396,20 +291,6 @@ namespace Test
 			{
 				return String.Format("x = {0}, y = {1}, String = {2}", m_fX, m_fY, String);
 			}
-		}
-
-
-		private static long ReadBitsAsInt64(ulong u, int bitIndex, int bits)
-		{
-			long value = 0;
-
-			// Calculate a bitmask of the desired length
-			long mask = 0;
-			for (int i = 0; i < bits; i++)
-				mask |= 1 << i;
-
-			value |= ((uint) u & mask) << bitIndex;
-			return value;
 		}
 
 

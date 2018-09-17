@@ -1,19 +1,23 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
-using NUnit.Framework;
 using Microsoft.Diagnostics.Runtime;
+using NUnit.Framework;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
-using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using Test.Testing.Types;
 using Unsafe = RazorSharp.Unsafe;
+
+#endregion
 
 namespace Test.Testing.Tests
 {
@@ -22,7 +26,7 @@ namespace Test.Testing.Tests
 // @formatter:on — enable formatter after this line
 
 	/// <summary>
-	/// Compares ClrMD with RazorSharp
+	///     Compares ClrMD with RazorSharp
 	/// </summary>
 	[TestFixture]
 	public unsafe class ClrRuntimeTests
@@ -33,15 +37,25 @@ namespace Test.Testing.Tests
 
 		private ClrRuntime get()
 		{
-			var dataTarget =
+			DataTarget dataTarget =
 				DataTarget.AttachToProcess(Process.GetCurrentProcess().Id, UInt32.MaxValue, AttachFlag.Passive);
 			return dataTarget.ClrVersions.Single().CreateRuntime();
 		}
+
+		#region Tests
 
 		[SetUp]
 		public void Setup()
 		{
 			m_runtime = get();
+		}
+
+		[Test]
+		[Category(VALUE_TYPE_CATEGORY)]
+		public void Test_Point()
+		{
+			Point p = new Point();
+			Compare(ref p);
 		}
 
 		[Test]
@@ -76,13 +90,14 @@ namespace Test.Testing.Tests
 			Compare(ref s);
 		}
 
+		#endregion
 
 		#region Util
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private ulong GetDataAddr<T>(ref T t)
 		{
-			var addr = Unsafe.AddressOf(ref t);
+			IntPtr addr = Unsafe.AddressOf(ref t);
 			if (!typeof(T).IsValueType) {
 				addr = *(IntPtr*) addr;
 			}
@@ -113,7 +128,7 @@ namespace Test.Testing.Tests
 
 		private void WritePass(params string[] msgs)
 		{
-			foreach (var v in msgs) {
+			foreach (string v in msgs) {
 				WriteLine("\t\t-> {0} {1}", v, StringUtils.Check);
 			}
 		}
@@ -132,57 +147,60 @@ namespace Test.Testing.Tests
 
 			WriteLine("-> Comparing fields");
 			CompareFields(ref t);
-			WriteLine("-> Field comparison passed\n");
+			WriteLine("-> Fields comparison passed\n");
 
-
-//			CompareMethods(ref t);
+			WriteLine("-> Comparing methods");
+			CompareMethods(ref t);
+			WriteLine("-> Methods comparison massed");
 		}
 
 
 		// todo
 		public void CompareMethods<T>(ref T t)
 		{
-			var methodDescs = Runtime.GetMethodDescs<T>();
+			Pointer<MethodDesc>[] methodDescs = Runtime.GetMethodDescs<T>();
 
-			if (!GetClrType(ref t, out ClrType clrType)) {
-				ClrTypeWarn<T>();
-				return;
-			}
-
-			List<ClrMethod> clrMethods = new List<ClrMethod>();
-
-			foreach (var c in methodDescs) {
-				clrMethods.Add(m_runtime.GetMethodByHandle(c.ToUInt64()));
-			}
-
+			List<ClrMethod> clrMethods = methodDescs.Select(c => m_runtime.GetMethodByHandle(c.ToUInt64())).ToList();
 
 			for (int i = 0; i < methodDescs.Length; i++) {
 				CompareMethod(methodDescs[i], clrMethods[i]);
 			}
 		}
 
+		/// <summary>
+		///     Compares a <see cref="MethodDesc" /> with a <see cref="ClrMethod" />
+		/// </summary>
 		private void CompareMethod(Pointer<MethodDesc> pMd, ClrMethod clrMethod)
 		{
 			WriteLine("\t-> Method: {0} {1}", pMd.Reference.Name, clrMethod);
 			Assert.Multiple(() =>
 			{
-				Assert.AreEqual(pMd.ToUInt64(), clrMethod.MethodDesc, "MethodDesc");
+				try {
+					if (clrMethod.MethodDesc == 0) {
+						WriteLine("\t\t-> MethodDesc* could not be retrieved for {0}", clrMethod);
+					}
+					else {
+						Assert.AreEqual(pMd.ToUInt64(), clrMethod.MethodDesc, "MethodDesc");
+					}
+				}
+				catch (ArgumentOutOfRangeException) { }
+
 				Assert.AreEqual(pMd.Reference.Token, clrMethod.MetadataToken, "Token");
-				Assert.AreEqual(pMd.Reference.IsConstructor, clrMethod.IsConstructor, "IsConstructor");
-				Assert.AreEqual((ulong) pMd.Reference.Function, clrMethod.NativeCode, "Code");
 			});
 		}
 
 		public void CompareFields<T>(ref T t)
 		{
-			var fieldDescs = Runtime.GetFieldDescs(ref t);
+			Pointer<FieldDesc>[] fieldDescs = Runtime.GetFieldDescs(ref t);
 			if (!GetClrType(ref t, out ClrType clrType)) {
 				ClrTypeWarn<T>();
+				Assert.Warn("Field comparison not ran");
 				return;
 			}
 
 
-			var clrFields = clrType.Fields;
+
+			IList<ClrInstanceField> clrFields = clrType.Fields;
 
 			Collections.RemoveAll(ref fieldDescs, x => x.Reference.IsStatic);
 			clrFields  = clrFields.OrderBy(x => x.Offset).ToList();
@@ -196,6 +214,9 @@ namespace Test.Testing.Tests
 			}
 		}
 
+		/// <summary>
+		///     Compares a <see cref="FieldDesc" /> with a <see cref="ClrInstanceField" />
+		/// </summary>
 		private void CompareField<T>(ref T t, Pointer<FieldDesc> pFd, ClrInstanceField clrField)
 		{
 			WriteLine("\t-> Field: {0} {1}", typeof(T).Name, clrField);
@@ -219,8 +240,8 @@ namespace Test.Testing.Tests
 			#region Address
 
 			// ClrMD may miscalculate the address if its ClrType is null
-			var rsAddr  = (ulong) pFd.Reference.GetAddress(ref t);
-			var clrAddr = clrField.GetAddress(GetDataAddr(ref t));
+			ulong rsAddr  = (ulong) pFd.Reference.GetAddress(ref t);
+			ulong clrAddr = clrField.GetAddress(GetDataAddr(ref t));
 			Assert.AreEqual(rsAddr, clrAddr, "Addresses do not match");
 
 			#endregion
@@ -243,13 +264,14 @@ namespace Test.Testing.Tests
 
 
 		/// <summary>
-		/// Compares <see cref="ClrType"/> with <see cref="MethodTable"/>
+		///     Compares a <see cref="ClrType" /> with a <see cref="MethodTable" />
 		/// </summary>
 		public void CompareType<T>(ref T t)
 		{
 			ulong heapAddr = GetDataAddr(ref t);
 			if (!GetClrType(ref t, out ClrType clrType)) {
 				ClrTypeWarn<T>();
+				Assert.Warn("Type comparison not ran");
 				return;
 			}
 
@@ -257,16 +279,14 @@ namespace Test.Testing.Tests
 			ulong                clrMt = m_runtime.Heap.GetMethodTable(heapAddr);
 
 			if (clrMt == 0) {
-				Assert.Warn("MethodTable* could not be retrieved for typeof({0})", typeof(T).Name);
+				WriteLine("\t-> MethodTable* could not be retrieved for typeof({0})", typeof(T).Name);
 			}
-
-			if (clrMt != 0) {
+			else {
 				#region MethodTable
 
 				Assert.Multiple(() =>
 				{
-					Assert.AreEqual(rsMt.ToUInt64(), clrMt, "MethodTable pointers do not match : {0}, {1}",
-						Hex.ToHex(rsMt.ToUInt64()), Hex.ToHex(clrMt));
+					Assert.AreEqual(rsMt.ToUInt64(), clrMt, "MethodTable pointers do not match");
 					Assert.AreEqual(rsMt.ToUInt64(), clrType.MethodTable);
 				});
 
@@ -324,15 +344,14 @@ namespace Test.Testing.Tests
 
 			#region Sizes
 
-			if (RazorContract.TypeEqual<string, T>()) {
-				WriteLine("-> Ignoring BaseSize comparison, typeof(T) is string");
-			}
-
 			/**
 			 * Note: we ignore this because both ClrMD and WinDbg seem to be incorrect about the base
 			 * size of a string.
 			 */
-			if (!RazorContract.TypeEqual<string, T>()) {
+			if (RazorContract.TypeEqual<string, T>()) {
+				WriteLine("-> Ignoring BaseSize comparison: typeof(T) is string");
+			}
+			else {
 				Assert.AreEqual(clrType.BaseSize, rsMt.Reference.BaseSize);
 			}
 
