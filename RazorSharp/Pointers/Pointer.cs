@@ -107,6 +107,7 @@ namespace RazorSharp.Pointers
 		/// <param name="v">Address to point to</param>
 		public Pointer(long v) : this((void*) v) { }
 
+		public Pointer(ulong ul) : this((void*) ul) { }
 
 		/// <summary>
 		///     Creates a new <see cref="T:RazorSharp.Pointers.Pointer`1" /> pointing to the address of <paramref name="t" />
@@ -418,6 +419,11 @@ namespace RazorSharp.Pointers
 		public static implicit operator Pointer<T>(long l)
 		{
 			return new Pointer<T>(l);
+		}
+
+		public static implicit operator Pointer<T>(ulong ul)
+		{
+			return new Pointer<T>(ul);
 		}
 
 		public static explicit operator void*(Pointer<T> ptr)

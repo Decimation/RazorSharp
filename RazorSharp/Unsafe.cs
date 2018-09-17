@@ -136,6 +136,8 @@ namespace RazorSharp
 
 		#region Address
 
+
+
 		/// <summary>
 		///     Returns the address of a field in the specified type.
 		/// </summary>

@@ -239,7 +239,7 @@
       <Compile Include="Testing\Tests\AddrInRangeTests.cs"/>
     <Compile Include="Testing\Tests\AllocPointerTests.cs" />
       <Compile Include="Testing\Tests\AllocPoolTests.cs"/>
-      <Compile Include="Testing\Tests\CLRRuntimeTests.cs"/>
+      <Compile Include="Testing\Tests\ClrRuntimeTests.cs"/>
       <Compile Include="Testing\Tests\SignatureCallTests.cs"/>
       <Compile Include="Testing\Tests\StackAllocateTests.cs"/>
       <Compile Include="Testing\Tests\StructureTests.cs"/>

@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 namespace RazorSharp.CLR.Structures
 {
 
+	// todo
 	internal struct SigParser
 	{
 		private byte[] _sig;

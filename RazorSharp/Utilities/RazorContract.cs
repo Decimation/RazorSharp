@@ -141,27 +141,18 @@ namespace RazorSharp.Utilities
 			}
 		}
 
-		internal static void AssertNoThrows<TException>(Action action) where TException : Exception
+		internal static bool TypeEqual<TExpected, TActual>()
 		{
-			Trace.Assert(!Throws<TException>(action));
-		}
-
-		internal static void AssertThrows<TException>(Action action) where TException : Exception
-		{
-			Trace.Assert(Throws<TException>(action));
-		}
-
-		[HandleProcessCorruptedStateExceptions]
-		internal static bool Throws<TException>(Action action) where TException : Exception
-		{
-			try {
-				action();
+			if (typeof(TExpected) == typeof(Array)) {
+				if (!typeof(TActual).IsArray) {
+					return false;
+				}
 			}
-			catch (TException) {
-				return true;
+			else if (typeof(TExpected) != typeof(TActual)) {
+				return false;
 			}
 
-			return false;
+			return true;
 		}
 
 		/// <summary>
