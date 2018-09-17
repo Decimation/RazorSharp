@@ -383,7 +383,6 @@ namespace RazorSharp
 			return (int) methodTable.Reference.BaseSize;
 		}
 
-
 		/// <summary>
 		///     <para>Returns the base size of the fields (data) in the heap.</para>
 		///     <para>This follows the formula of:</para>

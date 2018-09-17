@@ -72,6 +72,16 @@ namespace RazorSharp.Pointers
 			return Address.ToInt64();
 		}
 
+		public uint ToUInt32()
+		{
+			return (uint) Address.ToInt32();
+		}
+
+		public ulong ToUInt64()
+		{
+			return (ulong) Address.ToInt64();
+		}
+
 		public void* ToPointer()
 		{
 			return m_pValue;

@@ -65,6 +65,18 @@ namespace RazorSharp.Pointers
 		long ToInt64();
 
 		/// <summary>
+		///     Converts <see cref="Address" /> to a 32-bit unsigned integer.
+		/// </summary>
+		/// <returns></returns>
+		uint ToUInt32();
+
+		/// <summary>
+		///     Converts <see cref="Address" /> to a 64-bit unsigned integer.
+		/// </summary>
+		/// <returns></returns>
+		ulong ToUInt64();
+
+		/// <summary>
 		///     Returns <see cref="Address" /> as a pointer.
 		/// </summary>
 		/// <returns></returns>

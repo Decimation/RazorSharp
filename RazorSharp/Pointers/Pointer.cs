@@ -95,9 +95,9 @@ namespace RazorSharp.Pointers
 		/// <param name="v">Address to point to</param>
 		public Pointer(void* v)
 		{
+			// Root constructor
 			m_pValue = v;
 		}
-
 
 		/// <summary>
 		///     Creates a new <see cref="T:RazorSharp.Pointers.Pointer`1" /> pointing to the address <paramref name="v" />
@@ -210,12 +210,21 @@ namespace RazorSharp.Pointers
 
 		#region Bitwise operations
 
+		/// <summary>
+		/// Performs the bitwise AND (<c>&</c>) operation on <see cref="ToInt64"/> and sets <see cref="Address"/> as the result
+		///
+		/// </summary>
+		/// <param name="l">Operand</param>
 		public void And(long l)
 		{
 			long newAddr = ToInt64() & l;
 			Address = new IntPtr(newAddr);
 		}
 
+		/// <summary>
+		/// Performs the bitwise OR (<c>|</c>) operation on <see cref="ToInt64"/> and sets <see cref="Address"/> as the result
+		/// </summary>
+		/// <param name="l">Operand</param>
 		public void Or(long l)
 		{
 			long newAddr = ToInt64() | l;
@@ -249,7 +258,8 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="T" />.
+		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="T" />, starting
+		///     from index 0.
 		/// </summary>
 		/// <param name="elemCnt">Number of elements to copy</param>
 		/// <returns>
@@ -262,8 +272,8 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="T" />, starting from
-		///     index <paramref name="startIndex" />
+		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="T" />,
+		///     starting from index <paramref name="startIndex" />
 		/// </summary>
 		/// <param name="startIndex">Index to begin copying from</param>
 		/// <param name="elemCnt">Number of elements to copy</param>
@@ -277,8 +287,8 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="TType" />, starting from
-		///     index <paramref name="startIndex" />
+		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="TType" />,
+		///     starting from index <paramref name="startIndex" />
 		/// </summary>
 		/// <param name="startIndex">Index to begin copying from</param>
 		/// <param name="elemCnt">Number of elements to copy</param>
@@ -294,6 +304,20 @@ namespace RazorSharp.Pointers
 			}
 
 			return rg;
+		}
+
+		/// <summary>
+		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="TType" />,
+		///     starting from index 0.
+		/// </summary>
+		/// <param name="elemCnt">Number of elements to copy</param>
+		/// <returns>
+		///     An array of length <paramref name="elemCnt" /> of type <typeparamref name="TType" /> copied from
+		///     the current pointer
+		/// </returns>
+		public TType[] CopyOut<TType>(int elemCnt)
+		{
+			return CopyOut<TType>(0, elemCnt);
 		}
 
 		#endregion
@@ -551,11 +575,23 @@ namespace RazorSharp.Pointers
 			return p;
 		}
 
+		/// <summary>
+		/// Checks if <paramref name="left"/> <see cref="Address"/> is higher than <paramref name="right"/>'s.
+		/// </summary>
+		/// <param name="left">Left operand</param>
+		/// <param name="right">Right operand</param>
+		/// <returns><c>true</c> if <paramref name="left"/> points to a higher address than <paramref name="right"/>; <c>false</c> otherwise</returns>
 		public static bool operator >(Pointer<T> left, Pointer<T> right)
 		{
 			return left.ToInt64() > right.ToInt64();
 		}
 
+		/// <summary>
+		/// Checks if <paramref name="left"/> <see cref="Address"/> is lower than <paramref name="right"/>'s.
+		/// </summary>
+		/// <param name="left">Left operand</param>
+		/// <param name="right">Right operand</param>
+		/// <returns><c>true</c> if <paramref name="left"/> points to a lower address than <paramref name="right"/>; <c>false</c> otherwise</returns>
 		public static bool operator <(Pointer<T> left, Pointer<T> right)
 		{
 			return left.ToInt64() < right.ToInt64();

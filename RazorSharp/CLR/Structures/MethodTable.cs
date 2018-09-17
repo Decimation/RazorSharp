@@ -230,12 +230,13 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
-		public bool HasComponentSize => Flags.HasFlag(MethodTableFlags.HasComponentSize);
-		public bool IsArray          => Flags.HasFlag(MethodTableFlags.Array);
-		public bool IsStringOrArray  => HasComponentSize;
-		public bool IsBlittable      => EEClass.Reference.IsBlittable;
-		public bool IsString         => HasComponentSize && !IsArray;
-		public bool ContainsPointers => Flags.HasFlag(MethodTableFlags.ContainsPointers);
+		public bool   HasComponentSize => Flags.HasFlag(MethodTableFlags.HasComponentSize);
+		public bool   IsArray          => Flags.HasFlag(MethodTableFlags.Array);
+		public bool   IsStringOrArray  => HasComponentSize;
+		public bool   IsBlittable      => EEClass.Reference.IsBlittable;
+		public bool   IsString         => HasComponentSize && !IsArray;
+		public bool   ContainsPointers => Flags.HasFlag(MethodTableFlags.ContainsPointers);
+		public string Name             => RuntimeType.Name;
 
 		/// <summary>
 		///     Metadata token
@@ -294,8 +295,6 @@ namespace RazorSharp.CLR.Structures
 
 		// todo
 		internal MethodDescChunk* MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
-
-		public string Name => RuntimeType.Name;
 
 		#endregion
 

@@ -1,6 +1,8 @@
 #region
 
 using System;
+using System.Diagnostics;
+using System.Runtime;
 using RazorInvoke;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
@@ -8,12 +10,12 @@ using RazorSharp.Utilities.Exceptions;
 using static RazorSharp.Memory.Mem;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
-
 // ReSharper disable MemberCanBeMadeStatic.Global
+// ReSharper disable InconsistentNaming
 
 #endregion
 
-// ReSharper disable InconsistentNaming
+
 
 namespace RazorSharp.CLR
 {

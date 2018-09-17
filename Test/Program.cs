@@ -87,7 +87,6 @@ namespace Test
 			 * - .NET CLR 4.7.2
 			 * - Workstation Concurrent GC
 			 *
-			 *
 			 */
 			RazorContract.Assert(IntPtr.Size == 8);
 			RazorContract.Assert(Environment.Is64BitProcess);
@@ -116,6 +115,7 @@ namespace Test
 
 		// todo: protect address-sensitive functions
 		// todo: replace native pointers* with Pointer<T> for consistency
+		// todo: ClrMD
 
 
 		/**
@@ -168,24 +168,27 @@ namespace Test
 			Console.WriteLine(clrMethod.IL.Length);
 			Console.WriteLine(Collections.ToString(pMd.Reference.Info.GetMethodBody()?.GetILAsByteArray()));
 			Console.WriteLine(Mem.Read<byte>(clrMethod.IL.Address, 1).ToString("X"));
+
+			Pointer<byte> a = 0UL;
+			Pointer<byte> b = 1UL;
+
+			Debug.Assert(a < b);
+			Debug.Assert(b > a);
 		}
 
+		#region todo
 
-
-
-		static ClrRuntime GetRuntime()
+		private static ClrRuntime GetRuntime()
 		{
 			var dataTarget =
 				DataTarget.AttachToProcess(Process.GetCurrentProcess().Id, UInt32.MaxValue, AttachFlag.Passive);
 			return dataTarget.ClrVersions.Single().CreateRuntime();
 		}
 
-
-		static TTo reinterpret_cast<TFrom, TTo>(TFrom tf)
+		private static TTo reinterpret_cast<TFrom, TTo>(TFrom tf)
 		{
 			return CSUnsafe.Read<TTo>(Unsafe.AddressOf(ref tf).ToPointer());
 		}
-
 
 		private static class WinDbg
 		{
@@ -202,9 +205,7 @@ namespace Test
 				private readonly int                  m_cbSize;
 				private readonly string               m_szStringValue;
 				private readonly Pointer<FieldDesc>[] m_rgpFieldDescs;
-
-				private ConsoleTable m_fieldTable;
-
+				private          ConsoleTable         m_fieldTable;
 
 				public static DumpObjInfo Get<T>(ref T t)
 				{
@@ -219,8 +220,8 @@ namespace Test
 				}
 
 
-				private DumpObjInfo(string szName, Pointer<MethodTable> pMt, Pointer<EEClass> pEEClass, int cbSize,
-					string szStringValue, Pointer<FieldDesc>[] rgpFieldDescs)
+				private DumpObjInfo(string szName, Pointer<MethodTable> pMt, Pointer<EEClass> pEEClass,
+					int cbSize, string szStringValue, Pointer<FieldDesc>[] rgpFieldDescs)
 				{
 					m_szName        = szName;
 					m_pMT           = pMt;
@@ -237,7 +238,9 @@ namespace Test
 					// - FieldInfo.Attributes is used for the Attr column; I don't know what WinDbg uses
 					var table = new ConsoleTable("MT", "Field", "Offset", "Type", "VT", "Attr", "Value", "Name");
 					foreach (var v in m_rgpFieldDescs) {
-						table.AddRow(Hex.ToHex(v.Reference.TypeMethodTable.Address), Hex.ToHex(v.Reference.Token),
+						table.AddRow(
+							Hex.ToHex(v.Reference.TypeMethodTable.Address),
+							Hex.ToHex(v.Reference.Token),
 							v.Reference.Offset,
 							v.Reference.Info.FieldType.Name, v.Reference.Info.FieldType.IsValueType,
 							v.Reference.Info.Attributes, v.Reference.GetValue(t),
@@ -268,9 +271,7 @@ namespace Test
 			private float m_fX,
 			              m_fY;
 
-
 			public string String { get; set; }
-
 
 			public float X {
 				get => m_fX;
@@ -298,9 +299,6 @@ namespace Test
 		{
 			BenchmarkRunner.Run<T>();
 		}
-
-
-		#region todo
 
 		private static void VMMap()
 		{

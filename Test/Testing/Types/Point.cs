@@ -1,6 +1,7 @@
 #region
 
 using System;
+#pragma warning disable 649
 
 #endregion
 
