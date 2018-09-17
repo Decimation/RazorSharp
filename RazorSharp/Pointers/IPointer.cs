@@ -1,16 +1,23 @@
 #region
 
 using System;
+// ReSharper disable UnusedMemberInSuper.Global
 
 #endregion
 
 namespace RazorSharp.Pointers
 {
 
+	/// <inheritdoc />
 	/// <summary>
-	///     <para>The interface for a Pointer. This interface is kept <c>internal</c> because we don't</para>
-	///     <para>want to cause accidental boxing allocations. All Pointer types should be <c>struct</c> types</para>
-	///     <para>so they can equal the size and layout of a native pointer in memory.</para>
+	///     <para>
+	///         The interface for a Pointer. This interface is kept <c>internal</c> because we don't
+	///         want to cause accidental boxing allocations.
+	///     </para>
+	///     <para>
+	///         All Pointer types should be <c>struct</c> types
+	///         so they can equal the size and layout of a native pointer in memory.
+	///     </para>
 	///     <para>Therefore, this interface just serves as a static contract and shouldn't be used in runtime.</para>
 	/// </summary>
 	/// <typeparam name="T">Element type</typeparam>
@@ -98,7 +105,6 @@ namespace RazorSharp.Pointers
 		/// <typeparam name="TType">Type to write</typeparam>
 		void Write<TType>(TType t, int elemOffset = 0);
 
-
 		/// <summary>
 		///     Reinterprets <see cref="Address" /> as a reference to a value of type <typeparamref name="TType" />
 		/// </summary>
@@ -113,8 +119,6 @@ namespace RazorSharp.Pointers
 		/// <param name="other">Other <see cref="IPointer{T}" /></param>
 		/// <returns></returns>
 		bool Equals(Pointer<T> other);
-
-
 	}
 
 }

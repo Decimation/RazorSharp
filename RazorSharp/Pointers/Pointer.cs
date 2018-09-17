@@ -211,8 +211,8 @@ namespace RazorSharp.Pointers
 		#region Bitwise operations
 
 		/// <summary>
-		/// Performs the bitwise AND (<c>&</c>) operation on <see cref="ToInt64"/> and sets <see cref="Address"/> as the result
-		///
+		///     Performs the bitwise AND (<c>&</c>) operation on <see cref="ToInt64" /> and
+		///     sets <see cref="Address" /> as the result
 		/// </summary>
 		/// <param name="l">Operand</param>
 		public void And(long l)
@@ -222,7 +222,8 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Performs the bitwise OR (<c>|</c>) operation on <see cref="ToInt64"/> and sets <see cref="Address"/> as the result
+		///     Performs the bitwise OR (<c>|</c>) operation on <see cref="ToInt64" /> and
+		///     sets <see cref="Address" /> as the result
 		/// </summary>
 		/// <param name="l">Operand</param>
 		public void Or(long l)
@@ -576,22 +577,28 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Checks if <paramref name="left"/> <see cref="Address"/> is higher than <paramref name="right"/>'s.
+		///     Checks if <paramref name="left" /> <see cref="Address" /> is higher than <paramref name="right" />'s.
 		/// </summary>
 		/// <param name="left">Left operand</param>
 		/// <param name="right">Right operand</param>
-		/// <returns><c>true</c> if <paramref name="left"/> points to a higher address than <paramref name="right"/>; <c>false</c> otherwise</returns>
+		/// <returns>
+		///     <c>true</c> if <paramref name="left" /> points to a higher address than <paramref name="right" />;
+		///     <c>false</c> otherwise
+		/// </returns>
 		public static bool operator >(Pointer<T> left, Pointer<T> right)
 		{
 			return left.ToInt64() > right.ToInt64();
 		}
 
 		/// <summary>
-		/// Checks if <paramref name="left"/> <see cref="Address"/> is lower than <paramref name="right"/>'s.
+		///     Checks if <paramref name="left" /> <see cref="Address" /> is lower than <paramref name="right" />'s.
 		/// </summary>
 		/// <param name="left">Left operand</param>
 		/// <param name="right">Right operand</param>
-		/// <returns><c>true</c> if <paramref name="left"/> points to a lower address than <paramref name="right"/>; <c>false</c> otherwise</returns>
+		/// <returns>
+		///     <c>true</c> if <paramref name="left" /> points to a lower address than <paramref name="right" />; <c>false</c>
+		///     otherwise
+		/// </returns>
 		public static bool operator <(Pointer<T> left, Pointer<T> right)
 		{
 			return left.ToInt64() < right.ToInt64();

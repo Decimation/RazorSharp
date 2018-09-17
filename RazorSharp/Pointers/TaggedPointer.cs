@@ -22,7 +22,7 @@ namespace RazorSharp.Pointers
 	///     https://nikic.github.io/2012/02/02/Pointer-magic-for-efficient-dynamic-value-representations.html
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public unsafe struct TaggedPointer<T>
+	internal unsafe struct TaggedPointer<T>
 	{
 		/// <summary>
 		///     <c>8</c> for 64-bit
