@@ -22,8 +22,7 @@ using Unsafe = RazorSharp.Unsafe;
 namespace Test.Testing.Tests
 {
 
-// @formatter:off — disable formatter after this line
-// @formatter:on — enable formatter after this line
+
 
 	/// <summary>
 	///     Compares ClrMD with RazorSharp
@@ -151,7 +150,7 @@ namespace Test.Testing.Tests
 
 			WriteLine("-> Comparing methods");
 			CompareMethods(ref t);
-			WriteLine("-> Methods comparison massed");
+			WriteLine("-> Methods comparison passed");
 		}
 
 

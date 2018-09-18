@@ -773,7 +773,7 @@ namespace RazorSharp.CLR
 
 	/// <summary>
 	///     <remarks>
-	///         Use with <see cref="MethodDesc.m_wFlags" />
+	///         Use with <see cref="MethodDesc.Flags" />
 	///     </remarks>
 	/// </summary>
 	[Flags]
@@ -879,6 +879,12 @@ namespace RazorSharp.CLR
 		HasSingleNonVirtualSlot               = 0x4000,
 		DependsOnEquivalentOrForwardedStructs = 0x8000
 
+	}
+
+	internal enum MbMask
+	{
+		PackedMbLayoutMbMask       = 0x01FFFF,
+		PackedMbLayoutNameHashMask = 0xFE0000
 	}
 
 	public enum TokenType : uint

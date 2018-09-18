@@ -16,8 +16,6 @@ using RazorSharp.Utilities;
 namespace RazorSharp.CLR.Structures
 {
 
-	// class.h
-
 	#region
 
 	using DWORD = UInt32;

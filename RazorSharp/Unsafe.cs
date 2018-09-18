@@ -234,6 +234,14 @@ namespace RazorSharp
 
 		#region Sizes
 
+		/// <summary>
+		/// Calculates the complete size of <paramref name="t"/>'s data. If <typeparamref name="T"/> is
+		/// a value type, this is equal to <see cref="SizeOf{T}"/>. If <typeparamref name="T"/> is a
+		/// reference type, this is equal to <see cref="HeapSize{T}"/>.
+		/// </summary>
+		/// <param name="t">Value to calculate the size of</param>
+		/// <typeparam name="T">Type of <paramref name="t"/></typeparam>
+		/// <returns>The complete size of <paramref name="t"/></returns>
 		public static int AutoSizeOf<T>(in T t)
 		{
 			return typeof(T).IsValueType ? SizeOf<T>() : HeapSizeInternal(in t);
@@ -298,7 +306,7 @@ namespace RazorSharp
 
 
 		/// <summary>
-		///     <para>Calculates the size of a reference type in heap memory.</para>
+		///     <para>Calculates the complete size of a reference type in heap memory.</para>
 		///     <para>This is the most accurate size calculation.</para>
 		///     <para>
 		///         This follows the size formula of: (<see cref="MethodTable.BaseSize" />) + (length) *
@@ -325,7 +333,7 @@ namespace RazorSharp
 		///     <para>Source: /src/vm/object.inl: 45</para>
 		///     <para>Equals the Son Of Strike "!do" command.</para>
 		///     <para>Equals <see cref="Unsafe.BaseInstanceSize{T}()" /> for objects that aren't arrays or strings.</para>
-		///     <para>Note: This also includes padding and overhead.</para>
+		///     <para>Note: This also includes padding and overhead (<see cref="ObjHeader"/> and <see cref="MethodTable"/> ptr.)</para>
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		public static int HeapSize<T>(in T t) where T : class
@@ -367,12 +375,13 @@ namespace RazorSharp
 			// No need to assert, we already know it's not a value type
 //			RazorContract.Assert(!typeof(T).IsValueType);
 
-
 			Pointer<MethodTable> methodTable = Runtime.MethodTableOf<T>();
 
 			if (typeof(T).IsArray) {
 				Array arr = t as Array;
-				RazorContract.RequiresNotNull(arr);
+
+				// ReSharper disable once PossibleNullReferenceException
+				// We already know it's not null because the type is an array.
 				return (int) methodTable.Reference.BaseSize + arr.Length * methodTable.Reference.ComponentSize;
 			}
 
@@ -452,8 +461,7 @@ namespace RazorSharp
 		{
 			return
 				(typeof(T).IsInterface || typeof(T) == typeof(object)) &&
-				value != null &&
-				value.GetType().IsValueType;
+				value != null && value.GetType().IsValueType;
 		}
 
 		/// <summary>
@@ -500,7 +508,6 @@ namespace RazorSharp
 			Marshal.Copy(AddressOfHeap(ref t) + IntPtr.Size, fields, 0, fieldSize);
 			return fields;
 		}
-
 
 		public static void WriteReference<T>(ref T t, IntPtr newHeapAddr)
 		{

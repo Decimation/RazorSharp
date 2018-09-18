@@ -69,13 +69,10 @@ namespace RazorSharp.CLR
 			BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
 
 		/// <summary>
-		///     The offset, in bytes, of an array's actual <see cref="MethodTable" /> pointer, relative to the address pointed to
-		///     by
-		///     an array type's <see cref="RuntimeTypeHandle.Value" />
+		///     The offset, in bytes, of an array's actual <see cref="MethodTable" /> pointer, relative to the
+		///     address pointed to by an array type's <see cref="RuntimeTypeHandle.Value" />
 		/// </summary>
 		private const int ARRAY_MT_PTR_OFFSET = 6;
-
-		static Runtime() { }
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -90,7 +87,6 @@ namespace RazorSharp.CLR
 		public static ArrayObject** GetArrayObject<T>(ref T t) where T : class
 		{
 			RazorContract.RequiresType<Array, T>();
-
 
 			return (ArrayObject**) Unsafe.AddressOf(ref t);
 		}
@@ -139,15 +135,7 @@ namespace RazorSharp.CLR
 			IntPtr       ptr = *(IntPtr*) Unsafe.AddressOf(ref t);
 			MethodTable* mt  = *(MethodTable**) ptr;
 
-
 			return mt;
-
-			//return (*((HeapObject**) Unsafe.AddressOf(ref t)))->MethodTable;
-		}
-
-		private static void WriteMethodTable<TOrig, TNew>(ref TOrig t) where TOrig : class
-		{
-			WriteMethodTable(ref t, MethodTableOf<TNew>());
 		}
 
 		/// <summary>
@@ -170,17 +158,6 @@ namespace RazorSharp.CLR
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<MethodTable> MethodTableOf(Type t)
 		{
-			// Array method tables need to be read using ReadMethodTable,
-			// they don't have a TypeHandle
-			//Assertion.NegativeAssertType<Array, T>();
-
-			// From https://github.com/dotnet/coreclr/blob/6bb3f84d42b9756c5fa18158db8f724d57796296/src/vm/typehandle.h#L74:
-			// Array MTs are not valid TypeHandles...
-//			RazorContract.Requires(!t.IsArray, $"{t.Name}: Array MethodTables are not valid TypeHandles.");
-
-			// + ~10ns
-//			Trace.Assert(!t.IsArray, $"{t.Name}: Array MethodTables are not valid TypeHandles.");
-
 			IntPtr typeHandle = t.TypeHandle.Value;
 
 
@@ -191,21 +168,14 @@ namespace RazorSharp.CLR
 			// Example:
 			// 00 00 00 00 00 00 18 91 C6 83 F9 7F
 			//				     ^
+
+			// I don't know why this is, but whatever
+
 			return t.IsArray ? Mem.ReadPointer<MethodTable>(typeHandle, ARRAY_MT_PTR_OFFSET) : typeHandle;
 		}
 
 
-		public static void WriteMethodTable<T>(ref T t, Pointer<MethodTable> m) where T : class
-		{
-			IntPtr addrMt = Unsafe.AddressOfHeap(ref t);
-			*((MethodTable**) addrMt) = (MethodTable*) m;
-
-			//var h = GetHeapObject(ref t);
-			//(**h).MethodTable = m;
-		}
-
 		#endregion
-
 
 		#region FieldDesc
 
@@ -304,18 +274,6 @@ namespace RazorSharp.CLR
 
 		#region MethodDesc
 
-		public static void ReplaceMethod(Type target, string targetName, Type src, string srcName)
-		{
-			SetFunctionPointer(GetMethod(target, targetName),
-				GetMethod(src, srcName).MethodHandle.GetFunctionPointer());
-		}
-
-		public static void ReplaceMethod<TTarget, TSource>(string target, string src)
-		{
-			SetFunctionPointer(GetMethod(typeof(TTarget), target),
-				GetMethod(typeof(TSource), src).MethodHandle.GetFunctionPointer());
-		}
-
 		public static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
 		{
 			return GetMethodDescs(typeof(T), flags);
@@ -413,7 +371,6 @@ namespace RazorSharp.CLR
 			return t.GetMethod(name, flags);
 		}
 
-
 		internal static MethodInfo[] GetMethods(Type t, BindingFlags flags = DefaultFlags)
 		{
 			return t.GetMethods(flags);
@@ -423,7 +380,7 @@ namespace RazorSharp.CLR
 
 
 		/// <summary>
-		///     Reads a reference type's object header.
+		///     Reads a reference type's <see cref="ObjHeader"/>
 		/// </summary>
 		/// <returns>A pointer to the reference type's header</returns>
 		public static ObjHeader* ReadObjHeader<T>(ref T t) where T : class
@@ -456,7 +413,6 @@ namespace RazorSharp.CLR
 
 			return MethodTableOf<T>().Reference.IsBlittable;
 		}
-
 
 	}
 

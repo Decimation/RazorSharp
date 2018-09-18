@@ -29,7 +29,6 @@ namespace Test.Testing.Tests
 			var fd = Runtime.GetFieldDesc<string>("m_firstChar");
 			var module = fd.Reference.GetModule();
 			var size = fd.Reference.Size;
-			var stub = fd.Reference.GetStubFieldInfo();
 			var mt = fd.Reference.EnclosingMethodTable;
 			var memberDef = fd.Reference.Token;
 		}

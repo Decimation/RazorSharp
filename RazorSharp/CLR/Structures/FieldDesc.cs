@@ -109,15 +109,19 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
 
+		#region Access modifiers
+
 		public bool IsPublic            => Protection.HasFlag(ProtectionLevel.Public);
 		public bool IsPrivate           => Protection.HasFlag(ProtectionLevel.Private);
 		public bool IsInternal          => Protection.HasFlag(ProtectionLevel.Internal);
 		public bool IsPrivateProtected  => Protection.HasFlag(ProtectionLevel.PrivateProtected);
 		public bool IsProtectedInternal => Protection.HasFlag(ProtectionLevel.ProtectedInternal);
 
+		#endregion
+
+
 		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
 		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
-
 
 		/// <summary>
 		///     Field type
@@ -154,7 +158,6 @@ namespace RazorSharp.CLR.Structures
 		public int Size {
 			get {
 				int s = Constants.SizeOfCorElementType(CorType);
-
 				return s == -1 ? LoadSize : s;
 			}
 		}
@@ -231,18 +234,7 @@ namespace RazorSharp.CLR.Structures
 			throw new SigcallException();
 		}
 
-		/// <summary>
-		///     <remarks>
-		///         Address-sensitive
-		///     </remarks>
-		/// </summary>
-		[CLRSigcall]
-		internal void* GetStubFieldInfo()
-		{
-			// RuntimeFieldInfoStub
-			// ReflectFieldObject
-			throw new SigcallException();
-		}
+
 
 		#region Value
 
@@ -324,11 +316,5 @@ namespace RazorSharp.CLR.Structures
 		}
 	}
 
-
-	internal enum MbMask
-	{
-		PackedMbLayoutMbMask       = 0x01FFFF,
-		PackedMbLayoutNameHashMask = 0xFE0000
-	}
 
 }

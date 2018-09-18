@@ -242,7 +242,6 @@
       <Compile Include="Experimental\FunctionHooker.cs"/>
     <Compile Include="Experimental\StackAllocated.cs" />
     <Compile Include="Experimental\UnmanagedAllocated.cs" />
-      <Compile Include="Memory\AllocCollection.cs"/>
       <Compile Include="Memory\AllocPool.cs"/>
     <Compile Include="Memory\Asm.cs" />
       <Compile Include="Memory\Mem.cs"/>

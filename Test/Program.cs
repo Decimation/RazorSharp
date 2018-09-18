@@ -117,7 +117,6 @@ namespace Test
 		// todo: replace native pointers* with Pointer<T> for consistency
 		// todo: ClrMD
 
-
 		/**
 		 * >> Entry point
 		 */
@@ -161,7 +160,7 @@ namespace Test
 			var       pMd       = Runtime.GetMethodDesc<CPoint>("getInt32");
 			ClrMethod clrMethod = GetRuntime().GetMethodByHandle(pMd.ToUInt64());
 
-			Console.WriteLine(clrMethod);
+			Console.WriteLine(clrMethod.IL);
 			Console.WriteLine(Hex.ToHex(pMd.Reference.Function));
 			Console.WriteLine(Hex.ToHex(clrMethod.NativeCode));
 			Console.WriteLine(Hex.ToHex(clrMethod.IL.Address));
@@ -175,6 +174,7 @@ namespace Test
 			Debug.Assert(a < b);
 			Debug.Assert(b > a);
 		}
+
 
 		#region todo
 
@@ -324,6 +324,8 @@ namespace Test
 
 		#endregion
 
+// @formatter:off — disable formatter after this line
+// @formatter:on — enable formatter after this line
 
 		/**
 		 * Dependencies:

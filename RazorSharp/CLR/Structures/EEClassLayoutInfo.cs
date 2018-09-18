@@ -26,6 +26,9 @@ namespace RazorSharp.CLR.Structures
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct EEClassLayoutInfo
 	{
+
+		#region Fields
+
 		// why is there an m_cbNativeSize in EEClassLayoutInfo and EEClass?
 		[FieldOffset(0)] private readonly UINT32 m_cbNativeSize;
 		[FieldOffset(4)] private readonly UINT32 m_cbManagedSize;
@@ -40,16 +43,22 @@ namespace RazorSharp.CLR.Structures
 		// for the managed layout.
 		[FieldOffset(9)] private readonly BYTE m_ManagedLargestAlignmentRequirementOfAllMembers;
 
-		[FieldOffset(10)] private readonly BYTE m_bFlags;
-
-		// Packing size in bytes (1, 2, 4, 8 etc.)
-		[FieldOffset(11)] private readonly BYTE m_cbPackingSize;
-
-		// # of fields that are of the calltime-marshal variety.
-		[FieldOffset(12)] private readonly UINT m_numCTMFields;
-
-
+		[FieldOffset(10)] private readonly BYTE  m_bFlags;
+		[FieldOffset(11)] private readonly BYTE  m_cbPackingSize;
+		[FieldOffset(12)] private readonly UINT  m_numCTMFields;
 		[FieldOffset(16)] private readonly void* m_pFieldMarshalers;
+
+		#endregion
+
+		/// <summary>
+		/// Packing size in bytes (1, 2, 4, 8 etc.)
+		/// </summary>
+		internal BYTE PackingSize => m_cbPackingSize;
+
+		/// <summary>
+		/// # of fields that are of the calltime-marshal variety.
+		/// </summary>
+		internal UINT NumCTMFields => m_numCTMFields;
 
 		/// <summary>
 		///     <para>Size (in bytes) of fixed portion of NStruct.</para>
@@ -69,21 +78,18 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		internal uint ManagedSize => m_cbManagedSize;
 
-		internal LayoutFlags Flags => (LayoutFlags) m_bFlags;
-
-
-		internal bool ZeroSized => Flags.HasFlag(LayoutFlags.ZeroSized);
-
-		internal bool IsBlittable => Flags.HasFlag(LayoutFlags.Blittable);
+		internal LayoutFlags Flags       => (LayoutFlags) m_bFlags;
+		internal bool        ZeroSized   => Flags.HasFlag(LayoutFlags.ZeroSized);
+		internal bool        IsBlittable => Flags.HasFlag(LayoutFlags.Blittable);
 
 		public override string ToString()
 		{
 			ConsoleTable table = new ConsoleTable("Field", "Value");
+
 			table.AddRow("Native size", m_cbNativeSize);
 			table.AddRow("Managed size", m_cbManagedSize);
 			table.AddRow("Largest alignment req of all", m_LargestAlignmentRequirementOfAllMembers);
-			table.AddRow("Flags", String.Format("{0} ({1})", m_bFlags, String.Join(", ", Flags.GetFlags())));
-
+			table.AddRow("Flags", Runtime.CreateFlagsString(m_bFlags, Flags));
 			table.AddRow("Packing size", m_cbPackingSize);
 			table.AddRow("CTM fields", m_numCTMFields);
 			table.AddRow("Field marshalers", Hex.ToHex(m_pFieldMarshalers));

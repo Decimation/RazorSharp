@@ -88,10 +88,10 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     <para>The size of an individual element when this type is an array or string.</para>
 		///     <example>
-		///         If this type is a <c>string</c>, the component size will be 2. (<c>sizeof(char)</c>)
+		///         If this type is a <c>string</c>, the component size will be <c>2</c>. (<c>sizeof(char)</c>)
 		///     </example>
 		///     <returns>
-		///         <c>-1</c> if <c>!</c><see cref="HasComponentSize" />, component size otherwise
+		///         <c>0</c> if <c>!</c><see cref="HasComponentSize" />, component size otherwise
 		///     </returns>
 		/// </summary>
 		public short ComponentSize => HasComponentSize ? (short) m_dwFlags.ComponentSize : (short) 0;
@@ -337,20 +337,18 @@ namespace RazorSharp.CLR.Structures
 
 		public override string ToString()
 		{
-			//var lowFlags = String.Join(", ", TableFlagsLow.GetFlags().Distinct());
-
 			ConsoleTable table = new ConsoleTable("Field", "Value");
 
 			table.AddRow("Name", RuntimeType.Name);
-
 			table.AddRow("Base size", m_BaseSize);
+
 			if (HasComponentSize) {
 				table.AddRow("Component size", m_dwFlags.ComponentSize);
 			}
 
-			table.AddRow("Flags", $"{FlagsValue} ({Flags.Join()})");
-			table.AddRow("Flags 2", $"{Flags2Value} ({Flags2.Join()})");
-			table.AddRow("Low flags", $"{FlagsLowValue} ({FlagsLow})");
+			table.AddRow("Flags", Runtime.CreateFlagsString(FlagsValue, Flags));
+			table.AddRow("Flags 2", Runtime.CreateFlagsString(Flags2Value, Flags2));
+			table.AddRow("Low flags", Runtime.CreateFlagsString(FlagsLowValue, FlagsLow));
 			table.AddRow("Token", MDToken);
 
 			if (m_pParentMethodTable != null) {
@@ -358,9 +356,6 @@ namespace RazorSharp.CLR.Structures
 			}
 
 			table.AddRow("Module", Hex.ToHex(m_pLoaderModule));
-
-			//table.AddRow("m_pWriteableData", Hex.ToHex(m_pWriteableData));
-
 			table.AddRow("Union type", UnionType);
 			table.AddRow("EEClass", Hex.ToHex(EEClass.Address));
 			table.AddRow("Canon MT", Hex.ToHex(Canon.Address));
@@ -370,15 +365,10 @@ namespace RazorSharp.CLR.Structures
 			}
 
 
-			//table.AddRow("Multipurpose slot 2", Hex.ToHex(m_pMultipurposeSlot2));
-
-
 			// EEClass fields
 			table.AddRow("FieldDesc List", Hex.ToHex(FieldDescList));
 			table.AddRow("FieldDesc List length", FieldDescListLength);
 			table.AddRow("MethodDescChunk List", Hex.ToHex(MethodDescChunkList));
-
-			// EEClass fields
 			table.AddRow("Number instance fields", NumInstanceFields);
 			table.AddRow("Number static fields", NumStaticFields);
 			table.AddRow("Number non virtual slots", NumNonVirtualSlots);
@@ -390,7 +380,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Number interfaces", m_wNumInterfaces);
 
 			// EEClass field
-			table.AddRow("Blittable", EEClass.Reference.IsBlittable ? StringUtils.Check : StringUtils.BallotX);
+			table.AddRow("Blittable", EEClass.Reference.IsBlittable.Prettify());
 
 
 //			table.RemoveFromRows(0, "0x0", (ushort) 0, (uint) 0);

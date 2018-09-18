@@ -34,22 +34,23 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     Module (DLL) containing <see cref="Signature" />
 		/// </summary>
-		internal string Module { get; }
+		public string Module { get; set; }
 
 		/// <summary>
 		///     Unique byte-sequence-string signature of the function
 		/// </summary>
-		internal string Signature { get; }
+		public string Signature { get; set; }
 
 		/// <summary>
 		/// </summary>
-		internal bool IsInFunctionMap = false;
+		public bool IsInFunctionMap { get; set; }
 
 		/// <summary>
 		///     Relative to the module's <see cref="SigScanner.BaseAddress" />
 		/// </summary>
-		public long OffsetGuess = 0x0;
+		public long OffsetGuess { get; set; }
 
+		public SigcallAttribute() { }
 
 		public SigcallAttribute(string module, string signature)
 		{
@@ -57,8 +58,6 @@ namespace RazorSharp.Memory
 			Signature       = signature;
 			IsInFunctionMap = false;
 		}
-
-
 	}
 
 	/// <inheritdoc />
@@ -95,7 +94,6 @@ namespace RazorSharp.Memory
 		private const           string                                      TEXT_SEGMENT = ".text";
 		public static           bool                                        UseTextSegment { get; set; } = true;
 		private static readonly Dictionary<MethodInfo, Tuple<byte[], long>> SigcallMethodMap;
-
 
 		static SignatureCall()
 		{

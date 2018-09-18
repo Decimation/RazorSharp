@@ -24,11 +24,12 @@ namespace RazorSharp.CLR.Structures
 
 #if !WIN32
 		[FieldOffset(0)] private readonly UInt32 m_uAlignpad;
+		[FieldOffset(4)] private          UInt32 m_uSyncBlockValue;
+#else
+		[FieldOffset(0)] private          UInt32 m_uSyncBlockValue;
 #endif
-		[FieldOffset(4)] private UInt32 m_uSyncBlockValue;
 
 		#endregion
-
 
 		#region Accessors
 
@@ -36,7 +37,6 @@ namespace RazorSharp.CLR.Structures
 		public SyncBlockFlags SyncBlockAsFlags => (SyncBlockFlags) m_uSyncBlockValue;
 
 		#endregion
-
 
 		static ObjHeader()
 		{
