@@ -70,7 +70,11 @@ namespace RazorSharp.CLR
 
 		/// <summary>
 		///     The offset, in bytes, of an array's actual <see cref="MethodTable" /> pointer, relative to the
-		///     address pointed to by an array type's <see cref="RuntimeTypeHandle.Value" />
+		///     address pointed to by an array type's <see cref="RuntimeTypeHandle.Value" />.
+		///     <para>
+		///         An array's <see cref="MethodTable" /> pointer is located 1 indirection of
+		///         <see cref="RuntimeTypeHandle.Value" /> + <see cref="ARRAY_MT_PTR_OFFSET" /> bytes.
+		///     </para>
 		/// </summary>
 		private const int ARRAY_MT_PTR_OFFSET = 6;
 
@@ -164,6 +168,8 @@ namespace RazorSharp.CLR
 			// Special case:
 			// If an object is an array, its actual MethodTable* is stored at the address pointed to by its
 			// given MethodTable* returned from TypeHandle.Value (which is invalid), offset by ARRAY_MT_PTR_OFFSET bytes.
+
+			// See ARRAY_MT_PTR_OFFSET documentation
 
 			// Example:
 			// 00 00 00 00 00 00 18 91 C6 83 F9 7F
@@ -379,7 +385,7 @@ namespace RazorSharp.CLR
 
 
 		/// <summary>
-		///     Reads a reference type's <see cref="ObjHeader"/>
+		///     Reads a reference type's <see cref="ObjHeader" />
 		/// </summary>
 		/// <returns>A pointer to the reference type's header</returns>
 		public static ObjHeader* ReadObjHeader<T>(ref T t) where T : class
