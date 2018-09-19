@@ -174,7 +174,6 @@ namespace RazorSharp.CLR
 			return t.IsArray ? Mem.ReadPointer<MethodTable>(typeHandle, ARRAY_MT_PTR_OFFSET) : typeHandle;
 		}
 
-
 		#endregion
 
 		#region FieldDesc

@@ -160,7 +160,7 @@ namespace Test
 			var       pMd       = Runtime.GetMethodDesc<CPoint>("getInt32");
 			ClrMethod clrMethod = GetRuntime().GetMethodByHandle(pMd.ToUInt64());
 
-			Console.WriteLine(clrMethod.IL);
+
 			Console.WriteLine(Hex.ToHex(pMd.Reference.Function));
 			Console.WriteLine(Hex.ToHex(clrMethod.NativeCode));
 			Console.WriteLine(Hex.ToHex(clrMethod.IL.Address));
@@ -173,6 +173,21 @@ namespace Test
 
 			Debug.Assert(a < b);
 			Debug.Assert(b > a);
+			Debug.Assert(a.IsNull);
+
+			Console.WriteLine();
+
+			Pointer<byte> nil = -1;
+			Console.WriteLine(nil.ToInt64());
+			Console.WriteLine(nil.ToUInt64());
+			Console.WriteLine("{0:P}", nil);
+
+			Console.WriteLine();
+
+			Pointer<byte> nil2 = -2;
+			Console.WriteLine(nil2.ToInt64());
+			Console.WriteLine(nil2.ToUInt64());
+			Console.WriteLine("{0:P}", nil2);
 		}
 
 

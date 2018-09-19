@@ -235,13 +235,13 @@ namespace RazorSharp
 		#region Sizes
 
 		/// <summary>
-		/// Calculates the complete size of <paramref name="t"/>'s data. If <typeparamref name="T"/> is
-		/// a value type, this is equal to <see cref="SizeOf{T}"/>. If <typeparamref name="T"/> is a
-		/// reference type, this is equal to <see cref="HeapSize{T}"/>.
+		///     Calculates the complete size of <paramref name="t" />'s data. If <typeparamref name="T" /> is
+		///     a value type, this is equal to <see cref="SizeOf{T}" />. If <typeparamref name="T" /> is a
+		///     reference type, this is equal to <see cref="HeapSize{T}" />.
 		/// </summary>
 		/// <param name="t">Value to calculate the size of</param>
-		/// <typeparam name="T">Type of <paramref name="t"/></typeparam>
-		/// <returns>The complete size of <paramref name="t"/></returns>
+		/// <typeparam name="T">Type of <paramref name="t" /></typeparam>
+		/// <returns>The complete size of <paramref name="t" /></returns>
 		public static int AutoSizeOf<T>(in T t)
 		{
 			return typeof(T).IsValueType ? SizeOf<T>() : HeapSizeInternal(in t);
@@ -258,7 +258,7 @@ namespace RazorSharp
 		{
 			// No layout
 			if (typeof(T).IsArray) {
-				//			return InvalidValue;
+				// return InvalidValue;
 			}
 
 			Pointer<MethodTable> mt = Runtime.MethodTableOf<T>();
@@ -333,7 +333,7 @@ namespace RazorSharp
 		///     <para>Source: /src/vm/object.inl: 45</para>
 		///     <para>Equals the Son Of Strike "!do" command.</para>
 		///     <para>Equals <see cref="Unsafe.BaseInstanceSize{T}()" /> for objects that aren't arrays or strings.</para>
-		///     <para>Note: This also includes padding and overhead (<see cref="ObjHeader"/> and <see cref="MethodTable"/> ptr.)</para>
+		///     <para>Note: This also includes padding and overhead (<see cref="ObjHeader" /> and <see cref="MethodTable" /> ptr.)</para>
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		public static int HeapSize<T>(in T t) where T : class

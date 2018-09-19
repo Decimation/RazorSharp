@@ -389,6 +389,8 @@ namespace RazorSharp.Pointers
 			return m_pValue;
 		}
 
+		#region Integer conversions
+
 		public int ToInt32()
 		{
 			return (int) m_pValue;
@@ -408,6 +410,8 @@ namespace RazorSharp.Pointers
 		{
 			return (uint) m_pValue;
 		}
+
+		#endregion
 
 		#endregion
 
