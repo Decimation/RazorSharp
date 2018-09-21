@@ -190,7 +190,7 @@ namespace RazorSharp.CLR.Structures
 				switch (UnionType) {
 					case LowBits.MethodTable:
 						Pointer<MethodTable> pCanon = m_pCanonMT;
-						pCanon.Subtract(CANON_MT_UNION_MT_OFFSET);
+						pCanon.Subtract(Offsets.CANON_MT_UNION_MT_OFFSET);
 						return pCanon;
 					case LowBits.EEClass:
 					{
@@ -206,15 +206,6 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
-
-		/// <summary>
-		///     How many bytes to subtract from <see cref="m_pCanonMT" /> if <see cref="UnionType" /> is
-		///     <see cref="LowBits.MethodTable" />
-		///     <remarks>
-		///         <para>Source: /src/vm/methodtable.inl: 1180</para>
-		///     </remarks>
-		/// </summary>
-		private const int CANON_MT_UNION_MT_OFFSET = 2;
 
 		/// <summary>
 		///     Element type handle of an individual element if this is the <see cref="MethodTable" /> of an array.

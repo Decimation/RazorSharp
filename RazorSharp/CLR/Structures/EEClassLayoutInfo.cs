@@ -3,11 +3,11 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
-
-// ReSharper disable ConvertToAutoPropertyWhenPossible
+using RazorCommon.Strings;
 
 #endregion
 
+// ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable InconsistentNaming
 // ReSharper disable BuiltInTypeReferenceStyle
 
@@ -93,8 +93,8 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Packing size", m_cbPackingSize);
 			table.AddRow("CTM fields", m_numCTMFields);
 			table.AddRow("Field marshalers", Hex.ToHex(m_pFieldMarshalers));
-			table.AddRow("Blittable", IsBlittable);
-			table.AddRow("Zero sized", ZeroSized);
+			table.AddRow("Blittable", IsBlittable.Prettify());
+			table.AddRow("Zero sized", ZeroSized.Prettify());
 
 			return table.ToMarkDownString();
 		}

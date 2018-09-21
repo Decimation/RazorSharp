@@ -45,21 +45,6 @@ namespace RazorSharp.CLR
 	/// </summary>
 	public static unsafe class Runtime
 	{
-		/// <summary>
-		///     Heap offset to the first array element.
-		///     <list type="bullet">
-		///         <item>
-		///             <description>+ 8 for <c>MethodTable*</c> (<see cref="IntPtr.Size" />)</description>
-		///         </item>
-		///         <item>
-		///             <description>+ 4 for length (<see cref="UInt32" />) </description>
-		///         </item>
-		///         <item>
-		///             <description>+ 4 for padding (<see cref="UInt32" />) (x64 only)</description>
-		///         </item>
-		///     </list>
-		/// </summary>
-		public static readonly int OffsetToArrayData = sizeof(MethodTable*) + sizeof(uint) + sizeof(uint);
 
 		/// <summary>
 		///     These specific <see cref="BindingFlags" /> are used because they correspond with the metadata and structures
@@ -67,16 +52,6 @@ namespace RazorSharp.CLR
 		/// </summary>
 		private const BindingFlags DefaultFlags =
 			BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
-
-		/// <summary>
-		///     The offset, in bytes, of an array's actual <see cref="MethodTable" /> pointer, relative to the
-		///     address pointed to by an array type's <see cref="RuntimeTypeHandle.Value" />.
-		///     <para>
-		///         An array's <see cref="MethodTable" /> pointer is located 1 indirection of
-		///         <see cref="RuntimeTypeHandle.Value" /> + <see cref="ARRAY_MT_PTR_OFFSET" /> bytes.
-		///     </para>
-		/// </summary>
-		private const int ARRAY_MT_PTR_OFFSET = 6;
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -177,7 +152,7 @@ namespace RazorSharp.CLR
 
 			// I don't know why this is, but whatever
 
-			return t.IsArray ? Mem.ReadPointer<MethodTable>(typeHandle, ARRAY_MT_PTR_OFFSET) : typeHandle;
+			return t.IsArray ? Mem.ReadPointer<MethodTable>(typeHandle, Offsets.ARRAY_MT_PTR_OFFSET) : typeHandle;
 		}
 
 		#endregion

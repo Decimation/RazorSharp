@@ -1,4 +1,4 @@
-#region
+
 
 #region
 
@@ -8,12 +8,12 @@ using RazorCommon;
 
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable ConvertToAutoPropertyWhenPossible
-
-#endregion
-
 // ReSharper disable InconsistentNaming
 
 #endregion
+
+
+
 
 namespace RazorSharp.CLR.Structures
 {

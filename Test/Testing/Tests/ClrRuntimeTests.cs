@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using Microsoft.Diagnostics.Runtime;
@@ -12,6 +13,8 @@ using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
+using RazorSharp.CLR.Structures.ILMethods;
+using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing.Types;
@@ -21,7 +24,6 @@ using Unsafe = RazorSharp.Unsafe;
 
 namespace Test.Testing.Tests
 {
-
 
 
 	/// <summary>
@@ -163,6 +165,8 @@ namespace Test.Testing.Tests
 
 			for (int i = 0; i < methodDescs.Length; i++) {
 				CompareMethod(methodDescs[i], clrMethods[i]);
+				CompareIL(methodDescs[i].Reference.GetILHeader(), clrMethods[i]);
+				CompareIL(methodDescs[i].Reference.GetILHeader(), methodDescs[i].Reference.Info.GetMethodBody());
 			}
 		}
 
@@ -196,7 +200,6 @@ namespace Test.Testing.Tests
 				Assert.Warn("Field comparison not ran");
 				return;
 			}
-
 
 
 			IList<ClrInstanceField> clrFields = clrType.Fields;
@@ -359,7 +362,43 @@ namespace Test.Testing.Tests
 			#endregion
 		}
 
+		/// <summary>
+		/// Compares a <see cref="COR_ILMETHOD"/> with a <see cref="MethodBody"/>
+		/// </summary>
+		private static void CompareIL(Pointer<COR_ILMETHOD> il, MethodBody mb)
+		{
+			Assert.Multiple(() =>
+			{
+				Assert.AreEqual(mb.MaxStackSize, il.Reference.MaxStack);
+				Assert.True(mb.GetILAsByteArray().SequenceEqual(Mem.ReadBytes(il.Reference.Code,
+					(int) il.Reference.CodeSize)));
+				Assert.AreEqual(mb.LocalSignatureMetadataToken, il.Reference.LocalVarSigTok);
+				Assert.AreEqual(mb.InitLocals, il.Reference.Fat.Reference.Flags.HasFlag(CorILMethodFlags.InitLocals));
+			});
+		}
+
+		// todo
+		/// <summary>
+		/// Compares a <see cref="COR_ILMETHOD"/> with a <see cref="ClrMethod"/>
+		/// </summary>
+		private static void CompareIL(Pointer<COR_ILMETHOD> il, ClrMethod clrMethod)
+		{
+			var ilInfo = clrMethod.IL;
+
+			//Assert.Multiple(() =>
+			//{
+				Assert.AreEqual(ilInfo.Address, il.Reference.Code.ToUInt64(), "IL address");
+				Assert.AreEqual(ilInfo.Length, il.Reference.CodeSize, "Code size");
+				Assert.AreEqual(ilInfo.LocalVarSignatureToken, il.Reference.LocalVarSigTok, "Token");
+			//});
+
+			// MaxStack and Flags seem to be wrong for ClrMD
+			Warn.If(ilInfo.MaxStack != il.Reference.MaxStack, "MaxStack");
+			Warn.If(ilInfo.Flags != il.Reference.Fat.Reference.FlagsValue, "Flags");
+		}
+
 		#endregion
+
 
 	}
 

@@ -237,7 +237,13 @@
       <Compile Include="CLR\Fixed\PinHandle.cs"/>
       <Compile Include="CLR\Fixed\PinHelper.cs"/>
       <Compile Include="CLR\GCHeap.cs"/>
+      <Compile Include="CLR\Offsets.cs"/>
+      <Compile Include="CLR\ReflectionUtil.cs"/>
       <Compile Include="CLR\SpecialNames.cs"/>
+      <Compile Include="CLR\Structures\ILMethods\CorILMethodFlags.cs"/>
+      <Compile Include="CLR\Structures\ILMethods\COR_ILMETHOD.cs"/>
+      <Compile Include="CLR\Structures\ILMethods\ILMETHOD_FAT.cs"/>
+      <Compile Include="CLR\Structures\ILMethods\ILMETHOD_TINY.cs"/>
       <Compile Include="CLR\Structures\SigParser.cs"/>
       <Compile Include="Experimental\FunctionHooker.cs"/>
     <Compile Include="Experimental\StackAllocated.cs" />

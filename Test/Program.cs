@@ -14,9 +14,11 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
 using JetBrains.Annotations;
 using Microsoft.Diagnostics.Runtime;
+using NUnit.Framework;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
@@ -28,6 +30,7 @@ using RazorSharp.CLR;
 using RazorSharp.CLR.Fixed;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.HeapObjects;
+using RazorSharp.CLR.Structures.ILMethods;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -157,16 +160,13 @@ namespace Test
 //			VMMap();
 //			regions();
 
-			var       pMd       = Runtime.GetMethodDesc<CPoint>("getInt32");
-			ClrMethod clrMethod = GetRuntime().GetMethodByHandle(pMd.ToUInt64());
 
-
-			Console.WriteLine(Hex.ToHex(pMd.Reference.Function));
+/*			Console.WriteLine(Hex.ToHex(pMd.Reference.Function));
 			Console.WriteLine(Hex.ToHex(clrMethod.NativeCode));
 			Console.WriteLine(Hex.ToHex(clrMethod.IL.Address));
 			Console.WriteLine(clrMethod.IL.Length);
 			Console.WriteLine(Collections.ToString(pMd.Reference.Info.GetMethodBody()?.GetILAsByteArray()));
-			Console.WriteLine(Mem.Read<byte>(clrMethod.IL.Address, 1).ToString("X"));
+			Console.WriteLine(Mem.Read<byte>(clrMethod.IL.Address, 1).ToString("X"));*/
 
 			Pointer<byte> a = 0UL;
 			Pointer<byte> b = 1UL;
@@ -175,23 +175,47 @@ namespace Test
 			Debug.Assert(b > a);
 			Debug.Assert(a.IsNull);
 
-			Console.WriteLine();
+			var       pMd       = Runtime.GetMethodDesc(typeof(Program), "call");
+			ClrMethod clrMethod = GetRuntime().GetMethodByHandle(pMd.ToUInt64());
+			var       pIL       = pMd.Reference.GetILHeader().Reference.Code;
 
-			Pointer<byte> nil = -1;
-			Console.WriteLine(nil.ToInt64());
-			Console.WriteLine(nil.ToUInt64());
-			Console.WriteLine("{0:P}", nil);
+			Console.WriteLine("Actual IL:");
+			Console.WriteLine(Collections.ToString(pMd.Reference.Info.GetMethodBody().GetILAsByteArray()));
 
-			Console.WriteLine();
+			// 000001532FFC5248       77843          7  285212695  722081536
 
-			Pointer<byte> nil2 = -2;
-			Console.WriteLine(nil2.ToInt64());
-			Console.WriteLine(nil2.ToUInt64());
-			Console.WriteLine("{0:P}", nil2);
+			Console.WriteLine(Hex.ToHex(clrMethod.IL.Address));
+			Console.WriteLine(Hex.ToHex(pIL.Address));
+
+			Console.WriteLine(Collections.ToString(Mem.ReadBytes(clrMethod.IL.Address, 13)));
+			Console.WriteLine(Collections.ToString(pIL.CopyOut(13)));
+
+			const long fn = 0x7FFCBCC614D0;
+
 		}
+
+		static void call()
+		{
+			Console.WriteLine("g");
+		}
+
+		// ClrHeapFree, ClrHeapAlloc - compatjit.dll
 
 
 		#region todo
+
+		static string AutoCreateFieldTable<T>(ref T t)
+		{
+			var table  = new ConsoleTable("Field", "Value");
+			var fields = Runtime.GetFieldDescs<T>();
+			foreach (var f in fields) {
+				if (f.Reference.IsPointer)
+					table.AddRow(f.Reference.Name, ReflectionUtil.GetPointerForPointerField(f, ref t).ToString("P"));
+				else table.AddRow(f.Reference.Name, f.Reference.GetValue(t));
+			}
+
+			return table.ToMarkDownString();
+		}
 
 		private static ClrRuntime GetRuntime()
 		{
@@ -315,7 +339,7 @@ namespace Test
 			BenchmarkRunner.Run<T>();
 		}
 
-		private static void VMMap()
+		private static void VmMap()
 		{
 			var table = new ConsoleTable("Low address", "High address", "Size");
 

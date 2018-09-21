@@ -119,6 +119,7 @@ namespace RazorSharp.CLR.Structures
 
 		#endregion
 
+		public bool IsPointer => CorType == CorElementType.Ptr;
 
 		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
 		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
@@ -234,15 +235,12 @@ namespace RazorSharp.CLR.Structures
 			throw new SigcallException();
 		}
 
-
-
 		#region Value
 
 		public object GetValue<TInstance>(TInstance t)
 		{
 			return Info.GetValue(t);
 		}
-
 
 		public void SetValue<TInstance>(TInstance t, object value)
 		{

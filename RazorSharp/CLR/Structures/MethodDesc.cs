@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
+using RazorSharp.CLR.Structures.ILMethods;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -224,6 +225,13 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		public Pointer<MethodTable> EnclosingMethodTable {
 			[CLRSigcall] get => throw new SigcallException("MethodTable");
+		}
+
+		// COR_ILMETHOD
+		[CLRSigcall("48 89 5C 24 08 48 89 74 24 10 57 48 83 EC 20 8B DA 48 8B F9 E8 AB 3D E7 FF 48 8B CF")]
+		public Pointer<COR_ILMETHOD> GetILHeader(int fAllowOverrides = 0)
+		{
+			throw new SigcallException();
 		}
 
 

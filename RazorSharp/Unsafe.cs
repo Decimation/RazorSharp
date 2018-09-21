@@ -41,7 +41,7 @@ namespace RazorSharp
 
 		/// <summary>
 		///     If the type is an array, return
-		///     the pointer offset by <see cref="Runtime.OffsetToArrayData" /> so it points
+		///     the pointer offset by <see cref="Offsets.OffsetToArrayData" /> so it points
 		///     to the array's elements.
 		///     <remarks>
 		///         Note: Equal to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>
@@ -210,7 +210,7 @@ namespace RazorSharp
 
 				case OffsetType.ArrayData:
 					RazorContract.RequiresType<Array, T>();
-					return AddressOfHeap(ref t) + Runtime.OffsetToArrayData;
+					return AddressOfHeap(ref t) + Offsets.OffsetToArrayData;
 
 				case OffsetType.Fields:
 
