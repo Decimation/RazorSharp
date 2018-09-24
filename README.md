@@ -4,7 +4,7 @@ Low-level utilities and tools for working with the CLR, CLR internal structures,
 # Goals
 
 RazorSharp aims to provide functionality similar to that of ClrMD, WinDbg SOS, and Reflection but in a faster and more efficient way, while also exposing more underlying metadata. 
-RazorSharp also allows for manipulation of the CLR and low-level operations with managed objects.
+RazorSharp also allows for manipulation of the CLR and low-level operations with managed objects. Additionally, RazorSharp doesn't require attachment of a debugger to the process to acquire metadata. All metadata is acquired through memory; no debugging is necessary or used.
 
 # Features
 
