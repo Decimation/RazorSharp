@@ -27,11 +27,11 @@ namespace Test.Testing.Benchmarking
 
 		public class CClass
 		{
-			[CLRSigcall(
+			[ClrSigcall(
 				"4C 8B 01 49 83 E0 FC 41 F7 00 00 00 00 80 41 8B 40 04 74 0E 8B 51 08 41 0F B7 08 48 0F AF D1 48 03 C2")]
 			void doSomething() { }
 
-			[CLRSigcall]
+			[ClrSigcall]
 			void doSomething2() { }
 		}
 

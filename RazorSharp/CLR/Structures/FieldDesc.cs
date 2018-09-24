@@ -4,6 +4,7 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -44,7 +45,7 @@ namespace RazorSharp.CLR.Structures
 	///         </item>
 	///     </list>
 	///     <remarks>
-	///         Do not dereference.
+	///         This should only be accessed via <see cref="Pointer{T}"/>
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
@@ -78,6 +79,8 @@ namespace RazorSharp.CLR.Structures
 
 		#region Accessors
 
+
+
 		/// <summary>
 		///     Unprocessed <see cref="Token" />
 		/// </summary>
@@ -109,6 +112,19 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
 
+
+
+
+		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
+		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
+
+		/// <summary>
+		///     Field type
+		/// </summary>
+		public CorElementType CorType => (CorElementType) TypeInt;
+
+		#region bool accessors
+
 		#region Access modifiers
 
 		public bool IsPublic            => Protection.HasFlag(ProtectionLevel.Public);
@@ -120,14 +136,6 @@ namespace RazorSharp.CLR.Structures
 		#endregion
 
 		public bool IsPointer => CorType == CorElementType.Ptr;
-
-		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
-		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);
-
-		/// <summary>
-		///     Field type
-		/// </summary>
-		public CorElementType CorType => (CorElementType) TypeInt;
 
 		/// <summary>
 		///     Whether the field is <c>static</c>
@@ -144,6 +152,22 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		public bool IsRVA => ReadBit(m_dword1, 26);
 
+		public bool IsFixedBuffer => SpecialNames.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
+
+		public bool IsAutoProperty {
+			get {
+				string demangled = SpecialNames.DemangledAutoPropertyName(Name);
+				if (demangled != null) {
+					return SpecialNames.NameOfAutoPropertyBackingField(demangled) == Name;
+				}
+
+				return false;
+			}
+		}
+
+		private bool RequiresFullMBValue => ReadBit(m_dword1, 31);
+
+		#endregion
 
 		/// <summary>
 		///     Access level of the field
@@ -169,7 +193,7 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		private int LoadSize {
-			[CLRSigcall] get => throw new SigcallException();
+			[ClrSigcall] get => throw new SigcallException();
 		}
 
 		/// <summary>
@@ -183,19 +207,6 @@ namespace RazorSharp.CLR.Structures
 		public string Name => Info.Name;
 
 
-		public bool IsFixedBuffer => SpecialNames.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
-
-		public bool IsAutoProperty {
-			get {
-				string demangled = SpecialNames.DemangledAutoPropertyName(Name);
-				if (demangled != null) {
-					return SpecialNames.NameOfAutoPropertyBackingField(demangled) == Name;
-				}
-
-				return false;
-			}
-		}
-
 		/// <summary>
 		///     Enclosing type of this <see cref="FieldDesc" />
 		/// </summary>
@@ -204,7 +215,7 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     <see cref="MethodTable" /> of this field's type
 		/// </summary>
-		public Pointer<MethodTable> TypeMethodTable => Runtime.MethodTableOf(Info.FieldType);
+		public Pointer<MethodTable> FieldMethodTable => Runtime.MethodTableOf(Info.FieldType);
 
 
 		/// <summary>
@@ -214,11 +225,8 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public Pointer<MethodTable> EnclosingMethodTable {
-			[CLRSigcall] get => throw new SigcallException();
+			[ClrSigcall] get => throw new SigcallException();
 		}
-
-
-		private bool RequiresFullMBValue => ReadBit(m_dword1, 31);
 
 		#endregion
 
@@ -229,7 +237,7 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		[CLRSigcall]
+		[ClrSigcall]
 		internal void* GetModule()
 		{
 			throw new SigcallException();
@@ -275,8 +283,6 @@ namespace RazorSharp.CLR.Structures
 			return data;
 		}
 
-		#endregion
-
 
 		//https://github.com/dotnet/coreclr/blob/7b169b9a7ed2e0e1eeb668e9f1c2a049ec34ca66/src/inc/corhdr.h#L1512
 
@@ -293,7 +299,7 @@ namespace RazorSharp.CLR.Structures
 
 
 			// Unsigned 1
-			table.AddRow("MB", MB);
+//			table.AddRow("MB", MB);
 			table.AddRow("MemberDef", Token);
 
 
@@ -301,9 +307,9 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("CorType", CorType);
 			table.AddRow("Size", Size);
 
-			table.AddRow("Static", IsStatic);
-			table.AddRow("ThreadLocal", IsThreadLocal);
-			table.AddRow("RVA", IsRVA);
+			table.AddRow("Static", IsStatic.Prettify());
+			table.AddRow("ThreadLocal", IsThreadLocal.Prettify());
+			table.AddRow("RVA", IsRVA.Prettify());
 
 			table.AddRow("Protection", Protection);
 			table.AddRow("Requires full MB value", RequiresFullMBValue);
@@ -312,6 +318,9 @@ namespace RazorSharp.CLR.Structures
 
 			return table.ToMarkDownString();
 		}
+
+		#endregion
+
 	}
 
 

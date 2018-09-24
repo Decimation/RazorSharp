@@ -103,6 +103,13 @@ namespace Test.Testing.Tests
 			Debug.Assert(lpTarget[0] == t);
 			Debug.Assert(lpTarget.Reference == t);
 			Debug.Assert(lpTarget.Value == t);
+
+			Pointer<byte> a = 0UL;
+			Pointer<byte> b = 1UL;
+
+			Debug.Assert(a < b);
+			Debug.Assert(b > a);
+			Debug.Assert(a.IsNull);
 		}
 	}
 

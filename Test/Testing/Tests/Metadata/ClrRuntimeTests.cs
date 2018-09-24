@@ -1,4 +1,4 @@
-#region
+/*#region
 
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ using Unsafe = RazorSharp.Unsafe;
 
 #endregion
 
-namespace Test.Testing.Tests
+namespace Test.Testing.Tests.Metadata
 {
 
 
@@ -346,10 +346,10 @@ namespace Test.Testing.Tests
 
 			#region Sizes
 
-			/**
-			 * Note: we ignore this because both ClrMD and WinDbg seem to be incorrect about the base
-			 * size of a string.
-			 */
+
+			//  Note: we ignore this because both ClrMD and WinDbg seem to be incorrect about the base
+			//  size of a string.
+
 			if (RazorContract.TypeEqual<string, T>()) {
 				WriteLine("-> Ignoring BaseSize comparison: typeof(T) is string");
 			}
@@ -363,9 +363,9 @@ namespace Test.Testing.Tests
 		}
 
 		/// <summary>
-		/// Compares a <see cref="COR_ILMETHOD"/> with a <see cref="MethodBody"/>
+		/// Compares a <see cref="ILMethod"/> with a <see cref="MethodBody"/>
 		/// </summary>
-		private static void CompareIL(Pointer<COR_ILMETHOD> il, MethodBody mb)
+		private static void CompareIL(Pointer<ILMethod> il, MethodBody mb)
 		{
 			Assert.Multiple(() =>
 			{
@@ -379,9 +379,9 @@ namespace Test.Testing.Tests
 
 		// todo
 		/// <summary>
-		/// Compares a <see cref="COR_ILMETHOD"/> with a <see cref="ClrMethod"/>
+		/// Compares a <see cref="ILMethod"/> with a <see cref="ClrMethod"/>
 		/// </summary>
-		private static void CompareIL(Pointer<COR_ILMETHOD> il, ClrMethod clrMethod)
+		private static void CompareIL(Pointer<ILMethod> il, ClrMethod clrMethod)
 		{
 			var ilInfo = clrMethod.IL;
 
@@ -402,4 +402,4 @@ namespace Test.Testing.Tests
 
 	}
 
-}
+}*/

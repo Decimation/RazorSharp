@@ -9,10 +9,10 @@ namespace Test.Testing.Benchmarking
 
 	//                   Method |     Mean |     Error |    StdDev |
 	// ------------------------ |---------:|----------:|----------:|
-	//     GetFields_ByMT_Check | 146.0 ns | 0.4860 ns | 0.4308 ns | <<
-	//  GetFields_ByPtr_NoCheck | 149.8 ns | 0.4889 ns | 0.4573 ns |
-	//   GetFields_ByMT_NoCheck | 135.8 ns | 0.4067 ns | 0.3605 ns |
-	//   GetFields_ByReflection | 170.8 ns | 0.3591 ns | 0.3183 ns |
+	//     GetFields_ByMT_Check | 128.0 ns | 0.3832 ns | 0.3584 ns | <<
+	//  GetFields_ByPtr_NoCheck | 121.8 ns | 0.8253 ns | 0.7316 ns |
+	//   GetFields_ByMT_NoCheck | 122.5 ns | 0.3999 ns | 0.3741 ns |
+	//   GetFields_ByReflection | 374.4 ns | 3.0981 ns | 2.8979 ns |
 	public class RuntimeBenchmarking
 	{
 

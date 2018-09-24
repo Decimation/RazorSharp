@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using RazorCommon;
 using RazorSharp.CLR;
 
 #endregion
@@ -21,14 +20,14 @@ namespace RazorSharp.Memory
 
 	/// <inheritdoc />
 	/// <summary>
-	///
-	///     <para>Indicates that the attributed function is exposed via signature scanning (using
-	///     <see cref="T:RazorSharp.Memory.SigScanner" /> internally).</para> The original function pointer (
-	///     <see cref="RuntimeMethodHandle.GetFunctionPointer" />) will be overwritten
-	///     with a pointer to the matched signature found by <see cref="SigScanner" />.
-	///     <remarks>
-	///         <c>virtual</c> and <c>abstract</c> functions cannot be annotated.
-	///     </remarks>
+	///     <para>
+	///         Indicates that the attributed function is exposed via signature scanning (using
+	///         <see cref="T:RazorSharp.Memory.SigScanner" /> internally).
+	///     </para>
+	///    <para>The annotated method's entry point (<see cref="RazorSharp.CLR.Structures.MethodDesc.Function"/>)
+	///     will be set (<see cref="ClrFunctions.SetStableEntryPoint"/>) to the address of the matched signature found by <see cref="SigScanner" />.
+	///     </para>
+	/// <para>This allows the calling of non-exported DLL functions, so long as the function signature matches.</para>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method)]
 	public class SigcallAttribute : Attribute
@@ -66,14 +65,14 @@ namespace RazorSharp.Memory
 	/// <summary>
 	///     <see cref="T:RazorSharp.Memory.SigcallAttribute" /> for module <see cref="F:RazorSharp.CLR.CLRFunctions.ClrDll" />
 	/// </summary>
-	public class CLRSigcallAttribute : SigcallAttribute
+	public class ClrSigcallAttribute : SigcallAttribute
 	{
-		public CLRSigcallAttribute() : base(CLRFunctions.ClrDll, null)
+		public ClrSigcallAttribute() : base(ClrFunctions.ClrDll, null)
 		{
 			IsInFunctionMap = true;
 		}
 
-		public CLRSigcallAttribute(string signature) : base(CLRFunctions.ClrDll, signature) { }
+		public ClrSigcallAttribute(string signature) : base(ClrFunctions.ClrDll, signature) { }
 	}
 
 
@@ -87,22 +86,32 @@ namespace RazorSharp.Memory
 
 
 		/// <summary>
-		///     Fully bound types
-		///     Not including individual methods
+		///     <para>Fully bound types</para>
+		///     <para>Not including individual methods</para>
 		/// </summary>
 		private static readonly ISet<Type> BoundTypes = new HashSet<Type>();
 
-		private static readonly SigScanner                                  SigScanner   = new SigScanner();
-		private const           string                                      TEXT_SEGMENT = ".text";
-		public static           bool                                        UseTextSegment { get; set; } = true;
+
+		private static readonly SigScanner SigScanner = new SigScanner();
+
+		/// <summary>
+		/// When <c>true</c>, only the text (code) segment (which contains executable code)
+		/// of the target DLL will be scanned by <see cref="SigScanner"/>.
+		/// </summary>
+		public static bool UseTextSegment { get; set; } = true;
+
+		/// <summary>
+		/// Cached functions
+		/// </summary>
 		private static readonly Dictionary<MethodInfo, Tuple<byte[], long>> SigcallMethodMap;
 
 		static SignatureCall()
 		{
 			SigcallMethodMap = new Dictionary<MethodInfo, Tuple<byte[], long>>();
-			CLRFunctions.AddAll();
+			ClrFunctions.AddAll();
 		}
 
+		#region IsBound
 
 		public static bool IsBound<T>()
 		{
@@ -114,11 +123,14 @@ namespace RazorSharp.Memory
 			return BoundTypes.Contains(t);
 		}
 
+		#endregion
+
+
 
 		private static void SelectModule(SigcallAttribute attr)
 		{
 			if (UseTextSegment) {
-				SigScanner.SelectModuleBySegment(attr.Module, TEXT_SEGMENT);
+				SigScanner.SelectModuleBySegment(attr.Module, Segments.TEXT_SEGMENT);
 			}
 			else {
 				SigScanner.SelectModule(attr.Module);
@@ -144,7 +156,7 @@ namespace RazorSharp.Memory
 
 				IntPtr fn = GetCorrespondingFunctionPointer(attr, methodInfo);
 
-				Runtime.SetFunctionPointer(methodInfo, fn);
+				ClrFunctions.SetStableEntryPoint(methodInfo, fn);
 
 //				Console.WriteLine("Bind {0} @ {1}", methodInfo.Name, Hex.ToHex(fn));
 #if DEBUG
@@ -218,10 +230,19 @@ namespace RazorSharp.Memory
 
 		#endregion
 
+		#region Cache
+
 		private static void AddToMap(MethodInfo mi, byte[] rgBytes, long offsetGuess = 0)
 		{
 			if (!SigcallMethodMap.ContainsKey(mi)) {
 				SigcallMethodMap.Add(mi, new Tuple<byte[], long>(rgBytes, offsetGuess));
+			}
+		}
+
+		public static void Cache<T>(Cache<T> cache)
+		{
+			foreach (PatternPair pair in cache.Pairs) {
+				CacheFunction<T>(pair.Name, pair.Pattern, pair.Offset);
 			}
 		}
 
@@ -240,6 +261,9 @@ namespace RazorSharp.Memory
 		{
 			CacheFunction(typeof(T), funcName, rgBytes, offsetGuess);
 		}
+
+		#endregion
+
 	}
 
 }

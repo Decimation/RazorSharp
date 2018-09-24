@@ -487,9 +487,11 @@ namespace RazorSharp.Pointers
 		///     Increment <see cref="Address" /> by the specified number of bytes
 		/// </summary>
 		/// <param name="bytes">Number of bytes to add</param>
-		public void Add(long bytes)
+		/// <returns><c>this</c></returns>
+		public Pointer<T> Add(long bytes = 1)
 		{
 			m_pValue = PointerUtils.Add(m_pValue, bytes).ToPointer();
+			return this;
 		}
 
 
@@ -497,9 +499,11 @@ namespace RazorSharp.Pointers
 		///     Decrement <see cref="Address" /> by the specified number of bytes
 		/// </summary>
 		/// <param name="bytes">Number of bytes to subtract</param>
-		public void Subtract(long bytes)
+		/// <returns><c>this</c></returns>
+		public Pointer<T> Subtract(long bytes = 1)
 		{
 			m_pValue = PointerUtils.Subtract(m_pValue, bytes).ToPointer();
+			return this;
 		}
 
 
@@ -507,9 +511,11 @@ namespace RazorSharp.Pointers
 		///     Increment <see cref="Address" /> by the specified number of elements
 		/// </summary>
 		/// <param name="elemCnt">Number of elements</param>
-		public void Increment(int elemCnt = 1)
+		/// <returns><c>this</c></returns>
+		public Pointer<T> Increment(int elemCnt = 1)
 		{
 			m_pValue = PointerUtils.Offset<T>(m_pValue, elemCnt).ToPointer();
+			return this;
 		}
 
 
@@ -517,9 +523,11 @@ namespace RazorSharp.Pointers
 		///     Decrement <see cref="Address" /> by the specified number of elements
 		/// </summary>
 		/// <param name="elemCnt">Number of elements</param>
-		public void Decrement(int elemCnt = 1)
+		/// <returns><c>this</c></returns>
+		public Pointer<T> Decrement(int elemCnt = 1)
 		{
 			m_pValue = PointerUtils.Offset<T>(m_pValue, -elemCnt).ToPointer();
+			return this;
 		}
 
 		/// <summary>
@@ -705,7 +713,13 @@ namespace RazorSharp.Pointers
 						goto case PointerSettings.FMT_O;
 					}
 				case PointerSettings.FMT_B:
-					return String.Format("Value @ {0}:\n{1}", Hex.ToHex(Address), Reference.ToString());
+					string str = String.Format("Value @ {0}:\n{1}", Hex.ToHex(Address), Reference.ToString());
+
+					if (typeof(T).IsNumericType()) {
+						str = String.Format("{0} ({1})", str, Hex.TryCreateHex(Reference));
+					}
+
+					return str;
 				default:
 					goto case PointerSettings.FMT_O;
 			}

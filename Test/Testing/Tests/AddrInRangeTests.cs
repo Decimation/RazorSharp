@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 

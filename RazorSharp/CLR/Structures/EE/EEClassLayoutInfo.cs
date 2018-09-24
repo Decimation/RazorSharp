@@ -11,7 +11,7 @@ using RazorCommon.Strings;
 // ReSharper disable InconsistentNaming
 // ReSharper disable BuiltInTypeReferenceStyle
 
-namespace RazorSharp.CLR.Structures
+namespace RazorSharp.CLR.Structures.EE
 {
 
 	#region
@@ -51,12 +51,12 @@ namespace RazorSharp.CLR.Structures
 		#endregion
 
 		/// <summary>
-		/// Packing size in bytes (1, 2, 4, 8 etc.)
+		///     Packing size in bytes (1, 2, 4, 8 etc.)
 		/// </summary>
 		internal BYTE PackingSize => m_cbPackingSize;
 
 		/// <summary>
-		/// # of fields that are of the calltime-marshal variety.
+		///     # of fields that are of the calltime-marshal variety.
 		/// </summary>
 		internal UINT NumCTMFields => m_numCTMFields;
 

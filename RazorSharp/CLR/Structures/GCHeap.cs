@@ -7,7 +7,6 @@ using RazorInvoke;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
-using static RazorSharp.Memory.Mem;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable MemberCanBeMadeStatic.Global
@@ -16,8 +15,7 @@ using static RazorSharp.Memory.Mem;
 #endregion
 
 
-
-namespace RazorSharp.CLR
+namespace RazorSharp.CLR.Structures
 {
 
 
@@ -80,7 +78,7 @@ namespace RazorSharp.CLR
 		///     </remarks>
 		/// </summary>
 		public int GCCount {
-			[CLRSigcall] get => throw new SigcallException();
+			[ClrSigcall] get => throw new SigcallException();
 		}
 
 		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
@@ -105,7 +103,7 @@ namespace RazorSharp.CLR
 		/// <param name="obj">Pointer to an object in the GC heap</param>
 		/// <param name="smallHeapOnly">Whether to include small GC heaps only</param>
 		/// <returns><c>true</c> if <paramref name="obj" /> is a heap pointer; <c>false</c> otherwise</returns>
-		[CLRSigcall]
+		[ClrSigcall]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
 			throw new SigcallException();
@@ -128,7 +126,7 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <param name="obj">Pointer to an object in the GC heap</param>
 		/// <returns></returns>
-		[CLRSigcall]
+		[ClrSigcall]
 		public bool IsEphemeral(void* obj)
 		{
 			throw new SigcallException();
@@ -158,11 +156,11 @@ namespace RazorSharp.CLR
 		/// <returns><c>true</c> if <paramref name="p" /> is in the GC heap; <c>false</c> otherwise</returns>
 		public static bool IsInGCHeap(IntPtr p)
 		{
-			return IsAddressInRange(g_highest_address, p, g_lowest_address);
+			return Mem.IsAddressInRange(g_highest_address, p, g_lowest_address);
 		}
 
 		// 85
-		[CLRSigcall]
+		[ClrSigcall]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
 		{
 			throw new SigcallException();
@@ -190,6 +188,7 @@ namespace RazorSharp.CLR
 			/**
 			 * Circumvent ASLR
 			 */
+
 #if !UNIT_TEST
 			Trace.Assert(!GCSettings.IsServerGC, "Server GC");
 #endif
@@ -202,12 +201,12 @@ namespace RazorSharp.CLR
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 
-			ImageSectionInfo dataSegment = Segments.GetSegment(".data", CLRFunctions.ClrDll);
+			ImageSectionInfo dataSegment = Segments.GetSegment(".data", ClrFunctions.ClrDll);
 
 
-			g_pGCHeap         = ReadPointer<byte>(dataSegment.SectionAddress, g_pGCHeapOffset).Address;
-			g_lowest_address  = ReadPointer<byte>(dataSegment.SectionAddress, g_lowest_addressOffset).Address;
-			g_highest_address = ReadPointer<byte>(dataSegment.SectionAddress, g_highest_addressOffset).Address;
+			g_pGCHeap         = Mem.ReadPointer<byte>(dataSegment.SectionAddress, g_pGCHeapOffset).Address;
+			g_lowest_address  = Mem.ReadPointer<byte>(dataSegment.SectionAddress, g_lowest_addressOffset).Address;
+			g_highest_address = Mem.ReadPointer<byte>(dataSegment.SectionAddress, g_highest_addressOffset).Address;
 
 			SignatureCall.DynamicBind<GCHeap>();
 

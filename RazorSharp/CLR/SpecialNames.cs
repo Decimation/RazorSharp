@@ -10,9 +10,10 @@ namespace RazorSharp.CLR
 
 	internal static class SpecialNames
 	{
-		internal const string FIXED_BUFFER_NAME         = "<{0}>e__FixedBuffer";
-		internal const string BACKING_FIELD_NAME        = "<{0}>" + BACKING_FIELD_NAME_SUFFIX;
-		private const  string BACKING_FIELD_NAME_SUFFIX = "k__BackingField";
+		private const string FIXED_BUFFER_NAME         = "<{0}>e__FixedBuffer";
+		private const string BACKING_FIELD_NAME        = "<{0}>" + BACKING_FIELD_NAME_SUFFIX;
+		private const string BACKING_FIELD_NAME_SUFFIX = "k__BackingField";
+		private const string GET_PREFIX                = "get_";
 
 
 		internal static string TypeNameOfFixedBuffer(string fieldName)
@@ -44,8 +45,7 @@ namespace RazorSharp.CLR
 
 		internal static string NameOfGetPropertyMethod(string propname)
 		{
-			const string getPrefix = "get_";
-			return getPrefix + propname;
+			return GET_PREFIX + propname;
 		}
 	}
 

@@ -1,5 +1,3 @@
-
-
 #region
 
 using System;
@@ -11,8 +9,6 @@ using RazorCommon;
 // ReSharper disable InconsistentNaming
 
 #endregion
-
-
 
 
 namespace RazorSharp.CLR.Structures

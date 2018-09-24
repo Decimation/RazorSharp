@@ -18,7 +18,7 @@ namespace RazorSharp.Memory
 	///     Provides utilities for operating with module (DLL) data segments.
 	///     todo: data segment sizes seem to be a few Ks off from VMMap
 	/// </summary>
-	public static unsafe class Segments
+	public static class Segments
 	{
 
 		/// <summary>
@@ -90,7 +90,7 @@ namespace RazorSharp.Memory
 				ConsoleTable table =
 					new ConsoleTable("Number", "Name", "Size", "Address", "End Address", "Characteristics");
 				table.AddRow(v.SectionNumber, v.SectionName,
-					string.Format("{0} ({1} K)", v.SectionSize, v.SectionSize / Mem.BytesInKilobyte),
+					String.Format("{0} ({1} K)", v.SectionSize, v.SectionSize / Mem.BytesInKilobyte),
 					Hex.ToHex(v.SectionAddress),
 					Hex.ToHex(v.EndAddress), v.SectionHeader.Characteristics);
 				Console.WriteLine(table.ToMarkDownString());
@@ -101,31 +101,22 @@ namespace RazorSharp.Memory
 		{
 			switch (name) {
 				case ".rdata":
-				case "rdata":
 					return SegmentType.rdata;
 				case ".idata":
-				case "idata":
 					return SegmentType.idata;
 				case ".data":
-				case "data":
 					return SegmentType.data;
 				case ".pdata":
-				case "pdata":
 					return SegmentType.pdata;
 				case ".bss":
-				case "bss":
 					return SegmentType.bss;
 				case ".rsrc":
-				case "rsrc":
 					return SegmentType.rsrc;
 				case ".reloc":
-				case "reloc":
 					return SegmentType.reloc;
-				case ".text":
-				case "text":
+				case TEXT_SEGMENT:
 					return SegmentType.text;
 				case ".didat":
-				case "didat":
 					return SegmentType.didat;
 				default:
 					throw new Exception();
@@ -187,14 +178,15 @@ namespace RazorSharp.Memory
 			ImageSectionInfo s      = GetSegment(segment, module);
 			byte[]           segMem = Mem.ReadBytes(s.SectionAddress, 0, s.SectionSize);
 			for (int i = 0; i < s.SectionSize; i += IntPtr.Size) {
-				if (new ArraySegment<byte>(segMem, i, IntPtr.Size).SequenceEqual(
-					mem)) {
+				if (new ArraySegment<byte>(segMem, i, IntPtr.Size).SequenceEqual(mem)) {
 					return s.SectionAddress + i;
 				}
 			}
 
 			return IntPtr.Zero;
 		}
+
+		internal const string TEXT_SEGMENT = ".text";
 	}
 
 }

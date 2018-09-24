@@ -1,12 +1,18 @@
+#region
+
 using System.Runtime.InteropServices;
 using RazorSharp.Pointers;
+
+#endregion
+
 // ReSharper disable MemberCanBeMadeStatic.Global
+// ReSharper disable InconsistentNaming
 
 namespace RazorSharp.CLR.Structures.ILMethods
 {
 
 	/// <summary>
-	/// Internal name: <code>COR_ILMETHOD_TINY</code>
+	///     <para>Internal name: <c>COR_ILMETHOD_TINY</c></para>
 	///     <para>Used when the method is tiny (less than 64 bytes), and there are no local vars</para>
 	///     <code>typedef struct tagCOR_ILMETHOD_TINY : IMAGE_COR_ILMETHOD_TINY</code>
 	///     <para>Corresponding files:</para>
@@ -23,40 +29,33 @@ namespace RazorSharp.CLR.Structures.ILMethods
 	///     </list>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct COR_ILMETHOD_TINY /* : IMAGE_COR_ILMETHOD_TINY */
+	public unsafe struct TinyILMethod /* : IMAGE_COR_ILMETHOD_TINY */
 	{
 		/// <summary>
-		/// This value is inherited from <see cref="IMAGE_COR_ILMETHOD_TINY"/>
+		///     This value is inherited from <see cref="IMAGE_COR_ILMETHOD_TINY" />
 		/// </summary>
 		[FieldOffset(0)] private readonly IMAGE_COR_ILMETHOD_TINY m_inheritedValue;
 
 		private byte Flags_CodeSize => m_inheritedValue.Flags_CodeSize;
 
-		public bool IsTiny {
-			get {
-				return (Flags_CodeSize & (((uint) CorILMethodFlags.FormatMask) >> 1)) ==
-				       (uint) CorILMethodFlags.TinyFormat;
-			}
-		}
+		public bool IsTiny => (Flags_CodeSize & ((uint) CorILMethodFlags.FormatMask >> 1)) ==
+		                      (uint) CorILMethodFlags.TinyFormat;
 
 		/// <summary>
-		/// <code>
+		///     <code>
 		/// return(((BYTE*) this) + sizeof(struct tagCOR_ILMETHOD_TINY));
 		/// </code>
 		/// </summary>
-		public Pointer<byte> Code {
-			get { return (((byte*) Unsafe.AddressOf(ref this)) + sizeof(IMAGE_COR_ILMETHOD_TINY)); }
-		}
+		public Pointer<byte> Code => (byte*) Unsafe.AddressOf(ref this) + sizeof(IMAGE_COR_ILMETHOD_TINY);
 
-		public uint CodeSize {
-			get { return ((uint) Flags_CodeSize) >> ((int) (CorILMethodFlags.FormatShift - 1)); }
-		}
+		public uint CodeSize => (uint) Flags_CodeSize >> (int) (CorILMethodFlags.FormatShift - 1);
 
 		public uint MaxStack       => 8;
 		public uint LocalVarSigTok => 0;
 	}
 
 	/// <summary>
+	///     <para>Internal name: <c>IMAGE_COR_ILMETHOD_TINY</c></para>
 	///     <para>Used when the method is tiny (less than 64 bytes), and there are no local vars</para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">

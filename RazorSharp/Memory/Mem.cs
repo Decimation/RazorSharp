@@ -136,16 +136,28 @@ namespace RazorSharp.Memory
 			int    size                   = Unsafe.SizeOf<T>();
 			IntPtr targetPtr              = PointerUtils.Add(p, byteOffset).Address;
 
-//			bool a = Kernel32.VirtualProtect(targetPtr, (IntPtr) size, Enumerations.MemoryProtection.ExecuteReadWrite, out _);
-//			RazorContract.Assert(a);
 
-			bool b = Kernel32.WriteProcessMemory(hProc, targetPtr,
+			// Make the region writable
+			bool virtualProtect = Kernel32.VirtualProtect(targetPtr, (IntPtr) size,
+				Enumerations.MemoryProtection.ExecuteReadWrite, out uint oldProtect);
+			Enumerations.MemoryProtection mpOldProtect = (Enumerations.MemoryProtection) oldProtect;
+
+			RazorContract.Assert(virtualProtect);
+
+			// Write the memory
+			bool writeProcessMemory = Kernel32.WriteProcessMemory(hProc, targetPtr,
 				Unsafe.AddressOf(ref t), size, ref lpNumberOfBytesWritten);
 
-			RazorContract.Assert(b);
+			RazorContract.Assert(writeProcessMemory);
 			RazorContract.Assert(lpNumberOfBytesWritten == size);
 
-			Kernel32.CloseHandle(hProc);
+			// Close the handle
+			bool closeHandle = Kernel32.CloseHandle(hProc);
+			RazorContract.Assert(closeHandle);
+
+			// Restore the old memory protection
+			bool virtualProtectRestore = Kernel32.VirtualProtect(targetPtr, (IntPtr) size, mpOldProtect, out _);
+			RazorContract.Assert(virtualProtectRestore);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -17,7 +17,9 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
 using JetBrains.Annotations;
-using Microsoft.Diagnostics.Runtime;
+
+//using Microsoft.Diagnostics.Runtime;
+using Mono.Cecil;
 using NUnit.Framework;
 using RazorCommon;
 using RazorCommon.Extensions;
@@ -29,6 +31,7 @@ using RazorSharp.Analysis;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Fixed;
 using RazorSharp.CLR.Structures;
+using RazorSharp.CLR.Structures.EE;
 using RazorSharp.CLR.Structures.HeapObjects;
 using RazorSharp.CLR.Structures.ILMethods;
 using RazorSharp.Memory;
@@ -168,41 +171,159 @@ namespace Test
 			Console.WriteLine(Collections.ToString(pMd.Reference.Info.GetMethodBody()?.GetILAsByteArray()));
 			Console.WriteLine(Mem.Read<byte>(clrMethod.IL.Address, 1).ToString("X"));*/
 
-			Pointer<byte> a = 0UL;
-			Pointer<byte> b = 1UL;
 
-			Debug.Assert(a < b);
-			Debug.Assert(b > a);
-			Debug.Assert(a.IsNull);
+/*			auto a = new auto();
+			var mdIncr = Runtime.GetMethodDesc<auto>("incr");
+			a.incr();
+			Console.WriteLine(a.Value);
 
-			var       pMd       = Runtime.GetMethodDesc(typeof(Program), "call");
-			ClrMethod clrMethod = GetRuntime().GetMethodByHandle(pMd.ToUInt64());
-			var       pIL       = pMd.Reference.GetILHeader().Reference.Code;
+			var mdOverride = Runtime.GetMethodDesc(typeof(Program), "incr_override");
+			mdIncr.Reference.SetStableEntryPoint(mdOverride.Reference.Function);
+			a.incr();
+			Console.WriteLine(a.Value);
 
-			Console.WriteLine("Actual IL:");
-			Console.WriteLine(Collections.ToString(pMd.Reference.Info.GetMethodBody().GetILAsByteArray()));
+			var fdValue = Runtime.GetFieldDesc<auto>("m_value");
+			var dw = fdValue.Reference.DWORD_2;
+			Console.WriteLine(Bits.ReadBits((int)dw,27,0));
+			Console.WriteLine((CorElementType) Bits.ReadBits((int)dw,5,27));
 
-			// 000001532FFC5248       77843          7  285212695  722081536
+			var rdata =Segments.GetSegment(".rdata", "clr.dll");
+			Pointer<int> lpInt32 = rdata.SectionAddress;
+			var ptr = Segments.ScanSegment(".rdata", "clr.dll", new byte[] { 0x80, 0x31, 0x00, 0x00});
+			Console.WriteLine(Hex.ToHex(ptr));
+//			Console.WriteLine(lpInt32);*/
 
-			Console.WriteLine(Hex.ToHex(clrMethod.IL.Address));
-			Console.WriteLine(Hex.ToHex(pIL.Address));
+			var mdItemOp         = Runtime.GetMethodDesc<auto>("get_Item");
+			var mdItemOpOverride = Runtime.GetMethodDesc(typeof(Program), "get_ItemOp");
+			mdItemOp.Reference.SetStableEntryPoint(mdItemOpOverride.Reference.Function);
+			auto a = new auto();
+			Debug.Assert(a[0] == -0xFF);
 
-			Console.WriteLine(Collections.ToString(Mem.ReadBytes(clrMethod.IL.Address, 13)));
-			Console.WriteLine(Collections.ToString(pIL.CopyOut(13)));
 
-			const long fn = 0x7FFCBCC614D0;
+			var mdAdd = Runtime.GetMethodDesc(typeof(Operations), "addOp");
+			var mdSub = Runtime.GetMethodDesc(typeof(Operations), "subOp");
+			mdAdd.Reference.Function = mdSub.Reference.Function;
+			Debug.Assert(Operations.addOp(1, 1) == 0);
+
+
+			var il = getIL(typeof(Program), "getValue32");
+			Console.WriteLine(Collections.ToString(il.Reference.GetILAsByteArray()));
+			Console.WriteLine(Collections.ToString(getBytes(1)));
+
+			Console.WriteLine(Collections.ToString(MemoryOfVal(1)));
 
 		}
 
-		static void call()
+		static byte[] getBytes<T>(T value) where T : struct
 		{
-			Console.WriteLine("g");
+			Pointer<T> ptr = Unsafe.AddressOf(ref value);
+			return ptr.CopyOut<byte>(SizeOf<T>());
 		}
 
-		// ClrHeapFree, ClrHeapAlloc - compatjit.dll
+		static Pointer<ILMethod> getIL(Type t, string name)
+		{
+			var mdVal = Runtime.GetMethodDesc(t, name);
+			return mdVal.Reference.GetILHeader();
+		}
+
+		static Pointer<ILMethod> getIL<T>(string name)
+		{
+			return getIL(typeof(T), name);
+		}
+
+
+		static int getValue32()
+		{
+			return 1;
+		}
+
+
+		private static void op_Finalize(void* __this)
+		{
+			Pointer<byte> pVal = __this;
+			Console.WriteLine("{0:P}", pVal);
+		}
+
+		class Class
+		{
+			~Class() { }
+
+			public static Class operator +(Class c, object o)
+			{
+				return c;
+			}
+		}
+
+		static Class op_AddOverride(Class val, object val2)
+		{
+			Console.WriteLine(val);
+			Console.WriteLine(val2);
+			return val;
+		}
+
+		private static class Operations
+		{
+			public static int addOp(int a, int b)
+			{
+				return a + b;
+			}
+
+			public static int subOp(int a, int b)
+			{
+				return a - b;
+			}
+		}
+
+
+		static int get_ItemOp(void* __this, int index)
+		{
+			Debug.Assert(GCHeap.GlobalHeap.Reference.IsHeapPointer(__this));
+			return -0xFF;
+		}
+
+		class auto
+		{
+			private int m_value;
+
+			public int Value => m_value;
+
+			public int this[int index] {
+				get => m_value;
+			}
+
+			public virtual void incr()
+			{
+				m_value++;
+			}
+		}
+
+
+		[DllImport("kernel32.dll", EntryPoint = "RtlZeroMemory")]
+		static extern void get(void* v, uint sz);
+
+
+		[Conditional("DEBUG")]
+		static void @break()
+		{
+			Console.ReadLine();
+		}
 
 
 		#region todo
+
+		/*static void Region()
+		{
+			var table   = new ConsoleTable("Region", "Address", "Size", "GC Segment", "GC Heap");
+			var regions = GetRuntime().EnumerateMemoryRegions().OrderBy(x => x.Address).DistinctBy(x => x.Address);
+
+			foreach (var region in regions) {
+				table.AddRow(region.Type, Hex.ToHex(region.Address), region.Size,
+					region.Type == ClrMemoryRegionType.GCSegment ? region.GCSegmentType.ToString() : "-",
+					region.HeapNumber != -1 ? region.HeapNumber.ToString() : "-");
+			}
+
+			Console.WriteLine(table.ToMarkDownString());
+		}*/
 
 		static string AutoCreateFieldTable<T>(ref T t)
 		{
@@ -217,12 +338,12 @@ namespace Test
 			return table.ToMarkDownString();
 		}
 
-		private static ClrRuntime GetRuntime()
+		/*private static ClrRuntime GetRuntime()
 		{
 			var dataTarget =
 				DataTarget.AttachToProcess(Process.GetCurrentProcess().Id, UInt32.MaxValue, AttachFlag.Passive);
 			return dataTarget.ClrVersions.Single().CreateRuntime();
-		}
+		}*/
 
 		private static TTo reinterpret_cast<TFrom, TTo>(TFrom tf)
 		{
@@ -278,7 +399,7 @@ namespace Test
 					var table = new ConsoleTable("MT", "Field", "Offset", "Type", "VT", "Attr", "Value", "Name");
 					foreach (var v in m_rgpFieldDescs) {
 						table.AddRow(
-							Hex.ToHex(v.Reference.TypeMethodTable.Address),
+							Hex.ToHex(v.Reference.FieldMethodTable.Address),
 							Hex.ToHex(v.Reference.Token),
 							v.Reference.Offset,
 							v.Reference.Info.FieldType.Name, v.Reference.Info.FieldType.IsValueType,

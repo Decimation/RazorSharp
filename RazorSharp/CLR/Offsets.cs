@@ -1,5 +1,9 @@
+#region
+
 using System;
 using RazorSharp.CLR.Structures;
+
+#endregion
 
 namespace RazorSharp.CLR
 {
@@ -7,7 +11,7 @@ namespace RazorSharp.CLR
 	public static class Offsets
 	{
 		internal const int FIELD_DESC_LIST_FIELD_OFFSET = 24;
-		internal const int CHUNKS_FIELD_OFFSET = 32;
+		internal const int CHUNKS_FIELD_OFFSET          = 32;
 
 		/// <summary>
 		///     Heap offset to the first array element.

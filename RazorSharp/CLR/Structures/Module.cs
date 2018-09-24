@@ -3,6 +3,8 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.Memory;
+using RazorSharp.Pointers;
 
 #endregion
 
@@ -24,7 +26,18 @@ namespace RazorSharp.CLR.Structures
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct Module
 	{
-		[FieldOffset(0)]  private readonly void*       m_pSimpleName;
+		static Module()
+		{
+			SignatureCall.DynamicBind<Module>();
+		}
+
+		[ClrSigcall("48 89 5C 24 08 57 48 83 EC 30 83 3D FB D1 8F 00 00 8B DA")]
+		public Pointer<MethodDesc> LookupMethodDef(uint methodDef)
+		{
+			return null;
+		}
+
+		/*[FieldOffset(0)]  private readonly void*       m_pSimpleName;
 		[FieldOffset(8)]  private readonly void*       m_file;
 		[FieldOffset(16)] private readonly MethodDesc* m_pDllMain;
 		[FieldOffset(24)] private readonly DWORD       m_dwTransientFlags;
@@ -64,7 +77,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Cookie block", Hex.ToHex(m_pVASigCookieBlock));
 			table.AddRow("Assembly", Hex.ToHex(m_pAssembly));
 			return table.ToMarkDownString();
-		}
+		}*/
 
 		// Current line: https://github.com/dotnet/coreclr/blob/93955d4b58380068df9d99c58a699de6ad03f532/src/vm/ceeload.h#L1428
 	}

@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
+using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -316,9 +317,8 @@ namespace RazorSharp
 		///     <list type="bullet">
 		///         <item>
 		///             <description>
-		///                 <see cref="MethodTable.BaseSize" /> = The base instance size of a type (<c>24</c> (x64) or <c>12</c>
-		///                 (x86)
-		///                 by default) (<see cref="Constants.MinObjectSize" />)
+		///                 <see cref="MethodTable.BaseSize" /> = The base instance size of a type
+		///                 (<c>24</c> (x64) or <c>12</c> (x86) by default) (<see cref="Constants.MinObjectSize" />)
 		///             </description>
 		///         </item>
 		///         <item>
@@ -473,14 +473,11 @@ namespace RazorSharp
 		/// <param name="t">Value to copy the memory of</param>
 		/// <typeparam name="T">Reference type</typeparam>
 		/// <returns>An array of <see cref="Byte" />s containing the raw memory of <paramref name="t" /></returns>
-		public static byte[] MemoryOf<T>(ref T t) where T : class
+		public static byte[] MemoryOf<T>(T t) where T : class
 		{
-			int    heapSize = HeapSize(in t);
-			byte[] alloc    = new byte[heapSize];
-
 			// Need to include the ObjHeader
-			Marshal.Copy(AddressOfHeap(ref t) - IntPtr.Size, alloc, 0, heapSize);
-			return alloc;
+			Pointer<T> ptr = Unsafe.AddressOfHeap(ref t, OffsetType.Header);
+			return ptr.CopyOut<byte>(HeapSize(in t));
 		}
 
 		/// <summary>
@@ -489,15 +486,13 @@ namespace RazorSharp
 		/// <param name="t">Value to copy the memory of</param>
 		/// <typeparam name="T">Value type</typeparam>
 		/// <returns>An array of <see cref="Byte" />s containing the raw memory of <paramref name="t" /></returns>
-		public static byte[] MemoryOfVal<T>(ref T t) where T : struct
+		public static byte[] MemoryOfVal<T>(T t) where T : struct
 		{
-			int    size  = SizeOf<T>();
-			byte[] alloc = new byte[size];
-			Marshal.Copy(AddressOf(ref t), alloc, 0, size);
-			return alloc;
+			Pointer<T> ptr = Unsafe.AddressOf(ref t);
+			return ptr.CopyOut<byte>(ptr.ElementSize);
 		}
 
-		public static byte[] MemoryOfFields<T>(ref T t) where T : class
+		public static byte[] MemoryOfFields<T>(T t) where T : class
 		{
 			// Subtract the size of the ObjHeader and MethodTable*
 			int fieldSize = HeapSize(in t) - IntPtr.Size * 2;

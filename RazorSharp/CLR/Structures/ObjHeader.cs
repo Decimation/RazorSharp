@@ -8,10 +8,10 @@ using RazorSharp.Utilities;
 
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable ConvertToAutoPropertyWhenPossible
-
+// ReSharper disable InconsistentNaming
 #endregion
 
-// ReSharper disable InconsistentNaming
+
 
 namespace RazorSharp.CLR.Structures
 {
@@ -104,7 +104,7 @@ namespace RazorSharp.CLR.Structures
 
 		public bool Equals(ObjHeader other)
 		{
-			return m_uAlignpad == other.m_uAlignpad && m_uSyncBlockValue == other.m_uSyncBlockValue;
+			return m_uSyncBlockValue == other.m_uSyncBlockValue;
 		}
 
 		public override int GetHashCode()

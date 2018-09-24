@@ -92,7 +92,7 @@ namespace RazorSharp.CLR
 		/// <returns>The <see cref="Type" /> of the specified <see cref="MethodTable" /></returns>
 		public static Type MethodTableToType(Pointer<MethodTable> pMt)
 		{
-			return CLRFunctions.JIT_GetRuntimeType(pMt.ToPointer());
+			return ClrFunctions.JIT_GetRuntimeType(pMt.ToPointer());
 		}
 
 		/// <summary>
@@ -174,7 +174,10 @@ namespace RazorSharp.CLR
 
 
 		/// <summary>
-		///     Gets all the <see cref="FieldDesc" />s from <see cref="MethodTable.FieldDescList" />
+		///     Gets all the <see cref="FieldDesc" />s from <typeparamref name="T" />'s <see cref="MethodTable.FieldDescList" />
+		///     <remarks>
+		///         Note: this does not include literal (<c>const</c>) fields.
+		///     </remarks>
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
@@ -245,9 +248,12 @@ namespace RazorSharp.CLR
 			return GetFieldDesc(typeof(T), name, fieldTypes, flags);
 		}
 
+
 		internal static FieldInfo[] GetFields<T>()
 		{
-			return typeof(T).GetFields(DefaultFlags);
+			FieldInfo[] fields = typeof(T).GetFields(DefaultFlags);
+			Collections.RemoveAll(ref fields, f => f.IsLiteral);
+			return fields;
 		}
 
 		#endregion
@@ -302,18 +308,6 @@ namespace RazorSharp.CLR
 		#endregion
 
 		#region Sigcall functions
-
-		/// <summary>
-		///     Same operation as <see cref="MethodDesc.SetFunctionPointer" /> without using a <see cref="MethodDesc" />
-		/// </summary>
-		/// <param name="info">Target method</param>
-		/// <param name="fn">Pointer to new code</param>
-		/// <exception cref="RuntimeException">If the function is <c>virtual</c> or <c>abstract</c></exception>
-		internal static void SetFunctionPointer(MethodInfo info, IntPtr fn)
-		{
-			RazorContract.Requires(!info.IsVirtual && !info.IsAbstract);
-			Marshal.WriteIntPtr(info.MethodHandle.Value, IntPtr.Size, fn);
-		}
 
 		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(Type t, BindingFlags flags = DefaultFlags)
 			where TAttribute : Attribute

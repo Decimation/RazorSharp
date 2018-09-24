@@ -1,5 +1,7 @@
 #region
 
+#region
+
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
@@ -7,11 +9,15 @@ using RazorSharp.Pointers;
 
 #endregion
 
+// ReSharper disable InconsistentNaming
+
+#endregion
+
 namespace RazorSharp.CLR.Structures.ILMethods
 {
 
 	/// <summary>
-	/// Internal name: <code>COR_ILMETHOD_FAT</code>
+	///     <para>Internal name: <c>COR_ILMETHOD_FAT</c></para>
 	///     <para>This structure is the 'fat' layout, where no compression is attempted.</para>
 	///     <para>Note that this structure can be added on at the end, thus making it extensible</para>
 	///     <code>typedef struct tagCOR_ILMETHOD_FAT : IMAGE_COR_ILMETHOD_FAT</code>
@@ -29,10 +35,10 @@ namespace RazorSharp.CLR.Structures.ILMethods
 	///     </list>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct COR_ILMETHOD_FAT /* : IMAGE_COR_ILMETHOD_FAT */
+	public unsafe struct FatILMethod /* : IMAGE_COR_ILMETHOD_FAT */
 	{
 		/// <summary>
-		/// This value is inherited from <see cref="IMAGE_COR_ILMETHOD_FAT"/>
+		///     This value is inherited from <see cref="IMAGE_COR_ILMETHOD_FAT" />
 		/// </summary>
 		[FieldOffset(0)] private readonly IMAGE_COR_ILMETHOD_FAT m_inheritedValue;
 
@@ -45,18 +51,15 @@ namespace RazorSharp.CLR.Structures.ILMethods
 
 
 		/// <summary>
-		/// Max stack size
-		///
-		/// <code>
-		/// return VAL16(*(USHORT*)((BYTE*)this+2));
-		/// </code>
+		///     Max stack size
+		///     <code>
+		///  return VAL16(*(USHORT*)((BYTE*)this+2));
+		///  </code>
 		/// </summary>
-		public uint MaxStack {
-			get { return (*(ushort*) ((byte*) Unsafe.AddressOf(ref this) + 2)); }
-		}
+		public uint MaxStack => *(ushort*) ((byte*) Unsafe.AddressOf(ref this) + 2);
 
 		/// <summary>
-		/// <code>
+		///     <code>
 		/// /* return Flags; */
 		/// BYTE* p = (BYTE*)this;
 		/// return ((unsigned)*(p+0)) | (( ((unsigned)*(p+1)) &amp; 0x0F) &lt;&lt; 8);
@@ -65,28 +68,23 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		public uint FlagsValue {
 			get {
 				byte* p = (byte*) Unsafe.AddressOf(ref this);
-				return ((uint) *(p + 0)) | ((((uint) *(p + 1)) & 0x0F) << 8);
+				return ((uint) *p + 0) | ((((uint) *p + 1) & 0x0F) << 8);
 			}
 		}
 
 		public CorILMethodFlags Flags => (CorILMethodFlags) FlagsValue;
 
 		/// <summary>
-		/// <code>
+		///     <code>
 		/// return (*(BYTE*)this &amp; CorILMethod_FormatMask) == CorILMethod_FatFormat;
 		/// </code>
 		/// </summary>
-		public bool IsFat {
-
-			get {
-				return (CorILMethodFlags) ((*(byte*) Unsafe.AddressOf(ref this)) &
-				                           (byte) CorILMethodFlags.FormatMask) ==
-				       CorILMethodFlags.FatFormat;
-			}
-		}
+		public bool IsFat => (CorILMethodFlags) (*(byte*) Unsafe.AddressOf(ref this) &
+		                                         (byte) CorILMethodFlags.FormatMask) ==
+		                     CorILMethodFlags.FatFormat;
 
 		/// <summary>
-		/// <code>
+		///     <code>
 		/// /* return Size; */
 		/// BYTE* p = (BYTE*)this;
 		/// return *(p+1) &gt;&gt; 4;
@@ -95,22 +93,20 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		public int Size {
 			get {
 				byte* p = (byte*) Unsafe.AddressOf(ref this);
-				return *(p + 1) >> 4;
+				return (*p + 1) >> 4;
 			}
 		}
 
 		/// <summary>
-		/// <code>
+		///     <code>
 		/// return(((BYTE*) this) + 4*GetSize());
 		/// </code>
 		/// </summary>
-		public Pointer<byte> Code {
-			get { return ((byte*) Unsafe.AddressOf(ref this)) + 4 * Size; }
-		}
+		public Pointer<byte> Code => (byte*) Unsafe.AddressOf(ref this) + 4 * Size;
 
 		public override string ToString()
 		{
-			var table = new ConsoleTable("Field", "Value");
+			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Flags", Runtime.CreateFlagsString(FlagsValue, Flags));
 			table.AddRow("Size", Size);
 			table.AddRow("Code size", CodeSize);
@@ -123,6 +119,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 	}
 
 	/// <summary>
+	///     <para>Internal name: <c>IMAGE_COR_ILMETHOD_FAT</c></para>
 	///     <para>This structure is the 'fat' layout, where no compression is attempted.</para>
 	///     <para>Note that this structure can be added on at the end, thus making it extensible</para>
 	///     <para>Corresponding files:</para>

@@ -93,12 +93,7 @@ namespace RazorSharp.Memory
 				return;
 			}
 
-			foreach (ProcessModule m in Process.GetCurrentProcess().Modules) {
-				if (m.ModuleName == name) {
-					SelectModule(m);
-					return;
-				}
-			}
+			SelectModule(Modules.GetModule(name));
 		}
 
 		#endregion
@@ -177,6 +172,31 @@ namespace RazorSharp.Memory
 			return FindPattern(arrPattern, ofsGuess);
 		}
 
+		public static IntPtr QuickScan(string module, string szPattern, long ofsGuess = 0)
+		{
+			return QuickScan(module, ParsePatternString(szPattern), ofsGuess);
+		}
+
+		public static IntPtr QuickScan(string module, byte[] rgPattern, long ofsGuess = 0)
+		{
+			SigScanner ss = new SigScanner();
+			ss.SelectModule(module);
+			return ss.FindPattern(rgPattern, ofsGuess);
+		}
+
+		public static TDelegate QuickScanDelegate<TDelegate>(string module, byte[] rgPattern, long ofsGuess = 0)
+			where TDelegate : Delegate
+		{
+			SigScanner ss = new SigScanner();
+			ss.SelectModule(module);
+			return ss.GetDelegate<TDelegate>(rgPattern, ofsGuess);
+		}
+
+		public static TDelegate QuickScanDelegate<TDelegate>(string module, string szPattern, long ofsGuess = 0)
+			where TDelegate : Delegate
+		{
+			return QuickScanDelegate<TDelegate>(module, ParsePatternString(szPattern), ofsGuess);
+		}
 
 		/*public IntPtr FindPattern(string szPattern, out long lTime)
 		{
@@ -201,24 +221,19 @@ namespace RazorSharp.Memory
 			return IntPtr.Zero;
 		}*/
 
-		public TDelegate GetDelegate<TDelegate>(byte[] opcodes, long ofsGuess = 0) where TDelegate : Delegate
+		public TDelegate GetDelegate<TDelegate>(byte[] rgPattern, long ofsGuess = 0) where TDelegate : Delegate
 		{
-			IntPtr addr = FindPattern(opcodes, ofsGuess);
+			IntPtr addr = FindPattern(rgPattern, ofsGuess);
 			if (addr == IntPtr.Zero) {
-				throw new Exception($"Could not find function with opcodes {opcodes}");
+				throw new Exception($"Could not find function with opcodes {rgPattern}");
 			}
 
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
 		}
 
-		public TDelegate GetDelegate<TDelegate>(string opcodes, long ofsGuess = 0) where TDelegate : Delegate
+		public TDelegate GetDelegate<TDelegate>(string szPattern, long ofsGuess = 0) where TDelegate : Delegate
 		{
-			IntPtr addr = FindPattern(opcodes, ofsGuess);
-			if (addr == IntPtr.Zero) {
-				throw new Exception($"Could not find function with opcodes {opcodes}");
-			}
-
-			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
+			return GetDelegate<TDelegate>(ParsePatternString(szPattern), ofsGuess);
 		}
 
 

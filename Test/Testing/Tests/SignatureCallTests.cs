@@ -36,7 +36,7 @@ namespace Test.Testing.Tests
 		[Test]
 		public void GCHeap()
 		{
-			var gc = RazorSharp.CLR.GCHeap.GlobalHeap;
+			var gc = RazorSharp.CLR.Structures.GCHeap.GlobalHeap;
 			string o = "foo";
 
 			// todo: weird DivideByZeroException here, passes fine without unit testing

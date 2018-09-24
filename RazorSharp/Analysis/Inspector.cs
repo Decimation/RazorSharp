@@ -9,6 +9,7 @@ using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
+using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 

@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp.CLR.Structures
+namespace RazorSharp.CLR.Structures.EE
 {
 
 	[StructLayout(LayoutKind.Explicit)]

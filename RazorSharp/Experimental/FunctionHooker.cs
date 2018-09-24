@@ -98,7 +98,8 @@ namespace RazorSharp.Experimental
 			Pointer<MethodDesc> md = GetMethodDesc<TType>(fnName);
 
 //			AddFunction(md->MethodInfo, fn);
-			md.Reference.SetFunctionPointer(fn);
+
+//			md.Reference.SetFunctionPointer(fn);
 		}
 	}
 

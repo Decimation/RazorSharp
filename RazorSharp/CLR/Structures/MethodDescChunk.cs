@@ -46,7 +46,7 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     Relative fixup pointer
 		/// </summary>
-		[FieldOffset(0)] private readonly MethodTable* m_methodTable;
+		[FieldOffset(0)] private /*readonly*/ MethodTable* m_methodTable;
 
 		/// <summary>
 		///     Relative pointer
@@ -97,6 +97,7 @@ namespace RazorSharp.CLR.Structures
 				__this.Add((int) m_methodTable);
 				return __this;
 			}
+			set => m_methodTable = (MethodTable*)value.ToPointer();
 		}
 
 		public Pointer<MethodDesc> FirstMethodDesc {

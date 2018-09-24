@@ -1,6 +1,11 @@
 #region
 
+#region
+
 using System;
+
+#endregion
+
 // ReSharper disable UnusedMemberInSuper.Global
 
 #endregion
@@ -34,7 +39,7 @@ namespace RazorSharp.Pointers
 		T Value { get; set; }
 
 		/// <summary>
-		///     Returns the value as a reference, without copying.
+		///     Returns the value as a reference.
 		/// </summary>
 		ref T Reference { get; }
 

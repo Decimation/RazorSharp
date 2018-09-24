@@ -2,6 +2,7 @@
 
 using System;
 using RazorSharp.CLR.Structures;
+using RazorSharp.CLR.Structures.EE;
 
 #endregion
 
@@ -186,37 +187,7 @@ namespace RazorSharp.CLR
 		}
 	}
 
-	/// <summary>
-	///     The value of lowest two bits describe what the union contains
-	///     <remarks>
-	///         Use with <see cref="Structures.MethodTable.UnionType" />
-	///     </remarks>
-	/// </summary>
-	[Flags]
-	public enum LowBits
-	{
-		/// <summary>
-		///     0 - pointer to <see cref="EEClass" />
-		///     This <see cref="MethodTable" /> is the canonical method table.
-		/// </summary>
-		EEClass = 0,
-
-		/// <summary>
-		///     1 - not used
-		/// </summary>
-		Invalid = 1,
-
-		/// <summary>
-		///     2 - pointer to canonical <see cref="MethodTable" />.
-		/// </summary>
-		MethodTable = 2,
-
-		/// <summary>
-		///     3 - pointer to indirection cell that points to canonical <see cref="MethodTable" />.
-		///     (used only if FEATURE_PREJIT is defined)
-		/// </summary>
-		Indirection = 3
-	}
+	#region FieldDesc
 
 	/// <summary>
 	///     <remarks>
@@ -232,6 +203,10 @@ namespace RazorSharp.CLR
 		ProtectedInternal = 20,
 		Public            = 24,
 	}
+
+	#endregion
+
+
 
 
 	/// <summary>
@@ -401,80 +376,39 @@ namespace RazorSharp.CLR
 		Pinned      = 0x45,
 	}
 
+
+	#region MethodTable
+
 	/// <summary>
-	///     <para>Sources:</para>
-	///     <list type="bullet">
-	///         <item>
-	///             <description>/src/vm/method.hpp: 1701</description>
-	///         </item>
-	///     </list>
+	///     The value of lowest two bits describe what the union contains
 	///     <remarks>
-	///         Use with <see cref="MethodDesc.Flags2" />
+	///         Use with <see cref="Structures.MethodTable.UnionType" />
 	///     </remarks>
 	/// </summary>
 	[Flags]
-	public enum MethodDescFlags2 : byte
+	public enum LowBits
 	{
 		/// <summary>
-		///     The method entrypoint is stable (either precode or actual code)
+		///     0 - pointer to <see cref="EEClass" />
+		///     This <see cref="MethodTable" /> is the canonical method table.
 		/// </summary>
-		HasStableEntryPoint = 0x01,
+		EEClass = 0,
 
 		/// <summary>
-		///     implies that HasStableEntryPoint is set.
-		///     Precode has been allocated for this method
+		///     1 - not used
 		/// </summary>
-		HasPrecode = 0x02,
-
-		IsUnboxingStub = 0x04,
+		Invalid = 1,
 
 		/// <summary>
-		///     Has slot for native code
+		///     2 - pointer to canonical <see cref="MethodTable" />.
 		/// </summary>
-		HasNativeCodeSlot = 0x08,
+		MethodTable = 2,
 
 		/// <summary>
-		///     Jit may expand method as an intrinsic
+		///     3 - pointer to indirection cell that points to canonical <see cref="MethodTable" />.
+		///     (used only if FEATURE_PREJIT is defined)
 		/// </summary>
-		IsJitIntrinsic = 0x10,
-	}
-
-	/// <summary>
-	///     <para>Sources:</para>
-	///     <list type="bullet">
-	///         <item>
-	///             <description>/src/vm/method.hpp: 1686</description>
-	///         </item>
-	///     </list>
-	///     <remarks>
-	///         Use with <see cref="MethodDesc.Flags3" />
-	///     </remarks>
-	/// </summary>
-	[Flags]
-	public enum MethodDescFlags3 : ushort
-	{
-
-		TokenRemainderMask = 0x3FFF,
-
-		// These are separate to allow the flags space available and used to be obvious here
-		// and for the logic that splits the token to be algorithmically generated based on the
-		// #define
-
-		/// <summary>
-		///     Indicates that a type-forwarded type is used as a valuetype parameter (this flag is only valid for ngenned items)
-		/// </summary>
-		HasForwardedValuetypeParameter = 0x4000,
-
-		/// <summary>
-		///     Indicates that all typeref's in the signature of the method have been resolved to typedefs (or that process failed)
-		///     (this flag is only valid for non-ngenned methods)
-		/// </summary>
-		ValueTypeParametersWalked = 0x4000,
-
-		/// <summary>
-		///     Indicates that we have verified that there are no equivalent valuetype parameters for this method
-		/// </summary>
-		DoesNotHaveEquivalentValuetypeParameters = 0x8000,
+		Indirection = 3
 	}
 
 	/// <summary>
@@ -603,42 +537,6 @@ namespace RazorSharp.CLR
 
 	/// <summary>
 	///     <remarks>
-	///         Use with <see cref="ObjHeader.SyncBlock" />
-	///     </remarks>
-	/// </summary>
-	[Flags]
-	public enum SyncBlockFlags : uint
-	{
-		BitSblkStringHasNoHighChars = 0x80000000,
-		BitSblkAgileInProgress      = 0x80000000,
-		BitSblkStringHighCharsKnown = 0x40000000,
-		BitSblkStringHasSpecialSort = 0xC0000000,
-		BitSblkStringHighCharMask   = 0xC0000000,
-		BitSblkFinalizerRun         = 0x40000000,
-		BitSblkGcReserve            = 0x20000000,
-		BitSblkSpinLock             = 0x10000000,
-		BitSblkIsHashOrSyncblkindex = 0x08000000,
-		BitSblkIsHashcode           = 0x04000000
-	}
-
-	internal enum EEClassFieldId : uint
-	{
-		NumInstanceFields = 0,
-		NumMethods,
-		NumStaticFields,
-		NumHandleStatics,
-		NumBoxedStatics,
-		NonGCStaticFieldBytes,
-		NumThreadStaticFields,
-		NumHandleThreadStatics,
-		NumBoxedThreadStatics,
-		NonGCThreadStaticFieldBytes,
-		NumNonVirtualSlots,
-		COUNT
-	}
-
-	/// <summary>
-	///     <remarks>
 	///         Use with <see cref="MethodTable.FlagsLow" />
 	///     </remarks>
 	/// </summary>
@@ -707,6 +605,286 @@ namespace RazorSharp.CLR
 		                    (HasVariance & 0) |
 		                    (HasDefaultCtor & 0) |
 		                    (HasPreciseInitCctors & 0)
+	}
+
+	/// <summary>
+	///     <para>Sources:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/methodtable.h: 4049</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Use with <see cref="MethodTable.Flags2" />
+	///     </remarks>
+	/// </summary>
+	[Flags]
+	public enum MethodTableFlags2 : ushort
+	{
+		MultipurposeSlotsMask    = 0x001F,
+		HasPerInstInfo           = 0x0001,
+		HasInterfaceMap          = 0x0002,
+		HasDispatchMapSlot       = 0x0004,
+		HasNonVirtualSlots       = 0x0008,
+		HasModuleOverride        = 0x0010,
+		IsZapped                 = 0x0020,
+		IsPreRestored            = 0x0040,
+		HasModuleDependencies    = 0x0080,
+		IsIntrinsicType          = 0x0100,
+		RequiresDispatchTokenFat = 0x0200,
+		HasCctor                 = 0x0400,
+		HasCCWTemplate           = 0x0800,
+
+		/// <summary>
+		///     Type requires 8-byte alignment (only set on platforms that require this and don't get it implicitly)
+		/// </summary>
+		RequiresAlign8 = 0x1000,
+
+		HasBoxedRegularStatics                = 0x2000,
+		HasSingleNonVirtualSlot               = 0x4000,
+		DependsOnEquivalentOrForwardedStructs = 0x8000
+
+	}
+
+	#endregion
+
+	#region ObjHeader
+
+	/// <summary>
+	///     <remarks>
+	///         Use with <see cref="ObjHeader.SyncBlock" />
+	///     </remarks>
+	/// </summary>
+	[Flags]
+	public enum SyncBlockFlags : uint
+	{
+		BitSblkStringHasNoHighChars = 0x80000000,
+		BitSblkAgileInProgress      = 0x80000000,
+		BitSblkStringHighCharsKnown = 0x40000000,
+		BitSblkStringHasSpecialSort = 0xC0000000,
+		BitSblkStringHighCharMask   = 0xC0000000,
+		BitSblkFinalizerRun         = 0x40000000,
+		BitSblkGcReserve            = 0x20000000,
+		BitSblkSpinLock             = 0x10000000,
+		BitSblkIsHashOrSyncblkindex = 0x08000000,
+		BitSblkIsHashcode           = 0x04000000
+	}
+
+	#endregion
+
+
+	#region EEClass
+
+	internal enum EEClassFieldId : uint
+	{
+		NumInstanceFields = 0,
+		NumMethods,
+		NumStaticFields,
+		NumHandleStatics,
+		NumBoxedStatics,
+		NonGCStaticFieldBytes,
+		NumThreadStaticFields,
+		NumHandleThreadStatics,
+		NumBoxedThreadStatics,
+		NonGCThreadStaticFieldBytes,
+		NumNonVirtualSlots,
+		COUNT
+	}
+
+	/// <summary>
+	///     <para>Sources:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/class.h: 396</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Use with <see cref="EEClassLayoutInfo.Flags" />
+	///     </remarks>
+	/// </summary>
+	[Flags]
+	public enum LayoutFlags : byte
+	{
+		/// <summary>
+		///     TRUE if the GC layout of the class is bit-for-bit identical
+		///     to its unmanaged counterpart (i.e. no internal reference fields,
+		///     no ansi-unicode char conversions required, etc.) Used to
+		///     optimize marshaling.
+		/// </summary>
+		Blittable = 0x01,
+
+		/// <summary>
+		///     Is this type also sequential in managed memory?
+		/// </summary>
+		ManagedSequential = 0x02,
+
+		/// <summary>
+		///     When a sequential/explicit type has no fields, it is conceptually
+		///     zero-sized, but actually is 1 byte in length. This holds onto this
+		///     fact and allows us to revert the 1 byte of padding when another
+		///     explicit type inherits from this type.
+		/// </summary>
+		ZeroSized = 0x04,
+
+		/// <summary>
+		///     The size of the struct is explicitly specified in the meta-data.
+		/// </summary>
+		HasExplicitSize = 0x08,
+
+		/// <summary>
+		///     Whether a native struct is passed in registers.
+		/// </summary>
+		NativePassInRegisters = 0x10,
+
+		R4HFA = 0x10,
+		R8HFA = 0x20,
+	}
+
+	/// <summary>
+	///     <remarks>
+	///         Use with <see cref="EEClass.VMFlags" />
+	///     </remarks>
+	/// </summary>
+	[Flags]
+	public enum VMFlags : uint
+	{
+		LayoutDependsOnOtherModules = 0x00000001,
+		Delegate                    = 0x00000002,
+		FixedAddressVtStatics       = 0x00000020, // Value type Statics in this class will be pinned
+		HasLayout                   = 0x00000040,
+		IsNested                    = 0x00000080,
+		IsEquivalentType            = 0x00000200,
+
+		//   OVERLAYED is used to detect whether Equals can safely optimize to a bit-compare across the structure.
+		HasOverlayedFields = 0x00000400,
+
+		// Set this if this class or its parent have instance fields which
+		// must be explicitly inited in a constructor (e.g. pointers of any
+		// kind, gc or native).
+		//
+		// Currently this is used by the verifier when verifying value classes
+		// - it's ok to use uninitialised value classes if there are no
+		// pointer fields in them.
+		HasFieldsWhichMustBeInited = 0x00000800,
+
+		UnsafeValueType = 0x00001000,
+
+		BestFitMappingInited =
+			0x00002000,                     // VMFLAG_BESTFITMAPPING and VMFLAG_THROWONUNMAPPABLECHAR are valid only if this is set
+		BestFitMapping        = 0x00004000, // BestFitMappingAttribute.Value
+		ThrowOnUnmappableChar = 0x00008000, // BestFitMappingAttribute.ThrowOnUnmappableChar
+
+		// unused                              = 0x00010000,
+		NoGuid             = 0x00020000,
+		HasNonPublicFields = 0x00040000,
+
+		// unused                              = 0x00080000,
+		ContainsStackPtr = 0x00100000,
+		PreferAlign8     = 0x00200000, // Would like to have 8-byte alignment
+		// unused                              = 0x00400000,
+
+		SparseForCominterop = 0x00800000,
+
+		// interfaces may have a coclass attribute
+		HasCoClassAttrib   = 0x01000000,
+		ComEventItfMask    = 0x02000000, // class is a special COM event interface
+		ProjectedFromWinRT = 0x04000000,
+		ExportedToWinRT    = 0x08000000,
+
+		// This one indicates that the fields of the valuetype are
+		// not tightly packed and is used to check whether we can
+		// do bit-equality on value types to implement ValueType::Equals.
+		// It is not valid for classes, and only matters if ContainsPointer
+		// is false.
+		NotTightlyPacked = 0x10000000,
+
+		// True if methoddesc on this class have any real (non-interface) methodimpls
+		ContainsMethodImpls        = 0x20000000,
+		MarshalingTypeMask         = 0xc0000000,
+		MarshalingTypeInhibit      = 0x40000000,
+		MarshalingTypeFreeThreaded = 0x80000000,
+		MarshalingTypeStandard     = 0xc0000000,
+	}
+
+	#endregion
+
+
+	#region MethodDesc
+
+	/// <summary>
+	///     <para>Sources:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/method.hpp: 1701</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Use with <see cref="MethodDesc.Flags2" />
+	///     </remarks>
+	/// </summary>
+	[Flags]
+	public enum MethodDescFlags2 : byte
+	{
+		/// <summary>
+		///     The method entrypoint is stable (either precode or actual code)
+		/// </summary>
+		HasStableEntryPoint = 0x01,
+
+		/// <summary>
+		///     implies that HasStableEntryPoint is set.
+		///     Precode has been allocated for this method
+		/// </summary>
+		HasPrecode = 0x02,
+
+		IsUnboxingStub = 0x04,
+
+		/// <summary>
+		///     Has slot for native code
+		/// </summary>
+		HasNativeCodeSlot = 0x08,
+
+		/// <summary>
+		///     Jit may expand method as an intrinsic
+		/// </summary>
+		IsJitIntrinsic = 0x10,
+	}
+
+	/// <summary>
+	///     <para>Sources:</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>/src/vm/method.hpp: 1686</description>
+	///         </item>
+	///     </list>
+	///     <remarks>
+	///         Use with <see cref="MethodDesc.Flags3" />
+	///     </remarks>
+	/// </summary>
+	[Flags]
+	public enum MethodDescFlags3 : ushort
+	{
+
+		TokenRemainderMask = 0x3FFF,
+
+		// These are separate to allow the flags space available and used to be obvious here
+		// and for the logic that splits the token to be algorithmically generated based on the
+		// #define
+
+		/// <summary>
+		///     Indicates that a type-forwarded type is used as a valuetype parameter (this flag is only valid for ngenned items)
+		/// </summary>
+		HasForwardedValuetypeParameter = 0x4000,
+
+		/// <summary>
+		///     Indicates that all typeref's in the signature of the method have been resolved to typedefs (or that process failed)
+		///     (this flag is only valid for non-ngenned methods)
+		/// </summary>
+		ValueTypeParametersWalked = 0x4000,
+
+		/// <summary>
+		///     Indicates that we have verified that there are no equivalent valuetype parameters for this method
+		/// </summary>
+		DoesNotHaveEquivalentValuetypeParameters = 0x8000,
 	}
 
 	/// <summary>
@@ -842,50 +1020,14 @@ namespace RazorSharp.CLR
 		mdcRequiresFullSlotNumber = 0x8000
 	}
 
-	/// <summary>
-	///     <para>Sources:</para>
-	///     <list type="bullet">
-	///         <item>
-	///             <description>/src/vm/methodtable.h: 4049</description>
-	///         </item>
-	///     </list>
-	///     <remarks>
-	///         Use with <see cref="MethodTable.Flags2" />
-	///     </remarks>
-	/// </summary>
-	[Flags]
-	public enum MethodTableFlags2 : ushort
-	{
-		MultipurposeSlotsMask    = 0x001F,
-		HasPerInstInfo           = 0x0001,
-		HasInterfaceMap          = 0x0002,
-		HasDispatchMapSlot       = 0x0004,
-		HasNonVirtualSlots       = 0x0008,
-		HasModuleOverride        = 0x0010,
-		IsZapped                 = 0x0020,
-		IsPreRestored            = 0x0040,
-		HasModuleDependencies    = 0x0080,
-		IsIntrinsicType          = 0x0100,
-		RequiresDispatchTokenFat = 0x0200,
-		HasCctor                 = 0x0400,
-		HasCCWTemplate           = 0x0800,
-
-		/// <summary>
-		///     Type requires 8-byte alignment (only set on platforms that require this and don't get it implicitly)
-		/// </summary>
-		RequiresAlign8 = 0x1000,
-
-		HasBoxedRegularStatics                = 0x2000,
-		HasSingleNonVirtualSlot               = 0x4000,
-		DependsOnEquivalentOrForwardedStructs = 0x8000
-
-	}
 
 	internal enum MbMask
 	{
 		PackedMbLayoutMbMask       = 0x01FFFF,
 		PackedMbLayoutNameHashMask = 0xFE0000
 	}
+
+	#endregion
 
 	public enum TokenType : uint
 	{
@@ -925,119 +1067,5 @@ namespace RazorSharp.CLR
 		String = 0x70000000,
 	}
 
-	/// <summary>
-	///     <para>Sources:</para>
-	///     <list type="bullet">
-	///         <item>
-	///             <description>/src/vm/class.h: 396</description>
-	///         </item>
-	///     </list>
-	///     <remarks>
-	///         Use with <see cref="EEClassLayoutInfo.Flags" />
-	///     </remarks>
-	/// </summary>
-	[Flags]
-	public enum LayoutFlags : byte
-	{
-		/// <summary>
-		///     TRUE if the GC layout of the class is bit-for-bit identical
-		///     to its unmanaged counterpart (i.e. no internal reference fields,
-		///     no ansi-unicode char conversions required, etc.) Used to
-		///     optimize marshaling.
-		/// </summary>
-		Blittable = 0x01,
-
-		/// <summary>
-		///     Is this type also sequential in managed memory?
-		/// </summary>
-		ManagedSequential = 0x02,
-
-		/// <summary>
-		///     When a sequential/explicit type has no fields, it is conceptually
-		///     zero-sized, but actually is 1 byte in length. This holds onto this
-		///     fact and allows us to revert the 1 byte of padding when another
-		///     explicit type inherits from this type.
-		/// </summary>
-		ZeroSized = 0x04,
-
-		/// <summary>
-		///     The size of the struct is explicitly specified in the meta-data.
-		/// </summary>
-		HasExplicitSize = 0x08,
-
-		/// <summary>
-		///     Whether a native struct is passed in registers.
-		/// </summary>
-		NativePassInRegisters = 0x10,
-
-		R4HFA = 0x10,
-		R8HFA = 0x20,
-	}
-
-	/// <summary>
-	///     <remarks>
-	///         Use with <see cref="EEClass.VMFlags" />
-	///     </remarks>
-	/// </summary>
-	[Flags]
-	public enum VMFlags : uint
-	{
-		LayoutDependsOnOtherModules = 0x00000001,
-		Delegate                    = 0x00000002,
-		FixedAddressVtStatics       = 0x00000020, // Value type Statics in this class will be pinned
-		HasLayout                   = 0x00000040,
-		IsNested                    = 0x00000080,
-		IsEquivalentType            = 0x00000200,
-
-		//   OVERLAYED is used to detect whether Equals can safely optimize to a bit-compare across the structure.
-		HasOverlayedFields = 0x00000400,
-
-		// Set this if this class or its parent have instance fields which
-		// must be explicitly inited in a constructor (e.g. pointers of any
-		// kind, gc or native).
-		//
-		// Currently this is used by the verifier when verifying value classes
-		// - it's ok to use uninitialised value classes if there are no
-		// pointer fields in them.
-		HasFieldsWhichMustBeInited = 0x00000800,
-
-		UnsafeValueType = 0x00001000,
-
-		BestFitMappingInited =
-			0x00002000,                     // VMFLAG_BESTFITMAPPING and VMFLAG_THROWONUNMAPPABLECHAR are valid only if this is set
-		BestFitMapping        = 0x00004000, // BestFitMappingAttribute.Value
-		ThrowOnUnmappableChar = 0x00008000, // BestFitMappingAttribute.ThrowOnUnmappableChar
-
-		// unused                              = 0x00010000,
-		NoGuid             = 0x00020000,
-		HasNonPublicFields = 0x00040000,
-
-		// unused                              = 0x00080000,
-		ContainsStackPtr = 0x00100000,
-		PreferAlign8     = 0x00200000, // Would like to have 8-byte alignment
-		// unused                              = 0x00400000,
-
-		SparseForCominterop = 0x00800000,
-
-		// interfaces may have a coclass attribute
-		HasCoClassAttrib   = 0x01000000,
-		ComEventItfMask    = 0x02000000, // class is a special COM event interface
-		ProjectedFromWinRT = 0x04000000,
-		ExportedToWinRT    = 0x08000000,
-
-		// This one indicates that the fields of the valuetype are
-		// not tightly packed and is used to check whether we can
-		// do bit-equality on value types to implement ValueType::Equals.
-		// It is not valid for classes, and only matters if ContainsPointer
-		// is false.
-		NotTightlyPacked = 0x10000000,
-
-		// True if methoddesc on this class have any real (non-interface) methodimpls
-		ContainsMethodImpls        = 0x20000000,
-		MarshalingTypeMask         = 0xc0000000,
-		MarshalingTypeInhibit      = 0x40000000,
-		MarshalingTypeFreeThreaded = 0x80000000,
-		MarshalingTypeStandard     = 0xc0000000,
-	}
 
 }

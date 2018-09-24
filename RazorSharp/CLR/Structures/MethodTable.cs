@@ -6,6 +6,7 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
+using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
 
@@ -51,7 +52,7 @@ namespace RazorSharp.CLR.Structures
 	///         </item>
 	///     </list>
 	///     <remarks>
-	///         Do not dereference. This should be kept a pointer and should not be copied.
+	///         This should only be accessed via <see cref="Pointer{T}"/>
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
@@ -101,18 +102,18 @@ namespace RazorSharp.CLR.Structures
 		///     <see cref="BaseSize" /> returns the size of instance fields for a boxed value, and
 		///     <see cref="NumInstanceFieldBytes" /> for an unboxed value.
 		/// </summary>
-		public DWORD BaseSize => m_BaseSize;
+		public int BaseSize => (int) m_BaseSize;
 
 		/// <summary>
 		///     Class token if it fits into 16-bits. If this is (WORD)-1, the class token is stored in the TokenOverflow optional
 		///     member.
 		/// </summary>
-		private WORD Token => m_wToken;
+		private int Token => m_wToken;
 
 		/// <summary>
 		///     The number of virtual methods in this type (<c>4</c> by default; from <see cref="Object" />)
 		/// </summary>
-		public WORD NumVirtuals => m_wNumVirtuals;
+		public int NumVirtuals => m_wNumVirtuals;
 
 		/// <summary>
 		///     The number of interfaces this type implements
@@ -120,7 +121,7 @@ namespace RazorSharp.CLR.Structures
 		///         <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>Number of IFaces in IFaceMap</c> value.</para>
 		///     </remarks>
 		/// </summary>
-		public WORD NumInterfaces => m_wNumInterfaces;
+		public int NumInterfaces => m_wNumInterfaces;
 
 		/// <summary>
 		///     The parent type's <see cref="MethodTable" />.
@@ -142,7 +143,7 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		// todo
-		internal void* Module => m_pLoaderModule;
+		internal Pointer<Module> Module => m_pLoaderModule;
 
 
 		/// <summary>
@@ -233,6 +234,7 @@ namespace RazorSharp.CLR.Structures
 		///     Metadata token
 		///     <remarks>
 		///         <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>"mdToken"</c> value in hexadecimal format.</para>
+		/// <para>Equals <see cref="Type.MetadataToken"/></para>
 		///     </remarks>
 		/// </summary>
 		public int MDToken => Constants.TokenFromRid(Token, CorTokenType.mdtTypeDef);
@@ -300,13 +302,28 @@ namespace RazorSharp.CLR.Structures
 		[FieldOffset(16)] private readonly MethodTable* m_pParentMethodTable;
 		[FieldOffset(24)] private readonly void*        m_pLoaderModule;
 		[FieldOffset(32)] private readonly void*        m_pWriteableData;
+
+		#region Union
+
 		[FieldOffset(40)] private readonly EEClass*     m_pEEClass;
 		[FieldOffset(40)] private readonly MethodTable* m_pCanonMT;
-		[FieldOffset(48)] private readonly void*        m_pPerInstInfo;
-		[FieldOffset(48)] private readonly void*        m_ElementTypeHnd;
-		[FieldOffset(48)] private readonly void*        m_pMultipurposeSlot1;
-		[FieldOffset(56)] private readonly void*        m_pInterfaceMap;
-		[FieldOffset(56)] private readonly void*        m_pMultipurposeSlot2;
+
+		#endregion
+
+		#region Union
+
+		[FieldOffset(48)] private readonly void* m_pPerInstInfo;
+		[FieldOffset(48)] private readonly void* m_ElementTypeHnd;
+		[FieldOffset(48)] private readonly void* m_pMultipurposeSlot1;
+
+		#endregion
+
+		#region Union
+
+		[FieldOffset(56)] private readonly void* m_pInterfaceMap;
+		[FieldOffset(56)] private readonly void* m_pMultipurposeSlot2;
+
+		#endregion
 
 		/// <summary>
 		///     Bit mask for <see cref="UnionType" />

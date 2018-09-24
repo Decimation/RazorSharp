@@ -71,7 +71,7 @@ namespace RazorSharp.Experimental
 		private T RewriteUnmanaged(T value)
 		{
 			// Get the memory of the managed object
-			byte[] refMem = Unsafe.MemoryOf(ref value);
+			byte[] refMem = Unsafe.MemoryOf(value);
 
 			// Make sure it's the correct size
 			Debug.Assert(refMem.Length == Unsafe.BaseInstanceSize<T>());

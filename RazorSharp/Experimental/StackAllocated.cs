@@ -53,7 +53,7 @@ namespace RazorSharp.Experimental
 
 		private T ReAllocateRefOnStack(ref T refValue)
 		{
-			byte[] refMem    = Unsafe.MemoryOf(ref refValue);
+			byte[] refMem    = Unsafe.MemoryOf(refValue);
 			int    allocSize = Unsafe.BaseInstanceSize<T>();
 			Debug.Assert(refMem.Length == allocSize);
 

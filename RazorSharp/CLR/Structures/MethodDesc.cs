@@ -3,6 +3,7 @@
 #region
 
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -13,6 +14,10 @@ using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
+
+// ReSharper disable MemberCanBeMadeStatic.Local
+
+// ReSharper disable InconsistentNaming
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 
@@ -53,6 +58,9 @@ namespace RazorSharp.CLR.Structures
 	///             <description>/src/vm/method.hpp: 1683</description>
 	///         </item>
 	///     </list>
+	///     <remarks>
+	///         This should only be accessed via <see cref="Pointer{T}" />
+	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	public unsafe struct MethodDesc
@@ -62,6 +70,11 @@ namespace RazorSharp.CLR.Structures
 		private const int ALIGNMENT_SHIFT = 3;
 		private const int ALIGNMENT       = 1 << ALIGNMENT_SHIFT;
 		private const int ALIGNMENT_MASK  = ALIGNMENT - 1;
+
+		static MethodDesc()
+		{
+			SignatureCall.DynamicBind<MethodDesc>();
+		}
 
 		#region Fields
 
@@ -80,11 +93,6 @@ namespace RazorSharp.CLR.Structures
 
 		#region Accessors
 
-		static MethodDesc()
-		{
-			SignatureCall.DynamicBind<MethodDesc>();
-		}
-
 		/// <summary>
 		///     The enclosing type of this <see cref="MethodDesc" />
 		/// </summary>
@@ -96,9 +104,44 @@ namespace RazorSharp.CLR.Structures
 		public MethodInfo Info => (MethodInfo) EnclosingType.Module.ResolveMethod(Token);
 
 		/// <summary>
-		///     Function pointer
+		///     Function pointer (entry point) of this method.
+		///     <para>
+		///         <see cref="get_Function" /> returns the entry point
+		///         (<see cref="RuntimeMethodHandle.GetFunctionPointer()" />) of this method.
+		///     </para>
+		///     <para>
+		///         <see cref="set_Function" /> sets the method entry point (<see cref="SetStableEntryPoint" />).
+		///     </para>
 		/// </summary>
-		public IntPtr Function => Info.MethodHandle.GetFunctionPointer();
+		public IntPtr Function {
+			get => Info.MethodHandle.GetFunctionPointer();
+			set => SetStableEntryPoint(value);
+		}
+
+
+		/// <summary>
+		///     Returns the address of the native code. The native code can be one of jitted code if
+		///     <see cref="IsPreImplemented" /> is <c>false</c> or
+		///     ngened code if <see cref="IsPreImplemented" /> is <c>true</c>.
+		///     <returns><see cref="IntPtr.Zero" /> if the method has no native code.</returns>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
+		/// <exception cref="SigcallException"></exception>
+		public IntPtr NativeCode {
+			[ClrSigcall] get => throw new SigcallException();
+		}
+
+
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
+		public IntPtr PreImplementedCode {
+			[ClrSigcall] get => throw new SigcallException();
+		}
 
 		/// <summary>
 		///     Name of this method
@@ -108,13 +151,49 @@ namespace RazorSharp.CLR.Structures
 		public byte ChunkIndex => m_chunkIndex;
 
 		/// <summary>
-		///     <para>Whether this method is a constructor</para>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public bool IsConstructor {
-			[CLRSigcall] get => throw new SigcallException();
+		public Pointer<MethodDescChunk> MethodDescChunk {
+			get {
+				// return
+				//PTR_MethodDescChunk(dac_cast<TADDR>(this) -
+				//                    (sizeof(MethodDescChunk) + (GetMethodDescIndex() * MethodDesc::ALIGNMENT)));
+				Pointer<MethodDescChunk> __this = Unsafe.AddressOf(ref this);
+				__this.Subtract(sizeof(MethodDescChunk) + (ChunkIndex * ALIGNMENT));
+				return __this;
+			}
+		}
+
+
+		/// <summary>
+		///     Size of the current <see cref="MethodDesc" />
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
+		public int SizeOf {
+			[ClrSigcall] get => throw new SigcallException();
+		}
+
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
+		public Pointer<MethodTable> EnclosingMethodTable {
+			[ClrSigcall] get => throw new SigcallException();
+		}
+
+
+		/// <summary>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
+		public uint RVA {
+			[ClrSigcall] get => throw new SigcallException();
 		}
 
 		/// <summary>
@@ -125,8 +204,22 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public int Token {
-			[CLRSigcall] get => throw new SigcallException();
+			[ClrSigcall] get => throw new SigcallException();
 		}
+
+		#region bool accessors
+
+		/// <summary>
+		///     <para>Whether this method is a constructor</para>
+		///     <remarks>
+		///         Address-sensitive
+		///     </remarks>
+		/// </summary>
+		public bool IsConstructor {
+			[ClrSigcall] get => throw new SigcallException();
+		}
+
+		public bool IsPreImplemented => PreImplementedCode != IntPtr.Zero;
 
 		/// <summary>
 		///     <para>Whether this method is pointing to native code</para>
@@ -135,10 +228,21 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public bool IsPointingToNativeCode {
-			[CLRSigcall] get => throw new SigcallException();
+			[ClrSigcall] get => throw new SigcallException();
 		}
 
 		public bool HasThis => Info.CallingConvention.HasFlag(CallingConventions.HasThis);
+
+		public bool HasILHeader => IsIL && !IsUnboxingStub && RVA > 0;
+
+		public bool IsUnboxingStub => (Flags2 & MethodDescFlags2.IsUnboxingStub) != 0;
+
+		public bool IsIL => MethodClassification.mcIL == Classification ||
+		                    MethodClassification.mcInstantiated == Classification;
+
+		public bool IsStatic => Info.IsStatic;
+
+		#endregion
 
 		#region Flags
 
@@ -153,6 +257,9 @@ namespace RazorSharp.CLR.Structures
 		#endregion
 
 		#endregion
+
+
+		#region Methods
 
 		#region Equality
 
@@ -191,49 +298,37 @@ namespace RazorSharp.CLR.Structures
 
 		#endregion
 
-		/// <summary>
-		///     <remarks>
-		///         Address-sensitive
-		///     </remarks>
-		/// </summary>
-		public Pointer<MethodDescChunk> MethodDescChunk {
-			get {
-				// return
-				//PTR_MethodDescChunk(dac_cast<TADDR>(this) -
-				//                    (sizeof(MethodDescChunk) + (GetMethodDescIndex() * MethodDesc::ALIGNMENT)));
-				Pointer<MethodDescChunk> __this = Unsafe.AddressOf(ref this);
-				__this.Subtract(sizeof(MethodDescChunk) + ChunkIndex * ALIGNMENT);
-				return __this;
-			}
-		}
-
-
-		/// <summary>
-		///     Size of the current <see cref="MethodDesc" />
-		///     <remarks>
-		///         Address-sensitive
-		///     </remarks>
-		/// </summary>
-		public int SizeOf {
-			[CLRSigcall] get => throw new SigcallException();
-		}
 
 		/// <summary>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public Pointer<MethodTable> EnclosingMethodTable {
-			[CLRSigcall] get => throw new SigcallException("MethodTable");
-		}
-
-		// COR_ILMETHOD
-		[CLRSigcall("48 89 5C 24 08 48 89 74 24 10 57 48 83 EC 20 8B DA 48 8B F9 E8 AB 3D E7 FF 48 8B CF")]
-		public Pointer<COR_ILMETHOD> GetILHeader(int fAllowOverrides = 0)
+		[ClrSigcall]
+		public Pointer<ILMethod> GetILHeader(int fAllowOverrides = 0)
 		{
 			throw new SigcallException();
 		}
 
+		/// <summary>
+		///     <remarks>Address-sensitive</remarks>
+		/// </summary>
+		[ClrSigcall]
+		private long SetStableEntryPointInterlocked(ulong pCode)
+		{
+			throw new SigcallException();
+		}
+
+		/// <summary>
+		///     Sets the entry point for this method.
+		/// </summary>
+		/// <param name="pCode">Pointer to the new entry point</param>
+		public void SetStableEntryPoint(IntPtr pCode)
+		{
+			Reset();
+			long val = SetStableEntryPointInterlocked((ulong) pCode);
+			Debug.Assert(val > 0);
+		}
 
 		/// <summary>
 		///     <para>Reset the <see cref="MethodDesc" /> to its original state</para>
@@ -241,7 +336,7 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		[CLRSigcall]
+		[ClrSigcall]
 		public void Reset()
 		{
 			throw new SigcallException();
@@ -252,7 +347,8 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		/// <param name="p">New function pointer</param>
 		/// <exception cref="MethodDescException">If this function is <c>virtual</c> or <c>abstract</c></exception>
-		public void SetFunctionPointer(IntPtr p)
+		[Obsolete("Use SetStableEntryPoint", true)]
+		internal void SetFunctionPointer(IntPtr p)
 		{
 			RazorContract.Requires<MethodDescException>(
 				!Attributes.HasFlag(MethodAttributes.Virtual) && !Attributes.HasFlag(MethodAttributes.Abstract),
@@ -283,20 +379,25 @@ namespace RazorSharp.CLR.Structures
 		{
 			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Name", Name);
-			table.AddRow("MethodTable", Hex.ToHex(EnclosingMethodTable.Address));
 			table.AddRow("Enclosing type", EnclosingType.Name);
+			table.AddRow("MethodTable", Hex.ToHex(EnclosingMethodTable.Address));
 			table.AddRow("Signature", Info);
 
 			table.AddRow("Function", Hex.ToHex(Function));
 			table.AddRow("Non-MI Function", Hex.ToHex(m_pFunction));
+			table.AddRow("Native code", Hex.ToHex(NativeCode));
+			if (HasILHeader) {
+				table.AddRow("IL code", Hex.ToHex(GetILHeader().Reference.Code.Address));
+			}
 
-			table.AddRow("Chunk index", m_chunkIndex);
-			table.AddRow("Slot number", m_wSlotNumber);
+//			table.AddRow("Chunk index", m_chunkIndex);
+//			table.AddRow("Slot number", m_wSlotNumber);
 			table.AddRow("Attributes", Attributes);
 
 			table.AddRow("Is pointing to native code", IsPointingToNativeCode.Prettify());
 			table.AddRow("Is constructor", IsConstructor.Prettify());
 			table.AddRow("Has this", HasThis.Prettify());
+			table.AddRow("Is IL", IsIL.Prettify());
 			table.AddRow("MethodDescChunk", MethodDescChunk.ToString("P"));
 
 
@@ -309,6 +410,9 @@ namespace RazorSharp.CLR.Structures
 
 			return table.ToMarkDownString();
 		}
+
+		#endregion
+
 	}
 
 

@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
-using static RazorSharp.CLR.Offsets;
 
 #endregion
 
@@ -14,7 +13,7 @@ using static RazorSharp.CLR.Offsets;
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp.CLR.Structures
+namespace RazorSharp.CLR.Structures.EE
 {
 
 	#region
@@ -43,7 +42,7 @@ namespace RazorSharp.CLR.Structures
 	///         </item>
 	///     </list>
 	///     <remarks>
-	///         Do not dereference.
+	///         This should only be accessed via <see cref="Pointer{T}"/>
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
@@ -57,16 +56,22 @@ namespace RazorSharp.CLR.Structures
 		[FieldOffset(16)] private readonly MethodTable* m_pMethodTable;
 
 		// @formatter:off — disable formatter after this line
-		[FieldOffset(FIELD_DESC_LIST_FIELD_OFFSET)]
+		[FieldOffset(Offsets.FIELD_DESC_LIST_FIELD_OFFSET)]
 		private readonly FieldDesc* m_pFieldDescList;
 
-		[FieldOffset(CHUNKS_FIELD_OFFSET)]
+		[FieldOffset(Offsets.CHUNKS_FIELD_OFFSET)]
 		private readonly void* m_pChunks;
 		// @formatter:on — enable formatter after this line
+
+		#region Union
 
 		[FieldOffset(40)] private readonly uint  m_cbNativeSize;
 		[FieldOffset(40)] private readonly void* m_ohDelegate;
 		[FieldOffset(40)] private readonly int   m_ComInterfaceType;
+
+		#endregion
+
+
 		[FieldOffset(48)] private readonly void* m_pccwTemplate;
 		[FieldOffset(56)] private readonly DWORD m_dwAttrClass;
 		[FieldOffset(60)] private readonly DWORD m_VMFlags;
@@ -143,6 +148,8 @@ namespace RazorSharp.CLR.Structures
 
 
 				IntPtr thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass)).Address;
+
+				// ReSharper disable once ArrangeRedundantParentheses
 				return &((LayoutEEClass*) thisptr)->m_LayoutInfo;
 			}
 		}
