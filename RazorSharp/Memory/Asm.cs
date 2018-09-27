@@ -4,10 +4,9 @@ using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using RazorCommon;
-using RazorInvoke.Libraries;
-using static RazorInvoke.Enumerations;
-using static RazorInvoke.Enumerations.AllocationType;
-using static RazorInvoke.Enumerations.MemoryProtection;
+using RazorSharp.Native;
+using RazorSharp.Native.Enums;
+// ReSharper disable InconsistentNaming
 
 #endregion
 
@@ -35,8 +34,8 @@ namespace RazorSharp.Memory
 		/// <param name="memory">Opcodes</param>
 		public static void asm(params byte[] memory)
 		{
-			IntPtr buf = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) memory.Length, Commit,
-				ExecuteReadWrite);
+			IntPtr buf = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) memory.Length, AllocationType.Commit,
+				MemoryProtection.ExecuteReadWrite);
 			Marshal.Copy(memory, 0, buf, memory.Length);
 			Marshal.GetDelegateForFunctionPointer<Exec>(buf)();
 			if (!Kernel32.VirtualFree(buf, (uint) memory.Length, FreeTypes.Decommit)) {
@@ -81,8 +80,8 @@ namespace RazorSharp.Memory
 		/// <returns>The value returned by the execution</returns>
 		public static T asm<T>(params byte[] memory)
 		{
-			IntPtr buf = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) memory.Length, Commit,
-				ExecuteReadWrite);
+			IntPtr buf = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) memory.Length, AllocationType.Commit,
+				MemoryProtection.ExecuteReadWrite);
 			Marshal.Copy(memory, 0, buf, memory.Length);
 			IntPtr p = Marshal.GetDelegateForFunctionPointer<GetValue>(buf)();
 

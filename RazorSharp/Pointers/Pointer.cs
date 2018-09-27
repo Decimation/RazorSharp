@@ -487,7 +487,9 @@ namespace RazorSharp.Pointers
 		///     Increment <see cref="Address" /> by the specified number of bytes
 		/// </summary>
 		/// <param name="bytes">Number of bytes to add</param>
-		/// <returns><c>this</c></returns>
+		/// <returns>
+		///     <c>this</c>
+		/// </returns>
 		public Pointer<T> Add(long bytes = 1)
 		{
 			m_pValue = PointerUtils.Add(m_pValue, bytes).ToPointer();
@@ -499,7 +501,9 @@ namespace RazorSharp.Pointers
 		///     Decrement <see cref="Address" /> by the specified number of bytes
 		/// </summary>
 		/// <param name="bytes">Number of bytes to subtract</param>
-		/// <returns><c>this</c></returns>
+		/// <returns>
+		///     <c>this</c>
+		/// </returns>
 		public Pointer<T> Subtract(long bytes = 1)
 		{
 			m_pValue = PointerUtils.Subtract(m_pValue, bytes).ToPointer();
@@ -511,7 +515,9 @@ namespace RazorSharp.Pointers
 		///     Increment <see cref="Address" /> by the specified number of elements
 		/// </summary>
 		/// <param name="elemCnt">Number of elements</param>
-		/// <returns><c>this</c></returns>
+		/// <returns>
+		///     <c>this</c>
+		/// </returns>
 		public Pointer<T> Increment(int elemCnt = 1)
 		{
 			m_pValue = PointerUtils.Offset<T>(m_pValue, elemCnt).ToPointer();
@@ -523,7 +529,9 @@ namespace RazorSharp.Pointers
 		///     Decrement <see cref="Address" /> by the specified number of elements
 		/// </summary>
 		/// <param name="elemCnt">Number of elements</param>
-		/// <returns><c>this</c></returns>
+		/// <returns>
+		///     <c>this</c>
+		/// </returns>
 		public Pointer<T> Decrement(int elemCnt = 1)
 		{
 			m_pValue = PointerUtils.Offset<T>(m_pValue, -elemCnt).ToPointer();

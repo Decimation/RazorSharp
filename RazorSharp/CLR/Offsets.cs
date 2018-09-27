@@ -10,8 +10,26 @@ namespace RazorSharp.CLR
 
 	public static class Offsets
 	{
+
+		#region EEClass
+
+		/// <summary>
+		///     Offset for the field <see cref="RazorSharp.CLR.Structures.EE.EEClass.m_pFieldDescList" />
+		///     <remarks>
+		///         Relative to address of a <see cref="RazorSharp.CLR.Structures.EE.EEClass" />
+		///     </remarks>
+		/// </summary>
 		internal const int FIELD_DESC_LIST_FIELD_OFFSET = 24;
-		internal const int CHUNKS_FIELD_OFFSET          = 32;
+
+		/// <summary>
+		///     Offset for the field <see cref="RazorSharp.CLR.Structures.EE.EEClass.m_pChunks" />
+		///     <remarks>
+		///         Relative to address of a <see cref="RazorSharp.CLR.Structures.EE.EEClass" />
+		///     </remarks>
+		/// </summary>
+		internal const int CHUNKS_FIELD_OFFSET = 32;
+
+		#endregion
 
 		/// <summary>
 		///     Heap offset to the first array element.
@@ -36,6 +54,9 @@ namespace RazorSharp.CLR
 		///         An array's <see cref="MethodTable" /> pointer is located 1 indirection of
 		///         <see cref="RuntimeTypeHandle.Value" /> + <see cref="ARRAY_MT_PTR_OFFSET" /> bytes.
 		///     </para>
+		///     <remarks>
+		///         Relative to <see cref="RuntimeTypeHandle.Value" /> (1 indirection)
+		///     </remarks>
 		/// </summary>
 		internal const int ARRAY_MT_PTR_OFFSET = 6;
 
@@ -47,6 +68,44 @@ namespace RazorSharp.CLR
 		///     </remarks>
 		/// </summary>
 		internal const int CANON_MT_UNION_MT_OFFSET = 2;
+
+
+		#region Global variables of clr dll data segment
+
+		// const long g_pStringClassOffset    = 32;
+
+		/// <summary>
+		///     Offset for global variable <c>g_pGCHeap</c> in the <see cref="Memory.Segments.SegmentType.data" />
+		///     segment of <c>clr.dll</c>
+		///     <remarks>
+		///         Relative to <see cref="RazorInvoke.ImageSectionInfo.SectionAddress" /> of
+		///         <see cref="Memory.Segments.SegmentType.data" /> segment of <see cref="ClrFunctions.ClrDll" />
+		///     </remarks>
+		/// </summary>
+		internal const long GLOBAL_GCHEAP_OFFSET = 48;
+
+		/// <summary>
+		///     Offset for global variable <c>g_lowest_address</c> in the <see cref="Memory.Segments.SegmentType.data" />
+		///     segment of <c>clr.dll</c>
+		///     <remarks>
+		///         Relative to <see cref="RazorInvoke.ImageSectionInfo.SectionAddress" /> of
+		///         <see cref="Memory.Segments.SegmentType.data" /> segment of <see cref="ClrFunctions.ClrDll" />
+		///     </remarks>
+		/// </summary>
+		internal const long GLOBAL_LOWEST_ADDRESS_OFFSET = 40;
+
+		/// <summary>
+		///     Offset for global variable <c>g_highest_address</c> in the <see cref="Memory.Segments.SegmentType.data" />
+		///     segment of <c>clr.dll</c>
+		///     <remarks>
+		///         Relative to <see cref="RazorInvoke.ImageSectionInfo.SectionAddress" /> of
+		///         <see cref="Memory.Segments.SegmentType.data" /> segment of <see cref="ClrFunctions.ClrDll" />
+		///     </remarks>
+		/// </summary>
+		internal const long GLOBAL_HIGHEST_ADDRESS_OFFSET = 408;
+
+		#endregion
+
 	}
 
 }

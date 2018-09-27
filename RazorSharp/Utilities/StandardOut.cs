@@ -2,8 +2,8 @@
 
 using System;
 using System.Text;
-using RazorInvoke;
-using RazorInvoke.Libraries;
+using RazorSharp.Native;
+using RazorSharp.Native.Enums;
 
 #endregion
 
@@ -19,8 +19,8 @@ namespace RazorSharp.Utilities
 		{
 			Console.OutputEncoding = Encoding.Unicode; // todo: Encoding.Unicode / UTF8? Any difference?
 			IntPtr handle = Kernel32.GetConsoleHandle();
-			Kernel32.GetConsoleMode(handle, out uint mode);
-			mode |= (uint) Enumerations.ConsoleOutputModes.EnableVirtualTerminalProcessing;
+			Kernel32.GetConsoleMode(handle, out ConsoleOutputModes mode);
+			mode |= ConsoleOutputModes.EnableVirtualTerminalProcessing;
 			Kernel32.SetConsoleMode(handle, mode);
 
 //			Logger.Log(Level.Standard, Flags.Info, "Console modded");

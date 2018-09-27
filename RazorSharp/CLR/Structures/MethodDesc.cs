@@ -161,7 +161,7 @@ namespace RazorSharp.CLR.Structures
 				//PTR_MethodDescChunk(dac_cast<TADDR>(this) -
 				//                    (sizeof(MethodDescChunk) + (GetMethodDescIndex() * MethodDesc::ALIGNMENT)));
 				Pointer<MethodDescChunk> __this = Unsafe.AddressOf(ref this);
-				__this.Subtract(sizeof(MethodDescChunk) + (ChunkIndex * ALIGNMENT));
+				__this.Subtract(sizeof(MethodDescChunk) + ChunkIndex * ALIGNMENT);
 				return __this;
 			}
 		}
@@ -346,11 +346,11 @@ namespace RazorSharp.CLR.Structures
 		///     Use at your own risk!
 		/// </summary>
 		/// <param name="p">New function pointer</param>
-		/// <exception cref="MethodDescException">If this function is <c>virtual</c> or <c>abstract</c></exception>
+		/// <exception cref="Exception">If this function is <c>virtual</c> or <c>abstract</c></exception>
 		[Obsolete("Use SetStableEntryPoint", true)]
 		internal void SetFunctionPointer(IntPtr p)
 		{
-			RazorContract.Requires<MethodDescException>(
+			RazorContract.Requires(
 				!Attributes.HasFlag(MethodAttributes.Virtual) && !Attributes.HasFlag(MethodAttributes.Abstract),
 				"Function is virtual/abstract");
 

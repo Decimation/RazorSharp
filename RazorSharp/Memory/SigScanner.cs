@@ -9,8 +9,8 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorInvoke;
-using RazorInvoke.Libraries;
+using RazorSharp.Native;
+using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
 
 #endregion

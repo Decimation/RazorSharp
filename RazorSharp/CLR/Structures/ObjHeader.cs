@@ -9,8 +9,8 @@ using RazorSharp.Utilities;
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable InconsistentNaming
-#endregion
 
+#endregion
 
 
 namespace RazorSharp.CLR.Structures

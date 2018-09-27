@@ -19,13 +19,10 @@ using BenchmarkDotNet.Running;
 using JetBrains.Annotations;
 
 //using Microsoft.Diagnostics.Runtime;
-using Mono.Cecil;
 using NUnit.Framework;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
-using RazorInvoke;
-using RazorInvoke.Libraries;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
@@ -43,6 +40,7 @@ using Test.Testing.Benchmarking;
 using Test.Testing.Tests;
 using Test.Testing.Types;
 using static RazorSharp.Unsafe;
+using Kernel32 = RazorSharp.Native.Kernel32;
 using Module = System.Reflection.Module;
 using Point = Test.Testing.Types.Point;
 using Runtime = RazorSharp.CLR.Runtime;
@@ -54,6 +52,7 @@ namespace Test
 
 	#region
 
+	using DWORD = UInt32;
 	using Unsafe = RazorSharp.Unsafe;
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
@@ -206,19 +205,20 @@ namespace Test
 			Debug.Assert(Operations.addOp(1, 1) == 0);
 
 
-			var il = getIL(typeof(Program), "getValue32");
-			Console.WriteLine(Collections.ToString(il.Reference.GetILAsByteArray()));
-			Console.WriteLine(Collections.ToString(getBytes(1)));
-
-			Console.WriteLine(Collections.ToString(MemoryOfVal(1)));
-
+			string str   = "foo";
+			var    value = Kernel32.ReadProcessMemory<string>(Process.GetCurrentProcess(), Unsafe.AddressOf(ref str));
+			Debug.Assert(value == "foo");
+			Kernel32.WriteProcessMemory(Process.GetCurrentProcess(), Unsafe.AddressOf(ref str), "bar");
+			Debug.Assert(str == "bar");
 		}
 
-		static byte[] getBytes<T>(T value) where T : struct
-		{
-			Pointer<T> ptr = Unsafe.AddressOf(ref value);
-			return ptr.CopyOut<byte>(SizeOf<T>());
-		}
+
+		[DllImport("DbgHelp.dll")]
+		static extern bool StackWalk64(uint machineType, IntPtr hProc, IntPtr hThread, IntPtr stackFrame,
+			void* contextRecord,
+			IntPtr readMemoryRoutine, IntPtr functionTableAccessRoutine,
+			IntPtr getModuleBaseRoutine, IntPtr translateAddress);
+
 
 		static Pointer<ILMethod> getIL(Type t, string name)
 		{
@@ -298,8 +298,7 @@ namespace Test
 		}
 
 
-		[DllImport("kernel32.dll", EntryPoint = "RtlZeroMemory")]
-		static extern void get(void* v, uint sz);
+
 
 
 		[Conditional("DEBUG")]
@@ -493,12 +492,10 @@ namespace Test
 		 * RazorSharp:
 		 *  - RazorCommon
 		 * 	- CompilerServices.Unsafe
-		 *  - RazorInvoke
 		 *
 		 * Test:
 		 *  - RazorCommon
 		 *  - CompilerServices.Unsafe
-		 *  - RazorInvoke
 		 * 	- NUnit
 		 *  - BenchmarkDotNet
 		 */

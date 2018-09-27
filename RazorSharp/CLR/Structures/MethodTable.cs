@@ -52,7 +52,7 @@ namespace RazorSharp.CLR.Structures
 	///         </item>
 	///     </list>
 	///     <remarks>
-	///         This should only be accessed via <see cref="Pointer{T}"/>
+	///         This should only be accessed via <see cref="Pointer{T}" />
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
@@ -134,7 +134,7 @@ namespace RazorSharp.CLR.Structures
 			// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
 			// for enum_flag_HasIndirectParentMethodTable.
 			get {
-				if (!Flags.HasFlag(MethodTableFlags.HasIndirectParent)) {
+				if (!Flags.HasFlagFast(MethodTableFlags.HasIndirectParent)) {
 					return m_pParentMethodTable;
 				}
 
@@ -222,19 +222,19 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
-		public bool   HasComponentSize => Flags.HasFlag(MethodTableFlags.HasComponentSize);
-		public bool   IsArray          => Flags.HasFlag(MethodTableFlags.Array);
+		public bool   HasComponentSize => Flags.HasFlagFast(MethodTableFlags.HasComponentSize);
+		public bool   IsArray          => Flags.HasFlagFast(MethodTableFlags.Array);
 		public bool   IsStringOrArray  => HasComponentSize;
 		public bool   IsBlittable      => EEClass.Reference.IsBlittable;
 		public bool   IsString         => HasComponentSize && !IsArray;
-		public bool   ContainsPointers => Flags.HasFlag(MethodTableFlags.ContainsPointers);
+		public bool   ContainsPointers => Flags.HasFlagFast(MethodTableFlags.ContainsPointers);
 		public string Name             => RuntimeType.Name;
 
 		/// <summary>
 		///     Metadata token
 		///     <remarks>
 		///         <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>"mdToken"</c> value in hexadecimal format.</para>
-		/// <para>Equals <see cref="Type.MetadataToken"/></para>
+		///         <para>Equals <see cref="Type.MetadataToken" /></para>
 		///     </remarks>
 		/// </summary>
 		public int MDToken => Constants.TokenFromRid(Token, CorTokenType.mdtTypeDef);
@@ -274,7 +274,7 @@ namespace RazorSharp.CLR.Structures
 		///     The size of the instance fields in this type. This is the unboxed size of the type if the object is boxed.
 		///     (Minus padding and overhead of the base size.)
 		/// </summary>
-		public int NumInstanceFieldBytes => (int) BaseSize - EEClass.Reference.BaseSizePadding;
+		public int NumInstanceFieldBytes => BaseSize - EEClass.Reference.BaseSizePadding;
 
 		/// <summary>
 		///     Array of <see cref="FieldDesc" />s for this type.

@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using static RazorSharp.CLR.Offsets;
 
 #endregion
 
@@ -42,7 +43,7 @@ namespace RazorSharp.CLR.Structures.EE
 	///         </item>
 	///     </list>
 	///     <remarks>
-	///         This should only be accessed via <see cref="Pointer{T}"/>
+	///         This should only be accessed via <see cref="Pointer{T}" />
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
@@ -56,10 +57,10 @@ namespace RazorSharp.CLR.Structures.EE
 		[FieldOffset(16)] private readonly MethodTable* m_pMethodTable;
 
 		// @formatter:off — disable formatter after this line
-		[FieldOffset(Offsets.FIELD_DESC_LIST_FIELD_OFFSET)]
+		[FieldOffset(FIELD_DESC_LIST_FIELD_OFFSET)]
 		private readonly FieldDesc* m_pFieldDescList;
 
-		[FieldOffset(Offsets.CHUNKS_FIELD_OFFSET)]
+		[FieldOffset(CHUNKS_FIELD_OFFSET)]
 		private readonly void* m_pChunks;
 		// @formatter:on — enable formatter after this line
 
@@ -230,7 +231,7 @@ namespace RazorSharp.CLR.Structures.EE
 				//PTR_HOST_MEMBER_TADDR(EEClass, this, m_pFieldDescList)
 				Pointer<FieldDesc> p = Unsafe.AddressOf(ref this);
 				p.Add((long) m_pFieldDescList);
-				p.Add(Offsets.FIELD_DESC_LIST_FIELD_OFFSET);
+				p.Add(FIELD_DESC_LIST_FIELD_OFFSET);
 				return (FieldDesc*) p;
 			}
 		}
@@ -245,7 +246,7 @@ namespace RazorSharp.CLR.Structures.EE
 			get {
 				Pointer<MethodDescChunk> p = Unsafe.AddressOf(ref this);
 				p.Add((long) m_pChunks);
-				p.Add(Offsets.CHUNKS_FIELD_OFFSET);
+				p.Add(CHUNKS_FIELD_OFFSET);
 				return (MethodDescChunk*) p;
 			}
 		}

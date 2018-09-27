@@ -23,14 +23,17 @@ namespace RazorSharp.CLR
 
 
 	/// <summary>
-	///     Some CLR functions are too complex to replicate in C# so we'll use <see cref="SigcallAttribute"/>
-	/// to execute them.
+	///     Some CLR functions are too complex to replicate in C# so we'll use <see cref="SigcallAttribute" />
+	///     to execute them.
 	///     <remarks>
 	///         All functions are WKS, not SVR
 	///     </remarks>
 	/// </summary>
 	internal static unsafe class ClrFunctions
 	{
+		/// <summary>
+		///     <c>clr.dll</c>
+		/// </summary>
 		internal const string ClrDll = "clr.dll";
 
 		private static bool s_bFunctionsCached = false;
@@ -320,11 +323,11 @@ namespace RazorSharp.CLR
 		#region SetStableEntryPoint
 
 		/// <summary>
-		/// We implement <see cref="SetStableEntryPointInterlockedDelegate"/> as a <see cref="Delegate"/> initially because
-		/// <see cref="MethodDesc.SetStableEntryPointInterlocked"/> has not been bound yet, and in order to bind it
-		/// we have to use this function.
+		///     We implement <see cref="SetStableEntryPointInterlockedDelegate" /> as a <see cref="Delegate" /> initially because
+		///     <see cref="MethodDesc.SetStableEntryPointInterlocked" /> has not been bound yet, and in order to bind it
+		///     we have to use this function.
 		/// </summary>
-		/// <param name="__this"><c>this</c> pointer of a <see cref="MethodDesc"/></param>
+		/// <param name="__this"><c>this</c> pointer of a <see cref="MethodDesc" /></param>
 		/// <param name="pCode">Entry point</param>
 		private delegate long SetStableEntryPointInterlockedDelegate(MethodDesc* __this, ulong pCode);
 
@@ -337,9 +340,9 @@ namespace RazorSharp.CLR
 		};
 
 		/// <summary>
-		/// <remarks>
-		/// Equal to <see cref="MethodDesc.SetStableEntryPoint"/>, but this is implemented via a <see cref="Delegate"/>
-		/// </remarks>
+		///     <remarks>
+		///         Equal to <see cref="MethodDesc.SetStableEntryPoint" />, but this is implemented via a <see cref="Delegate" />
+		///     </remarks>
 		/// </summary>
 		/// <param name="mi"></param>
 		/// <param name="pCode"></param>
@@ -352,9 +355,9 @@ namespace RazorSharp.CLR
 		#endregion
 
 		/// <summary>
-		/// Returns the corresponding <see cref="Type"/> for a <see cref="MethodTable"/> pointer.
+		///     Returns the corresponding <see cref="Type" /> for a <see cref="MethodTable" /> pointer.
 		/// </summary>
-		/// <param name="__struct"><see cref="MethodTable"/> pointer</param>
+		/// <param name="__struct"><see cref="MethodTable" /> pointer</param>
 		/// <returns></returns>
 		/// <exception cref="SigcallException">Method has not been bound</exception>
 		[ClrSigcall]

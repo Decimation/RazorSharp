@@ -3,8 +3,8 @@
 using System;
 using System.Linq;
 using RazorCommon;
-using RazorInvoke;
-using RazorInvoke.Libraries;
+using RazorSharp.Native;
+using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
 
 #endregion

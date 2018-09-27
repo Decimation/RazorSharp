@@ -45,7 +45,6 @@ namespace RazorSharp.Memory
 		public List<PatternPair> Pairs => m_rgPatternPairs;
 
 
-
 		public void AddCache(string fnName, bool isGet = false, long ofsGuess = 0)
 		{
 			if (isGet) {

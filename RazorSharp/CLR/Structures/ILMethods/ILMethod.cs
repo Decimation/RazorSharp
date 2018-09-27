@@ -50,7 +50,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		public void WriteIL(byte[] rgOpCodes)
 		{
 			for (int i = 0; i < rgOpCodes.Length; i++) {
-				Code.ForceWrite(rgOpCodes[i],i);
+				Code.ForceWrite(rgOpCodes[i], i);
 			}
 		}
 
@@ -110,7 +110,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		public Pointer<byte> Code => IsTiny ? Tiny.Reference.Code : Fat.Reference.Code;
 
 		/// <summary>
-		///     Length/size of the IL code (<see cref="Code"/>)
+		///     Length/size of the IL code (<see cref="Code" />)
 		/// </summary>
 		public int CodeSize => (int) (IsTiny ? Tiny.Reference.CodeSize : Fat.Reference.CodeSize);
 

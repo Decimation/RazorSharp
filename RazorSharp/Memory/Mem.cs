@@ -7,10 +7,10 @@ using System.Collections;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorInvoke;
-using RazorInvoke.Libraries;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
+using RazorSharp.Native;
+using RazorSharp.Native.Enums;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -60,9 +60,9 @@ namespace RazorSharp.Memory
 
 		#region Array operations
 
-		public static byte[] ReadBytes(Pointer<byte> b, int size)
+		public static byte[] ReadBytes(Pointer<byte> p, int size)
 		{
-			return ReadBytes(b, 0, size);
+			return ReadBytes(p, 0, size);
 		}
 
 		public static byte[] ReadBytes(Pointer<byte> p, int byteOffset, int size)
@@ -125,39 +125,23 @@ namespace RazorSharp.Memory
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<T> ReadPointer<T>(Pointer<byte> ptr, long byteOffset)
 		{
-			return *(IntPtr*) PointerUtils.Add(ptr, byteOffset);
+			return *(IntPtr*) ptr.Add(byteOffset);
 		}
 
 		public static void ForceWrite<T>(Pointer<byte> p, int byteOffset, T t)
 		{
-			IntPtr hProc = Kernel32.OpenProcess(Process.GetCurrentProcess(), Enumerations.ProcessAccessFlags.All);
-
-			int    lpNumberOfBytesWritten = 0;
-			int    size                   = Unsafe.SizeOf<T>();
-			IntPtr targetPtr              = PointerUtils.Add(p, byteOffset).Address;
+			int    size      = Unsafe.SizeOf<T>();
+			IntPtr targetPtr = p.Add(byteOffset).Address;
 
 
 			// Make the region writable
-			bool virtualProtect = Kernel32.VirtualProtect(targetPtr, (IntPtr) size,
-				Enumerations.MemoryProtection.ExecuteReadWrite, out uint oldProtect);
-			Enumerations.MemoryProtection mpOldProtect = (Enumerations.MemoryProtection) oldProtect;
+			RazorContract.Assert(Kernel32.VirtualProtect(targetPtr, (uint) size,
+				MemoryProtection.ExecuteReadWrite, out MemoryProtection mpOldProtect));
 
-			RazorContract.Assert(virtualProtect);
-
-			// Write the memory
-			bool writeProcessMemory = Kernel32.WriteProcessMemory(hProc, targetPtr,
-				Unsafe.AddressOf(ref t), size, ref lpNumberOfBytesWritten);
-
-			RazorContract.Assert(writeProcessMemory);
-			RazorContract.Assert(lpNumberOfBytesWritten == size);
-
-			// Close the handle
-			bool closeHandle = Kernel32.CloseHandle(hProc);
-			RazorContract.Assert(closeHandle);
+			Kernel32.WriteProcessMemory(Process.GetCurrentProcess(), p, t);
 
 			// Restore the old memory protection
-			bool virtualProtectRestore = Kernel32.VirtualProtect(targetPtr, (IntPtr) size, mpOldProtect, out _);
-			RazorContract.Assert(virtualProtectRestore);
+			RazorContract.Assert(Kernel32.VirtualProtect(targetPtr, (uint) size, mpOldProtect, out _));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -220,12 +204,12 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     Stack Base / Bottom of stack (high address)
 		/// </summary>
-		public static IntPtr StackBase => Kernel32.GetCurrentThreadStackLimits().high;
+		public static IntPtr StackBase => Kernel32.GetCurrentThreadStackLimits().High;
 
 		/// <summary>
 		///     Stack Limit / Ceiling of stack (low address)
 		/// </summary>
-		public static IntPtr StackLimit => Kernel32.GetCurrentThreadStackLimits().low;
+		public static IntPtr StackLimit => Kernel32.GetCurrentThreadStackLimits().Low;
 
 		/// <summary>
 		///     Should equal <c>4 MB</c> for 64-bit and <c>1 MB</c> for 32-bit
@@ -345,17 +329,15 @@ namespace RazorSharp.Memory
 
 		/// <summary>
 		///     <para>Frees memory allocated from <see cref="AllocUnmanaged{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>
-		///     <para>The memory is zeroed before it is freed.</para>
 		/// </summary>
 		/// <param name="p">Pointer to allocated memory</param>
-		/// <param name="bZero">Whether to zero the memory before freeing</param>
-		public static void Free(IntPtr p, bool bZero = false)
+		public static void Free(IntPtr p)
 		{
-			if (bZero) {
-				// AllocHGlobal is a wrapper of LocalAlloc
-				uint size = Kernel32.LocalSize(p.ToPointer());
-				Zero(p, (int) size);
-			}
+//			if (bZero) {
+			// AllocHGlobal is a wrapper of LocalAlloc
+//				uint size = Kernel32.LocalSize(p.ToPointer());
+//				Zero(p, (int) size);
+//			}
 
 			Marshal.FreeHGlobal(p);
 		}

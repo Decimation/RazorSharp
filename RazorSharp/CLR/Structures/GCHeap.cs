@@ -1,12 +1,11 @@
 #region
 
 using System;
-using System.Diagnostics;
-using System.Runtime;
-using RazorInvoke;
 using RazorSharp.Memory;
+using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
+using static RazorSharp.CLR.Offsets;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable MemberCanBeMadeStatic.Global
@@ -193,25 +192,17 @@ namespace RazorSharp.CLR.Structures
 			Trace.Assert(!GCSettings.IsServerGC, "Server GC");
 #endif
 
-
-//			const long g_pStringClassOffset    = 32;
-			const long g_pGCHeapOffset         = 48;
-			const long g_lowest_addressOffset  = 40;
-			const long g_highest_addressOffset = 408;
-
 			// Retrieve the global variables from the data segment of the CLR DLL
 
 			ImageSectionInfo dataSegment = Segments.GetSegment(".data", ClrFunctions.ClrDll);
 
 
-			g_pGCHeap         = Mem.ReadPointer<byte>(dataSegment.SectionAddress, g_pGCHeapOffset).Address;
-			g_lowest_address  = Mem.ReadPointer<byte>(dataSegment.SectionAddress, g_lowest_addressOffset).Address;
-			g_highest_address = Mem.ReadPointer<byte>(dataSegment.SectionAddress, g_highest_addressOffset).Address;
+			g_pGCHeap        = Mem.ReadPointer<byte>(dataSegment.SectionAddress, GLOBAL_GCHEAP_OFFSET).Address;
+			g_lowest_address = Mem.ReadPointer<byte>(dataSegment.SectionAddress, GLOBAL_LOWEST_ADDRESS_OFFSET).Address;
+			g_highest_address = Mem.ReadPointer<byte>(dataSegment.SectionAddress, GLOBAL_HIGHEST_ADDRESS_OFFSET)
+				.Address;
 
 			SignatureCall.DynamicBind<GCHeap>();
-
-//			Console.WriteLine("g_pGCHeap address: {0}", Hex.ToHex(g_pGCHeapAddr));
-//			Console.WriteLine("g_pGCHeap: {0}", Hex.ToHex(g_pGCHeap));
 		}
 	}
 

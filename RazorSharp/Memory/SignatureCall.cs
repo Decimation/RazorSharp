@@ -24,10 +24,12 @@ namespace RazorSharp.Memory
 	///         Indicates that the attributed function is exposed via signature scanning (using
 	///         <see cref="T:RazorSharp.Memory.SigScanner" /> internally).
 	///     </para>
-	///    <para>The annotated method's entry point (<see cref="RazorSharp.CLR.Structures.MethodDesc.Function"/>)
-	///     will be set (<see cref="ClrFunctions.SetStableEntryPoint"/>) to the address of the matched signature found by <see cref="SigScanner" />.
+	///     <para>
+	///         The annotated method's entry point (<see cref="RazorSharp.CLR.Structures.MethodDesc.Function" />)
+	///         will be set (<see cref="ClrFunctions.SetStableEntryPoint" />) to the address of the matched signature found by
+	///         <see cref="SigScanner" />.
 	///     </para>
-	/// <para>This allows the calling of non-exported DLL functions, so long as the function signature matches.</para>
+	///     <para>This allows the calling of non-exported DLL functions, so long as the function signature matches.</para>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method)]
 	public class SigcallAttribute : Attribute
@@ -95,13 +97,13 @@ namespace RazorSharp.Memory
 		private static readonly SigScanner SigScanner = new SigScanner();
 
 		/// <summary>
-		/// When <c>true</c>, only the text (code) segment (which contains executable code)
-		/// of the target DLL will be scanned by <see cref="SigScanner"/>.
+		///     When <c>true</c>, only the text (code) segment (which contains executable code)
+		///     of the target DLL will be scanned by <see cref="SigScanner" />.
 		/// </summary>
 		public static bool UseTextSegment { get; set; } = true;
 
 		/// <summary>
-		/// Cached functions
+		///     Cached functions
 		/// </summary>
 		private static readonly Dictionary<MethodInfo, Tuple<byte[], long>> SigcallMethodMap;
 
@@ -124,7 +126,6 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
-
 
 
 		private static void SelectModule(SigcallAttribute attr)

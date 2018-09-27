@@ -1,7 +1,11 @@
+#region
+
 using System;
 using System.Reflection;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace RazorSharp.CLR.Meta
 {

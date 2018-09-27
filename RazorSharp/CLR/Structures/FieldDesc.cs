@@ -45,7 +45,7 @@ namespace RazorSharp.CLR.Structures
 	///         </item>
 	///     </list>
 	///     <remarks>
-	///         This should only be accessed via <see cref="Pointer{T}"/>
+	///         This should only be accessed via <see cref="Pointer{T}" />
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
@@ -79,8 +79,6 @@ namespace RazorSharp.CLR.Structures
 
 		#region Accessors
 
-
-
 		/// <summary>
 		///     Unprocessed <see cref="Token" />
 		/// </summary>
@@ -111,8 +109,6 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
-
-
 
 
 		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
@@ -263,11 +259,11 @@ namespace RazorSharp.CLR.Structures
 		///     <remarks>
 		///         <para>Sources: /src/vm/field.cpp: 516, 489, 467</para>
 		///     </remarks>
-		///     <exception cref="FieldDescException">If the field is <c>static</c> </exception>
+		///     <exception cref="Exception">If the field is <c>static</c> </exception>
 		/// </summary>
 		public IntPtr GetAddress<TInstance>(ref TInstance t)
 		{
-			RazorContract.Requires<FieldDescException>(!IsStatic, "You cannot get the address of a static field (yet)");
+			RazorContract.Requires(!IsStatic, "You cannot get the address of a static field (yet)");
 			RazorContract.Assert(Runtime.ReadMethodTable(ref t) == EnclosingMethodTable);
 			RazorContract.Assert(Offset != FieldOffsetNewEnC);
 

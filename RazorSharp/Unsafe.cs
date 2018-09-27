@@ -157,6 +157,7 @@ namespace RazorSharp
 		/// </summary>
 		/// <param name="t">Type to return the address of</param>
 		/// <returns>The address of the type in memory.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static IntPtr AddressOf<T>(ref T t)
 		{
 			TypedReference tr = __makeref(t);
@@ -476,19 +477,20 @@ namespace RazorSharp
 		public static byte[] MemoryOf<T>(T t) where T : class
 		{
 			// Need to include the ObjHeader
-			Pointer<T> ptr = Unsafe.AddressOfHeap(ref t, OffsetType.Header);
+			Pointer<T> ptr = AddressOfHeap(ref t, OffsetType.Header);
 			return ptr.CopyOut<byte>(HeapSize(in t));
 		}
 
 		/// <summary>
 		///     Copies the memory of <paramref name="t" /> into a <see cref="Byte" /> array.
+		///     If <typeparamref name="T" /> is a pointer, the memory of the pointer will be returned.
 		/// </summary>
 		/// <param name="t">Value to copy the memory of</param>
 		/// <typeparam name="T">Value type</typeparam>
 		/// <returns>An array of <see cref="Byte" />s containing the raw memory of <paramref name="t" /></returns>
-		public static byte[] MemoryOfVal<T>(T t) where T : struct
+		public static byte[] MemoryOfVal<T>(T t)
 		{
-			Pointer<T> ptr = Unsafe.AddressOf(ref t);
+			Pointer<T> ptr = AddressOf(ref t);
 			return ptr.CopyOut<byte>(ptr.ElementSize);
 		}
 

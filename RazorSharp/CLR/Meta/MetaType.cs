@@ -1,8 +1,12 @@
+#region
+
 using System;
 using System.Reflection;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace RazorSharp.CLR.Meta
 {
@@ -18,8 +22,8 @@ namespace RazorSharp.CLR.Meta
 
 		public MetaField[] GetFields(Type t)
 		{
-			var         fieldDescs = Runtime.GetFieldDescs(t);
-			MetaField[] fields     = new MetaField[fieldDescs.Length];
+			Pointer<FieldDesc>[] fieldDescs = Runtime.GetFieldDescs(t);
+			MetaField[]          fields     = new MetaField[fieldDescs.Length];
 			for (int i = 0; i < fields.Length; i++) {
 				fields[i] = new MetaField(fieldDescs[i]);
 			}
