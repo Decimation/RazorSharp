@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorCommon;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.HeapObjects;
+using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -359,7 +359,7 @@ namespace RazorSharp.CLR
 		/// <returns>A pointer to the reference type's header</returns>
 		public static ObjHeader* ReadObjHeader<T>(ref T t) where T : class
 		{
-			IntPtr data = Unsafe.AddressOfHeap(ref t);
+			IntPtr data = Unsafe.AddressOfHeap(ref t).Address;
 
 			return (ObjHeader*) (data - IntPtr.Size);
 		}

@@ -6,8 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Strings;
+using RazorSharp.Common;
 
 #endregion
 
@@ -476,11 +475,11 @@ namespace RazorSharp.Pointers.Ex
 
 				if (refType) {
 					table.AddRow(i, Hex.ToHex(addr), this[i], Hex.ToHex(Marshal.ReadIntPtr(addr)),
-						AddressInBounds(addr) ? StringUtils.Check : StringUtils.BallotX);
+						AddressInBounds(addr).Prettify());
 				}
 				else {
 					table.AddRow(i, Hex.ToHex(addr), this[i],
-						AddressInBounds(addr) ? StringUtils.Check : StringUtils.BallotX);
+						AddressInBounds(addr).Prettify());
 				}
 			}
 
@@ -499,7 +498,7 @@ namespace RazorSharp.Pointers.Ex
 		/// </summary>
 		public void Dispose()
 		{
-			Logger.Log(Flags.Memory, "Freeing {0} bytes @ {1:P}", AllocatedSize, Address);
+//			Logger.Log(Flags.Memory, "Freeing {0} bytes @ {1:P}", AllocatedSize, Address);
 			MoveToStart();
 			ReleaseUnmanagedResources();
 

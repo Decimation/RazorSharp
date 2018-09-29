@@ -4,7 +4,7 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Linq;
-using RazorCommon;
+using RazorSharp.Common;
 using RazorSharp.Utilities.Exceptions;
 
 #endregion
@@ -28,6 +28,9 @@ namespace RazorSharp.Experimental
 	///     - IList
 	///     <para></para>
 	/// </summary>
+	/// <remarks>
+	/// Old namespace: Experimental
+	/// </remarks>
 	/// <typeparam name="T"></typeparam>
 	internal unsafe struct StackAllocated<T> where T : class
 	{
@@ -87,7 +90,7 @@ namespace RazorSharp.Experimental
 			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Value", Value);
 			table.AddRow("Stack", Hex.ToHex(m_stackPtr));
-			table.AddRow("Dummy heap pointer", Hex.ToHex(Unsafe.AddressOfHeap(ref m_dummy)));
+			table.AddRow("Dummy heap pointer", Hex.ToHex(Unsafe.AddressOfHeap(ref m_dummy).Address));
 			return table.ToMarkDownString();
 		}
 	}

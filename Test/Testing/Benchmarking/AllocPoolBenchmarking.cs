@@ -1,6 +1,10 @@
+#region
+
 using BenchmarkDotNet.Attributes;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace Test.Testing.Benchmarking
 {
@@ -43,7 +47,7 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void ReAlloc()
 		{
-			m_pAlloc=AllocPool.ReAlloc(m_pAlloc, 20);
+			m_pAlloc = AllocPool.ReAlloc(m_pAlloc, 20);
 		}
 
 		[Benchmark]
@@ -51,7 +55,6 @@ namespace Test.Testing.Benchmarking
 		{
 			AllocPool.IsAllocated(m_pAlloc);
 		}
-
 
 
 		[Benchmark]

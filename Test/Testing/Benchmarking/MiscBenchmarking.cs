@@ -1,4 +1,8 @@
+#region
+
 using BenchmarkDotNet.Attributes;
+
+#endregion
 
 namespace Test.Testing.Benchmarking
 {
@@ -18,23 +22,19 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void ForEmpty()
 		{
-			for (int i = 0; i < m_rgInt32.Length; i++) {
-
-			}
+			for (int i = 0; i < m_rgInt32.Length; i++) { }
 		}
 
 		[Benchmark]
 		public void ForEachEmpty()
 		{
-			foreach (var v in m_rgInt32) {
-
-			}
+			foreach (int v in m_rgInt32) { }
 		}
 
 		[Benchmark]
 		public void ForEach()
 		{
-			foreach (var v in m_rgInt32) {
+			foreach (int v in m_rgInt32) {
 				int x = v;
 			}
 		}

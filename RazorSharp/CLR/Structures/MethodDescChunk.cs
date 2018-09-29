@@ -4,7 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorCommon;
+using RazorSharp.Common;
 using RazorSharp.Pointers;
 
 #endregion
@@ -92,7 +92,7 @@ namespace RazorSharp.CLR.Structures
 			get {
 				// return m_methodTable.GetValue(PTR_HOST_MEMBER_TADDR(MethodDescChunk, this, m_methodTable));
 
-				Pointer<MethodTable> __this = Unsafe.AddressOf(ref this);
+				Pointer<MethodTable> __this = Unsafe.AddressOf(ref this).Address;
 				__this.Add(0);
 				__this.Add((int) m_methodTable);
 				return __this;
@@ -103,7 +103,7 @@ namespace RazorSharp.CLR.Structures
 		public Pointer<MethodDesc> FirstMethodDesc {
 			get {
 				// return PTR_MethodDesc(dac_cast<TADDR>(this) + sizeof(MethodDescChunk));
-				IntPtr              __this = Unsafe.AddressOf(ref this);
+				IntPtr              __this = Unsafe.AddressOf(ref this).Address;
 				Pointer<MethodDesc> pMD    = __this;
 				pMD.Add(sizeof(MethodDescChunk));
 				return pMD;

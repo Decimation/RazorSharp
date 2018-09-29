@@ -1,10 +1,16 @@
+#region
+
 using System;
 using System.Diagnostics;
 using System.Reflection;
 using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
+using RazorSharp.Pointers;
 using Test.Testing.Types;
+
+#endregion
 
 namespace Test.Testing.Tests
 {
@@ -12,12 +18,13 @@ namespace Test.Testing.Tests
 	[TestFixture]
 	internal class StructureTests
 	{
-		private static void AssertFieldInfo<TType, TField>(string fieldName, ProtectionLevel prot = ProtectionLevel.Private)
+		private static void AssertFieldInfo<TType, TField>(string fieldName,
+			ProtectionLevel prot = ProtectionLevel.Private)
 		{
-			var fieldActual =
+			FieldInfo fieldActual =
 				typeof(TType).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
-			var fieldDesc = Runtime.GetFieldDesc<TType>(fieldName);
+			Pointer<FieldDesc> fieldDesc = Runtime.GetFieldDesc<TType>(fieldName);
 
 			/**
 			 * Intrinsic functions
@@ -55,16 +62,15 @@ namespace Test.Testing.Tests
 
 		private static void AssertMethodInfo<TType>(string fnName)
 		{
-			var methodInfoActual = typeof(TType).GetMethod(fnName,
+			MethodInfo methodInfoActual = typeof(TType).GetMethod(fnName,
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic);
-			var methodDesc = Runtime.GetMethodDesc<TType>(fnName);
+			Pointer<MethodDesc> methodDesc = Runtime.GetMethodDesc<TType>(fnName);
 
 
 			Debug.Assert(methodDesc.Reference.Info == methodInfoActual);
 			Debug.Assert(methodDesc.Reference.EnclosingMethodTable == Runtime.MethodTableOf<TType>());
 			Debug.Assert(methodDesc.Reference.Token == methodInfoActual.MetadataToken);
 			Debug.Assert(!methodDesc.Reference.IsConstructor);
-
 		}
 	}
 

@@ -5,7 +5,6 @@ using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.Pointers.Ex;
-using RazorSharp.Utilities;
 
 #endregion
 
@@ -37,29 +36,29 @@ namespace Test.Testing.Tests
 
 			// Bounds checking
 
-			Assert.Throws<Exception>(delegate
+			Assert.Throws<IndexOutOfRangeException>(delegate
 			{
 				AllocExPointer<string> p = new AllocExPointer<string>(5);
 				p += p.Count + 1;
 			});
 
-			Assert.Throws<Exception>(delegate
+			Assert.Throws<IndexOutOfRangeException>(delegate
 			{
 				AllocExPointer<string> p = new AllocExPointer<string>(5);
 				p -= p.Count + 1;
 			});
 
-			Assert.Throws<Exception>(delegate
+			Assert.Throws<IndexOutOfRangeException>(delegate
 			{
 				string x = alloc[-1];
 			});
 
-			Assert.Throws<Exception>(delegate
+			Assert.Throws<IndexOutOfRangeException>(delegate
 			{
 				string x = alloc[alloc.Count];
 			});
 
-			Assert.Throws<Exception>(delegate
+			Assert.Throws<IndexOutOfRangeException>(delegate
 			{
 				alloc++;
 				string x = alloc[-2];

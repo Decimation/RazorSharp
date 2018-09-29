@@ -3,7 +3,7 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using RazorCommon;
+using RazorSharp.Common;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using static RazorSharp.CLR.Offsets;
@@ -148,8 +148,8 @@ namespace RazorSharp.CLR.Structures.EE
 				RazorContract.Requires(HasLayout, "EEClass does not have LayoutInfo");
 
 
-				IntPtr thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass)).Address;
-
+				//IntPtr thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass)).Address;
+				IntPtr thisptr = Unsafe.AddressOf(ref this).Add(sizeof(EEClass)).Address;
 				// ReSharper disable once ArrangeRedundantParentheses
 				return &((LayoutEEClass*) thisptr)->m_LayoutInfo;
 			}
@@ -196,7 +196,8 @@ namespace RazorSharp.CLR.Structures.EE
 		///     </remarks>
 		/// </summary>
 		private PackedDWORDFields* PackedFields =>
-			(PackedDWORDFields*) PointerUtils.Add(Unsafe.AddressOf(ref this), m_cbFixedEEClassFields);
+			//(PackedDWORDFields*) PointerUtils.Add(Unsafe.AddressOf(ref this), m_cbFixedEEClassFields);
+			(PackedDWORDFields*)Unsafe.AddressOf(ref this).Add(m_cbFixedEEClassFields);
 
 		private Pointer<EEClass> ParentClass => m_pMethodTable->Parent.Reference.EEClass;
 
@@ -229,7 +230,7 @@ namespace RazorSharp.CLR.Structures.EE
 
 			get {
 				//PTR_HOST_MEMBER_TADDR(EEClass, this, m_pFieldDescList)
-				Pointer<FieldDesc> p = Unsafe.AddressOf(ref this);
+				Pointer<FieldDesc> p = Unsafe.AddressOf(ref this).Address;
 				p.Add((long) m_pFieldDescList);
 				p.Add(FIELD_DESC_LIST_FIELD_OFFSET);
 				return (FieldDesc*) p;
@@ -244,7 +245,7 @@ namespace RazorSharp.CLR.Structures.EE
 		internal MethodDescChunk* MethodDescChunkList {
 			//todo: verify
 			get {
-				Pointer<MethodDescChunk> p = Unsafe.AddressOf(ref this);
+				Pointer<MethodDescChunk> p = Unsafe.AddressOf(ref this).Address;
 				p.Add((long) m_pChunks);
 				p.Add(CHUNKS_FIELD_OFFSET);
 				return (MethodDescChunk*) p;

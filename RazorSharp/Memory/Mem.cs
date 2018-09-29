@@ -120,6 +120,11 @@ namespace RazorSharp.Memory
 
 		#endregion
 
+		public static void Zero<T>(ref T t)
+		{
+			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
+		}
+
 		#region Read / write
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -138,7 +143,7 @@ namespace RazorSharp.Memory
 			RazorContract.Assert(Kernel32.VirtualProtect(targetPtr, (uint) size,
 				MemoryProtection.ExecuteReadWrite, out MemoryProtection mpOldProtect));
 
-			Kernel32.WriteProcessMemory(Process.GetCurrentProcess(), p, t);
+			Kernel32.WriteCurrentProcessMemory(p, t);
 
 			// Restore the old memory protection
 			RazorContract.Assert(Kernel32.VirtualProtect(targetPtr, (uint) size, mpOldProtect, out _));
@@ -188,7 +193,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		public static bool IsOnStack<T>(ref T t)
 		{
-			return IsOnStack(Unsafe.AddressOf(ref t));
+			return IsOnStack(Unsafe.AddressOf(ref t).Address);
 		}
 
 		public static bool IsOnStack(Pointer<byte> ptr)

@@ -19,7 +19,7 @@ namespace RazorSharp
 		{
 			ObjectPinner.InvokeWhilePinned(str, delegate
 			{
-				Pointer<char> lpChar = Unsafe.AddressOfHeap(ref str, OffsetType.StringData);
+				Pointer<char> lpChar = Unsafe.AddressOfHeap(ref str, OffsetType.StringData).Address;
 				lpChar[i] = c;
 			});
 		}
@@ -28,7 +28,7 @@ namespace RazorSharp
 		{
 			ObjectPinner.InvokeWhilePinned(str, delegate
 			{
-				Pointer<char> lpChar = Unsafe.AddressOfHeap(ref str, OffsetType.StringData);
+				Pointer<char> lpChar = Unsafe.AddressOfHeap(ref str, OffsetType.StringData).Address;
 				for (int i = 0; i < str.Length; i++) {
 					lpChar[i] = s[i];
 				}

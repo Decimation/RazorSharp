@@ -538,8 +538,6 @@ namespace RazorSharp.CLR
 
 	}
 
-	public static class MethodTableFlagsExtensions { }
-
 	/// <summary>
 	///     <remarks>
 	///         Use with <see cref="MethodTable.FlagsLow" />

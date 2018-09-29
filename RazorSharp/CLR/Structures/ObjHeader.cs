@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using RazorCommon;
+using RazorSharp.Common;
 using RazorSharp.Utilities;
 
 // ReSharper disable BuiltInTypeReferenceStyle

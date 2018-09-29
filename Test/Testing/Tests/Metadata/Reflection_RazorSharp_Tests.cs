@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Reflection;
 using NUnit.Framework;
@@ -5,6 +7,8 @@ using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace Test.Testing.Tests
 {
@@ -28,31 +32,31 @@ namespace Test.Testing.Tests
 
 		public void CompareType<T>()
 		{
-			Type reType = typeof(T);
+			Type                 reType        = typeof(T);
 			Pointer<MethodTable> rsMethodTable = Runtime.MethodTableOf<T>();
-			Pointer<EEClass> rsEEClass = rsMethodTable.Reference.EEClass;
+			Pointer<EEClass>     rsEEClass     = rsMethodTable.Reference.EEClass;
 
 			Assert.True(reType == rsMethodTable.Reference.RuntimeType);
 		}
 
 		public void CompareMethods<T>()
 		{
-			var mbs = Runtime.GetMethodDescs<T>();
-			var methods = Runtime.GetMethods(typeof(T));
+			Pointer<MethodDesc>[] mbs     = Runtime.GetMethodDescs<T>();
+			MethodInfo[]          methods = Runtime.GetMethods(typeof(T));
 
-			Assert.AreEqual(mbs.Length,methods.Length);
+			Assert.AreEqual(mbs.Length, methods.Length);
 
 			for (int i = 0; i < mbs.Length; i++) {
-				CompareMethod(mbs[i],methods[i]);
+				CompareMethod(mbs[i], methods[i]);
 			}
 		}
 
 		public void CompareFields<T>()
 		{
-			var fds = Runtime.GetFieldDescs<T>();
-			var fields = Runtime.GetFields<T>();
+			Pointer<FieldDesc>[] fds    = Runtime.GetFieldDescs<T>();
+			FieldInfo[]          fields = Runtime.GetFields<T>();
 
-			Assert.AreEqual(fds.Length,fields.Length);
+			Assert.AreEqual(fds.Length, fields.Length);
 
 			for (int i = 0; i < fds.Length; i++) {
 				CompareField(fds[i], fields[i]);
@@ -67,7 +71,6 @@ namespace Test.Testing.Tests
 		public void CompareMethod(Pointer<MethodDesc> rsMethodDesc, MethodInfo reMethod)
 		{
 			Assert.True(reMethod.Equals(rsMethodDesc.Reference.Info), "Fail: {0}", reMethod.Name);
-
 		}
 	}
 

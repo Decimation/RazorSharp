@@ -1,11 +1,14 @@
+#region
+
 using System;
 using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
-using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace Test.Testing.Tests
 {

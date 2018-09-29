@@ -7,9 +7,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Strings;
+
 using RazorSharp.CLR.Structures.ILMethods;
+using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -160,7 +160,7 @@ namespace RazorSharp.CLR.Structures
 				// return
 				//PTR_MethodDescChunk(dac_cast<TADDR>(this) -
 				//                    (sizeof(MethodDescChunk) + (GetMethodDescIndex() * MethodDesc::ALIGNMENT)));
-				Pointer<MethodDescChunk> __this = Unsafe.AddressOf(ref this);
+				Pointer<MethodDescChunk> __this = Unsafe.AddressOf(ref this).Address;
 				__this.Subtract(sizeof(MethodDescChunk) + ChunkIndex * ALIGNMENT);
 				return __this;
 			}

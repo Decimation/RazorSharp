@@ -22,6 +22,9 @@ namespace RazorSharp
 	#endregion
 
 
+	/// <summary>
+	/// Offset options for <see cref="Unsafe.AddressOfHeap{T}(ref T, OffsetType)"/>
+	/// </summary>
 	public enum OffsetType
 	{
 		/// <summary>
@@ -70,7 +73,7 @@ namespace RazorSharp
 	/// </summary>
 	public static unsafe class Unsafe
 	{
-		internal const int InvalidValue = -1;
+		internal const int INVALID_VALUE = -1;
 
 
 		#region OffsetOf
@@ -115,7 +118,7 @@ namespace RazorSharp
 			}
 
 
-			Pointer<TMember> rawMemory = AddressOf(ref type);
+			Pointer<TMember> rawMemory = AddressOf(ref type).Address;
 
 			if (!typeof(TType).IsValueType) {
 				rawMemory = Marshal.ReadIntPtr(rawMemory.Address) + IntPtr.Size;
@@ -129,7 +132,7 @@ namespace RazorSharp
 			}
 
 
-			return InvalidValue;
+			return INVALID_VALUE;
 		}
 
 		#endregion
@@ -142,7 +145,7 @@ namespace RazorSharp
 		/// <param name="instance">Instance of the enclosing type</param>
 		/// <param name="name">Name of the field</param>
 		/// <param name="fieldTypes">If the field has unique attributes (i.e. auto-property)</param>
-		public static IntPtr AddressOfField<T>(ref T instance, string name,
+		public static Pointer<byte> AddressOfField<T>(ref T instance, string name,
 			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None)
 		{
 			Pointer<FieldDesc> fd = Runtime.GetFieldDesc<T>(name, fieldTypes);
@@ -158,7 +161,7 @@ namespace RazorSharp
 		/// <param name="t">Type to return the address of</param>
 		/// <returns>The address of the type in memory.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static IntPtr AddressOf<T>(ref T t)
+		public static Pointer<T> AddressOf<T>(ref T t)
 		{
 			TypedReference tr = __makeref(t);
 			return *(IntPtr*) (&tr);
@@ -176,7 +179,8 @@ namespace RazorSharp
 		/// </summary>
 		/// <param name="t">Reference type to return the heap address of</param>
 		/// <returns>The address of the heap object.</returns>
-		public static IntPtr AddressOfHeap<T>(ref T t) where T : class
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Pointer<byte> AddressOfHeap<T>(ref T t) where T : class
 		{
 			TypedReference tr = __makeref(t);
 
@@ -201,7 +205,7 @@ namespace RazorSharp
 		/// <param name="offset">Offset type</param>
 		/// <returns>The address of <paramref name="t" /></returns>
 		/// <exception cref="ArgumentOutOfRangeException">If <paramref name="offset"></paramref> is out of range.</exception>
-		public static IntPtr AddressOfHeap<T>(ref T t, OffsetType offset) where T : class
+		public static Pointer<byte> AddressOfHeap<T>(ref T t, OffsetType offset) where T : class
 		{
 			switch (offset) {
 				case OffsetType.StringData:
@@ -211,6 +215,7 @@ namespace RazorSharp
 					return AddressOfHeap(ref s) + RuntimeHelpers.OffsetToStringData;
 
 				case OffsetType.ArrayData:
+
 					RazorContract.RequiresType<Array, T>();
 					return AddressOfHeap(ref t) + Offsets.OffsetToArrayData;
 
@@ -236,6 +241,82 @@ namespace RazorSharp
 
 		#region Sizes
 
+		// todo: make an AutoSize method
+
+		/*public enum SizeType
+		{
+			/// <summary>
+			/// Requires an argument
+			/// <see cref="Unsafe.AutoSizeOf{T}"/>
+			/// </summary>
+			Auto,
+
+			/// <summary>
+			/// <see cref="Unsafe.SizeOf{T}"/>
+			/// </summary>
+			Default,
+
+			/// <summary>
+			/// <see cref="Unsafe.ManagedSizeOf{T}"/>
+			/// </summary>
+			Managed,
+
+			/// <summary>
+			/// <see cref="Unsafe.NativeSizeOf{T}"/>
+			/// </summary>
+			Native,
+
+			/// <summary>
+			/// Requires an argument
+			/// <see cref="Unsafe.HeapSize{T}"/>
+			/// </summary>
+			Heap,
+
+			/// <summary>
+			/// <see cref="Unsafe.BaseInstanceSize{T}"/>
+			/// </summary>
+			BaseInstance,
+
+			/// <summary>
+			/// Requires an argument
+			/// <see cref="Unsafe.BaseFieldsSize{T}(T)"/>
+			/// </summary>
+			BaseFields,
+
+			/// <summary>
+			/// <see cref="Unsafe.BaseFieldsSize{T}()"/>
+			/// </summary>
+			BaseFields2,
+		}
+
+		// todo: WIP
+
+		public static int SizeOf__<T>(T t = default, SizeType type = SizeType.Auto)
+		{
+			switch (type) {
+				case SizeType.Auto:
+					return AutoSizeOf(t);
+				case SizeType.Default:
+					return SizeOf<T>();
+				case SizeType.Managed:
+					return ManagedSizeOf<T>();
+				case SizeType.Native:
+					return NativeSizeOf<T>();
+				case SizeType.Heap:
+					return HeapSizeInternal(t);
+				case SizeType.BaseInstance:
+					return BaseInstanceSizeInternal<T>();
+				case SizeType.BaseFields:
+					return BaseFieldsSizeInternal(t);
+				case SizeType.BaseFields2:
+					return BaseFieldsSize<T>();
+
+				default:
+					throw new ArgumentOutOfRangeException(nameof(type), type, null);
+			}
+		}*/
+
+
 		/// <summary>
 		///     Calculates the complete size of <paramref name="t" />'s data. If <typeparamref name="T" /> is
 		///     a value type, this is equal to <see cref="SizeOf{T}" />. If <typeparamref name="T" /> is a
@@ -244,9 +325,9 @@ namespace RazorSharp
 		/// <param name="t">Value to calculate the size of</param>
 		/// <typeparam name="T">Type of <paramref name="t" /></typeparam>
 		/// <returns>The complete size of <paramref name="t" /></returns>
-		public static int AutoSizeOf<T>(in T t)
+		public static int AutoSizeOf<T>(T t)
 		{
-			return typeof(T).IsValueType ? SizeOf<T>() : HeapSizeInternal(in t);
+			return typeof(T).IsValueType ? SizeOf<T>() : HeapSizeInternal(t);
 		}
 
 		/// <summary>
@@ -255,13 +336,11 @@ namespace RazorSharp
 		/// <remarks>
 		///     Returned from <see cref="EEClassLayoutInfo.ManagedSize" />
 		/// </remarks>
-		/// <returns>Managed size if the type has an <see cref="EEClassLayoutInfo" />; <c>-1</c> otherwise</returns>
+		/// <returns>Managed size if the type has an <see cref="EEClassLayoutInfo" />; <see cref="INVALID_VALUE"/> otherwise</returns>
 		public static int ManagedSizeOf<T>()
 		{
-			// No layout
-			if (typeof(T).IsArray) {
-				// return InvalidValue;
-			}
+			// Note: Arrays have no layout
+
 
 			Pointer<MethodTable> mt = Runtime.MethodTableOf<T>();
 			Pointer<EEClass>     ee = mt.Reference.EEClass;
@@ -269,7 +348,7 @@ namespace RazorSharp
 				return (int) ee.Reference.LayoutInfo->ManagedSize;
 			}
 
-			return InvalidValue;
+			return INVALID_VALUE;
 		}
 
 		/// <summary>
@@ -280,18 +359,16 @@ namespace RazorSharp
 		///     <para> Equals <see cref="Marshal.SizeOf(Type)" /></para>
 		///     <para> Equals <see cref="StructLayoutAttribute.Size" /> when type isn't zero-sized.</para>
 		/// </remarks>
-		/// <returns>The native size if the type has a native representation; <c>-1</c> otherwise</returns>
+		/// <returns>The native size if the type has a native representation; <see cref="INVALID_VALUE"/> otherwise</returns>
 		public static int NativeSizeOf<T>()
 		{
-			// == 0
-			if (typeof(T).IsArray) {
-//				return InvalidValue;
-			}
+			// Note: Arrays native size == 0
 
-			Pointer<MethodTable> mt        = Runtime.MethodTableOf<T>();
-			int                  native    = mt.Reference.EEClass.Reference.NativeSize;
-			int                  nativeOut = native == 0 ? InvalidValue : native;
-			return nativeOut;
+
+			Pointer<MethodTable> mt     = Runtime.MethodTableOf<T>();
+			int                  native = mt.Reference.EEClass.Reference.NativeSize;
+
+			return native == 0 ? INVALID_VALUE : native;
 		}
 
 
@@ -306,6 +383,7 @@ namespace RazorSharp
 			return CSUnsafe.SizeOf<T>();
 		}
 
+		#region HeapSize
 
 		/// <summary>
 		///     <para>Calculates the complete size of a reference type in heap memory.</para>
@@ -337,7 +415,7 @@ namespace RazorSharp
 		///     <para>Note: This also includes padding and overhead (<see cref="ObjHeader" /> and <see cref="MethodTable" /> ptr.)</para>
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
-		public static int HeapSize<T>(in T t) where T : class
+		public static int HeapSize<T>(ref T t) where T : class
 		{
 			/**
 			 * Type			x86 size				x64 size
@@ -368,41 +446,54 @@ namespace RazorSharp
 			 *
 			 */
 
-			return HeapSizeInternal(in t);
+			return HeapSizeInternal(t);
 		}
 
-		private static int HeapSizeInternal<T>(in T t)
-		{
-			// No need to assert, we already know it's not a value type
-//			RazorContract.Assert(!typeof(T).IsValueType);
 
-			Pointer<MethodTable> methodTable = Runtime.MethodTableOf<T>();
+		private static int HeapSizeInternal<T>(T t)
+		{
+			RazorContract.RequiresClassType<T>();
+
+			// By manually reading the MethodTable*, we can calculate the size correctly if the reference
+			// is boxed or cloaked
+			Pointer<MethodTable> methodTable = Runtime.ReadMethodTable(ref t);
 
 			if (typeof(T).IsArray) {
 				Array arr = t as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
 				// We already know it's not null because the type is an array.
-				return (int) methodTable.Reference.BaseSize + arr.Length * methodTable.Reference.ComponentSize;
+				return CalculateHeapSize(arr.Length);
 			}
 
 			if (t is string str) {
-				return (int) methodTable.Reference.BaseSize + str.Length * methodTable.Reference.ComponentSize;
+				return CalculateHeapSize(str.Length);
 			}
 
-			return (int) methodTable.Reference.BaseSize;
+
+			int CalculateHeapSize(int length)
+			{
+				return methodTable.Reference.BaseSize + length * methodTable.Reference.ComponentSize;
+			}
+
+			return methodTable.Reference.BaseSize;
 		}
+
+		#endregion
+
+		#region BaseFieldsSize
 
 		/// <summary>
 		///     <para>Returns the base size of the fields (data) in the heap.</para>
 		///     <para>This follows the formula of:</para>
 		///     <para><see cref="MethodTable.BaseSize" /> - <see cref="EEClass.BaseSizePadding" /></para>
 		///     <remarks>
-		///         <para>Use <see cref="BaseFieldsSize{T}(ref T)" /> if the value may be boxed.</para>
+		///         <para>Use <see cref="BaseFieldsSize{T}(T)" /> if the value may be boxed.</para>
 		///         <para>Returned from <see cref="MethodTable.NumInstanceFieldBytes" /></para>
+		/// <para>This includes field padding.</para>
 		///     </remarks>
 		/// </summary>
-		/// <returns><see cref="Constants.MinObjectSize" />if type is an array, fields size otherwise</returns>
+		/// <returns><see cref="Constants.MinObjectSize" /> if type is an array, fields size otherwise</returns>
 		public static int BaseFieldsSize<T>()
 		{
 			//inline DWORD MethodTable::GetNumInstanceFieldBytes()
@@ -430,13 +521,23 @@ namespace RazorSharp
 		///     <remarks>
 		///         <para>Returned from <see cref="MethodTable.NumInstanceFieldBytes" /></para>
 		///         <para>Equals <see cref="Unsafe.SizeOf{T}()" /> for value types</para>
+		/// <para>This includes field padding.</para>
 		///     </remarks>
 		/// </summary>
-		public static int BaseFieldsSize<T>(ref T t) where T : class
+		public static int BaseFieldsSize<T>(T t) where T : class
 		{
+			return BaseFieldsSizeInternal(t);
+		}
+
+		private static int BaseFieldsSizeInternal<T>(T t)
+		{
+			RazorContract.RequiresClassType<T>();
 			return Runtime.ReadMethodTable(ref t).Reference.NumInstanceFieldBytes;
 		}
 
+		#endregion
+
+		#region BaseInstanceSize
 
 		/// <summary>
 		///     <para>Returns the base instance size according to the TypeHandle (<c>MethodTable</c>).</para>
@@ -451,8 +552,16 @@ namespace RazorSharp
 		/// </returns>
 		public static int BaseInstanceSize<T>() where T : class
 		{
-			return (int) Runtime.MethodTableOf<T>().Reference.BaseSize;
+			return BaseInstanceSizeInternal<T>();
 		}
+
+		private static int BaseInstanceSizeInternal<T>()
+		{
+			RazorContract.RequiresClassType<T>();
+			return Runtime.MethodTableOf<T>().Reference.BaseSize;
+		}
+
+		#endregion
 
 		#endregion
 
@@ -477,8 +586,8 @@ namespace RazorSharp
 		public static byte[] MemoryOf<T>(T t) where T : class
 		{
 			// Need to include the ObjHeader
-			Pointer<T> ptr = AddressOfHeap(ref t, OffsetType.Header);
-			return ptr.CopyOut<byte>(HeapSize(in t));
+			Pointer<T> ptr = AddressOfHeap(ref t, OffsetType.Header).Address;
+			return ptr.CopyOut<byte>(HeapSize(ref t));
 		}
 
 		/// <summary>
@@ -497,23 +606,23 @@ namespace RazorSharp
 		public static byte[] MemoryOfFields<T>(T t) where T : class
 		{
 			// Subtract the size of the ObjHeader and MethodTable*
-			int fieldSize = HeapSize(in t) - IntPtr.Size * 2;
+			int fieldSize = HeapSize(ref t) - IntPtr.Size * 2;
 
 			byte[] fields = new byte[fieldSize];
 
 			// Skip over the MethodTable*
-			Marshal.Copy(AddressOfHeap(ref t) + IntPtr.Size, fields, 0, fieldSize);
+			Marshal.Copy((AddressOfHeap(ref t) + IntPtr.Size).Address, fields, 0, fieldSize);
 			return fields;
 		}
 
-		public static void WriteReference<T>(ref T t, IntPtr newHeapAddr)
+		internal static void WriteReference<T>(ref T t, IntPtr newHeapAddr)
 		{
-			Marshal.WriteIntPtr(AddressOf(ref t), newHeapAddr);
+			Marshal.WriteIntPtr(AddressOf(ref t).Address, newHeapAddr);
 		}
 
-		public static void WriteReference<T>(ref T t, void* newHeapAddr)
+		internal static void WriteReference<T>(ref T t, void* newHeapAddr)
 		{
-			Marshal.WriteIntPtr(AddressOf(ref t), new IntPtr(newHeapAddr));
+			Marshal.WriteIntPtr(AddressOf(ref t).Address, new IntPtr(newHeapAddr));
 		}
 
 		#endregion

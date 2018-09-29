@@ -3,8 +3,7 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Strings;
+using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -268,7 +267,7 @@ namespace RazorSharp.CLR.Structures
 			RazorContract.Assert(Offset != FieldOffsetNewEnC);
 
 
-			IntPtr data = Unsafe.AddressOf(ref t);
+			IntPtr data = Unsafe.AddressOf(ref t).Address;
 			if (typeof(TInstance).IsValueType) {
 				return data + Offset;
 			}

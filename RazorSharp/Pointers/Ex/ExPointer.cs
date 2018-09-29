@@ -3,8 +3,7 @@
 using System;
 using System.Collections;
 using System.Globalization;
-using RazorCommon;
-using RazorCommon.Extensions;
+using RazorSharp.Common;
 using RazorSharp.Memory;
 
 #endregion
@@ -115,7 +114,7 @@ namespace RazorSharp.Pointers.Ex
 
 		public ExPointer(void* v) : this((IntPtr) v) { }
 
-		public ExPointer(ref T t) : this(Unsafe.AddressOf(ref t)) { }
+		public ExPointer(ref T t) : this(Unsafe.AddressOf(ref t).Address) { }
 
 		#endregion
 

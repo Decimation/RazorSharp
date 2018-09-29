@@ -1,8 +1,12 @@
+#region
+
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
+using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
-using Runtime = RazorSharp.CLR.Runtime;
+
+#endregion
 
 namespace Test.Testing.Benchmarking
 {
@@ -28,8 +32,8 @@ namespace Test.Testing.Benchmarking
 		{
 			string                                 s      = "foo";
 			Pointer<Pointer<Pointer<MethodTable>>> pppMT  = Unsafe.AsPointer(ref s);
-			var                                    fields = pppMT.Reference.Reference.Reference.FieldDescListLength;
-			var                                    cpy    = new Pointer<FieldDesc>[fields];
+			int                                    fields = pppMT.Reference.Reference.Reference.FieldDescListLength;
+			Pointer<FieldDesc>[]                   cpy    = new Pointer<FieldDesc>[fields];
 			for (int i = 0; i < cpy.Length; i++) {
 				cpy[i] = &pppMT.Reference.Reference.Reference.FieldDescList[i];
 			}
@@ -39,8 +43,8 @@ namespace Test.Testing.Benchmarking
 		public unsafe void GetFields_ByMT_NoCheck()
 		{
 			Pointer<MethodTable> pppMT  = typeof(string).TypeHandle.Value;
-			var                  fields = pppMT.Reference.FieldDescListLength;
-			var                  cpy    = new Pointer<FieldDesc>[fields];
+			int                  fields = pppMT.Reference.FieldDescListLength;
+			Pointer<FieldDesc>[] cpy    = new Pointer<FieldDesc>[fields];
 			for (int i = 0; i < cpy.Length; i++) {
 				cpy[i] = &pppMT.Reference.FieldDescList[i];
 			}

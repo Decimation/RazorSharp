@@ -38,7 +38,7 @@ namespace Test.Testing.Types
 
 		private void* _voidptr;
 
-		private int[] _valTypeRg;
+		private int[]    _valTypeRg;
 		private string[] _ptrTypeRg;
 
 		private DateTime _dateTime;

@@ -85,9 +85,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="RazorCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\RazorCommon\RazorCommon\bin\x64\Release\RazorCommon.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
       <Reference Include="System.AppContext, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
           <HintPath>..\packages\System.AppContext.4.3.0\lib\net463\System.AppContext.dll</HintPath>
@@ -250,16 +247,18 @@
       <Compile Include="CLR\Structures\ILMethods\FatILMethod.cs"/>
       <Compile Include="CLR\Structures\ILMethods\TinyILMethod.cs"/>
       <Compile Include="CLR\Structures\SigParser.cs"/>
-      <Compile Include="Experimental\FunctionHooker.cs"/>
-    <Compile Include="Experimental\StackAllocated.cs" />
-    <Compile Include="Experimental\UnmanagedAllocated.cs" />
+      <Compile Include="Common\Collections.cs"/>
+      <Compile Include="Common\ConsoleTable.cs"/>
+      <Compile Include="Common\Enums.cs"/>
+      <Compile Include="Common\Extensions.cs"/>
+      <Compile Include="Common\Hex.cs"/>
+      <Compile Include="Common\Strings.cs"/>
       <Compile Include="Memory\AllocPool.cs"/>
     <Compile Include="Memory\Asm.cs" />
       <Compile Include="Memory\Bits.cs"/>
       <Compile Include="Memory\Cache.cs"/>
       <Compile Include="Memory\Images.cs"/>
       <Compile Include="Memory\Mem.cs"/>
-    <Compile Include="Memory\MemoryInspector.cs" />
       <Compile Include="Memory\Modules.cs"/>
       <Compile Include="Memory\Segments.cs"/>
     <Compile Include="Memory\SigScanner.cs" />
@@ -272,6 +271,7 @@
       <Compile Include="Native\Enums\MemoryProtection.cs"/>
       <Compile Include="Native\Enums\ProcessAccessFlags.cs"/>
       <Compile Include="Native\Enums\StandardHandles.cs"/>
+      <Compile Include="Native\Functions.cs"/>
       <Compile Include="Native\Kernel32.cs"/>
       <Compile Include="Native\Structures\Images\ImageDataDirectory.cs"/>
       <Compile Include="Native\Structures\Images\ImageFileHeader.cs"/>
@@ -280,6 +280,10 @@
       <Compile Include="Native\Structures\Images\ImageSectionCharacteristics.cs"/>
       <Compile Include="Native\Structures\Images\ImageSectionHeader.cs"/>
       <Compile Include="Native\Structures\Images\ImageSectionInfo.cs"/>
+      <Compile Include="Obsolete\Experimental\FunctionHooker.cs"/>
+      <Compile Include="Obsolete\Experimental\StackAllocated.cs"/>
+      <Compile Include="Obsolete\Experimental\UnmanagedAllocated.cs"/>
+      <Compile Include="Obsolete\MemoryInspector.cs"/>
       <Compile Include="Pointers\Ex\AllocExPointer.cs"/>
       <Compile Include="Pointers\Ex\DecayExPointer.cs"/>
       <Compile Include="Pointers\Ex\ExPointer.cs"/>

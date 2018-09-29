@@ -60,7 +60,7 @@ namespace RazorSharp.Pointers
 
 		public ReadOnlyPointer(long l) : this((IntPtr) l) { }
 
-		public ReadOnlyPointer(ref T t) : this(Unsafe.AddressOf(ref t)) { }
+		public ReadOnlyPointer(ref T t) : this(Unsafe.AddressOf(ref t).Address) { }
 
 		public int ToInt32()
 		{

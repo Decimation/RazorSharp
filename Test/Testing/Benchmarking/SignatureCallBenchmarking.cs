@@ -1,16 +1,8 @@
 #region
 
-using System;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using BenchmarkDotNet.Attributes;
-using RazorSharp;
-using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
-using RazorSharp.Pointers;
-using RazorSharp.Utilities;
-using Test.Testing.Types;
 
 #endregion
 
@@ -29,18 +21,16 @@ namespace Test.Testing.Benchmarking
 		{
 			[ClrSigcall(
 				"4C 8B 01 49 83 E0 FC 41 F7 00 00 00 00 80 41 8B 40 04 74 0E 8B 51 08 41 0F B7 08 48 0F AF D1 48 03 C2")]
-			void doSomething() { }
+			private void doSomething() { }
 
 			[ClrSigcall]
-			void doSomething2() { }
+			private void doSomething2() { }
 		}
 
 
 		[GlobalSetup]
 		public void Setup()
 		{
-
-
 			SignatureCall.DynamicBind<MethodDesc>();
 			SignatureCall.DynamicBind<FieldDesc>();
 			SignatureCall.DynamicBind<GCHeap>();

@@ -1,6 +1,8 @@
 #region
 
 using System;
+using System.Diagnostics;
+using System.Runtime;
 using RazorSharp.Memory;
 using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
@@ -144,7 +146,7 @@ namespace RazorSharp.CLR.Structures
 		/// <returns><c>true</c> if the address of <paramref name="t" /> is in the GC heap; <c>false</c> otherwise</returns>
 		public static bool IsInGCHeap<T>(ref T t)
 		{
-			IntPtr addr = Unsafe.AddressOf(ref t);
+			IntPtr addr = Unsafe.AddressOf(ref t).Address;
 			return IsInGCHeap(addr);
 		}
 

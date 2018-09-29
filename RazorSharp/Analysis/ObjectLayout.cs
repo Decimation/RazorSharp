@@ -3,9 +3,10 @@
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
-using RazorCommon;
+
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
+using RazorSharp.Common;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using static RazorSharp.Memory.Mem;
@@ -103,7 +104,7 @@ namespace RazorSharp.Analysis
 		///     When <c>false</c>, internal metadata such as the <see cref="MethodTable" />
 		///     pointer is also included.
 		/// </param>
-		public ObjectLayout(ref T[] t, bool bFieldsOnly = true) : this(Unsafe.AddressOfHeap(ref t), default,
+		public ObjectLayout(ref T[] t, bool bFieldsOnly = true) : this(Unsafe.AddressOfHeap(ref t).Address, default,
 			bFieldsOnly, true, false)
 		{
 //			m_bFullOffset = bFullOffset;
@@ -119,7 +120,7 @@ namespace RazorSharp.Analysis
 		///     When <c>false</c>, internal metadata such as the <see cref="MethodTable" />
 		///     pointer is also included.
 		/// </param>
-		public ObjectLayout(ref T t, bool bFieldsOnly = true) : this(Unsafe.AddressOf(ref t), t, bFieldsOnly, false,
+		public ObjectLayout(ref T t, bool bFieldsOnly = true) : this(Unsafe.AddressOf(ref t).Address, t, bFieldsOnly, false,
 			false)
 		{
 			RazorContract.Requires(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");

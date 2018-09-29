@@ -117,20 +117,11 @@ namespace RazorSharp.Native
 
 		#region Read / write
 
-		public static void WriteProcessMemory<T>(Process proc, Pointer<byte> lpBaseAddress, T value)
+		#region Read
+
+		public static T ReadCurrentProcessMemory<T>(Pointer<byte> lpBaseAddress)
 		{
-			IntPtr hProc                = OpenProcess(proc);
-			int    numberOfBytesWritten = 0;
-			int    dwSize               = Unsafe.SizeOf<T>();
-
-			// Write the memory
-			Trace.Assert(WriteProcessMemory(hProc, lpBaseAddress.Address, Unsafe.AddressOf(ref value), dwSize,
-				ref numberOfBytesWritten));
-
-			Trace.Assert(numberOfBytesWritten == dwSize);
-
-			// Close the handle
-			Trace.Assert(CloseHandle(hProc));
+			return ReadProcessMemory<T>(Process.GetCurrentProcess(), lpBaseAddress);
 		}
 
 		public static T ReadProcessMemory<T>(Process proc, Pointer<byte> lpBaseAddress)
@@ -141,7 +132,7 @@ namespace RazorSharp.Native
 			uint   size              = (uint) Unsafe.SizeOf<T>();
 
 			// Read the memory
-			Trace.Assert(ReadProcessMemory(hProc, lpBaseAddress.Address, Unsafe.AddressOf(ref t), size,
+			Trace.Assert(ReadProcessMemory(hProc, lpBaseAddress.Address, Unsafe.AddressOf(ref t).Address, size,
 				ref numberOfBytesRead));
 
 			Trace.Assert(numberOfBytesRead == size);
@@ -179,15 +170,54 @@ namespace RazorSharp.Native
 		public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, ulong nSize,
 			ref ulong lpNumberOfBytesRead);
 
+		#endregion
+
+		#region Write
+
+		public static void WriteCurrentProcessMemory<T>(Pointer<byte> lpBaseAddress, T value)
+		{
+			WriteProcessMemory<T>(Process.GetCurrentProcess(), lpBaseAddress, value);
+		}
+
+		public static void WriteProcessMemory<T>(Process proc, Pointer<byte> lpBaseAddress, T value)
+		{
+			IntPtr hProc                = OpenProcess(proc);
+			int    numberOfBytesWritten = 0;
+			int    dwSize               = Unsafe.SizeOf<T>();
+
+			// Write the memory
+			Trace.Assert(WriteProcessMemory(hProc, lpBaseAddress.Address, Unsafe.AddressOf(ref value).Address, dwSize,
+				ref numberOfBytesWritten));
+
+			Trace.Assert(numberOfBytesWritten == dwSize);
+
+			// Close the handle
+			Trace.Assert(CloseHandle(hProc));
+		}
+
+
 		[DllImport(Kernel32Dll, SetLastError = true)]
 		public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, IntPtr lpBuffer, int dwSize,
 			ref int lpNumberOfBytesWritten);
 
 		#endregion
 
+		#endregion
+
+		/// <summary>
+		/// Retrieves the address of an exported function or variable from the specified dynamic-link library (DLL).
+		/// </summary>
+		/// <param name="hModule"></param>
+		/// <param name="procName"></param>
+		/// <returns></returns>
 		[DllImport(Kernel32Dll, CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
 		public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
 
+		/// <summary>
+		/// Retrieves a module handle for the specified module. The module must have been loaded by the calling process.
+		/// </summary>
+		/// <param name="lpModuleName"></param>
+		/// <returns></returns>
 		[DllImport(Kernel32Dll, CharSet = CharSet.Auto)]
 		public static extern IntPtr GetModuleHandle(string lpModuleName);
 

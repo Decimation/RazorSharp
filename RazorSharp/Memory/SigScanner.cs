@@ -134,7 +134,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <param name="rgPattern"></param>
 		/// <param name="ofsGuess"></param>
-		/// <returns></returns>
+		/// <returns><see cref="IntPtr.Zero"/> if the pattern could not be found</returns>
 		public IntPtr FindPattern(byte[] rgPattern, long ofsGuess = 0)
 		{
 			ModuleCheck();
@@ -144,6 +144,8 @@ namespace RazorSharp.Memory
 					return PointerUtils.Add(m_lpModuleBase, ofsGuess).Address;
 				}
 				else {
+					throw new Exception($"Offset guess of {ofsGuess} failed");
+
 //					Logger.Log("Offset guess of {0} failed", Hex.ToHex(ofsGuess));
 				}
 			}
@@ -239,9 +241,7 @@ namespace RazorSharp.Memory
 
 		public Dictionary<string, IntPtr> FindPatterns(out long lTime)
 		{
-			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero) {
-				throw new Exception("Selected module is null");
-			}
+			ModuleCheck();
 
 			Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -277,8 +277,6 @@ namespace RazorSharp.Memory
 		private static byte[] ParsePatternString(string szPattern)
 		{
 //			List<byte> patternbytes = new List<byte>();
-
-
 //			foreach (string szByte in szPattern.Split(' '))
 //				patternbytes.Add(szByte == "?" ? (byte) 0x0 : Convert.ToByte(szByte, 16));
 //			return patternbytes.ToArray();

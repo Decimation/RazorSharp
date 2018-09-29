@@ -20,8 +20,8 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestString()
 		{
-			string       s  = "foo";
-			var mt = Runtime.ReadMethodTable(ref s);
+			string               s  = "foo";
+			Pointer<MethodTable> mt = Runtime.ReadMethodTable(ref s);
 
 			Debug.Assert(mt.Reference.IsStringOrArray);
 
@@ -40,7 +40,7 @@ namespace Test.Testing.Tests
 
 //			Debug.Assert(mt == (MethodTable*) 0x00007fff1c1a6830);
 //			Debug.Assert(mt.Reference.EEClass == (void*) 0x00007fff1ba86cb8);
-			Debug.Assert(Unsafe.HeapSize(in s) == 32);
+			Debug.Assert(Unsafe.HeapSize(ref s) == 32);
 
 			// Note: SOS's BaseSize is wrong here
 
@@ -104,8 +104,8 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestList()
 		{
-			List<int>    list = new List<int>();
-			var mt   = Runtime.ReadMethodTable(ref list);
+			List<int>            list = new List<int>();
+			Pointer<MethodTable> mt   = Runtime.ReadMethodTable(ref list);
 
 			// Name:        System.Collections.Generic.List`1[[System.Int32, mscorlib]]
 			// MethodTable: 00007ff819d105d8
@@ -137,7 +137,7 @@ namespace Test.Testing.Tests
 
 //			Debug.Assert(mt.Reference.Module == (void*) 0x00007ff819611000);
 			Debug.Assert(mt.Reference.BaseSize == 40);
-			Debug.Assert(Unsafe.HeapSize(in list) == 40);
+			Debug.Assert(Unsafe.HeapSize(ref list) == 40);
 
 //			Debug.Assert(mt == (MethodTable*) 0x00007ff819d105d8);
 			Debug.Assert(mt.Reference.ComponentSize == 0);
@@ -172,8 +172,8 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestArray()
 		{
-			int[]        arr = new int[5];
-			var mt  = Runtime.ReadMethodTable(ref arr);
+			int[]                arr = new int[5];
+			Pointer<MethodTable> mt  = Runtime.ReadMethodTable(ref arr);
 
 
 			// 0:007> !do 0x17500083FB0
@@ -187,7 +187,7 @@ namespace Test.Testing.Tests
 
 //			Debug.Assert(mt == (MethodTable*) 0x00007ff819d39118);
 //			Debug.Assert(mt.Reference.EEClass == (EEClass*) 0x00007ff8196e4668);
-			Debug.Assert(Unsafe.HeapSize(in arr) == 44);
+			Debug.Assert(Unsafe.HeapSize(ref arr) == 44);
 
 			// 0:007> !DumpMT /d 00007ff819d39118
 			// EEClass:         00007ff8196e4668
@@ -231,8 +231,8 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestPtrArray()
 		{
-			string[]     arr = new string[5];
-			var mt  = Runtime.ReadMethodTable(ref arr);
+			string[]             arr = new string[5];
+			Pointer<MethodTable> mt  = Runtime.ReadMethodTable(ref arr);
 
 
 			Debug.Assert(mt.Reference.ElementTypeHandle == Runtime.MethodTableOf<string>());
@@ -249,7 +249,7 @@ namespace Test.Testing.Tests
 //			Debug.Assert(mt == (MethodTable*)0x00007ff819d1eb08);
 //			Assert.That((long) mt, Is.EqualTo(0x00007ff819d1eb08));
 //			Debug.Assert(mt.Reference.EEClass == (EEClass*) 0x00007ff8196e3ca0);
-			Debug.Assert(Unsafe.HeapSize(in arr) == 64);
+			Debug.Assert(Unsafe.HeapSize(ref arr) == 64);
 
 			// !DumpMT /d 00007ff819d1eb08
 			// EEClass:         00007ff8196e3ca0
@@ -299,15 +299,15 @@ namespace Test.Testing.Tests
 			Pointer<FieldDesc> xfd = Runtime.GetFieldDesc<Point>("X", SpecialFieldTypes.AutoProperty);
 			Debug.Assert(xfd.Reference.Token == xfd.Reference.Info.MetadataToken);
 
-			var ffd = Runtime.GetFieldDesc<Point>("FixedBuffer");
+			Pointer<FieldDesc> ffd = Runtime.GetFieldDesc<Point>("FixedBuffer");
 			Debug.Assert(ffd.Reference.Token == ffd.Reference.Info.MetadataToken);
 		}
 
 		[Test]
 		public void TestDummy()
 		{
-			Dummy        d  = new Dummy();
-			var mt = Runtime.ReadMethodTable(ref d);
+			Dummy                d  = new Dummy();
+			Pointer<MethodTable> mt = Runtime.ReadMethodTable(ref d);
 
 
 			// 0:007> !do 0x1750004EEC8
@@ -320,7 +320,7 @@ namespace Test.Testing.Tests
 
 			//Debug.Assert(mt == (MethodTable*) 0x00007ff7bdce6c18);
 			//Debug.Assert(mt.Reference.EEClass == (EEClass*) 0x00007ff7bdcd8ab0);
-			Debug.Assert(Unsafe.HeapSize(in d) == 128);
+			Debug.Assert(Unsafe.HeapSize(ref d) == 128);
 
 			// 0:007> !DumpMT /d 00007ff7bdce6c18
 			// EEClass:         00007ff7bdcd8ab0

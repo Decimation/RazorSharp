@@ -1,10 +1,13 @@
+#region
+
 using System;
 using System.Diagnostics;
 using NUnit.Framework;
-using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace Test.Testing.Tests
 {
@@ -12,13 +15,12 @@ namespace Test.Testing.Tests
 	[TestFixture]
 	public class AddrInRangeTests
 	{
-
-
 		[Test]
 		public void Test()
 		{
 			Debug.Assert(Mem.IsAddressInRange(Mem.StackBase, Mem.StackLimit, Mem.StackLimit));
 			Debug.Assert(Mem.IsAddressInRange(GCHeap.HighestAddress, GCHeap.LowestAddress, GCHeap.LowestAddress));
+
 			int[]        rg    = {1, 2, 3, 4, 5};
 			Pointer<int> rgPtr = Mem.AllocUnmanaged<int>(5);
 			rgPtr.Init(1, 2, 3, 4, 5);

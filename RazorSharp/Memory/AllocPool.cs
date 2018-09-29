@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using RazorCommon;
+using RazorSharp.Common;
 using RazorSharp.Pointers;
 using static RazorSharp.Unsafe;
 

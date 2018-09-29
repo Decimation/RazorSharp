@@ -64,7 +64,7 @@ namespace Test.Testing.Tests
 		public void Test()
 		{
 			Target        t   = new Target("foo", 123);
-			Pointer<byte> ptr = Unsafe.AddressOf(ref t);
+			Pointer<byte> ptr = Unsafe.AddressOf(ref t).Address;
 
 			Debug.Assert(ptr.Read<string>() == t.Str);
 			Debug.Assert(ptr.Read<int>(2) == t.I);
@@ -85,11 +85,11 @@ namespace Test.Testing.Tests
 			lpStr.Write("bar");
 			Debug.Assert(lpStr.Reference == t.Str);
 
-			Debug.Assert(lpStr == Unsafe.AddressOfField(ref t, "_str"));
+			Debug.Assert(lpStr == Unsafe.AddressOfField(ref t, "_str").Address);
 
 			Pointer<int> lpInt32 = lpStr.Reinterpret<int>();
 			lpInt32 += 2;
-			Debug.Assert(lpInt32 == Unsafe.AddressOfField(ref t, "_int"));
+			Debug.Assert(lpInt32 == Unsafe.AddressOfField(ref t, "_int").Address);
 			lpInt32[0] = 321;
 			Debug.Assert(lpInt32.Reference == t.I);
 			Debug.Assert(lpInt32.Value == t.I);

@@ -4,12 +4,11 @@ using System;
 using System.Collections;
 using System.Linq;
 using System.Text;
-using RazorCommon;
-using RazorCommon.Extensions;
-using RazorCommon.Strings;
+
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
+using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 
@@ -56,9 +55,12 @@ namespace RazorSharp.Analysis
 
 		#region Reference types
 
-		public static void Inspect<T>(ref T t,
-			InspectorMode mode) where T : class
+		public static void Inspect<T>(ref T t, InspectorMode mode) where T : class
 		{
+			// todo: This causes an InvalidProgramException
+			if (mode.HasFlag(InspectorMode.MethodDescs) && typeof(T) == typeof(string)) {
+				throw new Exception($"Flag {InspectorMode.MethodDescs} cannot be used on typeof({typeof(string).Name})");
+			}
 			ReferenceInspector<T>.Write(ref t, false, mode);
 		}
 
@@ -85,7 +87,7 @@ namespace RazorSharp.Analysis
 
 		internal static string CreateLabelString(string label, ConsoleTable table)
 		{
-			return String.Format("\n{0}\n{1}\n", ANSI.BoldString(label), table.ToMarkDownString());
+			return String.Format("\n{0}\n{1}\n", /*ANSI.BoldString(label)*/ label, table.ToMarkDownString());
 		}
 	}
 
@@ -196,7 +198,7 @@ namespace RazorSharp.Analysis
 							v.Reference.IsStatic ? omitted : Hex.ToHex(v.Reference.GetAddress(ref value));
 
 						table.AddRow(v.Reference.Offset, Hex.ToHex(v.Address), fieldAddrHex, v.Reference.CorType,
-							v.Reference.IsStatic ? StringUtils.Check : StringUtils.BallotX, v.Reference.Size,
+							v.Reference.IsStatic.Prettify(), v.Reference.Size,
 							v.Reference.Name, v.Reference.GetValue(value), Hex.ToHex(v.Reference.Token));
 					}
 				}
@@ -272,9 +274,9 @@ namespace RazorSharp.Analysis
 						? String.Format("[{0}]", Collections.ListToString((IList) Value))
 						: Value.ToString());
 
-				table.AddRow("Blittable", IsBlittable ? StringUtils.Check : StringUtils.BallotX);
-				table.AddRow("Value type", IsValueType ? StringUtils.Check : StringUtils.BallotX);
-				table.AddRow("On stack", IsOnStack ? StringUtils.Check : StringUtils.BallotX);
+				table.AddRow("Blittable", IsBlittable.Prettify());
+				table.AddRow("Value type", IsValueType.Prettify());
+				table.AddRow("On stack", IsOnStack.Prettify());
 				return table;
 			}
 
@@ -291,7 +293,7 @@ namespace RazorSharp.Analysis
 
 			protected internal AddressInfo(ref T t)
 			{
-				Address = Unsafe.AddressOf(ref t);
+				Address = Unsafe.AddressOf(ref t).Address;
 			}
 
 			protected virtual ConsoleTable ToTable()
@@ -370,19 +372,23 @@ namespace RazorSharp.Analysis
 		{
 			const char colon = ':';
 
-			Console.WriteLine(ANSI.BoldString(MethodTableStr + colon));
+//			Console.WriteLine(ANSI.BoldString(MethodTableStr + colon));
+			Console.WriteLine(MethodTableStr + colon);
 			Console.WriteLine(inspector.Internal.MethodTable);
 
-			Console.WriteLine(ANSI.BoldString(EEClassStr + colon));
+//			Console.WriteLine(ANSI.BoldString(EEClassStr + colon));
+			Console.WriteLine(EEClassStr + colon);
 			Console.WriteLine(inspector.Internal.EEClass);
 
 			if (inspector.Internal.Canon != inspector.Internal.MethodTable) {
-				Console.WriteLine(ANSI.BoldString(CanonMTStr + colon));
+//				Console.WriteLine(ANSI.BoldString(CanonMTStr + colon));
+				Console.WriteLine(CanonMTStr + colon);
 				Console.WriteLine(inspector.Internal.MethodTable.Reference.Canon);
 			}
 
 			if (inspector.Internal.EEClass.Reference.HasLayout) {
-				Console.WriteLine(ANSI.BoldString(EEClassLayoutInfoStr + colon));
+//				Console.WriteLine(ANSI.BoldString(EEClassLayoutInfoStr + colon));
+				Console.WriteLine(EEClassLayoutInfoStr + colon);
 				Console.WriteLine(inspector.Internal.EEClass.Reference.LayoutInfo->ToString());
 			}
 		}

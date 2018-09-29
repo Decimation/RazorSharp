@@ -75,7 +75,7 @@ namespace Test.Testing.Benchmarking
 		{
 			m_rgInt32       = new int[10];
 			m_hGC           = GCHandle.Alloc(m_rgInt32, GCHandleType.Pinned);
-			m_lpInt32       = Unsafe.AddressOfHeap(ref m_rgInt32, OffsetType.ArrayData);
+			m_lpInt32       = Unsafe.AddressOfHeap(ref m_rgInt32, OffsetType.ArrayData).Address;
 			m_lpInt32Native = (int*) m_lpInt32.Address;
 		}
 
@@ -158,7 +158,7 @@ namespace Test.Testing.Benchmarking
 		{
 			m_rgInt32       = new int[10];
 			m_hGC           = GCHandle.Alloc(m_rgInt32, GCHandleType.Pinned);
-			m_lpInt32       = Unsafe.AddressOfHeap(ref m_rgInt32, OffsetType.ArrayData);
+			m_lpInt32       = Unsafe.AddressOfHeap(ref m_rgInt32, OffsetType.ArrayData).Address;
 			m_lpInt32Native = (int*) m_lpInt32.Address;
 		}
 

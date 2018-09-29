@@ -3,8 +3,7 @@
 #region
 
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Strings;
+using RazorSharp.Common;
 using RazorSharp.Pointers;
 
 #endregion

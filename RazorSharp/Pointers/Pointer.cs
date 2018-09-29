@@ -6,10 +6,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using RazorCommon;
-using RazorCommon.Extensions;
-using RazorCommon.Strings;
 using RazorSharp.CLR.Fixed;
+using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Utilities;
 
@@ -113,7 +111,7 @@ namespace RazorSharp.Pointers
 		///     Creates a new <see cref="T:RazorSharp.Pointers.Pointer`1" /> pointing to the address of <paramref name="t" />
 		/// </summary>
 		/// <param name="t">Variable whose address will be pointed to</param>
-		public Pointer(ref T t) : this(Unsafe.AddressOf(ref t)) { }
+		public Pointer(ref T t) : this(Unsafe.AddressOf(ref t).Address) { }
 
 		#endregion
 
@@ -626,7 +624,6 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
-		#endregion
 
 		#region Equality operators
 
@@ -650,7 +647,6 @@ namespace RazorSharp.Pointers
 			return unchecked((int) (long) m_pValue);
 		}
 
-
 		public static bool operator ==(Pointer<T> left, Pointer<T> right)
 		{
 			return left.Equals(right);
@@ -660,6 +656,8 @@ namespace RazorSharp.Pointers
 		{
 			return !left.Equals(right);
 		}
+
+		#endregion
 
 		#endregion
 
@@ -689,7 +687,7 @@ namespace RazorSharp.Pointers
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			if (String.IsNullOrEmpty(format)) {
-				format = PointerSettings.FMT_O;
+				format = PointerSettings.FMT_B;
 			}
 
 			if (formatProvider == null) {
@@ -698,6 +696,7 @@ namespace RazorSharp.Pointers
 
 
 			switch (format.ToUpperInvariant()) {
+
 				case PointerSettings.FMT_O:
 					if (typeof(T).IsIListType()) {
 						return Collections.ListToString((IList) Reference);
@@ -709,21 +708,20 @@ namespace RazorSharp.Pointers
 					}
 
 					return Reference.ToString();
+
 				case PointerSettings.FMT_I:
 					return ToInfoTable().ToMarkDownString();
-				case PointerSettings.FMT_P:
-					return Hex.ToHex(Address);
-				case PointerSettings.FMT_S:
-					if (Reference == null || IsNull) {
-						return PointerSettings.NULLPTR;
-					}
-					else {
-						goto case PointerSettings.FMT_O;
-					}
-				case PointerSettings.FMT_B:
-					string str = String.Format("Value @ {0}:\n{1}", Hex.ToHex(Address), Reference.ToString());
 
-					if (typeof(T).IsNumericType()) {
+				case PointerSettings.FMT_P:
+					return Hex.ToHex(this);
+
+				case PointerSettings.FMT_S:
+					return ToStringSafe(this);
+
+				case PointerSettings.FMT_B:
+					string str = String.Format("Value of <{0}> @ {1}: \n{2}", typeof(T).Name,Hex.ToHex(Address), ToStringSafe(this));
+
+					if (typeof(T).IsNumericType() && !IsNull) {
 						str = String.Format("{0} ({1})", str, Hex.TryCreateHex(Reference));
 					}
 
@@ -731,7 +729,19 @@ namespace RazorSharp.Pointers
 				default:
 					goto case PointerSettings.FMT_O;
 			}
+
+			string ToStringSafe(Pointer<T> inst)
+			{
+				if (inst.IsNull) {
+					return PointerSettings.NULLPTR;
+				}
+				else {
+					return inst.ToString(PointerSettings.FMT_O);
+				}
+			}
 		}
+
+
 
 		public string ToString(string format)
 		{
@@ -740,7 +750,7 @@ namespace RazorSharp.Pointers
 
 		public override string ToString()
 		{
-			return ToString(PointerSettings.FMT_O, null);
+			return ToString(PointerSettings.FMT_B, null);
 		}
 
 		#endregion

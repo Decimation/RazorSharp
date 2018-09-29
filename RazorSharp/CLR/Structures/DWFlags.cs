@@ -2,7 +2,8 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorCommon;
+using RazorSharp.Common;
+
 
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable ConvertToAutoPropertyWhenPossible

@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorCommon;
+using RazorSharp.Common;
 using RazorSharp.Utilities;
 
 #endregion
@@ -264,13 +264,13 @@ namespace RazorSharp.Pointers.Ex
 			RazorContract.RequiresType<char, T>();
 
 
-			return CreateDecayedPointer(Unsafe.AddressOfHeap(ref s, OffsetType.StringData),
+			return CreateDecayedPointer(Unsafe.AddressOfHeap(ref s, OffsetType.StringData).Address,
 				true);
 		}
 
 		public static implicit operator DecayExPointer<T>(T[] arr)
 		{
-			return CreateDecayedPointer(Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData),
+			return CreateDecayedPointer(Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData).Address,
 				false);
 		}
 

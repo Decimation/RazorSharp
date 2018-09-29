@@ -5,7 +5,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using RazorCommon;
+using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Utilities.Exceptions;
 
@@ -25,6 +25,9 @@ namespace RazorSharp.Experimental
 	///     <para></para>
 	///     For that, use ExAllocExPointer.
 	/// </summary>
+	/// <remarks>
+	/// Old namespace: Experimental
+	/// </remarks>
 	/// <typeparam name="T"></typeparam>
 	internal struct UnmanagedAllocated<T> where T : class
 	{
@@ -89,7 +92,7 @@ namespace RazorSharp.Experimental
 			ConsoleTable table = new ConsoleTable("Field", "Value");
 			table.AddRow("Value", m_dummy);
 			table.AddRow("Unmanaged", Hex.ToHex(m_unmanaged));
-			table.AddRow("Dummy heap pointer", Hex.ToHex(Unsafe.AddressOfHeap(ref m_dummy)));
+			table.AddRow("Dummy heap pointer", Hex.ToHex(Unsafe.AddressOfHeap(ref m_dummy).Address));
 			return table.ToMarkDownString();
 		}
 

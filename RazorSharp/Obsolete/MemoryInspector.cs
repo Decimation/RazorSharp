@@ -3,9 +3,9 @@
 using System;
 using System.Linq;
 using System.Threading;
-using RazorCommon;
-using RazorCommon.Extensions;
+
 using RazorSharp.CLR.Fixed;
+using RazorSharp.Common;
 using RazorSharp.Pointers;
 
 #endregion
@@ -20,9 +20,13 @@ namespace RazorSharp.Memory
 	#endregion
 
 	/// <summary>
-	///     Provides a way to interpret memory as different types
+	/// Provides a way to interpret memory as different types
+	/// <remarks>
+	/// Old namespace: Memory
+	/// </remarks>
+	///
 	/// </summary>
-	public static unsafe class MemoryInspector
+	internal static unsafe class MemoryInspector
 	{
 
 		public static string Create<T>(IntPtr p)
@@ -97,7 +101,7 @@ namespace RazorSharp.Memory
 
 			ObjectPinner.InvokeWhilePinned(mem, delegate
 			{
-				Pointer<T> ptrMem = Unsafe.AddressOfHeap(ref mem, OffsetType.ArrayData);
+				Pointer<T> ptrMem = Unsafe.AddressOfHeap(ref mem, OffsetType.ArrayData).Address;
 
 				string OfsAs(int o)
 				{

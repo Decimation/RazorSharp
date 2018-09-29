@@ -3,11 +3,8 @@
 using System;
 using System.Diagnostics;
 using NUnit.Framework;
-using RazorCommon;
 using RazorSharp;
-using RazorSharp.CLR;
 using RazorSharp.CLR.Fixed;
-using RazorSharp.Experimental;
 
 #endregion
 
@@ -22,7 +19,7 @@ namespace Test.Testing.Tests
 		private static void ApplyPressure_PinHandle<T>(ref T t) where T : class
 		{
 			PinHandle ph       = new ObjectPinHandle(t);
-			IntPtr    origHeap = Unsafe.AddressOfHeap(ref t);
+			IntPtr    origHeap = Unsafe.AddressOfHeap(ref t).Address;
 
 //			Console.WriteLine("Original: {0}", Hex.ToHex(origHeap));
 
@@ -37,7 +34,7 @@ namespace Test.Testing.Tests
 
 		private static void ApplyPressure_PinHelper<T>(ref T t) where T : class
 		{
-			IntPtr origHeap = Unsafe.AddressOfHeap(ref t);
+			IntPtr origHeap = Unsafe.AddressOfHeap(ref t).Address;
 
 //			Console.WriteLine("Original: {0}", Hex.ToHex(origHeap));
 

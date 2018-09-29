@@ -3,7 +3,6 @@
 using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using RazorCommon;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;
 // ReSharper disable InconsistentNaming
@@ -39,7 +38,7 @@ namespace RazorSharp.Memory
 			Marshal.Copy(memory, 0, buf, memory.Length);
 			Marshal.GetDelegateForFunctionPointer<Exec>(buf)();
 			if (!Kernel32.VirtualFree(buf, (uint) memory.Length, FreeTypes.Decommit)) {
-				Logger.Log(Level.Error, Flags.Memory, "Asm::asm failed to free memory");
+//				Logger.Log(Level.Error, Flags.Memory, "Asm::asm failed to free memory");
 			}
 		}
 
@@ -86,7 +85,7 @@ namespace RazorSharp.Memory
 			IntPtr p = Marshal.GetDelegateForFunctionPointer<GetValue>(buf)();
 
 			if (!Kernel32.VirtualFree(buf, (uint) memory.Length, FreeTypes.Decommit)) {
-				Logger.Log(Level.Error, Flags.Memory, "Asm::asm failed to free memory");
+//				Logger.Log(Level.Error, Flags.Memory, "Asm::asm failed to free memory");
 			}
 
 			return CSUnsafe.Read<T>(&p);

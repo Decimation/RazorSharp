@@ -5,12 +5,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using NUnit.Framework;
-using RazorCommon;
-using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures.HeapObjects;
+using RazorSharp.Common;
 using RazorSharp.Pointers;
 using RazorSharp.Pointers.Ex;
 using Test.Testing.Types;
@@ -43,7 +42,7 @@ namespace Test.Testing
 		/// </summary>
 		internal static void Pinning<T>(ref T t) where T : class
 		{
-			(IntPtr stackPtr, IntPtr heap) mem = (Unsafe.AddressOf(ref t), Unsafe.AddressOfHeap(ref t));
+			(IntPtr stackPtr, IntPtr heap) mem = (Unsafe.AddressOf(ref t).Address, Unsafe.AddressOfHeap(ref t).Address);
 
 
 			int passes = 0;
@@ -60,7 +59,7 @@ namespace Test.Testing
 
 		internal static void Pinning2<T>(ref T t) where T : class
 		{
-			(IntPtr stackPtr, IntPtr heap) mem = (Unsafe.AddressOf(ref t), Unsafe.AddressOfHeap(ref t));
+			(IntPtr stackPtr, IntPtr heap) mem = (Unsafe.AddressOf(ref t).Address, Unsafe.AddressOfHeap(ref t).Address);
 
 
 			int passes = 0;
@@ -75,7 +74,8 @@ namespace Test.Testing
 				}
 
 				if (mem.heap != Unsafe.AddressOfHeap(ref t)) {
-					Console.WriteLine("Heap: {0} != {1}", Hex.ToHex(mem.heap), Hex.ToHex(Unsafe.AddressOfHeap(ref t)));
+					Console.WriteLine("Heap: {0} != {1}", Hex.ToHex(mem.heap),
+						Hex.ToHex(Unsafe.AddressOfHeap(ref t).Address));
 					break;
 				}
 			}
@@ -146,7 +146,7 @@ namespace Test.Testing
 
 		internal static void DumpArray<T>(ref T[] arr) where T : class
 		{
-			Pointer<long> lp_rg = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData);
+			Pointer<long> lp_rg = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData).Address;
 			for (int i = 0; i < arr.Length; i++) {
 				Console.WriteLine("{0} : {1}", Hex.ToHex(lp_rg.Read<long>()), lp_rg.Read<T>());
 				lp_rg++;
@@ -232,7 +232,7 @@ namespace Test.Testing
 			foreach (MethodInfo v in typeof(T).GetMethods(BindingFlags.Instance | BindingFlags.Public |
 			                                              BindingFlags.NonPublic))
 				table.AddRow(Hex.ToHex(v.MethodHandle.GetFunctionPointer()), Hex.ToHex(v.MethodHandle.Value),
-					v.Name, v.IsVirtual ? StringUtils.Check : StringUtils.BallotX);
+					v.Name, v.IsVirtual.Prettify());
 
 			Console.WriteLine(table.ToMarkDownString());
 		}

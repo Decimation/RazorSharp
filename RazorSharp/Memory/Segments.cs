@@ -2,7 +2,7 @@
 
 using System;
 using System.Linq;
-using RazorCommon;
+using RazorSharp.Common;
 using RazorSharp.Native;
 using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;

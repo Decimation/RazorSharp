@@ -1,49 +1,23 @@
 ﻿#region
 
+//using Microsoft.Diagnostics.Runtime;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Threading;
-using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
-using JetBrains.Annotations;
-
-//using Microsoft.Diagnostics.Runtime;
-using NUnit.Framework;
-using RazorCommon;
-using RazorCommon.Extensions;
-using RazorCommon.Strings;
-using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
-using RazorSharp.CLR.Fixed;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
-using RazorSharp.CLR.Structures.HeapObjects;
 using RazorSharp.CLR.Structures.ILMethods;
+using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
-using RazorSharp.Utilities.Exceptions;
-using Test.Testing;
 using Test.Testing.Benchmarking;
-using Test.Testing.Tests;
-using Test.Testing.Types;
 using static RazorSharp.Unsafe;
-using Kernel32 = RazorSharp.Native.Kernel32;
-using Module = System.Reflection.Module;
-using Point = Test.Testing.Types.Point;
-using Runtime = RazorSharp.CLR.Runtime;
 
 #endregion
 
@@ -53,8 +27,7 @@ namespace Test
 	#region
 
 	using DWORD = UInt32;
-	using Unsafe = RazorSharp.Unsafe;
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+	using CSUnsafe = Unsafe;
 
 	#endregion
 
@@ -72,7 +45,7 @@ namespace Test
 	 *  - Most types are probably not thread-safe
 	 *
 	 * Goals:
-	 *  - Provide identical functionality of ClrMD, SOS, and Reflection
+	 *  - Provide identical and better functionality of ClrMD, SOS, and Reflection
 	 * 	  but in a faster and more efficient way
 	 */
 	internal static unsafe class Program
@@ -120,189 +93,107 @@ namespace Test
 
 		// todo: protect address-sensitive functions
 		// todo: replace native pointers* with Pointer<T> for consistency
-		// todo: ClrMD
+		// todo: RazorSharp, ClrMD, Reflection comparison
+		// todo: Contract-oriented programming
 
 		/**
 		 * >> Entry point
 		 */
 		public static void Main(string[] args)
 		{
-/*
-			// Method Address = Method Virtual Address + base address of class that declares this member..
-			SignatureCall.DynamicBind(typeof(Program), "setObjRef");
-			Pointer<char> cstr = stackalloc char[3];
-			Console.WriteLine(cstr.ToTable(3).ToMarkDownString());
-			cstr.Init("foo");
-			Console.WriteLine(cstr.ToTable(3).ToMarkDownString());
+			// todo: read module memory
 
 
-			Debug.Assert(cstr.ToString() == "foo");
-			Debug.Assert(cstr.SequenceEqual("foo"));
+			IComparable cmp = 1;
+			dmp(ref cmp);
 
 
-			byte* b = stackalloc byte[BaseInstanceSize<CPoint>()];
-			Mem.StackInit<CPoint>(ref b);
-			Pointer<CPoint> lpMem = &b;
-			Console.WriteLine(InspectorHelper.LayoutString(ref lpMem.Reference));
+			Super s = new Sub();
+			dmp(ref s);
 
 
-			var ptr = lpMem.Read<Pointer<byte>>();
-//			ptr.Write("foo", 1);
-
-			Console.WriteLine(GCHeap.GlobalHeap.Reference.GCCount);
-			__break();
-			GC.Collect();
-			Console.WriteLine(GCHeap.GlobalHeap.Reference.GCCount);
-			Console.WriteLine(lpMem);
-
-			__break();
-*/
+			object o = 0;
+			dmp(ref o);
+			Console.WriteLine(AutoSizeOf(1));
+			Console.WriteLine(BaseFieldsSize<int>());
 
 
-//			VMMap();
-//			regions();
+			int          z      = 0;
+			Pointer<int> pInt32 = AddressOf(ref z);
+			Console.WriteLine(pInt32);
 
 
-/*			Console.WriteLine(Hex.ToHex(pMd.Reference.Function));
-			Console.WriteLine(Hex.ToHex(clrMethod.NativeCode));
-			Console.WriteLine(Hex.ToHex(clrMethod.IL.Address));
-			Console.WriteLine(clrMethod.IL.Length);
-			Console.WriteLine(Collections.ToString(pMd.Reference.Info.GetMethodBody()?.GetILAsByteArray()));
-			Console.WriteLine(Mem.Read<byte>(clrMethod.IL.Address, 1).ToString("X"));*/
+			Pointer<byte> pNull = 0UL;
+			Console.WriteLine(pNull);
 
+			Console.WriteLine();
 
-/*			auto a = new auto();
-			var mdIncr = Runtime.GetMethodDesc<auto>("incr");
-			a.incr();
-			Console.WriteLine(a.Value);
+			RunBenchmark<ToStringBenchmarking>();
 
-			var mdOverride = Runtime.GetMethodDesc(typeof(Program), "incr_override");
-			mdIncr.Reference.SetStableEntryPoint(mdOverride.Reference.Function);
-			a.incr();
-			Console.WriteLine(a.Value);
+			/*int[][] arrInline = {new[] {0}, new[] {1, 2}};
+			Console.WriteLine(Collections.InlineString(arrInline));
+			Console.WriteLine(Collections.ToString(arrInline));
 
-			var fdValue = Runtime.GetFieldDesc<auto>("m_value");
-			var dw = fdValue.Reference.DWORD_2;
-			Console.WriteLine(Bits.ReadBits((int)dw,27,0));
-			Console.WriteLine((CorElementType) Bits.ReadBits((int)dw,5,27));
+			Console.WriteLine();
 
-			var rdata =Segments.GetSegment(".rdata", "clr.dll");
-			Pointer<int> lpInt32 = rdata.SectionAddress;
-			var ptr = Segments.ScanSegment(".rdata", "clr.dll", new byte[] { 0x80, 0x31, 0x00, 0x00});
-			Console.WriteLine(Hex.ToHex(ptr));
-//			Console.WriteLine(lpInt32);*/
-
-			var mdItemOp         = Runtime.GetMethodDesc<auto>("get_Item");
-			var mdItemOpOverride = Runtime.GetMethodDesc(typeof(Program), "get_ItemOp");
-			mdItemOp.Reference.SetStableEntryPoint(mdItemOpOverride.Reference.Function);
-			auto a = new auto();
-			Debug.Assert(a[0] == -0xFF);
-
-
-			var mdAdd = Runtime.GetMethodDesc(typeof(Operations), "addOp");
-			var mdSub = Runtime.GetMethodDesc(typeof(Operations), "subOp");
-			mdAdd.Reference.Function = mdSub.Reference.Function;
-			Debug.Assert(Operations.addOp(1, 1) == 0);
-
-
-			string str   = "foo";
-			var    value = Kernel32.ReadProcessMemory<string>(Process.GetCurrentProcess(), Unsafe.AddressOf(ref str));
-			Debug.Assert(value == "foo");
-			Kernel32.WriteProcessMemory(Process.GetCurrentProcess(), Unsafe.AddressOf(ref str), "bar");
-			Debug.Assert(str == "bar");
+			int[] arr = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+			Console.WriteLine(Collections.InlineString(arr));
+			Console.WriteLine(Collections.ToString(arr));*/
 		}
 
 
-		[DllImport("DbgHelp.dll")]
-		static extern bool StackWalk64(uint machineType, IntPtr hProc, IntPtr hThread, IntPtr stackFrame,
-			void* contextRecord,
-			IntPtr readMemoryRoutine, IntPtr functionTableAccessRoutine,
-			IntPtr getModuleBaseRoutine, IntPtr translateAddress);
-
-
-		static Pointer<ILMethod> getIL(Type t, string name)
+		private class Super
 		{
-			var mdVal = Runtime.GetMethodDesc(t, name);
-			return mdVal.Reference.GetILHeader();
+			private Decimal512 m_decimal512;
 		}
 
-		static Pointer<ILMethod> getIL<T>(string name)
+		private class Sub : Super
 		{
-			return getIL(typeof(T), name);
+			private Decimal512 m_decimal512x;
 		}
 
-
-		static int getValue32()
+		/*static int SizeOf<T>(this T val)
 		{
-			return 1;
+			return AutoSizeOf(val);
+		}*/
+
+
+		private static Pointer<ILMethod> il(Type t, string name)
+		{
+			return Runtime.GetMethodDesc(t, name).Reference.GetILHeader();
 		}
 
 
-		private static void op_Finalize(void* __this)
+		private static void dmp<T>(ref T t) where T : class
 		{
-			Pointer<byte> pVal = __this;
-			Console.WriteLine("{0:P}", pVal);
+			ConsoleTable table = new ConsoleTable("Info", "Value");
+			table.AddRow("Stack", Hex.ToHex(AddressOf(ref t).Address));
+			table.AddRow("Heap", Hex.ToHex(AddressOfHeap(ref t).Address));
+			table.AddRow("Size", AutoSizeOf(t));
+
+			Console.WriteLine(table.ToMarkDownString());
 		}
 
-		class Class
+		private class Val : IComparable
 		{
-			~Class() { }
+			private decimal d;
 
-			public static Class operator +(Class c, object o)
+			public int CompareTo(object obj)
 			{
-				return c;
+				throw new NotImplementedException();
 			}
 		}
 
-		static Class op_AddOverride(Class val, object val2)
+		private struct Decimal512
 		{
-			Console.WriteLine(val);
-			Console.WriteLine(val2);
-			return val;
+			private decimal a,
+			                b,
+			                c,
+			                d;
 		}
-
-		private static class Operations
-		{
-			public static int addOp(int a, int b)
-			{
-				return a + b;
-			}
-
-			public static int subOp(int a, int b)
-			{
-				return a - b;
-			}
-		}
-
-
-		static int get_ItemOp(void* __this, int index)
-		{
-			Debug.Assert(GCHeap.GlobalHeap.Reference.IsHeapPointer(__this));
-			return -0xFF;
-		}
-
-		class auto
-		{
-			private int m_value;
-
-			public int Value => m_value;
-
-			public int this[int index] {
-				get => m_value;
-			}
-
-			public virtual void incr()
-			{
-				m_value++;
-			}
-		}
-
-
-
-
 
 		[Conditional("DEBUG")]
-		static void @break()
+		private static void @break()
 		{
 			Console.ReadLine();
 		}
@@ -322,7 +213,7 @@ namespace Test
 			}
 
 			Console.WriteLine(table.ToMarkDownString());
-		}*/
+		}
 
 		static string AutoCreateFieldTable<T>(ref T t)
 		{
@@ -337,7 +228,7 @@ namespace Test
 			return table.ToMarkDownString();
 		}
 
-		/*private static ClrRuntime GetRuntime()
+		private static ClrRuntime GetRuntime()
 		{
 			var dataTarget =
 				DataTarget.AttachToProcess(Process.GetCurrentProcess().Id, UInt32.MaxValue, AttachFlag.Passive);
@@ -346,7 +237,7 @@ namespace Test
 
 		private static TTo reinterpret_cast<TFrom, TTo>(TFrom tf)
 		{
-			return CSUnsafe.Read<TTo>(Unsafe.AddressOf(ref tf).ToPointer());
+			return CSUnsafe.Read<TTo>(AddressOf(ref tf).ToPointer());
 		}
 
 		private static class WinDbg
@@ -368,10 +259,10 @@ namespace Test
 
 				public static DumpObjInfo Get<T>(ref T t)
 				{
-					var mt = Runtime.ReadMethodTable(ref t);
-					var sz = t is string s ? s : "-";
+					Pointer<MethodTable> mt = Runtime.ReadMethodTable(ref t);
+					string               sz = t is string s ? s : "-";
 
-					var dump = new DumpObjInfo(mt.Reference.Name, mt, mt.Reference.EEClass, AutoSizeOf(in t), sz,
+					DumpObjInfo dump = new DumpObjInfo(mt.Reference.Name, mt, mt.Reference.EEClass, AutoSizeOf(t), sz,
 						Runtime.GetFieldDescs<T>());
 					dump.m_fieldTable = dump.FieldsTable(ref t);
 
@@ -395,8 +286,9 @@ namespace Test
 				{
 					// A few differences:
 					// - FieldInfo.Attributes is used for the Attr column; I don't know what WinDbg uses
-					var table = new ConsoleTable("MT", "Field", "Offset", "Type", "VT", "Attr", "Value", "Name");
-					foreach (var v in m_rgpFieldDescs) {
+					ConsoleTable table =
+						new ConsoleTable("MT", "Field", "Offset", "Type", "VT", "Attr", "Value", "Name");
+					foreach (Pointer<FieldDesc> v in m_rgpFieldDescs) {
 						table.AddRow(
 							Hex.ToHex(v.Reference.FieldMethodTable.Address),
 							Hex.ToHex(v.Reference.Token),
@@ -411,7 +303,7 @@ namespace Test
 
 				public override string ToString()
 				{
-					var table = new ConsoleTable("Attribute", "Value");
+					ConsoleTable table = new ConsoleTable("Attribute", "Value");
 					table.AddRow("Name", m_szName);
 					table.AddRow("MethodTable", Hex.ToHex(m_pMT.Address));
 					table.AddRow("EEClass", Hex.ToHex(m_pEEClass.Address));
@@ -425,35 +317,6 @@ namespace Test
 		}
 
 
-		class CPoint
-		{
-			private float m_fX,
-			              m_fY;
-
-			public string String { get; set; }
-
-			public float X {
-				get => m_fX;
-				set => m_fX = value;
-			}
-
-			public float Y {
-				get => m_fY;
-				set => m_fY = value;
-			}
-
-			public int getInt32()
-			{
-				return 1;
-			}
-
-			public override string ToString()
-			{
-				return String.Format("x = {0}, y = {1}, String = {2}", m_fX, m_fY, String);
-			}
-		}
-
-
 		private static void RunBenchmark<T>()
 		{
 			BenchmarkRunner.Run<T>();
@@ -461,7 +324,7 @@ namespace Test
 
 		private static void VmMap()
 		{
-			var table = new ConsoleTable("Low address", "High address", "Size");
+			ConsoleTable table = new ConsoleTable("Low address", "High address", "Size");
 
 			// Stack of current thread
 			table.AddRow(Hex.ToHex(Mem.StackLimit), Hex.ToHex(Mem.StackBase),
@@ -490,14 +353,13 @@ namespace Test
 		 * Dependencies:
 		 *
 		 * RazorSharp:
-		 *  - RazorCommon
 		 * 	- CompilerServices.Unsafe
 		 *
 		 * Test:
-		 *  - RazorCommon
 		 *  - CompilerServices.Unsafe
 		 * 	- NUnit
 		 *  - BenchmarkDotNet
+		 *  - ClrMD
 		 */
 
 		/**

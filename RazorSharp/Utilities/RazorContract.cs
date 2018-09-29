@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
-using RazorCommon;
+using RazorSharp.Common;
 using RazorSharp.Utilities.Exceptions;
 
 #endregion
@@ -27,17 +27,24 @@ namespace RazorSharp.Utilities
 	/// </summary>
 	internal static class RazorContract
 	{
+		private const string COND_FALSE_HALT = "cond:false => halt";
+		private const string VALUE_NULL_HALT = "value:null => halt";
+		private const string STRING_FORMAT_PARAM = "msg";
+
+
 		/// <summary>
 		///     Call to <see cref="Trace.Assert(bool, string)" />
 		/// </summary>
 		/// <param name="cond">Condition to assert</param>
 		/// <param name="msg"></param>
+		/// <param name="args"></param>
 		[AssertionMethod]
-		[ContractAnnotation("cond:false => halt")]
+		[ContractAnnotation(COND_FALSE_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void Assert([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg)
+		[StringFormatMethod(STRING_FORMAT_PARAM)]
+		internal static void Assert([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg, params object[] args)
 		{
-			Trace.Assert(cond, msg);
+			Trace.Assert(cond, String.Format(msg, args));
 		}
 
 		/// <summary>
@@ -45,7 +52,7 @@ namespace RazorSharp.Utilities
 		/// </summary>
 		/// <param name="cond">Condition to assert</param>
 		[AssertionMethod]
-		[ContractAnnotation("cond:false => halt")]
+		[ContractAnnotation(COND_FALSE_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void Assert([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond)
 		{
@@ -53,27 +60,28 @@ namespace RazorSharp.Utilities
 		}
 
 		[AssertionMethod]
-		[ContractAnnotation("v:null => halt")]
+		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static unsafe void RequiresNotNull([AsrtCnd(AsrtCndType.IS_NOT_NULL)] void* v)
+		internal static unsafe void RequiresNotNull([AsrtCnd(AsrtCndType.IS_NOT_NULL)] void* value)
 		{
-			if (v == null) {
+			if (value == null) {
 				throw new NullReferenceException($"Pointer {Hex.ToHex(null)} == null");
 			}
 		}
 
 		[AssertionMethod]
-		[ContractAnnotation("t:null => halt")]
+		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] in T t) where T : class
+		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] in T value) where T : class
 		{
-			if (t == null) {
-				throw new NullReferenceException($"{nameof(t)} == null");
+			if (value == null) {
+				throw new NullReferenceException($"{nameof(value)} == null");
 			}
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void Requires([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null)
+		[StringFormatMethod(STRING_FORMAT_PARAM)]
+		internal static void Requires([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null, params object[] args)
 		{
 			if (cond) {
 				return;
@@ -88,21 +96,27 @@ namespace RazorSharp.Utilities
 		/// </summary>
 		/// <param name="cond">Condition</param>
 		/// <param name="msg">Optional message for <typeparamref name="TException"></typeparamref> </param>
+		/// <param name="args"></param>
 		/// <typeparam name="TException">Exception type to throw</typeparam>
 		[AssertionMethod]
-		[ContractAnnotation("cond:false => halt")]
-		internal static void Requires<TException>([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null)
+		[ContractAnnotation(COND_FALSE_HALT)]
+		[StringFormatMethod(STRING_FORMAT_PARAM)]
+		internal static void Requires<TException>([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null, params object[] args)
 			where TException : Exception, new()
 		{
 			if (cond) {
 				return;
 			}
 
+
+
 			if (!cond) {
+
 				if (msg == null) {
 					throw new TException();
 				}
 				else {
+					msg = String.Format(msg, args);
 					// Special support for RuntimeException
 					if (typeof(TException) == typeof(RuntimeException)) {
 						throw new RuntimeException(msg);
@@ -138,6 +152,12 @@ namespace RazorSharp.Utilities
 			else if (typeof(TExpected) != typeof(TActual)) {
 				TypeException.Throw<TExpected, TActual>();
 			}
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static void RequiresClassType<T>()
+		{
+			Assert(!typeof(T).IsValueType, "Type parameter <{0}> must be a reference type", typeof(T).Name);
 		}
 
 		internal static bool TypeEqual<TExpected, TActual>()

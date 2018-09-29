@@ -4,9 +4,8 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Strings;
 using RazorSharp.CLR.Structures.EE;
+using RazorSharp.Common;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
 
@@ -65,7 +64,7 @@ namespace RazorSharp.CLR.Structures
 
 		private DWORD FlagsValue {
 			get {
-				IntPtr dwPtr = Unsafe.AddressOf(ref m_dwFlags);
+				IntPtr dwPtr = Unsafe.AddressOf(ref m_dwFlags).Address;
 				return *(DWORD*) dwPtr;
 			}
 		}

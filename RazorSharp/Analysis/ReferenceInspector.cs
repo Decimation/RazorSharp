@@ -1,10 +1,10 @@
 #region
 
 using System;
-using RazorCommon;
-using RazorCommon.Strings;
+
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
+using RazorSharp.Common;
 
 #endregion
 
@@ -58,7 +58,7 @@ namespace RazorSharp.Analysis
 			protected override ConsoleTable ToTable()
 			{
 				ConsoleTable table = base.ToTable();
-				table.AddRow("Heap pointer", IsHeapPointer ? StringUtils.Check : StringUtils.BallotX);
+				table.AddRow("Heap pointer", IsHeapPointer.Prettify());
 				return table;
 			}
 		}
@@ -73,9 +73,9 @@ namespace RazorSharp.Analysis
 
 			internal ReferenceSizeInfo(ref T t)
 			{
-				Heap              = Unsafe.HeapSize(in t);
+				Heap              = Unsafe.HeapSize(ref t);
 				BaseInstance      = Unsafe.BaseInstanceSize<T>();
-				BaseFieldsUnboxed = Unsafe.BaseFieldsSize(ref t);
+				BaseFieldsUnboxed = Unsafe.BaseFieldsSize(t);
 				m_typeName        = t.GetType().Name;
 			}
 
@@ -91,7 +91,7 @@ namespace RazorSharp.Analysis
 
 				// todo: if the value is boxed
 				//if (m_typeName != typeof(T).Name) {
-				table.AttachColumn($"Base fields size <{m_typeName}> {StringUtils.Superscript(1)}", BaseFieldsUnboxed);
+				table.AttachColumn($"Base fields size <{m_typeName}> {1}", BaseFieldsUnboxed);
 
 				//}
 
@@ -99,7 +99,7 @@ namespace RazorSharp.Analysis
 				table.AttachColumn("Base instance size", BaseInstance);
 
 
-				table.DetachFromColumns(Unsafe.InvalidValue);
+				table.DetachFromColumns(Unsafe.INVALID_VALUE);
 				return table;
 			}
 		}
@@ -119,14 +119,14 @@ namespace RazorSharp.Analysis
 
 			internal ReferenceAddressInfo(ref T t) : base(ref t)
 			{
-				Heap   = Unsafe.AddressOfHeap(ref t);
-				Fields = Unsafe.AddressOfHeap(ref t, OffsetType.Fields);
+				Heap   = Unsafe.AddressOfHeap(ref t).Address;
+				Fields = Unsafe.AddressOfHeap(ref t, OffsetType.Fields).Address;
 				Header = (IntPtr) Runtime.ReadObjHeader(ref t);
 				if (typeof(T).IsArray) {
-					HeapMisc = Unsafe.AddressOfHeap(ref t, OffsetType.ArrayData);
+					HeapMisc = Unsafe.AddressOfHeap(ref t, OffsetType.ArrayData).Address;
 				}
 				else if (typeof(T) == typeof(string)) {
-					HeapMisc = Unsafe.AddressOfHeap(ref t, OffsetType.StringData);
+					HeapMisc = Unsafe.AddressOfHeap(ref t, OffsetType.StringData).Address;
 				}
 				else {
 					HeapMisc = IntPtr.Zero;

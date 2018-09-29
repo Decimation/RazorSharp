@@ -24,7 +24,7 @@ namespace Test.Testing.Tests
 			Debug.Assert(strPtr == strPtr2);
 
 			string[]          arr     = {"", "foo", "anime"};
-			ExPointer<string> strPtr3 = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData);
+			ExPointer<string> strPtr3 = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData).Address;
 			TestingUtil.Elements(strPtr3, arr);
 			strPtr3 -= 3;
 			Debug.Assert(strPtr3.Value == arr[0]);

@@ -11,6 +11,11 @@ using static RazorSharp.CLR.Runtime;
 namespace RazorSharp.Experimental
 {
 
+	/// <summary>
+	/// <remarks>
+	/// Old namespace: Experimental
+	/// </remarks>
+	/// </summary>
 	internal static unsafe class FunctionHooker
 	{
 		private struct PointerPair

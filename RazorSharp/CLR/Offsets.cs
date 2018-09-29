@@ -78,7 +78,7 @@ namespace RazorSharp.CLR
 		///     Offset for global variable <c>g_pGCHeap</c> in the <see cref="Memory.Segments.SegmentType.data" />
 		///     segment of <c>clr.dll</c>
 		///     <remarks>
-		///         Relative to <see cref="RazorInvoke.ImageSectionInfo.SectionAddress" /> of
+		///         Relative to <see cref="RazorSharp.Native.Structures.Images.ImageSectionInfo.SectionAddress" /> of
 		///         <see cref="Memory.Segments.SegmentType.data" /> segment of <see cref="ClrFunctions.ClrDll" />
 		///     </remarks>
 		/// </summary>
@@ -88,7 +88,7 @@ namespace RazorSharp.CLR
 		///     Offset for global variable <c>g_lowest_address</c> in the <see cref="Memory.Segments.SegmentType.data" />
 		///     segment of <c>clr.dll</c>
 		///     <remarks>
-		///         Relative to <see cref="RazorInvoke.ImageSectionInfo.SectionAddress" /> of
+		///         Relative to <see cref="RazorSharp.Native.Structures.Images.ImageSectionInfo.SectionAddress" /> of
 		///         <see cref="Memory.Segments.SegmentType.data" /> segment of <see cref="ClrFunctions.ClrDll" />
 		///     </remarks>
 		/// </summary>
@@ -98,7 +98,7 @@ namespace RazorSharp.CLR
 		///     Offset for global variable <c>g_highest_address</c> in the <see cref="Memory.Segments.SegmentType.data" />
 		///     segment of <c>clr.dll</c>
 		///     <remarks>
-		///         Relative to <see cref="RazorInvoke.ImageSectionInfo.SectionAddress" /> of
+		///         Relative to <see cref="RazorSharp.Native.Structures.Images.ImageSectionInfo.SectionAddress" /> of
 		///         <see cref="Memory.Segments.SegmentType.data" /> segment of <see cref="ClrFunctions.ClrDll" />
 		///     </remarks>
 		/// </summary>
