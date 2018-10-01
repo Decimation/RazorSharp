@@ -134,7 +134,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <param name="rgPattern"></param>
 		/// <param name="ofsGuess"></param>
-		/// <returns><see cref="IntPtr.Zero"/> if the pattern could not be found</returns>
+		/// <returns><see cref="IntPtr.Zero" /> if the pattern could not be found</returns>
 		public IntPtr FindPattern(byte[] rgPattern, long ofsGuess = 0)
 		{
 			ModuleCheck();

@@ -1,10 +1,15 @@
 #region
 
+#region
+
 using System;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;
+
+#endregion
+
 // ReSharper disable InconsistentNaming
 
 #endregion

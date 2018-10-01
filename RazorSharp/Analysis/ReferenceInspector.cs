@@ -1,7 +1,6 @@
 #region
 
 using System;
-
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Common;

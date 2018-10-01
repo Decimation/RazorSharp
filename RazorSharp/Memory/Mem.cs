@@ -259,7 +259,7 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     Allocates basic reference types in the unmanaged heap.
 		///     <para>
-		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free" />
+		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free{T}" />
 		///     </para>
 		/// </summary>
 		/// <typeparam name="T">
@@ -311,7 +311,7 @@ namespace RazorSharp.Memory
 		///         <see cref="AllocUnmanagedInstance{T}" />.
 		///     </para>
 		///     <para>
-		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free" />
+		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free{T}" />
 		///     </para>
 		/// </summary>
 		/// <typeparam name="T">Element type to allocate</typeparam>
@@ -336,7 +336,7 @@ namespace RazorSharp.Memory
 		///     <para>Frees memory allocated from <see cref="AllocUnmanaged{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>
 		/// </summary>
 		/// <param name="p">Pointer to allocated memory</param>
-		public static void Free(IntPtr p)
+		public static void Free<T>(Pointer<T> p)
 		{
 //			if (bZero) {
 			// AllocHGlobal is a wrapper of LocalAlloc
@@ -344,8 +344,9 @@ namespace RazorSharp.Memory
 //				Zero(p, (int) size);
 //			}
 
-			Marshal.FreeHGlobal(p);
+			Marshal.FreeHGlobal(p.Address);
 		}
+
 
 		#region Copy
 

@@ -150,6 +150,7 @@ namespace RazorSharp.CLR.Structures.EE
 
 				//IntPtr thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass)).Address;
 				IntPtr thisptr = Unsafe.AddressOf(ref this).Add(sizeof(EEClass)).Address;
+
 				// ReSharper disable once ArrangeRedundantParentheses
 				return &((LayoutEEClass*) thisptr)->m_LayoutInfo;
 			}
@@ -196,8 +197,9 @@ namespace RazorSharp.CLR.Structures.EE
 		///     </remarks>
 		/// </summary>
 		private PackedDWORDFields* PackedFields =>
+
 			//(PackedDWORDFields*) PointerUtils.Add(Unsafe.AddressOf(ref this), m_cbFixedEEClassFields);
-			(PackedDWORDFields*)Unsafe.AddressOf(ref this).Add(m_cbFixedEEClassFields);
+			(PackedDWORDFields*) Unsafe.AddressOf(ref this).Add(m_cbFixedEEClassFields);
 
 		private Pointer<EEClass> ParentClass => m_pMethodTable->Parent.Reference.EEClass;
 

@@ -286,7 +286,7 @@ namespace RazorSharp.Pointers.Ex
 			switch (format.ToUpperInvariant()) {
 				case "O":
 					if (typeof(T).IsIListType()) {
-						return Collections.ListToString((IList) Value);
+						return Collections.ToString((IList) Value);
 					}
 
 					return Value.ToString();

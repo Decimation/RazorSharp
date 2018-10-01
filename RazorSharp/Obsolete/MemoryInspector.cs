@@ -3,7 +3,6 @@
 using System;
 using System.Linq;
 using System.Threading;
-
 using RazorSharp.CLR.Fixed;
 using RazorSharp.Common;
 using RazorSharp.Pointers;
@@ -20,11 +19,10 @@ namespace RazorSharp.Memory
 	#endregion
 
 	/// <summary>
-	/// Provides a way to interpret memory as different types
-	/// <remarks>
-	/// Old namespace: Memory
-	/// </remarks>
-	///
+	///     Provides a way to interpret memory as different types
+	///     <remarks>
+	///         Old namespace: Memory
+	///     </remarks>
 	/// </summary>
 	internal static unsafe class MemoryInspector
 	{
@@ -114,7 +112,7 @@ namespace RazorSharp.Memory
 				string[] @out                                   = new string[possibleTypes];
 				for (int i = 0; i < possibleTypes; i++) @out[i] = OfsAs(i);
 
-				res = Collections.ToString(@out, options & ~ToStringOptions.UseCommas);
+				res = Collections.ToString(list: @out, options & ~ToStringOptions.UseCommas);
 			});
 
 

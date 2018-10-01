@@ -23,7 +23,7 @@ namespace RazorSharp
 
 
 	/// <summary>
-	/// Offset options for <see cref="Unsafe.AddressOfHeap{T}(ref T, OffsetType)"/>
+	///     Offset options for <see cref="Unsafe.AddressOfHeap{T}(ref T, OffsetType)" />
 	/// </summary>
 	public enum OffsetType
 	{
@@ -34,7 +34,7 @@ namespace RazorSharp
 		Header,
 
 		/// <summary>
-		///     If the type is a <c>string</c>, return the
+		///     If the type is a <see cref="string" />, return the
 		///     pointer offset by <see cref="RuntimeHelpers.OffsetToStringData" /> so it
 		///     points to the string's characters.
 		///     <remarks>
@@ -237,6 +237,16 @@ namespace RazorSharp
 			}
 		}
 
+		public static Pointer<byte> AddressOfHeap<T>(T t) where T : class
+		{
+			return AddressOfHeap(ref t);
+		}
+
+		public static Pointer<byte> AddressOfHeap<T>(T t, OffsetType offset) where T : class
+		{
+			return AddressOfHeap(ref t, offset);
+		}
+
 		#endregion
 
 		#region Sizes
@@ -317,10 +327,15 @@ namespace RazorSharp
 		}*/
 
 
+		/*static int SizeOf<T>(this T val)
+		{
+			return AutoSizeOf(val);
+		}*/
+
 		/// <summary>
 		///     Calculates the complete size of <paramref name="t" />'s data. If <typeparamref name="T" /> is
 		///     a value type, this is equal to <see cref="SizeOf{T}" />. If <typeparamref name="T" /> is a
-		///     reference type, this is equal to <see cref="HeapSize{T}" />.
+		///     reference type, this is equal to <see cref="HeapSize{T}(ref T)" />.
 		/// </summary>
 		/// <param name="t">Value to calculate the size of</param>
 		/// <typeparam name="T">Type of <paramref name="t" /></typeparam>
@@ -336,7 +351,7 @@ namespace RazorSharp
 		/// <remarks>
 		///     Returned from <see cref="EEClassLayoutInfo.ManagedSize" />
 		/// </remarks>
-		/// <returns>Managed size if the type has an <see cref="EEClassLayoutInfo" />; <see cref="INVALID_VALUE"/> otherwise</returns>
+		/// <returns>Managed size if the type has an <see cref="EEClassLayoutInfo" />; <see cref="INVALID_VALUE" /> otherwise</returns>
 		public static int ManagedSizeOf<T>()
 		{
 			// Note: Arrays have no layout
@@ -359,7 +374,7 @@ namespace RazorSharp
 		///     <para> Equals <see cref="Marshal.SizeOf(Type)" /></para>
 		///     <para> Equals <see cref="StructLayoutAttribute.Size" /> when type isn't zero-sized.</para>
 		/// </remarks>
-		/// <returns>The native size if the type has a native representation; <see cref="INVALID_VALUE"/> otherwise</returns>
+		/// <returns>The native size if the type has a native representation; <see cref="INVALID_VALUE" /> otherwise</returns>
 		public static int NativeSizeOf<T>()
 		{
 			// Note: Arrays native size == 0
@@ -449,6 +464,10 @@ namespace RazorSharp
 			return HeapSizeInternal(t);
 		}
 
+		public static int HeapSize<T>(T t) where T : class
+		{
+			return HeapSize(ref t);
+		}
 
 		private static int HeapSizeInternal<T>(T t)
 		{
@@ -490,7 +509,7 @@ namespace RazorSharp
 		///     <remarks>
 		///         <para>Use <see cref="BaseFieldsSize{T}(T)" /> if the value may be boxed.</para>
 		///         <para>Returned from <see cref="MethodTable.NumInstanceFieldBytes" /></para>
-		/// <para>This includes field padding.</para>
+		///         <para>This includes field padding.</para>
 		///     </remarks>
 		/// </summary>
 		/// <returns><see cref="Constants.MinObjectSize" /> if type is an array, fields size otherwise</returns>
@@ -521,7 +540,7 @@ namespace RazorSharp
 		///     <remarks>
 		///         <para>Returned from <see cref="MethodTable.NumInstanceFieldBytes" /></para>
 		///         <para>Equals <see cref="Unsafe.SizeOf{T}()" /> for value types</para>
-		/// <para>This includes field padding.</para>
+		///         <para>This includes field padding.</para>
 		///     </remarks>
 		/// </summary>
 		public static int BaseFieldsSize<T>(T t) where T : class

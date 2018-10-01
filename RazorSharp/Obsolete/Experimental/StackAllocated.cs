@@ -29,7 +29,7 @@ namespace RazorSharp.Experimental
 	///     <para></para>
 	/// </summary>
 	/// <remarks>
-	/// Old namespace: Experimental
+	///     Old namespace: Experimental
 	/// </remarks>
 	/// <typeparam name="T"></typeparam>
 	internal unsafe struct StackAllocated<T> where T : class

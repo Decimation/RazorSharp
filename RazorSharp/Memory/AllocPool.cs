@@ -63,7 +63,7 @@ namespace RazorSharp.Memory
 			IntPtr origin = rg.LowAddr;
 
 			Mem.Zero(origin, rg.Size);
-			Mem.Free(origin);
+			Mem.Free((Pointer<byte>)origin);
 			s_rgPool.Remove(rg);
 		}
 

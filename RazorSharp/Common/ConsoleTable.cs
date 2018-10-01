@@ -1,14 +1,18 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+#endregion
+
 namespace RazorSharp.Common
 {
 
 	/// <summary>
-	/// Source: https://github.com/khalidabuhakmeh/ConsoleTables
+	///     Source: https://github.com/khalidabuhakmeh/ConsoleTables
 	/// </summary>
 	public class ConsoleTable
 	{
@@ -29,31 +33,33 @@ namespace RazorSharp.Common
 
 		public ConsoleTable AddColumn(IEnumerable<string> names)
 		{
-			foreach (var name in names)
+			foreach (string name in names)
 				Columns.Add(name);
 			return this;
 		}
 
 		public ConsoleTable AddRow(params object[] values)
 		{
-			if (values == null)
+			if (values == null) {
 				throw new ArgumentNullException(nameof(values));
+			}
 
-			if (!Columns.Any())
+			if (!Columns.Any()) {
 				throw new Exception("Please set the columns first");
+			}
 
-			if (Columns.Count != values.Length)
+			if (Columns.Count != values.Length) {
 				throw new Exception(
 					$"The number columns in the row ({Columns.Count}) does not match the values ({values.Length}");
+			}
 
 			Rows.Add(values);
 			return this;
 		}
 
 		/// <summary>
-		/// <para>Custom method</para>
-		///
-		/// Removes the entire row if one cell in the row contains one of the args
+		///     <para>Custom method</para>
+		///     Removes the entire row if one cell in the row contains one of the args
 		/// </summary>
 		public ConsoleTable RemoveFromRows(params object[] args)
 		{
@@ -66,7 +72,7 @@ namespace RazorSharp.Common
 			// | Field | Value |
 			// |-------|-------|
 
-			var matching = from a in Rows from b in a from c in args where b.Equals(c) select a;
+			IEnumerable<object[]> matching = from a in Rows from b in a from c in args where b.Equals(c) select a;
 			Rows.RemoveAtRange(matching.Select(v => Rows.IndexOf(v)).ToArray());
 
 			/*for (int i = Rows.Count - 1; i >= 0; i--) {
@@ -83,10 +89,12 @@ namespace RazorSharp.Common
 		}
 
 		/// <summary>
-		/// Custom method<para></para>
-		///
-		/// Similar to RemoveFromRows, but for columns.<para></para>
-		/// Removes the corresponding column if one of the rows in the columns contains one of the args<para></para>
+		///     Custom method
+		///     <para></para>
+		///     Similar to RemoveFromRows, but for columns.
+		///     <para></para>
+		///     Removes the corresponding column if one of the rows in the columns contains one of the args
+		///     <para></para>
 		/// </summary>
 		public ConsoleTable DetachFromColumns(params object[] args)
 		{
@@ -129,7 +137,7 @@ namespace RazorSharp.Common
 
 
 		/// <summary>
-		/// Custom method
+		///     Custom method
 		/// </summary>
 		public ConsoleTable AttachColumn(string col, object rowval)
 		{
@@ -137,7 +145,7 @@ namespace RazorSharp.Common
 		}
 
 		/// <summary>
-		/// Custom method
+		///     Custom method
 		/// </summary>
 		public ConsoleTable AttachColumn(string col, object[] rowval)
 		{
@@ -147,7 +155,7 @@ namespace RazorSharp.Common
 				throw new Exception();
 			}
 
-			var ls = Rows[0].ToList();
+			List<object> ls = Rows[0].ToList();
 			ls.AddRange(rowval);
 			Rows.Clear();
 			Rows.Add(ls.ToArray());
@@ -157,13 +165,13 @@ namespace RazorSharp.Common
 
 		public static ConsoleTable From<T>(IEnumerable<T> values)
 		{
-			var table = new ConsoleTable();
+			ConsoleTable table = new ConsoleTable();
 
-			var columns = GetColumns<T>();
+			IEnumerable<string> columns = GetColumns<T>();
 
 			table.AddColumn(columns);
 
-			foreach (var propertyValues in values.Select(value =>
+			foreach (IEnumerable<object> propertyValues in values.Select(value =>
 				columns.Select(column => GetColumnValue<T>(value, column))))
 				table.AddRow(propertyValues.ToArray());
 
@@ -172,33 +180,33 @@ namespace RazorSharp.Common
 
 		public override string ToString()
 		{
-			var builder = new StringBuilder();
+			StringBuilder builder = new StringBuilder();
 
 			// find the longest column by searching each row
-			var columnLengths = ColumnLengths();
+			List<int> columnLengths = ColumnLengths();
 
 			// create the string format with padding
-			var format = Enumerable.Range(0, Columns.Count)
-				             .Select(i => " | {" + i + ",-" + columnLengths[i] + "}")
-				             .Aggregate((s, a) => s + a) + " |";
+			string format = Enumerable.Range(0, Columns.Count)
+				                .Select(i => " | {" + i + ",-" + columnLengths[i] + "}")
+				                .Aggregate((s, a) => s + a) + " |";
 
 			// find the longest formatted line
-			var maxRowLength  = Math.Max(0, Rows.Any() ? Rows.Max(row => string.Format(format, row).Length) : 0);
-			var columnHeaders = string.Format(format, Columns.ToArray());
+			int    maxRowLength  = Math.Max(0, Rows.Any() ? Rows.Max(row => string.Format(format, row).Length) : 0);
+			string columnHeaders = string.Format(format, Columns.ToArray());
 
 			// longest line is greater of formatted columnHeader and longest row
-			var longestLine = Math.Max(maxRowLength, columnHeaders.Length);
+			int longestLine = Math.Max(maxRowLength, columnHeaders.Length);
 
 			// add each row
-			var results = Rows.Select(row => string.Format(format, row)).ToList();
+			List<string> results = Rows.Select(row => string.Format(format, row)).ToList();
 
 			// create the divider
-			var divider = " " + string.Join("", Enumerable.Repeat("-", longestLine - 1)) + " ";
+			string divider = " " + string.Join("", Enumerable.Repeat("-", longestLine - 1)) + " ";
 
 			builder.AppendLine(divider);
 			builder.AppendLine(columnHeaders);
 
-			foreach (var row in results) {
+			foreach (string row in results) {
 				builder.AppendLine(divider);
 				builder.AppendLine(row);
 			}
@@ -220,23 +228,23 @@ namespace RazorSharp.Common
 
 		private string ToMarkDownString(char delimiter)
 		{
-			var builder = new StringBuilder();
+			StringBuilder builder = new StringBuilder();
 
 			// find the longest column by searching each row
-			var columnLengths = ColumnLengths();
+			List<int> columnLengths = ColumnLengths();
 
 			// create the string format with padding
-			var format = Format(columnLengths, delimiter);
+			string format = Format(columnLengths, delimiter);
 
 			// find the longest formatted line
-			var columnHeaders = string.Format(format, Columns.ToArray());
+			string columnHeaders = string.Format(format, Columns.ToArray());
 
 
 			// add each row
-			var results = Rows.Select(row => string.Format(format, row)).ToList();
+			List<string> results = Rows.Select(row => string.Format(format, row)).ToList();
 
 			// create the divider
-			var divider = Regex.Replace(columnHeaders, @"[^|]", "-");
+			string divider = Regex.Replace(columnHeaders, @"[^|]", "-");
 
 			// custom subroutine:
 			// remove the first delimiter if the first column is empty
@@ -258,28 +266,28 @@ namespace RazorSharp.Common
 
 		public string ToStringAlternative()
 		{
-			var builder = new StringBuilder();
+			StringBuilder builder = new StringBuilder();
 
 			// find the longest column by searching each row
-			var columnLengths = ColumnLengths();
+			List<int> columnLengths = ColumnLengths();
 
 			// create the string format with padding
-			var format = Format(columnLengths);
+			string format = Format(columnLengths);
 
 			// find the longest formatted line
-			var columnHeaders = string.Format(format, Columns.ToArray());
+			string columnHeaders = string.Format(format, Columns.ToArray());
 
 			// add each row
-			var results = Rows.Select(row => string.Format(format, row)).ToList();
+			List<string> results = Rows.Select(row => string.Format(format, row)).ToList();
 
 			// create the divider
-			var divider     = Regex.Replace(columnHeaders, @"[^|]", "-");
-			var dividerPlus = divider.Replace("|", "+");
+			string divider     = Regex.Replace(columnHeaders, @"[^|]", "-");
+			string dividerPlus = divider.Replace("|", "+");
 
 			builder.AppendLine(dividerPlus);
 			builder.AppendLine(columnHeaders);
 
-			foreach (var row in results) {
+			foreach (string row in results) {
 				builder.AppendLine(dividerPlus);
 				builder.AppendLine(row);
 			}
@@ -291,16 +299,16 @@ namespace RazorSharp.Common
 
 		private string Format(List<int> columnLengths, char delimiter = '|')
 		{
-			var delimiterStr = delimiter == char.MinValue ? string.Empty : delimiter.ToString();
-			var format = (Enumerable.Range(0, Columns.Count)
-				              .Select(i => " " + delimiterStr + " {" + i + ",-" + columnLengths[i] + "}")
-				              .Aggregate((s, a) => s + a) + " " + delimiterStr).Trim();
+			string delimiterStr = delimiter == char.MinValue ? string.Empty : delimiter.ToString();
+			string format = (Enumerable.Range(0, Columns.Count)
+				                 .Select(i => " " + delimiterStr + " {" + i + ",-" + columnLengths[i] + "}")
+				                 .Aggregate((s, a) => s + a) + " " + delimiterStr).Trim();
 			return format;
 		}
 
 		private List<int> ColumnLengths()
 		{
-			var columnLengths = Columns
+			List<int> columnLengths = Columns
 				.Select((t, i) => Rows.Select(x => x[i])
 					.Union(new[] {Columns[i]})
 					.Where(x => x != null)
@@ -313,16 +321,16 @@ namespace RazorSharp.Common
 		{
 			switch (format) {
 				case RFormat.Default:
-					System.Console.WriteLine(ToString());
+					Console.WriteLine(ToString());
 					break;
 				case RFormat.MarkDown:
-					System.Console.WriteLine(ToMarkDownString());
+					Console.WriteLine(ToMarkDownString());
 					break;
 				case RFormat.Alternative:
-					System.Console.WriteLine(ToStringAlternative());
+					Console.WriteLine(ToStringAlternative());
 					break;
 				case RFormat.Minimal:
-					System.Console.WriteLine(ToMinimalString());
+					Console.WriteLine(ToMinimalString());
 					break;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(format), format, null);

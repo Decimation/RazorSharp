@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
 using RazorSharp.CLR.Structures.ILMethods;
 using RazorSharp.Common;
 using RazorSharp.Memory;

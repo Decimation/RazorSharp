@@ -12,9 +12,9 @@ namespace RazorSharp.Experimental
 {
 
 	/// <summary>
-	/// <remarks>
-	/// Old namespace: Experimental
-	/// </remarks>
+	///     <remarks>
+	///         Old namespace: Experimental
+	///     </remarks>
 	/// </summary>
 	internal static unsafe class FunctionHooker
 	{

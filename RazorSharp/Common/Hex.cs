@@ -1,6 +1,10 @@
+#region
+
 using System;
 using System.Runtime.CompilerServices;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace RazorSharp.Common
 {
@@ -10,40 +14,37 @@ namespace RazorSharp.Common
 	{
 
 		/// <summary>
-		/// Separate elements with a comma
+		///     Separate elements with a comma
 		/// </summary>
 		UseCommas = 1,
 
 		/// <summary>
-		/// Represent the number in hexadecimal format
+		///     Represent the number in hexadecimal format
 		/// </summary>
 		Hex = 2,
 
 
 		/// <summary>
-		/// Pad single-digit hex with a zero
+		///     Pad single-digit hex with a zero
 		/// </summary>
 		ZeroPadHex = Hex | 4,
 
 
 		/// <summary>
-		/// Prefix hex with "0x"
+		///     Prefix hex with "0x"
 		/// </summary>
 		PrefixHex = Hex | 8,
 	}
 
 
-
 	/// <summary>
-	///
-	/// <para>Creates hex representations of pointers</para>
-	/// <para>All operations in this class implicitly use <see cref="ToStringOptions.Hex"/></para>
-	///
+	///     <para>Creates hex representations of pointers</para>
+	///     <para>All operations in this class implicitly use <see cref="ToStringOptions.Hex" /></para>
 	/// </summary>
 	public static unsafe class Hex
 	{
-		internal const string          PrefixString = "0x";
-		public static  ToStringOptions Options { get; set; }
+		private const string          PrefixString = "0x";
+		public static ToStringOptions Options { get; set; }
 
 
 		static Hex()
@@ -75,8 +76,9 @@ namespace RazorSharp.Common
 		private static string ToHexInternal(long l)
 		{
 			string s = l.ToString("X");
-			if (Options.HasFlagFast(ToStringOptions.PrefixHex))
+			if (Options.HasFlagFast(ToStringOptions.PrefixHex)) {
 				s = PrefixString + s;
+			}
 
 
 			return s;
@@ -84,8 +86,8 @@ namespace RazorSharp.Common
 
 
 		/// <summary>
-		/// Independent from <see cref="ToHexInternal"/>. Not for pointers.
-		/// Implicitly uses <see cref="ToStringOptions.Hex"/>
+		///     Independent from <see cref="ToHexInternal" />. Not for pointers.
+		///     Implicitly uses <see cref="ToStringOptions.Hex" />
 		/// </summary>
 		/// <param name="t"></param>
 		/// <param name="options"></param>

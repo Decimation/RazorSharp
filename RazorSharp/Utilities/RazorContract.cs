@@ -27,8 +27,8 @@ namespace RazorSharp.Utilities
 	/// </summary>
 	internal static class RazorContract
 	{
-		private const string COND_FALSE_HALT = "cond:false => halt";
-		private const string VALUE_NULL_HALT = "value:null => halt";
+		private const string COND_FALSE_HALT     = "cond:false => halt";
+		private const string VALUE_NULL_HALT     = "value:null => halt";
 		private const string STRING_FORMAT_PARAM = "msg";
 
 
@@ -101,7 +101,8 @@ namespace RazorSharp.Utilities
 		[AssertionMethod]
 		[ContractAnnotation(COND_FALSE_HALT)]
 		[StringFormatMethod(STRING_FORMAT_PARAM)]
-		internal static void Requires<TException>([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null, params object[] args)
+		internal static void Requires<TException>([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null,
+			params object[] args)
 			where TException : Exception, new()
 		{
 			if (cond) {
@@ -109,14 +110,13 @@ namespace RazorSharp.Utilities
 			}
 
 
-
 			if (!cond) {
-
 				if (msg == null) {
 					throw new TException();
 				}
 				else {
 					msg = String.Format(msg, args);
+
 					// Special support for RuntimeException
 					if (typeof(TException) == typeof(RuntimeException)) {
 						throw new RuntimeException(msg);

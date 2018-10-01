@@ -4,7 +4,6 @@ using System;
 using System.Collections;
 using System.Linq;
 using System.Text;
-
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
@@ -59,8 +58,10 @@ namespace RazorSharp.Analysis
 		{
 			// todo: This causes an InvalidProgramException
 			if (mode.HasFlag(InspectorMode.MethodDescs) && typeof(T) == typeof(string)) {
-				throw new Exception($"Flag {InspectorMode.MethodDescs} cannot be used on typeof({typeof(string).Name})");
+				throw new Exception(
+					$"Flag {InspectorMode.MethodDescs} cannot be used on typeof({typeof(string).Name})");
 			}
+
 			ReferenceInspector<T>.Write(ref t, false, mode);
 		}
 
@@ -271,7 +272,7 @@ namespace RazorSharp.Analysis
 				ConsoleTable table = new ConsoleTable("Info", "Value");
 				table.AddRow("Value",
 					typeof(T).IsIListType()
-						? String.Format("[{0}]", Collections.ListToString((IList) Value))
+						? String.Format("[{0}]", Collections.ToString((IList) Value))
 						: Value.ToString());
 
 				table.AddRow("Blittable", IsBlittable.Prettify());

@@ -3,7 +3,6 @@
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
-
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Common;
@@ -120,7 +119,8 @@ namespace RazorSharp.Analysis
 		///     When <c>false</c>, internal metadata such as the <see cref="MethodTable" />
 		///     pointer is also included.
 		/// </param>
-		public ObjectLayout(ref T t, bool bFieldsOnly = true) : this(Unsafe.AddressOf(ref t).Address, t, bFieldsOnly, false,
+		public ObjectLayout(ref T t, bool bFieldsOnly = true) : this(Unsafe.AddressOf(ref t).Address, t, bFieldsOnly,
+			false,
 			false)
 		{
 			RazorContract.Requires(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");

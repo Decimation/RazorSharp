@@ -1,8 +1,6 @@
 #region
 
 using System;
-using System.Diagnostics;
-using System.Runtime;
 using RazorSharp.Memory;
 using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;

@@ -12,11 +12,10 @@ namespace RazorSharp.Native
 {
 
 	/// <summary>
-	/// Native P/Invoke.
-	/// <remarks>
-	/// Stolen from RazorInvoke for sake of portability and convenience
-	/// </remarks>
-	///
+	///     Native P/Invoke.
+	///     <remarks>
+	///         Stolen from RazorInvoke for sake of portability and convenience
+	///     </remarks>
 	/// </summary>
 	public static unsafe class Kernel32
 	{
@@ -205,7 +204,7 @@ namespace RazorSharp.Native
 		#endregion
 
 		/// <summary>
-		/// Retrieves the address of an exported function or variable from the specified dynamic-link library (DLL).
+		///     Retrieves the address of an exported function or variable from the specified dynamic-link library (DLL).
 		/// </summary>
 		/// <param name="hModule"></param>
 		/// <param name="procName"></param>
@@ -214,7 +213,7 @@ namespace RazorSharp.Native
 		public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
 
 		/// <summary>
-		/// Retrieves a module handle for the specified module. The module must have been loaded by the calling process.
+		///     Retrieves a module handle for the specified module. The module must have been loaded by the calling process.
 		/// </summary>
 		/// <param name="lpModuleName"></param>
 		/// <returns></returns>

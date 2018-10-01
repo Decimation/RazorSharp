@@ -214,7 +214,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
       <Compile Include="Testing\Benchmarking\AllocPoolBenchmarking.cs"/>
-    <Compile Include="Testing\Benchmarking\CollectionsBenchmarking.cs" />
       <Compile Include="Testing\Benchmarking\ContractBenchmarking.cs"/>
       <Compile Include="Testing\Benchmarking\MiscBenchmarking.cs"/>
       <Compile Include="Testing\Benchmarking\RuntimeBenchmarking.cs"/>
@@ -222,7 +221,6 @@
     <Compile Include="Testing\Benchmarking\SigScanningBenchmarking.cs" />
       <Compile Include="Testing\Benchmarking\PointerBenchmarking.cs"/>
     <Compile Include="Testing\Benchmarking\MarshalBenchmarking.cs" />
-      <Compile Include="Testing\Benchmarking\ToStringBenchmarking.cs"/>
     <Compile Include="Testing\Benchmarking\UnsafeBenchmarking.cs" />
       <Compile Include="Testing\TestingUtil.cs"/>
     <Compile Include="Testing\Benchmarking\AllocPointerBenchmarking.cs" />

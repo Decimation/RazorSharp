@@ -2,13 +2,18 @@
 
 //using Microsoft.Diagnostics.Runtime;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 using BenchmarkDotNet.Running;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
+using RazorSharp.CLR.Fixed;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
 using RazorSharp.CLR.Structures.ILMethods;
@@ -18,6 +23,7 @@ using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
+using Unsafe = RazorSharp.Unsafe;
 
 #endregion
 
@@ -27,7 +33,7 @@ namespace Test
 	#region
 
 	using DWORD = UInt32;
-	using CSUnsafe = Unsafe;
+	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
 
@@ -104,21 +110,7 @@ namespace Test
 			// todo: read module memory
 
 
-			IComparable cmp = 1;
-			dmp(ref cmp);
-
-
-			Super s = new Sub();
-			dmp(ref s);
-
-
-			object o = 0;
-			dmp(ref o);
-			Console.WriteLine(AutoSizeOf(1));
-			Console.WriteLine(BaseFieldsSize<int>());
-
-
-			int          z      = 0;
+			int          z      = 0xFF;
 			Pointer<int> pInt32 = AddressOf(ref z);
 			Console.WriteLine(pInt32);
 
@@ -126,36 +118,56 @@ namespace Test
 			Pointer<byte> pNull = 0UL;
 			Console.WriteLine(pNull);
 
-			Console.WriteLine();
 
-			RunBenchmark<ToStringBenchmarking>();
+			var ptrUnmanagedInstance = Mem.AllocUnmanagedInstance<Val>();
+			Console.WriteLine(ptrUnmanagedInstance);
 
-			/*int[][] arrInline = {new[] {0}, new[] {1, 2}};
-			Console.WriteLine(Collections.InlineString(arrInline));
-			Console.WriteLine(Collections.ToString(arrInline));
+			Mem.Free(ptrUnmanagedInstance);
 
-			Console.WriteLine();
 
-			int[] arr = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-			Console.WriteLine(Collections.InlineString(arr));
-			Console.WriteLine(Collections.ToString(arr));*/
+			const string  s      = "foo";
+			Pointer<char> lpChar = Unsafe.AddressOfHeap(s).Reinterpret<char>();
+
+
+			Debug.Assert(lpChar.IndexOf('f', HeapSize(s)) == 6);
+			Debug.Assert(lpChar.Read<int>(lpChar.IndexOf(3, HeapSize(s))) == 3);
+			Debug.Assert(lpChar.Contains(3, HeapSize(s)));
+			Debug.Assert(lpChar.Contains('f', HeapSize(s)));
+
+			lpChar.Add(RuntimeHelpers.OffsetToStringData);
+			Console.WriteLine(lpChar);
+
+			inline(lpChar, s);
+
+			void inline(Pointer<char> pChar, string v)
+			{
+				for (int i = 0; i < v.Length; i++) {
+					Debug.Assert(pChar[i] == v[i]);
+					Debug.Assert(pChar.IndexOf(v[i], v.Length) == v.IndexOf(v[i]));
+					Debug.Assert(pChar.Contains(v[i], v.Length) == v.Contains(v[i]));
+				}
+			}
+
+			Console.WriteLine(lpChar.IndexOf('f', HeapSize(s)));
+			Console.WriteLine(Collections.ToString(list: lpChar.CopyOut(s.Length)));
+
+			int[] rgx = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+			Pointer<int> native = Mem.AllocUnmanaged<int>(10);
+			native.Init(rgx);
+			inlineAssert(native,rgx);
+
 		}
 
-
-		private class Super
+		static void inlineAssert<T>(Pointer<T> pValue, IList<T> v)
 		{
-			private Decimal512 m_decimal512;
+
+			Debug.Assert(pValue.SequenceEqual(v));
+			for (int i = 0; i < v.Count; i++) {
+				Debug.Assert(pValue[i].Equals(v[i]));
+				Debug.Assert(pValue.Contains(v[i], v.Count) == v.Contains(v[i]));
+				Debug.Assert(pValue.IndexOf(v[i],v.Count)==v.IndexOf(v[i]));
+			}
 		}
-
-		private class Sub : Super
-		{
-			private Decimal512 m_decimal512x;
-		}
-
-		/*static int SizeOf<T>(this T val)
-		{
-			return AutoSizeOf(val);
-		}*/
 
 
 		private static Pointer<ILMethod> il(Type t, string name)
@@ -178,9 +190,17 @@ namespace Test
 		{
 			private decimal d;
 
+			public decimal val  { get; set; }
+			public string  sval { get; set; }
+
 			public int CompareTo(object obj)
 			{
 				throw new NotImplementedException();
+			}
+
+			public override string ToString()
+			{
+				return string.Format("{0}, {1}", val, sval);
 			}
 		}
 

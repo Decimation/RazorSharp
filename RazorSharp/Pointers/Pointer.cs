@@ -117,34 +117,54 @@ namespace RazorSharp.Pointers
 
 		#region Collection-esque operations
 
+		#region IndexOf
+
 		/// <summary>
-		///     Retrieves the index of the specified element <paramref name="value" />
+		///     Retrieves the index of the specified element <paramref name="value" />.
+		/// <remarks>
+		/// Indexes are in terms of <typeparamref name="T"/>
+		/// </remarks>
 		/// </summary>
 		/// <param name="value">Value to retrieve the index of</param>
 		/// <param name="searchLength">How many elements to search, starting from the current index</param>
-		/// <returns>The index of the element if it was found; <c>-1</c> if the element was not found</returns>
+		/// <returns>The index of the element if it was found; <see cref="Unsafe.INVALID_VALUE"/> if the element was not found</returns>
 		public int IndexOf(T value, int searchLength)
 		{
-			return IndexOf(value, 0, searchLength);
+			return IndexOf<T>(value, searchLength);
 		}
 
 		/// <summary>
-		///     Retrieves the index of the specified element <paramref name="value" />
+		///     Retrieves the index of the specified element <paramref name="value" />.
+		/// <remarks>
+		/// Indexes are in terms of <typeparamref name="T"/>
+		/// </remarks>
 		/// </summary>
 		/// <param name="value">Value to retrieve the index of</param>
 		/// <param name="startIndex">Index to start searching from</param>
 		/// <param name="searchLength">How many elements to search, starting from the current index</param>
-		/// <returns>The index of the element if it was found; <c>-1</c> if the element was not found</returns>
+		/// <returns>The index of the element if it was found; <see cref="Unsafe.INVALID_VALUE"/> if the element was not found</returns>
 		public int IndexOf(T value, int startIndex, int searchLength)
 		{
-			for (int i = startIndex; i < searchLength; i++) {
-				if (this[i].Equals(value)) {
+			return IndexOf<T>(value, startIndex, searchLength);
+		}
+
+		public int IndexOf<TType>(TType value, int startIndex, int searchLength)
+		{
+			for (int i = startIndex; i < searchLength + startIndex; i++) {
+				if (Read<TType>(i).Equals(value)) {
 					return i;
 				}
 			}
 
-			return -1;
+			return Unsafe.INVALID_VALUE;
 		}
+
+		public int IndexOf<TType>(TType value, int searchLength)
+		{
+			return IndexOf(value, 0, searchLength);
+		}
+
+		#endregion
 
 		/// <summary>
 		///     Writes all elements of <paramref name="enumerable" /> to the current pointer.
@@ -180,7 +200,12 @@ namespace RazorSharp.Pointers
 		/// <returns><c>true</c> if the value was found within the range specified, <c>false</c> otherwise</returns>
 		public bool Contains(T value, int searchLength)
 		{
-			return IndexOf(value, searchLength) != -1;
+			return Contains<T>(value, searchLength);
+		}
+
+		public bool Contains<TType>(TType value, int searchLength)
+		{
+			return IndexOf(value, searchLength) != Unsafe.INVALID_VALUE;
 		}
 
 		public bool SequenceEqual(T[] values)
@@ -212,22 +237,26 @@ namespace RazorSharp.Pointers
 		///     Performs the bitwise AND (<c>&</c>) operation on <see cref="ToInt64" /> and
 		///     sets <see cref="Address" /> as the result
 		/// </summary>
+		/// <returns><c>this</c></returns>
 		/// <param name="l">Operand</param>
-		public void And(long l)
+		public Pointer<T> And(long l)
 		{
 			long newAddr = ToInt64() & l;
 			Address = new IntPtr(newAddr);
+			return this;
 		}
 
 		/// <summary>
 		///     Performs the bitwise OR (<c>|</c>) operation on <see cref="ToInt64" /> and
 		///     sets <see cref="Address" /> as the result
 		/// </summary>
+		/// <returns><c>this</c></returns>
 		/// <param name="l">Operand</param>
-		public void Or(long l)
+		public Pointer<T> Or(long l)
 		{
 			long newAddr = ToInt64() | l;
 			Address = new IntPtr(newAddr);
+			return this;
 		}
 
 		#endregion
@@ -249,7 +278,6 @@ namespace RazorSharp.Pointers
 		{
 			return Mem.Read<TType>(Offset<TType>(elemOffset));
 		}
-
 
 		public ref TType AsRef<TType>(int elemOffset = 0)
 		{
@@ -298,8 +326,8 @@ namespace RazorSharp.Pointers
 		public TType[] CopyOut<TType>(int startIndex, int elemCnt)
 		{
 			TType[] rg = new TType[elemCnt];
-			for (int i = startIndex; i < elemCnt; i++) {
-				rg[i] = Read<TType>(i);
+			for (int i = startIndex; i < elemCnt + startIndex; i++) {
+				rg[i - startIndex] = Read<TType>(i);
 			}
 
 			return rg;
@@ -339,16 +367,16 @@ namespace RazorSharp.Pointers
 		public ConsoleTable ToInfoTable()
 		{
 			ConsoleTable table = typeof(T).IsValueType
-				? new ConsoleTable("Address", "Value", "Aligned", "Null", "Element size")
-				: new ConsoleTable("Address", "Pointer", "Value", "Aligned", "Null", "Element size");
+				? new ConsoleTable("Address", "Value", "Aligned", "Null", "Element size", "Type")
+				: new ConsoleTable("Address", "Pointer", "Value", "Aligned", "Null", "Element size", "Type");
 
 			if (typeof(T).IsValueType) {
-				table.AddRow(Hex.ToHex(m_pValue), Reference, IsAligned.Prettify(),
-					IsNull.Prettify(), ElementSize);
+				table.AddRow(Hex.ToHex(m_pValue), ToString(PointerSettings.FMT_O), IsAligned.Prettify(),
+					IsNull.Prettify(), ElementSize, String.Format("<{0}>", typeof(T).Name));
 			}
 			else {
-				table.AddRow(Hex.ToHex(m_pValue), Hex.ToHex(Read<long>()), Reference,
-					IsAligned.Prettify(), IsNull.Prettify(), ElementSize);
+				table.AddRow(Hex.ToHex(m_pValue), Hex.ToHex(Read<long>()), ToString(PointerSettings.FMT_O),
+					IsAligned.Prettify(), IsNull.Prettify(), ElementSize, String.Format("<{0}>", typeof(T).Name));
 			}
 
 			return table;
@@ -668,18 +696,42 @@ namespace RazorSharp.Pointers
 		/// </summary>
 		/// <param name="format">
 		///     <para>
-		///         <c>"O"</c>: Object (<see cref="P:RazorSharp.Pointers.Pointer`1.Reference" />). If <typeparamref name="T" />
-		///         is <see cref="Char" />, it will be printed as a C-string.
+		///         <c>"O"</c>: Object (<see cref="P:RazorSharp.Pointers.Pointer`1.Reference" />).
+		///         <list type="bullet">
+		///             <item>
+		///                 <description>
+		///                     If <typeparamref name="T" /> is <see cref="Char" />, it will be
+		///                     returned as a C-string represented as a <see cref="String" />.
+		///                 </description>
+		///             </item>
+		///             <item>
+		///                 <description>
+		///                     If <typeparamref name="T" /> is a reference type, its string representation will be
+		///                     returned along with its heap pointer in <c>"P"</c> format.
+		///                 </description>
+		///             </item>
+		///             <item>
+		///                 <description>
+		///                     If <typeparamref name="T" /> is an <see cref="IList" /> type, its contents will be returned
+		///                     along with its heap pointer in <c>"P"</c> format.
+		///                 </description>
+		///             </item>
+		///             <item>
+		///                 <description>
+		///                     If <typeparamref name="T" /> is a number type, its value will be returned as well its
+		///                     value in <see cref="Hex.ToHex(long)" /> format.
+		///                 </description>
+		///             </item>
+		///         </list>
+		///
 		///     </para>
-		///     <para><c>"P"</c>: Pointer (<see cref="P:RazorSharp.Pointers.Pointer`1.Address" />) </para>
 		///     <para>
-		///         <c>"S"</c>: Safe <c>"O"</c> (when <see cref="P:RazorSharp.Pointers.Pointer`1.Reference" /> or
-		///         <see cref="P:RazorSharp.Pointers.Pointer`1.Address" /> may be <c>null</c>)
+		///         <c>"P"</c>: Pointer (<see cref="P:RazorSharp.Pointers.Pointer`1.Address" />) in <see cref="Hex.ToHex{T}" />
+		///         format
 		///     </para>
 		///     <para><c>"I"</c>: Table of information </para>
 		///     <para>
-		///         <c>"B"</c>: Both <see cref="P:RazorSharp.Pointers.Pointer`1.Address" /> and
-		///         <see cref="P:RazorSharp.Pointers.Pointer`1.Reference" />
+		///         <c>"B"</c>: Both <c>"P"</c> and <c>"O"</c>
 		///     </para>
 		/// </param>
 		/// <param name="formatProvider"></param>
@@ -696,18 +748,8 @@ namespace RazorSharp.Pointers
 
 
 			switch (format.ToUpperInvariant()) {
-
 				case PointerSettings.FMT_O:
-					if (typeof(T).IsIListType()) {
-						return Collections.ListToString((IList) Reference);
-					}
-
-					/* Special support for C-string */
-					if (typeof(T) == typeof(char)) {
-						return new string((char*) m_pValue);
-					}
-
-					return Reference.ToString();
+					return ToStringSafe(this);
 
 				case PointerSettings.FMT_I:
 					return ToInfoTable().ToMarkDownString();
@@ -715,32 +757,48 @@ namespace RazorSharp.Pointers
 				case PointerSettings.FMT_P:
 					return Hex.ToHex(this);
 
-				case PointerSettings.FMT_S:
-					return ToStringSafe(this);
-
 				case PointerSettings.FMT_B:
-					string str = String.Format("Value of <{0}> @ {1}: \n{2}", typeof(T).Name,Hex.ToHex(Address), ToStringSafe(this));
-
-					if (typeof(T).IsNumericType() && !IsNull) {
-						str = String.Format("{0} ({1})", str, Hex.TryCreateHex(Reference));
-					}
-
+					string str = String.Format("Value of <{0}> @ {1}: \n{2}", typeof(T).Name, Hex.ToHex(Address),
+						ToStringSafe(this));
 					return str;
 				default:
 					goto case PointerSettings.FMT_O;
 			}
+
 
 			string ToStringSafe(Pointer<T> inst)
 			{
 				if (inst.IsNull) {
 					return PointerSettings.NULLPTR;
 				}
-				else {
-					return inst.ToString(PointerSettings.FMT_O);
+
+				if (typeof(T).IsNumericType()) {
+					return String.Format("{0} ({1})", inst.Reference, Hex.TryCreateHex(inst.Reference));
 				}
+
+				/* Special support for C-string */
+				if (typeof(T) == typeof(char)) {
+					return new string((char*) inst.m_pValue);
+				}
+
+				if (!typeof(T).IsValueType) {
+					Pointer<byte> heapPtr = inst.Read<Pointer<byte>>();
+					string        valueStr;
+
+					if (typeof(T).IsIListType()) {
+						valueStr = $"[{Collections.ToString((IList) inst.Reference)}]";
+					}
+					else {
+						valueStr = inst.Reference.ToString();
+					}
+
+					return String.Format("{0} ({1})", valueStr, heapPtr.ToString(PointerSettings.FMT_P));
+				}
+
+
+				return inst.Reference.ToString();
 			}
 		}
-
 
 
 		public string ToString(string format)
@@ -750,7 +808,7 @@ namespace RazorSharp.Pointers
 
 		public override string ToString()
 		{
-			return ToString(PointerSettings.FMT_B, null);
+			return ToString(PointerSettings.FMT_B);
 		}
 
 		#endregion

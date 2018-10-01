@@ -26,7 +26,7 @@ namespace RazorSharp.Experimental
 	///     For that, use ExAllocExPointer.
 	/// </summary>
 	/// <remarks>
-	/// Old namespace: Experimental
+	///     Old namespace: Experimental
 	/// </remarks>
 	/// <typeparam name="T"></typeparam>
 	internal struct UnmanagedAllocated<T> where T : class

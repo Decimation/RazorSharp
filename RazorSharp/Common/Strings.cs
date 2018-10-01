@@ -1,17 +1,38 @@
+#region
+
 using System;
 using System.Collections.Generic;
+
+#endregion
 
 namespace RazorSharp.Common
 {
 
 	public static class Strings
 	{
+		/// <summary>
+		///     Java substring.
+		/// </summary>
+		/// <param name="s">
+		///     <see cref="string" />
+		/// </param>
+		/// <param name="beginIndex">Start index</param>
+		/// <returns></returns>
 		public static string JSubstring(this string s, int beginIndex)
 		{
 			// simulates Java substring function
 			return s.Substring(beginIndex, s.Length);
 		}
 
+		/// <summary>
+		///     Java substring.
+		/// </summary>
+		/// <param name="s">
+		///     <see cref="string" />
+		/// </param>
+		/// <param name="beginIndex">Start index</param>
+		/// <param name="endIndex">End index, exclusive</param>
+		/// <returns></returns>
 		public static string JSubstring(this string s, int beginIndex, int endIndex)
 		{
 			// simulates Java substring function
@@ -20,7 +41,7 @@ namespace RazorSharp.Common
 		}
 
 		/// <summary>
-		/// Get string value after [last] a.
+		///     Get string value after [last] <paramref name="a" />
 		/// </summary>
 		public static string SubstringAfter(this string value, string a)
 		{
@@ -34,7 +55,7 @@ namespace RazorSharp.Common
 		}
 
 		/// <summary>
-		/// Get string value after [first] a.
+		///     Get string value after [first] <paramref name="a" />
 		/// </summary>
 		public static string SubstringBefore(this string value, string a)
 		{
@@ -43,7 +64,7 @@ namespace RazorSharp.Common
 		}
 
 		/// <summary>
-		/// Get string value between [first] a and [last] b.
+		///     Get string value between [first] <paramref name="a" /> and [last] <paramref name="b" />.
 		/// </summary>
 		public static string SubstringBetween(this string value, string a, string b)
 		{
@@ -61,12 +82,12 @@ namespace RazorSharp.Common
 			return adjustedPosA >= posB ? String.Empty : value.Substring(adjustedPosA, posB - adjustedPosA);
 		}
 
-		public static IEnumerable<int> AllIndexesOf(this string str, string searchstring)
+		public static IEnumerable<int> AllIndexesOf(this string str, string searchString)
 		{
-			int minIndex = str.IndexOf(searchstring);
+			int minIndex = str.IndexOf(searchString, StringComparison.InvariantCulture);
 			while (minIndex != -1) {
 				yield return minIndex;
-				minIndex = str.IndexOf(searchstring, minIndex + searchstring.Length);
+				minIndex = str.IndexOf(searchString, minIndex + searchString.Length, StringComparison.InvariantCulture);
 			}
 		}
 	}
