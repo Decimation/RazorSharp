@@ -118,7 +118,6 @@ namespace Test
 			Pointer<byte> pNull = 0UL;
 			Console.WriteLine(pNull);
 
-
 			var ptrUnmanagedInstance = Mem.AllocUnmanagedInstance<Val>();
 			Console.WriteLine(ptrUnmanagedInstance);
 
