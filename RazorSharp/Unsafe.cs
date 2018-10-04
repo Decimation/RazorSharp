@@ -247,6 +247,11 @@ namespace RazorSharp
 			return AddressOfHeap(ref t, offset);
 		}
 
+		/*public static Pointer<T> AddressOfHeap<T>(T[] rg)
+		{
+			return AddressOfHeap(rg, OffsetType.ArrayData).Reinterpret<T>();
+		}*/
+
 		#endregion
 
 		#region Sizes

@@ -133,7 +133,7 @@ namespace RazorSharp.CLR.Structures
 			// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
 			// for enum_flag_HasIndirectParentMethodTable.
 			get {
-				if (!Flags.HasFlagFast(MethodTableFlags.HasIndirectParent)) {
+				if (!Flags.HasFlag(MethodTableFlags.HasIndirectParent)) {
 					return m_pParentMethodTable;
 				}
 
@@ -221,12 +221,12 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
-		public bool   HasComponentSize => Flags.HasFlagFast(MethodTableFlags.HasComponentSize);
-		public bool   IsArray          => Flags.HasFlagFast(MethodTableFlags.Array);
+		public bool   HasComponentSize => Flags.HasFlag(MethodTableFlags.HasComponentSize);
+		public bool   IsArray          => Flags.HasFlag(MethodTableFlags.Array);
 		public bool   IsStringOrArray  => HasComponentSize;
 		public bool   IsBlittable      => EEClass.Reference.IsBlittable;
 		public bool   IsString         => HasComponentSize && !IsArray;
-		public bool   ContainsPointers => Flags.HasFlagFast(MethodTableFlags.ContainsPointers);
+		public bool   ContainsPointers => Flags.HasFlag(MethodTableFlags.ContainsPointers);
 		public string Name             => RuntimeType.Name;
 
 		/// <summary>

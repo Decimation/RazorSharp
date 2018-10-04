@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using RazorSharp.CLR.Fixed;
 using RazorSharp.Common;
 using RazorSharp.Memory;
@@ -21,6 +22,12 @@ namespace RazorSharp.Pointers
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
+
+	public enum StringTypes
+	{
+		AnsiStr,
+		UniStr,
+	}
 
 
 	/// <summary>
@@ -264,6 +271,18 @@ namespace RazorSharp.Pointers
 
 		#region Read / write
 
+		public string ReadString(StringTypes s)
+		{
+			switch (s) {
+				case StringTypes.AnsiStr:
+					return new string((sbyte*) m_pValue);
+				case StringTypes.UniStr:
+					return new string((char*) m_pValue);
+				default:
+					throw new ArgumentOutOfRangeException(nameof(s), s, null);
+			}
+		}
+
 		public void Write<TType>(TType t, int elemOffset = 0)
 		{
 			Mem.Write(Offset<TType>(elemOffset), 0, t);
@@ -347,10 +366,36 @@ namespace RazorSharp.Pointers
 			return CopyOut<TType>(0, elemCnt);
 		}
 
+
+
+		[HandleProcessCorruptedStateExceptions]
+		public bool TryRead<TType>(out TType value)
+		{
+			try {
+				value = Read<TType>();
+				return true;
+			}
+			catch (AccessViolationException) {
+
+			}
+			catch (NullReferenceException) {
+
+			}
+
+
+			value = default;
+			return false;
+		}
+
 		#endregion
 
 
 		#region Other methods
+
+		public Pointer<T> AddressOfIndex(int index)
+		{
+			return Offset(index);
+		}
 
 		public void Zero(int byteCnt)
 		{
@@ -461,6 +506,11 @@ namespace RazorSharp.Pointers
 
 		#region Implicit and explicit conversions
 
+		public static implicit operator Pointer<T>(Pointer<byte> v)
+		{
+			return v.Address;
+		}
+
 		public static implicit operator Pointer<T>(void* v)
 		{
 			return new Pointer<T>(v);
@@ -499,7 +549,7 @@ namespace RazorSharp.Pointers
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private IntPtr Offset(int elemCnt)
 		{
-			return PointerUtils.Offset<T>(m_pValue, elemCnt);
+			return Offset<T>(elemCnt);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -546,7 +596,7 @@ namespace RazorSharp.Pointers
 		/// </returns>
 		public Pointer<T> Increment(int elemCnt = 1)
 		{
-			m_pValue = PointerUtils.Offset<T>(m_pValue, elemCnt).ToPointer();
+			m_pValue = Offset(elemCnt).ToPointer();
 			return this;
 		}
 
@@ -560,7 +610,7 @@ namespace RazorSharp.Pointers
 		/// </returns>
 		public Pointer<T> Decrement(int elemCnt = 1)
 		{
-			m_pValue = PointerUtils.Offset<T>(m_pValue, -elemCnt).ToPointer();
+			m_pValue = Offset(-elemCnt).ToPointer();
 			return this;
 		}
 
@@ -778,12 +828,17 @@ namespace RazorSharp.Pointers
 
 				/* Special support for C-string */
 				if (typeof(T) == typeof(char)) {
-					return new string((char*) inst.m_pValue);
+					return inst.ReadString(StringTypes.UniStr);
 				}
 
 				if (!typeof(T).IsValueType) {
 					Pointer<byte> heapPtr = inst.Read<Pointer<byte>>();
 					string        valueStr;
+
+					if (heapPtr.IsNull) {
+						valueStr = PointerSettings.NULLPTR;
+						goto RETURN;
+					}
 
 					if (typeof(T).IsIListType()) {
 						valueStr = $"[{Collections.ToString((IList) inst.Reference)}]";
@@ -792,6 +847,7 @@ namespace RazorSharp.Pointers
 						valueStr = inst.Reference.ToString();
 					}
 
+					RETURN:
 					return String.Format("{0} ({1})", valueStr, heapPtr.ToString(PointerSettings.FMT_P));
 				}
 

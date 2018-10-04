@@ -33,6 +33,11 @@ namespace Test.Testing.Types
 			Console.WriteLine("hi");
 		}
 
+		public int getInt32()
+		{
+			return X + 1;
+		}
+
 		public static Point operator ++(Point p)
 		{
 			p.X++;

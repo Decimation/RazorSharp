@@ -67,6 +67,7 @@ namespace RazorSharp.Common
 
 		public static string ToString(IList list, ToStringOptions options = ToStringOptions.UseCommas)
 		{
+
 			StringBuilder sb = new StringBuilder();
 			string        current;
 
@@ -77,7 +78,7 @@ namespace RazorSharp.Common
 					current = PointerSettings.NULLPTR;
 				}
 
-				else if (options.HasFlagFast(ToStringOptions.Hex) && list[i].GetType().IsNumericType()) {
+				else if (options.HasFlag(ToStringOptions.Hex) && list[i].GetType().IsNumericType()) {
 					current = Hex.TryCreateHex(list[i], options);
 				}
 
@@ -93,7 +94,7 @@ namespace RazorSharp.Common
 
 				#region Separate elements
 
-				if (options.HasFlagFast(ToStringOptions.UseCommas)) {
+				if (options.HasFlag(ToStringOptions.UseCommas)) {
 					sb.AppendFormat(i + 1 != list.Count ? "{0}, " : "{0}", current);
 				}
 				else {

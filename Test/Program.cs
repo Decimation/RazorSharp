@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using BenchmarkDotNet.Running;
+using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Fixed;
@@ -22,6 +23,7 @@ using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing.Benchmarking;
+using Test.Testing.Types;
 using static RazorSharp.Unsafe;
 using Unsafe = RazorSharp.Unsafe;
 
@@ -150,21 +152,60 @@ namespace Test
 			Console.WriteLine(lpChar.IndexOf('f', HeapSize(s)));
 			Console.WriteLine(Collections.ToString(list: lpChar.CopyOut(s.Length)));
 
-			int[] rgx = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+			int[]        rgx    = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 			Pointer<int> native = Mem.AllocUnmanaged<int>(10);
 			native.Init(rgx);
-			inlineAssert(native,rgx);
+			inlineAssert(native, rgx);
+
+			Mem.Free(native);
+
+			Pointer<char> pHChar = Marshal.StringToHGlobalUni("g");
+			Console.WriteLine(pHChar);
+			Mem.Free(pHChar);
+
+			Pointer<byte> pHCharLpc = Marshal.StringToHGlobalAnsi("g");
+			Console.WriteLine(pHCharLpc.ReadString(StringTypes.AnsiStr));
+			Mem.Free(pHCharLpc);
+
+			string        sz  = "foo";
+			Pointer<char> ptr = Unsafe.AddressOfHeap(sz, OffsetType.StringData).Address;
+			ptr[0] = 'b';
+			Debug.Assert(sz[0] == 'b');
+
+			Pointer<byte> nil = 0L;
+			if (nil.TryRead(out int val32)) {
+				Console.WriteLine(val32);
+			}
+
+			Pointer<Pointer<byte>> x = Unsafe.AddressOf(ref nil);
+
+
+			Console.WriteLine(x);
+
+			Pointer<string> lpAlloc = AllocPool.Alloc<string>();
+			Console.WriteLine(lpAlloc);
+			lpAlloc.Reference = "nil";
+			Console.WriteLine(lpAlloc);
+			AllocPool.Free(lpAlloc);
+			Console.WriteLine(lpAlloc);
+
+
 
 		}
 
+		private static int add(int a, int b)
+		{
+			return a + b;
+		}
+
+
 		static void inlineAssert<T>(Pointer<T> pValue, IList<T> v)
 		{
-
 			Debug.Assert(pValue.SequenceEqual(v));
 			for (int i = 0; i < v.Count; i++) {
 				Debug.Assert(pValue[i].Equals(v[i]));
 				Debug.Assert(pValue.Contains(v[i], v.Count) == v.Contains(v[i]));
-				Debug.Assert(pValue.IndexOf(v[i],v.Count)==v.IndexOf(v[i]));
+				Debug.Assert(pValue.IndexOf(v[i], v.Count) == v.IndexOf(v[i]));
 			}
 		}
 

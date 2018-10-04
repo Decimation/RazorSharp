@@ -100,13 +100,14 @@ namespace RazorSharp.Common
 				long l = Int64.Parse(t.ToString());
 				value = $"{l:X}";
 
-				if (value.Length == 1 && options.HasFlagFast(ToStringOptions.ZeroPadHex)) {
+				if (value.Length == 1 && options.HasFlag(ToStringOptions.ZeroPadHex)) {
 					value = 0 + value;
 				}
 
 
-				if (options.HasFlagFast(ToStringOptions.PrefixHex)) {
+				if (options.HasFlag(ToStringOptions.PrefixHex)) {
 					value = PrefixString + value;
+					Console.WriteLine("pfx");
 				}
 			}
 

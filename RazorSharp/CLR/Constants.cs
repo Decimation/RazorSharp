@@ -185,11 +185,6 @@ namespace RazorSharp.CLR
 		{
 			return rid | (int) tktype;
 		}
-
-		internal static bool HasFlagFast(this MethodTableFlags value, MethodTableFlags flag)
-		{
-			return (value & flag) != 0;
-		}
 	}
 
 	#region FieldDesc

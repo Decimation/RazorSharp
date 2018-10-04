@@ -13,15 +13,17 @@ using static RazorSharp.Unsafe;
 namespace RazorSharp.Memory
 {
 
+	// todo: revise
+
 	/// <summary>
 	///     <see cref="AllocPool" /> keeps track of allocated <see cref="Pointer{T}" />s.
 	///     <para>Operations in this class work even if the pointer is offset from the original allocated address.</para>
 	///     <example>
 	///         <para>
 	///             For example, if an allocated pointer is
-	///             incremented one byte from its original address, you could still <see cref="Free{T}" /> it, whereas you must
-	///             use <see cref="Marshal.FreeHGlobal" /> with the original, untouched address returned by
-	///             <see cref="Marshal.AllocHGlobal(int)" />.
+	///             incremented one byte from its original address, you could still <see cref="Free{T}" /> it,
+	///             whereas you must use <see cref="Marshal.FreeHGlobal" /> with the original, untouched address
+	///             returned by <see cref="Marshal.AllocHGlobal(int)" />.
 	///         </para>
 	///     </example>
 	/// </summary>
@@ -63,7 +65,7 @@ namespace RazorSharp.Memory
 			IntPtr origin = rg.LowAddr;
 
 			Mem.Zero(origin, rg.Size);
-			Mem.Free((Pointer<byte>)origin);
+			Mem.Free((Pointer<byte>) origin);
 			s_rgPool.Remove(rg);
 		}
 
