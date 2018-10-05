@@ -67,7 +67,6 @@ namespace RazorSharp.Common
 
 		public static string ToString(IList list, ToStringOptions options = ToStringOptions.UseCommas)
 		{
-
 			StringBuilder sb = new StringBuilder();
 			string        current;
 

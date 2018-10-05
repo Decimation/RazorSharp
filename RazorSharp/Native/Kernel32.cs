@@ -22,6 +22,14 @@ namespace RazorSharp.Native
 
 		private const string Kernel32Dll = "kernel32.dll";
 
+		[DllImport(Kernel32Dll, SetLastError = true)]
+		public static extern IntPtr LoadLibrary(string lpFileName);
+
+		[DllImport(Kernel32Dll, SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool FreeLibrary(IntPtr hModule);
+
+
 		#region OpenProcess
 
 		[DllImport(Kernel32Dll, SetLastError = true)]
@@ -40,8 +48,13 @@ namespace RazorSharp.Native
 
 		#endregion
 
+		[DllImport(Kernel32Dll)]
+		public static extern uint GetCurrentThreadId();
 
 		[DllImport(Kernel32Dll)]
+		public static extern uint GetLastError();
+
+		[DllImport(Kernel32Dll, SetLastError = true, PreserveSig = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool CloseHandle(IntPtr hObject);
 
@@ -52,6 +65,59 @@ namespace RazorSharp.Native
 		/// <returns></returns>
 		[DllImport(Kernel32Dll)]
 		public static extern uint GetProcessId(IntPtr process);
+
+		//ResumeThread
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		public static extern uint ResumeThread(IntPtr hThread);
+
+		[DllImport(Kernel32Dll)]
+		public static extern IntPtr GetCurrentThread();
+
+		//SuspendThread
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		public static extern uint SuspendThread(IntPtr hThread);
+
+		//GetThreadContext
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool GetThreadContext(IntPtr hThread, IntPtr lpContext);
+
+		[DllImport(Kernel32Dll, SetLastError = true)]
+		public static extern IntPtr OpenThread(uint desiredAccess, bool inheritHandle, uint threadId);
+
+
+		public static IntPtr OpenThread(ThreadAccess desiredAccess, int threadId)
+		{
+			return OpenThread(desiredAccess, false, (uint) threadId);
+		}
+
+		//OpenProcess
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		public static extern IntPtr OpenProcess(ProcessAccess dwDesiredAccess, bool bInheritHandle, uint processId);
+
+		//OpenThread
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		public static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, uint threadId);
+
+
+		//Wow64GetThreadContext
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool Wow64GetThreadContext(IntPtr hThread, IntPtr lpContext);
+
+		//Wow64SuspendThread
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		public static extern uint Wow64SuspendThread(IntPtr hThread);
+
+
+//IsWow64Process
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool IsWow64Process(IntPtr hProcess, ref bool wow64Process);
+
+		//GetNativeSystemInfo
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		public static extern void GetNativeSystemInfo(out DbgHelp.SYSTEM_INFO lpSystemInfo);
 
 
 		[DllImport(Kernel32Dll)]

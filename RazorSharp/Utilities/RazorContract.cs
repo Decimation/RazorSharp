@@ -72,6 +72,16 @@ namespace RazorSharp.Utilities
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static void RequiresNotNull(IntPtr value)
+		{
+			if (value == IntPtr.Zero) {
+				throw new NullReferenceException($"Pointer {Hex.ToHex(value)} == null");
+			}
+		}
+
+		[AssertionMethod]
+		[ContractAnnotation(VALUE_NULL_HALT)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] in T value) where T : class
 		{
 			if (value == null) {

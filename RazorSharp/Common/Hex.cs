@@ -31,7 +31,7 @@ namespace RazorSharp.Common
 
 
 		/// <summary>
-		///     Prefix hex with "0x"
+		///     Prefix hex with <see cref="RazorSharp.Common.Hex.PrefixString"/>
 		/// </summary>
 		PrefixHex = Hex | 8,
 	}
@@ -60,6 +60,11 @@ namespace RazorSharp.Common
 		public static string ToHex(IntPtr p)
 		{
 			return ToHex(p.ToInt64());
+		}
+
+		public static string ToHex(ulong u)
+		{
+			return ToHexInternal((long) u);
 		}
 
 		public static string ToHex(long l)

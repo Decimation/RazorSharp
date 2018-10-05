@@ -20,11 +20,15 @@ using RazorSharp.CLR.Structures.EE;
 using RazorSharp.CLR.Structures.ILMethods;
 using RazorSharp.Common;
 using RazorSharp.Memory;
+using RazorSharp.Native;
+using RazorSharp.Native.Enums;
+using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing.Benchmarking;
 using Test.Testing.Types;
 using static RazorSharp.Unsafe;
+using StackTrace = RazorSharp.Native.StackTrace;
 using Unsafe = RazorSharp.Unsafe;
 
 #endregion
@@ -111,108 +115,45 @@ namespace Test
 		{
 			// todo: read module memory
 
+			char* stackStr = stackalloc char[256];
 
-			int          z      = 0xFF;
-			Pointer<int> pInt32 = AddressOf(ref z);
-			Console.WriteLine(pInt32);
-
-
-			Pointer<byte> pNull = 0UL;
-			Console.WriteLine(pNull);
-
-			var ptrUnmanagedInstance = Mem.AllocUnmanagedInstance<Val>();
-			Console.WriteLine(ptrUnmanagedInstance);
-
-			Mem.Free(ptrUnmanagedInstance);
-
-
-			const string  s      = "foo";
-			Pointer<char> lpChar = Unsafe.AddressOfHeap(s).Reinterpret<char>();
-
-
-			Debug.Assert(lpChar.IndexOf('f', HeapSize(s)) == 6);
-			Debug.Assert(lpChar.Read<int>(lpChar.IndexOf(3, HeapSize(s))) == 3);
-			Debug.Assert(lpChar.Contains(3, HeapSize(s)));
-			Debug.Assert(lpChar.Contains('f', HeapSize(s)));
-
-			lpChar.Add(RuntimeHelpers.OffsetToStringData);
-			Console.WriteLine(lpChar);
-
-			inline(lpChar, s);
-
-			void inline(Pointer<char> pChar, string v)
-			{
-				for (int i = 0; i < v.Length; i++) {
-					Debug.Assert(pChar[i] == v[i]);
-					Debug.Assert(pChar.IndexOf(v[i], v.Length) == v.IndexOf(v[i]));
-					Debug.Assert(pChar.Contains(v[i], v.Length) == v.Contains(v[i]));
-				}
-			}
-
-			Console.WriteLine(lpChar.IndexOf('f', HeapSize(s)));
-			Console.WriteLine(Collections.ToString(list: lpChar.CopyOut(s.Length)));
-
-			int[]        rgx    = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-			Pointer<int> native = Mem.AllocUnmanaged<int>(10);
-			native.Init(rgx);
-			inlineAssert(native, rgx);
-
-			Mem.Free(native);
-
-			Pointer<char> pHChar = Marshal.StringToHGlobalUni("g");
-			Console.WriteLine(pHChar);
-			Mem.Free(pHChar);
-
-			Pointer<byte> pHCharLpc = Marshal.StringToHGlobalAnsi("g");
-			Console.WriteLine(pHCharLpc.ReadString(StringTypes.AnsiStr));
-			Mem.Free(pHCharLpc);
-
-			string        sz  = "foo";
-			Pointer<char> ptr = Unsafe.AddressOfHeap(sz, OffsetType.StringData).Address;
-			ptr[0] = 'b';
-			Debug.Assert(sz[0] == 'b');
-
-			Pointer<byte> nil = 0L;
-			if (nil.TryRead(out int val32)) {
-				Console.WriteLine(val32);
-			}
-
-			Pointer<Pointer<byte>> x = Unsafe.AddressOf(ref nil);
-
-
-			Console.WriteLine(x);
-
-			Pointer<string> lpAlloc = AllocPool.Alloc<string>();
-			Console.WriteLine(lpAlloc);
-			lpAlloc.Reference = "nil";
-			Console.WriteLine(lpAlloc);
-			AllocPool.Free(lpAlloc);
-			Console.WriteLine(lpAlloc);
+			Console.WriteLine("Stack = {0} <---> {1}", Hex.ToHex(Mem.StackLimit), Hex.ToHex(Mem.StackBase));
+			Console.WriteLine("&Main = {0:P}, &stackStr = {1}", addrOfFn(typeof(Program), "Main"),
+				Hex.ToHex(&stackStr));
 
 
 
+			Thread observer = new Thread(z => x(Thread.CurrentThread.ManagedThreadId));
+			observer.Start();
+
+			@break();
+
+			observer.Join();
 		}
 
-		private static int add(int a, int b)
+		static int get(int a, int b)
 		{
+			Console.WriteLine(Thread.CurrentContext.ContextID);
 			return a + b;
 		}
 
-
-		static void inlineAssert<T>(Pointer<T> pValue, IList<T> v)
+		static void x(int id)
 		{
-			Debug.Assert(pValue.SequenceEqual(v));
-			for (int i = 0; i < v.Count; i++) {
-				Debug.Assert(pValue[i].Equals(v[i]));
-				Debug.Assert(pValue.Contains(v[i], v.Count) == v.Contains(v[i]));
-				Debug.Assert(pValue.IndexOf(v[i], v.Count) == v.IndexOf(v[i]));
+			var proc = Process.GetCurrentProcess();
+			foreach (var v in new StackTrace((uint) proc.Id, (uint) id).Calls) {
+				Console.WriteLine(v);
 			}
 		}
 
-
-		private static Pointer<ILMethod> il(Type t, string name)
+		static Pointer<byte> addrOfFn(Type t, string name)
 		{
-			return Runtime.GetMethodDesc(t, name).Reference.GetILHeader();
+			var mdFn = Runtime.GetMethodDesc(t, name);
+			return mdFn.Reference.Function;
+		}
+
+		static bool _bool(int i)
+		{
+			return i >= 1;
 		}
 
 
