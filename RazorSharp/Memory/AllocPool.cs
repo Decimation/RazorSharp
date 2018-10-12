@@ -13,7 +13,7 @@ using static RazorSharp.Unsafe;
 namespace RazorSharp.Memory
 {
 
-	// todo: revise
+	// todo: WIP
 
 	/// <summary>
 	///     <see cref="AllocPool" /> keeps track of allocated <see cref="Pointer{T}" />s.

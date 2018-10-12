@@ -9,8 +9,12 @@ using System.Reflection;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using BenchmarkDotNet.Running;
+using JetBrains.Annotations;
+using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
@@ -28,7 +32,7 @@ using RazorSharp.Utilities;
 using Test.Testing.Benchmarking;
 using Test.Testing.Types;
 using static RazorSharp.Unsafe;
-using StackTrace = RazorSharp.Native.StackTrace;
+using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Unsafe = RazorSharp.Unsafe;
 
 #endregion
@@ -114,46 +118,246 @@ namespace Test
 		public static void Main(string[] args)
 		{
 			// todo: read module memory
+			/*
+//			Target tgt = new Target();
 
-			char* stackStr = stackalloc char[256];
+			var mdAdd = Runtime.GetMethodDesc<Target>("add");
+			Debug.Assert(!mdAdd.Reference.IsPointingToNativeCode);
+			mdAdd.Reference.Prepare();
+			Debug.Assert(mdAdd.Reference.IsPointingToNativeCode);
 
-			Console.WriteLine("Stack = {0} <---> {1}", Hex.ToHex(Mem.StackLimit), Hex.ToHex(Mem.StackBase));
-			Console.WriteLine("&Main = {0:P}, &stackStr = {1}", addrOfFn(typeof(Program), "Main"),
-				Hex.ToHex(&stackStr));
+			Runtime.GetMethodDesc(typeof(Program), "Val").Reference.Prepare();
+
+			var nativeCode = AddressOfFunction(typeof(Program), "Val");
+
+			Console.WriteLine(Collections.ToString(nativeCode.CopyOut(0x3E + 1)));
+
+			Console.WriteLine(Val(1, 2));
+
+			nativeCode[0x27] = 0x2B;
+
+			Console.WriteLine(Val(1, 2));
+			Console.WriteLine(nativeCode.Query());
 
 
+			// xrefs to ?g_jitHost@@3PEAVICorJitHost@@EA at 0x18010b970 from:
 
-			Thread observer = new Thread(z => x(Thread.CurrentThread.ManagedThreadId));
-			observer.Start();
+			SignatureCall.DynamicBind(typeof(Program));
 
-			@break();
+			// nativeSizeOfCode
 
-			observer.Join();
+			*/
+
+
+			//000000AFB6DFE990
+
+			//000000EBEBBFFCC8
+			long l = 0;
+
+
+			Console.WriteLine("Stack base = {0}", Hex.ToHex(Mem.StackBase));
+			Console.WriteLine("Stack lim = {0}", Hex.ToHex(Mem.StackLimit));
+
+			Console.WriteLine("&l = {0}", Hex.ToHex(&l));
+
+//			var rdi = PointerUtils.Add(&l, 0x10);
+			//		Console.WriteLine("rdi = {0}", Hex.ToHex(rdi));
+
+			// or rbp?
+			// sometimes wrong - frick
+			var rsp = PointerUtils.Subtract(&l, 0xE0).Subtract(0x20).Subtract(0x10).Subtract(0x10);
+			Console.WriteLine("rsp = {0}", Hex.ToHex(rsp));
+
+
+			Console.WriteLine("{0:P}", get_reg());
+			Console.WriteLine("Frame ptr = {0}", Hex.ToHex(&l - 1));
+			Console.WriteLine("Ret addr = {0}", Hex.ToHex(&l - 2));
+
+
+			string sz = "jew";
+
+			AddressOf(ref sz).WriteAs<string, long>("bar");
+			Debug.Assert(sz == "bar");
+			AddressOf(ref sz).WriteAs<string, IntPtr>("baz");
+			Debug.Assert(sz == "baz");
+			AddressOfHeap(ref sz, OffsetType.StringData).Write('j', 2);
+			Debug.Assert(sz == "baj");
+
+
+			float pi    = 3.14F;
+			var   piptr = Unsafe.AddressOf(ref pi);
+			Debug.Assert(piptr.ReadAs<float, int>() == *((int*) &pi));
+
+			int i = *((int*) &pi);
+			Debug.Assert(Unsafe.AddressOf(ref i).ReadAs<int, float>() == 3.14F);
+
+
+			var       alloc = Mem.AllocUnmanaged<Structure>();
+			Structure s     = new Structure
+			{
+				s = "joo"
+			};
+			alloc.Write(s);
+			Console.WriteLine(alloc);
+
+
+			Mem.Free(alloc);
 		}
 
-		static int get(int a, int b)
+		struct Structure
 		{
-			Console.WriteLine(Thread.CurrentContext.ContextID);
-			return a + b;
-		}
+			public string s;
 
-		static void x(int id)
-		{
-			var proc = Process.GetCurrentProcess();
-			foreach (var v in new StackTrace((uint) proc.Id, (uint) id).Calls) {
-				Console.WriteLine(v);
+			public override string ToString()
+			{
+				return String.Format("[{0}]", s);
 			}
 		}
 
-		static Pointer<byte> addrOfFn(Type t, string name)
-		{
-			var mdFn = Runtime.GetMethodDesc(t, name);
-			return mdFn.Reference.Function;
-		}
+		static void Interpret<T>(T t) { }
 
 		static bool _bool(int i)
 		{
-			return i >= 1;
+			return i > 0;
+		}
+
+
+		private static int get()
+		{
+			return -1;
+		}
+
+		static void overwrite()
+		{
+			byte* buffer = stackalloc byte[10];
+			gets(buffer);
+		}
+
+		static void gets(byte* buffer)
+		{
+			string val = Console.ReadLine();
+			Mem.Copy(buffer, Encoding.UTF8.GetBytes(val));
+		}
+
+		static Pointer<byte> get_reg()
+		{
+			long          l;
+			Pointer<byte> rbp = &l + 1;
+			return rbp;
+		}
+
+
+		static void auto(Pointer<Pointer<int>> lpInt32)
+		{
+			int z = 0xFFFFFF;
+			lpInt32.Reference = &z;
+		}
+
+		//struct CORINFO_METHOD_INFO
+		//{
+		//	CORINFO_METHOD_HANDLE ftn;
+		//	CORINFO_MODULE_HANDLE scope;
+		//	BYTE *                ILCode;
+		//	unsigned              ILCodeSize;
+		//	unsigned              maxStack;
+		//	unsigned              EHcount;
+		//	CorInfoOptions        options;
+		//	CorInfoRegionKind     regionKind;
+		//	CORINFO_SIG_INFO      args;
+		//	CORINFO_SIG_INFO      locals;
+		//};
+
+		[Sigcall(Module = "clrjit.dll", Signature = "48 8B 05 B9 D8 05 00 48 85 C0 75 1C 48 8D 05 CD 34 04 00")]
+		private static Pointer<byte> GetJit()
+		{
+			return null;
+		}
+
+		private static int Val(int a, int b)
+		{
+			a += b;
+			return a;
+		}
+
+
+		static TDelegate HyperInvoke<TType, TDelegate>(string name) where TDelegate : Delegate
+		{
+			return Runtime.GetMethodDesc<TType>(name).Reference.GetDelegate<TDelegate>();
+		}
+
+
+		private static class Dbg
+		{
+			[Conditional("DEBUG")]
+			public static void Break()
+			{
+				Console.ReadLine();
+			}
+		}
+
+
+		[DllImport("kernel32.dll", EntryPoint = "RtlCopyMemory")]
+		private static extern void CopyMemory(void* dest, void* src, uint len);
+
+		private delegate int add(Target ptr, int i, int j);
+
+
+		class Hyper
+		{
+			public Hyper()
+			{
+				Swap<object>();
+			}
+
+			public bool IsType<T>()
+			{
+				return GetType() == typeof(T);
+			}
+
+			public void Swap<T>()
+			{
+				var heap = Unsafe.AddressOfHeap(this);
+				heap.Write(Runtime.MethodTableOf<T>());
+				Debug.Assert(IsType<T>());
+			}
+
+			public void Write<T>(T t, int elemOffset = 0)
+			{
+				var heap = Unsafe.AddressOfHeap(this, OffsetType.Fields);
+
+
+				heap.Write(t, elemOffset);
+			}
+		}
+
+
+		[NotNull]
+		public static List<MemoryBasicInformation> GetRegionsOfStack()
+		{
+			GetStackExtents(out byte* stackBase, out long stackSize);
+
+			List<MemoryBasicInformation> result = new List<MemoryBasicInformation>();
+
+			byte* current = stackBase;
+			while (current < stackBase + stackSize) {
+				MemoryBasicInformation info = new MemoryBasicInformation();
+				Kernel32.VirtualQuery(new IntPtr(current), ref info, (uint) sizeof(MemoryBasicInformation));
+				result.Add(info);
+				current = (byte*) PointerUtils.Add(info.BaseAddress, info.RegionSize);
+			}
+
+			result.Reverse();
+			return result;
+		}
+
+
+		public static void GetStackExtents(out byte* stackBase, out long stackSize)
+		{
+			MemoryBasicInformation info = new MemoryBasicInformation();
+			Kernel32.VirtualQuery(new IntPtr(&info), ref info, (uint) sizeof(MemoryBasicInformation));
+			stackBase = (byte*) info.AllocationBase;
+			stackSize = ((PointerUtils.Subtract(info.BaseAddress, info.AllocationBase).ToInt64()) +
+			             info.RegionSize.ToInt64());
 		}
 
 
@@ -165,38 +369,6 @@ namespace Test
 			table.AddRow("Size", AutoSizeOf(t));
 
 			Console.WriteLine(table.ToMarkDownString());
-		}
-
-		private class Val : IComparable
-		{
-			private decimal d;
-
-			public decimal val  { get; set; }
-			public string  sval { get; set; }
-
-			public int CompareTo(object obj)
-			{
-				throw new NotImplementedException();
-			}
-
-			public override string ToString()
-			{
-				return string.Format("{0}, {1}", val, sval);
-			}
-		}
-
-		private struct Decimal512
-		{
-			private decimal a,
-			                b,
-			                c,
-			                d;
-		}
-
-		[Conditional("DEBUG")]
-		private static void @break()
-		{
-			Console.ReadLine();
 		}
 
 

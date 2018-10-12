@@ -895,35 +895,35 @@ namespace RazorSharp.CLR
 		/// <summary>
 		///     IL
 		/// </summary>
-		mcIL = 0,
+		IL = 0,
 
 		/// <summary>
 		///     FCall(also includes tlbimped ctor, Delegate ctor)
 		/// </summary>
-		mcFCall = 1,
+		FCall = 1,
 
 
 		/// <summary>
 		///     N/Direct
 		/// </summary>
-		mcNDirect = 2,
+		NDirect = 2,
 
 
 		/// <summary>
 		///     Special method; implementation provided by EE (like Delegate Invoke)
 		/// </summary>
-		mcEEImpl = 3,
+		EEImpl = 3,
 
 		/// <summary>
 		///     Array ECall
 		/// </summary>
-		mcArray = 4,
+		Array = 4,
 
 		/// <summary>
 		///     Instantiated generic methods, including descriptors
 		///     for both shared and unshared code (see InstantiatedMethodDesc)
 		/// </summary>
-		mcInstantiated = 5,
+		Instantiated = 5,
 
 
 //#ifdef FEATURE_COMINTEROP
@@ -936,16 +936,16 @@ namespace RazorSharp.CLR
 		// error (someone forgot to look up the method in a class' VTable) or it is
 		// a case of COM Interop.
 
-		mcComInterop = 6,
+		ComInterop = 6,
 
 //#endif                 // FEATURE_COMINTEROP
 
 		/// <summary>
 		///     For <see cref="MethodDesc" /> with no metadata behind
 		/// </summary>
-		mcDynamic = 7,
-		mcCount,
-	};
+		Dynamic = 7,
+		Count,
+	}
 
 	/// <summary>
 	///     <remarks>
@@ -958,10 +958,10 @@ namespace RazorSharp.CLR
 
 
 		/// <summary>
-		///     Method is IL, FCall etc., see MethodClassification above.
+		///     Method is <see cref="MethodClassification.IL"/>, <see cref="MethodClassification.FCall"/> etc., see <see cref="MethodClassification"/> above.
 		/// </summary>
-		mdcClassification = 0x0007,
-		mdcClassificationCount = mdcClassification + 1,
+		Classification = 0x0007,
+		ClassificationCount = Classification + 1,
 
 		// Note that layout of code:MethodDesc::s_ClassificationSizeTable depends on the exact values
 		// of mdcHasNonVtableSlot and mdcMethodImpl
@@ -969,18 +969,18 @@ namespace RazorSharp.CLR
 		/// <summary>
 		///     Has local slot (vs. has real slot in MethodTable)
 		/// </summary>
-		mdcHasNonVtableSlot = 0x0008,
+		HasNonVtableSlot = 0x0008,
 
 		/// <summary>
 		///     Method is a body for a method impl (MI_MethodDesc, MI_NDirectMethodDesc, etc)
 		///     where the function explicitly implements IInterface.foo() instead of foo().
 		/// </summary>
-		mdcMethodImpl = 0x0010,
+		MethodImpl = 0x0010,
 
 		/// <summary>
 		///     Method is static
 		/// </summary>
-		mdcStatic = 0x0020,
+		Static = 0x0020,
 
 		// unused                           = 0x0040,
 		// unused                           = 0x0080,
@@ -990,32 +990,32 @@ namespace RazorSharp.CLR
 		// Duplicate method. When a method needs to be placed in multiple slots in the
 		// method table, because it could not be packed into one slot. For eg, a method
 		// providing implementation for two interfaces, MethodImpl, etc
-		mdcDuplicate = 0x0400,
+		Duplicate = 0x0400,
 
 		/// <summary>
 		///     Has this method been verified?
 		/// </summary>
-		mdcVerifiedState = 0x0800,
+		VerifiedState = 0x0800,
 
 		/// <summary>
 		///     Is the method verifiable? It needs to be verified first to determine this
 		/// </summary>
-		mdcVerifiable = 0x1000,
+		Verifiable = 0x1000,
 
 		/// <summary>
 		///     Is this method ineligible for inlining?
 		/// </summary>
-		mdcNotInline = 0x2000,
+		NotInline = 0x2000,
 
 		/// <summary>
 		///     Is the method synchronized
 		/// </summary>
-		mdcSynchronized = 0x4000,
+		Synchronized = 0x4000,
 
 		/// <summary>
 		///     Does the method's slot number require all 16 bits
 		/// </summary>
-		mdcRequiresFullSlotNumber = 0x8000
+		RequiresFullSlotNumber = 0x8000
 	}
 
 
@@ -1027,6 +1027,7 @@ namespace RazorSharp.CLR
 
 	#endregion
 
+	// todo: compare to CorTokenType
 	public enum TokenType : uint
 	{
 		Module                 = 0x00000000,

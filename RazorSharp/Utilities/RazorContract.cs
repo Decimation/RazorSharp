@@ -30,6 +30,7 @@ namespace RazorSharp.Utilities
 		private const string COND_FALSE_HALT     = "cond:false => halt";
 		private const string VALUE_NULL_HALT     = "value:null => halt";
 		private const string STRING_FORMAT_PARAM = "msg";
+		private const string NULLREF_EXCEPTION   = "Value == null";
 
 
 		/// <summary>
@@ -38,6 +39,7 @@ namespace RazorSharp.Utilities
 		/// <param name="cond">Condition to assert</param>
 		/// <param name="msg"></param>
 		/// <param name="args"></param>
+		[DebuggerHidden]
 		[AssertionMethod]
 		[ContractAnnotation(COND_FALSE_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -51,6 +53,7 @@ namespace RazorSharp.Utilities
 		///     Call to <see cref="Trace.Assert(bool)" />
 		/// </summary>
 		/// <param name="cond">Condition to assert</param>
+		[DebuggerHidden]
 		[AssertionMethod]
 		[ContractAnnotation(COND_FALSE_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -59,36 +62,47 @@ namespace RazorSharp.Utilities
 			Trace.Assert(cond);
 		}
 
+		[DebuggerHidden]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private static void ThrowNullReferenceException()
+		{
+			throw new NullReferenceException(NULLREF_EXCEPTION);
+		}
+
+		[DebuggerHidden]
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static unsafe void RequiresNotNull([AsrtCnd(AsrtCndType.IS_NOT_NULL)] void* value)
 		{
 			if (value == null) {
-				throw new NullReferenceException($"Pointer {Hex.ToHex(null)} == null");
+				ThrowNullReferenceException();
 			}
 		}
 
+		[DebuggerHidden]
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresNotNull(IntPtr value)
 		{
 			if (value == IntPtr.Zero) {
-				throw new NullReferenceException($"Pointer {Hex.ToHex(value)} == null");
+				ThrowNullReferenceException();
 			}
 		}
 
+		[DebuggerHidden]
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] in T value) where T : class
 		{
 			if (value == null) {
-				throw new NullReferenceException($"{nameof(value)} == null");
+				ThrowNullReferenceException();
 			}
 		}
 
+		[DebuggerHidden]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		[StringFormatMethod(STRING_FORMAT_PARAM)]
 		internal static void Requires([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null, params object[] args)
@@ -108,18 +122,13 @@ namespace RazorSharp.Utilities
 		/// <param name="msg">Optional message for <typeparamref name="TException"></typeparamref> </param>
 		/// <param name="args"></param>
 		/// <typeparam name="TException">Exception type to throw</typeparam>
+		[DebuggerHidden]
 		[AssertionMethod]
 		[ContractAnnotation(COND_FALSE_HALT)]
 		[StringFormatMethod(STRING_FORMAT_PARAM)]
-		internal static void Requires<TException>([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null,
-			params object[] args)
-			where TException : Exception, new()
+		internal static void Requires<TException>([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond,
+			string msg = null, params object[] args) where TException : Exception, new()
 		{
-			if (cond) {
-				return;
-			}
-
-
 			if (!cond) {
 				if (msg == null) {
 					throw new TException();
@@ -152,6 +161,7 @@ namespace RazorSharp.Utilities
 		/// <exception cref="TypeException">
 		///     If <typeparamref name="TExpected" /> is not <typeparamref name="TActual" />
 		/// </exception>
+		[DebuggerHidden]
 		internal static void RequiresType<TExpected, TActual>()
 		{
 			if (typeof(TExpected) == typeof(Array)) {
@@ -164,12 +174,14 @@ namespace RazorSharp.Utilities
 			}
 		}
 
+		[DebuggerHidden]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresClassType<T>()
 		{
 			Assert(!typeof(T).IsValueType, "Type parameter <{0}> must be a reference type", typeof(T).Name);
 		}
 
+		[DebuggerHidden]
 		internal static bool TypeEqual<TExpected, TActual>()
 		{
 			if (typeof(TExpected) == typeof(Array)) {
@@ -189,6 +201,7 @@ namespace RazorSharp.Utilities
 		/// </summary>
 		/// <param name="values"></param>
 		/// <typeparam name="T"></typeparam>
+		[DebuggerHidden]
 		internal static void AssertEqual<T>(params T[] values)
 		{
 			if (values == null || values.Length == 0) {

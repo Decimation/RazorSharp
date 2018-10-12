@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR;
@@ -245,6 +246,27 @@ namespace RazorSharp
 		public static Pointer<byte> AddressOfHeap<T>(T t, OffsetType offset) where T : class
 		{
 			return AddressOfHeap(ref t, offset);
+		}
+
+		public static Pointer<byte> AddressOfFunction<T>(string name)
+		{
+			return AddressOfFunction(typeof(T), name);
+		}
+
+		/// <summary>
+		/// Returns the entry point of the specified function (assembly code).
+		/// </summary>
+		/// <param name="t">Enclosing type</param>
+		/// <param name="name">Name of the function in <see cref="Type"/> <paramref name="t"/></param>
+		/// <returns></returns>
+		public static Pointer<byte> AddressOfFunction(Type t, string name)
+		{
+			var md = Runtime.GetMethodDesc(t, name);
+
+			// Function must be jitted
+			Debug.Assert(md.Reference.IsPointingToNativeCode);
+
+			return Runtime.GetMethodDesc(t, name).Reference.Function;
 		}
 
 		/*public static Pointer<T> AddressOfHeap<T>(T[] rg)

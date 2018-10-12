@@ -124,6 +124,9 @@ namespace RazorSharp.Memory
 		}
 
 		//todo
+		/// <summary>
+		/// http://www.hexacorn.com/blog/2016/12/15/pe-section-names-re-visited/
+		/// </summary>
 		public enum SegmentType
 		{
 			/// <summary>

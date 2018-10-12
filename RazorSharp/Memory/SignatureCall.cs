@@ -37,21 +37,21 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     Module (DLL) containing <see cref="Signature" />
 		/// </summary>
-		public string Module { get; set; }
+		public string Module;
 
 		/// <summary>
 		///     Unique byte-sequence-string signature of the function
 		/// </summary>
-		public string Signature { get; set; }
+		public string Signature;
 
 		/// <summary>
 		/// </summary>
-		public bool IsInFunctionMap { get; set; }
+		public bool IsInFunctionMap;
 
 		/// <summary>
 		///     Relative to the module's <see cref="SigScanner.BaseAddress" />
 		/// </summary>
-		public long OffsetGuess { get; set; }
+		public long OffsetGuess;
 
 		public SigcallAttribute() { }
 

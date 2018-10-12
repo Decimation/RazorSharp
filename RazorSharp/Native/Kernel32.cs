@@ -4,7 +4,9 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using RazorSharp.Native.Enums;
+using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 
 #endregion
 
@@ -12,15 +14,18 @@ namespace RazorSharp.Native
 {
 
 	/// <summary>
-	///     Native P/Invoke.
+	///     Native P/Invoke for <see cref="Kernel32Dll"/>
 	///     <remarks>
 	///         Stolen from RazorInvoke for sake of portability and convenience
 	///     </remarks>
 	/// </summary>
 	public static unsafe class Kernel32
 	{
+		internal const int ERROR_INVALID_PARAMETER = 0x57;
 
 		private const string Kernel32Dll = "kernel32.dll";
+
+		#region Library
 
 		[DllImport(Kernel32Dll, SetLastError = true)]
 		public static extern IntPtr LoadLibrary(string lpFileName);
@@ -29,8 +34,9 @@ namespace RazorSharp.Native
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool FreeLibrary(IntPtr hModule);
 
+		#endregion
 
-		#region OpenProcess
+		#region Process
 
 		[DllImport(Kernel32Dll, SetLastError = true)]
 		public static extern IntPtr OpenProcess(ProcessAccessFlags processAccess, bool bInheritHandle,
@@ -46,10 +52,52 @@ namespace RazorSharp.Native
 			return OpenProcess(Process.GetCurrentProcess(), flags);
 		}
 
+		/// <summary>
+		///     Equals <see cref="Process.Id" />
+		/// </summary>
+		[DllImport(Kernel32Dll)]
+		public static extern uint GetProcessId(IntPtr process);
+
+
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		public static extern IntPtr OpenProcess(ProcessAccess dwDesiredAccess, bool bInheritHandle, uint processId);
+
 		#endregion
+
+		#region Thread
+
+		[DllImport(Kernel32Dll, SetLastError = true)]
+		private static extern void GetCurrentThreadStackLimits(IntPtr* low, IntPtr* high);
+
+		public static (IntPtr Low, IntPtr High) GetCurrentThreadStackLimits()
+		{
+			IntPtr l,
+			       h;
+
+			GetCurrentThreadStackLimits(&l, &h);
+			return (l, h);
+		}
 
 		[DllImport(Kernel32Dll)]
 		public static extern uint GetCurrentThreadId();
+
+		[DllImport(Kernel32Dll)]
+		public static extern IntPtr GetCurrentThread();
+
+		[DllImport(Kernel32Dll, SetLastError = true)]
+		public static extern IntPtr OpenThread(uint desiredAccess, bool inheritHandle, uint threadId);
+
+
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		public static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, uint threadId);
+
+		public static IntPtr OpenThread(ThreadAccess desiredAccess, int threadId)
+		{
+			return OpenThread(desiredAccess, false, (uint) threadId);
+		}
+
+		#endregion
+
 
 		[DllImport(Kernel32Dll)]
 		public static extern uint GetLastError();
@@ -58,80 +106,71 @@ namespace RazorSharp.Native
 		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool CloseHandle(IntPtr hObject);
 
-		/// <summary>
-		///     Equals <see cref="Process.Id" />
-		/// </summary>
-		/// <param name="process"></param>
-		/// <returns></returns>
-		[DllImport(Kernel32Dll)]
-		public static extern uint GetProcessId(IntPtr process);
 
-		//ResumeThread
-		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-		public static extern uint ResumeThread(IntPtr hThread);
+		#region Console
 
 		[DllImport(Kernel32Dll)]
-		public static extern IntPtr GetCurrentThread();
-
-		//SuspendThread
-		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-		public static extern uint SuspendThread(IntPtr hThread);
-
-		//GetThreadContext
-		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		public static extern bool GetThreadContext(IntPtr hThread, IntPtr lpContext);
-
-		[DllImport(Kernel32Dll, SetLastError = true)]
-		public static extern IntPtr OpenThread(uint desiredAccess, bool inheritHandle, uint threadId);
-
-
-		public static IntPtr OpenThread(ThreadAccess desiredAccess, int threadId)
-		{
-			return OpenThread(desiredAccess, false, (uint) threadId);
-		}
-
-		//OpenProcess
-		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-		public static extern IntPtr OpenProcess(ProcessAccess dwDesiredAccess, bool bInheritHandle, uint processId);
-
-		//OpenThread
-		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-		public static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, uint threadId);
-
-
-		//Wow64GetThreadContext
-		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		public static extern bool Wow64GetThreadContext(IntPtr hThread, IntPtr lpContext);
-
-		//Wow64SuspendThread
-		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-		public static extern uint Wow64SuspendThread(IntPtr hThread);
-
-
-//IsWow64Process
-		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		public static extern bool IsWow64Process(IntPtr hProcess, ref bool wow64Process);
-
-		//GetNativeSystemInfo
-		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-		public static extern void GetNativeSystemInfo(out DbgHelp.SYSTEM_INFO lpSystemInfo);
-
+		public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out ConsoleOutputModes lpMode);
 
 		[DllImport(Kernel32Dll)]
-		public static extern IntPtr GetStdHandle(StandardHandles nStdHandle);
+		public static extern bool SetConsoleMode(IntPtr hConsoleHandle, ConsoleOutputModes dwMode);
 
 		public static IntPtr GetConsoleHandle()
 		{
 			return GetStdHandle(StandardHandles.StdOutputHandle);
 		}
 
+		#endregion
+
+
+		/// <summary>
+		///     WOW64 of GetSystemInfo
+		/// </summary>
+		/// <param name="lpSystemInfo"></param>
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		public static extern void GetNativeSystemInfo(out SystemInfo lpSystemInfo);
+
+		[DllImport(Kernel32Dll)]
+		public static extern IntPtr GetStdHandle(StandardHandles nStdHandle);
+
+
 		#region Virtual
 
 		/// <summary>
-		///     <para>https://msdn.microsoft.com/en-us/library/windows/desktop/aa366887(v=vs.85).aspx</para>
+		/// Retrieves information about a range of pages in the virtual address space of the calling process.
+		/// <para><a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa366902(v=vs.85).aspx"> Doc </a></para>
+		///
+		/// </summary>
+		/// <param name="address">
+		///     A pointer to the base address of the region of pages to be queried. This value is rounded down to the next page
+		///     boundary. To determine the size of a page on the host computer, use the <see cref="GetNativeSystemInfo" />
+		///     function. If <paramref name="address" /> specifies an address above the highest memory address accessible to the
+		///     process, the function fails with <see cref="ERROR_INVALID_PARAMETER"/>.
+		/// </param>
+		/// <param name="buffer">
+		///     A pointer to a <see cref="MemoryBasicInformation" /> structure in which information about the specified page
+		///     range is returned.
+		/// </param>
+		/// <param name="length">The size of the buffer pointed to by the <paramref name="buffer" /> parameter, in bytes.</param>
+		/// <returns>
+		///     The return value is the actual number of bytes returned in the information buffer. If the function fails, the
+		///     return value is zero. To get extended error information, call <see cref="GetLastError" />. Possible error values
+		///     include <see cref="ERROR_INVALID_PARAMETER"/>.
+		/// </returns>
+		[DllImport(Kernel32Dll)]
+		public static extern IntPtr VirtualQuery(IntPtr address, ref MemoryBasicInformation buffer, uint length);
+
+		public static MemoryBasicInformation VirtualQuery(IntPtr lpAddress)
+		{
+			MemoryBasicInformation info    = new MemoryBasicInformation();
+			IntPtr                 lpValue = VirtualQuery(lpAddress, ref info, (uint) sizeof(MemoryBasicInformation));
+			Debug.Assert(lpValue.ToInt64() == sizeof(MemoryBasicInformation));
+			return info;
+		}
+
+
+		/// <summary>
+		///     <para><a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa366887(v=vs.85).aspx"> Doc </a></para>
 		///     Reserves, commits, or changes the state of a region of pages in the virtual address space of the calling process.
 		///     Memory allocated by this function is automatically initialized to zero.
 		/// </summary>
@@ -168,16 +207,13 @@ namespace RazorSharp.Native
 		public static extern bool VirtualProtect([In] IntPtr lpAddress, uint dwSize, MemoryProtection flNewProtect,
 			[Out] out MemoryProtection lpflOldProtect);
 
+		public static void VirtualProtect(Pointer<byte> lpAddress, int dwSize,
+			MemoryProtection flNewProtect, out MemoryProtection lpflOldProtect)
+		{
+			RazorContract.Assert(VirtualProtect(lpAddress.Address, (uint) dwSize, flNewProtect, out lpflOldProtect));
+		}
+
 		#endregion
-
-		[DllImport(Kernel32Dll, SetLastError = true)]
-		private static extern void GetCurrentThreadStackLimits(IntPtr* low, IntPtr* high);
-
-		[DllImport(Kernel32Dll)]
-		public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out ConsoleOutputModes lpMode);
-
-		[DllImport(Kernel32Dll)]
-		public static extern bool SetConsoleMode(IntPtr hConsoleHandle, ConsoleOutputModes dwMode);
 
 
 		#region Read / write
@@ -241,7 +277,7 @@ namespace RazorSharp.Native
 
 		public static void WriteCurrentProcessMemory<T>(Pointer<byte> lpBaseAddress, T value)
 		{
-			WriteProcessMemory<T>(Process.GetCurrentProcess(), lpBaseAddress, value);
+			WriteProcessMemory(Process.GetCurrentProcess(), lpBaseAddress, value);
 		}
 
 		public static void WriteProcessMemory<T>(Process proc, Pointer<byte> lpBaseAddress, T value)
@@ -285,15 +321,6 @@ namespace RazorSharp.Native
 		/// <returns></returns>
 		[DllImport(Kernel32Dll, CharSet = CharSet.Auto)]
 		public static extern IntPtr GetModuleHandle(string lpModuleName);
-
-		public static (IntPtr Low, IntPtr High) GetCurrentThreadStackLimits()
-		{
-			IntPtr l,
-			       h;
-
-			GetCurrentThreadStackLimits(&l, &h);
-			return (l, h);
-		}
 
 
 	}

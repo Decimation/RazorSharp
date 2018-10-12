@@ -227,6 +227,7 @@
       <Compile Include="Testing\Tests\AddrInRangeTests.cs"/>
     <Compile Include="Testing\Tests\AllocPointerTests.cs" />
       <Compile Include="Testing\Tests\AllocPoolTests.cs"/>
+      <Compile Include="Testing\Tests\FunctionOverrideTests.cs"/>
       <Compile Include="Testing\Tests\ILTests.cs"/>
       <Compile Include="Testing\Tests\Metadata\ClrRuntimeTests.cs"/>
       <Compile Include="Testing\Tests\Metadata\Reflection_RazorSharp_Tests.cs"/>
@@ -245,6 +246,7 @@
       <Compile Include="Testing\Types\Dummy.cs"/>
       <Compile Include="Testing\Types\GenericDummy.cs"/>
       <Compile Include="Testing\Types\Point.cs"/>
+      <Compile Include="Testing\Types\Target.cs"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -5,16 +5,15 @@ using System.Linq;
 using System.Threading;
 using RazorSharp.CLR.Fixed;
 using RazorSharp.Common;
+using RazorSharp.Memory;
 using RazorSharp.Pointers;
 
 #endregion
 
-namespace RazorSharp.Memory
+namespace RazorSharp.Obsolete
 {
 
 	#region
-
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
 
@@ -24,6 +23,7 @@ namespace RazorSharp.Memory
 	///         Old namespace: Memory
 	///     </remarks>
 	/// </summary>
+	[Obsolete]
 	internal static unsafe class MemoryInspector
 	{
 

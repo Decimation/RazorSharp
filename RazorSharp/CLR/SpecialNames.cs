@@ -14,6 +14,8 @@ namespace RazorSharp.CLR
 		private const string BACKING_FIELD_NAME        = "<{0}>" + BACKING_FIELD_NAME_SUFFIX;
 		private const string BACKING_FIELD_NAME_SUFFIX = "k__BackingField";
 		private const string GET_PREFIX                = "get_";
+		private const string SET_PREFIX                = "set_";
+		private const string OPERATOR_PREFIX           = "op_";
 
 
 		internal static string TypeNameOfFixedBuffer(string fieldName)

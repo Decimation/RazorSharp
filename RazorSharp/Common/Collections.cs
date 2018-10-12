@@ -55,6 +55,10 @@ namespace RazorSharp.Common
 
 		#region ToString
 
+		public static string ToString<T>(T[] rg, ToStringOptions options = ToStringOptions.UseCommas)
+		{
+			return ToString(list: rg, options);
+		}
 		public static string ToString(byte[] mem, ToStringOptions options = ToStringOptions.ZeroPadHex)
 		{
 			return ToString(list: mem, options);

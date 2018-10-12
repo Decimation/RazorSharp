@@ -2,13 +2,13 @@
 
 using System;
 using System.Reflection;
+using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
-using static RazorSharp.CLR.Runtime;
 
 #endregion
 
-namespace RazorSharp.Experimental
+namespace RazorSharp.Obsolete.Experimental
 {
 
 	/// <summary>
@@ -16,6 +16,7 @@ namespace RazorSharp.Experimental
 	///         Old namespace: Experimental
 	///     </remarks>
 	/// </summary>
+	[Obsolete]
 	internal static unsafe class FunctionHooker
 	{
 		private struct PointerPair
@@ -100,7 +101,7 @@ namespace RazorSharp.Experimental
 		// Base function
 		public static void HookFunction<TType>(string fnName, IntPtr fn)
 		{
-			Pointer<MethodDesc> md = GetMethodDesc<TType>(fnName);
+			Pointer<MethodDesc> md = Runtime.GetMethodDesc<TType>(fnName);
 
 //			AddFunction(md->MethodInfo, fn);
 

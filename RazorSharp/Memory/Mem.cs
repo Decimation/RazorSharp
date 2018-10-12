@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -125,6 +126,13 @@ namespace RazorSharp.Memory
 			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
 		}
 
+		public static void Set<T>(Pointer<byte> ptr, T value, int elemCnt)
+		{
+			for (int i = 0; i < elemCnt; i++) {
+				ptr.Write(value,i);
+			}
+		}
+
 		#region Read / write
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -185,6 +193,8 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
+
+
 
 		#region Stack
 
@@ -367,6 +377,11 @@ namespace RazorSharp.Memory
 			fixed (byte* b = src) {
 				Copy(dest, 0, b, src.Length);
 			}
+		}
+
+		public static void Copy<T>(Pointer<T> dest, IEnumerable<T> src)
+		{
+			dest.Init(src);
 		}
 
 		#endregion

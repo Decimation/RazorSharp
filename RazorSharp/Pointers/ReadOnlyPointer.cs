@@ -15,7 +15,7 @@ namespace RazorSharp.Pointers
 
 	#endregion
 
-	// todo
+	// todo: WIP
 	// A lot of methods and properties are just copied from Pointer because
 	// we can only use interfaces with structs
 	internal unsafe struct ReadOnlyPointer<T> : IPointer<T>

@@ -11,12 +11,6 @@ namespace RazorSharp.Common
 
 	public static class Extensions
 	{
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool HasFlagFast(this ToStringOptions value, ToStringOptions flag)
-		{
-			return (value & flag) != 0;
-		}
-
 		private static bool HasInterface(this Type t, string interfaceType)
 		{
 			return t.GetInterface(interfaceType) != null;

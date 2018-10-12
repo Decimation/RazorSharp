@@ -10,6 +10,8 @@ using System.Runtime.ExceptionServices;
 using RazorSharp.CLR.Fixed;
 using RazorSharp.Common;
 using RazorSharp.Memory;
+using RazorSharp.Native;
+using RazorSharp.Native.Structures;
 using RazorSharp.Utilities;
 
 #endregion
@@ -35,8 +37,8 @@ namespace RazorSharp.Pointers
 	///     <para>Can be represented as a native pointer in memory. </para>
 	///     <para>Has identical or better performance than native pointers.</para>
 	///     <para>
-	///         Supports pointer arithmetic, reading/writing different types other than type <typeparamref name="T" />, and
-	///         bitwise operations.
+	///         Supports pointer arithmetic, reading/writing different types other than type <typeparamref name="T" />,
+	///         and bitwise operations.
 	///     </para>
 	///     <list type="bullet">
 	///         <item>
@@ -106,8 +108,7 @@ namespace RazorSharp.Pointers
 
 		/// <summary>
 		///     Creates a new <see cref="T:RazorSharp.Pointers.Pointer`1" /> pointing to the address <paramref name="v" />
-		///     represented as an
-		///     <see cref="T:System.Int64" />
+		///     represented as an <see cref="T:System.Int64" />
 		/// </summary>
 		/// <param name="v">Address to point to</param>
 		public Pointer(long v) : this((void*) v) { }
@@ -128,13 +129,13 @@ namespace RazorSharp.Pointers
 
 		/// <summary>
 		///     Retrieves the index of the specified element <paramref name="value" />.
-		/// <remarks>
-		/// Indexes are in terms of <typeparamref name="T"/>
-		/// </remarks>
+		///     <remarks>
+		///         Indexes are in terms of <typeparamref name="T" />
+		///     </remarks>
 		/// </summary>
 		/// <param name="value">Value to retrieve the index of</param>
 		/// <param name="searchLength">How many elements to search, starting from the current index</param>
-		/// <returns>The index of the element if it was found; <see cref="Unsafe.INVALID_VALUE"/> if the element was not found</returns>
+		/// <returns>The index of the element if it was found; <see cref="Unsafe.INVALID_VALUE" /> if the element was not found</returns>
 		public int IndexOf(T value, int searchLength)
 		{
 			return IndexOf<T>(value, searchLength);
@@ -142,14 +143,14 @@ namespace RazorSharp.Pointers
 
 		/// <summary>
 		///     Retrieves the index of the specified element <paramref name="value" />.
-		/// <remarks>
-		/// Indexes are in terms of <typeparamref name="T"/>
-		/// </remarks>
+		///     <remarks>
+		///         Indexes are in terms of <typeparamref name="T" />
+		///     </remarks>
 		/// </summary>
 		/// <param name="value">Value to retrieve the index of</param>
 		/// <param name="startIndex">Index to start searching from</param>
 		/// <param name="searchLength">How many elements to search, starting from the current index</param>
-		/// <returns>The index of the element if it was found; <see cref="Unsafe.INVALID_VALUE"/> if the element was not found</returns>
+		/// <returns>The index of the element if it was found; <see cref="Unsafe.INVALID_VALUE" /> if the element was not found</returns>
 		public int IndexOf(T value, int startIndex, int searchLength)
 		{
 			return IndexOf<T>(value, startIndex, searchLength);
@@ -172,6 +173,8 @@ namespace RazorSharp.Pointers
 		}
 
 		#endregion
+
+		#region Init
 
 		/// <summary>
 		///     Writes all elements of <paramref name="enumerable" /> to the current pointer.
@@ -199,6 +202,10 @@ namespace RazorSharp.Pointers
 			}
 		}
 
+		#endregion
+
+		#region Contains
+
 		/// <summary>
 		///     Determines whether the pointer contains <paramref name="value" /> from the range specified.
 		/// </summary>
@@ -214,6 +221,10 @@ namespace RazorSharp.Pointers
 		{
 			return IndexOf(value, searchLength) != Unsafe.INVALID_VALUE;
 		}
+
+		#endregion
+
+		#region SequenceEqual
 
 		public bool SequenceEqual(T[] values)
 		{
@@ -237,6 +248,8 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+		#endregion
+
 
 		#region Bitwise operations
 
@@ -244,7 +257,9 @@ namespace RazorSharp.Pointers
 		///     Performs the bitwise AND (<c>&</c>) operation on <see cref="ToInt64" /> and
 		///     sets <see cref="Address" /> as the result
 		/// </summary>
-		/// <returns><c>this</c></returns>
+		/// <returns>
+		///     <c>this</c>
+		/// </returns>
 		/// <param name="l">Operand</param>
 		public Pointer<T> And(long l)
 		{
@@ -257,7 +272,9 @@ namespace RazorSharp.Pointers
 		///     Performs the bitwise OR (<c>|</c>) operation on <see cref="ToInt64" /> and
 		///     sets <see cref="Address" /> as the result
 		/// </summary>
-		/// <returns><c>this</c></returns>
+		/// <returns>
+		///     <c>this</c>
+		/// </returns>
 		/// <param name="l">Operand</param>
 		public Pointer<T> Or(long l)
 		{
@@ -269,7 +286,45 @@ namespace RazorSharp.Pointers
 		#endregion
 
 
+		public MemoryBasicInformation Query()
+		{
+			return Kernel32.VirtualQuery(Address);
+		}
+
 		#region Read / write
+
+		public TAs ReadAs<TType, TAs>()
+		{
+			TType t = Read<TType>();
+			return CSUnsafe.Read<TAs>(Unsafe.AddressOf(ref t).ToPointer());
+		}
+
+		public void WriteAs<TType, TAs>(TType value)
+		{
+			Write(CSUnsafe.Read<TAs>(Unsafe.AddressOf(ref value).ToPointer()));
+		}
+
+		[HandleProcessCorruptedStateExceptions]
+		public bool TryRead<TType>(out TType value)
+		{
+			TType      valueProxy = default;
+			Pointer<T> thisProxy  = this;
+
+			if (!LowLevel.CorruptsState(() => { valueProxy = thisProxy.Read<TType>(); }, out _)) {
+				value = valueProxy;
+				return true;
+			}
+
+			value = valueProxy;
+			return false;
+		}
+
+		[HandleProcessCorruptedStateExceptions]
+		public bool TryWrite<TType>(TType value)
+		{
+			Pointer<T> thisProxy = this;
+			return !LowLevel.CorruptsState(() => { thisProxy.Write(value); }, out _);
+		}
 
 		public string ReadString(StringTypes s)
 		{
@@ -302,6 +357,8 @@ namespace RazorSharp.Pointers
 		{
 			return ref Mem.AsRef<TType>(Offset<TType>(elemOffset));
 		}
+
+		#region Copy
 
 		/// <summary>
 		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="T" />, starting
@@ -366,26 +423,7 @@ namespace RazorSharp.Pointers
 			return CopyOut<TType>(0, elemCnt);
 		}
 
-
-
-		[HandleProcessCorruptedStateExceptions]
-		public bool TryRead<TType>(out TType value)
-		{
-			try {
-				value = Read<TType>();
-				return true;
-			}
-			catch (AccessViolationException) {
-
-			}
-			catch (NullReferenceException) {
-
-			}
-
-
-			value = default;
-			return false;
-		}
+		#endregion
 
 		#endregion
 
@@ -539,6 +577,11 @@ namespace RazorSharp.Pointers
 		public static explicit operator long(Pointer<T> ptr)
 		{
 			return ptr.ToInt64();
+		}
+
+		public static explicit operator ulong(Pointer<T> ptr)
+		{
+			return ptr.ToUInt64();
 		}
 
 		#endregion
@@ -773,7 +816,6 @@ namespace RazorSharp.Pointers
 		///                 </description>
 		///             </item>
 		///         </list>
-		///
 		///     </para>
 		///     <para>
 		///         <c>"P"</c>: Pointer (<see cref="P:RazorSharp.Pointers.Pointer`1.Address" />) in <see cref="Hex.ToHex{T}" />
@@ -822,6 +864,7 @@ namespace RazorSharp.Pointers
 					return PointerSettings.NULLPTR;
 				}
 
+
 				if (typeof(T).IsNumericType()) {
 					return String.Format("{0} ({1})", inst.Reference, Hex.TryCreateHex(inst.Reference));
 				}
@@ -830,6 +873,11 @@ namespace RazorSharp.Pointers
 				if (typeof(T) == typeof(char)) {
 					return inst.ReadString(StringTypes.UniStr);
 				}
+
+				/*if (typeof(T) == typeof(sbyte)) {
+					return inst.ReadString(StringTypes.AnsiStr);
+				}*/
+
 
 				if (!typeof(T).IsValueType) {
 					Pointer<byte> heapPtr = inst.Read<Pointer<byte>>();

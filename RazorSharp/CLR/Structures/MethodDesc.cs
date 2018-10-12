@@ -236,8 +236,8 @@ namespace RazorSharp.CLR.Structures
 
 		public bool IsUnboxingStub => (Flags2 & MethodDescFlags2.IsUnboxingStub) != 0;
 
-		public bool IsIL => MethodClassification.mcIL == Classification ||
-		                    MethodClassification.mcInstantiated == Classification;
+		public bool IsIL => MethodClassification.IL == Classification ||
+		                    MethodClassification.Instantiated == Classification;
 
 		public bool IsStatic => Info.IsStatic;
 
@@ -246,7 +246,7 @@ namespace RazorSharp.CLR.Structures
 		#region Flags
 
 		public MethodClassification Classification =>
-			(MethodClassification) (m_wFlags & (ushort) MethodDescClassification.mdcClassification);
+			(MethodClassification) (m_wFlags & (ushort) MethodDescClassification.Classification);
 
 		public MethodAttributes         Attributes => Info.Attributes;
 		public MethodDescClassification Flags      => (MethodDescClassification) m_wFlags;
@@ -322,7 +322,7 @@ namespace RazorSharp.CLR.Structures
 		///     Sets the entry point for this method.
 		/// </summary>
 		/// <param name="pCode">Pointer to the new entry point</param>
-		public void SetStableEntryPoint(IntPtr pCode)
+		public void SetStableEntryPoint(Pointer<byte> pCode)
 		{
 			Reset();
 			long val = SetStableEntryPointInterlocked((ulong) pCode);
@@ -380,6 +380,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Name", Name);
 			table.AddRow("Enclosing type", EnclosingType.Name);
 			table.AddRow("MethodTable", Hex.ToHex(EnclosingMethodTable.Address));
+			table.AddRow("Token", Token);
 			table.AddRow("Signature", Info);
 
 			table.AddRow("Function", Hex.ToHex(Function));

@@ -9,12 +9,10 @@ using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
-namespace RazorSharp.Experimental
+namespace RazorSharp.Obsolete.Experimental
 {
 
 	#region
-
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
 
@@ -32,6 +30,7 @@ namespace RazorSharp.Experimental
 	///     Old namespace: Experimental
 	/// </remarks>
 	/// <typeparam name="T"></typeparam>
+	[Obsolete]
 	internal unsafe struct StackAllocated<T> where T : class
 	{
 		/// <summary>

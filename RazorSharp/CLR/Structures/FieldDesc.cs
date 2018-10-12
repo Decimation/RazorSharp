@@ -11,12 +11,12 @@ using RazorSharp.Utilities.Exceptions;
 using static RazorSharp.Memory.Mem;
 
 // ReSharper disable MemberCanBeMadeStatic.Local
-
+// ReSharper disable InconsistentNaming
 // ReSharper disable MemberCanBeMadeStatic.Global
 
 #endregion
 
-// ReSharper disable InconsistentNaming
+
 
 namespace RazorSharp.CLR.Structures
 {
@@ -212,6 +212,7 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		public Pointer<MethodTable> FieldMethodTable => Runtime.MethodTableOf(Info.FieldType);
 
+		public Type FieldType => Info.FieldType;
 
 		/// <summary>
 		///     The enclosing type's <see cref="EnclosingMethodTable" />
@@ -295,7 +296,7 @@ namespace RazorSharp.CLR.Structures
 
 			// Unsigned 1
 //			table.AddRow("MB", MB);
-			table.AddRow("MemberDef", Token);
+			table.AddRow("Token", Token);
 
 
 			table.AddRow("Offset", Offset);

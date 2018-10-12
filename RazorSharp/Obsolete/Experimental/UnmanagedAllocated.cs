@@ -11,7 +11,7 @@ using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
-namespace RazorSharp.Experimental
+namespace RazorSharp.Obsolete.Experimental
 {
 
 	/// <summary>
@@ -29,6 +29,7 @@ namespace RazorSharp.Experimental
 	///     Old namespace: Experimental
 	/// </remarks>
 	/// <typeparam name="T"></typeparam>
+	[Obsolete]
 	internal struct UnmanagedAllocated<T> where T : class
 	{
 		/// <summary>

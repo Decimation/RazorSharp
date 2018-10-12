@@ -81,7 +81,7 @@ namespace RazorSharp.Common
 		private static string ToHexInternal(long l)
 		{
 			string s = l.ToString("X");
-			if (Options.HasFlagFast(ToStringOptions.PrefixHex)) {
+			if (Options.HasFlag(ToStringOptions.PrefixHex)) {
 				s = PrefixString + s;
 			}
 
@@ -112,7 +112,7 @@ namespace RazorSharp.Common
 
 				if (options.HasFlag(ToStringOptions.PrefixHex)) {
 					value = PrefixString + value;
-					Console.WriteLine("pfx");
+
 				}
 			}
 
