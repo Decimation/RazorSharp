@@ -10,7 +10,6 @@ namespace RazorSharp.CLR
 
 	public static class Offsets
 	{
-
 		#region EEClass
 
 		/// <summary>

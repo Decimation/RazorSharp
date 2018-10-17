@@ -105,10 +105,10 @@ namespace RazorSharp.Memory
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private bool PatternCheck(long nOffset, byte[] arrPattern)
+		private bool PatternCheck(long nOffset, IReadOnlyList<byte> arrPattern)
 		{
 			// ReSharper disable once LoopCanBeConvertedToQuery
-			for (int i = 0; i < arrPattern.Length; i++) {
+			for (int i = 0; i < arrPattern.Count; i++) {
 				if (arrPattern[i] == 0x0) {
 					continue;
 				}

@@ -4,8 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -19,8 +22,10 @@ using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Fixed;
+using RazorSharp.CLR.Meta;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
+using RazorSharp.CLR.Structures.HeapObjects;
 using RazorSharp.CLR.Structures.ILMethods;
 using RazorSharp.Common;
 using RazorSharp.Memory;
@@ -32,6 +37,7 @@ using RazorSharp.Utilities;
 using Test.Testing.Benchmarking;
 using Test.Testing.Types;
 using static RazorSharp.Unsafe;
+using static Test.Testing.Benchmarking.SignatureCallBenchmarking;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Unsafe = RazorSharp.Unsafe;
 
@@ -111,147 +117,84 @@ namespace Test
 		// todo: replace native pointers* with Pointer<T> for consistency
 		// todo: RazorSharp, ClrMD, Reflection comparison
 		// todo: Contract-oriented programming
+		// todo: read module memory
 
 		/**
 		 * >> Entry point
 		 */
 		public static void Main(string[] args)
 		{
-			// todo: read module memory
-			/*
-//			Target tgt = new Target();
-
-			var mdAdd = Runtime.GetMethodDesc<Target>("add");
-			Debug.Assert(!mdAdd.Reference.IsPointingToNativeCode);
-			mdAdd.Reference.Prepare();
-			Debug.Assert(mdAdd.Reference.IsPointingToNativeCode);
-
-			Runtime.GetMethodDesc(typeof(Program), "Val").Reference.Prepare();
-
-			var nativeCode = AddressOfFunction(typeof(Program), "Val");
-
-			Console.WriteLine(Collections.ToString(nativeCode.CopyOut(0x3E + 1)));
-
-			Console.WriteLine(Val(1, 2));
-
-			nativeCode[0x27] = 0x2B;
-
-			Console.WriteLine(Val(1, 2));
-			Console.WriteLine(nativeCode.Query());
 
 
-			// xrefs to ?g_jitHost@@3PEAVICorJitHost@@EA at 0x18010b970 from:
+			MetaType mt = Meta.GetType<string>();
+			Console.WriteLine(mt);
+			Console.WriteLine(mt["m_firstChar"]);
+			Console.WriteLine(mt.Parent);
 
-			SignatureCall.DynamicBind(typeof(Program));
+			Debug.Assert(Compare<string>());
 
-			// nativeSizeOfCode
-
-			*/
-
-
-			//000000AFB6DFE990
-
-			//000000EBEBBFFCC8
-			long l = 0;
-
-
-			Console.WriteLine("Stack base = {0}", Hex.ToHex(Mem.StackBase));
-			Console.WriteLine("Stack lim = {0}", Hex.ToHex(Mem.StackLimit));
-
-			Console.WriteLine("&l = {0}", Hex.ToHex(&l));
-
-//			var rdi = PointerUtils.Add(&l, 0x10);
-			//		Console.WriteLine("rdi = {0}", Hex.ToHex(rdi));
-
-			// or rbp?
-			// sometimes wrong - frick
-			var rsp = PointerUtils.Subtract(&l, 0xE0).Subtract(0x20).Subtract(0x10).Subtract(0x10);
-			Console.WriteLine("rsp = {0}", Hex.ToHex(rsp));
-
-
-			Console.WriteLine("{0:P}", get_reg());
-			Console.WriteLine("Frame ptr = {0}", Hex.ToHex(&l - 1));
-			Console.WriteLine("Ret addr = {0}", Hex.ToHex(&l - 2));
-
-
-			string sz = "jew";
-
-			AddressOf(ref sz).WriteAs<string, long>("bar");
-			Debug.Assert(sz == "bar");
-			AddressOf(ref sz).WriteAs<string, IntPtr>("baz");
-			Debug.Assert(sz == "baz");
-			AddressOfHeap(ref sz, OffsetType.StringData).Write('j', 2);
-			Debug.Assert(sz == "baj");
-
-
-			float pi    = 3.14F;
-			var   piptr = Unsafe.AddressOf(ref pi);
-			Debug.Assert(piptr.ReadAs<float, int>() == *((int*) &pi));
-
-			int i = *((int*) &pi);
-			Debug.Assert(Unsafe.AddressOf(ref i).ReadAs<int, float>() == 3.14F);
-
-
-			var       alloc = Mem.AllocUnmanaged<Structure>();
-			Structure s     = new Structure
-			{
-				s = "joo"
-			};
-			alloc.Write(s);
-			Console.WriteLine(alloc);
-
-
-			Mem.Free(alloc);
 		}
 
-		struct Structure
+		private static bool Compare<T>()
 		{
-			public string s;
+			return Compare(Meta.GetType<T>(), typeof(T));
+		}
 
-			public override string ToString()
-			{
-				return String.Format("[{0}]", s);
+		private static bool Compare(MetaType meta, Type t)
+		{
+			Debug.Assert(meta.RuntimeType == t);
+			Debug.Assert(meta.Token == t.MetadataToken);
+
+			return true;
+		}
+
+		private static bool CompareEnums<TEnumA, TEnumB>() where TEnumA : Enum where TEnumB : Enum
+		{
+			var valuesA_rg = typeof(TEnumA).GetEnumValues();
+			var valuesB_rg = typeof(TEnumB).GetEnumValues();
+
+			Console.WriteLine("A {0}", valuesA_rg.Length);
+			Console.WriteLine("B {0}", valuesB_rg.Length);
+
+			List<TEnumA> valuesA = new List<TEnumA>();
+			List<TEnumB> valuesB = new List<TEnumB>();
+
+
+			foreach (var v in valuesA_rg) {
+				valuesA.Add(((TEnumA) v));
 			}
+
+			foreach (var v in valuesB_rg) {
+				valuesB.Add((TEnumB) v);
+			}
+
+
+			if (valuesA.Count != valuesB.Count) return false;
+			for (int i = 0; i < valuesA.Count; i++) {
+				if ((long) (object) valuesA[i] != (long) (object) valuesB[i]) {
+					Console.WriteLine("{0} != {1}", valuesA[i], valuesB[i]);
+					return false;
+				}
+			}
+
+			return true;
 		}
 
-		static void Interpret<T>(T t) { }
-
-		static bool _bool(int i)
+		private static CorTokenType getToken(int tk)
 		{
-			return i > 0;
+			return (CorTokenType) Constants.TypeFromToken(tk);
 		}
 
-
-		private static int get()
+		private static int tk<T>(string name)
 		{
-			return -1;
+			return Runtime.GetMethodDesc<T>(name).Reference.Token;
 		}
 
-		static void overwrite()
+		public static bool IsInterned(this string text)
 		{
-			byte* buffer = stackalloc byte[10];
-			gets(buffer);
+			return string.IsInterned(text) != null;
 		}
 
-		static void gets(byte* buffer)
-		{
-			string val = Console.ReadLine();
-			Mem.Copy(buffer, Encoding.UTF8.GetBytes(val));
-		}
-
-		static Pointer<byte> get_reg()
-		{
-			long          l;
-			Pointer<byte> rbp = &l + 1;
-			return rbp;
-		}
-
-
-		static void auto(Pointer<Pointer<int>> lpInt32)
-		{
-			int z = 0xFFFFFF;
-			lpInt32.Reference = &z;
-		}
 
 		//struct CORINFO_METHOD_INFO
 		//{
@@ -267,69 +210,8 @@ namespace Test
 		//	CORINFO_SIG_INFO      locals;
 		//};
 
-		[Sigcall(Module = "clrjit.dll", Signature = "48 8B 05 B9 D8 05 00 48 85 C0 75 1C 48 8D 05 CD 34 04 00")]
-		private static Pointer<byte> GetJit()
-		{
-			return null;
-		}
 
-		private static int Val(int a, int b)
-		{
-			a += b;
-			return a;
-		}
-
-
-		static TDelegate HyperInvoke<TType, TDelegate>(string name) where TDelegate : Delegate
-		{
-			return Runtime.GetMethodDesc<TType>(name).Reference.GetDelegate<TDelegate>();
-		}
-
-
-		private static class Dbg
-		{
-			[Conditional("DEBUG")]
-			public static void Break()
-			{
-				Console.ReadLine();
-			}
-		}
-
-
-		[DllImport("kernel32.dll", EntryPoint = "RtlCopyMemory")]
-		private static extern void CopyMemory(void* dest, void* src, uint len);
-
-		private delegate int add(Target ptr, int i, int j);
-
-
-		class Hyper
-		{
-			public Hyper()
-			{
-				Swap<object>();
-			}
-
-			public bool IsType<T>()
-			{
-				return GetType() == typeof(T);
-			}
-
-			public void Swap<T>()
-			{
-				var heap = Unsafe.AddressOfHeap(this);
-				heap.Write(Runtime.MethodTableOf<T>());
-				Debug.Assert(IsType<T>());
-			}
-
-			public void Write<T>(T t, int elemOffset = 0)
-			{
-				var heap = Unsafe.AddressOfHeap(this, OffsetType.Fields);
-
-
-				heap.Write(t, elemOffset);
-			}
-		}
-
+		#region todo
 
 		[NotNull]
 		public static List<MemoryBasicInformation> GetRegionsOfStack()
@@ -370,10 +252,6 @@ namespace Test
 
 			Console.WriteLine(table.ToMarkDownString());
 		}
-
-
-		#region todo
-
 		/*static void Region()
 		{
 			var table   = new ConsoleTable("Region", "Address", "Size", "GC Segment", "GC Heap");
@@ -492,7 +370,7 @@ namespace Test
 
 		private static void RunBenchmark<T>()
 		{
-			BenchmarkRunner.Run<T>();
+			BenchmarkRunner.Run<T>(new AllowNonOptimized());
 		}
 
 		private static void VmMap()
@@ -510,11 +388,6 @@ namespace Test
 			table.AddRow(Hex.ToHex(GCHeap.LowestAddress), Hex.ToHex(GCHeap.HighestAddress),
 				String.Format("{0} ({1} K)", GCHeap.Size, GCHeap.Size / Mem.BytesInKilobyte));
 			Console.WriteLine(InspectorHelper.CreateLabelString("GC:", table));
-		}
-
-		private static T* AddrOf<T>(ref T t) where T : unmanaged
-		{
-			return (T*) AddressOf(ref t);
 		}
 
 		#endregion

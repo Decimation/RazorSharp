@@ -88,10 +88,6 @@
     <Reference Include="System" />
       <Reference Include="System.AppContext, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
           <HintPath>..\packages\System.AppContext.4.3.0\lib\net463\System.AppContext.dll</HintPath>
-      </Reference>
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
-      <HintPath>..\packages\System.Buffers.4.5.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\packages\System.Collections.Immutable.1.5.0\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
@@ -138,16 +134,8 @@
     </Reference>
       <Reference Include="System.Linq.Expressions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
           <HintPath>..\packages\System.Linq.Expressions.4.3.0\lib\net463\System.Linq.Expressions.dll</HintPath>
-      </Reference>
-    <Reference Include="System.Memory, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
-      <HintPath>..\packages\System.Memory.4.5.1\lib\netstandard2.0\System.Memory.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
       <Reference Include="System.Reflection, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
           <HintPath>..\packages\System.Reflection.4.3.0\lib\net462\System.Reflection.dll</HintPath>
       </Reference>
@@ -158,8 +146,8 @@
       <HintPath>..\packages\System.Runtime.4.3.0\lib\net462\System.Runtime.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.1\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+          <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Runtime.Extensions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -316,8 +304,10 @@
       <Compile Include="CLR\Structures\PackedDWORDFields.cs"/>
       <Compile Include="CLR\Constants.cs"/>
       <Compile Include="CLR\Runtime.cs"/>
+      <Compile Include="Substrate.cs"/>
     <Compile Include="Unsafe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+      <Compile Include="Utilities\Exceptions\PreconditionException.cs"/>
       <Compile Include="Utilities\Exceptions\SigcallException.cs"/>
       <Compile Include="Utilities\Exceptions\RuntimeException.cs"/>
       <Compile Include="Utilities\Exceptions\TypeException.cs"/>
@@ -329,8 +319,12 @@
       <PackageReference Include="Microsoft.NETCore.Compilers" Version="2.9.0" Condition="'$(MSBuildRuntimeType)' == 'Core'"/>
   </ItemGroup>
     <ItemGroup>
-        <None Include="app.config"/>
-        <None Include="packages.config"/>
+        <None Include="app.config">
+            <SubType>Designer</SubType>
+        </None>
+        <None Include="packages.config">
+            <SubType>Designer</SubType>
+        </None>
     </ItemGroup>
     <ItemGroup>
         <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.1.1.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll"/>

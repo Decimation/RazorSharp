@@ -7,7 +7,7 @@ using System;
 namespace RazorSharp.Utilities.Exceptions
 {
 
-	internal class TypeException : Exception
+	internal class TypeException : PreconditionException
 	{
 		internal TypeException(string s) : base(s) { }
 

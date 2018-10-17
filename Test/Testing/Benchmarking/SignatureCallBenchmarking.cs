@@ -25,6 +25,9 @@ namespace Test.Testing.Benchmarking
 
 			[ClrSigcall]
 			private void doSomething2() { }
+
+			[ClrSigcall]
+			private void doSomething3() { }
 		}
 
 
@@ -34,24 +37,41 @@ namespace Test.Testing.Benchmarking
 			SignatureCall.DynamicBind<MethodDesc>();
 			SignatureCall.DynamicBind<FieldDesc>();
 			SignatureCall.DynamicBind<GCHeap>();
+		}
 
-			SignatureCall.CacheFunction<CClass>("doSomething2",
-				new byte[]
-				{
-					0x4C, 0x8B, 0x01, 0x49, 0x83, 0xE0, 0xFC, 0x41, 0xF7, 0x00, 0x00, 0x00, 0x00, 0x80, 0x41, 0x8B,
-					0x40, 0x04, 0x74, 0x0E, 0x8B, 0x51, 0x08, 0x41, 0x0F, 0xB7, 0x08, 0x48, 0x0F, 0xAF, 0xD1, 0x48,
-					0x03, 0xC2
-				});
+		private readonly byte[] m_sig =
+		{
+			0x4C, 0x8B, 0x01, 0x49, 0x83, 0xE0, 0xFC, 0x41, 0xF7, 0x00, 0x00, 0x00, 0x00, 0x80, 0x41, 0x8B,
+			0x40, 0x04, 0x74, 0x0E, 0x8B, 0x51, 0x08, 0x41, 0x0F, 0xB7, 0x08, 0x48, 0x0F, 0xAF, 0xD1, 0x48,
+			0x03, 0xC2
+		};
+
+		[IterationCleanup]
+		public void Cleanup()
+		{
+			SignatureCall.Clear();
+		}
+
+		[Benchmark]
+		public void CacheNoToken()
+		{
+			SignatureCall.CacheFunction<CClass>("doSomething2", m_sig);
+		}
+
+		[Benchmark]
+		public void CacheToken()
+		{
+			SignatureCall.CacheFunction<CClass>(100663534, m_sig);
 		}
 
 
-		[Benchmark]
+//		[Benchmark]
 		public void BindSingleInline()
 		{
 			SignatureCall.DynamicBind<CClass>("doSomething");
 		}
 
-		[Benchmark]
+//		[Benchmark]
 		public void BindSingleCached()
 		{
 			SignatureCall.DynamicBind<CClass>("doSomething2");

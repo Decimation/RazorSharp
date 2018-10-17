@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR;
@@ -75,7 +76,6 @@ namespace RazorSharp
 	public static unsafe class Unsafe
 	{
 		internal const int INVALID_VALUE = -1;
-
 
 		#region OffsetOf
 
@@ -152,6 +152,9 @@ namespace RazorSharp
 			Pointer<FieldDesc> fd = Runtime.GetFieldDesc<T>(name, fieldTypes);
 			return fd.Reference.GetAddress(ref instance);
 		}
+
+		// todo: maybe use CSUnsafe.AsPointer instead of a TypedReference...
+		// todo: it's much faster (by ~1.8 ns)
 
 		/// <summary>
 		///     <para>Returns the address of <paramref name="t" />.</para>

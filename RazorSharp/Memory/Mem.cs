@@ -179,18 +179,14 @@ namespace RazorSharp.Memory
 
 		#region Zero
 
-		public static void Zero(IntPtr ptr, int length)
+		public static void Zero(Pointer<byte> ptr, int length)
 		{
-			Zero(ptr.ToPointer(), length);
-		}
-
-		public static void Zero(void* ptr, int length)
-		{
-			byte* memptr = (byte*) ptr;
 			for (int i = 0; i < length; i++) {
-				memptr[i] = 0;
+				ptr[i] = 0;
 			}
 		}
+
+
 
 		#endregion
 

@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -56,6 +57,7 @@ namespace RazorSharp.Pointers
 	///     </remarks>
 	/// </summary>
 	/// <typeparam name="T">Element type to point to</typeparam>
+	[DebuggerDisplay("{" + nameof(DbgToString) + "()}")]
 	public unsafe struct Pointer<T> : IPointer<T>
 	{
 		/// <summary>
@@ -236,6 +238,9 @@ namespace RazorSharp.Pointers
 			IEnumerator<T> enumerator = enumerable.GetEnumerator();
 			int            i          = 0;
 			while (enumerator.MoveNext()) {
+
+				RazorContract.RequiresNotNull(enumerator.Current);
+
 				if (!enumerator.Current.Equals(this[i++])) {
 					enumerator.Dispose();
 					return false;
@@ -291,17 +296,37 @@ namespace RazorSharp.Pointers
 			return Kernel32.VirtualQuery(Address);
 		}
 
+		private string DbgToString()
+		{
+			return String.Format("Address = {0} | Value = {1}", ToString(PointerSettings.FMT_P),
+				Reference.ToString());
+		}
+
 		#region Read / write
 
-		public TAs ReadAs<TType, TAs>()
+		/// <summary>
+		/// Reads a value of <typeparamref name="TType"/> as a <typeparamref name="TAs"/>
+		/// </summary>
+		/// <param name="elemOffset">Element offset in terms of <typeparamref name="TType"/></param>
+		/// <typeparam name="TType">Inherent type</typeparam>
+		/// <typeparam name="TAs">Type to reinterpret <typeparamref name="TType"/> as</typeparam>
+		/// <returns></returns>
+		public TAs ReadAs<TType, TAs>(int elemOffset = 0)
 		{
-			TType t = Read<TType>();
+			TType t = Read<TType>(elemOffset);
 			return CSUnsafe.Read<TAs>(Unsafe.AddressOf(ref t).ToPointer());
 		}
 
-		public void WriteAs<TType, TAs>(TType value)
+		/// <summary>
+		/// Writes a value of <typeparamref name="TType"/> as a <typeparamref name="TAs"/>
+		/// </summary>
+		/// <param name="value">Value to write as a <typeparamref name="TAs"/></param>
+		/// <param name="elemOffset">Element offset in terms of <typeparamref name="TType"/></param>
+		/// <typeparam name="TType">Inherent type</typeparam>
+		/// <typeparam name="TAs">Type to reinterpret <typeparamref name="TType"/> as</typeparam>
+		public void WriteAs<TType, TAs>(TType value, int elemOffset = 0)
 		{
-			Write(CSUnsafe.Read<TAs>(Unsafe.AddressOf(ref value).ToPointer()));
+			Write(CSUnsafe.Read<TAs>(Unsafe.AddressOf(ref value).ToPointer()), elemOffset);
 		}
 
 		[HandleProcessCorruptedStateExceptions]

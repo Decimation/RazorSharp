@@ -45,7 +45,7 @@ namespace RazorSharp.Memory
 		public List<PatternPair> Pairs => m_rgPatternPairs;
 
 
-		public void AddCache(string fnName, bool isGet = false, [ValueProvider("RazorSharp.CLR.Constants")]long ofsGuess = 0)
+		public void AddCache(string fnName, bool isGet = false, [ValueProvider("Constants")] long ofsGuess = 0)
 		{
 			if (isGet) {
 				fnName = SpecialNames.NameOfGetPropertyMethod(fnName);

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.Pointers.Ex;
+#pragma warning disable 612
 
 #endregion
 

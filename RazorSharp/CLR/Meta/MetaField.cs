@@ -77,6 +77,11 @@ namespace RazorSharp.CLR.Meta
 		}
 
 //		public static implicit operator MetaField(Pointer<FieldDesc> p) {}
+
+		public override string ToString()
+		{
+			return String.Format("{0} {1} (offset: {2}) (size: {3})",m_pFieldDesc.Reference.FieldType.Name,Name, Offset,Size);
+		}
 	}
 
 }

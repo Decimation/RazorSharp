@@ -152,6 +152,7 @@ namespace RazorSharp.CLR
 		{
 			private static readonly Cache<FieldDesc> s_fieldDescCache;
 
+
 			static FieldDescFunctions()
 			{
 				s_fieldDescCache = new Cache<FieldDesc>(Functions);

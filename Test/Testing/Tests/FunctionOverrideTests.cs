@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.CLR;
@@ -50,7 +51,8 @@ namespace Test.Testing.Tests
 		{
 			var target = new Target();
 			target += target;
-			Debug.Assert(!Switch.Flag.Value);
+//			Debug.Assert(!Switch.Flag.Value);
+			Contract.Requires(!Switch.Flag.Value);
 
 			Override(typeof(Target), "op_Addition", typeof(FunctionOverrideTests), "override_op_Addition");
 
@@ -63,7 +65,8 @@ namespace Test.Testing.Tests
 		{
 			var target = new Target();
 			ManualInvokeTarget("Finalize", target);
-			Debug.Assert(!Switch.Flag.Value);
+//			Debug.Assert(!Switch.Flag.Value);
+			Contract.Requires(!Switch.Flag.Value);
 
 			Override(typeof(Target), "Finalize", typeof(FunctionOverrideTests), "override_Finalize");
 

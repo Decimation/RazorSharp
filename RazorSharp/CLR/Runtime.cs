@@ -50,7 +50,7 @@ namespace RazorSharp.CLR
 		///     These specific <see cref="BindingFlags" /> are used because they correspond with the metadata and structures
 		///     in CLR structures such as <see cref="MethodTable" />
 		/// </summary>
-		private const BindingFlags DefaultFlags =
+		internal const BindingFlags DefaultFlags =
 			BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
 
 
@@ -238,6 +238,7 @@ namespace RazorSharp.CLR
 			RazorContract.RequiresNotNull(fieldInfo);
 			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
 			RazorContract.Assert(fieldDesc.Reference.Info == fieldInfo);
+			RazorContract.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
 
 			return fieldDesc;
 		}

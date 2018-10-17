@@ -7,7 +7,7 @@ namespace RazorSharp
 	/// <summary>
 	/// Describes a type of low-level exception / segmentation fault
 	/// </summary>
-	public enum CorruptionState
+	internal enum CorruptionState
 	{
 		None,
 

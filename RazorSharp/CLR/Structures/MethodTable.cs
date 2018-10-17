@@ -107,7 +107,7 @@ namespace RazorSharp.CLR.Structures
 		///     Class token if it fits into 16-bits. If this is (WORD)-1, the class token is stored in the TokenOverflow optional
 		///     member.
 		/// </summary>
-		private int Token => m_wToken;
+		private int OrigToken => m_wToken;
 
 		/// <summary>
 		///     The number of virtual methods in this type (<c>4</c> by default; from <see cref="Object" />)
@@ -236,11 +236,9 @@ namespace RazorSharp.CLR.Structures
 		///         <para>Equals <see cref="Type.MetadataToken" /></para>
 		///     </remarks>
 		/// </summary>
-		public int MDToken => Constants.TokenFromRid(Token, CorTokenType.mdtTypeDef);
+		public int Token => Constants.TokenFromRid(OrigToken, CorTokenType.mdtTypeDef);
 
 		// internal name: GetTypeDefRid
-
-		// todo: Rename MDToken to MemberDef? or vise versa
 
 		/// <summary>
 		///     <para>Corresponding <see cref="Type" /> of this <see cref="MethodTable" /></para>
@@ -283,7 +281,7 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     Length of the <see cref="FieldDescList" />
 		/// </summary>
-		public int FieldDescListLength => EEClass.Reference.FieldDescListLength;
+		internal int FieldDescListLength => EEClass.Reference.FieldDescListLength;
 
 		// todo
 		internal MethodDescChunk* MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
@@ -356,7 +354,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Flags", Runtime.CreateFlagsString(FlagsValue, Flags));
 			table.AddRow("Flags 2", Runtime.CreateFlagsString(Flags2Value, Flags2));
 			table.AddRow("Low flags", Runtime.CreateFlagsString(FlagsLowValue, FlagsLow));
-			table.AddRow("Token", MDToken);
+			table.AddRow("Token", Token);
 
 			if (m_pParentMethodTable != null) {
 				table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));

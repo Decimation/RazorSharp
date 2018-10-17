@@ -16,8 +16,6 @@ using static RazorSharp.Memory.Mem;
 
 #endregion
 
-
-
 namespace RazorSharp.CLR.Structures
 {
 

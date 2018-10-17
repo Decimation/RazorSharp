@@ -15,6 +15,22 @@ namespace RazorSharp
 	/// </summary>
 	internal static class Misc
 	{
+		/// <summary>
+		///     Converts an <see cref="Action" /> to a <see cref="Func{TResult}" /> by returning a dummy <c>default</c>
+		///     value of <typeparamref name="T" />.
+		/// </summary>
+		/// <param name="action"><see cref="Action" /> to convert</param>
+		/// <typeparam name="T">Dummy return type</typeparam>
+		/// <returns></returns>
+		private static Func<T> ProxyAction<T>(Action action)
+		{
+			return delegate
+			{
+				action();
+				return default;
+			};
+		}
+
 		internal static void SetChar(this string str, int i, char c)
 		{
 			ObjectPinner.InvokeWhilePinned(str, delegate

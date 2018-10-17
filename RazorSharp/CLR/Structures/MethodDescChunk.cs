@@ -71,7 +71,7 @@ namespace RazorSharp.CLR.Structures
 		public byte Size => m_size;
 
 
-		public byte Count => (byte) (m_count + (byte) 1); //(byte) (m_count + 1);
+		public byte Count => (byte) (m_count + 1); //(byte) (m_count + 1);
 
 // PTR_HOST_MEMBER_TADDR(type, host, memb)
 // Retrieves the target address of a host instance pointer and

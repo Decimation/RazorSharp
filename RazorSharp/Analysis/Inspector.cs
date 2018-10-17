@@ -10,6 +10,7 @@ using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
+// ReSharper disable StaticMemberInGenericType
 
 #endregion
 

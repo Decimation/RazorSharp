@@ -6,7 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 using RazorSharp.CLR;
+using Module = RazorSharp.CLR.Structures.Module;
 
 #endregion
 
@@ -65,7 +67,7 @@ namespace RazorSharp.Memory
 
 	/// <inheritdoc />
 	/// <summary>
-	///     <see cref="T:RazorSharp.Memory.SigcallAttribute" /> for module <see cref="F:RazorSharp.CLR.CLRFunctions.ClrDll" />
+	///     <see cref="T:RazorSharp.Memory.SigcallAttribute" /> for module <see cref="RazorSharp.CLR.ClrFunctions.ClrDll" />
 	/// </summary>
 	public class ClrSigcallAttribute : SigcallAttribute
 	{
@@ -77,8 +79,8 @@ namespace RazorSharp.Memory
 		public ClrSigcallAttribute(string signature) : base(ClrFunctions.ClrDll, signature) { }
 	}
 
-
 	// todo: WIP
+	// todo: make caching more efficient
 
 	/// <summary>
 	///     Contains methods for operating with <see cref="SigcallAttribute" />-annotated functions
@@ -93,7 +95,6 @@ namespace RazorSharp.Memory
 		/// </summary>
 		private static readonly ISet<Type> BoundTypes = new HashSet<Type>();
 
-
 		private static readonly SigScanner SigScanner = new SigScanner();
 
 		/// <summary>
@@ -107,9 +108,11 @@ namespace RazorSharp.Memory
 		/// </summary>
 		private static readonly Dictionary<MethodInfo, Tuple<byte[], long>> SigcallMethodMap;
 
+
 		static SignatureCall()
 		{
 			SigcallMethodMap = new Dictionary<MethodInfo, Tuple<byte[], long>>();
+
 			ClrFunctions.AddAll();
 		}
 
@@ -141,12 +144,14 @@ namespace RazorSharp.Memory
 		private static IntPtr GetCorrespondingFunctionPointer(SigcallAttribute attr, MethodInfo methodInfo)
 		{
 			IntPtr fn = attr.IsInFunctionMap
-				? SigScanner.FindPattern(SigcallMethodMap[methodInfo].Item1,
-					attr.OffsetGuess == 0 ? SigcallMethodMap[methodInfo].Item2 : attr.OffsetGuess)
+				? SigScanner.FindPattern(SigcallMethodMap[methodInfo].Item1, attr.OffsetGuess == 0 ?
+						SigcallMethodMap[methodInfo].Item2 : attr.OffsetGuess)
 				: SigScanner.FindPattern(attr.Signature, attr.OffsetGuess);
 
 			return fn;
 		}
+
+
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void ApplySigcallIndependent(MethodInfo methodInfo)
@@ -238,6 +243,17 @@ namespace RazorSharp.Memory
 			if (!SigcallMethodMap.ContainsKey(mi)) {
 				SigcallMethodMap.Add(mi, new Tuple<byte[], long>(rgBytes, offsetGuess));
 			}
+		}
+
+		public static void Clear()
+		{
+			SigcallMethodMap.Clear();
+		}
+
+		public static void CacheFunction<T>(int token, byte[] rgBytes, long offsetGuess = 0)
+		{
+			var mb = typeof(T).Module.ResolveMethod(token);
+			AddToMap((MethodInfo) mb, rgBytes, offsetGuess);
 		}
 
 		public static void Cache<T>(Cache<T> cache)

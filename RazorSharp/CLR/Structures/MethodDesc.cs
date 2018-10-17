@@ -1,6 +1,6 @@
 #region
 
-#region
+
 
 using System;
 using System.Diagnostics;
@@ -15,16 +15,13 @@ using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 
 // ReSharper disable MemberCanBeMadeStatic.Local
-
 // ReSharper disable InconsistentNaming
-
 // ReSharper disable ConvertToAutoPropertyWhenPossible
-
-#endregion
-
 // ReSharper disable MemberCanBeMadeStatic.Global
 
 #endregion
+
+
 
 namespace RazorSharp.CLR.Structures
 {
@@ -35,7 +32,7 @@ namespace RazorSharp.CLR.Structures
 
 	#endregion
 
-	//todo: complete
+	// todo: complete
 
 	/// <summary>
 	///     <para>Internal representation: <see cref="RuntimeMethodHandle.Value" /></para>
@@ -129,7 +126,8 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		/// <exception cref="SigcallException"></exception>
 		public IntPtr NativeCode {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 
@@ -139,7 +137,8 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public IntPtr PreImplementedCode {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 		/// <summary>
