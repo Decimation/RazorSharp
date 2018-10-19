@@ -221,6 +221,7 @@
       <Compile Include="CLR\Meta\IMeta.cs"/>
       <Compile Include="CLR\Meta\Meta.cs"/>
       <Compile Include="CLR\Meta\MetaField.cs"/>
+      <Compile Include="CLR\Meta\MetaMethod.cs"/>
       <Compile Include="CLR\Meta\MetaType.cs"/>
       <Compile Include="CLR\Offsets.cs"/>
       <Compile Include="CLR\ReflectionUtil.cs"/>
@@ -241,6 +242,7 @@
       <Compile Include="Common\Extensions.cs"/>
       <Compile Include="Common\Hex.cs"/>
       <Compile Include="Common\Strings.cs"/>
+      <Compile Include="VirtualCollection.cs"/>
       <Compile Include="LowLevel.cs"/>
       <Compile Include="Memory\AllocPool.cs"/>
     <Compile Include="Memory\Asm.cs" />

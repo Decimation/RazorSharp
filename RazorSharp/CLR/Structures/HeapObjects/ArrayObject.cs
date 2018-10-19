@@ -38,7 +38,7 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct ArrayObject : IHeapObject
+	internal unsafe struct ArrayObject : IHeapObject
 	{
 // 		[FieldOffset(-8) public ObjHeader _header
 		[FieldOffset(0)]  private readonly MethodTable* m_methodTablePtr;

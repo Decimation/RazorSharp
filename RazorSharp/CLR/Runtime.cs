@@ -32,7 +32,7 @@ namespace RazorSharp.CLR
 	}
 
 	/// <summary>
-	///     Provides utilities for manipulating CLR structures.
+	///     Provides utilities for manipulating, reading, and writing CLR structures.
 	///     <para>Related files:</para>
 	///     <list type="bullet">
 	///         <item>
@@ -43,15 +43,15 @@ namespace RazorSharp.CLR
 	///         </item>
 	///     </list>
 	/// </summary>
-	public static unsafe class Runtime
+	internal static unsafe class Runtime
 	{
 
 		/// <summary>
 		///     These specific <see cref="BindingFlags" /> are used because they correspond with the metadata and structures
 		///     in CLR structures such as <see cref="MethodTable" />
 		/// </summary>
-		internal const BindingFlags DefaultFlags =
-			BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
+		private const BindingFlags DefaultFlags = BindingFlags.Instance | BindingFlags.NonPublic |
+		                                           BindingFlags.Public | BindingFlags.Static;
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -63,19 +63,19 @@ namespace RazorSharp.CLR
 
 		#region HeapObjects
 
-		public static ArrayObject** GetArrayObject<T>(ref T t) where T : class
+		internal static ArrayObject** GetArrayObject<T>(ref T t) where T : class
 		{
 			RazorContract.RequiresType<Array, T>();
 
 			return (ArrayObject**) Unsafe.AddressOf(ref t);
 		}
 
-		public static StringObject** GetStringObject(ref string s)
+		internal static StringObject** GetStringObject(ref string s)
 		{
 			return (StringObject**) Unsafe.AddressOf(ref s);
 		}
 
-		public static HeapObject** GetHeapObject<T>(ref T t) where T : class
+		internal static HeapObject** GetHeapObject<T>(ref T t) where T : class
 		{
 			HeapObject** h = (HeapObject**) Unsafe.AddressOf(ref t);
 			return h;
@@ -90,7 +90,7 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <param name="pMt"><see cref="MethodTable" /> to get the <see cref="Type" /> of</param>
 		/// <returns>The <see cref="Type" /> of the specified <see cref="MethodTable" /></returns>
-		public static Type MethodTableToType(Pointer<MethodTable> pMt)
+		internal static Type MethodTableToType(Pointer<MethodTable> pMt)
 		{
 			return ClrFunctions.JIT_GetRuntimeType(pMt.ToPointer());
 		}
@@ -103,7 +103,7 @@ namespace RazorSharp.CLR
 		///     </para>
 		/// </summary>
 		/// <returns>A pointer to type <typeparamref name="T" />'s <see cref="MethodTable" /></returns>
-		public static Pointer<MethodTable> ReadMethodTable<T>(ref T t)
+		internal static Pointer<MethodTable> ReadMethodTable<T>(ref T t)
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
 			if (typeof(T).IsValueType) {
@@ -123,7 +123,7 @@ namespace RazorSharp.CLR
 		/// <typeparam name="T">Type to return the corresponding <see cref="MethodTable" /> for.</typeparam>
 		/// <returns>A <see cref="Pointer{T}" /> to type <typeparamref name="T" />'s <see cref="MethodTable" /></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Pointer<MethodTable> MethodTableOf<T>()
+		internal static Pointer<MethodTable> MethodTableOf<T>()
 		{
 			return MethodTableOf(typeof(T));
 		}
@@ -135,7 +135,7 @@ namespace RazorSharp.CLR
 		/// <param name="t">Type to return the corresponding <see cref="MethodTable" /> for.</param>
 		/// <returns>A <see cref="Pointer{T}" /> to type <paramref name="t" />'s <see cref="MethodTable" /></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Pointer<MethodTable> MethodTableOf(Type t)
+		internal static Pointer<MethodTable> MethodTableOf(Type t)
 		{
 			IntPtr typeHandle = t.TypeHandle.Value;
 
@@ -159,9 +159,8 @@ namespace RazorSharp.CLR
 
 		#region FieldDesc
 
-		public static Pointer<FieldDesc>[] GetFieldDescs<T>(ref T t)
+		private static Pointer<FieldDesc>[] ReadFieldDescs(Pointer<MethodTable> mt)
 		{
-			Pointer<MethodTable> mt   = ReadMethodTable(ref t);
 			int                  len  = mt.Reference.FieldDescListLength;
 			Pointer<FieldDesc>[] lpFd = new Pointer<FieldDesc>[len];
 
@@ -170,6 +169,11 @@ namespace RazorSharp.CLR
 			}
 
 			return lpFd;
+		}
+
+		internal static Pointer<FieldDesc>[] GetFieldDescs<T>(T t)
+		{
+			return ReadFieldDescs(ReadMethodTable(ref t));
 		}
 
 
@@ -181,29 +185,18 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public static Pointer<FieldDesc>[] GetFieldDescs<T>()
+		internal static Pointer<FieldDesc>[] GetFieldDescs<T>()
 		{
 			return GetFieldDescs(typeof(T));
 		}
 
 
-		public static Pointer<FieldDesc>[] GetFieldDescs(Type t)
+		internal static Pointer<FieldDesc>[] GetFieldDescs(Type t)
 		{
 //			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
-
-			Pointer<MethodTable> mt   = MethodTableOf(t);
-			int                  len  = mt.Reference.FieldDescListLength;
-			Pointer<FieldDesc>[] lpFd = new Pointer<FieldDesc>[len];
-
-			for (int i = 0; i < len; i++)
-				lpFd[i] = &mt.Reference.FieldDescList[i];
-
-
 			// Adds about 1k ns
 //			lpFd = lpFd.OrderBy(x => x.ToInt64()).ToArray();
-
-
-			return lpFd;
+			return ReadFieldDescs(MethodTableOf(t));
 		}
 
 		// todo: add support for getting FieldDesc of fixed buffers (like isAutoProperty) - use an enum probably
@@ -217,7 +210,7 @@ namespace RazorSharp.CLR
 		/// <param name="flags"></param>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		public static Pointer<FieldDesc> GetFieldDesc(Type t, string name,
+		internal static Pointer<FieldDesc> GetFieldDesc(Type t, string name,
 			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None, BindingFlags flags = DefaultFlags)
 		{
 			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
@@ -243,7 +236,7 @@ namespace RazorSharp.CLR
 			return fieldDesc;
 		}
 
-		public static Pointer<FieldDesc> GetFieldDesc<T>(string name,
+		internal static Pointer<FieldDesc> GetFieldDesc<T>(string name,
 			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None, BindingFlags flags = DefaultFlags)
 		{
 			return GetFieldDesc(typeof(T), name, fieldTypes, flags);
@@ -252,7 +245,18 @@ namespace RazorSharp.CLR
 
 		internal static FieldInfo[] GetFields<T>()
 		{
-			FieldInfo[] fields = typeof(T).GetFields(DefaultFlags);
+			return GetFields(typeof(T));
+		}
+
+		/// <summary>
+		/// Gets the corresponding <see cref="FieldInfo"/>s equivalent to the fields
+		/// in <see cref="MethodTable.FieldDescList"/>
+		/// </summary>
+		/// <param name="t"></param>
+		/// <returns></returns>
+		internal static FieldInfo[] GetFields(Type t)
+		{
+			FieldInfo[] fields = t.GetFields(DefaultFlags);
 			Collections.RemoveAll(ref fields, f => f.IsLiteral);
 			return fields;
 		}
@@ -261,12 +265,12 @@ namespace RazorSharp.CLR
 
 		#region MethodDesc
 
-		public static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
 		{
 			return GetMethodDescs(typeof(T), flags);
 		}
 
-		public static Pointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
 		{
 			MethodInfo[] methods = t.GetMethods(flags);
 			RazorContract.RequiresNotNull(methods);
@@ -285,7 +289,7 @@ namespace RazorSharp.CLR
 			return arr;
 		}
 
-		public static Pointer<MethodDesc> GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc> GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
 		{
 			MethodInfo methodInfo = t.GetMethod(name, flags);
 
@@ -301,7 +305,7 @@ namespace RazorSharp.CLR
 			return md;
 		}
 
-		public static Pointer<MethodDesc> GetMethodDesc<T>(string name, BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc> GetMethodDesc<T>(string name, BindingFlags flags = DefaultFlags)
 		{
 			return GetMethodDesc(typeof(T), name, flags);
 		}
@@ -358,7 +362,7 @@ namespace RazorSharp.CLR
 		///     Reads a reference type's <see cref="ObjHeader" />
 		/// </summary>
 		/// <returns>A pointer to the reference type's header</returns>
-		public static ObjHeader* ReadObjHeader<T>(ref T t) where T : class
+		internal static ObjHeader* ReadObjHeader<T>(ref T t) where T : class
 		{
 			IntPtr data = Unsafe.AddressOfHeap(ref t).Address;
 
@@ -378,7 +382,7 @@ namespace RazorSharp.CLR
 		///         </para>
 		///     </remarks>
 		/// </summary>
-		public static bool IsBlittable<T>()
+		internal static bool IsBlittable<T>()
 		{
 			// We'll say arrays and strings are blittable cause they're
 			// usable with GCHandle

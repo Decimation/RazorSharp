@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using RazorSharp.CLR.Meta;
 using RazorSharp.CLR.Structures.ILMethods;
 using RazorSharp.Common;
 using RazorSharp.Memory;
@@ -35,6 +36,7 @@ namespace RazorSharp.CLR.Structures
 	// todo: complete
 
 	/// <summary>
+	/// <para>CLR <see cref="MethodDesc"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaMethod"/></para>
 	///     <para>Internal representation: <see cref="RuntimeMethodHandle.Value" /></para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
@@ -59,7 +61,7 @@ namespace RazorSharp.CLR.Structures
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct MethodDesc
+	internal unsafe struct MethodDesc
 	{
 
 		// method.hpp: 213

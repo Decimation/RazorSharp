@@ -4,6 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorSharp.CLR.Meta;
 using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Common;
 using RazorSharp.Pointers;
@@ -28,6 +29,7 @@ namespace RazorSharp.CLR.Structures
 
 
 	/// <summary>
+	/// <para>CLR <see cref="MethodTable"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaType"/></para>
 	///     <para>Internal representation: <see cref="RuntimeTypeHandle.Value" /></para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
@@ -55,7 +57,7 @@ namespace RazorSharp.CLR.Structures
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct MethodTable
+	internal unsafe struct MethodTable
 	{
 
 		#region Properties and Accessors
@@ -157,7 +159,7 @@ namespace RazorSharp.CLR.Structures
 		///     If the union type is not <see cref="LowBits.EEClass" /> or
 		///     <see cref="LowBits.MethodTable" />
 		/// </exception>
-		public Pointer<EEClass> EEClass {
+		internal Pointer<EEClass> EEClass {
 			get {
 				switch (UnionType) {
 					case LowBits.EEClass:
@@ -185,7 +187,7 @@ namespace RazorSharp.CLR.Structures
 		///         <see cref="LowBits.EEClass" />
 		///     </exception>
 		/// </summary>
-		public Pointer<MethodTable> Canon {
+		internal Pointer<MethodTable> Canon {
 			get {
 				switch (UnionType) {
 					case LowBits.MethodTable:

@@ -38,7 +38,7 @@ namespace RazorSharp.CLR.Structures
 	///     </list>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct MethodDescChunk
+	internal unsafe struct MethodDescChunk
 	{
 
 		#region Fields
@@ -68,16 +68,16 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     The size of this chunk minus 1 (in multiples of <see cref="MethodDesc.ALIGNMENT" />)
 		/// </summary>
-		public byte Size => m_size;
+		internal byte Size => m_size;
 
 
-		public byte Count => (byte) (m_count + 1); //(byte) (m_count + 1);
+		internal byte Count => (byte) (m_count + 1); //(byte) (m_count + 1);
 
 // PTR_HOST_MEMBER_TADDR(type, host, memb)
 // Retrieves the target address of a host instance pointer and
 // offsets it by the given member's offset within the type.
 
-		public Pointer<MethodDescChunk> Next {
+		internal Pointer<MethodDescChunk> Next {
 			get {
 				// return m_next.GetValueMaybeNull(PTR_HOST_MEMBER_TADDR(MethodDescChunk, this, m_next));
 
@@ -88,7 +88,7 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
-		public Pointer<MethodTable> MethodTable {
+		internal Pointer<MethodTable> MethodTable {
 			get {
 				// return m_methodTable.GetValue(PTR_HOST_MEMBER_TADDR(MethodDescChunk, this, m_methodTable));
 
@@ -100,7 +100,7 @@ namespace RazorSharp.CLR.Structures
 			set => m_methodTable = (MethodTable*) value.ToPointer();
 		}
 
-		public Pointer<MethodDesc> FirstMethodDesc {
+		internal Pointer<MethodDesc> FirstMethodDesc {
 			get {
 				// return PTR_MethodDesc(dac_cast<TADDR>(this) + sizeof(MethodDescChunk));
 				IntPtr              __this = Unsafe.AddressOf(ref this).Address;

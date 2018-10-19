@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Resources;
 using System.Runtime;
@@ -18,7 +19,6 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Running;
 using JetBrains.Annotations;
 using NUnit.Framework;
-using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Fixed;
@@ -37,6 +37,7 @@ using RazorSharp.Utilities;
 using Test.Testing.Benchmarking;
 using Test.Testing.Types;
 using static RazorSharp.Unsafe;
+using static RazorSharp.VirtualCollection<int>;
 using static Test.Testing.Benchmarking.SignatureCallBenchmarking;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Unsafe = RazorSharp.Unsafe;
@@ -124,16 +125,27 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-
-
 			MetaType mt = Meta.GetType<string>();
-			Console.WriteLine(mt);
+			Console.WriteLine("{0:E}",mt);
 			Console.WriteLine(mt["m_firstChar"]);
 			Console.WriteLine(mt.Parent);
 
 			Debug.Assert(Compare<string>());
 
+			GetItem g = G;
+			Console.WriteLine();
+
+			Pointer<byte> p = g.Method.MethodHandle.GetFunctionPointer();
+			Console.WriteLine(p);
+
+
 		}
+
+		private static int G(string name)
+		{
+			throw new NotImplementedException();
+		}
+
 
 		private static bool Compare<T>()
 		{
@@ -142,53 +154,50 @@ namespace Test
 
 		private static bool Compare(MetaType meta, Type t)
 		{
+			//
+			// Type
+			//
+
 			Debug.Assert(meta.RuntimeType == t);
 			Debug.Assert(meta.Token == t.MetadataToken);
+			Debug.Assert(meta.Parent.RuntimeType == t.BaseType);
+
+
+			//
+			// Fields
+			//
+
+			var fields     = Runtime.GetFields(t);
+			var metaFields = meta.Fields.ToArray();
+			Debug.Assert(fields.Length == metaFields.Length);
+			Collections.OrderBy(ref fields, x => x.MetadataToken);
+			Collections.OrderBy(ref metaFields, x => x.Token);
+
+			for (int i = 0; i < fields.Length; i++) {
+				Debug.Assert(fields[i].MetadataToken == metaFields[i].Token);
+				Debug.Assert(fields[i].DeclaringType == metaFields[i].EnclosingType);
+				Debug.Assert(fields[i].FieldType == metaFields[i].FieldType);
+			}
+
+			//
+			// Methods
+			//
+
+			var methods     = Runtime.GetMethods(t);
+			var metaMethods = meta.Methods.ToArray();
+			Debug.Assert(methods.Length == metaMethods.Length);
+			Collections.OrderBy(ref methods, x => x.MetadataToken);
+			Collections.OrderBy(ref metaMethods, x => x.Token);
+
+			for (int i = 0; i < methods.Length; i++) {
+				Debug.Assert(methods[i].MetadataToken == metaMethods[i].Token);
+				Debug.Assert(methods[i].DeclaringType == metaMethods[i].EnclosingType);
+			}
+
 
 			return true;
 		}
 
-		private static bool CompareEnums<TEnumA, TEnumB>() where TEnumA : Enum where TEnumB : Enum
-		{
-			var valuesA_rg = typeof(TEnumA).GetEnumValues();
-			var valuesB_rg = typeof(TEnumB).GetEnumValues();
-
-			Console.WriteLine("A {0}", valuesA_rg.Length);
-			Console.WriteLine("B {0}", valuesB_rg.Length);
-
-			List<TEnumA> valuesA = new List<TEnumA>();
-			List<TEnumB> valuesB = new List<TEnumB>();
-
-
-			foreach (var v in valuesA_rg) {
-				valuesA.Add(((TEnumA) v));
-			}
-
-			foreach (var v in valuesB_rg) {
-				valuesB.Add((TEnumB) v);
-			}
-
-
-			if (valuesA.Count != valuesB.Count) return false;
-			for (int i = 0; i < valuesA.Count; i++) {
-				if ((long) (object) valuesA[i] != (long) (object) valuesB[i]) {
-					Console.WriteLine("{0} != {1}", valuesA[i], valuesB[i]);
-					return false;
-				}
-			}
-
-			return true;
-		}
-
-		private static CorTokenType getToken(int tk)
-		{
-			return (CorTokenType) Constants.TypeFromToken(tk);
-		}
-
-		private static int tk<T>(string name)
-		{
-			return Runtime.GetMethodDesc<T>(name).Reference.Token;
-		}
 
 		public static bool IsInterned(this string text)
 		{

@@ -52,6 +52,11 @@ namespace RazorSharp.Common
 
 		#endregion
 
+		public static void OrderBy<TSource, TKey>(ref TSource[] arr, Func<TSource, TKey> order)
+		{
+			arr = arr.OrderBy(order).ToArray();
+		}
+
 
 		#region ToString
 

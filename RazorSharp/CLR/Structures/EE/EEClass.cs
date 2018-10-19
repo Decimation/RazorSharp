@@ -3,6 +3,7 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using RazorSharp.CLR.Meta;
 using RazorSharp.Common;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -24,6 +25,7 @@ namespace RazorSharp.CLR.Structures.EE
 	#endregion
 
 	/// <summary>
+	/// <para>CLR <see cref="EEClass"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaType"/></para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
 	///         <item>
@@ -47,7 +49,7 @@ namespace RazorSharp.CLR.Structures.EE
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct EEClass
+	internal unsafe struct EEClass
 	{
 
 		#region Fields

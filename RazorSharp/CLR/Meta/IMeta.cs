@@ -1,7 +1,7 @@
 namespace RazorSharp.CLR.Meta
 {
 
-	public interface IMeta
+	internal interface IMeta
 	{
 		int    Token { get; }
 		string Name  { get; }

@@ -144,7 +144,8 @@ namespace RazorSharp.Analysis
 
 		public sealed class MethodInfo
 		{
-			public Pointer<MethodDesc>[] MethodDescs { get; }
+			// todo: was public
+			internal Pointer<MethodDesc>[] MethodDescs { get; }
 
 			internal MethodInfo()
 			{
@@ -170,7 +171,8 @@ namespace RazorSharp.Analysis
 
 		public sealed class FieldInfo
 		{
-			public           Pointer<FieldDesc>[] FieldDescs { get; }
+			// todo: was public
+			internal Pointer<FieldDesc>[] FieldDescs { get; }
 			private readonly ConsoleTable         m_table;
 
 
@@ -224,9 +226,12 @@ namespace RazorSharp.Analysis
 		{
 			// Value types have a MethodTable, but not a
 			// MethodTable*.
-			public Pointer<MethodTable> MethodTable { get; }
-			public Pointer<EEClass>     EEClass     { get; }
-			public Pointer<MethodTable> Canon       { get; }
+
+			// todo: these were public
+
+			internal Pointer<MethodTable> MethodTable { get; }
+			internal Pointer<EEClass>     EEClass     { get; }
+			internal Pointer<MethodTable> Canon       { get; }
 
 
 			protected internal InternalInfo(ref T t)

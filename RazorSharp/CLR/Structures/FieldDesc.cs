@@ -3,6 +3,7 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using RazorSharp.CLR.Meta;
 using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
@@ -25,6 +26,7 @@ namespace RazorSharp.CLR.Structures
 
 
 	/// <summary>
+	/// <para>CLR <see cref="FieldDesc"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaField"/></para>
 	///     <para>Internal representation: <see cref="RuntimeFieldHandle.Value" /></para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
@@ -46,7 +48,7 @@ namespace RazorSharp.CLR.Structures
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct FieldDesc
+	internal unsafe struct FieldDesc
 	{
 		static FieldDesc()
 		{
@@ -78,8 +80,11 @@ namespace RazorSharp.CLR.Structures
 
 		/// <summary>
 		///     Unprocessed <see cref="Token" />
+		/// <remarks>
+		/// Original name: MB
+		/// </remarks>
 		/// </summary>
-		private int MB => (int) (m_dword1 & 0xFFFFFF);
+		private int OrigToken => (int) (m_dword1 & 0xFFFFFF);
 
 		/// <summary>
 		///     Field metadata token
@@ -92,10 +97,10 @@ namespace RazorSharp.CLR.Structures
 			get {
 				// Check if this FieldDesc is using the packed mb layout
 				if (!RequiresFullMBValue) {
-					return Constants.TokenFromRid(MB & (int) MbMask.PackedMbLayoutMbMask, CorTokenType.mdtFieldDef);
+					return Constants.TokenFromRid(OrigToken & (int) MbMask.PackedMbLayoutMbMask, CorTokenType.mdtFieldDef);
 				}
 
-				return Constants.TokenFromRid(MB, CorTokenType.mdtFieldDef);
+				return Constants.TokenFromRid(OrigToken, CorTokenType.mdtFieldDef);
 			}
 		}
 
@@ -213,7 +218,7 @@ namespace RazorSharp.CLR.Structures
 		public Type FieldType => Info.FieldType;
 
 		/// <summary>
-		///     The enclosing type's <see cref="EnclosingMethodTable" />
+		///     The enclosing type's <see cref="MethodTable" />
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>

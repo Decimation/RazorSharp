@@ -204,6 +204,7 @@
       <Compile Include="Testing\Benchmarking\AddressBenchmarking.cs"/>
       <Compile Include="Testing\Benchmarking\AllocPoolBenchmarking.cs"/>
       <Compile Include="Testing\Benchmarking\ContractBenchmarking.cs"/>
+      <Compile Include="Testing\Benchmarking\MetaBenchmarking.cs"/>
       <Compile Include="Testing\Benchmarking\MiscBenchmarking.cs"/>
       <Compile Include="Testing\Benchmarking\RuntimeBenchmarking.cs"/>
       <Compile Include="Testing\Benchmarking\SignatureCallBenchmarking.cs"/>
@@ -218,7 +219,6 @@
       <Compile Include="Testing\Tests\FunctionOverrideTests.cs"/>
       <Compile Include="Testing\Tests\ILTests.cs"/>
       <Compile Include="Testing\Tests\Metadata\ClrRuntimeTests.cs"/>
-      <Compile Include="Testing\Tests\Metadata\Reflection_RazorSharp_Tests.cs"/>
       <Compile Include="Testing\Tests\NativeTests.cs"/>
       <Compile Include="Testing\Tests\SignatureCallTests.cs"/>
       <Compile Include="Testing\Tests\StackAllocateTests.cs"/>

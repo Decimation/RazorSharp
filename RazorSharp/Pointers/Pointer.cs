@@ -64,7 +64,7 @@ namespace RazorSharp.Pointers
 		///     <para>The address we're pointing to.</para>
 		///     <para>We want this to be the only field so it can be represented as a pointer in memory.</para>
 		/// </summary>
-		private void* m_pValue;
+		private void* m_value;
 
 		#region Properties
 
@@ -78,13 +78,13 @@ namespace RazorSharp.Pointers
 		}
 
 		public IntPtr Address {
-			get => (IntPtr) m_pValue;
-			set => m_pValue = (void*) value;
+			get => (IntPtr) m_value;
+			set => m_value = (void*) value;
 		}
 
 		public int ElementSize => Unsafe.SizeOf<T>();
 
-		public bool IsNull => m_pValue == null;
+		public bool IsNull => m_value == null;
 
 		public bool IsAligned => Mem.IsAligned(Address);
 
@@ -105,7 +105,7 @@ namespace RazorSharp.Pointers
 		public Pointer(void* v)
 		{
 			// Root constructor
-			m_pValue = v;
+			m_value = v;
 		}
 
 		/// <summary>
@@ -355,9 +355,9 @@ namespace RazorSharp.Pointers
 		{
 			switch (s) {
 				case StringTypes.AnsiStr:
-					return new string((sbyte*) m_pValue);
+					return new string((sbyte*) m_value);
 				case StringTypes.UniStr:
-					return new string((char*) m_pValue);
+					return new string((char*) m_value);
 				default:
 					throw new ArgumentOutOfRangeException(nameof(s), s, null);
 			}
@@ -462,7 +462,7 @@ namespace RazorSharp.Pointers
 
 		public void Zero(int byteCnt)
 		{
-			Mem.Zero(m_pValue, byteCnt);
+			Mem.Zero(m_value, byteCnt);
 		}
 
 		public PinHandle TryPin()
@@ -479,11 +479,11 @@ namespace RazorSharp.Pointers
 				: new ConsoleTable("Address", "Pointer", "Value", "Aligned", "Null", "Element size", "Type");
 
 			if (typeof(T).IsValueType) {
-				table.AddRow(Hex.ToHex(m_pValue), ToString(PointerSettings.FMT_O), IsAligned.Prettify(),
+				table.AddRow(Hex.ToHex(m_value), ToString(PointerSettings.FMT_O), IsAligned.Prettify(),
 					IsNull.Prettify(), ElementSize, String.Format("<{0}>", typeof(T).Name));
 			}
 			else {
-				table.AddRow(Hex.ToHex(m_pValue), Hex.ToHex(Read<long>()), ToString(PointerSettings.FMT_O),
+				table.AddRow(Hex.ToHex(m_value), Hex.ToHex(Read<long>()), ToString(PointerSettings.FMT_O),
 					IsAligned.Prettify(), IsNull.Prettify(), ElementSize, String.Format("<{0}>", typeof(T).Name));
 			}
 
@@ -520,29 +520,29 @@ namespace RazorSharp.Pointers
 
 		public void* ToPointer()
 		{
-			return m_pValue;
+			return m_value;
 		}
 
 		#region Integer conversions
 
 		public int ToInt32()
 		{
-			return (int) m_pValue;
+			return (int) m_value;
 		}
 
 		public long ToInt64()
 		{
-			return (long) m_pValue;
+			return (long) m_value;
 		}
 
 		public ulong ToUInt64()
 		{
-			return (ulong) m_pValue;
+			return (ulong) m_value;
 		}
 
 		public uint ToUInt32()
 		{
-			return (uint) m_pValue;
+			return (uint) m_value;
 		}
 
 		#endregion
@@ -623,7 +623,7 @@ namespace RazorSharp.Pointers
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private IntPtr Offset<TType>(int elemCnt)
 		{
-			return PointerUtils.Offset<TType>(m_pValue, elemCnt);
+			return PointerUtils.Offset<TType>(m_value, elemCnt);
 		}
 
 
@@ -636,7 +636,7 @@ namespace RazorSharp.Pointers
 		/// </returns>
 		public Pointer<T> Add(long bytes = 1)
 		{
-			m_pValue = PointerUtils.Add(m_pValue, bytes).ToPointer();
+			m_value = PointerUtils.Add(m_value, bytes).ToPointer();
 			return this;
 		}
 
@@ -650,7 +650,7 @@ namespace RazorSharp.Pointers
 		/// </returns>
 		public Pointer<T> Subtract(long bytes = 1)
 		{
-			m_pValue = PointerUtils.Subtract(m_pValue, bytes).ToPointer();
+			m_value = PointerUtils.Subtract(m_value, bytes).ToPointer();
 			return this;
 		}
 
@@ -664,7 +664,7 @@ namespace RazorSharp.Pointers
 		/// </returns>
 		public Pointer<T> Increment(int elemCnt = 1)
 		{
-			m_pValue = Offset(elemCnt).ToPointer();
+			m_value = Offset(elemCnt).ToPointer();
 			return this;
 		}
 
@@ -678,7 +678,7 @@ namespace RazorSharp.Pointers
 		/// </returns>
 		public Pointer<T> Decrement(int elemCnt = 1)
 		{
-			m_pValue = Offset(-elemCnt).ToPointer();
+			m_value = Offset(-elemCnt).ToPointer();
 			return this;
 		}
 
@@ -790,7 +790,7 @@ namespace RazorSharp.Pointers
 		public override int GetHashCode()
 		{
 			// ReSharper disable once NonReadonlyMemberInGetHashCode
-			return unchecked((int) (long) m_pValue);
+			return unchecked((int) (long) m_value);
 		}
 
 		public static bool operator ==(Pointer<T> left, Pointer<T> right)

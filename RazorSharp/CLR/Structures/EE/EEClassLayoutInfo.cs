@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorSharp.CLR.Meta;
 using RazorSharp.Common;
 
 #endregion
@@ -22,6 +23,9 @@ namespace RazorSharp.CLR.Structures.EE
 	#endregion
 
 
+	/// <summary>
+	/// <para>CLR <see cref="EEClassLayoutInfo"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaType"/></para>
+	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct EEClassLayoutInfo
 	{
