@@ -92,7 +92,7 @@ namespace RazorSharp.CLR.Structures.EE
 			table.AddRow("Native size", m_cbNativeSize);
 			table.AddRow("Managed size", m_cbManagedSize);
 			table.AddRow("Largest alignment req of all", m_LargestAlignmentRequirementOfAllMembers);
-			table.AddRow("Flags", Runtime.CreateFlagsString(m_bFlags, Flags));
+			table.AddRow("Flags", Enums.CreateFlagsString(m_bFlags, Flags));
 			table.AddRow("Packing size", m_cbPackingSize);
 			table.AddRow("CTM fields", m_numCTMFields);
 			table.AddRow("Field marshalers", Hex.ToHex(m_pFieldMarshalers));

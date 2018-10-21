@@ -18,18 +18,7 @@ using RazorSharp.Utilities.Exceptions;
 namespace RazorSharp.CLR
 {
 
-	public enum SpecialFieldTypes
-	{
-		/// <summary>
-		///     The field is an auto-property's backing field.
-		/// </summary>
-		AutoProperty,
 
-		/// <summary>
-		///     The field is normal.
-		/// </summary>
-		None,
-	}
 
 	/// <summary>
 	///     Provides utilities for manipulating, reading, and writing CLR structures.
@@ -53,13 +42,6 @@ namespace RazorSharp.CLR
 		private const BindingFlags DefaultFlags = BindingFlags.Instance | BindingFlags.NonPublic |
 		                                           BindingFlags.Public | BindingFlags.Static;
 
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static string CreateFlagsString(object num, Enum e)
-		{
-			string join = e.Join();
-			return join == String.Empty ? $"{num}" : $"{num} ({e.Join()})";
-		}
 
 		#region HeapObjects
 
@@ -206,26 +188,12 @@ namespace RazorSharp.CLR
 		/// </summary>
 		/// <param name="t"></param>
 		/// <param name="name"></param>
-		/// <param name="fieldTypes"></param>
 		/// <param name="flags"></param>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		internal static Pointer<FieldDesc> GetFieldDesc(Type t, string name,
-			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None, BindingFlags flags = DefaultFlags)
+		internal static Pointer<FieldDesc> GetFieldDesc(Type t, string name,BindingFlags flags = DefaultFlags)
 		{
 			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
-
-			switch (fieldTypes) {
-				case SpecialFieldTypes.AutoProperty:
-					name = SpecialNames.NameOfAutoPropertyBackingField(name);
-					break;
-
-				case SpecialFieldTypes.None:
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(fieldTypes), fieldTypes, null);
-			}
-
 
 			FieldInfo fieldInfo = t.GetField(name, flags);
 			RazorContract.RequiresNotNull(fieldInfo);
@@ -237,9 +205,9 @@ namespace RazorSharp.CLR
 		}
 
 		internal static Pointer<FieldDesc> GetFieldDesc<T>(string name,
-			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None, BindingFlags flags = DefaultFlags)
+			BindingFlags flags = DefaultFlags)
 		{
-			return GetFieldDesc(typeof(T), name, fieldTypes, flags);
+			return GetFieldDesc(typeof(T), name, flags);
 		}
 
 

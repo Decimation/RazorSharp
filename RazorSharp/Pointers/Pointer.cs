@@ -8,12 +8,14 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using JetBrains.Annotations;
 using RazorSharp.CLR.Fixed;
 using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Native;
 using RazorSharp.Native.Structures;
 using RazorSharp.Utilities;
+// ReSharper disable UseStringInterpolation
 
 #endregion
 
@@ -238,7 +240,6 @@ namespace RazorSharp.Pointers
 			IEnumerator<T> enumerator = enumerable.GetEnumerator();
 			int            i          = 0;
 			while (enumerator.MoveNext()) {
-
 				RazorContract.RequiresNotNull(enumerator.Current);
 
 				if (!enumerator.Current.Equals(this[i++])) {
@@ -366,6 +367,11 @@ namespace RazorSharp.Pointers
 		public void Write<TType>(TType t, int elemOffset = 0)
 		{
 			Mem.Write(Offset<TType>(elemOffset), 0, t);
+		}
+
+		public void ForceWrite(byte[] t, int byteOffset = 0)
+		{
+			Mem.ForceWrite(Offset<byte>(byteOffset), 0, rgMem: t);
 		}
 
 		public void ForceWrite<TType>(TType t, int elemOffset = 0)
@@ -853,6 +859,7 @@ namespace RazorSharp.Pointers
 		/// </param>
 		/// <param name="formatProvider"></param>
 		/// <returns></returns>
+		[Pure]
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			if (String.IsNullOrEmpty(format)) {
@@ -875,8 +882,9 @@ namespace RazorSharp.Pointers
 					return Hex.ToHex(this);
 
 				case PointerSettings.FMT_B:
-					string str = String.Format("Value of <{0}> @ {1}: \n{2}", typeof(T).Name, Hex.ToHex(Address),
-						ToStringSafe(this));
+					string thisStr = ToStringSafe(this);
+					string str = String.Format("{0} @ {1}: {2}", typeof(T).Name, Hex.ToHex(Address),
+						thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
 					return str;
 				default:
 					goto case PointerSettings.FMT_O;
@@ -930,11 +938,13 @@ namespace RazorSharp.Pointers
 		}
 
 
+		[Pure]
 		public string ToString(string format)
 		{
 			return ToString(format, CultureInfo.CurrentCulture);
 		}
 
+		[Pure]
 		public override string ToString()
 		{
 			return ToString(PointerSettings.FMT_B);

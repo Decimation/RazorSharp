@@ -4,7 +4,9 @@ using System;
 using System.Reflection;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.ILMethods;
+using RazorSharp.Common;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 
 #endregion
 
@@ -34,19 +36,45 @@ namespace RazorSharp.CLR.Meta
 
 		#region Accessors
 
+		/// <summary>
+		///     <para>Metadata token of this method</para>
+		///     <remarks>
+		///         <para>Equal to <see cref="System.Reflection.MethodInfo.MetadataToken" /></para>
+		///         <para>Address-sensitive</para>
+		///     </remarks>
+		/// </summary>
 		public int Token => m_value.Reference.Token;
 
 		public string Name => m_value.Reference.Name;
 
 		public Type EnclosingType => m_value.Reference.EnclosingType;
 
+		/// <summary>
+		///     The corresponding <see cref="MethodInfo" /> of this <see cref="MethodDesc" />
+		/// </summary>
 		public MethodInfo Info => m_value.Reference.Info;
 
+		/// <summary>
+		///     Function pointer (entry point) of this method.
+		///     <para>
+		///         <see cref="get_Function" /> returns the entry point
+		///         (<see cref="RuntimeMethodHandle.GetFunctionPointer()" />) of this method.
+		///     </para>
+		///     <para>
+		///         <see cref="set_Function" /> sets the method entry point (<see cref="SetStableEntryPoint" />).
+		///     </para>
+		/// </summary>
 		public IntPtr Function {
 			get => m_value.Reference.Function;
 			set => m_value.Reference.Function = value;
 		}
 
+		/// <summary>
+		///     Returns the address of the native code. The native code can be one of jitted code if
+		///     <see cref="IsPreImplemented" /> is <c>false</c> or
+		///     ngened code if <see cref="IsPreImplemented" /> is <c>true</c>.
+		///     <returns><see cref="IntPtr.Zero" /> if the method has no native code.</returns>
+		/// </summary>
 		public IntPtr NativeCode => m_value.Reference.NativeCode;
 
 		public IntPtr PreImplementedCode => m_value.Reference.PreImplementedCode;
@@ -86,11 +114,16 @@ namespace RazorSharp.CLR.Meta
 
 		#region Methods
 
-		public Pointer<ILMethod> GetILHeader(int fAllowOverrides = 0)
+		public MetaIL GetILHeader(int fAllowOverrides = 0)
 		{
-			return m_value.Reference.GetILHeader(fAllowOverrides);
+			RazorContract.Requires(IsIL);
+			return new MetaIL(m_value.Reference.GetILHeader(fAllowOverrides));
 		}
 
+		/// <summary>
+		///     Sets the entry point for this method.
+		/// </summary>
+		/// <param name="pCode">Pointer to the new entry point</param>
 		public void SetStableEntryPoint(Pointer<byte> pCode)
 		{
 			m_value.Reference.SetStableEntryPoint(pCode);
@@ -106,13 +139,42 @@ namespace RazorSharp.CLR.Meta
 			return m_value.Reference.GetDelegate<TDelegate>();
 		}
 
+		/// <summary>
+		///     JIT the method
+		/// </summary>
 		public void Prepare()
 		{
 			m_value.Reference.Prepare();
 		}
 
+
+		public ConsoleTable ToTable()
+		{
+			var table = new ConsoleTable("Info", "Value");
+			table.AddRow("Name", Name);
+			table.AddRow("Token", Token);
+
+			table.AddRow("Signature", Info);
+
+			table.AddRow("Classification", Enums.CreateString(Classification));
+			table.AddRow("Attributes", Enums.CreateString(Attributes));
+			table.AddRow("Flags", Enums.CreateString(Flags));
+			table.AddRow("Flags 2", Enums.CreateString(Flags2));
+			table.AddRow("Flags 3", Enums.CreateString(Flags3));
+
+			table.AddRow("Function", Hex.ToHex(Function));
+
+
+			return table;
+		}
+
 		#endregion
 
+
+		public override string ToString()
+		{
+			return ToTable().ToMarkDownString();
+		}
 	}
 
 }

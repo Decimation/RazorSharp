@@ -94,40 +94,25 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     The enclosing type of this <see cref="MethodDesc" />
 		/// </summary>
-		public Type EnclosingType => Runtime.MethodTableToType(EnclosingMethodTable);
+		internal Type EnclosingType => Runtime.MethodTableToType(EnclosingMethodTable);
 
-		/// <summary>
-		///     The corresponding <see cref="MethodInfo" /> of this <see cref="MethodDesc" />
-		/// </summary>
-		public MethodInfo Info => (MethodInfo) EnclosingType.Module.ResolveMethod(Token);
 
-		/// <summary>
-		///     Function pointer (entry point) of this method.
-		///     <para>
-		///         <see cref="get_Function" /> returns the entry point
-		///         (<see cref="RuntimeMethodHandle.GetFunctionPointer()" />) of this method.
-		///     </para>
-		///     <para>
-		///         <see cref="set_Function" /> sets the method entry point (<see cref="SetStableEntryPoint" />).
-		///     </para>
-		/// </summary>
-		public IntPtr Function {
+		internal MethodInfo Info => (MethodInfo) EnclosingType.Module.ResolveMethod(Token);
+
+
+		internal IntPtr Function {
 			get => Info.MethodHandle.GetFunctionPointer();
 			set => SetStableEntryPoint(value);
 		}
 
 
 		/// <summary>
-		///     Returns the address of the native code. The native code can be one of jitted code if
-		///     <see cref="IsPreImplemented" /> is <c>false</c> or
-		///     ngened code if <see cref="IsPreImplemented" /> is <c>true</c>.
-		///     <returns><see cref="IntPtr.Zero" /> if the method has no native code.</returns>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
 		/// <exception cref="SigcallException"></exception>
-		public IntPtr NativeCode {
+		internal IntPtr NativeCode {
 			[ClrSigcall]
 			get => throw new SigcallException();
 		}
@@ -138,7 +123,7 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public IntPtr PreImplementedCode {
+		internal IntPtr PreImplementedCode {
 			[ClrSigcall]
 			get => throw new SigcallException();
 		}
@@ -146,16 +131,16 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     Name of this method
 		/// </summary>
-		public string Name => Info.Name;
+		internal string Name => Info.Name;
 
-		public byte ChunkIndex => m_chunkIndex;
+		internal byte ChunkIndex => m_chunkIndex;
 
 		/// <summary>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public Pointer<MethodDescChunk> MethodDescChunk {
+		internal Pointer<MethodDescChunk> MethodDescChunk {
 			get {
 				// return
 				//PTR_MethodDescChunk(dac_cast<TADDR>(this) -
@@ -173,7 +158,7 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public int SizeOf {
+		internal int SizeOf {
 			[ClrSigcall] get => throw new SigcallException();
 		}
 
@@ -182,7 +167,7 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public Pointer<MethodTable> EnclosingMethodTable {
+		internal Pointer<MethodTable> EnclosingMethodTable {
 			[ClrSigcall] get => throw new SigcallException();
 		}
 
@@ -192,18 +177,12 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public uint RVA {
+		internal uint RVA {
 			[ClrSigcall] get => throw new SigcallException();
 		}
 
-		/// <summary>
-		///     <para>Metadata token of this method</para>
-		///     <remarks>
-		///         <para>Equal to <see cref="System.Reflection.MethodInfo.MetadataToken" /></para>
-		///         <para>Address-sensitive</para>
-		///     </remarks>
-		/// </summary>
-		public int Token {
+
+		internal int Token {
 			[ClrSigcall] get => throw new SigcallException();
 		}
 
@@ -215,11 +194,11 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public bool IsConstructor {
+		internal bool IsConstructor {
 			[ClrSigcall] get => throw new SigcallException();
 		}
 
-		public bool IsPreImplemented => PreImplementedCode != IntPtr.Zero;
+		internal bool IsPreImplemented => PreImplementedCode != IntPtr.Zero;
 
 		/// <summary>
 		///     <para>Whether this method is pointing to native code</para>
@@ -227,32 +206,32 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public bool IsPointingToNativeCode {
+		internal bool IsPointingToNativeCode {
 			[ClrSigcall] get => throw new SigcallException();
 		}
 
-		public bool HasThis => Info.CallingConvention.HasFlag(CallingConventions.HasThis);
+		internal bool HasThis => Info.CallingConvention.HasFlag(CallingConventions.HasThis);
 
-		public bool HasILHeader => IsIL && !IsUnboxingStub && RVA > 0;
+		internal bool HasILHeader => IsIL && !IsUnboxingStub && RVA > 0;
 
-		public bool IsUnboxingStub => (Flags2 & MethodDescFlags2.IsUnboxingStub) != 0;
+		internal bool IsUnboxingStub => (Flags2 & MethodDescFlags2.IsUnboxingStub) != 0;
 
-		public bool IsIL => MethodClassification.IL == Classification ||
+		internal bool IsIL => MethodClassification.IL == Classification ||
 		                    MethodClassification.Instantiated == Classification;
 
-		public bool IsStatic => Info.IsStatic;
+		internal bool IsStatic => Info.IsStatic;
 
 		#endregion
 
 		#region Flags
 
-		public MethodClassification Classification =>
+		internal MethodClassification Classification =>
 			(MethodClassification) (m_wFlags & (ushort) MethodDescClassification.Classification);
 
-		public MethodAttributes         Attributes => Info.Attributes;
-		public MethodDescClassification Flags      => (MethodDescClassification) m_wFlags;
-		public MethodDescFlags2         Flags2     => (MethodDescFlags2) m_bFlags2;
-		public MethodDescFlags3         Flags3     => (MethodDescFlags3) m_wFlags3AndTokenRemainder;
+		internal MethodAttributes         Attributes => Info.Attributes;
+		internal MethodDescClassification Flags      => (MethodDescClassification) m_wFlags;
+		internal MethodDescFlags2         Flags2     => (MethodDescFlags2) m_bFlags2;
+		internal MethodDescFlags3         Flags3     => (MethodDescFlags3) m_wFlags3AndTokenRemainder;
 
 		#endregion
 
@@ -305,7 +284,7 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		[ClrSigcall]
-		public Pointer<ILMethod> GetILHeader(int fAllowOverrides = 0)
+		internal Pointer<ILMethod> GetILHeader(int fAllowOverrides = 0)
 		{
 			throw new SigcallException();
 		}
@@ -319,11 +298,8 @@ namespace RazorSharp.CLR.Structures
 			throw new SigcallException();
 		}
 
-		/// <summary>
-		///     Sets the entry point for this method.
-		/// </summary>
-		/// <param name="pCode">Pointer to the new entry point</param>
-		public void SetStableEntryPoint(Pointer<byte> pCode)
+
+		internal void SetStableEntryPoint(Pointer<byte> pCode)
 		{
 			Reset();
 			long val = SetStableEntryPointInterlocked((ulong) pCode);
@@ -337,7 +313,7 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		[ClrSigcall]
-		public void Reset()
+		internal void Reset()
 		{
 			throw new SigcallException();
 		}
@@ -359,15 +335,13 @@ namespace RazorSharp.CLR.Structures
 		}
 
 
-		public TDelegate GetDelegate<TDelegate>() where TDelegate : Delegate
+		internal TDelegate GetDelegate<TDelegate>() where TDelegate : Delegate
 		{
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(Function);
 		}
 
-		/// <summary>
-		///     JIT the method
-		/// </summary>
-		public void Prepare()
+
+		internal void Prepare()
 		{
 			if (!Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) || !Flags2.HasFlag(MethodDescFlags2.HasPrecode)) {
 				RuntimeHelpers.PrepareMethod(Info.MethodHandle);
@@ -403,9 +377,9 @@ namespace RazorSharp.CLR.Structures
 
 
 			table.AddRow("Classification", Classification.Join());
-			table.AddRow("Flags", Runtime.CreateFlagsString(m_wFlags, Flags));
-			table.AddRow("Flags 2", Runtime.CreateFlagsString(m_bFlags2, Flags2));
-			table.AddRow("Flags 3", Runtime.CreateFlagsString(m_wFlags3AndTokenRemainder, Flags3));
+			table.AddRow("Flags", Enums.CreateFlagsString(m_wFlags, Flags));
+			table.AddRow("Flags 2", Enums.CreateFlagsString(m_bFlags2, Flags2));
+			table.AddRow("Flags 3", Enums.CreateFlagsString(m_wFlags3AndTokenRemainder, Flags3));
 			table.AddRow("SizeOf", SizeOf);
 
 

@@ -51,8 +51,14 @@ namespace RazorSharp.CLR.Meta
 
 		public bool IsPointer => m_value.Reference.IsPointer;
 
+		/// <summary>
+		///     Whether the field is <c>static</c>
+		/// </summary>
 		public bool IsStatic => m_value.Reference.IsStatic;
 
+		/// <summary>
+		///     Whether the field is decorated with a <see cref="ThreadStaticAttribute" /> attribute
+		/// </summary>
 		public bool IsThreadLocal => m_value.Reference.IsThreadLocal;
 
 		public bool IsRVA => m_value.Reference.IsRVA;
@@ -63,16 +69,38 @@ namespace RazorSharp.CLR.Meta
 
 		#endregion
 
+		/// <summary>
+		///     Access level of the field
+		/// </summary>
 		public ProtectionLevel Protection => m_value.Reference.Protection;
 
 		public CorElementType CorType => m_value.Reference.CorType;
 
+		/// <summary>
+		///     <para>Size of the field</para>
+		/// </summary>
 		public int Size => m_value.Reference.Size;
 
+		/// <summary>
+		///     Field metadata token
+		///     <remarks>
+		///         <para>Equal to <see cref="System.Reflection.FieldInfo.MetadataToken" /></para>
+		///         <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Field"</c> column in hexadecimal format.</para>
+		///     </remarks>
+		/// </summary>
 		public int Token => m_value.Reference.Token;
 
+		/// <summary>
+		///     Offset in memory
+		///     <remarks>
+		///         <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Offset"</c> column in hexadecimal format.</para>
+		///     </remarks>
+		/// </summary>
 		public int Offset => m_value.Reference.Offset;
 
+		/// <summary>
+		///     The corresponding <see cref="FieldInfo" /> of this <see cref="FieldDesc" />
+		/// </summary>
 		public FieldInfo Info => m_value.Reference.Info;
 
 		public string Name => m_value.Reference.Name;

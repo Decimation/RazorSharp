@@ -17,7 +17,7 @@ namespace RazorSharp.CLR.Structures
 {
 
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct ObjHeader
+	internal unsafe struct ObjHeader
 	{
 
 		#region Fields

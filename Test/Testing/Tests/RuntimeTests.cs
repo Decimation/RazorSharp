@@ -296,7 +296,7 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestPoint()
 		{
-			Pointer<FieldDesc> xfd = Runtime.GetFieldDesc<Point>("X", SpecialFieldTypes.AutoProperty);
+			Pointer<FieldDesc> xfd = Runtime.GetFieldDesc<Point>("<X>k__BackingField");
 			Debug.Assert(xfd.Reference.Token == xfd.Reference.Info.MetadataToken);
 
 			Pointer<FieldDesc> ffd = Runtime.GetFieldDesc<Point>("FixedBuffer");

@@ -1,5 +1,6 @@
 #region
 
+using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Pointers;
 
@@ -11,6 +12,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 {
 
 	/// <summary>
+	/// <para>Aggregates both <see cref="FatILMethod"/> and <see cref="TinyILMethod"/></para>
 	///     <para>Internal name: <c>COR_ILMETHOD</c></para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
@@ -26,7 +28,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 	///     </list>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public struct ILMethod
+	internal struct ILMethod
 	{
 		/**
 		 * union
@@ -41,17 +43,15 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		[FieldOffset(0)] private TinyILMethod m_tiny;
 		[FieldOffset(0)] private FatILMethod  m_fat;
 
-		public Pointer<TinyILMethod> Tiny => Unsafe.AddressOf(ref m_tiny);
-		public Pointer<FatILMethod>  Fat  => Unsafe.AddressOf(ref m_fat);
+		private Pointer<TinyILMethod> Tiny => Unsafe.AddressOf(ref m_tiny);
+		private Pointer<FatILMethod>  Fat  => Unsafe.AddressOf(ref m_fat);
 
-		public bool IsTiny => Tiny.Reference.IsTiny;
-		public bool IsFat  => Fat.Reference.IsFat;
+		internal bool IsTiny => Tiny.Reference.IsTiny;
+		internal bool IsFat  => Fat.Reference.IsFat;
 
-		public void WriteIL(byte[] rgOpCodes)
+		internal void WriteIL(byte[] rgOpCodes)
 		{
-			for (int i = 0; i < rgOpCodes.Length; i++) {
-				Code.ForceWrite(rgOpCodes[i], i);
-			}
+			Code.ForceWrite(rgOpCodes);
 		}
 
 		/*public OpCode[] OpCodes {
@@ -93,40 +93,34 @@ namespace RazorSharp.CLR.Structures.ILMethods
 			}
 		}*/
 
-		/// <summary>
-		///     <remarks>
-		///         Equals <see cref="System.Reflection.MethodBody.GetILAsByteArray()" />
-		///     </remarks>
-		/// </summary>
-		/// <returns></returns>
-		public byte[] GetILAsByteArray()
+
+		internal byte[] GetILAsByteArray()
 		{
 			return Code.CopyOut(CodeSize);
 		}
 
-		/// <summary>
-		///     Points to the JIT IL code
-		/// </summary>
-		public Pointer<byte> Code => IsTiny ? Tiny.Reference.Code : Fat.Reference.Code;
+		internal CorILMethodFlags Flags {
+			get {
+				// todo: I don't know if the type has to be Fat or not, but just to be safe...
+				if (!IsFat) {
+					throw new Exception("IL method type must be Fat");
+				}
 
-		/// <summary>
-		///     Length/size of the IL code (<see cref="Code" />)
-		/// </summary>
-		public int CodeSize => (int) (IsTiny ? Tiny.Reference.CodeSize : Fat.Reference.CodeSize);
+				return Fat.Reference.Flags;
+			}
+		}
 
-		/// <summary>
-		///     <remarks>
-		///         Equals <see cref="System.Reflection.MethodBody.MaxStackSize" />
-		///     </remarks>
-		/// </summary>
-		public int MaxStack => (int) (IsTiny ? Tiny.Reference.MaxStack : Fat.Reference.MaxStack);
 
-		/// <summary>
-		///     <remarks>
-		///         Equals <see cref="System.Reflection.MethodBody.LocalSignatureMetadataToken" />
-		///     </remarks>
-		/// </summary>
-		public int LocalVarSigTok => (int) (IsTiny ? Tiny.Reference.LocalVarSigTok : Fat.Reference.LocalVarSigTok);
+		internal Pointer<byte> Code => IsTiny ? Tiny.Reference.Code : Fat.Reference.Code;
+
+
+		internal int CodeSize => (int) (IsTiny ? Tiny.Reference.CodeSize : Fat.Reference.CodeSize);
+
+
+		internal int MaxStack => (int) (IsTiny ? Tiny.Reference.MaxStack : Fat.Reference.MaxStack);
+
+
+		internal int LocalVarSigTok => (int) (IsTiny ? Tiny.Reference.LocalVarSigTok : Fat.Reference.LocalVarSigTok);
 	}
 
 }

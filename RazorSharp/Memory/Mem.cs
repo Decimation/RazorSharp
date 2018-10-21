@@ -129,7 +129,7 @@ namespace RazorSharp.Memory
 		public static void Set<T>(Pointer<byte> ptr, T value, int elemCnt)
 		{
 			for (int i = 0; i < elemCnt; i++) {
-				ptr.Write(value,i);
+				ptr.Write(value, i);
 			}
 		}
 
@@ -139,6 +139,32 @@ namespace RazorSharp.Memory
 		public static Pointer<T> ReadPointer<T>(Pointer<byte> ptr, long byteOffset)
 		{
 			return *(IntPtr*) ptr.Add(byteOffset);
+		}
+
+		public static void ForceWrite(Pointer<byte> p, int byteOffset, byte[] rgMem)
+		{
+			int    memWritten = 0;
+			int    size       = rgMem.Length;
+			IntPtr targetPtr  = p.Add(byteOffset).Address;
+			var    hProc      = Kernel32.OpenProcess(Process.GetCurrentProcess());
+
+
+			// Make the region writable
+			RazorContract.Assert(Kernel32.VirtualProtect(targetPtr, (uint) size,
+				MemoryProtection.ExecuteReadWrite, out MemoryProtection mpOldProtect));
+
+
+			// Write the memory
+			RazorContract.Assert(Kernel32.WriteProcessMemory(hProc, p.Address, rgMem, size, ref memWritten));
+
+			// Assert the size of memory written equals the size of memory requested to be written
+			RazorContract.Assert(memWritten == size);
+
+			// Restore the old memory protection
+			RazorContract.Assert(Kernel32.VirtualProtect(targetPtr, (uint) size, mpOldProtect, out _));
+
+			// Close the handle
+			RazorContract.Assert(Kernel32.CloseHandle(hProc));
 		}
 
 		public static void ForceWrite<T>(Pointer<byte> p, int byteOffset, T t)
@@ -169,13 +195,13 @@ namespace RazorSharp.Memory
 			return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static ref T AsRef<T>(Pointer<byte> p, int byteOffset = 0)
 		{
 			return ref CSUnsafe.AsRef<T>(PointerUtils.Add(p, byteOffset).ToPointer());
 		}
 
 		#endregion
-
 
 		#region Zero
 
@@ -186,11 +212,7 @@ namespace RazorSharp.Memory
 			}
 		}
 
-
-
 		#endregion
-
-
 
 		#region Stack
 
@@ -242,7 +264,6 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
-
 
 		/// <summary>
 		///     Checks whether an address is in range.

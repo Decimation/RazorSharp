@@ -29,7 +29,8 @@ namespace RazorSharp.Analysis
 
 		public sealed class ReferenceInternalInfo : InternalInfo
 		{
-			public ObjHeader* Header { get; }
+			// todo: was public
+			internal ObjHeader* Header { get; }
 
 			internal ReferenceInternalInfo(ref T t) : base(ref t)
 			{

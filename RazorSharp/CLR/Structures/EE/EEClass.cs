@@ -96,13 +96,13 @@ namespace RazorSharp.CLR.Structures.EE
 		/// <summary>
 		///     Corresponding <see cref="MethodTable" /> of this <see cref="EEClass" />
 		/// </summary>
-		public Pointer<MethodTable> MethodTable => m_pMethodTable;
+		internal Pointer<MethodTable> MethodTable => m_pMethodTable;
 
 
 		/// <summary>
 		///     Whether this <see cref="EEClass" /> has a <see cref="EEClassLayoutInfo" />
 		/// </summary>
-		public bool HasLayout => VMFlags.HasFlag(VMFlags.HasLayout);
+		internal bool HasLayout => VMFlags.HasFlag(VMFlags.HasLayout);
 
 		/// <summary>
 		///     <see cref="DWORD" /> of <see cref="TypeAttributes" />
@@ -110,20 +110,20 @@ namespace RazorSharp.CLR.Structures.EE
 		///         Equal to WinDbg's <c>!DumpClass</c> <c>"Class Attributes"</c> value in hexadecimal format.
 		///     </remarks>
 		/// </summary>
-		public DWORD Attributes => m_dwAttrClass;
+		internal DWORD Attributes => m_dwAttrClass;
 
 		/// <summary>
 		///     <remarks>
 		///         Equal to <see cref="Type.Attributes" />
 		///     </remarks>
 		/// </summary>
-		public TypeAttributes TypeAttributes => (TypeAttributes) Attributes;
+		internal TypeAttributes TypeAttributes => (TypeAttributes) Attributes;
 
 		/// <summary>
 		///     Number of bytes to subtract from <see cref="Structures.MethodTable.BaseSize" /> to get the actual number of bytes
 		///     of instance fields stored in the object on the GC heap.
 		/// </summary>
-		public byte BaseSizePadding => m_cbBaseSizePadding;
+		internal byte BaseSizePadding => m_cbBaseSizePadding;
 
 		/// <summary>
 		///     <para>Size of fixed portion in bytes </para>
@@ -135,9 +135,9 @@ namespace RazorSharp.CLR.Structures.EE
 		/// </summary>
 		internal int NativeSize => (int) m_cbNativeSize;
 
-		public VMFlags VMFlags => (VMFlags) m_VMFlags;
+		internal VMFlags VMFlags => (VMFlags) m_VMFlags;
 
-		public CorElementType NormalType => (CorElementType) m_NormType;
+		internal CorElementType NormalType => (CorElementType) m_NormType;
 
 		/// <summary>
 		///     <remarks>
@@ -198,10 +198,7 @@ namespace RazorSharp.CLR.Structures.EE
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		private PackedDWORDFields* PackedFields =>
-
-			//(PackedDWORDFields*) PointerUtils.Add(Unsafe.AddressOf(ref this), m_cbFixedEEClassFields);
-			(PackedDWORDFields*) Unsafe.AddressOf(ref this).Add(m_cbFixedEEClassFields);
+		private PackedDWORDFields* PackedFields => (PackedDWORDFields*) Unsafe.AddressOf(ref this).Add(m_cbFixedEEClassFields);
 
 		private Pointer<EEClass> ParentClass => m_pMethodTable->Parent.Reference.EEClass;
 

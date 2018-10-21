@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Running;
 using JetBrains.Annotations;
 using NUnit.Framework;
+using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Fixed;
@@ -125,25 +126,36 @@ namespace Test
 		 */
 		public static void Main(string[] args)
 		{
-			MetaType mt = Meta.GetType<string>();
-			Console.WriteLine("{0:E}",mt);
-			Console.WriteLine(mt["m_firstChar"]);
-			Console.WriteLine(mt.Parent);
+			MetaType mt = Meta.GetType<AnimeGirl>();
+			Console.WriteLine("{0:E}", mt);
 
-			Debug.Assert(Compare<string>());
+			Console.WriteLine(mt.Methods["uwu"]);
 
-			GetItem g = G;
+			Console.WriteLine(mt.Methods["uwu"].GetILHeader());
+			Console.WriteLine(mt);
+
+
+			Console.WriteLine(size(26,0,2));
+			Console.WriteLine(HeapSize("foo"));
 			Console.WriteLine();
-
-			Pointer<byte> p = g.Method.MethodHandle.GetFunctionPointer();
-			Console.WriteLine(p);
-
 
 		}
 
-		private static int G(string name)
+		static int size(int baseSize, int length, int componentSize)
 		{
-			throw new NotImplementedException();
+			return baseSize + length * componentSize;
+		}
+
+
+		/// <summary>
+		/// yeeeessss
+		/// </summary>
+		private class AnimeGirl
+		{
+			/// <summary>
+			/// nyaa~~
+			/// </summary>
+			public void uwu() { }
 		}
 
 

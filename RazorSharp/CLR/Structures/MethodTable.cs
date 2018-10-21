@@ -29,7 +29,10 @@ namespace RazorSharp.CLR.Structures
 
 
 	/// <summary>
-	/// <para>CLR <see cref="MethodTable"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaType"/></para>
+	///     <para>
+	///         CLR <see cref="MethodTable" />. Functionality is implemented in this <c>struct</c> and exposed via
+	///         <see cref="MetaType" />
+	///     </para>
 	///     <para>Internal representation: <see cref="RuntimeTypeHandle.Value" /></para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
@@ -74,36 +77,24 @@ namespace RazorSharp.CLR.Structures
 		private WORD FlagsLowValue => m_dwFlags.Flags;
 		private WORD Flags2Value   => m_wFlags2;
 
-		public MethodTableFlags Flags => (MethodTableFlags) FlagsValue;
+		internal MethodTableFlags Flags => (MethodTableFlags) FlagsValue;
 
 
 		/// <summary>
 		///     Note: these may not be accurate
 		/// </summary>
-		public MethodTableFlagsLow FlagsLow => (MethodTableFlagsLow) FlagsLowValue;
+		internal MethodTableFlagsLow FlagsLow => (MethodTableFlagsLow) FlagsLowValue;
 
 
-		public MethodTableFlags2 Flags2 => (MethodTableFlags2) Flags2Value;
+		internal MethodTableFlags2 Flags2 => (MethodTableFlags2) Flags2Value;
 
 		#endregion
 
-		/// <summary>
-		///     <para>The size of an individual element when this type is an array or string.</para>
-		///     <example>
-		///         If this type is a <c>string</c>, the component size will be <c>2</c>. (<c>sizeof(char)</c>)
-		///     </example>
-		///     <returns>
-		///         <c>0</c> if <c>!</c><see cref="HasComponentSize" />, component size otherwise
-		///     </returns>
-		/// </summary>
-		public short ComponentSize => HasComponentSize ? (short) m_dwFlags.ComponentSize : (short) 0;
 
-		/// <summary>
-		///     The base size of this class when allocated on the heap. Note that for value types
-		///     <see cref="BaseSize" /> returns the size of instance fields for a boxed value, and
-		///     <see cref="NumInstanceFieldBytes" /> for an unboxed value.
-		/// </summary>
-		public int BaseSize => (int) m_BaseSize;
+		internal short ComponentSize => HasComponentSize ? (short) m_dwFlags.ComponentSize : (short) 0;
+
+
+		internal int BaseSize => (int) m_BaseSize;
 
 		/// <summary>
 		///     Class token if it fits into 16-bits. If this is (WORD)-1, the class token is stored in the TokenOverflow optional
@@ -111,24 +102,17 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		private int OrigToken => m_wToken;
 
-		/// <summary>
-		///     The number of virtual methods in this type (<c>4</c> by default; from <see cref="Object" />)
-		/// </summary>
-		public int NumVirtuals => m_wNumVirtuals;
 
-		/// <summary>
-		///     The number of interfaces this type implements
-		///     <remarks>
-		///         <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>Number of IFaces in IFaceMap</c> value.</para>
-		///     </remarks>
-		/// </summary>
-		public int NumInterfaces => m_wNumInterfaces;
+		internal int NumVirtuals => m_wNumVirtuals;
+
+
+		internal int NumInterfaces => m_wNumInterfaces;
 
 		/// <summary>
 		///     The parent type's <see cref="MethodTable" />.
 		/// </summary>
 		/// <exception cref="NotImplementedException">If the type is an indirect parent</exception>
-		public Pointer<MethodTable> Parent {
+		internal Pointer<MethodTable> Parent {
 			// On Linux ARM is a RelativeFixupPointer. Otherwise,
 			// Parent PTR_MethodTable if enum_flag_HasIndirectParent is not set. Pointer to indirection cell
 			// if enum_flag_HasIndirectParent is set. The indirection is offset by offsetof(MethodTable, m_pParentMethodTable).
@@ -156,8 +140,7 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		/// <exception cref="NotImplementedException">
-		///     If the union type is not <see cref="LowBits.EEClass" /> or
-		///     <see cref="LowBits.MethodTable" />
+		///     If the union type is not <see cref="LowBits.EEClass" /> or <see cref="LowBits.MethodTable" />
 		/// </exception>
 		internal Pointer<EEClass> EEClass {
 			get {
@@ -213,7 +196,7 @@ namespace RazorSharp.CLR.Structures
 		///     Element type handle of an individual element if this is the <see cref="MethodTable" /> of an array.
 		/// </summary>
 		/// <exception cref="RuntimeException">If this is not an array <see cref="MethodTable" />.</exception>
-		public Pointer<MethodTable> ElementTypeHandle {
+		internal Pointer<MethodTable> ElementTypeHandle {
 			get {
 				if (IsArray) {
 					return (MethodTable*) m_ElementTypeHnd;
@@ -223,57 +206,40 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
-		public bool   HasComponentSize => Flags.HasFlag(MethodTableFlags.HasComponentSize);
-		public bool   IsArray          => Flags.HasFlag(MethodTableFlags.Array);
-		public bool   IsStringOrArray  => HasComponentSize;
-		public bool   IsBlittable      => EEClass.Reference.IsBlittable;
-		public bool   IsString         => HasComponentSize && !IsArray;
-		public bool   ContainsPointers => Flags.HasFlag(MethodTableFlags.ContainsPointers);
-		public string Name             => RuntimeType.Name;
+		internal bool   HasComponentSize => Flags.HasFlag(MethodTableFlags.HasComponentSize);
+		internal bool   IsArray          => Flags.HasFlag(MethodTableFlags.Array);
+		internal bool   IsStringOrArray  => HasComponentSize;
+		internal bool   IsBlittable      => EEClass.Reference.IsBlittable;
+		internal bool   IsString         => HasComponentSize && !IsArray;
+		internal bool   ContainsPointers => Flags.HasFlag(MethodTableFlags.ContainsPointers);
+		internal string Name             => RuntimeType.Name;
 
-		/// <summary>
-		///     Metadata token
-		///     <remarks>
-		///         <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>"mdToken"</c> value in hexadecimal format.</para>
-		///         <para>Equals <see cref="Type.MetadataToken" /></para>
-		///     </remarks>
-		/// </summary>
-		public int Token => Constants.TokenFromRid(OrigToken, CorTokenType.mdtTypeDef);
+
+		internal int Token => Constants.TokenFromRid(OrigToken, CorTokenType.mdtTypeDef);
 
 		// internal name: GetTypeDefRid
 
+
 		/// <summary>
-		///     <para>Corresponding <see cref="Type" /> of this <see cref="MethodTable" /></para>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public Type RuntimeType => Runtime.MethodTableToType(Unsafe.AddressOf(ref this));
-
-		/// <summary>
-		///     The number of instance fields in this type.
-		/// </summary>
-		public int NumInstanceFields => EEClass.Reference.NumInstanceFields;
-
-		/// <summary>
-		///     The number of <c>static</c> fields in this type.
-		/// </summary>
-		public int NumStaticFields => EEClass.Reference.NumStaticFields;
-
-		public int NumNonVirtualSlots => EEClass.Reference.NumNonVirtualSlots;
+		internal Type RuntimeType => Runtime.MethodTableToType(Unsafe.AddressOf(ref this));
 
 
-		/// <summary>
-		///     Number of methods in this type.
-		/// </summary>
-		public int NumMethods => EEClass.Reference.NumMethods;
+		internal int NumInstanceFields => EEClass.Reference.NumInstanceFields;
 
 
-		/// <summary>
-		///     The size of the instance fields in this type. This is the unboxed size of the type if the object is boxed.
-		///     (Minus padding and overhead of the base size.)
-		/// </summary>
-		public int NumInstanceFieldBytes => BaseSize - EEClass.Reference.BaseSizePadding;
+		internal int NumStaticFields => EEClass.Reference.NumStaticFields;
+
+		internal int NumNonVirtualSlots => EEClass.Reference.NumNonVirtualSlots;
+
+
+		internal int NumMethods => EEClass.Reference.NumMethods;
+
+
+		internal int NumInstanceFieldBytes => BaseSize - EEClass.Reference.BaseSizePadding;
 
 		/// <summary>
 		///     Array of <see cref="FieldDesc" />s for this type.
@@ -353,9 +319,9 @@ namespace RazorSharp.CLR.Structures
 				table.AddRow("Component size", m_dwFlags.ComponentSize);
 			}
 
-			table.AddRow("Flags", Runtime.CreateFlagsString(FlagsValue, Flags));
-			table.AddRow("Flags 2", Runtime.CreateFlagsString(Flags2Value, Flags2));
-			table.AddRow("Low flags", Runtime.CreateFlagsString(FlagsLowValue, FlagsLow));
+			table.AddRow("Flags", Enums.CreateFlagsString(FlagsValue, Flags));
+			table.AddRow("Flags 2", Enums.CreateFlagsString(Flags2Value, Flags2));
+			table.AddRow("Low flags", Enums.CreateFlagsString(FlagsLowValue, FlagsLow));
 			table.AddRow("Token", Token);
 
 			if (m_pParentMethodTable != null) {

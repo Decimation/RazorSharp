@@ -86,14 +86,8 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		private int OrigToken => (int) (m_dword1 & 0xFFFFFF);
 
-		/// <summary>
-		///     Field metadata token
-		///     <remarks>
-		///         <para>Equal to <see cref="System.Reflection.FieldInfo.MetadataToken" /></para>
-		///         <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Field"</c> column in hexadecimal format.</para>
-		///     </remarks>
-		/// </summary>
-		public int Token {
+
+		internal int Token {
 			get {
 				// Check if this FieldDesc is using the packed mb layout
 				if (!RequiresFullMBValue) {
@@ -104,13 +98,8 @@ namespace RazorSharp.CLR.Structures
 			}
 		}
 
-		/// <summary>
-		///     Offset in memory
-		///     <remarks>
-		///         <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Offset"</c> column in hexadecimal format.</para>
-		///     </remarks>
-		/// </summary>
-		public int Offset => (int) (m_dword2 & 0x7FFFFFF);
+
+		internal int Offset => (int) (m_dword2 & 0x7FFFFFF);
 
 
 		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
@@ -119,40 +108,36 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     Field type
 		/// </summary>
-		public CorElementType CorType => (CorElementType) TypeInt;
+		internal CorElementType CorType => (CorElementType) TypeInt;
 
 		#region bool accessors
 
 		#region Access modifiers
 
-		public bool IsPublic            => Protection.HasFlag(ProtectionLevel.Public);
-		public bool IsPrivate           => Protection.HasFlag(ProtectionLevel.Private);
-		public bool IsInternal          => Protection.HasFlag(ProtectionLevel.Internal);
-		public bool IsPrivateProtected  => Protection.HasFlag(ProtectionLevel.PrivateProtected);
-		public bool IsProtectedInternal => Protection.HasFlag(ProtectionLevel.ProtectedInternal);
+		internal bool IsPublic            => Protection.HasFlag(ProtectionLevel.Public);
+		internal bool IsPrivate           => Protection.HasFlag(ProtectionLevel.Private);
+		internal bool IsInternal          => Protection.HasFlag(ProtectionLevel.Internal);
+		internal bool IsPrivateProtected  => Protection.HasFlag(ProtectionLevel.PrivateProtected);
+		internal bool IsProtectedInternal => Protection.HasFlag(ProtectionLevel.ProtectedInternal);
 
 		#endregion
 
-		public bool IsPointer => CorType == CorElementType.Ptr;
+		internal bool IsPointer => CorType == CorElementType.Ptr;
 
-		/// <summary>
-		///     Whether the field is <c>static</c>
-		/// </summary>
-		public bool IsStatic => ReadBit(m_dword1, 24);
 
-		/// <summary>
-		///     Whether the field is decorated with a <see cref="ThreadStaticAttribute" /> attribute
-		/// </summary>
-		public bool IsThreadLocal => ReadBit(m_dword1, 25);
+		internal bool IsStatic => ReadBit(m_dword1, 24);
+
+
+		internal bool IsThreadLocal => ReadBit(m_dword1, 25);
 
 		/// <summary>
 		///     Unknown (Relative Virtual Address) ?
 		/// </summary>
-		public bool IsRVA => ReadBit(m_dword1, 26);
+		internal bool IsRVA => ReadBit(m_dword1, 26);
 
-		public bool IsFixedBuffer => SpecialNames.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
+		internal bool IsFixedBuffer => SpecialNames.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
 
-		public bool IsAutoProperty {
+		internal bool IsAutoProperty {
 			get {
 				string demangled = SpecialNames.DemangledAutoPropertyName(Name);
 				if (demangled != null) {
@@ -167,18 +152,16 @@ namespace RazorSharp.CLR.Structures
 
 		#endregion
 
-		/// <summary>
-		///     Access level of the field
-		/// </summary>
-		public ProtectionLevel Protection => (ProtectionLevel) ProtectionInt;
+
+		internal ProtectionLevel Protection => (ProtectionLevel) ProtectionInt;
 
 		/// <summary>
-		///     <para>Size of the field</para>
+		///
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public int Size {
+		internal int Size {
 			get {
 				int s = Constants.SizeOfCorElementType(CorType);
 				return s == -1 ? LoadSize : s;
@@ -194,28 +177,26 @@ namespace RazorSharp.CLR.Structures
 			[ClrSigcall] get => throw new SigcallException();
 		}
 
-		/// <summary>
-		///     The corresponding <see cref="FieldInfo" /> of this <see cref="FieldDesc" />
-		/// </summary>
-		public FieldInfo Info => EnclosingType.Module.ResolveField(Token);
+
+		internal FieldInfo Info => EnclosingType.Module.ResolveField(Token);
 
 		/// <summary>
 		///     Name of this field
 		/// </summary>
-		public string Name => Info.Name;
+		internal string Name => Info.Name;
 
 
 		/// <summary>
 		///     Enclosing type of this <see cref="FieldDesc" />
 		/// </summary>
-		public Type EnclosingType => Runtime.MethodTableToType(EnclosingMethodTable);
+		internal Type EnclosingType => Runtime.MethodTableToType(EnclosingMethodTable);
 
 		/// <summary>
 		///     <see cref="MethodTable" /> of this field's type
 		/// </summary>
-		public Pointer<MethodTable> FieldMethodTable => Runtime.MethodTableOf(Info.FieldType);
+		internal Pointer<MethodTable> FieldMethodTable => Runtime.MethodTableOf(Info.FieldType);
 
-		public Type FieldType => Info.FieldType;
+		internal Type FieldType => Info.FieldType;
 
 		/// <summary>
 		///     The enclosing type's <see cref="MethodTable" />
@@ -223,7 +204,7 @@ namespace RazorSharp.CLR.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		public Pointer<MethodTable> EnclosingMethodTable {
+		internal Pointer<MethodTable> EnclosingMethodTable {
 			[ClrSigcall] get => throw new SigcallException();
 		}
 
@@ -244,12 +225,12 @@ namespace RazorSharp.CLR.Structures
 
 		#region Value
 
-		public object GetValue<TInstance>(TInstance t)
+		internal object GetValue<TInstance>(TInstance t)
 		{
 			return Info.GetValue(t);
 		}
 
-		public void SetValue<TInstance>(TInstance t, object value)
+		internal void SetValue<TInstance>(TInstance t, object value)
 		{
 			Info.SetValue(t, value);
 		}
@@ -264,7 +245,7 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		///     <exception cref="Exception">If the field is <c>static</c> </exception>
 		/// </summary>
-		public IntPtr GetAddress<TInstance>(ref TInstance t)
+		internal IntPtr GetAddress<TInstance>(ref TInstance t)
 		{
 			RazorContract.Requires(!IsStatic, "You cannot get the address of a static field (yet)");
 			RazorContract.Assert(Runtime.ReadMethodTable(ref t) == EnclosingMethodTable);

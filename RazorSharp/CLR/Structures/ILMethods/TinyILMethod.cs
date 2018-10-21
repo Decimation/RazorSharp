@@ -1,6 +1,8 @@
 #region
 
+using System;
 using System.Runtime.InteropServices;
+using RazorSharp.CLR.Meta;
 using RazorSharp.Pointers;
 
 #endregion
@@ -12,6 +14,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 {
 
 	/// <summary>
+	/// <para>CLR <see cref="TinyILMethod"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaIL"/></para>
 	///     <para>Internal name: <c>COR_ILMETHOD_TINY</c></para>
 	///     <para>Used when the method is tiny (less than 64 bytes), and there are no local vars</para>
 	///     <code>typedef struct tagCOR_ILMETHOD_TINY : IMAGE_COR_ILMETHOD_TINY</code>
@@ -29,29 +32,38 @@ namespace RazorSharp.CLR.Structures.ILMethods
 	///     </list>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	public unsafe struct TinyILMethod /* : IMAGE_COR_ILMETHOD_TINY */
+	internal unsafe struct TinyILMethod /* : IMAGE_COR_ILMETHOD_TINY */
 	{
 		/// <summary>
 		///     This value is inherited from <see cref="IMAGE_COR_ILMETHOD_TINY" />
 		/// </summary>
 		[FieldOffset(0)] private readonly IMAGE_COR_ILMETHOD_TINY m_inheritedValue;
 
+		/// <summary>
+		/// Contains both <see cref="CodeSize"/> and <see cref="CorILMethodFlags"/>
+		/// </summary>
 		private byte Flags_CodeSize => m_inheritedValue.Flags_CodeSize;
 
-		public bool IsTiny => (Flags_CodeSize & ((uint) CorILMethodFlags.FormatMask >> 1)) ==
-		                      (uint) CorILMethodFlags.TinyFormat;
+		internal bool IsTiny {
+			get {
+				var v = (Flags_CodeSize & ((uint) CorILMethodFlags.FormatMask >> 1)) ==
+					(uint) CorILMethodFlags.TinyFormat;
+				return v;
+			}
+		}
 
 		/// <summary>
 		///     <code>
 		/// return(((BYTE*) this) + sizeof(struct tagCOR_ILMETHOD_TINY));
 		/// </code>
 		/// </summary>
-		public Pointer<byte> Code => (byte*) Unsafe.AddressOf(ref this) + sizeof(IMAGE_COR_ILMETHOD_TINY);
+		internal Pointer<byte> Code => (byte*) Unsafe.AddressOf(ref this) + sizeof(IMAGE_COR_ILMETHOD_TINY);
 
-		public uint CodeSize => (uint) Flags_CodeSize >> (int) (CorILMethodFlags.FormatShift - 1);
+		internal uint CodeSize => (uint) Flags_CodeSize >> (int) (CorILMethodFlags.FormatShift - 1);
 
-		public uint MaxStack       => 8;
-		public uint LocalVarSigTok => 0;
+		// todo: I should probably make these 2 fields const
+		internal uint MaxStack       => 8;
+		internal uint LocalVarSigTok => 0;
 	}
 
 	/// <summary>

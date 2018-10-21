@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR;
@@ -145,11 +144,9 @@ namespace RazorSharp
 		/// </summary>
 		/// <param name="instance">Instance of the enclosing type</param>
 		/// <param name="name">Name of the field</param>
-		/// <param name="fieldTypes">If the field has unique attributes (i.e. auto-property)</param>
-		public static Pointer<byte> AddressOfField<T>(ref T instance, string name,
-			SpecialFieldTypes fieldTypes = SpecialFieldTypes.None)
+		public static Pointer<byte> AddressOfField<T>(ref T instance, string name)
 		{
-			Pointer<FieldDesc> fd = Runtime.GetFieldDesc<T>(name, fieldTypes);
+			Pointer<FieldDesc> fd = Runtime.GetFieldDesc<T>(name);
 			return fd.Reference.GetAddress(ref instance);
 		}
 
@@ -257,14 +254,14 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		/// Returns the entry point of the specified function (assembly code).
+		///     Returns the entry point of the specified function (assembly code).
 		/// </summary>
 		/// <param name="t">Enclosing type</param>
-		/// <param name="name">Name of the function in <see cref="Type"/> <paramref name="t"/></param>
+		/// <param name="name">Name of the function in <see cref="Type" /> <paramref name="t" /></param>
 		/// <returns></returns>
 		public static Pointer<byte> AddressOfFunction(Type t, string name)
 		{
-			var md = Runtime.GetMethodDesc(t, name);
+			Pointer<MethodDesc> md = Runtime.GetMethodDesc(t, name);
 
 			// Function must be jitted
 			Debug.Assert(md.Reference.IsPointingToNativeCode);
@@ -409,10 +406,8 @@ namespace RazorSharp
 		{
 			// Note: Arrays native size == 0
 
-
 			Pointer<MethodTable> mt     = Runtime.MethodTableOf<T>();
 			int                  native = mt.Reference.EEClass.Reference.NativeSize;
-
 			return native == 0 ? INVALID_VALUE : native;
 		}
 
@@ -460,8 +455,29 @@ namespace RazorSharp
 		///     <para>Note: This also includes padding and overhead (<see cref="ObjHeader" /> and <see cref="MethodTable" /> ptr.)</para>
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int HeapSize<T>(ref T t) where T : class
 		{
+			return HeapSizeInternal(t);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int HeapSize<T>(T t) where T : class
+		{
+			return HeapSize(ref t);
+		}
+
+		private static int HeapSizeInternal<T>(T t)
+		{
+			RazorContract.RequiresClassType<T>();
+
+			// By manually reading the MethodTable*, we can calculate the size correctly if the reference
+			// is boxed or cloaked
+			Pointer<MethodTable> methodTable = Runtime.ReadMethodTable(ref t);
+
+			// Value of GetSizeField()
+			int length = 0;
+
 			/**
 			 * Type			x86 size				x64 size
 			 *
@@ -491,41 +507,23 @@ namespace RazorSharp
 			 *
 			 */
 
-			return HeapSizeInternal(t);
-		}
-
-		public static int HeapSize<T>(T t) where T : class
-		{
-			return HeapSize(ref t);
-		}
-
-		private static int HeapSizeInternal<T>(T t)
-		{
-			RazorContract.RequiresClassType<T>();
-
-			// By manually reading the MethodTable*, we can calculate the size correctly if the reference
-			// is boxed or cloaked
-			Pointer<MethodTable> methodTable = Runtime.ReadMethodTable(ref t);
-
 			if (typeof(T).IsArray) {
 				Array arr = t as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
 				// We already know it's not null because the type is an array.
-				return CalculateHeapSize(arr.Length);
+				length = arr.Length;
+
+				// Sanity check
+				Debug.Assert(!(t is string));
+			}
+			else if (t is string str) {
+				// Sanity check
+				Debug.Assert(!typeof(T).IsArray);
+				length = str.Length;
 			}
 
-			if (t is string str) {
-				return CalculateHeapSize(str.Length);
-			}
-
-
-			int CalculateHeapSize(int length)
-			{
-				return methodTable.Reference.BaseSize + length * methodTable.Reference.ComponentSize;
-			}
-
-			return methodTable.Reference.BaseSize;
+			return methodTable.Reference.BaseSize + length * methodTable.Reference.ComponentSize;
 		}
 
 		#endregion
@@ -676,6 +674,13 @@ namespace RazorSharp
 
 		#endregion
 
+		public static T Unbox<T>(object o)
+		{
+			lock (o) {
+				Pointer<byte> addr = AddressOfHeap(o, OffsetType.Fields);
+				return addr.Read<T>();
+			}
+		}
 	}
 
 }

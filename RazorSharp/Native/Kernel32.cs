@@ -296,6 +296,10 @@ namespace RazorSharp.Native
 			Trace.Assert(CloseHandle(hProc));
 		}
 
+		[DllImport(Kernel32Dll, SetLastError = true)]
+		public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int dwSize,
+			ref int lpNumberOfBytesWritten);
+
 
 		[DllImport(Kernel32Dll, SetLastError = true)]
 		public static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, IntPtr lpBuffer, int dwSize,
