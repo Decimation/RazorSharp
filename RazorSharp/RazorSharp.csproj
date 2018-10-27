@@ -219,6 +219,7 @@
       <Compile Include="CLR\Fixed\PinHandle.cs"/>
       <Compile Include="CLR\Fixed\PinHelper.cs"/>
       <Compile Include="CLR\Meta\IMeta.cs"/>
+      <Compile Include="CLR\Meta\IMetaMember.cs"/>
       <Compile Include="CLR\Meta\Meta.cs"/>
       <Compile Include="CLR\Meta\MetaField.cs"/>
       <Compile Include="CLR\Meta\MetaIL.cs"/>

@@ -369,14 +369,14 @@ namespace RazorSharp.Pointers
 			Mem.Write(Offset<TType>(elemOffset), 0, t);
 		}
 
-		public void ForceWrite(byte[] t, int byteOffset = 0)
+		public void ForceWrite(byte[] rgBytes, int byteOffset = 0)
 		{
-			Mem.ForceWrite(Offset<byte>(byteOffset), 0, rgMem: t);
+			Mem.ForceWrite(Offset<byte>(byteOffset), 0, rgMem: rgBytes);
 		}
 
 		public void ForceWrite<TType>(TType t, int elemOffset = 0)
 		{
-			Mem.ForceWrite(Offset<TType>(elemOffset), 0, t);
+			Mem.ForceWrite<TType>(Offset<TType>(elemOffset), 0, t);
 		}
 
 		public TType Read<TType>(int elemOffset = 0)

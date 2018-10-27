@@ -25,7 +25,7 @@ namespace RazorSharp.CLR.Meta
 	///         </item>
 	///     </list>
 	/// </summary>
-	public class MetaMethod : IMeta
+	public class MetaMethod : IMetaMember
 	{
 		private readonly Pointer<MethodDesc> m_value;
 
@@ -52,7 +52,9 @@ namespace RazorSharp.CLR.Meta
 		/// <summary>
 		///     The corresponding <see cref="MethodInfo" /> of this <see cref="MethodDesc" />
 		/// </summary>
-		public MethodInfo Info => m_value.Reference.Info;
+		public MethodInfo MethodInfo => m_value.Reference.Info;
+
+		public MemberInfo Info => MethodInfo;
 
 		/// <summary>
 		///     Function pointer (entry point) of this method.

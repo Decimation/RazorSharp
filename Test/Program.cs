@@ -135,10 +135,17 @@ namespace Test
 			Console.WriteLine(mt);
 
 
-			Console.WriteLine(size(26,0,2));
-			Console.WriteLine(HeapSize("foo"));
-			Console.WriteLine();
+			CPlayer cp = new CPlayer();
+			Console.WriteLine("{0}", cp.p);
+			cp.p.Reference = 0xFF;
+			Console.WriteLine("{0}", cp.p);
+			Console.WriteLine(typeof(Pointer<int>));
+		}
 
+		class CPlayer
+		{
+			private int          m_i;
+			public  Pointer<int> p => AddressOfField(this, "m_i");
 		}
 
 		static int size(int baseSize, int length, int componentSize)

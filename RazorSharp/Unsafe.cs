@@ -150,13 +150,18 @@ namespace RazorSharp
 			return fd.Reference.GetAddress(ref instance);
 		}
 
+		public static Pointer<byte> AddressOfField<T>(T instance, string name) where T : class
+		{
+			return AddressOfField(ref instance, name);
+		}
+
 		// todo: maybe use CSUnsafe.AsPointer instead of a TypedReference...
 		// todo: it's much faster (by ~1.8 ns)
 
 		/// <summary>
 		///     <para>Returns the address of <paramref name="t" />.</para>
 		///     <remarks>
-		///         <para> Equals <see cref="CSUnsafe.AsPointer{T}" /></para>
+		///         <para>Equals <see cref="CSUnsafe.AsPointer{T}" /></para>
 		///     </remarks>
 		/// </summary>
 		/// <param name="t">Type to return the address of</param>

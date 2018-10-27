@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using RazorSharp.CLR.Meta;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.HeapObjects;
 using RazorSharp.Common;
@@ -62,6 +63,18 @@ namespace RazorSharp.CLR
 			HeapObject** h = (HeapObject**) Unsafe.AddressOf(ref t);
 			return h;
 		}
+
+		#endregion
+
+		#region Compare
+
+		private static void AssertCompare(MemberInfo info, IMetaMember meta)
+		{
+			RazorContract.Assert(info.MetadataToken == meta.Token);
+			RazorContract.Assert(info.Name == meta.Name);
+			RazorContract.Assert(info == meta.Info);
+		}
+
 
 		#endregion
 
@@ -141,6 +154,13 @@ namespace RazorSharp.CLR
 
 		#region FieldDesc
 
+		/// <summary>
+		///     Reads all <see cref="FieldDesc" />s from <paramref name="mt"/>'s <see cref="MethodTable.FieldDescList" />
+		///     <remarks>
+		///         Note: this does not include literal (<c>const</c>) fields.
+		///     </remarks>
+		/// </summary>
+		/// <returns></returns>
 		private static Pointer<FieldDesc>[] ReadFieldDescs(Pointer<MethodTable> mt)
 		{
 			int                  len  = mt.Reference.FieldDescListLength;
@@ -158,15 +178,6 @@ namespace RazorSharp.CLR
 			return ReadFieldDescs(ReadMethodTable(ref t));
 		}
 
-
-		/// <summary>
-		///     Gets all the <see cref="FieldDesc" />s from <typeparamref name="T" />'s <see cref="MethodTable.FieldDescList" />
-		///     <remarks>
-		///         Note: this does not include literal (<c>const</c>) fields.
-		///     </remarks>
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
 		internal static Pointer<FieldDesc>[] GetFieldDescs<T>()
 		{
 			return GetFieldDescs(typeof(T));
@@ -201,11 +212,11 @@ namespace RazorSharp.CLR
 			RazorContract.Assert(fieldDesc.Reference.Info == fieldInfo);
 			RazorContract.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
 
+
 			return fieldDesc;
 		}
 
-		internal static Pointer<FieldDesc> GetFieldDesc<T>(string name,
-			BindingFlags flags = DefaultFlags)
+		internal static Pointer<FieldDesc> GetFieldDesc<T>(string name,BindingFlags flags = DefaultFlags)
 		{
 			return GetFieldDesc(typeof(T), name, flags);
 		}
@@ -245,11 +256,8 @@ namespace RazorSharp.CLR
 			Pointer<MethodDesc>[] arr = new Pointer<MethodDesc>[methods.Length];
 
 			for (int i = 0; i < arr.Length; i++) {
-				arr[i] = (MethodDesc*) methods[i].MethodHandle.Value;
+				arr[i] = methods[i].MethodHandle.Value;
 				RazorContract.Assert(arr[i].Reference.Info.MetadataToken == methods[i].MetadataToken);
-
-				// todo
-//				RazorContract.Assert(arr[i].Reference.Info==methods[i]);
 			}
 
 //			arr = arr.OrderBy(x => x.ToInt64()).ToArray();

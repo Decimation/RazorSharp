@@ -26,7 +26,7 @@ namespace RazorSharp.CLR.Meta
 	///         </item>
 	///     </list>
 	/// </summary>
-	public class MetaField : IMeta
+	public class MetaField : IMetaMember
 	{
 		private readonly Pointer<FieldDesc> m_value;
 
@@ -101,7 +101,9 @@ namespace RazorSharp.CLR.Meta
 		/// <summary>
 		///     The corresponding <see cref="FieldInfo" /> of this <see cref="FieldDesc" />
 		/// </summary>
-		public FieldInfo Info => m_value.Reference.Info;
+		public FieldInfo FieldInfo => m_value.Reference.Info;
+
+		public MemberInfo Info => FieldInfo;
 
 		public string Name => m_value.Reference.Name;
 

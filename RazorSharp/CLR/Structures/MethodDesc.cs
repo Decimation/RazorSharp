@@ -240,6 +240,13 @@ namespace RazorSharp.CLR.Structures
 
 		#region Methods
 
+		internal void Compare(MethodInfo info)
+		{
+			RazorContract.Assert(Token == info.MetadataToken);
+			RazorContract.Assert(Name == info.Name);
+			RazorContract.Assert(Info == info);
+		}
+
 		#region Equality
 
 		public bool Equals(MethodDesc md)
