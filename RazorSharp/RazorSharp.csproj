@@ -279,7 +279,6 @@
       <Compile Include="Native\Structures\Images\ImageSectionInfo.cs"/>
       <Compile Include="Native\Structures\MemoryBasicInformation.cs"/>
       <Compile Include="Native\Structures\SystemInfo.cs"/>
-      <Compile Include="Obsolete\Experimental\FunctionHooker.cs"/>
       <Compile Include="Obsolete\Experimental\StackAllocated.cs"/>
       <Compile Include="Obsolete\Experimental\UnmanagedAllocated.cs"/>
       <Compile Include="Obsolete\MemoryInspector.cs"/>
@@ -307,7 +306,6 @@
       <Compile Include="CLR\Structures\PackedDWORDFields.cs"/>
       <Compile Include="CLR\Constants.cs"/>
       <Compile Include="CLR\Runtime.cs"/>
-      <Compile Include="Substrate.cs"/>
     <Compile Include="Unsafe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
       <Compile Include="Utilities\Exceptions\PreconditionException.cs"/>

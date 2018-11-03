@@ -194,7 +194,7 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     <see cref="MethodTable" /> of this field's type
 		/// </summary>
-		internal Pointer<MethodTable> FieldMethodTable => Runtime.MethodTableOf(Info.FieldType);
+		internal Pointer<MethodTable> FieldMethodTable => Info.FieldType.GetMethodTable();
 
 		internal Type FieldType => Info.FieldType;
 

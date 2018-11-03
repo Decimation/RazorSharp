@@ -15,6 +15,35 @@ namespace Test.Testing.Tests
 	public class AllocPoolTests
 	{
 		[Test]
+		public void Test2()
+		{
+			const int INT_SIZE = 4;
+			const int LENGTH   = 10;
+			const int SIZE     = INT_SIZE * LENGTH;
+
+			Pointer<int> ptr = AllocPool.Alloc<int>(LENGTH);
+
+			for (int i = 0; i < AllocPool.GetLength(ptr); i++) {
+//				AllocPool.Info(ptr);
+//				Console.WriteLine(ptr.Query());
+//				Thread.Sleep(1000);
+//				Console.Clear();
+
+				Debug.Assert(AllocPool.GetLength(ptr) == LENGTH);
+				Debug.Assert(AllocPool.GetSize(ptr) == SIZE);
+				Debug.Assert(AllocPool.IsAllocated(ptr));
+				Debug.Assert(AllocPool.GetOffset(ptr) == i);
+
+
+
+				if (AllocPool.GetOffset(ptr) + 1 < AllocPool.GetLength(ptr))
+					ptr++;
+			}
+
+			AllocPool.Free(ptr);
+		}
+
+		[Test]
 		public void Test()
 		{
 			const int    alloc = 3;

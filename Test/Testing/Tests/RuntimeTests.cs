@@ -235,7 +235,7 @@ namespace Test.Testing.Tests
 			Pointer<MethodTable> mt  = Runtime.ReadMethodTable(ref arr);
 
 
-			Debug.Assert(mt.Reference.ElementTypeHandle == Runtime.MethodTableOf<string>());
+			Debug.Assert(mt.Reference.ElementTypeHandle == typeof(string).GetMethodTable());
 
 			// !do 0x175000746A8
 			// Name:        System.String[]
@@ -296,10 +296,10 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestPoint()
 		{
-			Pointer<FieldDesc> xfd = Runtime.GetFieldDesc<Point>("<X>k__BackingField");
+			Pointer<FieldDesc> xfd = typeof(Point).GetFieldDesc("<X>k__BackingField");
 			Debug.Assert(xfd.Reference.Token == xfd.Reference.Info.MetadataToken);
 
-			Pointer<FieldDesc> ffd = Runtime.GetFieldDesc<Point>("FixedBuffer");
+			Pointer<FieldDesc> ffd = typeof(Point).GetFieldDesc("FixedBuffer");
 			Debug.Assert(ffd.Reference.Token == ffd.Reference.Info.MetadataToken);
 		}
 

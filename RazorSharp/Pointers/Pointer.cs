@@ -1,5 +1,7 @@
 #region
 
+#region
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,14 +9,17 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 using JetBrains.Annotations;
 using RazorSharp.CLR.Fixed;
 using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Native;
+using RazorSharp.Native.Enums;
 using RazorSharp.Native.Structures;
 using RazorSharp.Utilities;
+
+#endregion
+
 // ReSharper disable UseStringInterpolation
 
 #endregion
@@ -178,35 +183,37 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
-		#region Init
+		#region Set
 
-		/// <summary>
-		///     Writes all elements of <paramref name="enumerable" /> to the current pointer.
-		/// </summary>
-		/// <param name="enumerable">Values to write</param>
-		public void Init(IEnumerable<T> enumerable)
+		public void Set(T value, int startIndex, int elemCount)
 		{
-			int            i          = 0;
-			IEnumerator<T> enumerator = enumerable.GetEnumerator();
-			while (enumerator.MoveNext()) {
-				this[i++] = enumerator.Current;
-			}
-
-			enumerator.Dispose();
+			Set<T>(value, startIndex, elemCount);
 		}
 
-		/// <summary>
-		///     Writes all elements of <paramref name="values" /> to the current pointer.
-		/// </summary>
-		/// <param name="values">Values to write</param>
-		public void Init(params T[] values)
+		public void Set(T value, int elemCount)
 		{
-			for (int i = 0; i < values.Length; i++) {
-				this[i] = values[i];
+			Set<T>(value, elemCount);
+		}
+
+		public void Set<TType>(TType value, int startIndex, int elemCount)
+		{
+			for (int i = startIndex; i < elemCount + startIndex; i++) {
+				Write(value, i - startIndex);
 			}
+		}
+
+		public void Set<TType>(TType value, int elemCount)
+		{
+			Set(value, 0, elemCount);
 		}
 
 		#endregion
+
+		public void Init(int elemCount)
+		{
+			Set(default, elemCount);
+		}
+
 
 		#region Contains
 
@@ -297,6 +304,10 @@ namespace RazorSharp.Pointers
 			return Kernel32.VirtualQuery(Address);
 		}
 
+		public bool IsWritable => !IsReadOnly;
+		public bool IsReadOnly => Query().Protect.HasFlag(MemoryProtection.ReadOnly);
+
+
 		private string DbgToString()
 		{
 			return String.Format("Address = {0} | Value = {1}", ToString(PointerSettings.FMT_P),
@@ -305,12 +316,47 @@ namespace RazorSharp.Pointers
 
 		#region Read / write
 
+		#region WriteAll
+
 		/// <summary>
-		/// Reads a value of <typeparamref name="TType"/> as a <typeparamref name="TAs"/>
+		///     Writes all elements of <paramref name="enumerable" /> to the current pointer.
 		/// </summary>
-		/// <param name="elemOffset">Element offset in terms of <typeparamref name="TType"/></param>
+		/// <param name="enumerable">Values to write</param>
+		public void WriteAll(IEnumerable<T> enumerable)
+		{
+			int            i          = 0;
+			IEnumerator<T> enumerator = enumerable.GetEnumerator();
+			while (enumerator.MoveNext()) {
+				this[i++] = enumerator.Current;
+			}
+
+			enumerator.Dispose();
+		}
+
+		/// <summary>
+		///     Writes all elements of <paramref name="values" /> to the current pointer.
+		/// </summary>
+		/// <param name="values">Values to write</param>
+		public void WriteAll(params T[] values)
+		{
+			for (int i = 0; i < values.Length; i++) {
+				this[i] = values[i];
+			}
+		}
+
+		#endregion
+
+		#region As
+
+		/// <summary>
+		///     Reads a value of <typeparamref name="TType" /> as a <typeparamref name="TAs" />
+		///     <remarks>
+		///         This is the same operation as <see cref="Mem.ReinterpretCast{TFrom,TTo}" />
+		///     </remarks>
+		/// </summary>
+		/// <param name="elemOffset">Element offset in terms of <typeparamref name="TType" /></param>
 		/// <typeparam name="TType">Inherent type</typeparam>
-		/// <typeparam name="TAs">Type to reinterpret <typeparamref name="TType"/> as</typeparam>
+		/// <typeparam name="TAs">Type to reinterpret <typeparamref name="TType" /> as</typeparam>
 		/// <returns></returns>
 		public TAs ReadAs<TType, TAs>(int elemOffset = 0)
 		{
@@ -319,38 +365,21 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Writes a value of <typeparamref name="TType"/> as a <typeparamref name="TAs"/>
+		///     Writes a value of <typeparamref name="TType" /> as a <typeparamref name="TAs" />
+		///     <remarks>
+		///         This is the same operation as <see cref="Mem.ReinterpretCast{TFrom,TTo}" />
+		///     </remarks>
 		/// </summary>
-		/// <param name="value">Value to write as a <typeparamref name="TAs"/></param>
-		/// <param name="elemOffset">Element offset in terms of <typeparamref name="TType"/></param>
+		/// <param name="value">Value to write as a <typeparamref name="TAs" /></param>
+		/// <param name="elemOffset">Element offset in terms of <typeparamref name="TType" /></param>
 		/// <typeparam name="TType">Inherent type</typeparam>
-		/// <typeparam name="TAs">Type to reinterpret <typeparamref name="TType"/> as</typeparam>
+		/// <typeparam name="TAs">Type to reinterpret <typeparamref name="TType" /> as</typeparam>
 		public void WriteAs<TType, TAs>(TType value, int elemOffset = 0)
 		{
 			Write(CSUnsafe.Read<TAs>(Unsafe.AddressOf(ref value).ToPointer()), elemOffset);
 		}
 
-		[HandleProcessCorruptedStateExceptions]
-		public bool TryRead<TType>(out TType value)
-		{
-			TType      valueProxy = default;
-			Pointer<T> thisProxy  = this;
-
-			if (!LowLevel.CorruptsState(() => { valueProxy = thisProxy.Read<TType>(); }, out _)) {
-				value = valueProxy;
-				return true;
-			}
-
-			value = valueProxy;
-			return false;
-		}
-
-		[HandleProcessCorruptedStateExceptions]
-		public bool TryWrite<TType>(TType value)
-		{
-			Pointer<T> thisProxy = this;
-			return !LowLevel.CorruptsState(() => { thisProxy.Write(value); }, out _);
-		}
+		#endregion
 
 		public string ReadString(StringTypes s)
 		{
@@ -369,15 +398,48 @@ namespace RazorSharp.Pointers
 			Mem.Write(Offset<TType>(elemOffset), 0, t);
 		}
 
-		public void ForceWrite(byte[] rgBytes, int byteOffset = 0)
+		#region Safe write
+
+		/// <summary>
+		///     Writes <paramref name="data" /> to <see cref="Address" /> after marking the memory region
+		///     <see cref="MemoryProtection.ExecuteReadWrite" />. The original region protection is restored after
+		///     the value <paramref name="data" /> is written.
+		/// </summary>
+		/// <param name="elemOffset">Element offset relative to <see cref="Address" /></param>
+		/// <param name="data">Value to write</param>
+		/// <typeparam name="TType">Type of <paramref name="data" /></typeparam>
+		public void SafeWrite<TType>(TType data, int elemOffset = 0)
 		{
-			Mem.ForceWrite(Offset<byte>(byteOffset), 0, rgMem: rgBytes);
+			IntPtr ptr = Offset<TType>(elemOffset);
+
+			Kernel32.VirtualProtect(ptr, ElementSize, MemoryProtection.ExecuteReadWrite,
+				out MemoryProtection oldProtect);
+
+			Write(data);
+
+			Kernel32.VirtualProtect(ptr, ElementSize, oldProtect, out oldProtect);
 		}
 
-		public void ForceWrite<TType>(TType t, int elemOffset = 0)
+		/// <summary>
+		///     Writes the values of <paramref name="mem" /> to <see cref="Address" /> after marking the memory region
+		///     <see cref="MemoryProtection.ExecuteReadWrite" />. The original region protection is restored after
+		///     the values of <paramref name="mem" /> are written.
+		/// </summary>
+		/// <param name="byteOffset">Byte offset relative to <see cref="Address" /></param>
+		/// <param name="mem">Byte values to write</param>
+		public void SafeWrite(byte[] mem, int byteOffset = 0)
 		{
-			Mem.ForceWrite<TType>(Offset<TType>(elemOffset), 0, t);
+			Pointer<byte> ptr = Offset<byte>(byteOffset);
+
+			Kernel32.VirtualProtect(ptr, mem.Length, MemoryProtection.ExecuteReadWrite,
+				out MemoryProtection oldProtect);
+
+			ptr.WriteAll(mem);
+
+			Kernel32.VirtualProtect(ptr, mem.Length, oldProtect, out oldProtect);
 		}
+
+		#endregion
 
 		public TType Read<TType>(int elemOffset = 0)
 		{
@@ -503,11 +565,12 @@ namespace RazorSharp.Pointers
 				: new ConsoleTable("Address", "Offset", "Pointer", "Value");
 
 			for (int i = 0; i < elemCnt; i++) {
+				Pointer<T> ptr = AddressOfIndex(i);
 				if (!typeof(T).IsValueType) {
-					table.AddRow(Hex.ToHex(Offset(i)), i, Hex.ToHex(Read<long>(i)), this[i]);
+					table.AddRow(ptr.ToString("P"), i, Hex.ToHex(Read<long>(i)), ptr.ToStringSafe());
 				}
 				else {
-					table.AddRow(Hex.ToHex(Offset(i)), i, this[i]);
+					table.AddRow(ptr.ToString("P"), i, ptr.ToStringSafe());
 				}
 			}
 
@@ -873,7 +936,7 @@ namespace RazorSharp.Pointers
 
 			switch (format.ToUpperInvariant()) {
 				case PointerSettings.FMT_O:
-					return ToStringSafe(this);
+					return ToStringSafe();
 
 				case PointerSettings.FMT_I:
 					return ToInfoTable().ToMarkDownString();
@@ -882,61 +945,58 @@ namespace RazorSharp.Pointers
 					return Hex.ToHex(this);
 
 				case PointerSettings.FMT_B:
-					string thisStr = ToStringSafe(this);
-					string str = String.Format("{0} @ {1}: {2}", typeof(T).Name, Hex.ToHex(Address),
+					string thisStr = ToStringSafe();
+					return String.Format("{0} @ {1}: {2}", typeof(T).Name, Hex.ToHex(Address),
 						thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
-					return str;
 				default:
 					goto case PointerSettings.FMT_O;
 			}
-
-
-			string ToStringSafe(Pointer<T> inst)
-			{
-				if (inst.IsNull) {
-					return PointerSettings.NULLPTR;
-				}
-
-
-				if (typeof(T).IsNumericType()) {
-					return String.Format("{0} ({1})", inst.Reference, Hex.TryCreateHex(inst.Reference));
-				}
-
-				/* Special support for C-string */
-				if (typeof(T) == typeof(char)) {
-					return inst.ReadString(StringTypes.UniStr);
-				}
-
-				/*if (typeof(T) == typeof(sbyte)) {
-					return inst.ReadString(StringTypes.AnsiStr);
-				}*/
-
-
-				if (!typeof(T).IsValueType) {
-					Pointer<byte> heapPtr = inst.Read<Pointer<byte>>();
-					string        valueStr;
-
-					if (heapPtr.IsNull) {
-						valueStr = PointerSettings.NULLPTR;
-						goto RETURN;
-					}
-
-					if (typeof(T).IsIListType()) {
-						valueStr = $"[{Collections.ToString((IList) inst.Reference)}]";
-					}
-					else {
-						valueStr = inst.Reference.ToString();
-					}
-
-					RETURN:
-					return String.Format("{0} ({1})", valueStr, heapPtr.ToString(PointerSettings.FMT_P));
-				}
-
-
-				return inst.Reference.ToString();
-			}
 		}
 
+		public string ToStringSafe()
+		{
+			if (IsNull) {
+				return PointerSettings.NULLPTR;
+			}
+
+
+			if (typeof(T).IsNumericType()) {
+				return String.Format("{0} ({1})", Reference, Hex.TryCreateHex(Reference));
+			}
+
+			/* Special support for C-string */
+			if (typeof(T) == typeof(char)) {
+				return ReadString(StringTypes.UniStr);
+			}
+
+			/*if (typeof(T) == typeof(sbyte)) {
+				return inst.ReadString(StringTypes.AnsiStr);
+			}*/
+
+
+			if (!typeof(T).IsValueType) {
+				Pointer<byte> heapPtr = Read<Pointer<byte>>();
+				string        valueStr;
+
+				if (heapPtr.IsNull) {
+					valueStr = PointerSettings.NULLPTR;
+					goto RETURN;
+				}
+
+				if (typeof(T).IsIListType()) {
+					valueStr = $"[{Collections.ToString((IList) Reference)}]";
+				}
+				else {
+					valueStr = Reference == null ? PointerSettings.NULLPTR : Reference.ToString();
+				}
+
+				RETURN:
+				return String.Format("{0} ({1})", valueStr, heapPtr.ToString(PointerSettings.FMT_P));
+			}
+
+
+			return Reference.ToString();
+		}
 
 		[Pure]
 		public string ToString(string format)

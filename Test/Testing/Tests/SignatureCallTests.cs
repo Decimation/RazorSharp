@@ -18,7 +18,7 @@ namespace Test.Testing.Tests
 		[Test]
 		public void MethodDesc()
 		{
-			Pointer<MethodDesc> md = Runtime.GetMethodDesc<Dummy>("doSomething");
+			Pointer<MethodDesc> md = typeof(Dummy).GetMethodDesc("doSomething");
 
 			bool                 isCtor                 = md.Reference.IsConstructor;
 			int                  memberDef              = md.Reference.Token;
@@ -31,7 +31,7 @@ namespace Test.Testing.Tests
 		[Test]
 		public void FieldDesc()
 		{
-			Pointer<FieldDesc>   fd        = Runtime.GetFieldDesc<string>("m_firstChar");
+			Pointer<FieldDesc> fd = typeof(string).GetFieldDesc("m_firstChar");
 			void*                module    = fd.Reference.GetModule();
 			int                  size      = fd.Reference.Size;
 			Pointer<MethodTable> mt        = fd.Reference.EnclosingMethodTable;
@@ -55,7 +55,7 @@ namespace Test.Testing.Tests
 		[Test]
 		public void JITFunctions()
 		{
-			Pointer<MethodTable> mt = Runtime.MethodTableOf<string>();
+			Pointer<MethodTable> mt = typeof(string).GetMethodTable();
 			Debug.Assert(Runtime.MethodTableToType(mt) == typeof(string));
 		}
 	}

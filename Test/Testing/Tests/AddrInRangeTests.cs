@@ -23,7 +23,7 @@ namespace Test.Testing.Tests
 
 			int[]        rg    = {1, 2, 3, 4, 5};
 			Pointer<int> rgPtr = Mem.AllocUnmanaged<int>(5);
-			rgPtr.Init(1, 2, 3, 4, 5);
+			rgPtr.WriteAll(1, 2, 3, 4, 5);
 
 			Debug.Assert(rgPtr.Contains(1, 5));
 

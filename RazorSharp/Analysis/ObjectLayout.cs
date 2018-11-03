@@ -120,8 +120,7 @@ namespace RazorSharp.Analysis
 		///     pointer is also included.
 		/// </param>
 		public ObjectLayout(ref T t, bool bFieldsOnly = true) : this(Unsafe.AddressOf(ref t).Address, t, bFieldsOnly,
-			false,
-			false)
+			false, false)
 		{
 			RazorContract.Requires(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");
 
@@ -299,7 +298,7 @@ namespace RazorSharp.Analysis
 		{
 			const string paddingByte = "Byte";
 
-			Pointer<FieldDesc>[] fieldDescs = Runtime.GetFieldDescs<T>();
+			Pointer<FieldDesc>[] fieldDescs = typeof(T).GetFieldDescs();
 			fieldDescs = fieldDescs.OrderBy(x => x.Reference.Offset).ToArray();
 			Collections.RemoveAll(ref fieldDescs, x => x.Reference.IsStatic);
 

@@ -89,7 +89,7 @@ namespace RazorSharp
 		/// <returns>Field offset</returns>
 		public static int OffsetOf<TType>(string fieldName)
 		{
-			return Runtime.GetFieldDesc<TType>(fieldName).Reference.Offset;
+			return typeof(TType).GetFieldDesc(fieldName).Reference.Offset;
 		}
 
 		/// <summary>
@@ -109,7 +109,7 @@ namespace RazorSharp
 			//	.Where(x => x.CorType == Constants.TypeToCorType<TMember>()).ToArray();
 
 			// Not using LINQ is faster
-			Pointer<FieldDesc>[] fieldDescsPtrs = Runtime.GetFieldDescs<TType>();
+			Pointer<FieldDesc>[] fieldDescsPtrs = typeof(TType).GetFieldDescs();
 			List<FieldDesc>      fieldDescs     = new List<FieldDesc>();
 			foreach (Pointer<FieldDesc> p in fieldDescsPtrs) {
 				if (p.Reference.CorType == Constants.TypeToCorType<TMember>()) {
@@ -146,7 +146,7 @@ namespace RazorSharp
 		/// <param name="name">Name of the field</param>
 		public static Pointer<byte> AddressOfField<T>(ref T instance, string name)
 		{
-			Pointer<FieldDesc> fd = Runtime.GetFieldDesc<T>(name);
+			Pointer<FieldDesc> fd = typeof(T).GetFieldDesc(name);
 			return fd.Reference.GetAddress(ref instance);
 		}
 
@@ -266,12 +266,12 @@ namespace RazorSharp
 		/// <returns></returns>
 		public static Pointer<byte> AddressOfFunction(Type t, string name)
 		{
-			Pointer<MethodDesc> md = Runtime.GetMethodDesc(t, name);
+			Pointer<MethodDesc> md = t.GetMethodDesc(name);
 
 			// Function must be jitted
 			Debug.Assert(md.Reference.IsPointingToNativeCode);
 
-			return Runtime.GetMethodDesc(t, name).Reference.Function;
+			return md.Reference.Function;
 		}
 
 		/*public static Pointer<T> AddressOfHeap<T>(T[] rg)
@@ -389,7 +389,7 @@ namespace RazorSharp
 			// Note: Arrays have no layout
 
 
-			Pointer<MethodTable> mt = Runtime.MethodTableOf<T>();
+			Pointer<MethodTable> mt = typeof(T).GetMethodTable();
 			Pointer<EEClass>     ee = mt.Reference.EEClass;
 			if (ee.Reference.HasLayout) {
 				return (int) ee.Reference.LayoutInfo->ManagedSize;
@@ -411,7 +411,7 @@ namespace RazorSharp
 		{
 			// Note: Arrays native size == 0
 
-			Pointer<MethodTable> mt     = Runtime.MethodTableOf<T>();
+			Pointer<MethodTable> mt = typeof(T).GetMethodTable();
 			int                  native = mt.Reference.EEClass.Reference.NativeSize;
 			return native == 0 ? INVALID_VALUE : native;
 		}
@@ -554,7 +554,7 @@ namespace RazorSharp
 			//}
 
 
-			return Runtime.MethodTableOf<T>().Reference.NumInstanceFieldBytes;
+			return typeof(T).GetMethodTable().Reference.NumInstanceFieldBytes;
 		}
 
 		/// <summary>
@@ -610,7 +610,7 @@ namespace RazorSharp
 		private static int BaseInstanceSizeInternal<T>()
 		{
 			RazorContract.RequiresClassType<T>();
-			return Runtime.MethodTableOf<T>().Reference.BaseSize;
+			return typeof(T).GetMethodTable().Reference.BaseSize;
 		}
 
 		#endregion
@@ -625,6 +625,8 @@ namespace RazorSharp
 				(typeof(T).IsInterface || typeof(T) == typeof(object)) &&
 				value != null && value.GetType().IsValueType;
 		}
+
+
 
 		/// <summary>
 		///     Copies the memory of <paramref name="t" /> into a <see cref="Byte" /> array.
@@ -667,15 +669,12 @@ namespace RazorSharp
 			return fields;
 		}
 
-		internal static void WriteReference<T>(ref T t, IntPtr newHeapAddr)
+		internal static void WriteReference<T>(ref T t, Pointer<byte> newHeapAddr)
 		{
-			Marshal.WriteIntPtr(AddressOf(ref t).Address, newHeapAddr);
+			Marshal.WriteIntPtr(AddressOf(ref t).Address, newHeapAddr.Address);
 		}
 
-		internal static void WriteReference<T>(ref T t, void* newHeapAddr)
-		{
-			Marshal.WriteIntPtr(AddressOf(ref t).Address, new IntPtr(newHeapAddr));
-		}
+
 
 		#endregion
 

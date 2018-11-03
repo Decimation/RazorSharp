@@ -11,7 +11,6 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\Microsoft.Win32.Regis
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\nunit.framework.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\RazorSharp.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Collections.Immutable.dll
-C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Memory.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Reflection.Metadata.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Runtime.CompilerServices.Unsafe.dll
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Security.AccessControl.dll
@@ -32,7 +31,6 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\Microsoft.CodeAnalysi
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\nunit.framework.pdb
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\nunit.framework.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Collections.Immutable.xml
-C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Memory.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Reflection.Metadata.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Runtime.CompilerServices.Unsafe.xml
 C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Threading.Tasks.Extensions.xml
@@ -69,3 +67,4 @@ C:\Users\Viper\RiderProjects\RazorSharp\Test\obj\x64\Debug\Test.csproj.CoreCompi
 C:\Users\Viper\RiderProjects\RazorSharp\Test\obj\x64\Debug\Test.csproj.CopyComplete
 C:\Users\Viper\RiderProjects\RazorSharp\Test\obj\x64\Debug\Test.exe
 C:\Users\Viper\RiderProjects\RazorSharp\Test\obj\x64\Debug\Test.pdb
+C:\Users\Viper\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Reflection.TypeExtensions.dll

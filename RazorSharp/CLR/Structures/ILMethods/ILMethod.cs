@@ -51,7 +51,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 
 		internal void WriteIL(byte[] rgOpCodes)
 		{
-			Code.ForceWrite(rgOpCodes);
+			Code.SafeWrite(rgOpCodes);
 		}
 
 		/*public OpCode[] OpCodes {

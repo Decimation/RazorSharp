@@ -20,7 +20,6 @@ namespace RazorSharp.CLR
 {
 
 
-
 	/// <summary>
 	///     Provides utilities for manipulating, reading, and writing CLR structures.
 	///     <para>Related files:</para>
@@ -41,7 +40,7 @@ namespace RazorSharp.CLR
 		///     in CLR structures such as <see cref="MethodTable" />
 		/// </summary>
 		private const BindingFlags DefaultFlags = BindingFlags.Instance | BindingFlags.NonPublic |
-		                                           BindingFlags.Public | BindingFlags.Static;
+		                                          BindingFlags.Public | BindingFlags.Static;
 
 
 		#region HeapObjects
@@ -75,7 +74,6 @@ namespace RazorSharp.CLR
 			RazorContract.Assert(info == meta.Info);
 		}
 
-
 		#endregion
 
 		#region MethodTable
@@ -102,7 +100,7 @@ namespace RazorSharp.CLR
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
 			if (typeof(T).IsValueType) {
-				return MethodTableOf<T>();
+				return typeof(T).GetMethodTable();
 			}
 
 			// We need to get the heap pointer manually because of type constraints
@@ -112,17 +110,6 @@ namespace RazorSharp.CLR
 			return mt;
 		}
 
-		/// <summary>
-		///     Returns a pointer to a type's TypeHandle as a <see cref="MethodTable" />
-		/// </summary>
-		/// <typeparam name="T">Type to return the corresponding <see cref="MethodTable" /> for.</typeparam>
-		/// <returns>A <see cref="Pointer{T}" /> to type <typeparamref name="T" />'s <see cref="MethodTable" /></returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static Pointer<MethodTable> MethodTableOf<T>()
-		{
-			return MethodTableOf(typeof(T));
-		}
-
 
 		/// <summary>
 		///     Returns a pointer to a type's TypeHandle as a <see cref="MethodTable" />
@@ -130,7 +117,7 @@ namespace RazorSharp.CLR
 		/// <param name="t">Type to return the corresponding <see cref="MethodTable" /> for.</param>
 		/// <returns>A <see cref="Pointer{T}" /> to type <paramref name="t" />'s <see cref="MethodTable" /></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static Pointer<MethodTable> MethodTableOf(Type t)
+		internal static Pointer<MethodTable> GetMethodTable(this Type t)
 		{
 			IntPtr typeHandle = t.TypeHandle.Value;
 
@@ -178,19 +165,15 @@ namespace RazorSharp.CLR
 			return ReadFieldDescs(ReadMethodTable(ref t));
 		}
 
-		internal static Pointer<FieldDesc>[] GetFieldDescs<T>()
-		{
-			return GetFieldDescs(typeof(T));
-		}
 
-
-		internal static Pointer<FieldDesc>[] GetFieldDescs(Type t)
+		internal static Pointer<FieldDesc>[] GetFieldDescs(this Type t)
 		{
 //			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
 			// Adds about 1k ns
 //			lpFd = lpFd.OrderBy(x => x.ToInt64()).ToArray();
-			return ReadFieldDescs(MethodTableOf(t));
+			return ReadFieldDescs(t.GetMethodTable());
 		}
+
 
 		// todo: add support for getting FieldDesc of fixed buffers (like isAutoProperty) - use an enum probably
 
@@ -202,7 +185,7 @@ namespace RazorSharp.CLR
 		/// <param name="flags"></param>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		internal static Pointer<FieldDesc> GetFieldDesc(Type t, string name,BindingFlags flags = DefaultFlags)
+		internal static Pointer<FieldDesc> GetFieldDesc(this Type t, string name, BindingFlags flags = DefaultFlags)
 		{
 			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
 
@@ -214,11 +197,6 @@ namespace RazorSharp.CLR
 
 
 			return fieldDesc;
-		}
-
-		internal static Pointer<FieldDesc> GetFieldDesc<T>(string name,BindingFlags flags = DefaultFlags)
-		{
-			return GetFieldDesc(typeof(T), name, flags);
 		}
 
 
@@ -244,28 +222,7 @@ namespace RazorSharp.CLR
 
 		#region MethodDesc
 
-		internal static Pointer<MethodDesc>[] GetMethodDescs<T>(BindingFlags flags = DefaultFlags)
-		{
-			return GetMethodDescs(typeof(T), flags);
-		}
-
-		internal static Pointer<MethodDesc>[] GetMethodDescs(Type t, BindingFlags flags = DefaultFlags)
-		{
-			MethodInfo[] methods = t.GetMethods(flags);
-			RazorContract.RequiresNotNull(methods);
-			Pointer<MethodDesc>[] arr = new Pointer<MethodDesc>[methods.Length];
-
-			for (int i = 0; i < arr.Length; i++) {
-				arr[i] = methods[i].MethodHandle.Value;
-				RazorContract.Assert(arr[i].Reference.Info.MetadataToken == methods[i].MetadataToken);
-			}
-
-//			arr = arr.OrderBy(x => x.ToInt64()).ToArray();
-
-			return arr;
-		}
-
-		internal static Pointer<MethodDesc> GetMethodDesc(Type t, string name, BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc> GetMethodDesc(this Type t, string name, BindingFlags flags = DefaultFlags)
 		{
 			MethodInfo methodInfo = t.GetMethod(name, flags);
 
@@ -281,9 +238,20 @@ namespace RazorSharp.CLR
 			return md;
 		}
 
-		internal static Pointer<MethodDesc> GetMethodDesc<T>(string name, BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc>[] GetMethodDescs(this Type t, BindingFlags flags = DefaultFlags)
 		{
-			return GetMethodDesc(typeof(T), name, flags);
+			MethodInfo[] methods = t.GetMethods(flags);
+			RazorContract.RequiresNotNull(methods);
+			Pointer<MethodDesc>[] arr = new Pointer<MethodDesc>[methods.Length];
+
+			for (int i = 0; i < arr.Length; i++) {
+				arr[i] = methods[i].MethodHandle.Value;
+				RazorContract.Assert(arr[i].Reference.Info.MetadataToken == methods[i].MetadataToken);
+			}
+
+//			arr = arr.OrderBy(x => x.ToInt64()).ToArray();
+
+			return arr;
 		}
 
 		#endregion
@@ -366,7 +334,7 @@ namespace RazorSharp.CLR
 				return true;
 			}
 
-			return MethodTableOf<T>().Reference.IsBlittable;
+			return typeof(T).GetMethodTable().Reference.IsBlittable;
 		}
 
 	}

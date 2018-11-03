@@ -135,53 +135,28 @@ namespace RazorSharp.Memory
 
 		#region Read / write
 
+		/// <summary>
+		/// Reinterprets <paramref name="value"/> of type <typeparamref name="TFrom"/> as a value of type <typeparamref name="TTo"/>
+		/// </summary>
+		/// <param name="value">Value to reinterpret</param>
+		/// <typeparam name="TFrom">Inherent type</typeparam>
+		/// <typeparam name="TTo">Type to reinterpret <typeparamref name="TFrom" /> as</typeparam>
+		/// <returns></returns>
+		public static TTo ReinterpretCast<TFrom, TTo>(TFrom value)
+		{
+			var addr = Unsafe.AddressOf(ref value);
+			return addr.Read<TTo>();
+		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<T> ReadPointer<T>(Pointer<byte> ptr, long byteOffset)
 		{
 			return *(IntPtr*) ptr.Add(byteOffset);
 		}
 
-		public static void ForceWrite(Pointer<byte> p, int byteOffset, byte[] rgMem)
-		{
-			int    memWritten = 0;
-			int    size       = rgMem.Length;
-			IntPtr targetPtr  = p.Add(byteOffset).Address;
-			var    hProc      = Kernel32.OpenProcess(Process.GetCurrentProcess());
 
 
-			// Make the region writable
-			RazorContract.Assert(Kernel32.VirtualProtect(targetPtr, (uint) size,
-				MemoryProtection.ExecuteReadWrite, out MemoryProtection mpOldProtect));
 
-
-			// Write the memory
-			RazorContract.Assert(Kernel32.WriteProcessMemory(hProc, p.Address, rgMem, size, ref memWritten));
-
-			// Assert the size of memory written equals the size of memory requested to be written
-			RazorContract.Assert(memWritten == size);
-
-			// Restore the old memory protection
-			RazorContract.Assert(Kernel32.VirtualProtect(targetPtr, (uint) size, mpOldProtect, out _));
-
-			// Close the handle
-			RazorContract.Assert(Kernel32.CloseHandle(hProc));
-		}
-
-		public static void ForceWrite<T>(Pointer<byte> p, int byteOffset, T t)
-		{
-			int    size      = Unsafe.SizeOf<T>();
-			IntPtr targetPtr = p.Add(byteOffset).Address;
-
-
-			// Make the region writable
-			RazorContract.Assert(Kernel32.VirtualProtect(targetPtr, (uint) size,
-				MemoryProtection.ExecuteReadWrite, out MemoryProtection mpOldProtect));
-
-			Kernel32.WriteCurrentProcessMemory(p, t);
-
-			// Restore the old memory protection
-			RazorContract.Assert(Kernel32.VirtualProtect(targetPtr, (uint) size, mpOldProtect, out _));
-		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Write<T>(Pointer<byte> p, int byteOffset, T t)
@@ -258,7 +233,7 @@ namespace RazorSharp.Memory
 
 			// MethodTable*
 			b += sizeof(MethodTable*);
-			Pointer<MethodTable> mt  = Runtime.MethodTableOf<T>();
+			Pointer<MethodTable> mt  = typeof(T).GetMethodTable();
 			Pointer<MethodTable> pMt = b;
 			pMt.Write(mt);
 		}
@@ -307,7 +282,7 @@ namespace RazorSharp.Memory
 			// the unmanaged "instance" there, as the CLR can only interpret
 			// reference types as a pointer.
 			Pointer<byte>        alloc       = AllocUnmanaged<byte>(baseSize + IntPtr.Size);
-			Pointer<MethodTable> methodTable = Runtime.MethodTableOf<T>();
+			Pointer<MethodTable> methodTable = typeof(T).GetMethodTable();
 
 			// Write the pointer in the extra allocated bytes,
 			// pointing to the MethodTable* (skip over the extra pointer and the ObjHeader)
@@ -398,7 +373,7 @@ namespace RazorSharp.Memory
 
 		public static void Copy<T>(Pointer<T> dest, IEnumerable<T> src)
 		{
-			dest.Init(src);
+			dest.WriteAll(src);
 		}
 
 		#endregion

@@ -207,8 +207,8 @@ namespace RazorSharp.Native
 		public static extern bool VirtualProtect([In] IntPtr lpAddress, uint dwSize, MemoryProtection flNewProtect,
 			[Out] out MemoryProtection lpflOldProtect);
 
-		public static void VirtualProtect(Pointer<byte> lpAddress, int dwSize,
-			MemoryProtection flNewProtect, out MemoryProtection lpflOldProtect)
+		public static void VirtualProtect(Pointer<byte> lpAddress, int dwSize, MemoryProtection flNewProtect,
+			out MemoryProtection lpflOldProtect)
 		{
 			RazorContract.Assert(VirtualProtect(lpAddress.Address, (uint) dwSize, flNewProtect, out lpflOldProtect));
 		}

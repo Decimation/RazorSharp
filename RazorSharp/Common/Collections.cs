@@ -60,6 +60,11 @@ namespace RazorSharp.Common
 
 		#region ToString
 
+		public static string Join<T>(this IEnumerable<T> enumerable)
+		{
+			return ToString(enumerable);
+		}
+
 		public static string ToString<T>(T[] rg, ToStringOptions options = ToStringOptions.UseCommas)
 		{
 			return ToString(list: rg, options);

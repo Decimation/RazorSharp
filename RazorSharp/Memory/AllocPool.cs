@@ -115,13 +115,36 @@ namespace RazorSharp.Memory
 			return GetRange(ptr.Address).LowAddr;
 		}
 
+		public static Pointer<T> GetLimit<T>(Pointer<T> ptr)
+		{
+			return GetRange(ptr.Address).HighAddr;
+		}
+
+
+		public static void Info<T>(Pointer<T> ptr)
+		{
+			var table = new ConsoleTable("Info", "Value");
+
+			table.AddRow("Origin", GetOrigin(ptr).ToString("P"));
+			table.AddRow("Limit", GetLimit(ptr).ToString("P"));
+			table.AddRow("Current address", ptr.ToString("P"));
+			table.AddRow("Value", ptr.ToString("O"));
+			table.AddRow("Length", GetLength(ptr));
+			table.AddRow("Size", GetSize(ptr));
+			table.AddRow("Offset", GetOffset(ptr));
+			table.AddRow("Allocated", IsAllocated(ptr));
+
+
+			Console.WriteLine(table.ToMarkDownString());
+		}
+
 		/// <summary>
-		///     Represents the address range of allocated pointers
+		///     Represents an address range of an allocated pointer
 		/// </summary>
 		private struct Range
 		{
 
-			private IntPtr HighAddr => LowAddr + Size;
+			internal IntPtr HighAddr => LowAddr + Size;
 
 			internal IntPtr LowAddr { get; }
 

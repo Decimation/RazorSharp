@@ -1,4 +1,5 @@
 using BenchmarkDotNet.Attributes;
+using RazorSharp.CLR;
 using RazorSharp.CLR.Meta;
 
 namespace Test.Testing.Benchmarking
@@ -9,17 +10,17 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void Runtime()
 		{
-			var f = RazorSharp.CLR.Runtime.GetFieldDesc<string>("m_firstChar");
+			var f = typeof(string).GetFieldDesc("m_firstChar");
 		}
 
 		[Benchmark]
 		public void Meta()
 		{
-			MetaType mt = new MetaType(RazorSharp.CLR.Runtime.MethodTableOf<string>());
+			MetaType mt = new MetaType(typeof(string).GetMethodTable());
 			var      f  = mt["m_firstChar"];
 		}
 
-		private MetaType m_type = new MetaType(RazorSharp.CLR.Runtime.MethodTableOf<string>());
+		private MetaType m_type = new MetaType(typeof(string).GetMethodTable());
 
 		[Benchmark]
 		public void Meta2()

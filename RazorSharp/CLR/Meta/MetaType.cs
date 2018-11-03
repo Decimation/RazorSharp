@@ -83,7 +83,7 @@ namespace RazorSharp.CLR.Meta
 
 		private MetaMethod GetMethod(string name)
 		{
-			return new MetaMethod(Runtime.GetMethodDesc(RuntimeType, name));
+			return new MetaMethod(RuntimeType.GetMethodDesc(name));
 		}
 
 		private MetaMethod[] GetMethods()

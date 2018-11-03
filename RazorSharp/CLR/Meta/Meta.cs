@@ -16,7 +16,7 @@ namespace RazorSharp.CLR.Meta
 
 		public static MetaType GetType(Type t)
 		{
-			return new MetaType(Runtime.MethodTableOf(t));
+			return new MetaType(t.GetMethodTable());
 		}
 	}
 

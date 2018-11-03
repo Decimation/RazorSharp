@@ -53,8 +53,8 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestIndexHook()
 		{
-			Pointer<MethodDesc> mdItemOp         = Runtime.GetMethodDesc<Substrate>("get_Item");
-			Pointer<MethodDesc> mdItemOpOverride = Runtime.GetMethodDesc(typeof(ILTests), "get_ItemOp");
+			Pointer<MethodDesc> mdItemOp = typeof(Substrate).GetMethodDesc("get_Item");
+			Pointer<MethodDesc> mdItemOpOverride = typeof(ILTests).GetMethodDesc("get_ItemOp");
 			mdItemOp.Reference.SetStableEntryPoint(mdItemOpOverride.Reference.Function);
 			Substrate a = new Substrate();
 			Debug.Assert(a[0] == -0xFF);
@@ -63,8 +63,8 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestInstructionReplace()
 		{
-			Pointer<MethodDesc> mdAdd = Runtime.GetMethodDesc(typeof(Operations), "AddOp");
-			Pointer<MethodDesc> mdSub = Runtime.GetMethodDesc(typeof(Operations), "SubOp");
+			Pointer<MethodDesc> mdAdd = typeof(Operations).GetMethodDesc("AddOp");
+			Pointer<MethodDesc> mdSub = typeof(Operations).GetMethodDesc("SubOp");
 			mdAdd.Reference.Function = mdSub.Reference.Function;
 			Debug.Assert(Operations.AddOp(1, 1) == 0);
 		}

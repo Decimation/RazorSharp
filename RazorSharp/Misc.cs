@@ -45,7 +45,7 @@ namespace RazorSharp
 			ObjectPinner.InvokeWhilePinned(str, delegate
 			{
 				Pointer<char> lpChar = Unsafe.AddressOfHeap(ref str, OffsetType.StringData).Address;
-				lpChar.Init(s);
+				lpChar.WriteAll(s);
 			});
 		}
 

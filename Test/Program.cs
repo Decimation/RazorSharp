@@ -43,6 +43,8 @@ using static Test.Testing.Benchmarking.SignatureCallBenchmarking;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Unsafe = RazorSharp.Unsafe;
 
+// ReSharper disable InconsistentNaming
+
 #endregion
 
 namespace Test
@@ -121,48 +123,61 @@ namespace Test
 		// todo: Contract-oriented programming
 		// todo: read module memory
 
+
 		/**
 		 * >> Entry point
 		 */
 		public static void Main(string[] args)
 		{
-			MetaType mt = Meta.GetType<AnimeGirl>();
-			Console.WriteLine("{0:E}", mt);
+			MetaType      mt    = Meta.GetType(typeof(Program));
+			var           addOp = mt.Methods["AddOp"];
+			Pointer<byte> il    = addOp.GetILHeader().Code;
+			Debug.Assert(il.IsReadOnly);
+			int          val  = int.MaxValue;
+			Pointer<int> xptr = &val;
+			Debug.Assert(xptr.IsWritable);
 
-			Console.WriteLine(mt.Methods["uwu"]);
+			Pointer<int> ptr = &val;
+			Console.WriteLine(ptr);
+			ptr.SafeWrite(MemoryOfVal(val));
+			Console.WriteLine(ptr);
 
-			Console.WriteLine(mt.Methods["uwu"].GetILHeader());
-			Console.WriteLine(mt);
+			Pointer<string> alloc = AllocPool.Alloc<string>(10);
+			alloc.WriteAll("foo", "bar");
+			Console.WriteLine(alloc.ToTable(10).ToMarkDownString());
+			alloc.Init(AllocPool.GetLength(alloc));
+			GC.Collect();
+			Console.WriteLine(alloc.ToTable(10).ToMarkDownString());
+			AllocPool.Free(alloc);
+			GC.Collect();
 
+			Array rg = new long[1];
+			rg.SetValue(Mem.ReinterpretCast<string, long>("foo"), 0);
 
-			CPlayer cp = new CPlayer();
-			Console.WriteLine("{0}", cp.p);
-			cp.p.Reference = 0xFF;
-			Console.WriteLine("{0}", cp.p);
-			Console.WriteLine(typeof(Pointer<int>));
+			Pointer<int> iAlloc = AllocPool.Alloc<int>(10);
+			iAlloc.Set(0xFF, AllocPool.GetLength(iAlloc));
+			Console.WriteLine(iAlloc.ToTable(10).ToMarkDownString());
+			iAlloc.Set(int.MaxValue, 1, 9);
+			Console.WriteLine(iAlloc.ToTable(10).ToMarkDownString());
+			AllocPool.Free(iAlloc);
+
+			Pointer<int> sPtr = AllocPool.Alloc<int>(2);
+			sPtr.Write("foo");
+			Console.WriteLine(sPtr.ToTable(2).ToMarkDownString());
+			Console.WriteLine(sPtr.Read<string>());
+			Console.WriteLine(sPtr.CopyOut<string>(1).Join());
+			AllocPool.Free(sPtr);
 		}
 
-		class CPlayer
+
+		static void HookCall(uint addr, void* func)
 		{
-			private int          m_i;
-			public  Pointer<int> p => AddressOfField(this, "m_i");
+			// SafeWrite32(addr+1, (DWORD)func - (addr+5));
 		}
 
-		static int size(int baseSize, int length, int componentSize)
+		static int AddOp(int a, int b)
 		{
-			return baseSize + length * componentSize;
-		}
-
-
-		/// <summary>
-		/// yeeeessss
-		/// </summary>
-		private class AnimeGirl
-		{
-			/// <summary>
-			/// nyaa~~
-			/// </summary>
-			public void uwu() { }
+			return a + b;
 		}
 
 
@@ -241,45 +256,6 @@ namespace Test
 
 		#region todo
 
-		[NotNull]
-		public static List<MemoryBasicInformation> GetRegionsOfStack()
-		{
-			GetStackExtents(out byte* stackBase, out long stackSize);
-
-			List<MemoryBasicInformation> result = new List<MemoryBasicInformation>();
-
-			byte* current = stackBase;
-			while (current < stackBase + stackSize) {
-				MemoryBasicInformation info = new MemoryBasicInformation();
-				Kernel32.VirtualQuery(new IntPtr(current), ref info, (uint) sizeof(MemoryBasicInformation));
-				result.Add(info);
-				current = (byte*) PointerUtils.Add(info.BaseAddress, info.RegionSize);
-			}
-
-			result.Reverse();
-			return result;
-		}
-
-
-		public static void GetStackExtents(out byte* stackBase, out long stackSize)
-		{
-			MemoryBasicInformation info = new MemoryBasicInformation();
-			Kernel32.VirtualQuery(new IntPtr(&info), ref info, (uint) sizeof(MemoryBasicInformation));
-			stackBase = (byte*) info.AllocationBase;
-			stackSize = ((PointerUtils.Subtract(info.BaseAddress, info.AllocationBase).ToInt64()) +
-			             info.RegionSize.ToInt64());
-		}
-
-
-		private static void dmp<T>(ref T t) where T : class
-		{
-			ConsoleTable table = new ConsoleTable("Info", "Value");
-			table.AddRow("Stack", Hex.ToHex(AddressOf(ref t).Address));
-			table.AddRow("Heap", Hex.ToHex(AddressOfHeap(ref t).Address));
-			table.AddRow("Size", AutoSizeOf(t));
-
-			Console.WriteLine(table.ToMarkDownString());
-		}
 		/*static void Region()
 		{
 			var table   = new ConsoleTable("Region", "Address", "Size", "GC Segment", "GC Heap");
@@ -314,10 +290,6 @@ namespace Test
 			return dataTarget.ClrVersions.Single().CreateRuntime();
 		}*/
 
-		private static TTo reinterpret_cast<TFrom, TTo>(TFrom tf)
-		{
-			return CSUnsafe.Read<TTo>(AddressOf(ref tf).ToPointer());
-		}
 
 		private static class WinDbg
 		{
@@ -342,7 +314,7 @@ namespace Test
 					string               sz = t is string s ? s : "-";
 
 					DumpObjInfo dump = new DumpObjInfo(mt.Reference.Name, mt, mt.Reference.EEClass, AutoSizeOf(t), sz,
-						Runtime.GetFieldDescs<T>());
+						typeof(T).GetFieldDescs());
 					dump.m_fieldTable = dump.FieldsTable(ref t);
 
 					return dump;

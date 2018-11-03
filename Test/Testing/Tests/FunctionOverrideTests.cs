@@ -88,7 +88,7 @@ namespace Test.Testing.Tests
 
 		private static void Override(Type target, string targetName, Type src, string srcName)
 		{
-			var mdTarget = Runtime.GetMethodDesc(target, targetName);
+			var mdTarget = target.GetMethodDesc(targetName);
 			var pSrc     = Unsafe.AddressOfFunction(src, srcName);
 
 			mdTarget.Reference.SetStableEntryPoint(pSrc);

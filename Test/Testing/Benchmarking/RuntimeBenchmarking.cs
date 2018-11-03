@@ -24,7 +24,7 @@ namespace Test.Testing.Benchmarking
 		[Benchmark]
 		public void GetFields_ByMT_Check()
 		{
-			Runtime.GetFieldDescs<string>();
+			typeof(string).GetFieldDescs();
 		}
 
 		[Benchmark]

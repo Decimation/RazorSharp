@@ -24,7 +24,7 @@ namespace Test.Testing.Tests
 			FieldInfo fieldActual =
 				typeof(TType).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
-			Pointer<FieldDesc> fieldDesc = Runtime.GetFieldDesc<TType>(fieldName);
+			Pointer<FieldDesc> fieldDesc = typeof(TType).GetFieldDesc(fieldName);
 
 			/**
 			 * Intrinsic functions
@@ -41,7 +41,7 @@ namespace Test.Testing.Tests
 			Debug.Assert(fieldDesc.Reference.Size == Unsafe.SizeOf<TField>());
 			Debug.Assert(fieldDesc.Reference.EnclosingType == typeof(TType));
 			Debug.Assert(fieldDesc.Reference.Token == fieldActual.MetadataToken);
-			Debug.Assert(fieldDesc.Reference.EnclosingMethodTable == Runtime.MethodTableOf<TType>());
+			Debug.Assert(fieldDesc.Reference.EnclosingMethodTable == typeof(TType).GetMethodTable());
 		}
 
 		[Test]
@@ -64,11 +64,11 @@ namespace Test.Testing.Tests
 		{
 			MethodInfo methodInfoActual = typeof(TType).GetMethod(fnName,
 				BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic);
-			Pointer<MethodDesc> methodDesc = Runtime.GetMethodDesc<TType>(fnName);
+			Pointer<MethodDesc> methodDesc = typeof(TType).GetMethodDesc(fnName);
 
 
 			Debug.Assert(methodDesc.Reference.Info == methodInfoActual);
-			Debug.Assert(methodDesc.Reference.EnclosingMethodTable == Runtime.MethodTableOf<TType>());
+			Debug.Assert(methodDesc.Reference.EnclosingMethodTable == typeof(TType).GetMethodTable());
 			Debug.Assert(methodDesc.Reference.Token == methodInfoActual.MetadataToken);
 			Debug.Assert(!methodDesc.Reference.IsConstructor);
 		}

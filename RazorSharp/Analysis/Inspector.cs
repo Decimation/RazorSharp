@@ -149,7 +149,7 @@ namespace RazorSharp.Analysis
 
 			internal MethodInfo()
 			{
-				MethodDescs = Runtime.GetMethodDescs<T>();
+				MethodDescs = typeof(T).GetMethodDescs();
 				MethodDescs = MethodDescs.OrderBy(x => (long) x.Reference.Function).ToArray();
 			}
 
@@ -182,7 +182,7 @@ namespace RazorSharp.Analysis
 					FieldDescs = null;
 				}
 				else {
-					FieldDescs = Runtime.GetFieldDescs<T>();
+					FieldDescs = typeof(T).GetFieldDescs();
 					FieldDescs = FieldDescs.OrderBy(x => x.Reference.Offset).ToArray();
 				}
 
