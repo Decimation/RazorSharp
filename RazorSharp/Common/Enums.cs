@@ -21,7 +21,7 @@ namespace RazorSharp.Common
 
 		internal static object AsNumeric<T>(T e) where T : Enum
 		{
-			var underlyingType = Enum.GetUnderlyingType(typeof(T));
+			Type underlyingType = Enum.GetUnderlyingType(typeof(T));
 			return Misc.InvokeGenericMethod(typeof(Unsafe), "Unbox", underlyingType, null, e);
 		}
 
@@ -29,10 +29,11 @@ namespace RazorSharp.Common
 		{
 			object asNum    = AsNumeric(e);
 			string join     = e.ToString();
-			var    asNumStr = String.Format("({0})", asNum);
+			string asNumStr = String.Format("({0})", asNum);
 
-			if (asNum.ToString() == join)
+			if (asNum.ToString() == join) {
 				return asNumStr;
+			}
 
 			return join.Length == 0 ? asNumStr : String.Format("{0} {1}", join, asNumStr);
 		}

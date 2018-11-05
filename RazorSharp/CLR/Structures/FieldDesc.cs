@@ -26,7 +26,10 @@ namespace RazorSharp.CLR.Structures
 
 
 	/// <summary>
-	/// <para>CLR <see cref="FieldDesc"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaField"/></para>
+	///     <para>
+	///         CLR <see cref="FieldDesc" />. Functionality is implemented in this <c>struct</c> and exposed via
+	///         <see cref="MetaField" />
+	///     </para>
 	///     <para>Internal representation: <see cref="RuntimeFieldHandle.Value" /></para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
@@ -80,9 +83,9 @@ namespace RazorSharp.CLR.Structures
 
 		/// <summary>
 		///     Unprocessed <see cref="Token" />
-		/// <remarks>
-		/// Original name: MB
-		/// </remarks>
+		///     <remarks>
+		///         Original name: MB
+		///     </remarks>
 		/// </summary>
 		private int OrigToken => (int) (m_dword1 & 0xFFFFFF);
 
@@ -91,7 +94,8 @@ namespace RazorSharp.CLR.Structures
 			get {
 				// Check if this FieldDesc is using the packed mb layout
 				if (!RequiresFullMBValue) {
-					return Constants.TokenFromRid(OrigToken & (int) MbMask.PackedMbLayoutMbMask, CorTokenType.mdtFieldDef);
+					return Constants.TokenFromRid(OrigToken & (int) MbMask.PackedMbLayoutMbMask,
+						CorTokenType.mdtFieldDef);
 				}
 
 				return Constants.TokenFromRid(OrigToken, CorTokenType.mdtFieldDef);
@@ -156,7 +160,6 @@ namespace RazorSharp.CLR.Structures
 		internal ProtectionLevel Protection => (ProtectionLevel) ProtectionInt;
 
 		/// <summary>
-		///
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>

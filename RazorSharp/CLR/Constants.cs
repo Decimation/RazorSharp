@@ -958,7 +958,8 @@ namespace RazorSharp.CLR
 
 
 		/// <summary>
-		///     Method is <see cref="MethodClassification.IL"/>, <see cref="MethodClassification.FCall"/> etc., see <see cref="MethodClassification"/> above.
+		///     Method is <see cref="MethodClassification.IL" />, <see cref="MethodClassification.FCall" /> etc., see
+		///     <see cref="MethodClassification" /> above.
 		/// </summary>
 		Classification = 0x0007,
 		ClassificationCount = Classification + 1,

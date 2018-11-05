@@ -31,7 +31,7 @@ namespace Test.Testing.Tests
 		[Test]
 		public void FieldDesc()
 		{
-			Pointer<FieldDesc> fd = typeof(string).GetFieldDesc("m_firstChar");
+			Pointer<FieldDesc>   fd        = typeof(string).GetFieldDesc("m_firstChar");
 			void*                module    = fd.Reference.GetModule();
 			int                  size      = fd.Reference.Size;
 			Pointer<MethodTable> mt        = fd.Reference.EnclosingMethodTable;

@@ -1,9 +1,16 @@
+#region
+
 using System;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Reflection;
 using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.CLR;
+using RazorSharp.CLR.Structures;
+using RazorSharp.Pointers;
+
+#endregion
 
 namespace Test.Testing.Tests
 {
@@ -15,7 +22,7 @@ namespace Test.Testing.Tests
 		{
 			public static bool? Flag { get; set; }
 
-			static void Reset()
+			private static void Reset()
 			{
 				Flag = null;
 			}
@@ -49,8 +56,9 @@ namespace Test.Testing.Tests
 		[Test]
 		public void OverrideAdditionOperator()
 		{
-			var target = new Target();
+			Target target = new Target();
 			target += target;
+
 //			Debug.Assert(!Switch.Flag.Value);
 			Contract.Requires(!Switch.Flag.Value);
 
@@ -63,8 +71,9 @@ namespace Test.Testing.Tests
 		[Test]
 		public void OverrideFinalizer()
 		{
-			var target = new Target();
+			Target target = new Target();
 			ManualInvokeTarget("Finalize", target);
+
 //			Debug.Assert(!Switch.Flag.Value);
 			Contract.Requires(!Switch.Flag.Value);
 
@@ -82,14 +91,14 @@ namespace Test.Testing.Tests
 		private static object ManualInvoke(Type target, string targetName, object targetInstance = null,
 			params object[] args)
 		{
-			var method = Runtime.GetMethod(target, targetName);
+			MethodInfo method = Runtime.GetMethod(target, targetName);
 			return method.Invoke(targetInstance, args);
 		}
 
 		private static void Override(Type target, string targetName, Type src, string srcName)
 		{
-			var mdTarget = target.GetMethodDesc(targetName);
-			var pSrc     = Unsafe.AddressOfFunction(src, srcName);
+			Pointer<MethodDesc> mdTarget = target.GetMethodDesc(targetName);
+			Pointer<byte>       pSrc     = Unsafe.AddressOfFunction(src, srcName);
 
 			mdTarget.Reference.SetStableEntryPoint(pSrc);
 		}

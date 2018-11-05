@@ -1,7 +1,5 @@
 #region
 
-
-
 using System;
 using System.Diagnostics;
 using System.Reflection;
@@ -23,7 +21,6 @@ using RazorSharp.Utilities.Exceptions;
 #endregion
 
 
-
 namespace RazorSharp.CLR.Structures
 {
 
@@ -36,7 +33,10 @@ namespace RazorSharp.CLR.Structures
 	// todo: complete
 
 	/// <summary>
-	/// <para>CLR <see cref="MethodDesc"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaMethod"/></para>
+	///     <para>
+	///         CLR <see cref="MethodDesc" />. Functionality is implemented in this <c>struct</c> and exposed via
+	///         <see cref="MetaMethod" />
+	///     </para>
 	///     <para>Internal representation: <see cref="RuntimeMethodHandle.Value" /></para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
@@ -113,8 +113,7 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		/// <exception cref="SigcallException"></exception>
 		internal IntPtr NativeCode {
-			[ClrSigcall]
-			get => throw new SigcallException();
+			[ClrSigcall] get => throw new SigcallException();
 		}
 
 
@@ -124,8 +123,7 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		internal IntPtr PreImplementedCode {
-			[ClrSigcall]
-			get => throw new SigcallException();
+			[ClrSigcall] get => throw new SigcallException();
 		}
 
 		/// <summary>
@@ -217,7 +215,7 @@ namespace RazorSharp.CLR.Structures
 		internal bool IsUnboxingStub => (Flags2 & MethodDescFlags2.IsUnboxingStub) != 0;
 
 		internal bool IsIL => MethodClassification.IL == Classification ||
-		                    MethodClassification.Instantiated == Classification;
+		                      MethodClassification.Instantiated == Classification;
 
 		internal bool IsStatic => Info.IsStatic;
 

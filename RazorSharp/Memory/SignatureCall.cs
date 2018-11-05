@@ -6,9 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using JetBrains.Annotations;
 using RazorSharp.CLR;
-using Module = RazorSharp.CLR.Structures.Module;
 
 #endregion
 
@@ -144,13 +142,12 @@ namespace RazorSharp.Memory
 		private static IntPtr GetCorrespondingFunctionPointer(SigcallAttribute attr, MethodInfo methodInfo)
 		{
 			IntPtr fn = attr.IsInFunctionMap
-				? SigScanner.FindPattern(SigcallMethodMap[methodInfo].Item1, attr.OffsetGuess == 0 ?
-						SigcallMethodMap[methodInfo].Item2 : attr.OffsetGuess)
+				? SigScanner.FindPattern(SigcallMethodMap[methodInfo].Item1,
+					attr.OffsetGuess == 0 ? SigcallMethodMap[methodInfo].Item2 : attr.OffsetGuess)
 				: SigScanner.FindPattern(attr.Signature, attr.OffsetGuess);
 
 			return fn;
 		}
-
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -252,7 +249,7 @@ namespace RazorSharp.Memory
 
 		public static void CacheFunction<T>(int token, byte[] rgBytes, long offsetGuess = 0)
 		{
-			var mb = typeof(T).Module.ResolveMethod(token);
+			MethodBase mb = typeof(T).Module.ResolveMethod(token);
 			AddToMap((MethodInfo) mb, rgBytes, offsetGuess);
 		}
 

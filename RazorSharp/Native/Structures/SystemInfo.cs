@@ -1,6 +1,10 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Native.Enums;
+
+#endregion
 
 // ReSharper disable MemberCanBePrivate.Global
 

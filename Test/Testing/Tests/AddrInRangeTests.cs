@@ -27,7 +27,7 @@ namespace Test.Testing.Tests
 
 			Debug.Assert(rgPtr.Contains(1, 5));
 
-			Mem.Free((Pointer<byte>)rgPtr.Address);
+			Mem.Free((Pointer<byte>) rgPtr.Address);
 
 			IntPtr orig = rgPtr.Address;
 

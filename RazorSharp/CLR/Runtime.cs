@@ -142,7 +142,7 @@ namespace RazorSharp.CLR
 		#region FieldDesc
 
 		/// <summary>
-		///     Reads all <see cref="FieldDesc" />s from <paramref name="mt"/>'s <see cref="MethodTable.FieldDescList" />
+		///     Reads all <see cref="FieldDesc" />s from <paramref name="mt" />'s <see cref="MethodTable.FieldDescList" />
 		///     <remarks>
 		///         Note: this does not include literal (<c>const</c>) fields.
 		///     </remarks>
@@ -206,8 +206,8 @@ namespace RazorSharp.CLR
 		}
 
 		/// <summary>
-		/// Gets the corresponding <see cref="FieldInfo"/>s equivalent to the fields
-		/// in <see cref="MethodTable.FieldDescList"/>
+		///     Gets the corresponding <see cref="FieldInfo" />s equivalent to the fields
+		///     in <see cref="MethodTable.FieldDescList" />
 		/// </summary>
 		/// <param name="t"></param>
 		/// <returns></returns>

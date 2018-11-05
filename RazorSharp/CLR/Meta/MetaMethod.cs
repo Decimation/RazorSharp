@@ -3,7 +3,6 @@
 using System;
 using System.Reflection;
 using RazorSharp.CLR.Structures;
-using RazorSharp.CLR.Structures.ILMethods;
 using RazorSharp.Common;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -152,7 +151,7 @@ namespace RazorSharp.CLR.Meta
 
 		public ConsoleTable ToTable()
 		{
-			var table = new ConsoleTable("Info", "Value");
+			ConsoleTable table = new ConsoleTable("Info", "Value");
 			table.AddRow("Name", Name);
 			table.AddRow("Token", Token);
 

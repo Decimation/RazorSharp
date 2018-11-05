@@ -17,7 +17,10 @@ namespace RazorSharp.CLR.Structures.ILMethods
 {
 
 	/// <summary>
-	/// <para>CLR <see cref="FatILMethod"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaIL"/></para>
+	///     <para>
+	///         CLR <see cref="FatILMethod" />. Functionality is implemented in this <c>struct</c> and exposed via
+	///         <see cref="MetaIL" />
+	///     </para>
 	///     <para>Internal name: <c>COR_ILMETHOD_FAT</c></para>
 	///     <para>This structure is the 'fat' layout, where no compression is attempted.</para>
 	///     <para>Note that this structure can be added on at the end, thus making it extensible</para>
@@ -81,8 +84,8 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		/// </code>
 		/// </summary>
 		internal bool IsFat => (CorILMethodFlags) (*(byte*) Unsafe.AddressOf(ref this) &
-		                                         (byte) CorILMethodFlags.FormatMask) ==
-		                     CorILMethodFlags.FatFormat;
+		                                           (byte) CorILMethodFlags.FormatMask) ==
+		                       CorILMethodFlags.FatFormat;
 
 		/// <summary>
 		///     <code>

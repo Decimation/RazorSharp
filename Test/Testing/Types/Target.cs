@@ -28,7 +28,7 @@ namespace Test.Testing.Types
 
 		public int sub(int a, int b)
 		{
-			return (a - b) - m_value;
+			return a - b - m_value;
 		}
 
 

@@ -25,7 +25,10 @@ namespace RazorSharp.CLR.Structures.EE
 	#endregion
 
 	/// <summary>
-	/// <para>CLR <see cref="EEClass"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaType"/></para>
+	///     <para>
+	///         CLR <see cref="EEClass" />. Functionality is implemented in this <c>struct</c> and exposed via
+	///         <see cref="MetaType" />
+	///     </para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
 	///         <item>
@@ -198,7 +201,8 @@ namespace RazorSharp.CLR.Structures.EE
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		private PackedDWORDFields* PackedFields => (PackedDWORDFields*) Unsafe.AddressOf(ref this).Add(m_cbFixedEEClassFields);
+		private PackedDWORDFields* PackedFields =>
+			(PackedDWORDFields*) Unsafe.AddressOf(ref this).Add(m_cbFixedEEClassFields);
 
 		private Pointer<EEClass> ParentClass => m_pMethodTable->Parent.Reference.EEClass;
 

@@ -1,6 +1,5 @@
 #region
 
-using System;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR.Meta;
 using RazorSharp.Pointers;
@@ -14,7 +13,10 @@ namespace RazorSharp.CLR.Structures.ILMethods
 {
 
 	/// <summary>
-	/// <para>CLR <see cref="TinyILMethod"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaIL"/></para>
+	///     <para>
+	///         CLR <see cref="TinyILMethod" />. Functionality is implemented in this <c>struct</c> and exposed via
+	///         <see cref="MetaIL" />
+	///     </para>
 	///     <para>Internal name: <c>COR_ILMETHOD_TINY</c></para>
 	///     <para>Used when the method is tiny (less than 64 bytes), and there are no local vars</para>
 	///     <code>typedef struct tagCOR_ILMETHOD_TINY : IMAGE_COR_ILMETHOD_TINY</code>
@@ -40,14 +42,14 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		[FieldOffset(0)] private readonly IMAGE_COR_ILMETHOD_TINY m_inheritedValue;
 
 		/// <summary>
-		/// Contains both <see cref="CodeSize"/> and <see cref="CorILMethodFlags"/>
+		///     Contains both <see cref="CodeSize" /> and <see cref="CorILMethodFlags" />
 		/// </summary>
 		private byte Flags_CodeSize => m_inheritedValue.Flags_CodeSize;
 
 		internal bool IsTiny {
 			get {
-				var v = (Flags_CodeSize & ((uint) CorILMethodFlags.FormatMask >> 1)) ==
-					(uint) CorILMethodFlags.TinyFormat;
+				bool v = (Flags_CodeSize & ((uint) CorILMethodFlags.FormatMask >> 1)) ==
+				         (uint) CorILMethodFlags.TinyFormat;
 				return v;
 			}
 		}

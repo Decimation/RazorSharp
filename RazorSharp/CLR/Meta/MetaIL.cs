@@ -1,14 +1,18 @@
 // ReSharper disable InconsistentNaming
 
+#region
+
 using RazorSharp.CLR.Structures.ILMethods;
 using RazorSharp.Common;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace RazorSharp.CLR.Meta
 {
 
 	/// <summary>
-	/// Exposes metadata from:
+	///     Exposes metadata from:
 	///     <list type="bullet">
 	///         <item>
 	///             <description>
@@ -37,12 +41,12 @@ namespace RazorSharp.CLR.Meta
 		}
 
 		/// <summary>
-		/// Whether this type is <see cref="TinyILMethod"/>
+		///     Whether this type is <see cref="TinyILMethod" />
 		/// </summary>
 		public bool IsTiny => m_value.Reference.IsTiny;
 
 		/// <summary>
-		/// Whether this type is <see cref="FatILMethod"/>
+		///     Whether this type is <see cref="FatILMethod" />
 		/// </summary>
 		public bool IsFat => m_value.Reference.IsFat;
 
@@ -87,15 +91,15 @@ namespace RazorSharp.CLR.Meta
 		public int LocalVarSigTok => m_value.Reference.LocalVarSigTok;
 
 		/// <summary>
-		/// <remarks>
-		/// <see cref="IsFat"/> must be <c>true</c>
-		/// </remarks>
+		///     <remarks>
+		///         <see cref="IsFat" /> must be <c>true</c>
+		///     </remarks>
 		/// </summary>
 		public CorILMethodFlags Flags => m_value.Reference.Flags;
 
 		public ConsoleTable ToTable()
 		{
-			var table = new ConsoleTable("Info", "Value");
+			ConsoleTable table = new ConsoleTable("Info", "Value");
 
 			table.AddRow("Type", IsTiny ? "Tiny" : "Fat");
 			table.AddRow("Code", Code.ToString("P"));

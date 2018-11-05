@@ -10,6 +10,7 @@ using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
+
 // ReSharper disable StaticMemberInGenericType
 
 #endregion
@@ -172,7 +173,7 @@ namespace RazorSharp.Analysis
 		public sealed class FieldInfo
 		{
 			// todo: was public
-			internal Pointer<FieldDesc>[] FieldDescs { get; }
+			internal         Pointer<FieldDesc>[] FieldDescs { get; }
 			private readonly ConsoleTable         m_table;
 
 

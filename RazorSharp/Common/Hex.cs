@@ -31,7 +31,7 @@ namespace RazorSharp.Common
 
 
 		/// <summary>
-		///     Prefix hex with <see cref="RazorSharp.Common.Hex.PrefixString"/>
+		///     Prefix hex with <see cref="RazorSharp.Common.Hex.PrefixString" />
 		/// </summary>
 		PrefixHex = Hex | 8,
 	}
@@ -112,7 +112,6 @@ namespace RazorSharp.Common
 
 				if (options.HasFlag(ToStringOptions.PrefixHex)) {
 					value = PrefixString + value;
-
 				}
 			}
 

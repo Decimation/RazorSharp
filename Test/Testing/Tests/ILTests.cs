@@ -53,7 +53,7 @@ namespace Test.Testing.Tests
 		[Test]
 		public void TestIndexHook()
 		{
-			Pointer<MethodDesc> mdItemOp = typeof(Substrate).GetMethodDesc("get_Item");
+			Pointer<MethodDesc> mdItemOp         = typeof(Substrate).GetMethodDesc("get_Item");
 			Pointer<MethodDesc> mdItemOpOverride = typeof(ILTests).GetMethodDesc("get_ItemOp");
 			mdItemOp.Reference.SetStableEntryPoint(mdItemOpOverride.Reference.Function);
 			Substrate a = new Substrate();

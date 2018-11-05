@@ -2,7 +2,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Text;
 using RazorSharp.Native.Structures;
 
 #endregion

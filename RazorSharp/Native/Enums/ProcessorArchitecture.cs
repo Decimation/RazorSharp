@@ -1,4 +1,4 @@
-using System;
+
 // ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Native.Enums
@@ -8,27 +8,27 @@ namespace RazorSharp.Native.Enums
 	public enum ProcessorArchitecture : ushort
 	{
 		/// <summary>
-		/// x64 (AMD or Intel)
+		///     x64 (AMD or Intel)
 		/// </summary>
 		Amd64 = 9,
 
 		/// <summary>
-		/// ARM
+		///     ARM
 		/// </summary>
 		Arm = 5,
 
 		/// <summary>
-		/// ARM64
+		///     ARM64
 		/// </summary>
 		Arm64 = 12,
 
 		/// <summary>
-		/// Intel Itanium-based
+		///     Intel Itanium-based
 		/// </summary>
 		IA64 = 6,
 
 		/// <summary>
-		/// x86
+		///     x86
 		/// </summary>
 		Intel = 0,
 

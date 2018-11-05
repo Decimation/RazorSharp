@@ -11,16 +11,16 @@ namespace RazorSharp.CLR
 	internal static class SpecialNames
 	{
 		/// <summary>
-		/// <example>
-		/// Fixed buffer named <c>buf</c> evaluates to name <c>&lt;buf&gt;e__FixedBuffer</c>
-		/// </example>
+		///     <example>
+		///         Fixed buffer named <c>buf</c> evaluates to name <c>&lt;buf&gt;e__FixedBuffer</c>
+		///     </example>
 		/// </summary>
 		private const string FIXED_BUFFER_NAME = "<{0}>e__FixedBuffer";
 
 		/// <summary>
-		/// <example>
-		/// Backing field named <c>field</c> evaluates to name <c>&lt;field&gt;k__BackingField</c>
-		/// </example>
+		///     <example>
+		///         Backing field named <c>field</c> evaluates to name <c>&lt;field&gt;k__BackingField</c>
+		///     </example>
 		/// </summary>
 		private const string BACKING_FIELD_NAME = "<{0}>" + BACKING_FIELD_NAME_SUFFIX;
 
@@ -31,9 +31,9 @@ namespace RazorSharp.CLR
 		private const string SET_PREFIX = "set_";
 
 		/// <summary>
-		/// <example>
-		/// Add operation evaluates to <c>op_Addition</c>
-		/// </example>
+		///     <example>
+		///         Add operation evaluates to <c>op_Addition</c>
+		///     </example>
 		/// </summary>
 		private const string OPERATOR_PREFIX = "op_";
 

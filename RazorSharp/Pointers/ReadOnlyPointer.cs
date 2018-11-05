@@ -105,7 +105,6 @@ namespace RazorSharp.Pointers
 		}
 
 
-
 		public TType Read<TType>(int elemOffset = 0)
 		{
 			return Mem.Read<TType>(Offset<TType>(elemOffset));

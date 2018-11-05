@@ -17,7 +17,6 @@ namespace RazorSharp.Native.Structures
 	///     The <see cref="Kernel32.VirtualQuery(IntPtr)" />,
 	///     <see cref="Kernel32.VirtualQuery(IntPtr, ref MemoryBasicInformation, uint)" /> and VirtualQueryEx functions use
 	///     this structure.
-	///
 	///     <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-_memory_basic_information">
 	///         Doc
 	///     </a>

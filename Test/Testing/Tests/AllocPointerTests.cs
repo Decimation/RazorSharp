@@ -1,10 +1,15 @@
 #region
 
+#region
+
 using System;
 using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.Pointers.Ex;
+
+#endregion
+
 #pragma warning disable 612
 
 #endregion

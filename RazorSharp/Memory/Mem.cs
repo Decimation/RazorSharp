@@ -11,7 +11,6 @@ using System.Runtime.InteropServices;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Native;
-using RazorSharp.Native.Enums;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -126,17 +125,12 @@ namespace RazorSharp.Memory
 			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
 		}
 
-		public static void Set<T>(Pointer<byte> ptr, T value, int elemCnt)
-		{
-			for (int i = 0; i < elemCnt; i++) {
-				ptr.Write(value, i);
-			}
-		}
 
 		#region Read / write
 
 		/// <summary>
-		/// Reinterprets <paramref name="value"/> of type <typeparamref name="TFrom"/> as a value of type <typeparamref name="TTo"/>
+		///     Reinterprets <paramref name="value" /> of type <typeparamref name="TFrom" /> as a value of type
+		///     <typeparamref name="TTo" />
 		/// </summary>
 		/// <param name="value">Value to reinterpret</param>
 		/// <typeparam name="TFrom">Inherent type</typeparam>
@@ -144,7 +138,7 @@ namespace RazorSharp.Memory
 		/// <returns></returns>
 		public static TTo ReinterpretCast<TFrom, TTo>(TFrom value)
 		{
-			var addr = Unsafe.AddressOf(ref value);
+			Pointer<TFrom> addr = Unsafe.AddressOf(ref value);
 			return addr.Read<TTo>();
 		}
 
@@ -153,9 +147,6 @@ namespace RazorSharp.Memory
 		{
 			return *(IntPtr*) ptr.Add(byteOffset);
 		}
-
-
-
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -349,6 +340,7 @@ namespace RazorSharp.Memory
 			Marshal.FreeHGlobal(p.Address);
 		}
 
+		// todo: the Copy methods should probably be implemented in Pointer for consistency
 
 		#region Copy
 

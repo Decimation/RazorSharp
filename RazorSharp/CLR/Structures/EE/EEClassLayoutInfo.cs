@@ -24,7 +24,10 @@ namespace RazorSharp.CLR.Structures.EE
 
 
 	/// <summary>
-	/// <para>CLR <see cref="EEClassLayoutInfo"/>. Functionality is implemented in this <c>struct</c> and exposed via <see cref="MetaType"/></para>
+	///     <para>
+	///         CLR <see cref="EEClassLayoutInfo" />. Functionality is implemented in this <c>struct</c> and exposed via
+	///         <see cref="MetaType" />
+	///     </para>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct EEClassLayoutInfo

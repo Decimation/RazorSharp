@@ -12,7 +12,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 {
 
 	/// <summary>
-	/// <para>Aggregates both <see cref="FatILMethod"/> and <see cref="TinyILMethod"/></para>
+	///     <para>Aggregates both <see cref="FatILMethod" /> and <see cref="TinyILMethod" /></para>
 	///     <para>Internal name: <c>COR_ILMETHOD</c></para>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">

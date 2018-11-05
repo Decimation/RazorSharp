@@ -411,7 +411,7 @@ namespace RazorSharp
 		{
 			// Note: Arrays native size == 0
 
-			Pointer<MethodTable> mt = typeof(T).GetMethodTable();
+			Pointer<MethodTable> mt     = typeof(T).GetMethodTable();
 			int                  native = mt.Reference.EEClass.Reference.NativeSize;
 			return native == 0 ? INVALID_VALUE : native;
 		}
@@ -627,7 +627,6 @@ namespace RazorSharp
 		}
 
 
-
 		/// <summary>
 		///     Copies the memory of <paramref name="t" /> into a <see cref="Byte" /> array.
 		///     <remarks>
@@ -673,8 +672,6 @@ namespace RazorSharp
 		{
 			Marshal.WriteIntPtr(AddressOf(ref t).Address, newHeapAddr.Address);
 		}
-
-
 
 		#endregion
 

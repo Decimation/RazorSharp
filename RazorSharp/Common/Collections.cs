@@ -69,6 +69,7 @@ namespace RazorSharp.Common
 		{
 			return ToString(list: rg, options);
 		}
+
 		public static string ToString(byte[] mem, ToStringOptions options = ToStringOptions.ZeroPadHex)
 		{
 			return ToString(list: mem, options);

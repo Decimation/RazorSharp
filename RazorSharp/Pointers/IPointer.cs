@@ -16,11 +16,11 @@ namespace RazorSharp.Pointers
 	/// <inheritdoc />
 	/// <summary>
 	///     <para>
-	///         The interface for <see cref="Pointer{T}"/>. This interface is kept <c>internal</c> because we don't
+	///         The interface for <see cref="Pointer{T}" />. This interface is kept <c>internal</c> because we don't
 	///         want to cause accidental boxing allocations.
 	///     </para>
 	///     <para>
-	///         All <see cref="IPointer{T}"/> types should be <c>struct</c> types
+	///         All <see cref="IPointer{T}" /> types should be <c>struct</c> types
 	///         so they can equal the size and layout of a native pointer in memory.
 	///     </para>
 	///     <para>Therefore, this interface just serves as a static contract and shouldn't be used in runtime.</para>

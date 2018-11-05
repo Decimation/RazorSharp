@@ -123,7 +123,7 @@ namespace RazorSharp.Memory
 
 		public static void Info<T>(Pointer<T> ptr)
 		{
-			var table = new ConsoleTable("Info", "Value");
+			ConsoleTable table = new ConsoleTable("Info", "Value");
 
 			table.AddRow("Origin", GetOrigin(ptr).ToString("P"));
 			table.AddRow("Limit", GetLimit(ptr).ToString("P"));

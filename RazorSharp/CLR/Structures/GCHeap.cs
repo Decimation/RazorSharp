@@ -1,4 +1,5 @@
 // ReSharper disable RedundantUsingDirective
+
 #region
 
 using System;

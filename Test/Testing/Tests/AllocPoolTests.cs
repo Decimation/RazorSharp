@@ -35,9 +35,9 @@ namespace Test.Testing.Tests
 				Debug.Assert(AllocPool.GetOffset(ptr) == i);
 
 
-
-				if (AllocPool.GetOffset(ptr) + 1 < AllocPool.GetLength(ptr))
+				if (AllocPool.GetOffset(ptr) + 1 < AllocPool.GetLength(ptr)) {
 					ptr++;
+				}
 			}
 
 			AllocPool.Free(ptr);

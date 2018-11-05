@@ -35,7 +35,14 @@ namespace RazorSharp.Pointers
 
 	public enum StringTypes
 	{
+		/// <summary>
+		///     <see cref="sbyte" /> (1-byte) string
+		/// </summary>
 		AnsiStr,
+
+		/// <summary>
+		///     <see cref="char" /> (2-byte) string
+		/// </summary>
 		UniStr,
 	}
 
@@ -209,6 +216,21 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+		public IEnumerable<T> Where(int elemCount, Func<T, bool> predicate)
+		{
+			return CopyOut(elemCount).Where(predicate);
+		}
+
+		public IEnumerable<TResult> Select<TResult>(int elemCount, Func<T, TResult> selector)
+		{
+			return CopyOut(elemCount).Select(selector);
+		}
+
+
+		/// <summary>
+		///     Initializes <paramref name="elemCount" /> elements with the default value of <typeparamref name="T" />.
+		/// </summary>
+		/// <param name="elemCount">Number of elements</param>
 		public void Init(int elemCount)
 		{
 			Set(default, elemCount);

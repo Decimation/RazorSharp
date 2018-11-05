@@ -1,8 +1,12 @@
+#region
+
 using System.Linq;
 using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Validators;
+
+#endregion
 
 namespace Test.Testing.Benchmarking
 {

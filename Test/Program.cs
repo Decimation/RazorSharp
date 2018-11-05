@@ -1,47 +1,30 @@
 ﻿#region
 
 //using Microsoft.Diagnostics.Runtime;
+
+#region
+
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Globalization;
 using System.Linq;
-using System.Numerics;
 using System.Reflection;
-using System.Resources;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using BenchmarkDotNet.Running;
-using JetBrains.Annotations;
-using NUnit.Framework;
-using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
-using RazorSharp.CLR.Fixed;
 using RazorSharp.CLR.Meta;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
-using RazorSharp.CLR.Structures.HeapObjects;
-using RazorSharp.CLR.Structures.ILMethods;
 using RazorSharp.Common;
 using RazorSharp.Memory;
-using RazorSharp.Native;
-using RazorSharp.Native.Enums;
-using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing.Benchmarking;
-using Test.Testing.Types;
 using static RazorSharp.Unsafe;
-using static RazorSharp.VirtualCollection<int>;
-using static Test.Testing.Benchmarking.SignatureCallBenchmarking;
-using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
-using Unsafe = RazorSharp.Unsafe;
+
+#endregion
 
 // ReSharper disable InconsistentNaming
 
@@ -53,7 +36,7 @@ namespace Test
 	#region
 
 	using DWORD = UInt32;
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+	using CSUnsafe = Unsafe;
 
 	#endregion
 
@@ -124,13 +107,10 @@ namespace Test
 		// todo: read module memory
 
 
-		/**
-		 * >> Entry point
-		 */
 		public static void Main(string[] args)
 		{
 			MetaType      mt    = Meta.GetType(typeof(Program));
-			var           addOp = mt.Methods["AddOp"];
+			MetaMethod    addOp = mt.Methods["AddOp"];
 			Pointer<byte> il    = addOp.GetILHeader().Code;
 			Debug.Assert(il.IsReadOnly);
 			int          val  = int.MaxValue;
@@ -161,21 +141,31 @@ namespace Test
 			Console.WriteLine(iAlloc.ToTable(10).ToMarkDownString());
 			AllocPool.Free(iAlloc);
 
-			Pointer<int> sPtr = AllocPool.Alloc<int>(2);
+			Pointer<uint> sPtr = AllocPool.Alloc<uint>(2);
 			sPtr.Write("foo");
 			Console.WriteLine(sPtr.ToTable(2).ToMarkDownString());
 			Console.WriteLine(sPtr.Read<string>());
 			Console.WriteLine(sPtr.CopyOut<string>(1).Join());
 			AllocPool.Free(sPtr);
+
+
+			Pointer<int> integers = AllocPool.Alloc<int>(10);
+			Console.WriteLine(integers.ToTable(10).ToMarkDownString());
+			integers.Set(0xFF, 10);
+			Console.WriteLine(integers.ToTable(10).ToMarkDownString());
+			integers.Set(int.MaxValue, 1, 9);
+			Console.WriteLine(integers.ToTable(10).ToMarkDownString());
+			Console.WriteLine(integers.Where(10, x => x > 1).ToArray().Join());
+			AllocPool.Free(integers);
 		}
 
 
-		static void HookCall(uint addr, void* func)
+		private static void HookCall(uint addr, void* func)
 		{
 			// SafeWrite32(addr+1, (DWORD)func - (addr+5));
 		}
 
-		static int AddOp(int a, int b)
+		private static int AddOp(int a, int b)
 		{
 			return a + b;
 		}
@@ -201,8 +191,8 @@ namespace Test
 			// Fields
 			//
 
-			var fields     = Runtime.GetFields(t);
-			var metaFields = meta.Fields.ToArray();
+			FieldInfo[] fields     = Runtime.GetFields(t);
+			MetaField[] metaFields = meta.Fields.ToArray();
 			Debug.Assert(fields.Length == metaFields.Length);
 			Collections.OrderBy(ref fields, x => x.MetadataToken);
 			Collections.OrderBy(ref metaFields, x => x.Token);
@@ -217,8 +207,8 @@ namespace Test
 			// Methods
 			//
 
-			var methods     = Runtime.GetMethods(t);
-			var metaMethods = meta.Methods.ToArray();
+			MethodInfo[] methods     = Runtime.GetMethods(t);
+			MetaMethod[] metaMethods = meta.Methods.ToArray();
 			Debug.Assert(methods.Length == metaMethods.Length);
 			Collections.OrderBy(ref methods, x => x.MetadataToken);
 			Collections.OrderBy(ref metaMethods, x => x.Token);

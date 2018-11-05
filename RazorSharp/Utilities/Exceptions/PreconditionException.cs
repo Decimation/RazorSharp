@@ -1,4 +1,8 @@
+#region
+
 using System;
+
+#endregion
 
 namespace RazorSharp.Utilities.Exceptions
 {
@@ -7,8 +11,8 @@ namespace RazorSharp.Utilities.Exceptions
 	{
 		private const string MSG_PRECONDITION_FAIL = "Precondition failed";
 
-		public PreconditionException() : this(MSG_PRECONDITION_FAIL) {}
-		internal PreconditionException(string msg) : base(msg) {}
+		public PreconditionException() : this(MSG_PRECONDITION_FAIL) { }
+		internal PreconditionException(string msg) : base(msg) { }
 	}
 
 }

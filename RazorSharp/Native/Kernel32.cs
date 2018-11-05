@@ -14,7 +14,7 @@ namespace RazorSharp.Native
 {
 
 	/// <summary>
-	///     Native P/Invoke for <see cref="Kernel32Dll"/>
+	///     Native P/Invoke for <see cref="Kernel32Dll" />
 	///     <remarks>
 	///         Stolen from RazorInvoke for sake of portability and convenience
 	///     </remarks>
@@ -137,15 +137,16 @@ namespace RazorSharp.Native
 		#region Virtual
 
 		/// <summary>
-		/// Retrieves information about a range of pages in the virtual address space of the calling process.
-		/// <para><a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa366902(v=vs.85).aspx"> Doc </a></para>
-		///
+		///     Retrieves information about a range of pages in the virtual address space of the calling process.
+		///     <para>
+		///         <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa366902(v=vs.85).aspx"> Doc </a>
+		///     </para>
 		/// </summary>
 		/// <param name="address">
 		///     A pointer to the base address of the region of pages to be queried. This value is rounded down to the next page
 		///     boundary. To determine the size of a page on the host computer, use the <see cref="GetNativeSystemInfo" />
 		///     function. If <paramref name="address" /> specifies an address above the highest memory address accessible to the
-		///     process, the function fails with <see cref="ERROR_INVALID_PARAMETER"/>.
+		///     process, the function fails with <see cref="ERROR_INVALID_PARAMETER" />.
 		/// </param>
 		/// <param name="buffer">
 		///     A pointer to a <see cref="MemoryBasicInformation" /> structure in which information about the specified page
@@ -155,7 +156,7 @@ namespace RazorSharp.Native
 		/// <returns>
 		///     The return value is the actual number of bytes returned in the information buffer. If the function fails, the
 		///     return value is zero. To get extended error information, call <see cref="GetLastError" />. Possible error values
-		///     include <see cref="ERROR_INVALID_PARAMETER"/>.
+		///     include <see cref="ERROR_INVALID_PARAMETER" />.
 		/// </returns>
 		[DllImport(Kernel32Dll)]
 		public static extern IntPtr VirtualQuery(IntPtr address, ref MemoryBasicInformation buffer, uint length);
@@ -170,7 +171,9 @@ namespace RazorSharp.Native
 
 
 		/// <summary>
-		///     <para><a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa366887(v=vs.85).aspx"> Doc </a></para>
+		///     <para>
+		///         <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa366887(v=vs.85).aspx"> Doc </a>
+		///     </para>
 		///     Reserves, commits, or changes the state of a region of pages in the virtual address space of the calling process.
 		///     Memory allocated by this function is automatically initialized to zero.
 		/// </summary>
