@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using RazorSharp.Common;
 using RazorSharp.Native;
 using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
@@ -61,7 +62,7 @@ namespace RazorSharp.Memory
 			ImageSectionInfo segment = Segments.GetSegment(segmentName, moduleName);
 
 			m_rgModuleBuffer = new byte[segment.SectionSize];
-			m_lpModuleBase   = segment.SectionAddress;
+			m_lpModuleBase   = segment.SectionAddress.Address;
 			m_dictStringPatterns.Clear();
 			m_moduleName = moduleName;
 			Marshal.Copy(m_lpModuleBase, m_rgModuleBuffer, 0, segment.SectionSize);
@@ -138,15 +139,17 @@ namespace RazorSharp.Memory
 		public IntPtr FindPattern(byte[] rgPattern, long ofsGuess = 0)
 		{
 			ModuleCheck();
+			bool ofsGuessFailed = false;
 
 			if (ofsGuess != 0) {
 				if (PatternCheck(ofsGuess, rgPattern)) {
 					return PointerUtils.Add(m_lpModuleBase, ofsGuess).Address;
 				}
 				else {
-					throw new Exception($"Offset guess of {ofsGuess} failed");
+//					throw new Exception($"Offset guess of {ofsGuess} failed");
 
 //					Logger.Log("Offset guess of {0} failed", Hex.ToHex(ofsGuess));
+					ofsGuessFailed = true;
 				}
 			}
 
@@ -156,6 +159,8 @@ namespace RazorSharp.Memory
 				}
 
 				if (PatternCheck(nModuleIndex, rgPattern)) {
+					if (ofsGuessFailed)
+						Console.WriteLine("{0} @ {1:X}", Collections.ToString(rgPattern), nModuleIndex);
 					return m_lpModuleBase + nModuleIndex;
 				}
 			}
@@ -227,7 +232,7 @@ namespace RazorSharp.Memory
 		{
 			IntPtr addr = FindPattern(rgPattern, ofsGuess);
 			if (addr == IntPtr.Zero) {
-				throw new Exception($"Could not find function with opcodes {rgPattern}");
+				throw new Exception($"Could not find function with opcodes {Collections.ToString(rgPattern)}");
 			}
 
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);

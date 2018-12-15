@@ -34,12 +34,12 @@ namespace RazorSharp.Native.Structures.Images
 
 		#region Accessors
 
-		public int    SectionNumber  => m_sectionNumber;
-		public IntPtr SectionAddress => (IntPtr) m_sectionAddress;
-		public string SectionName    => m_sectionName;
-		public int    SectionSize    => m_sectionSize;
+		public int           SectionNumber  => m_sectionNumber;
+		public Pointer<byte> SectionAddress => (IntPtr) m_sectionAddress;
+		public string        SectionName    => m_sectionName;
+		public int           SectionSize    => m_sectionSize;
 
-		public IntPtr EndAddress =>
+		public Pointer<byte> EndAddress =>
 			PointerUtils.Add(m_sectionAddress, (byte*) m_sectionSize - 1).Address;
 
 		public ImageSectionHeader SectionHeader => m_header;
@@ -63,8 +63,8 @@ namespace RazorSharp.Native.Structures.Images
 			StringBuilder sb = new StringBuilder();
 			sb.AppendFormat("Section #: {0}", m_sectionNumber).AppendLine();
 			sb.AppendFormat("Name: {0}", m_sectionName).AppendLine();
-			sb.AppendFormat("Address: {0:X}", SectionAddress.ToInt64()).AppendLine();
-			sb.AppendFormat("End Address: {0:X}", EndAddress.ToInt64()).AppendLine();
+			sb.AppendFormat("Address: {0:P}", SectionAddress).AppendLine();
+			sb.AppendFormat("End Address: {0:P}", EndAddress).AppendLine();
 			sb.AppendFormat("Size: {0}", m_sectionSize).AppendLine();
 
 			return sb.ToString();

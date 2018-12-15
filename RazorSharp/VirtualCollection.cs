@@ -1,7 +1,10 @@
+using System.Collections;
+using System.Collections.Generic;
+
 namespace RazorSharp
 {
 
-	public class VirtualCollection<T>
+	public class VirtualCollection<T> : IEnumerable<T>
 	{
 		public delegate T GetItem(string name);
 
@@ -23,6 +26,18 @@ namespace RazorSharp
 		public T[] ToArray()
 		{
 			return m_fnGetItems();
+		}
+
+		public IEnumerator<T> GetEnumerator()
+		{
+			foreach (T v in ToArray()) {
+				yield return v;
+			}
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 	}
 

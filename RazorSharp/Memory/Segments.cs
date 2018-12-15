@@ -34,11 +34,11 @@ namespace RazorSharp.Memory
 		///     If the address <paramref name="addr" /> is not found in the address space of
 		///     module <paramref name="moduleName" />
 		/// </exception>
-		public static SegmentType GetSegment(Pointer<byte> addr, string moduleName = null)
+		public static SegmentType GetSegmentType(Pointer<byte> addr, string moduleName = null)
 		{
 			ImageSectionInfo[] sections = DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
 			foreach (ImageSectionInfo s in sections) {
-				if (Mem.IsAddressInRange(s.EndAddress, addr.Address, s.SectionAddress)) {
+				if (Mem.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address)) {
 					return Parse(s.SectionName);
 				}
 			}
@@ -182,7 +182,7 @@ namespace RazorSharp.Memory
 			byte[]           segMem = Mem.ReadBytes(s.SectionAddress, 0, s.SectionSize);
 			for (int i = 0; i < s.SectionSize; i += IntPtr.Size) {
 				if (new ArraySegment<byte>(segMem, i, IntPtr.Size).SequenceEqual(mem)) {
-					return s.SectionAddress + i;
+					return (s.SectionAddress + i).Address;
 				}
 			}
 

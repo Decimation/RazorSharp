@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
+using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -681,6 +682,20 @@ namespace RazorSharp
 				Pointer<byte> addr = AddressOfHeap(o, OffsetType.Fields);
 				return addr.Read<T>();
 			}
+		}
+
+		/// <summary>
+		///     Interprets a dynamically allocated reference type in the heap as a proper managed type. This is useful when
+		///     you only have a pointer to a reference type's data in the heap but cannot dereference it because the CLR
+		///     automatically dereferences managed reference types (pointer logistics is handled by the CLR).
+		/// </summary>
+		/// <param name="rawMem">Pointer to the reference type's raw data</param>
+		/// <typeparam name="T">Type to interpret the data as</typeparam>
+		/// <returns>A CLR-compliant reference type pointer to access the data pointed to by <paramref name="rawMem" /></returns>
+		public static T RawInterpret<T>(Pointer<byte> rawMem) where T : class
+		{
+			IntPtr cpy = rawMem.Address;
+			return Mem.Read<T>(&cpy);
 		}
 	}
 

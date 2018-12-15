@@ -214,6 +214,7 @@
     <Compile Include="Analysis\Inspector.cs" />
     <Compile Include="Analysis\ObjectLayout.cs" />
       <Compile Include="Analysis\ReferenceInspector.cs"/>
+      <Compile Include="AssemblyHandle.cs"/>
       <Compile Include="CLR\Fixed\ObjectPinHandle.cs"/>
       <Compile Include="CLR\Fixed\ObjectPinner.cs"/>
       <Compile Include="CLR\Fixed\PinHandle.cs"/>
@@ -243,6 +244,7 @@
       <Compile Include="Common\Extensions.cs"/>
       <Compile Include="Common\Hex.cs"/>
       <Compile Include="Common\Strings.cs"/>
+      <Compile Include="ProcessHandle.cs"/>
       <Compile Include="VirtualCollection.cs"/>
       <Compile Include="LowLevel.cs"/>
       <Compile Include="Memory\AllocPool.cs"/>

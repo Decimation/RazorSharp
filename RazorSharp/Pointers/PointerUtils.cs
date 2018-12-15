@@ -92,6 +92,24 @@ namespace RazorSharp.Pointers
 			return Offset<T>((IntPtr) p, elemCnt);
 		}
 
+		public static IntPtr OffsetAs<TOriginal, TAs>(IntPtr p, int origElemCnt)
+		{
+			return p + OffsetCountAs<TOriginal, TAs>(origElemCnt);
+		}
+
+		/// <summary>
+		/// Calculates the element offset (count) of <paramref name="origElemCnt"/> in terms of <typeparamref name="TAs"/>
+		/// </summary>
+		/// <param name="origElemCnt">Original element count in terms of <typeparamref name="TOriginal"/></param>
+		/// <typeparam name="TOriginal">Type of <paramref name="origElemCnt"/></typeparam>
+		/// <typeparam name="TAs">Type to return <paramref name="origElemCnt"/> as</typeparam>
+		/// <returns></returns>
+		public static int OffsetCountAs<TOriginal, TAs>(int origElemCnt)
+		{
+			int origByteCount = origElemCnt * Unsafe.SizeOf<TOriginal>();
+			return (origByteCount / Unsafe.SizeOf<TAs>());
+		}
+
 		/// <summary>
 		///     Returns the element index of a pointer relative to <paramref name="orig" />
 		/// </summary>

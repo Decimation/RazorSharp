@@ -51,6 +51,7 @@ namespace RazorSharp.Pointers
 	///     <para>Represents a native pointer. Equals the size of <see cref="IntPtr.Size" />.</para>
 	///     <para>Can be represented as a native pointer in memory. </para>
 	///     <para>Has identical or better performance than native pointers.</para>
+	///     <para>Type safety is not enforced for accessibility</para>
 	///     <para>
 	///         Supports pointer arithmetic, reading/writing different types other than type <typeparamref name="T" />,
 	///         and bitwise operations.
@@ -403,6 +404,7 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+		[Pure]
 		public string ReadString(StringTypes s)
 		{
 			switch (s) {
@@ -414,6 +416,7 @@ namespace RazorSharp.Pointers
 					throw new ArgumentOutOfRangeException(nameof(s), s, null);
 			}
 		}
+
 
 		public void Write<TType>(TType t, int elemOffset = 0)
 		{
@@ -463,11 +466,13 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+		[Pure]
 		public TType Read<TType>(int elemOffset = 0)
 		{
 			return Mem.Read<TType>(Offset<TType>(elemOffset));
 		}
 
+		[Pure]
 		public ref TType AsRef<TType>(int elemOffset = 0)
 		{
 			return ref Mem.AsRef<TType>(Offset<TType>(elemOffset));
@@ -589,10 +594,10 @@ namespace RazorSharp.Pointers
 			for (int i = 0; i < elemCnt; i++) {
 				Pointer<T> ptr = AddressOfIndex(i);
 				if (!typeof(T).IsValueType) {
-					table.AddRow(ptr.ToString("P"), i, Hex.ToHex(Read<long>(i)), ptr.ToStringSafe());
+					table.AddRow(ptr.ToString(PointerSettings.FMT_P), i, Hex.ToHex(Read<long>(i)), ptr.ToStringSafe());
 				}
 				else {
-					table.AddRow(ptr.ToString("P"), i, ptr.ToStringSafe());
+					table.AddRow(ptr.ToString(PointerSettings.FMT_P), i, ptr.ToStringSafe());
 				}
 			}
 
@@ -968,8 +973,8 @@ namespace RazorSharp.Pointers
 
 				case PointerSettings.FMT_B:
 					string thisStr = ToStringSafe();
-					return String.Format("{0} @ {1}: {2}", typeof(T).Name, Hex.ToHex(Address),
-						thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
+					return String.Format("{0} @ {1}: {2}", typeof(T) == typeof(char) ? "Char*" : typeof(T).Name,
+						Hex.ToHex(Address), thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
 				default:
 					goto case PointerSettings.FMT_O;
 			}

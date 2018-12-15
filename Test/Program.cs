@@ -5,6 +5,7 @@
 #region
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -12,6 +13,7 @@ using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using BenchmarkDotNet.Running;
+using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Meta;
@@ -23,6 +25,7 @@ using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing.Benchmarking;
 using static RazorSharp.Unsafe;
+using Unsafe = RazorSharp.Unsafe;
 
 #endregion
 
@@ -36,7 +39,7 @@ namespace Test
 	#region
 
 	using DWORD = UInt32;
-	using CSUnsafe = Unsafe;
+	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
 
@@ -106,6 +109,8 @@ namespace Test
 		// todo: Contract-oriented programming
 		// todo: read module memory
 
+		// todo: Rider bug: squiggly lines
+
 
 		public static void Main(string[] args)
 		{
@@ -122,48 +127,75 @@ namespace Test
 			ptr.SafeWrite(MemoryOfVal(val));
 			Console.WriteLine(ptr);
 
-			Pointer<string> alloc = AllocPool.Alloc<string>(10);
-			alloc.WriteAll("foo", "bar");
-			Console.WriteLine(alloc.ToTable(10).ToMarkDownString());
-			alloc.Init(AllocPool.GetLength(alloc));
-			GC.Collect();
-			Console.WriteLine(alloc.ToTable(10).ToMarkDownString());
-			AllocPool.Free(alloc);
-			GC.Collect();
+			/*
+			var seg = Segments.GetSegment(".text", "clr.dll");
+			Console.WriteLine(seg);
 
-			Array rg = new long[1];
-			rg.SetValue(Mem.ReinterpretCast<string, long>("foo"), 0);
-
-			Pointer<int> iAlloc = AllocPool.Alloc<int>(10);
-			iAlloc.Set(0xFF, AllocPool.GetLength(iAlloc));
-			Console.WriteLine(iAlloc.ToTable(10).ToMarkDownString());
-			iAlloc.Set(int.MaxValue, 1, 9);
-			Console.WriteLine(iAlloc.ToTable(10).ToMarkDownString());
-			AllocPool.Free(iAlloc);
-
-			Pointer<uint> sPtr = AllocPool.Alloc<uint>(2);
-			sPtr.Write("foo");
-			Console.WriteLine(sPtr.ToTable(2).ToMarkDownString());
-			Console.WriteLine(sPtr.Read<string>());
-			Console.WriteLine(sPtr.CopyOut<string>(1).Join());
-			AllocPool.Free(sPtr);
+			//void __fastcall GCHandleValidatePinnedObject(struct Object *)
+			Pointer<byte> x = SigScanner.QuickScan("clr.dll",
+				szPattern:
+				"48 85 C9 0F 84 B4 00 00 00 53 48 83 EC 40 48 8B D9 48 " +
+				"8B 09 48 3B 0D 45 CD 83 00 0F 84 97 00 00 00 8B 01 25 " +
+				"00 00 0C 00");
 
 
-			Pointer<int> integers = AllocPool.Alloc<int>(10);
-			Console.WriteLine(integers.ToTable(10).ToMarkDownString());
-			integers.Set(0xFF, 10);
-			Console.WriteLine(integers.ToTable(10).ToMarkDownString());
-			integers.Set(int.MaxValue, 1, 9);
-			Console.WriteLine(integers.ToTable(10).ToMarkDownString());
-			Console.WriteLine(integers.Where(10, x => x > 1).ToArray().Join());
-			AllocPool.Free(integers);
+			List<int> list = new List<int>();
+			GCHandle  g;
+			Debug.Assert(!TryAlloc(list, out g));
+
+
+			x.SafeWrite(0xC3); // opcode: retn
+			Console.WriteLine("void __fastcall GCHandleValidatePinnedObject(struct Object *): {0:P}", x);
+
+
+			Debug.Assert(TryAlloc(list, out g));
+
+			const string s    = "foo";
+			var          heap = Unsafe.AddressOfHeap(s);
+			heap.Write('g', PointerUtils.OffsetCountAs<byte, char>(RuntimeHelpers.OffsetToStringData));
+			Console.WriteLine(s);
+			Console.WriteLine(RawInterpret<string>(heap));
+
+			g.Free();
+
+			string y = s;
+			Debug.Assert(TryAlloc(y, out g));
+			Pointer<char> charPtr = g.AddrOfPinnedObject();
+			Console.WriteLine(charPtr);
+
+			var z = &g;
+
+			AssemblyHandle handle = new AssemblyHandle(1);
+			Debug.Assert(handle.IsAllocated);
+			var fn = handle.Write<Ret>(0xC3);
+			fn();
+			handle.Free();
+			Debug.Assert(!handle.IsAllocated);
+
+
+			using (var p = new ProcessHandle("notepad")) {
+				Console.WriteLine(p.ReadString16(0x15E31B28F20));
+				p.WriteString16(0x15E31B28F20, "henloo!!");
+
+				//15E31B28F20
+			}*/
 		}
 
+		private delegate void Ret();
 
-		private static void HookCall(uint addr, void* func)
+
+		private static bool TryAlloc(object o, out GCHandle g)
 		{
-			// SafeWrite32(addr+1, (DWORD)func - (addr+5));
+			try {
+				g = GCHandle.Alloc(o, GCHandleType.Pinned);
+				return true;
+			}
+			catch {
+				g = default;
+				return false;
+			}
 		}
+
 
 		private static int AddOp(int a, int b)
 		{
