@@ -160,7 +160,8 @@ namespace RazorSharp.Memory
 
 				if (PatternCheck(nModuleIndex, rgPattern)) {
 					if (ofsGuessFailed)
-						Console.WriteLine("{0} @ {1:X}", Collections.ToString(rgPattern), nModuleIndex);
+						Console.WriteLine("{0} @ {1:X} | {2:X}", Collections.ToString(rgPattern), nModuleIndex,
+							(m_lpModuleBase + nModuleIndex).ToInt64());
 					return m_lpModuleBase + nModuleIndex;
 				}
 			}

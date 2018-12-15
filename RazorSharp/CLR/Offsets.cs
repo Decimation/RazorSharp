@@ -102,7 +102,7 @@ namespace RazorSharp.CLR
 		///         <see cref="Memory.Segments.SegmentType.data" /> segment of <see cref="ClrFunctions.ClrDll" />
 		///     </remarks>
 		/// </summary>
-		internal const long GLOBAL_HIGHEST_ADDRESS_OFFSET = 408;
+		internal const long GLOBAL_HIGHEST_ADDRESS_OFFSET = 464;
 
 		#endregion
 

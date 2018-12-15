@@ -111,6 +111,12 @@ namespace Test
 
 		// todo: Rider bug: squiggly lines
 
+		private static Pointer<byte> virtaddr(string module, long ofs)
+		{
+			// 0x18fd1c
+			Pointer<byte> ptr = Modules.GetModule(module).BaseAddress;
+			return ptr.Add(ofs);
+		}
 
 		public static void Main(string[] args)
 		{
@@ -121,11 +127,29 @@ namespace Test
 			int          val  = int.MaxValue;
 			Pointer<int> xptr = &val;
 			Debug.Assert(xptr.IsWritable);
+			Console.WriteLine(addOp);
 
 			Pointer<int> ptr = &val;
 			Console.WriteLine(ptr);
 			ptr.SafeWrite(MemoryOfVal(val));
 			Console.WriteLine(ptr);
+
+			Console.WriteLine((Pointer<byte>) GCHeap.LowestAddress);
+			Console.WriteLine((Pointer<byte>) GCHeap.HighestAddress);
+
+			Console.WriteLine(virtaddr("clr.dll", 0x1AA418));
+
+			Console.WriteLine(GCHeap.GlobalHeap.Reference.GCCount);
+			Console.WriteLine(GCHeap.Size);
+			Console.WriteLine(GCHeap.IsInGCHeap(GCHeap.LowestAddress));
+			Console.WriteLine(GCHeap.GlobalHeap.Reference.IsHeapPointer(mt));
+
+			string s = "foo";
+			Console.WriteLine(Unsafe.AddressOf(ref s));
+
+			Console.WriteLine(mt);
+			Console.WriteLine(addOp);
+
 
 			/*
 			var seg = Segments.GetSegment(".text", "clr.dll");

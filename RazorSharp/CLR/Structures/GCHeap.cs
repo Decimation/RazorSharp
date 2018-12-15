@@ -70,7 +70,7 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     Total size of the managed GC heap
 		/// </summary>
-		public static long Size => g_highest_address.ToInt64() - g_lowest_address.ToInt64();
+		public static long Size => Math.Abs(g_highest_address.ToInt64() - g_lowest_address.ToInt64());
 
 		public static Pointer<GCHeap> GlobalHeap => (GCHeap*) g_pGCHeap;
 
