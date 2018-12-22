@@ -114,33 +114,6 @@ namespace RazorSharp.CLR.Structures
 
 
 		/// <summary>
-		///     Returns whether or not this object resides in an ephemeral generation.
-		///     <remarks>
-		///         <para>Sources:</para>
-		///         <list type="bullet">
-		///             <item>
-		///                 <description>/src/gc/gcimpl.h: 163</description>
-		///             </item>
-		///             <item>
-		///                 <description>/src/gc/gcinterface.h: 717</description>
-		///             </item>
-		///         </list>
-		///     </remarks>
-		/// </summary>
-		/// <param name="obj">Pointer to an object in the GC heap</param>
-		/// <returns></returns>
-		[ClrSigcall]
-		public bool IsEphemeral(void* obj)
-		{
-			throw new SigcallException();
-		}
-
-		public bool IsEphemeral<T>(T t) where T : class
-		{
-			return IsEphemeral(Unsafe.AddressOfHeap(ref t).ToPointer());
-		}
-
-		/// <summary>
 		///     Returns true if the address of <paramref name="t" /> is in the GC heap.
 		/// </summary>
 		/// <param name="t">Reference to check</param>

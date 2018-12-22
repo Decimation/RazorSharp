@@ -158,6 +158,7 @@ namespace RazorSharp.Memory
 					continue;
 				}
 
+
 				if (PatternCheck(nModuleIndex, rgPattern)) {
 					if (ofsGuessFailed)
 						Console.WriteLine("{0} @ {1:X} | {2:X}", Collections.ToString(rgPattern), nModuleIndex,

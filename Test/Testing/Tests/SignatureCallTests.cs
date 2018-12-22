@@ -1,5 +1,6 @@
 #region
 
+using System;
 using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp.CLR;
@@ -31,9 +32,11 @@ namespace Test.Testing.Tests
 		[Test]
 		public void FieldDesc()
 		{
-			Pointer<FieldDesc>   fd        = typeof(string).GetFieldDesc("m_firstChar");
-			void*                module    = fd.Reference.GetModule();
-			int                  size      = fd.Reference.Size;
+			Pointer<FieldDesc> fd = typeof(string).GetFieldDesc("m_firstChar");
+
+//			void*                module    = fd.Reference.GetModule();
+			int size = fd.Reference.Size;
+			Console.WriteLine("Size");
 			Pointer<MethodTable> mt        = fd.Reference.EnclosingMethodTable;
 			int                  memberDef = fd.Reference.Token;
 		}
@@ -44,12 +47,12 @@ namespace Test.Testing.Tests
 			Pointer<GCHeap> gc = RazorSharp.CLR.Structures.GCHeap.GlobalHeap;
 			string          o  = "foo";
 
-			// todo: weird DivideByZeroException here, passes fine without unit testing
+			// todo: weird DivideByZeroException here; passes fine without unit testing
 //			bool isHeapPtr = gc->IsHeapPointer(o);
 
-			bool isEphemeral = gc.Reference.IsEphemeral(o);
-			bool isGcInProg  = gc.Reference.IsGCInProgress();
-			int  gcCount     = gc.Reference.GCCount;
+
+			bool isGcInProg = gc.Reference.IsGCInProgress();
+			int  gcCount    = gc.Reference.GCCount;
 		}
 
 		[Test]

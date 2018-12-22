@@ -109,8 +109,6 @@ namespace Test
 		// todo: Contract-oriented programming
 		// todo: read module memory
 
-		// todo: Rider bug: squiggly lines
-
 		private static Pointer<byte> virtaddr(string module, long ofs)
 		{
 			// 0x18fd1c
@@ -139,17 +137,23 @@ namespace Test
 
 			Console.WriteLine(virtaddr("clr.dll", 0x1AA418));
 
-			Console.WriteLine(GCHeap.GlobalHeap.Reference.GCCount);
-			Console.WriteLine(GCHeap.Size);
-			Console.WriteLine(GCHeap.IsInGCHeap(GCHeap.LowestAddress));
-			Console.WriteLine(GCHeap.GlobalHeap.Reference.IsHeapPointer(mt));
 
-			string s = "foo";
-			Console.WriteLine(Unsafe.AddressOf(ref s));
+			string nil = "nil";
 
-			Console.WriteLine(mt);
-			Console.WriteLine(addOp);
 
+			Debug.Assert(GCHeap.GlobalHeap.Reference.IsHeapPointer(nil));
+
+			Console.WriteLine(GCHeap.GlobalHeap.Reference.IsGCInProgress());
+			Debug.Assert(GCHeap.GlobalHeap.Reference.GCCount >= 0);
+
+
+			var field = Meta.GetType<string>()["m_firstChar"];
+			Console.WriteLine(field);
+
+			Console.WriteLine(field.Size);
+			Console.WriteLine(field.Info);
+			Console.WriteLine(field.Token);
+			Console.WriteLine();
 
 			/*
 			var seg = Segments.GetSegment(".text", "clr.dll");
@@ -204,8 +208,6 @@ namespace Test
 				//15E31B28F20
 			}*/
 		}
-
-		private delegate void Ret();
 
 
 		private static bool TryAlloc(object o, out GCHandle g)
