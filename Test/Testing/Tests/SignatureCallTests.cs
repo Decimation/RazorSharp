@@ -36,7 +36,7 @@ namespace Test.Testing.Tests
 
 //			void*                module    = fd.Reference.GetModule();
 			int size = fd.Reference.Size;
-			Console.WriteLine("Size");
+
 			Pointer<MethodTable> mt        = fd.Reference.EnclosingMethodTable;
 			int                  memberDef = fd.Reference.Token;
 		}

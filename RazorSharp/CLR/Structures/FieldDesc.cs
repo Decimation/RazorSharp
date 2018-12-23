@@ -215,17 +215,6 @@ namespace RazorSharp.CLR.Structures
 
 		#region Methods
 
-		/// <summary>
-		///     <remarks>
-		///         Address-sensitive
-		///     </remarks>
-		/// </summary>
-		[ClrSigcall]
-		internal void* GetModule()
-		{
-			throw new SigcallException();
-		}
-
 		#region Value
 
 		internal object GetValue<TInstance>(TInstance t)

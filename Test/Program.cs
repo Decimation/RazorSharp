@@ -118,95 +118,58 @@ namespace Test
 
 		public static void Main(string[] args)
 		{
-			MetaType      mt    = Meta.GetType(typeof(Program));
-			MetaMethod    addOp = mt.Methods["AddOp"];
-			Pointer<byte> il    = addOp.GetILHeader().Code;
-			Debug.Assert(il.IsReadOnly);
-			int          val  = int.MaxValue;
-			Pointer<int> xptr = &val;
-			Debug.Assert(xptr.IsWritable);
-			Console.WriteLine(addOp);
+			FieldDesc();
+			MethodDesc();
+			MethodTable();
+			GC();
+		}
 
-			Pointer<int> ptr = &val;
-			Console.WriteLine(ptr);
-			ptr.SafeWrite(MemoryOfVal(val));
-			Console.WriteLine(ptr);
+		private static void GC()
+		{
+			string s = "nil";
+			Console.WriteLine("IsInGCHeap: {0}", GCHeap.IsInGCHeap(ref s));
+			Console.WriteLine("GCCount: {0}", GCHeap.GlobalHeap.Reference.GCCount);
+			Console.WriteLine("IsHeapPointer: {0}", GCHeap.GlobalHeap.Reference.IsHeapPointer(s));
+			Console.WriteLine("IsGCInProgress: {0}", GCHeap.GlobalHeap.Reference.IsGCInProgress());
+		}
 
-			Console.WriteLine((Pointer<byte>) GCHeap.LowestAddress);
-			Console.WriteLine((Pointer<byte>) GCHeap.HighestAddress);
+		private static void MethodTable()
+		{
+			var ms = Meta.GetType<string>();
 
-			Console.WriteLine(virtaddr("clr.dll", 0x1AA418));
+			Console.WriteLine(ms);
+		}
 
+		private static void MethodDesc()
+		{
+			var mm = Meta.GetType(typeof(Program)).Methods["AddOp"];
 
-			string nil = "nil";
+			Console.WriteLine(mm);
+			Console.WriteLine("IsConstructor: {0}", mm.IsConstructor);
+			Console.WriteLine("Token: {0}", mm.Token);
+			Console.WriteLine("IsPointingToNativeCode: {0}", mm.IsPointingToNativeCode);
+			Console.WriteLine("SizeOf: {0}", mm.SizeOf);
 
+			mm.Reset();
 
-			Debug.Assert(GCHeap.GlobalHeap.Reference.IsHeapPointer(nil));
+			Console.WriteLine("Info: {0}", mm.Info);
+			Console.WriteLine("NativeCode: {0:X}", mm.NativeCode.ToInt64());
+			Console.WriteLine("PreImplementedCode: {0:X}", mm.PreImplementedCode.ToInt64());
+			Console.WriteLine("HasILHeader: {0}", mm.HasILHeader);
+			Console.WriteLine("ILHeader: {0}", mm.GetILHeader());
 
-			Console.WriteLine(GCHeap.GlobalHeap.Reference.IsGCInProgress());
-			Debug.Assert(GCHeap.GlobalHeap.Reference.GCCount >= 0);
-
-
-			var field = Meta.GetType<string>()["m_firstChar"];
-			Console.WriteLine(field);
-
-			Console.WriteLine(field.Size);
-			Console.WriteLine(field.Info);
-			Console.WriteLine(field.Token);
-			Console.WriteLine();
-
-			/*
-			var seg = Segments.GetSegment(".text", "clr.dll");
-			Console.WriteLine(seg);
-
-			//void __fastcall GCHandleValidatePinnedObject(struct Object *)
-			Pointer<byte> x = SigScanner.QuickScan("clr.dll",
-				szPattern:
-				"48 85 C9 0F 84 B4 00 00 00 53 48 83 EC 40 48 8B D9 48 " +
-				"8B 09 48 3B 0D 45 CD 83 00 0F 84 97 00 00 00 8B 01 25 " +
-				"00 00 0C 00");
+			// SetILHeader
+		}
 
 
-			List<int> list = new List<int>();
-			GCHandle  g;
-			Debug.Assert(!TryAlloc(list, out g));
+		private static void FieldDesc()
+		{
+			var mf = Meta.GetType<string>()["m_firstChar"];
 
 
-			x.SafeWrite(0xC3); // opcode: retn
-			Console.WriteLine("void __fastcall GCHandleValidatePinnedObject(struct Object *): {0:P}", x);
-
-
-			Debug.Assert(TryAlloc(list, out g));
-
-			const string s    = "foo";
-			var          heap = Unsafe.AddressOfHeap(s);
-			heap.Write('g', PointerUtils.OffsetCountAs<byte, char>(RuntimeHelpers.OffsetToStringData));
-			Console.WriteLine(s);
-			Console.WriteLine(RawInterpret<string>(heap));
-
-			g.Free();
-
-			string y = s;
-			Debug.Assert(TryAlloc(y, out g));
-			Pointer<char> charPtr = g.AddrOfPinnedObject();
-			Console.WriteLine(charPtr);
-
-			var z = &g;
-
-			AssemblyHandle handle = new AssemblyHandle(1);
-			Debug.Assert(handle.IsAllocated);
-			var fn = handle.Write<Ret>(0xC3);
-			fn();
-			handle.Free();
-			Debug.Assert(!handle.IsAllocated);
-
-
-			using (var p = new ProcessHandle("notepad")) {
-				Console.WriteLine(p.ReadString16(0x15E31B28F20));
-				p.WriteString16(0x15E31B28F20, "henloo!!");
-
-				//15E31B28F20
-			}*/
+			Console.WriteLine(mf);
+			Console.WriteLine("Size: {0}", mf.Size);
+			Console.WriteLine("Info: {0}", mf.Info);
 		}
 
 

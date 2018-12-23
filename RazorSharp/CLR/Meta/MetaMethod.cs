@@ -87,7 +87,10 @@ namespace RazorSharp.CLR.Meta
 		// EnclosingMethodTable
 		public MetaType EnclosingMetaType => new MetaType(m_value.Reference.EnclosingMethodTable);
 
+		public int SizeOf => m_value.Reference.SizeOf;
+
 		// RVA
+
 
 		#region bool
 
@@ -98,6 +101,8 @@ namespace RazorSharp.CLR.Meta
 		public bool IsUnboxingStub   => m_value.Reference.IsUnboxingStub;
 		public bool IsIL             => m_value.Reference.IsIL;
 		public bool IsStatic         => m_value.Reference.IsStatic;
+
+		public bool IsPointingToNativeCode => m_value.Reference.IsPointingToNativeCode;
 
 		#endregion
 
