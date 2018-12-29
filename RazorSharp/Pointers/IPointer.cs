@@ -95,28 +95,25 @@ namespace RazorSharp.Pointers
 		void* ToPointer();
 
 		/// <summary>
-		///     Reads a value of type <typeparamref name="TType" /> from <see cref="Address" />
+		///     Reads a value of type <typeparamref name="T" /> from <see cref="Address" />
 		/// </summary>
-		/// <param name="elemOffset">Element offset (of type <typeparamref name="TType" />)</param>
-		/// <typeparam name="TType">Type to read</typeparam>
+		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
 		/// <returns>The value read from the offset <see cref="Address" /></returns>
-		TType Read<TType>(int elemOffset = 0);
+		T Read(int elemOffset = 0);
 
 		/// <summary>
-		///     Writes a value of type <typeparamref name="TType" /> to <see cref="Address" />
+		///     Writes a value of type <typeparamref name="T" /> to <see cref="Address" />
 		/// </summary>
 		/// <param name="t">Value to write</param>
-		/// <param name="elemOffset">Element offset (of type <typeparamref name="TType" />)</param>
-		/// <typeparam name="TType">Type to write</typeparam>
-		void Write<TType>(TType t, int elemOffset = 0);
+		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
+		void Write(T t, int elemOffset = 0);
 
 		/// <summary>
-		///     Reinterprets <see cref="Address" /> as a reference to a value of type <typeparamref name="TType" />
+		///     Reinterprets <see cref="Address" /> as a reference to a value of type <typeparamref name="T" />
 		/// </summary>
-		/// <param name="elemOffset">Element offset (of type <typeparamref name="TType" />)</param>
-		/// <typeparam name="TType">Type to reference</typeparam>
-		/// <returns>A reference to a value of type <typeparamref name="TType" /></returns>
-		ref TType AsRef<TType>(int elemOffset = 0);
+		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
+		/// <returns>A reference to a value of type <typeparamref name="T" /></returns>
+		ref T AsRef(int elemOffset = 0);
 
 		/// <summary>
 		///     Checks to see if <see cref="other" /> is equal to the current instance.

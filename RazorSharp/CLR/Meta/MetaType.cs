@@ -41,6 +41,17 @@ namespace RazorSharp.CLR.Meta
 	/// </summary>
 	public class MetaType : IMeta, IFormattable
 	{
+
+		/// <summary>
+		///     Exhaustive
+		/// </summary>
+		private const string FMT_E = "E";
+
+		/// <summary>
+		///     Basic
+		/// </summary>
+		private const string FMT_B = "B";
+
 		private readonly Pointer<MethodTable> m_value;
 
 		internal MetaType(Pointer<MethodTable> p)
@@ -65,14 +76,37 @@ namespace RazorSharp.CLR.Meta
 
 		private unsafe Pointer<EEClassLayoutInfo> LayoutInfo => m_value.Reference.EEClass.Reference.LayoutInfo;
 
+		public string ToString(string format, IFormatProvider formatProvider)
+		{
+			if (string.IsNullOrEmpty(format)) {
+				format = FMT_B;
+			}
+
+			if (formatProvider == null) {
+				formatProvider = CultureInfo.CurrentCulture;
+			}
+
+
+			switch (format.ToUpperInvariant()) {
+				case FMT_B:
+					return
+						string.Format("{0} (token: {1}) (base size: {2}) (component size: {3}) (base fields size: {4})",
+							Name, Token, BaseSize, ComponentSize, BaseFieldsSize);
+				case FMT_E:
+					return ToTable().ToMarkDownString();
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
 		private MetaField GetField(string name)
 		{
-			return new MetaField(Runtime.GetFieldDesc(RuntimeType, name));
+			return new MetaField(RuntimeType.GetFieldDesc(name));
 		}
 
 		private MetaField[] GetFields()
 		{
-			Pointer<FieldDesc>[] fields = Runtime.GetFieldDescs(RuntimeType);
+			Pointer<FieldDesc>[] fields = RuntimeType.GetFieldDescs();
 			MetaField[]          meta   = new MetaField[fields.Length];
 			for (int i = 0; i < fields.Length; i++) {
 				meta[i] = new MetaField(fields[i]);
@@ -88,7 +122,7 @@ namespace RazorSharp.CLR.Meta
 
 		private MetaMethod[] GetMethods()
 		{
-			Pointer<MethodDesc>[] methods = Runtime.GetMethodDescs(RuntimeType);
+			Pointer<MethodDesc>[] methods = RuntimeType.GetMethodDescs();
 			MetaMethod[]          meta    = new MetaMethod[methods.Length];
 
 			for (int i = 0; i < meta.Length; i++) {
@@ -96,6 +130,57 @@ namespace RazorSharp.CLR.Meta
 			}
 
 			return meta;
+		}
+
+		private ConsoleTable ToTable()
+		{
+			ConsoleTable table = new ConsoleTable("Info", "Value");
+			table.AddRow("Name", Name);
+			table.AddRow("Token", Token);
+
+			/* -- Sizes -- */
+			table.AddRow("Base size", BaseSize);
+			table.AddRow("Component size", ComponentSize);
+			table.AddRow("Base fields size", BaseFieldsSize);
+
+			/* -- Flags -- */
+			table.AddRow("Flags", Enums.CreateString(Flags));
+			table.AddRow("Flags 2", Enums.CreateString(Flags2));
+			table.AddRow("Low flags", Enums.CreateString(FlagsLow));
+			table.AddRow("Attributes", Enums.CreateString(TypeAttributes));
+			table.AddRow("Layout flags", HasLayout ? Enums.CreateString(LayoutFlags) : "-");
+			table.AddRow("VM Flags", Enums.CreateString(VMFlags));
+
+			/* -- Aux types -- */
+			table.AddRow("Canon type", Canon?.Name);
+			table.AddRow("Element type", ElementType?.Name);
+			table.AddRow("Parent type", Parent.Name);
+
+			/* -- Numbers -- */
+			table.AddRow("Number instance fields", NumInstanceFields);
+			table.AddRow("Number static fields", NumStaticFields);
+			table.AddRow("Number non virtual slots", NumNonVirtualSlots);
+			table.AddRow("Number methods", NumMethods);
+			table.AddRow("Number instance field bytes", NumInstanceFieldBytes);
+			table.AddRow("Number virtuals", NumVirtuals);
+			table.AddRow("Number interfaces", NumInterfaces);
+
+			table.AddRow("Blittable", IsBlittable);
+
+
+			table.AddRow("Value", m_value.ToString("P"));
+
+			return table;
+		}
+
+		public override string ToString()
+		{
+			return ToString(FMT_B);
+		}
+
+		public string ToString(string format)
+		{
+			return ToString(format, CultureInfo.CurrentCulture);
 		}
 
 		#region Accessors
@@ -237,91 +322,6 @@ namespace RazorSharp.CLR.Meta
 		#endregion
 
 		#endregion
-
-		/// <summary>
-		///     Exhaustive
-		/// </summary>
-		private const string FMT_E = "E";
-
-		/// <summary>
-		///     Basic
-		/// </summary>
-		private const string FMT_B = "B";
-
-		private ConsoleTable ToTable()
-		{
-			ConsoleTable table = new ConsoleTable("Info", "Value");
-			table.AddRow("Name", Name);
-			table.AddRow("Token", Token);
-
-			/* -- Sizes -- */
-			table.AddRow("Base size", BaseSize);
-			table.AddRow("Component size", ComponentSize);
-			table.AddRow("Base fields size", BaseFieldsSize);
-
-			/* -- Flags -- */
-			table.AddRow("Flags", Enums.CreateString(Flags));
-			table.AddRow("Flags 2", Enums.CreateString(Flags2));
-			table.AddRow("Low flags", Enums.CreateString(FlagsLow));
-			table.AddRow("Attributes", Enums.CreateString(TypeAttributes));
-			table.AddRow("Layout flags", HasLayout ? Enums.CreateString(LayoutFlags) : "-");
-			table.AddRow("VM Flags", Enums.CreateString(VMFlags));
-
-			/* -- Aux types -- */
-			table.AddRow("Canon type", Canon?.Name);
-			table.AddRow("Element type", ElementType?.Name);
-			table.AddRow("Parent type", Parent.Name);
-
-			/* -- Numbers -- */
-			table.AddRow("Number instance fields", NumInstanceFields);
-			table.AddRow("Number static fields", NumStaticFields);
-			table.AddRow("Number non virtual slots", NumNonVirtualSlots);
-			table.AddRow("Number methods", NumMethods);
-			table.AddRow("Number instance field bytes", NumInstanceFieldBytes);
-			table.AddRow("Number virtuals", NumVirtuals);
-			table.AddRow("Number interfaces", NumInterfaces);
-
-			table.AddRow("Blittable", IsBlittable);
-
-
-			table.AddRow("Value", m_value.ToString("P"));
-
-			return table;
-		}
-
-		public override string ToString()
-		{
-			return ToString(FMT_B);
-		}
-
-		public string ToString(string format)
-		{
-			return ToString(format, CultureInfo.CurrentCulture);
-		}
-
-		public string ToString(string format, IFormatProvider formatProvider)
-		{
-			if (String.IsNullOrEmpty(format)) {
-				format = FMT_B;
-			}
-
-			if (formatProvider == null) {
-				formatProvider = CultureInfo.CurrentCulture;
-			}
-
-
-			switch (format.ToUpperInvariant()) {
-				case FMT_B:
-					return
-						String.Format("{0} (token: {1}) (base size: {2}) (component size: {3}) (base fields size: {4})",
-							Name, Token, BaseSize, ComponentSize, BaseFieldsSize);
-				case FMT_E:
-					return ToTable().ToMarkDownString();
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
-		}
-
 
 	}
 

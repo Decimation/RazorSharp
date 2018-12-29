@@ -25,6 +25,42 @@ namespace RazorSharp.Native
 
 		private const string Kernel32Dll = "kernel32.dll";
 
+
+		[DllImport(Kernel32Dll)]
+		internal static extern uint GetLastError();
+
+		[DllImport(Kernel32Dll, SetLastError = true, PreserveSig = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		internal static extern bool CloseHandle(IntPtr hObject);
+
+
+		/// <summary>
+		///     WOW64 of GetSystemInfo
+		/// </summary>
+		/// <param name="lpSystemInfo"></param>
+		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
+		internal static extern void GetNativeSystemInfo(out SystemInfo lpSystemInfo);
+
+		[DllImport(Kernel32Dll)]
+		internal static extern IntPtr GetStdHandle(StandardHandles nStdHandle);
+
+		/// <summary>
+		///     Retrieves the address of an exported function or variable from the specified dynamic-link library (DLL).
+		/// </summary>
+		/// <param name="hModule"></param>
+		/// <param name="procName"></param>
+		/// <returns></returns>
+		[DllImport(Kernel32Dll, CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
+		internal static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
+		/// <summary>
+		///     Retrieves a module handle for the specified module. The module must have been loaded by the calling process.
+		/// </summary>
+		/// <param name="lpModuleName"></param>
+		/// <returns></returns>
+		[DllImport(Kernel32Dll, CharSet = CharSet.Auto)]
+		internal static extern IntPtr GetModuleHandle(string lpModuleName);
+
 		#region Library
 
 		[DllImport(Kernel32Dll, SetLastError = true)]
@@ -99,14 +135,6 @@ namespace RazorSharp.Native
 		#endregion
 
 
-		[DllImport(Kernel32Dll)]
-		internal static extern uint GetLastError();
-
-		[DllImport(Kernel32Dll, SetLastError = true, PreserveSig = true)]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool CloseHandle(IntPtr hObject);
-
-
 		#region Console
 
 		[DllImport(Kernel32Dll)]
@@ -121,17 +149,6 @@ namespace RazorSharp.Native
 		}
 
 		#endregion
-
-
-		/// <summary>
-		///     WOW64 of GetSystemInfo
-		/// </summary>
-		/// <param name="lpSystemInfo"></param>
-		[DllImport(Kernel32Dll, SetLastError = true, CharSet = CharSet.Unicode)]
-		internal static extern void GetNativeSystemInfo(out SystemInfo lpSystemInfo);
-
-		[DllImport(Kernel32Dll)]
-		internal static extern IntPtr GetStdHandle(StandardHandles nStdHandle);
 
 
 		#region Virtual
@@ -315,24 +332,6 @@ namespace RazorSharp.Native
 		#endregion
 
 		#endregion
-
-		/// <summary>
-		///     Retrieves the address of an exported function or variable from the specified dynamic-link library (DLL).
-		/// </summary>
-		/// <param name="hModule"></param>
-		/// <param name="procName"></param>
-		/// <returns></returns>
-		[DllImport(Kernel32Dll, CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
-		internal static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
-
-		/// <summary>
-		///     Retrieves a module handle for the specified module. The module must have been loaded by the calling process.
-		/// </summary>
-		/// <param name="lpModuleName"></param>
-		/// <returns></returns>
-		[DllImport(Kernel32Dll, CharSet = CharSet.Auto)]
-		internal static extern IntPtr GetModuleHandle(string lpModuleName);
-
 
 	}
 

@@ -34,24 +34,25 @@ namespace RazorSharp.Memory
 	[AttributeUsage(AttributeTargets.Method)]
 	public class SigcallAttribute : Attribute
 	{
-		/// <summary>
-		///     Module (DLL) containing <see cref="Signature" />
-		/// </summary>
-		public string Module;
-
-		/// <summary>
-		///     Unique byte-sequence-string signature of the function
-		/// </summary>
-		public string Signature;
 
 		/// <summary>
 		/// </summary>
 		public bool IsInFunctionMap;
 
 		/// <summary>
+		///     Module (DLL) containing <see cref="Signature" />
+		/// </summary>
+		public string Module;
+
+		/// <summary>
 		///     Relative to the module's <see cref="SigScanner.BaseAddress" />
 		/// </summary>
 		public long OffsetGuess;
+
+		/// <summary>
+		///     Unique byte-sequence-string signature of the function
+		/// </summary>
+		public string Signature;
 
 		public SigcallAttribute() { }
 
@@ -96,12 +97,6 @@ namespace RazorSharp.Memory
 		private static readonly SigScanner SigScanner = new SigScanner();
 
 		/// <summary>
-		///     When <c>true</c>, only the text (code) segment (which contains executable code)
-		///     of the target DLL will be scanned by <see cref="SigScanner" />.
-		/// </summary>
-		public static bool UseTextSegment { get; set; } = true;
-
-		/// <summary>
 		///     Cached functions
 		/// </summary>
 		private static readonly Dictionary<MethodInfo, Tuple<byte[], long>> SigcallMethodMap;
@@ -114,19 +109,11 @@ namespace RazorSharp.Memory
 			ClrFunctions.AddAll();
 		}
 
-		#region IsBound
-
-		public static bool IsBound<T>()
-		{
-			return IsBound(typeof(T));
-		}
-
-		public static bool IsBound(Type t)
-		{
-			return BoundTypes.Contains(t);
-		}
-
-		#endregion
+		/// <summary>
+		///     When <c>true</c>, only the text (code) segment (which contains executable code)
+		///     of the target DLL will be scanned by <see cref="SigScanner" />.
+		/// </summary>
+		public static bool UseTextSegment { get; set; } = true;
 
 
 		private static void SelectModule(SigcallAttribute attr)
@@ -169,6 +156,20 @@ namespace RazorSharp.Memory
 #endif
 			}
 		}
+
+		#region IsBound
+
+		public static bool IsBound<T>()
+		{
+			return IsBound(typeof(T));
+		}
+
+		public static bool IsBound(Type t)
+		{
+			return BoundTypes.Contains(t);
+		}
+
+		#endregion
 
 
 		#region Normal

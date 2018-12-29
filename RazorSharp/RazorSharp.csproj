@@ -291,7 +291,6 @@
     <Compile Include="Pointers\Pointer.cs" />
       <Compile Include="Pointers\PointerSettings.cs"/>
     <Compile Include="Pointers\PointerUtils.cs" />
-      <Compile Include="Pointers\ReadOnlyPointer.cs"/>
       <Compile Include="Pointers\TaggedPointer.cs"/>
       <Compile Include="CLR\ClrFunctions.cs"/>
       <Compile Include="CLR\Structures\DWFlags.cs"/>

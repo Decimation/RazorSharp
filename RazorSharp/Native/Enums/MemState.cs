@@ -31,7 +31,7 @@ namespace RazorSharp.Native.Enums
 		///     Indicates free pages not accessible to the calling process and available to be allocated. For free pages, the
 		///     information in the AllocationBase, AllocationProtect, Protect, and Type members is undefined.
 		/// </summary>
-		Free = 0x10000,
+		Free = 0x10000
 	}
 
 }

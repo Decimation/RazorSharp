@@ -23,118 +23,6 @@ namespace RazorSharp.Analysis
 	/// <typeparam name="T">Type to get the layout of.</typeparam>
 	public unsafe class ObjectLayout<T>
 	{
-		// todo: add option to inline value types
-
-		#region Fields
-
-		private readonly IntPtr m_pAddr;
-		private readonly T      m_value;
-		private const    char   Omitted = '-';
-		private readonly bool   m_bFieldsOnly;
-		private readonly bool   m_bIsArray;
-
-		private const string OBJHEADER_TYPE_STR   = "ObjHeader";
-		private const string METHODTABLE_TYPE_STR = "MethodTable*";
-		private const string OBJHEADER_NAME_STR   = "(Object header)";
-		private const string METHODTABLE_NAME_STR = "(MethodTable ptr)";
-		private const string PADDING_STR          = "(padding)";
-
-		/// <summary>
-		///     Whether to include the full byte range of offsets (not included for MethodTable* or Object Header).
-		///     todo: Disabled for now.
-		/// </summary>
-		private const bool m_bFullOffset = false;
-
-
-		/// <summary>
-		///     If a value of type <typeparamref name="T" /> wasn't supplied in the constructor, we pass a value of <c>default</c>
-		///     of type
-		///     <typeparamref name="T" /> to <see cref="Create" />. Omit addresses and values in <see cref="Table" />.
-		/// </summary>
-		private readonly bool m_bIsDefault;
-
-		public ConsoleTable Table { get; }
-
-		#endregion
-
-		#region Constructors
-
-		// Base constructor
-		private ObjectLayout(IntPtr pAddr, T value, bool bFieldsOnly, bool bIsArray, bool bIsDefault)
-		{
-			m_pAddr       = pAddr;
-			m_value       = value;
-			m_bFieldsOnly = bFieldsOnly;
-			m_bIsArray    = bIsArray;
-			m_bIsDefault  = bIsDefault;
-
-			if (!typeof(T).IsValueType && !m_bIsDefault) {
-				// Point to heap
-				m_pAddr = *(IntPtr*) pAddr;
-			}
-
-			// If we're only displaying fields, we'll display the offset relative to the first field
-			Table = new ConsoleTable(bFieldsOnly ? "Field Offset" : "Memory Offset", "Address", "Size", "Type", "Name",
-				"Value", "Unique attributes");
-		}
-
-		/// <summary>
-		///     Creates the layout of an object in its default state.
-		/// </summary>
-		/// <param name="bFieldsOnly">
-		///     When <c>false</c>, internal metadata such as the <see cref="MethodTable" />
-		///     pointer is also included.
-		/// </param>
-		public ObjectLayout(bool bFieldsOnly = true) : this(IntPtr.Zero, default, bFieldsOnly, false, true)
-		{
-			RazorContract.Requires(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");
-
-//			m_bFullOffset = bFullOffset;
-
-			T def = default;
-			Create(ref def);
-		}
-
-		/// <summary>
-		///     Creates the layout of an array.
-		/// </summary>
-		/// <param name="t">Array of type <typeparamref name="T" /></param>
-		/// <param name="bFieldsOnly">
-		///     When <c>false</c>, internal metadata such as the <see cref="MethodTable" />
-		///     pointer is also included.
-		/// </param>
-		public ObjectLayout(ref T[] t, bool bFieldsOnly = true) : this(Unsafe.AddressOfHeap(ref t).Address, default,
-			bFieldsOnly, true, false)
-		{
-//			m_bFullOffset = bFullOffset;
-
-			ArrayCreate(t.Length);
-		}
-
-		/// <summary>
-		///     Creates the layout of an object of type <typeparamref name="T" /> with the supplied value <paramref name="t" />.
-		/// </summary>
-		/// <param name="t">Value of type <typeparamref name="T" /></param>
-		/// <param name="bFieldsOnly">
-		///     When <c>false</c>, internal metadata such as the <see cref="MethodTable" />
-		///     pointer is also included.
-		/// </param>
-		public ObjectLayout(ref T t, bool bFieldsOnly = true) : this(Unsafe.AddressOf(ref t).Address, t, bFieldsOnly,
-			false, false)
-		{
-			RazorContract.Requires(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");
-
-//			m_bFullOffset = bFullOffset;
-
-			Create(ref t);
-
-			// Write the remaining chars of the string
-			if (typeof(T) == typeof(string)) {
-				StringCreate();
-			}
-		}
-
-		#endregion
 
 
 		private string GetOffsetString(int baseOfs, int rightOfs, int leftOfs)
@@ -198,7 +86,7 @@ namespace RazorSharp.Analysis
 					OBJHEADER_NAME_STR,
 					objHeaderMem == null
 						? Omitted.ToString()
-						: String.Format("[{0}]", Collections.ToString(objHeaderMem)),
+						: string.Format("[{0}]", Collections.ToString(objHeaderMem)),
 					UniqueAttributes.None);
 
 				// MethodTable*
@@ -226,14 +114,6 @@ namespace RazorSharp.Analysis
 				Table.AddRow(ofsStr, Hex.ToHex(addr), sizeof(char), typeof(char).Name, $"(Character {i + 2})",
 					Read<char>(addr), UniqueAttributes.None);
 			}
-		}
-
-		private enum UniqueAttributes
-		{
-			None,
-			FixedBuffer,
-			AutoProperty,
-			Padding,
 		}
 
 		private static UniqueAttributes FindUniqueAttributes(Pointer<FieldDesc> fd)
@@ -366,6 +246,128 @@ namespace RazorSharp.Analysis
 		{
 			return InspectorHelper.CreateLabelString("Memory layout:", Table);
 		}
+
+		private enum UniqueAttributes
+		{
+			None,
+			FixedBuffer,
+			AutoProperty,
+			Padding
+		}
+
+		// todo: add option to inline value types
+
+		#region Fields
+
+		private readonly IntPtr m_pAddr;
+		private readonly T      m_value;
+		private const    char   Omitted = '-';
+		private readonly bool   m_bFieldsOnly;
+		private readonly bool   m_bIsArray;
+
+		private const string OBJHEADER_TYPE_STR   = "ObjHeader";
+		private const string METHODTABLE_TYPE_STR = "MethodTable*";
+		private const string OBJHEADER_NAME_STR   = "(Object header)";
+		private const string METHODTABLE_NAME_STR = "(MethodTable ptr)";
+		private const string PADDING_STR          = "(padding)";
+
+		/// <summary>
+		///     Whether to include the full byte range of offsets (not included for MethodTable* or Object Header).
+		///     todo: Disabled for now.
+		/// </summary>
+		private const bool m_bFullOffset = false;
+
+
+		/// <summary>
+		///     If a value of type <typeparamref name="T" /> wasn't supplied in the constructor, we pass a value of <c>default</c>
+		///     of type
+		///     <typeparamref name="T" /> to <see cref="Create" />. Omit addresses and values in <see cref="Table" />.
+		/// </summary>
+		private readonly bool m_bIsDefault;
+
+		public ConsoleTable Table { get; }
+
+		#endregion
+
+		#region Constructors
+
+		// Base constructor
+		private ObjectLayout(IntPtr pAddr, T value, bool bFieldsOnly, bool bIsArray, bool bIsDefault)
+		{
+			m_pAddr       = pAddr;
+			m_value       = value;
+			m_bFieldsOnly = bFieldsOnly;
+			m_bIsArray    = bIsArray;
+			m_bIsDefault  = bIsDefault;
+
+			if (!typeof(T).IsValueType && !m_bIsDefault) {
+				// Point to heap
+				m_pAddr = *(IntPtr*) pAddr;
+			}
+
+			// If we're only displaying fields, we'll display the offset relative to the first field
+			Table = new ConsoleTable(bFieldsOnly ? "Field Offset" : "Memory Offset", "Address", "Size", "Type", "Name",
+				"Value", "Unique attributes");
+		}
+
+		/// <summary>
+		///     Creates the layout of an object in its default state.
+		/// </summary>
+		/// <param name="bFieldsOnly">
+		///     When <c>false</c>, internal metadata such as the <see cref="MethodTable" />
+		///     pointer is also included.
+		/// </param>
+		public ObjectLayout(bool bFieldsOnly = true) : this(IntPtr.Zero, default, bFieldsOnly, false, true)
+		{
+			RazorContract.Requires(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");
+
+//			m_bFullOffset = bFullOffset;
+
+			T def = default;
+			Create(ref def);
+		}
+
+		/// <summary>
+		///     Creates the layout of an array.
+		/// </summary>
+		/// <param name="t">Array of type <typeparamref name="T" /></param>
+		/// <param name="bFieldsOnly">
+		///     When <c>false</c>, internal metadata such as the <see cref="MethodTable" />
+		///     pointer is also included.
+		/// </param>
+		public ObjectLayout(ref T[] t, bool bFieldsOnly = true) : this(Unsafe.AddressOfHeap(ref t).Address, default,
+			bFieldsOnly, true, false)
+		{
+//			m_bFullOffset = bFullOffset;
+
+			ArrayCreate(t.Length);
+		}
+
+		/// <summary>
+		///     Creates the layout of an object of type <typeparamref name="T" /> with the supplied value <paramref name="t" />.
+		/// </summary>
+		/// <param name="t">Value of type <typeparamref name="T" /></param>
+		/// <param name="bFieldsOnly">
+		///     When <c>false</c>, internal metadata such as the <see cref="MethodTable" />
+		///     pointer is also included.
+		/// </param>
+		public ObjectLayout(ref T t, bool bFieldsOnly = true) : this(Unsafe.AddressOf(ref t).Address, t, bFieldsOnly,
+			false, false)
+		{
+			RazorContract.Requires(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");
+
+//			m_bFullOffset = bFullOffset;
+
+			Create(ref t);
+
+			// Write the remaining chars of the string
+			if (typeof(T) == typeof(string)) {
+				StringCreate();
+			}
+		}
+
+		#endregion
+
 	}
 
 }

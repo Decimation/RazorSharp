@@ -11,42 +11,6 @@ namespace RazorSharp.CLR
 	public static class Offsets
 	{
 
-		#region EEClass
-
-		/// <summary>
-		///     Offset for the field <see cref="RazorSharp.CLR.Structures.EE.EEClass.m_pFieldDescList" />
-		///     <remarks>
-		///         Relative to address of a <see cref="RazorSharp.CLR.Structures.EE.EEClass" />
-		///     </remarks>
-		/// </summary>
-		internal const int FIELD_DESC_LIST_FIELD_OFFSET = 24;
-
-		/// <summary>
-		///     Offset for the field <see cref="RazorSharp.CLR.Structures.EE.EEClass.m_pChunks" />
-		///     <remarks>
-		///         Relative to address of a <see cref="RazorSharp.CLR.Structures.EE.EEClass" />
-		///     </remarks>
-		/// </summary>
-		internal const int CHUNKS_FIELD_OFFSET = 32;
-
-		#endregion
-
-		/// <summary>
-		///     Heap offset to the first array element.
-		///     <list type="bullet">
-		///         <item>
-		///             <description>+ 8 for <c>MethodTable*</c> (<see cref="IntPtr.Size" />)</description>
-		///         </item>
-		///         <item>
-		///             <description>+ 4 for length (<see cref="UInt32" />) </description>
-		///         </item>
-		///         <item>
-		///             <description>+ 4 for padding (<see cref="UInt32" />) (x64 only)</description>
-		///         </item>
-		///     </list>
-		/// </summary>
-		public static readonly unsafe int OffsetToArrayData = sizeof(MethodTable*) + sizeof(uint) + sizeof(uint);
-
 		/// <summary>
 		///     The offset, in bytes, of an array's actual <see cref="MethodTable" /> pointer, relative to the
 		///     address pointed to by an array type's <see cref="RuntimeTypeHandle.Value" />.
@@ -68,6 +32,42 @@ namespace RazorSharp.CLR
 		///     </remarks>
 		/// </summary>
 		internal const int CANON_MT_UNION_MT_OFFSET = 2;
+
+		/// <summary>
+		///     Heap offset to the first array element.
+		///     <list type="bullet">
+		///         <item>
+		///             <description>+ 8 for <c>MethodTable*</c> (<see cref="IntPtr.Size" />)</description>
+		///         </item>
+		///         <item>
+		///             <description>+ 4 for length (<see cref="UInt32" />) </description>
+		///         </item>
+		///         <item>
+		///             <description>+ 4 for padding (<see cref="UInt32" />) (x64 only)</description>
+		///         </item>
+		///     </list>
+		/// </summary>
+		public static readonly unsafe int OffsetToArrayData = sizeof(MethodTable*) + sizeof(uint) + sizeof(uint);
+
+		#region EEClass
+
+		/// <summary>
+		///     Offset for the field <see cref="RazorSharp.CLR.Structures.EE.EEClass.m_pFieldDescList" />
+		///     <remarks>
+		///         Relative to address of a <see cref="RazorSharp.CLR.Structures.EE.EEClass" />
+		///     </remarks>
+		/// </summary>
+		internal const int FIELD_DESC_LIST_FIELD_OFFSET = 24;
+
+		/// <summary>
+		///     Offset for the field <see cref="RazorSharp.CLR.Structures.EE.EEClass.m_pChunks" />
+		///     <remarks>
+		///         Relative to address of a <see cref="RazorSharp.CLR.Structures.EE.EEClass" />
+		///     </remarks>
+		/// </summary>
+		internal const int CHUNKS_FIELD_OFFSET = 32;
+
+		#endregion
 
 
 		#region Global variables of clr dll data segment

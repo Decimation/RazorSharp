@@ -34,6 +34,53 @@ namespace RazorSharp.Utilities
 		private const string STRING_FORMAT_PARAM = "msg";
 		private const string NULLREF_EXCEPTION   = "value == null";
 
+
+		/// <summary>
+		/// </summary>
+		/// <param name="notArray">
+		///     <see cref="Action" /> to perform if <typeparamref name="TExpected" /> is <c>typeof(Array)</c>
+		///     and <typeparamref name="TActual" /> is not <c>typeof(Array)</c>
+		/// </param>
+		/// <param name="notActual">
+		///     <see cref="Action" /> to perform if <typeparamref name="TExpected" /> is not
+		///     <typeparamref name="TActual" />
+		/// </param>
+		/// <typeparam name="TExpected">Expected <see cref="Type" /></typeparam>
+		/// <typeparam name="TActual">Actual <see cref="Type" /></typeparam>
+		private static void ResolveTypeAction<TExpected, TActual>(Action notArray, Action notActual)
+		{
+			if (typeof(TExpected) == typeof(Array)) {
+				if (!typeof(TActual).IsArray) {
+					notArray();
+				}
+			}
+			else if (typeof(TExpected) != typeof(TActual)) {
+				notActual();
+			}
+		}
+
+		[DebuggerHidden]
+		internal static bool TypeEqual<TExpected, TActual>()
+		{
+			bool val = true;
+			ResolveTypeAction<TExpected, TActual>(() => val = false, () => val = false);
+			return val;
+		}
+
+		/// <summary>
+		/// </summary>
+		/// <param name="values"></param>
+		/// <typeparam name="T"></typeparam>
+		[DebuggerHidden]
+		internal static void AssertEqual<T>(params T[] values)
+		{
+			if (values == null || values.Length == 0) {
+				return;
+			}
+
+			Assert(values.All(v => v.Equals(values[0])));
+		}
+
 		#region Assert
 
 		/// <summary>
@@ -49,7 +96,7 @@ namespace RazorSharp.Utilities
 		[StringFormatMethod(STRING_FORMAT_PARAM)]
 		internal static void Assert([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg, params object[] args)
 		{
-			Contract.Assert(cond, String.Format(msg, args));
+			Contract.Assert(cond, string.Format(msg, args));
 		}
 
 		/// <summary>
@@ -154,8 +201,8 @@ namespace RazorSharp.Utilities
 				throw Create();
 			}
 
-			msg = String.Format(msg, args);
-			msg = String.Format("Precondition failed: {0}", msg);
+			msg = string.Format(msg, args);
+			msg = string.Format("Precondition failed: {0}", msg);
 
 			if (typeof(TException) == typeof(NullReferenceException)) {
 				throw new NullReferenceException(NULLREF_EXCEPTION);
@@ -228,54 +275,6 @@ namespace RazorSharp.Utilities
 		}
 
 		#endregion
-
-
-		/// <summary>
-		/// </summary>
-		/// <param name="notArray">
-		///     <see cref="Action" /> to perform if <typeparamref name="TExpected" /> is <c>typeof(Array)</c>
-		///     and <typeparamref name="TActual" /> is not <c>typeof(Array)</c>
-		/// </param>
-		/// <param name="notActual">
-		///     <see cref="Action" /> to perform if <typeparamref name="TExpected" /> is not
-		///     <typeparamref name="TActual" />
-		/// </param>
-		/// <typeparam name="TExpected">Expected <see cref="Type" /></typeparam>
-		/// <typeparam name="TActual">Actual <see cref="Type" /></typeparam>
-		private static void ResolveTypeAction<TExpected, TActual>(Action notArray, Action notActual)
-		{
-			if (typeof(TExpected) == typeof(Array)) {
-				if (!typeof(TActual).IsArray) {
-					notArray();
-				}
-			}
-			else if (typeof(TExpected) != typeof(TActual)) {
-				notActual();
-			}
-		}
-
-		[DebuggerHidden]
-		internal static bool TypeEqual<TExpected, TActual>()
-		{
-			bool val = true;
-			ResolveTypeAction<TExpected, TActual>(() => val = false, () => val = false);
-			return val;
-		}
-
-		/// <summary>
-		/// </summary>
-		/// <param name="values"></param>
-		/// <typeparam name="T"></typeparam>
-		[DebuggerHidden]
-		internal static void AssertEqual<T>(params T[] values)
-		{
-			if (values == null || values.Length == 0) {
-				return;
-			}
-
-			Assert(values.All(v => v.Equals(values[0])));
-		}
-
 
 	}
 

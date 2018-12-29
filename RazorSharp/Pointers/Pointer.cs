@@ -51,10 +51,10 @@ namespace RazorSharp.Pointers
 	///     <para>Represents a native pointer. Equals the size of <see cref="IntPtr.Size" />.</para>
 	///     <para>Can be represented as a native pointer in memory. </para>
 	///     <para>Has identical or better performance than native pointers.</para>
-	///     <para>Type safety is not enforced for accessibility</para>
+	///     <para>Type safety is not enforced in methods suffixed with "Any" for accessibility</para>
 	///     <para>
-	///         Supports pointer arithmetic, reading/writing different types other than type <typeparamref name="T" />,
-	///         and bitwise operations.
+	///         Supports pointer arithmetic, reading/writing different types other than
+	///         type <typeparamref name="T" /> (in select methods), and bitwise operations.
 	///     </para>
 	///     <list type="bullet">
 	///         <item>
@@ -83,12 +83,12 @@ namespace RazorSharp.Pointers
 
 		#region Properties
 
-		public ref T this[int index] => ref AsRef<T>(index);
+		public ref T this[int index] => ref AsRef(index);
 
-		public ref T Reference => ref AsRef<T>();
+		public ref T Reference => ref AsRef();
 
 		public T Value {
-			get => Read<T>();
+			get => Read();
 			set => Write(value);
 		}
 
@@ -151,11 +151,18 @@ namespace RazorSharp.Pointers
 		///     </remarks>
 		/// </summary>
 		/// <param name="value">Value to retrieve the index of</param>
+		/// <param name="startIndex">Index to start searching from</param>
 		/// <param name="searchLength">How many elements to search, starting from the current index</param>
 		/// <returns>The index of the element if it was found; <see cref="Unsafe.INVALID_VALUE" /> if the element was not found</returns>
-		public int IndexOf(T value, int searchLength)
+		public int IndexOf(T value, int startIndex, int searchLength)
 		{
-			return IndexOf<T>(value, searchLength);
+			for (int i = startIndex; i < searchLength + startIndex; i++) {
+				if (Read(i).Equals(value)) {
+					return i;
+				}
+			}
+
+			return Unsafe.INVALID_VALUE;
 		}
 
 		/// <summary>
@@ -165,26 +172,9 @@ namespace RazorSharp.Pointers
 		///     </remarks>
 		/// </summary>
 		/// <param name="value">Value to retrieve the index of</param>
-		/// <param name="startIndex">Index to start searching from</param>
 		/// <param name="searchLength">How many elements to search, starting from the current index</param>
 		/// <returns>The index of the element if it was found; <see cref="Unsafe.INVALID_VALUE" /> if the element was not found</returns>
-		public int IndexOf(T value, int startIndex, int searchLength)
-		{
-			return IndexOf<T>(value, startIndex, searchLength);
-		}
-
-		public int IndexOf<TType>(TType value, int startIndex, int searchLength)
-		{
-			for (int i = startIndex; i < searchLength + startIndex; i++) {
-				if (Read<TType>(i).Equals(value)) {
-					return i;
-				}
-			}
-
-			return Unsafe.INVALID_VALUE;
-		}
-
-		public int IndexOf<TType>(TType value, int searchLength)
+		public int IndexOf(T value, int searchLength)
 		{
 			return IndexOf(value, 0, searchLength);
 		}
@@ -195,22 +185,12 @@ namespace RazorSharp.Pointers
 
 		public void Set(T value, int startIndex, int elemCount)
 		{
-			Set<T>(value, startIndex, elemCount);
-		}
-
-		public void Set(T value, int elemCount)
-		{
-			Set<T>(value, elemCount);
-		}
-
-		public void Set<TType>(TType value, int startIndex, int elemCount)
-		{
 			for (int i = startIndex; i < elemCount + startIndex; i++) {
 				Write(value, i - startIndex);
 			}
 		}
 
-		public void Set<TType>(TType value, int elemCount)
+		public void Set(T value, int elemCount)
 		{
 			Set(value, 0, elemCount);
 		}
@@ -247,11 +227,6 @@ namespace RazorSharp.Pointers
 		/// <param name="searchLength">Number of elements to search (range)</param>
 		/// <returns><c>true</c> if the value was found within the range specified, <c>false</c> otherwise</returns>
 		public bool Contains(T value, int searchLength)
-		{
-			return Contains<T>(value, searchLength);
-		}
-
-		public bool Contains<TType>(TType value, int searchLength)
 		{
 			return IndexOf(value, searchLength) != Unsafe.INVALID_VALUE;
 		}
@@ -383,7 +358,7 @@ namespace RazorSharp.Pointers
 		/// <returns></returns>
 		public TAs ReadAs<TType, TAs>(int elemOffset = 0)
 		{
-			TType t = Read<TType>(elemOffset);
+			TType t = ReadAny<TType>(elemOffset);
 			return CSUnsafe.Read<TAs>(Unsafe.AddressOf(ref t).ToPointer());
 		}
 
@@ -399,7 +374,7 @@ namespace RazorSharp.Pointers
 		/// <typeparam name="TAs">Type to reinterpret <typeparamref name="TType" /> as</typeparam>
 		public void WriteAs<TType, TAs>(TType value, int elemOffset = 0)
 		{
-			Write(CSUnsafe.Read<TAs>(Unsafe.AddressOf(ref value).ToPointer()), elemOffset);
+			WriteAny(CSUnsafe.Read<TAs>(Unsafe.AddressOf(ref value).ToPointer()), elemOffset);
 		}
 
 		#endregion
@@ -418,9 +393,9 @@ namespace RazorSharp.Pointers
 		}
 
 
-		public void Write<TType>(TType t, int elemOffset = 0)
+		public void Write(T t, int elemOffset = 0)
 		{
-			Mem.Write(Offset<TType>(elemOffset), 0, t);
+			WriteAny(t, elemOffset);
 		}
 
 		#region Safe write
@@ -432,15 +407,14 @@ namespace RazorSharp.Pointers
 		/// </summary>
 		/// <param name="elemOffset">Element offset relative to <see cref="Address" /></param>
 		/// <param name="data">Value to write</param>
-		/// <typeparam name="TType">Type of <paramref name="data" /></typeparam>
-		public void SafeWrite<TType>(TType data, int elemOffset = 0)
+		public void SafeWrite(T data, int elemOffset = 0)
 		{
-			IntPtr ptr = Offset<TType>(elemOffset);
+			IntPtr ptr = Offset(elemOffset);
 
 			Kernel32.VirtualProtect(ptr, ElementSize, MemoryProtection.ExecuteReadWrite,
 				out MemoryProtection oldProtect);
 
-			Write(data);
+			WriteAny(data);
 
 			Kernel32.VirtualProtect(ptr, ElementSize, oldProtect, out oldProtect);
 		}
@@ -467,32 +441,41 @@ namespace RazorSharp.Pointers
 		#endregion
 
 		[Pure]
-		public TType Read<TType>(int elemOffset = 0)
+		public T Read(int elemOffset = 0)
+		{
+			return Mem.Read<T>(Offset(elemOffset));
+		}
+
+
+		[Pure]
+		public ref T AsRef(int elemOffset = 0)
+		{
+			return ref Mem.AsRef<T>(Offset(elemOffset));
+		}
+
+		#region Any
+
+		public void WriteAny<TType>(TType t, int elemOffset = 0)
+		{
+			Mem.Write(Offset<TType>(elemOffset), 0, t);
+		}
+
+
+		[Pure]
+		public TType ReadAny<TType>(int elemOffset = 0)
 		{
 			return Mem.Read<TType>(Offset<TType>(elemOffset));
 		}
 
 		[Pure]
-		public ref TType AsRef<TType>(int elemOffset = 0)
+		public ref TType AsRefAny<TType>(int elemOffset = 0)
 		{
-			return ref Mem.AsRef<TType>(Offset<TType>(elemOffset));
+			return ref Mem.AsRef<TType>(Offset(elemOffset));
 		}
+
+		#endregion
 
 		#region Copy
-
-		/// <summary>
-		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="T" />, starting
-		///     from index 0.
-		/// </summary>
-		/// <param name="elemCnt">Number of elements to copy</param>
-		/// <returns>
-		///     An array of length <paramref name="elemCnt" /> of type <typeparamref name="T" /> copied from
-		///     the current pointer
-		/// </returns>
-		public T[] CopyOut(int elemCnt)
-		{
-			return CopyOut(0, elemCnt);
-		}
 
 		/// <summary>
 		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="T" />,
@@ -506,41 +489,26 @@ namespace RazorSharp.Pointers
 		/// </returns>
 		public T[] CopyOut(int startIndex, int elemCnt)
 		{
-			return CopyOut<T>(startIndex, elemCnt);
-		}
-
-		/// <summary>
-		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="TType" />,
-		///     starting from index <paramref name="startIndex" />
-		/// </summary>
-		/// <param name="startIndex">Index to begin copying from</param>
-		/// <param name="elemCnt">Number of elements to copy</param>
-		/// <returns>
-		///     An array of length <paramref name="elemCnt" /> of type <typeparamref name="TType" /> copied from
-		///     the current pointer
-		/// </returns>
-		public TType[] CopyOut<TType>(int startIndex, int elemCnt)
-		{
-			TType[] rg = new TType[elemCnt];
+			T[] rg = new T[elemCnt];
 			for (int i = startIndex; i < elemCnt + startIndex; i++) {
-				rg[i - startIndex] = Read<TType>(i);
+				rg[i - startIndex] = Read(i);
 			}
 
 			return rg;
 		}
 
 		/// <summary>
-		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="TType" />,
+		///     Copies <paramref name="elemCnt" /> elements into an array of type <typeparamref name="T" />,
 		///     starting from index 0.
 		/// </summary>
 		/// <param name="elemCnt">Number of elements to copy</param>
 		/// <returns>
-		///     An array of length <paramref name="elemCnt" /> of type <typeparamref name="TType" /> copied from
+		///     An array of length <paramref name="elemCnt" /> of type <typeparamref name="T" /> copied from
 		///     the current pointer
 		/// </returns>
-		public TType[] CopyOut<TType>(int elemCnt)
+		public T[] CopyOut(int elemCnt)
 		{
-			return CopyOut<TType>(0, elemCnt);
+			return CopyOut(0, elemCnt);
 		}
 
 		#endregion
@@ -578,7 +546,7 @@ namespace RazorSharp.Pointers
 					IsNull.Prettify(), ElementSize, string.Format("<{0}>", typeof(T).Name));
 			}
 			else {
-				table.AddRow(Hex.ToHex(m_value), Hex.ToHex(Read<long>()), ToString(PointerSettings.FMT_O),
+				table.AddRow(Hex.ToHex(m_value), Hex.ToHex(ReadAny<long>()), ToString(PointerSettings.FMT_O),
 					IsAligned.Prettify(), IsNull.Prettify(), ElementSize, string.Format("<{0}>", typeof(T).Name));
 			}
 
@@ -594,7 +562,8 @@ namespace RazorSharp.Pointers
 			for (int i = 0; i < elemCnt; i++) {
 				Pointer<T> ptr = AddressOfIndex(i);
 				if (!typeof(T).IsValueType) {
-					table.AddRow(ptr.ToString(PointerSettings.FMT_P), i, Hex.ToHex(Read<long>(i)), ptr.ToStringSafe());
+					table.AddRow(ptr.ToString(PointerSettings.FMT_P), i, Hex.ToHex(ReadAny<long>(i)), ptr.ToStringSafe
+						());
 				}
 				else {
 					table.AddRow(ptr.ToString(PointerSettings.FMT_P), i, ptr.ToStringSafe());
@@ -1002,7 +971,7 @@ namespace RazorSharp.Pointers
 
 
 			if (!typeof(T).IsValueType) {
-				Pointer<byte> heapPtr = Read<Pointer<byte>>();
+				Pointer<byte> heapPtr = ReadAny<Pointer<byte>>();
 				string        valueStr;
 
 				if (heapPtr.IsNull) {

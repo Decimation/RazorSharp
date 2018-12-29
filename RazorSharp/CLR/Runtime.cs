@@ -42,6 +42,53 @@ namespace RazorSharp.CLR
 		private const BindingFlags DefaultFlags = BindingFlags.Instance | BindingFlags.NonPublic |
 		                                          BindingFlags.Public | BindingFlags.Static;
 
+		#region Compare
+
+		private static void AssertCompare(MemberInfo info, IMetaMember meta)
+		{
+			RazorContract.Assert(info.MetadataToken == meta.Token);
+			RazorContract.Assert(info.Name == meta.Name);
+			RazorContract.Assert(info == meta.Info);
+		}
+
+		#endregion
+
+
+		/// <summary>
+		///     Reads a reference type's <see cref="ObjHeader" />
+		/// </summary>
+		/// <returns>A pointer to the reference type's header</returns>
+		internal static ObjHeader* ReadObjHeader<T>(ref T t) where T : class
+		{
+			IntPtr data = Unsafe.AddressOfHeap(ref t).Address;
+
+			return (ObjHeader*) (data - IntPtr.Size);
+		}
+
+
+		/// <summary>
+		///     Determines whether a type is blittable; that is, they don't
+		///     require conversion between managed and unmanaged code.
+		///     <remarks>
+		///         <para>Returned from <see cref="MethodTable.IsBlittable" /></para>
+		///         <para>
+		///             Note: If the type is an array or <c>string</c>, <see cref="MethodTable.IsBlittable" /> determines it
+		///             unblittable,
+		///             but <see cref="IsBlittable{T}" /> returns <c>true</c>, as <see cref="GCHandle" /> determines it blittable.
+		///         </para>
+		///     </remarks>
+		/// </summary>
+		internal static bool IsBlittable<T>()
+		{
+			// We'll say arrays and strings are blittable cause they're
+			// usable with GCHandle
+			if (typeof(T).IsArray || typeof(T) == typeof(string)) {
+				return true;
+			}
+
+			return typeof(T).GetMethodTable().Reference.IsBlittable;
+		}
+
 
 		#region HeapObjects
 
@@ -61,17 +108,6 @@ namespace RazorSharp.CLR
 		{
 			HeapObject** h = (HeapObject**) Unsafe.AddressOf(ref t);
 			return h;
-		}
-
-		#endregion
-
-		#region Compare
-
-		private static void AssertCompare(MemberInfo info, IMetaMember meta)
-		{
-			RazorContract.Assert(info.MetadataToken == meta.Token);
-			RazorContract.Assert(info.Name == meta.Name);
-			RazorContract.Assert(info == meta.Info);
 		}
 
 		#endregion
@@ -300,42 +336,6 @@ namespace RazorSharp.CLR
 		}
 
 		#endregion
-
-
-		/// <summary>
-		///     Reads a reference type's <see cref="ObjHeader" />
-		/// </summary>
-		/// <returns>A pointer to the reference type's header</returns>
-		internal static ObjHeader* ReadObjHeader<T>(ref T t) where T : class
-		{
-			IntPtr data = Unsafe.AddressOfHeap(ref t).Address;
-
-			return (ObjHeader*) (data - IntPtr.Size);
-		}
-
-
-		/// <summary>
-		///     Determines whether a type is blittable; that is, they don't
-		///     require conversion between managed and unmanaged code.
-		///     <remarks>
-		///         <para>Returned from <see cref="MethodTable.IsBlittable" /></para>
-		///         <para>
-		///             Note: If the type is an array or <c>string</c>, <see cref="MethodTable.IsBlittable" /> determines it
-		///             unblittable,
-		///             but <see cref="IsBlittable{T}" /> returns <c>true</c>, as <see cref="GCHandle" /> determines it blittable.
-		///         </para>
-		///     </remarks>
-		/// </summary>
-		internal static bool IsBlittable<T>()
-		{
-			// We'll say arrays and strings are blittable cause they're
-			// usable with GCHandle
-			if (typeof(T).IsArray || typeof(T) == typeof(string)) {
-				return true;
-			}
-
-			return typeof(T).GetMethodTable().Reference.IsBlittable;
-		}
 
 	}
 

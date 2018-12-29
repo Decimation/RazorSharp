@@ -20,29 +20,25 @@ namespace RazorSharp.Native.Structures.Images
 
 		#region Fields
 
-		private readonly int m_sectionNumber;
-
-		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = IMAGE_SIZEOF_SHORT_NAME)]
-		private readonly string m_sectionName;
-
 		private readonly void* m_sectionAddress;
-		private readonly int   m_sectionSize;
-
-		private readonly ImageSectionHeader m_header;
 
 		#endregion
 
 		#region Accessors
 
-		public int           SectionNumber  => m_sectionNumber;
+		public int SectionNumber { get; }
+
 		public Pointer<byte> SectionAddress => (IntPtr) m_sectionAddress;
-		public string        SectionName    => m_sectionName;
-		public int           SectionSize    => m_sectionSize;
+
+		[field: MarshalAs(UnmanagedType.ByValTStr, SizeConst = IMAGE_SIZEOF_SHORT_NAME)]
+		public string SectionName { get; }
+
+		public int SectionSize { get; }
 
 		public Pointer<byte> EndAddress =>
-			PointerUtils.Add(m_sectionAddress, (byte*) m_sectionSize - 1).Address;
+			PointerUtils.Add(m_sectionAddress, (byte*) SectionSize - 1).Address;
 
-		public ImageSectionHeader SectionHeader => m_header;
+		public ImageSectionHeader SectionHeader { get; }
 
 		#endregion
 
@@ -50,22 +46,22 @@ namespace RazorSharp.Native.Structures.Images
 		public ImageSectionInfo(int sectionNumber, string sectionName, void* sectionAddress, int sectionSize,
 			ImageSectionHeader header)
 		{
-			m_sectionNumber  = sectionNumber;
-			m_sectionName    = sectionName;
+			SectionNumber    = sectionNumber;
+			SectionName      = sectionName;
 			m_sectionAddress = sectionAddress;
-			m_sectionSize    = sectionSize;
-			m_header         = header;
+			SectionSize      = sectionSize;
+			SectionHeader    = header;
 		}
 
 
 		public override string ToString()
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.AppendFormat("Section #: {0}", m_sectionNumber).AppendLine();
-			sb.AppendFormat("Name: {0}", m_sectionName).AppendLine();
+			sb.AppendFormat("Section #: {0}", SectionNumber).AppendLine();
+			sb.AppendFormat("Name: {0}", SectionName).AppendLine();
 			sb.AppendFormat("Address: {0:P}", SectionAddress).AppendLine();
 			sb.AppendFormat("End Address: {0:P}", EndAddress).AppendLine();
-			sb.AppendFormat("Size: {0}", m_sectionSize).AppendLine();
+			sb.AppendFormat("Size: {0}", SectionSize).AppendLine();
 
 			return sb.ToString();
 		}

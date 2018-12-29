@@ -47,11 +47,11 @@ namespace RazorSharp.Common
 		{
 			int posA = value.LastIndexOf(a, StringComparison.Ordinal);
 			if (posA == -1) {
-				return String.Empty;
+				return string.Empty;
 			}
 
 			int adjustedPosA = posA + a.Length;
-			return adjustedPosA >= value.Length ? String.Empty : value.Substring(adjustedPosA);
+			return adjustedPosA >= value.Length ? string.Empty : value.Substring(adjustedPosA);
 		}
 
 		/// <summary>
@@ -60,7 +60,7 @@ namespace RazorSharp.Common
 		public static string SubstringBefore(this string value, string a)
 		{
 			int posA = value.IndexOf(a, StringComparison.Ordinal);
-			return posA == -1 ? String.Empty : value.Substring(0, posA);
+			return posA == -1 ? string.Empty : value.Substring(0, posA);
 		}
 
 		/// <summary>
@@ -71,15 +71,15 @@ namespace RazorSharp.Common
 			int posA = value.IndexOf(a, StringComparison.Ordinal);
 			int posB = value.LastIndexOf(b, StringComparison.Ordinal);
 			if (posA == -1) {
-				return String.Empty;
+				return string.Empty;
 			}
 
 			if (posB == -1) {
-				return String.Empty;
+				return string.Empty;
 			}
 
 			int adjustedPosA = posA + a.Length;
-			return adjustedPosA >= posB ? String.Empty : value.Substring(adjustedPosA, posB - adjustedPosA);
+			return adjustedPosA >= posB ? string.Empty : value.Substring(adjustedPosA, posB - adjustedPosA);
 		}
 
 		public static IEnumerable<int> AllIndexesOf(this string str, string searchString)

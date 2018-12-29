@@ -39,7 +39,7 @@ namespace RazorSharp.Obsolete.Experimental
 		private static readonly Type[] DisallowedTypes =
 		{
 			typeof(string),
-			typeof(IList),
+			typeof(IList)
 		};
 
 		private readonly IntPtr m_unmanaged;

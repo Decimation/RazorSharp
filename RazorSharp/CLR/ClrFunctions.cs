@@ -36,7 +36,16 @@ namespace RazorSharp.CLR
 		/// </summary>
 		internal const string ClrDll = "clr.dll";
 
-		private static bool s_bFunctionsCached = false;
+		private static bool s_bFunctionsCached;
+
+		static ClrFunctions()
+		{
+			s_setStableEntryPointInterlocked =
+				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(ClrDll,
+					s_rgStableEntryPointInterlockedSignature);
+			AddAll();
+			SignatureCall.DynamicBind(typeof(ClrFunctions));
+		}
 
 		internal static void AddAll()
 		{
@@ -50,13 +59,16 @@ namespace RazorSharp.CLR
 			}
 		}
 
-		static ClrFunctions()
+		/// <summary>
+		///     Returns the corresponding <see cref="Type" /> for a <see cref="MethodTable" /> pointer.
+		/// </summary>
+		/// <param name="__struct"><see cref="MethodTable" /> pointer</param>
+		/// <returns></returns>
+		/// <exception cref="SigcallException">Method has not been bound</exception>
+		[ClrSigcall]
+		internal static Type JIT_GetRuntimeType(void* __struct)
 		{
-			s_setStableEntryPointInterlocked =
-				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(ClrDll,
-					s_rgStableEntryPointInterlockedSignature);
-			AddAll();
-			SignatureCall.DynamicBind(typeof(ClrFunctions));
+			throw new SigcallException();
 		}
 
 
@@ -66,17 +78,17 @@ namespace RazorSharp.CLR
 		{
 			private static readonly Cache<GCHeap> s_gcHeapCache;
 
-			internal static void Init()
-			{
-				SignatureCall.Cache(s_gcHeapCache);
-			}
-
 			static GCFunctions()
 			{
 				s_gcHeapCache = new Cache<GCHeap>(Functions);
 				s_gcHeapCache.AddCache("IsHeapPointer", false, FN_ISHEAPPOINTER_OFFSET);
 				s_gcHeapCache.AddCache("IsGCInProgress", false, FN_ISGCINPROGRESS_OFFSET);
 				s_gcHeapCache.AddCache("GCCount", true, FN_GETGCCOUNT_OFFSET);
+			}
+
+			internal static void Init()
+			{
+				SignatureCall.Cache(s_gcHeapCache);
 			}
 
 
@@ -109,7 +121,7 @@ namespace RazorSharp.CLR
 					0x48, 0x8B, 0x05, 0x00 /* ? */, 0x00 /* ? */, 0x00 /* ? */, 0x00, 0x48, 0x89, 0x44, 0x24, 0x10,
 					0x48, 0x8B, 0x44, 0x24,
 					0x10, 0xC3
-				},
+				}
 			};
 
 			#endregion
@@ -144,7 +156,7 @@ namespace RazorSharp.CLR
 					0x48, 0x8B, 0x42, 0xFF,
 					0x48, 0x83, 0xC4, 0x28,
 					0xC3
-				},
+				}
 			};
 
 			#endregion
@@ -194,7 +206,7 @@ namespace RazorSharp.CLR
 					0x0F, 0x85, 0x00 /* ? */, 0x00 /* ? */, 0x00 /* ? */, 0x00 /* ? */,
 					0x48, 0x00 /* ? */, 0x00 /* ? */,
 					0x48, 0x03, 0xC3
-				},
+				}
 			};
 
 			#endregion
@@ -308,7 +320,7 @@ namespace RazorSharp.CLR
 					0x0F, 0x85, 0x37, 0x20, 0x2E, 0x00,
 					0x48, 0x83, 0xC4, 0x20,
 					0x5B,
-					0xC3,
+					0xC3
 				},
 
 				/* 6 NativeCode */
@@ -389,17 +401,6 @@ namespace RazorSharp.CLR
 
 		#endregion
 
-		/// <summary>
-		///     Returns the corresponding <see cref="Type" /> for a <see cref="MethodTable" /> pointer.
-		/// </summary>
-		/// <param name="__struct"><see cref="MethodTable" /> pointer</param>
-		/// <returns></returns>
-		/// <exception cref="SigcallException">Method has not been bound</exception>
-		[ClrSigcall]
-		internal static Type JIT_GetRuntimeType(void* __struct)
-		{
-			throw new SigcallException();
-		}
 	}
 
 }

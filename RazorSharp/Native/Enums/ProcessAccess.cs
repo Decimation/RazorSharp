@@ -10,7 +10,7 @@ namespace RazorSharp.Native.Enums
 	// todo: compare to ProcessAccessFlags
 
 	[Flags]
-	public enum ProcessAccess : int
+	public enum ProcessAccess
 	{
 		All                     = 0x1F0FFF,
 		Terminate               = 0x000001,
@@ -19,7 +19,7 @@ namespace RazorSharp.Native.Enums
 		VmWrite                 = 0x000020,
 		CreateProcess           = 0x000080,
 		QueryInformation        = 0x000400,
-		QueryLimitedInformation = 0x001000,
+		QueryLimitedInformation = 0x001000
 
 	}
 

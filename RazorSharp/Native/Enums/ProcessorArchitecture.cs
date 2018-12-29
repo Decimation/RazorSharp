@@ -31,7 +31,7 @@ namespace RazorSharp.Native.Enums
 		/// </summary>
 		Intel = 0,
 
-		Unknown = 0xFFFF,
+		Unknown = 0xFFFF
 	}
 
 }

@@ -10,24 +10,28 @@ namespace RazorSharp
 
 	public class ProcessHandle : IDisposable
 	{
-		private readonly Process       m_process;
-		private readonly IntPtr        m_procHandle;
 		private readonly Pointer<byte> m_handlePtr;
+		private readonly IntPtr        m_procHandle;
 		private readonly SigScanner    m_sigScanner;
-
-		public Process Process => m_process;
 
 
 		public ProcessHandle(string name) : this(Process.GetProcessesByName(name)[0]) { }
 
 		public ProcessHandle(Process proc)
 		{
-			m_process    = proc;
+			Process      = proc;
 			m_procHandle = Kernel32.OpenProcess(proc);
 			m_handlePtr  = m_procHandle;
 			m_sigScanner = new SigScanner(proc);
 
-			SelectModule(m_process.MainModule);
+			SelectModule(Process.MainModule);
+		}
+
+		public Process Process { get; }
+
+		public void Dispose()
+		{
+			Debug.Assert(Kernel32.CloseHandle(m_procHandle));
 		}
 
 
@@ -42,7 +46,7 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		/// Reads a 16-bit encoded string (<see cref="StringTypes.UniStr"/>) (<see cref="Char"/>)
+		///     Reads a 16-bit encoded string (<see cref="StringTypes.UniStr" />) (<see cref="Char" />)
 		/// </summary>
 		/// <param name="addr">Address of the string</param>
 		/// <param name="len">Number of bytes to read to retrieve the string from</param>
@@ -56,7 +60,7 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		/// Reads an 8-bit encoded string (<see cref="StringTypes.AnsiStr"/>) (<see cref="Byte"/>)
+		///     Reads an 8-bit encoded string (<see cref="StringTypes.AnsiStr" />) (<see cref="Byte" />)
 		/// </summary>
 		/// <param name="addr">Address of the string</param>
 		/// <param name="len">Number of bytes to read to retrieve the string from</param>
@@ -133,15 +137,10 @@ namespace RazorSharp
 			return t;
 		}
 
-		public void Dispose()
-		{
-			Debug.Assert(Kernel32.CloseHandle(m_procHandle));
-		}
-
 
 		public override string ToString()
 		{
-			return String.Format("Process: {0} ({1})", m_process.ProcessName, m_process.Id);
+			return string.Format("Process: {0} ({1})", Process.ProcessName, Process.Id);
 		}
 	}
 

@@ -66,11 +66,11 @@ namespace Test.Testing.Tests
 			Target        t   = new Target("foo", 123);
 			Pointer<byte> ptr = Unsafe.AddressOf(ref t).Address;
 
-			Debug.Assert(ptr.Read<string>() == t.Str);
-			Debug.Assert(ptr.Read<int>(2) == t.I);
+			Debug.Assert(ptr.ReadAny<string>() == t.Str);
+			Debug.Assert(ptr.ReadAny<int>(2) == t.I);
 
 			ptr += IntPtr.Size;
-			Debug.Assert(ptr.Read<int>() == t.I);
+			Debug.Assert(ptr.ReadAny<int>() == t.I);
 
 			ptr -= IntPtr.Size;
 
@@ -80,7 +80,7 @@ namespace Test.Testing.Tests
 			Debug.Assert(lpStr[0] == t.Str);
 
 			lpStr++;
-			Debug.Assert(lpStr.Read<int>() == t.I);
+			Debug.Assert(lpStr.ReadAny<int>() == t.I);
 			lpStr--;
 			lpStr.Write("bar");
 			Debug.Assert(lpStr.Reference == t.Str);

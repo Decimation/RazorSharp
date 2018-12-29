@@ -21,6 +21,60 @@ namespace RazorSharp.Memory
 	public static class Segments
 	{
 
+		//todo
+		/// <summary>
+		///     http://www.hexacorn.com/blog/2016/12/15/pe-section-names-re-visited/
+		/// </summary>
+		public enum SegmentType
+		{
+			/// <summary>
+			///     <c>const</c> data; readonly of <see cref="data" />
+			/// </summary>
+			rdata,
+
+			/// <summary>
+			///     Import directory; designates the imported and exported functions
+			/// </summary>
+			idata,
+
+			/// <summary>
+			///     Initialized data
+			/// </summary>
+			data,
+
+			/// <summary>
+			///     Exception information
+			/// </summary>
+			pdata,
+
+			/// <summary>
+			///     Uninitialized data
+			/// </summary>
+			bss,
+
+			/// <summary>
+			///     Resource directory
+			/// </summary>
+			rsrc,
+
+			/// <summary>
+			///     Image relocations
+			/// </summary>
+			reloc,
+
+			/// <summary>
+			///     Executable code. Also known as the <c>code</c> segment.
+			/// </summary>
+			text,
+
+			/// <summary>
+			///     Delay import section
+			/// </summary>
+			didat
+		}
+
+		internal const string TEXT_SEGMENT = ".text";
+
 		/// <summary>
 		///     Gets the segment type (<see cref="SegmentType" />) in which <paramref name="addr" /> resides.
 		/// </summary>
@@ -90,7 +144,7 @@ namespace RazorSharp.Memory
 				ConsoleTable table =
 					new ConsoleTable("Number", "Name", "Size", "Address", "End Address", "Characteristics");
 				table.AddRow(v.SectionNumber, v.SectionName,
-					String.Format("{0} ({1} K)", v.SectionSize, v.SectionSize / Mem.BytesInKilobyte),
+					string.Format("{0} ({1} K)", v.SectionSize, v.SectionSize / Mem.BytesInKilobyte),
 					Hex.ToHex(v.SectionAddress),
 					Hex.ToHex(v.EndAddress), v.SectionHeader.Characteristics);
 				Console.WriteLine(table.ToMarkDownString());
@@ -123,58 +177,6 @@ namespace RazorSharp.Memory
 			}
 		}
 
-		//todo
-		/// <summary>
-		///     http://www.hexacorn.com/blog/2016/12/15/pe-section-names-re-visited/
-		/// </summary>
-		public enum SegmentType
-		{
-			/// <summary>
-			///     <c>const</c> data; readonly of <see cref="data" />
-			/// </summary>
-			rdata,
-
-			/// <summary>
-			///     Import directory; designates the imported and exported functions
-			/// </summary>
-			idata,
-
-			/// <summary>
-			///     Initialized data
-			/// </summary>
-			data,
-
-			/// <summary>
-			///     Exception information
-			/// </summary>
-			pdata,
-
-			/// <summary>
-			///     Uninitialized data
-			/// </summary>
-			bss,
-
-			/// <summary>
-			///     Resource directory
-			/// </summary>
-			rsrc,
-
-			/// <summary>
-			///     Image relocations
-			/// </summary>
-			reloc,
-
-			/// <summary>
-			///     Executable code. Also known as the <c>code</c> segment.
-			/// </summary>
-			text,
-
-			/// <summary>
-			///     Delay import section
-			/// </summary>
-			didat,
-		}
-
 
 		internal static IntPtr ScanSegment(string segment, string module, byte[] mem)
 		{
@@ -188,8 +190,6 @@ namespace RazorSharp.Memory
 
 			return IntPtr.Zero;
 		}
-
-		internal const string TEXT_SEGMENT = ".text";
 	}
 
 }

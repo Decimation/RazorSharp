@@ -28,9 +28,6 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public static unsafe class Asm
 	{
-		private delegate void Exec();
-
-		private delegate IntPtr GetValue();
 
 		/// <summary>
 		///     Execute arbitrary Assembly opcodes
@@ -64,7 +61,7 @@ namespace RazorSharp.Memory
 					bytestrs[i] += "0";
 				}
 
-				mem[i] = Byte.Parse(bytestrs[i], NumberStyles.HexNumber);
+				mem[i] = byte.Parse(bytestrs[i], NumberStyles.HexNumber);
 			}
 
 
@@ -96,7 +93,9 @@ namespace RazorSharp.Memory
 			return CSUnsafe.Read<T>(&p);
 		}
 
+		private delegate void Exec();
 
+		private delegate IntPtr GetValue();
 	}
 
 }

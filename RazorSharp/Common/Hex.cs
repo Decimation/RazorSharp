@@ -33,7 +33,7 @@ namespace RazorSharp.Common
 		/// <summary>
 		///     Prefix hex with <see cref="RazorSharp.Common.Hex.PrefixString" />
 		/// </summary>
-		PrefixHex = Hex | 8,
+		PrefixHex = Hex | 8
 	}
 
 
@@ -43,14 +43,15 @@ namespace RazorSharp.Common
 	/// </summary>
 	public static unsafe class Hex
 	{
-		private const string          PrefixString = "0x";
-		public static ToStringOptions Options { get; set; }
+		private const string PrefixString = "0x";
 
 
 		static Hex()
 		{
 			Options = ToStringOptions.PrefixHex;
 		}
+
+		public static ToStringOptions Options { get; set; }
 
 		public static string ToHex<T>(Pointer<T> ptr)
 		{
@@ -102,7 +103,7 @@ namespace RazorSharp.Common
 		{
 			string value = null;
 			if (t.GetType().IsNumericType()) {
-				long l = Int64.Parse(t.ToString());
+				long l = long.Parse(t.ToString());
 				value = $"{l:X}";
 
 				if (value.Length == 1 && options.HasFlag(ToStringOptions.ZeroPadHex)) {

@@ -48,7 +48,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		/// <summary>
 		///     use this code if the code size is odd
 		/// </summary>
-		TinyFormat1 = 0x0006,
-	};
+		TinyFormat1 = 0x0006
+	}
 
 }

@@ -1,6 +1,5 @@
 #region
 
-using System;
 using RazorSharp.Common;
 
 #endregion
@@ -40,7 +39,7 @@ namespace RazorSharp.CLR
 
 		internal static string TypeNameOfFixedBuffer(string fieldName)
 		{
-			return String.Format(FIXED_BUFFER_NAME, fieldName);
+			return string.Format(FIXED_BUFFER_NAME, fieldName);
 		}
 
 		internal static string DemangledAutoPropertyName(string fieldName)
@@ -62,7 +61,7 @@ namespace RazorSharp.CLR
 		/// <returns>Internal name of the auto-property's backing field</returns>
 		internal static string NameOfAutoPropertyBackingField(string propname)
 		{
-			return String.Format(BACKING_FIELD_NAME, propname);
+			return string.Format(BACKING_FIELD_NAME, propname);
 		}
 
 		internal static string NameOfGetPropertyMethod(string propname)

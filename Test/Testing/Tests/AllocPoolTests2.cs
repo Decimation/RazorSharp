@@ -31,10 +31,10 @@ namespace Test.Testing.Tests
 			AllocPool.Free(iAlloc);
 
 			Pointer<uint> sPtr = AllocPool.Alloc<uint>(2);
-			sPtr.Write("foo");
+			sPtr.WriteAny("foo");
 			Console.WriteLine(sPtr.ToTable(2).ToMarkDownString());
-			Console.WriteLine(sPtr.Read<string>());
-			Console.WriteLine(sPtr.CopyOut<string>(1).Join());
+			Console.WriteLine(sPtr.ReadAny<string>());
+			Console.WriteLine(sPtr.Reinterpret<string>().CopyOut(1).Join());
 			AllocPool.Free(sPtr);
 
 

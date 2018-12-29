@@ -85,24 +85,23 @@ namespace RazorSharp.CLR.Structures
 					return (p->m_rgPackedFields[dwStartBlock] & dwValueMask) >> (int) dwValueShift;
 				}
 			}
-			else {
-				// Hard case: the return value is split across two DWORDs (two DWORDs is the max as the new value
-				// can be at most DWORD-sized itself). For simplicity we'll simply break this into two separate
-				// non-spanning gets and stitch the result together from that. We can revisit this in the future
-				// if the perf is a problem.
-				DWORD dwInitialBits =
-					kBitsPerDWORD - dwOffset % kBitsPerDWORD; // Number of bits to get in the first DWORD
-				DWORD dwReturn;
 
-				// Get the initial (low-order) bits from the first DWORD.
-				dwReturn = BitVectorGet(dwOffset, dwInitialBits);
+			// Hard case: the return value is split across two DWORDs (two DWORDs is the max as the new value
+			// can be at most DWORD-sized itself). For simplicity we'll simply break this into two separate
+			// non-spanning gets and stitch the result together from that. We can revisit this in the future
+			// if the perf is a problem.
+			DWORD dwInitialBits =
+				kBitsPerDWORD - dwOffset % kBitsPerDWORD; // Number of bits to get in the first DWORD
+			DWORD dwReturn;
 
-				// Get the remaining bits from the second DWORD. These bits will need to be shifted to the left
-				// (past the bits we've already read) before being OR'd into the result.
-				dwReturn |= BitVectorGet(dwOffset + dwInitialBits, dwLength - dwInitialBits) << (int) dwInitialBits;
+			// Get the initial (low-order) bits from the first DWORD.
+			dwReturn = BitVectorGet(dwOffset, dwInitialBits);
 
-				return dwReturn;
-			}
+			// Get the remaining bits from the second DWORD. These bits will need to be shifted to the left
+			// (past the bits we've already read) before being OR'd into the result.
+			dwReturn |= BitVectorGet(dwOffset + dwInitialBits, dwLength - dwInitialBits) << (int) dwInitialBits;
+
+			return dwReturn;
 		}
 	}
 

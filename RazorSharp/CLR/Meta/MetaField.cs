@@ -35,6 +35,12 @@ namespace RazorSharp.CLR.Meta
 			m_value = p;
 		}
 
+
+		public override string ToString()
+		{
+			return string.Format("{0} (offset: {1}) (size: {2})", m_value.Reference.Info, Offset, Size);
+		}
+
 		#region Accessors
 
 		#region bool
@@ -138,11 +144,6 @@ namespace RazorSharp.CLR.Meta
 
 		#endregion
 
-
-		public override string ToString()
-		{
-			return String.Format("{0} (offset: {1}) (size: {2})", m_value.Reference.Info, Offset, Size);
-		}
 	}
 
 }

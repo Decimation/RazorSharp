@@ -23,11 +23,6 @@ namespace RazorSharp
 
 		public T this[int index] => m_fnGetItems()[index];
 
-		public T[] ToArray()
-		{
-			return m_fnGetItems();
-		}
-
 		public IEnumerator<T> GetEnumerator()
 		{
 			foreach (T v in ToArray()) {
@@ -38,6 +33,11 @@ namespace RazorSharp
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return GetEnumerator();
+		}
+
+		public T[] ToArray()
+		{
+			return m_fnGetItems();
 		}
 	}
 

@@ -32,11 +32,29 @@ namespace RazorSharp.Analysis
 		MethodDescs = 32,
 		Layout      = 64,
 
-		Default = Meta | Address | Size | Internal | Layout | FieldDescs,
+		Default = Meta | Address | Size | Internal | Layout | FieldDescs
 	}
 
 	public static class InspectorHelper
 	{
+
+		public static string LayoutString<T>(ref T t, bool fieldsOnly = false)
+		{
+			ConsoleTable v = new ObjectLayout<T>(ref t, fieldsOnly).Table;
+			return v.ToMarkDownString();
+		}
+
+		public static string LayoutString<T>(bool fieldsOnly = false)
+		{
+			ConsoleTable v = new ObjectLayout<T>(fieldsOnly).Table;
+			return v.ToMarkDownString();
+		}
+
+
+		internal static string CreateLabelString(string label, ConsoleTable table)
+		{
+			return string.Format("\n{0}\n{1}\n", /*ANSI.BoldString(label)*/ label, table.ToMarkDownString());
+		}
 
 		#region Value types
 
@@ -75,38 +93,21 @@ namespace RazorSharp.Analysis
 
 		#endregion
 
-		public static string LayoutString<T>(ref T t, bool fieldsOnly = false)
-		{
-			ConsoleTable v = new ObjectLayout<T>(ref t, fieldsOnly).Table;
-			return v.ToMarkDownString();
-		}
-
-		public static string LayoutString<T>(bool fieldsOnly = false)
-		{
-			ConsoleTable v = new ObjectLayout<T>(fieldsOnly).Table;
-			return v.ToMarkDownString();
-		}
-
-
-		internal static string CreateLabelString(string label, ConsoleTable table)
-		{
-			return String.Format("\n{0}\n{1}\n", /*ANSI.BoldString(label)*/ label, table.ToMarkDownString());
-		}
 	}
 
 	public unsafe class Inspector<T>
 	{
-		public MetadataInfo Metadata  { get; protected set; }
-		public AddressInfo  Addresses { get; protected set; }
-		public SizeInfo     Sizes     { get; protected set; }
-		public InternalInfo Internal  { get; protected set; }
-		public FieldInfo    Fields    { get; protected set; }
-		public MethodInfo   Methods   { get; protected set; }
+
+		private const           string EEClassStr           = "EEClass";
+		private const           string MethodTableStr       = "Method Table";
+		private const           string CanonMTStr           = "Canon MT";
+		private const           string ObjHeaderStr         = "ObjHeader";
+		private const           string EEClassLayoutInfoStr = "EEClassLayoutInfo";
+		private static readonly string Separator            = new string('-', Console.BufferWidth);
 
 		private readonly ConsoleTable m_layout;
 
-		protected readonly      InspectorMode Mode;
-		private static readonly string        Separator = new string('-', Console.BufferWidth);
+		protected readonly InspectorMode Mode;
 
 
 		public Inspector(ref T t, InspectorMode mode = InspectorMode.Default)
@@ -142,220 +143,12 @@ namespace RazorSharp.Analysis
 			}
 		}
 
-
-		public sealed class MethodInfo
-		{
-			// todo: was public
-			internal Pointer<MethodDesc>[] MethodDescs { get; }
-
-			internal MethodInfo()
-			{
-				MethodDescs = typeof(T).GetMethodDescs();
-				MethodDescs = MethodDescs.OrderBy(x => (long) x.Reference.Function).ToArray();
-			}
-
-			private ConsoleTable ToTable()
-			{
-				ConsoleTable table = new ConsoleTable("MethodDesc Address", "Function Address", "Name");
-				foreach (Pointer<MethodDesc> v in MethodDescs) {
-					table.AddRow(Hex.ToHex(v.Address), Hex.ToHex(v.Reference.Function), v.Reference.Name);
-				}
-
-				return table;
-			}
-
-			public override string ToString()
-			{
-				return InspectorHelper.CreateLabelString("MethodDescs:", ToTable());
-			}
-		}
-
-		public sealed class FieldInfo
-		{
-			// todo: was public
-			internal         Pointer<FieldDesc>[] FieldDescs { get; }
-			private readonly ConsoleTable         m_table;
-
-
-			internal FieldInfo(ref T value)
-			{
-				if (typeof(T).IsArray) {
-					FieldDescs = null;
-				}
-				else {
-					FieldDescs = typeof(T).GetFieldDescs();
-					FieldDescs = FieldDescs.OrderBy(x => x.Reference.Offset).ToArray();
-				}
-
-				m_table = ToTable(ref value);
-			}
-
-			private ConsoleTable ToTable(ref T value)
-			{
-				const string omitted = "-";
-
-				ConsoleTable table = new ConsoleTable("Field Offset", "FieldDesc Address", "Field Address", "CorType",
-					"Static", "Size", "Name", "Value", "Metadata Token");
-
-				if (FieldDescs != null) {
-					foreach (Pointer<FieldDesc> v in FieldDescs) {
-						string fieldAddrHex =
-							v.Reference.IsStatic ? omitted : Hex.ToHex(v.Reference.GetAddress(ref value));
-
-						table.AddRow(v.Reference.Offset, Hex.ToHex(v.Address), fieldAddrHex, v.Reference.CorType,
-							v.Reference.IsStatic.Prettify(), v.Reference.Size,
-							v.Reference.Name, v.Reference.GetValue(value), Hex.ToHex(v.Reference.Token));
-					}
-				}
-
-				return table;
-			}
-
-			public override string ToString()
-			{
-				return InspectorHelper.CreateLabelString("FieldDescs:", m_table);
-			}
-		}
-
-		private const string EEClassStr           = "EEClass";
-		private const string MethodTableStr       = "Method Table";
-		private const string CanonMTStr           = "Canon MT";
-		private const string ObjHeaderStr         = "ObjHeader";
-		private const string EEClassLayoutInfoStr = "EEClassLayoutInfo";
-
-		public class InternalInfo
-		{
-			// Value types have a MethodTable, but not a
-			// MethodTable*.
-
-			// todo: these were public
-
-			internal Pointer<MethodTable> MethodTable { get; }
-			internal Pointer<EEClass>     EEClass     { get; }
-			internal Pointer<MethodTable> Canon       { get; }
-
-
-			protected internal InternalInfo(ref T t)
-			{
-				MethodTable = Runtime.ReadMethodTable(ref t);
-				EEClass     = MethodTable.Reference.EEClass;
-				Canon       = MethodTable.Reference.Canon;
-			}
-
-			protected virtual ConsoleTable ToTable()
-			{
-				ConsoleTable table = new ConsoleTable(String.Empty, MethodTableStr);
-				table.AddRow("Address", Hex.ToHex(MethodTable.Address));
-				table.AttachColumn(EEClassStr, Hex.ToHex(EEClass.Address));
-				table.AttachColumn(CanonMTStr, Hex.ToHex(Canon.Address));
-
-
-				return table;
-			}
-
-			public override string ToString()
-			{
-				return InspectorHelper.CreateLabelString("Internal:", ToTable());
-			}
-		}
-
-		public class MetadataInfo
-		{
-			public T    Value       { get; }
-			public bool IsOnStack   { get; }
-			public bool IsBlittable { get; }
-			public bool IsValueType { get; }
-
-			protected internal MetadataInfo(ref T t)
-			{
-				Value       = t;
-				IsBlittable = Runtime.IsBlittable<T>();
-				IsValueType = typeof(T).IsValueType;
-				IsOnStack   = Mem.IsOnStack(ref t);
-			}
-
-			protected virtual ConsoleTable ToTable()
-			{
-				ConsoleTable table = new ConsoleTable("Info", "Value");
-				table.AddRow("Value",
-					typeof(T).IsIListType()
-						? String.Format("[{0}]", Collections.ToString((IList) Value))
-						: Value.ToString());
-
-				table.AddRow("Blittable", IsBlittable.Prettify());
-				table.AddRow("Value type", IsValueType.Prettify());
-				table.AddRow("On stack", IsOnStack.Prettify());
-				return table;
-			}
-
-			public override string ToString()
-			{
-				return InspectorHelper.CreateLabelString("Metadata:", ToTable());
-			}
-		}
-
-		public class AddressInfo
-		{
-			// Address is the also the address of fields for value types
-			public IntPtr Address { get; }
-
-			protected internal AddressInfo(ref T t)
-			{
-				Address = Unsafe.AddressOf(ref t).Address;
-			}
-
-			protected virtual ConsoleTable ToTable()
-			{
-				ConsoleTable table = new ConsoleTable(String.Empty, "Address");
-				table.AddRow("Address", Hex.ToHex(Address));
-				if (typeof(T).IsValueType) {
-					table.AttachColumn("Fields", Hex.ToHex(Address));
-				}
-
-				return table;
-			}
-
-			public override string ToString()
-			{
-				return InspectorHelper.CreateLabelString("Addresses:", ToTable());
-			}
-		}
-
-		public class SizeInfo
-		{
-			public int Size       { get; }
-			public int Native     { get; }
-			public int BaseFields { get; }
-			public int Managed    { get; }
-
-			protected internal SizeInfo()
-			{
-				Size       = Unsafe.SizeOf<T>();
-				Native     = Unsafe.NativeSizeOf<T>();
-				BaseFields = Unsafe.BaseFieldsSize<T>();
-				Managed    = Unsafe.ManagedSizeOf<T>();
-			}
-
-			protected virtual ConsoleTable ToTable()
-			{
-				//var table = new ConsoleTable("Size type", "Value");
-				//table.AddRow("Size", Size);
-				//return table;
-				ConsoleTable table = new ConsoleTable(String.Empty, "Size");
-				table.AddRow("Size value", Size);
-				table.AttachColumn("Native size", Native);
-				table.AttachColumn("Managed size", Managed);
-				table.AttachColumn($"Base fields size <{typeof(T).Name}>", BaseFields);
-
-
-				return table;
-			}
-
-			public override string ToString()
-			{
-				return InspectorHelper.CreateLabelString("Sizes:", ToTable());
-			}
-		}
+		public MetadataInfo Metadata  { get; protected set; }
+		public AddressInfo  Addresses { get; protected set; }
+		public SizeInfo     Sizes     { get; protected set; }
+		public InternalInfo Internal  { get; protected set; }
+		public FieldInfo    Fields    { get; protected set; }
+		public MethodInfo   Methods   { get; protected set; }
 
 		internal static void Write(ref T t, bool printStructures = false, InspectorMode mode = InspectorMode.Default)
 		{
@@ -435,6 +228,221 @@ namespace RazorSharp.Analysis
 			}
 
 			return sb.ToString();
+		}
+
+
+		public sealed class MethodInfo
+		{
+
+			internal MethodInfo()
+			{
+				MethodDescs = typeof(T).GetMethodDescs();
+				MethodDescs = MethodDescs.OrderBy(x => (long) x.Reference.Function).ToArray();
+			}
+
+			// todo: was public
+			internal Pointer<MethodDesc>[] MethodDescs { get; }
+
+			private ConsoleTable ToTable()
+			{
+				ConsoleTable table = new ConsoleTable("MethodDesc Address", "Function Address", "Name");
+				foreach (Pointer<MethodDesc> v in MethodDescs) {
+					table.AddRow(Hex.ToHex(v.Address), Hex.ToHex(v.Reference.Function), v.Reference.Name);
+				}
+
+				return table;
+			}
+
+			public override string ToString()
+			{
+				return InspectorHelper.CreateLabelString("MethodDescs:", ToTable());
+			}
+		}
+
+		public sealed class FieldInfo
+		{
+			private readonly ConsoleTable m_table;
+
+
+			internal FieldInfo(ref T value)
+			{
+				if (typeof(T).IsArray) {
+					FieldDescs = null;
+				}
+				else {
+					FieldDescs = typeof(T).GetFieldDescs();
+					FieldDescs = FieldDescs.OrderBy(x => x.Reference.Offset).ToArray();
+				}
+
+				m_table = ToTable(ref value);
+			}
+
+			// todo: was public
+			internal Pointer<FieldDesc>[] FieldDescs { get; }
+
+			private ConsoleTable ToTable(ref T value)
+			{
+				const string omitted = "-";
+
+				ConsoleTable table = new ConsoleTable("Field Offset", "FieldDesc Address", "Field Address", "CorType",
+					"Static", "Size", "Name", "Value", "Metadata Token");
+
+				if (FieldDescs != null) {
+					foreach (Pointer<FieldDesc> v in FieldDescs) {
+						string fieldAddrHex =
+							v.Reference.IsStatic ? omitted : Hex.ToHex(v.Reference.GetAddress(ref value));
+
+						table.AddRow(v.Reference.Offset, Hex.ToHex(v.Address), fieldAddrHex, v.Reference.CorType,
+							v.Reference.IsStatic.Prettify(), v.Reference.Size,
+							v.Reference.Name, v.Reference.GetValue(value), Hex.ToHex(v.Reference.Token));
+					}
+				}
+
+				return table;
+			}
+
+			public override string ToString()
+			{
+				return InspectorHelper.CreateLabelString("FieldDescs:", m_table);
+			}
+		}
+
+		public class InternalInfo
+		{
+
+
+			protected internal InternalInfo(ref T t)
+			{
+				MethodTable = Runtime.ReadMethodTable(ref t);
+				EEClass     = MethodTable.Reference.EEClass;
+				Canon       = MethodTable.Reference.Canon;
+			}
+
+			// Value types have a MethodTable, but not a
+			// MethodTable*.
+
+			// todo: these were public
+
+			internal Pointer<MethodTable> MethodTable { get; }
+			internal Pointer<EEClass>     EEClass     { get; }
+			internal Pointer<MethodTable> Canon       { get; }
+
+			protected virtual ConsoleTable ToTable()
+			{
+				ConsoleTable table = new ConsoleTable(string.Empty, MethodTableStr);
+				table.AddRow("Address", Hex.ToHex(MethodTable.Address));
+				table.AttachColumn(EEClassStr, Hex.ToHex(EEClass.Address));
+				table.AttachColumn(CanonMTStr, Hex.ToHex(Canon.Address));
+
+
+				return table;
+			}
+
+			public override string ToString()
+			{
+				return InspectorHelper.CreateLabelString("Internal:", ToTable());
+			}
+		}
+
+		public class MetadataInfo
+		{
+
+			protected internal MetadataInfo(ref T t)
+			{
+				Value       = t;
+				IsBlittable = Runtime.IsBlittable<T>();
+				IsValueType = typeof(T).IsValueType;
+				IsOnStack   = Mem.IsOnStack(ref t);
+			}
+
+			public T    Value       { get; }
+			public bool IsOnStack   { get; }
+			public bool IsBlittable { get; }
+			public bool IsValueType { get; }
+
+			protected virtual ConsoleTable ToTable()
+			{
+				ConsoleTable table = new ConsoleTable("Info", "Value");
+				table.AddRow("Value",
+					typeof(T).IsIListType()
+						? string.Format("[{0}]", Collections.ToString((IList) Value))
+						: Value.ToString());
+
+				table.AddRow("Blittable", IsBlittable.Prettify());
+				table.AddRow("Value type", IsValueType.Prettify());
+				table.AddRow("On stack", IsOnStack.Prettify());
+				return table;
+			}
+
+			public override string ToString()
+			{
+				return InspectorHelper.CreateLabelString("Metadata:", ToTable());
+			}
+		}
+
+		public class AddressInfo
+		{
+
+			protected internal AddressInfo(ref T t)
+			{
+				Address = Unsafe.AddressOf(ref t).Address;
+			}
+
+			// Address is the also the address of fields for value types
+			public IntPtr Address { get; }
+
+			protected virtual ConsoleTable ToTable()
+			{
+				ConsoleTable table = new ConsoleTable(string.Empty, "Address");
+				table.AddRow("Address", Hex.ToHex(Address));
+				if (typeof(T).IsValueType) {
+					table.AttachColumn("Fields", Hex.ToHex(Address));
+				}
+
+				return table;
+			}
+
+			public override string ToString()
+			{
+				return InspectorHelper.CreateLabelString("Addresses:", ToTable());
+			}
+		}
+
+		public class SizeInfo
+		{
+
+			protected internal SizeInfo()
+			{
+				Size       = Unsafe.SizeOf<T>();
+				Native     = Unsafe.NativeSizeOf<T>();
+				BaseFields = Unsafe.BaseFieldsSize<T>();
+				Managed    = Unsafe.ManagedSizeOf<T>();
+			}
+
+			public int Size       { get; }
+			public int Native     { get; }
+			public int BaseFields { get; }
+			public int Managed    { get; }
+
+			protected virtual ConsoleTable ToTable()
+			{
+				//var table = new ConsoleTable("Size type", "Value");
+				//table.AddRow("Size", Size);
+				//return table;
+				ConsoleTable table = new ConsoleTable(string.Empty, "Size");
+				table.AddRow("Size value", Size);
+				table.AttachColumn("Native size", Native);
+				table.AttachColumn("Managed size", Managed);
+				table.AttachColumn($"Base fields size <{typeof(T).Name}>", BaseFields);
+
+
+				return table;
+			}
+
+			public override string ToString()
+			{
+				return InspectorHelper.CreateLabelString("Sizes:", ToTable());
+			}
 		}
 	}
 

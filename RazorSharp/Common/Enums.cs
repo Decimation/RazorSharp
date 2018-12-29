@@ -16,7 +16,7 @@ namespace RazorSharp.Common
 
 		public static string Join(this Enum e, string joinStr = JoinEnumStr)
 		{
-			return String.Join(joinStr, e.GetFlags());
+			return string.Join(joinStr, e.GetFlags());
 		}
 
 		internal static object AsNumeric<T>(T e) where T : Enum
@@ -29,13 +29,13 @@ namespace RazorSharp.Common
 		{
 			object asNum    = AsNumeric(e);
 			string join     = e.ToString();
-			string asNumStr = String.Format("({0})", asNum);
+			string asNumStr = string.Format("({0})", asNum);
 
 			if (asNum.ToString() == join) {
 				return asNumStr;
 			}
 
-			return join.Length == 0 ? asNumStr : String.Format("{0} {1}", join, asNumStr);
+			return join.Length == 0 ? asNumStr : string.Format("{0} {1}", join, asNumStr);
 		}
 
 		public static IEnumerable<Enum> GetFlags(this Enum e)
@@ -47,7 +47,7 @@ namespace RazorSharp.Common
 		internal static string CreateFlagsString(object num, Enum e)
 		{
 			string join = e.Join();
-			return join == String.Empty ? $"{num}" : $"{num} ({e.Join()})";
+			return join == string.Empty ? $"{num}" : $"{num} ({e.Join()})";
 		}
 	}
 

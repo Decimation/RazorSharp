@@ -21,10 +21,6 @@ namespace RazorSharp.CLR.Fixed
 	/// </summary>
 	public class ObjectPinHandle : PinHandle
 	{
-		/// <summary>
-		///     Gets the pinned object.
-		/// </summary>
-		public object Object { get; private set; }
 
 		/// <summary>
 		///     Pins an object in a memory and constructs its pin handle.
@@ -50,6 +46,11 @@ namespace RazorSharp.CLR.Fixed
 				re1.WaitOne();
 			}
 		}
+
+		/// <summary>
+		///     Gets the pinned object.
+		/// </summary>
+		public object Object { get; }
 	}
 
 }

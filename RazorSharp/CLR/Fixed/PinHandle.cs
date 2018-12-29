@@ -17,10 +17,6 @@ namespace RazorSharp.CLR.Fixed
 	/// </summary>
 	public abstract class PinHandle : IDisposable
 	{
-		/// <summary>
-		///     Used to tell the pinning thread to stop pinning the object.
-		/// </summary>
-		protected AutoResetEvent Reset { get; set; }
 
 		/// <summary>
 		///     Initializes the pin handle.
@@ -31,12 +27,9 @@ namespace RazorSharp.CLR.Fixed
 		}
 
 		/// <summary>
-		///     Finalizes the pin handle.
+		///     Used to tell the pinning thread to stop pinning the object.
 		/// </summary>
-		~PinHandle()
-		{
-			Dispose(false);
-		}
+		protected AutoResetEvent Reset { get; set; }
 
 		/// <inheritdoc />
 		/// <summary>
@@ -46,6 +39,14 @@ namespace RazorSharp.CLR.Fixed
 		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
+		}
+
+		/// <summary>
+		///     Finalizes the pin handle.
+		/// </summary>
+		~PinHandle()
+		{
+			Dispose(false);
 		}
 
 		/// <summary>

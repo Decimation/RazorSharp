@@ -66,8 +66,6 @@ namespace RazorSharp.Native
 			uint processorType = Convert.ToUInt32(systemInfo.ProcessorType.ToString(), 16);
 			return processorType;
 		}
-
-
 	}
 
 }

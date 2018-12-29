@@ -8,7 +8,7 @@ namespace RazorSharp.Native.Enums
 {
 
 	[Flags]
-	public enum ThreadAccess : int
+	public enum ThreadAccess
 	{
 		None                    = 0,
 		All                     = 0x1F03FF,
@@ -22,7 +22,7 @@ namespace RazorSharp.Native.Enums
 		SetLimitedInformation   = 0x400,
 		SetThreadToken          = 0x080,
 		SuspendResume           = 0x002,
-		Terminate               = 0x001,
+		Terminate               = 0x001
 	}
 
 }

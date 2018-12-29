@@ -33,6 +33,12 @@ namespace RazorSharp.CLR.Meta
 			m_value = methodDesc;
 		}
 
+
+		public override string ToString()
+		{
+			return ToTable().ToMarkDownString();
+		}
+
 		#region Accessors
 
 		/// <summary>
@@ -176,11 +182,6 @@ namespace RazorSharp.CLR.Meta
 
 		#endregion
 
-
-		public override string ToString()
-		{
-			return ToTable().ToMarkDownString();
-		}
 	}
 
 }

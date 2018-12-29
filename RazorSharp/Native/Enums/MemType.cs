@@ -30,7 +30,7 @@ namespace RazorSharp.Native.Enums
 		/// <summary>
 		///     Indicates that the memory pages within the region are private (that is, not shared by other processes).
 		/// </summary>
-		Private = 0x20000,
+		Private = 0x20000
 	}
 
 }

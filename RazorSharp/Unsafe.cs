@@ -77,6 +77,28 @@ namespace RazorSharp
 	{
 		internal const int INVALID_VALUE = -1;
 
+		public static T Unbox<T>(object o)
+		{
+			lock (o) {
+				Pointer<byte> addr = AddressOfHeap(o, OffsetType.Fields);
+				return addr.ReadAny<T>();
+			}
+		}
+
+		/// <summary>
+		///     Interprets a dynamically allocated reference type in the heap as a proper managed type. This is useful when
+		///     you only have a pointer to a reference type's data in the heap but cannot dereference it because the CLR
+		///     automatically dereferences managed reference types (pointer logistics is handled by the CLR).
+		/// </summary>
+		/// <param name="rawMem">Pointer to the reference type's raw data</param>
+		/// <typeparam name="T">Type to interpret the data as</typeparam>
+		/// <returns>A CLR-compliant reference type pointer to access the data pointed to by <paramref name="rawMem" /></returns>
+		public static T RawInterpret<T>(Pointer<byte> rawMem) where T : class
+		{
+			IntPtr cpy = rawMem.Address;
+			return Mem.Read<T>(&cpy);
+		}
+
 		#region OffsetOf
 
 		/// <summary>
@@ -641,7 +663,7 @@ namespace RazorSharp
 		{
 			// Need to include the ObjHeader
 			Pointer<T> ptr = AddressOfHeap(ref t, OffsetType.Header).Address;
-			return ptr.CopyOut<byte>(HeapSize(ref t));
+			return ptr.Reinterpret<byte>().CopyOut(HeapSize(ref t));
 		}
 
 		/// <summary>
@@ -654,7 +676,7 @@ namespace RazorSharp
 		public static byte[] MemoryOfVal<T>(T t)
 		{
 			Pointer<T> ptr = AddressOf(ref t);
-			return ptr.CopyOut<byte>(ptr.ElementSize);
+			return ptr.Reinterpret<byte>().CopyOut(ptr.ElementSize);
 		}
 
 		public static byte[] MemoryOfFields<T>(T t) where T : class
@@ -676,27 +698,6 @@ namespace RazorSharp
 
 		#endregion
 
-		public static T Unbox<T>(object o)
-		{
-			lock (o) {
-				Pointer<byte> addr = AddressOfHeap(o, OffsetType.Fields);
-				return addr.Read<T>();
-			}
-		}
-
-		/// <summary>
-		///     Interprets a dynamically allocated reference type in the heap as a proper managed type. This is useful when
-		///     you only have a pointer to a reference type's data in the heap but cannot dereference it because the CLR
-		///     automatically dereferences managed reference types (pointer logistics is handled by the CLR).
-		/// </summary>
-		/// <param name="rawMem">Pointer to the reference type's raw data</param>
-		/// <typeparam name="T">Type to interpret the data as</typeparam>
-		/// <returns>A CLR-compliant reference type pointer to access the data pointed to by <paramref name="rawMem" /></returns>
-		public static T RawInterpret<T>(Pointer<byte> rawMem) where T : class
-		{
-			IntPtr cpy = rawMem.Address;
-			return Mem.Read<T>(&cpy);
-		}
 	}
 
 }

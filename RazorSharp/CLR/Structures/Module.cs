@@ -23,7 +23,7 @@ namespace RazorSharp.CLR.Structures
 	///     </remarks>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	internal unsafe struct Module
+	internal struct Module
 	{
 		static Module()
 		{

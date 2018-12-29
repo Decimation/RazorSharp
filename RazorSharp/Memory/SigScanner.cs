@@ -28,76 +28,13 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public class SigScanner
 	{
-		private IntPtr                     m_hProcess           { get; set; }
+		private string                     m_moduleName;
+		private IntPtr                     m_hProcess           { get; }
 		private byte[]                     m_rgModuleBuffer     { get; set; }
 		private IntPtr                     m_lpModuleBase       { get; set; }
 		private Dictionary<string, string> m_dictStringPatterns { get; }
-		private string                     m_moduleName;
 
 		public IntPtr BaseAddress => m_lpModuleBase;
-
-		#region Constructors
-
-		public SigScanner() : this(Process.GetCurrentProcess()) { }
-
-		public SigScanner(Process proc) : this(proc.Handle) { }
-
-		public SigScanner(IntPtr hProc)
-		{
-			m_hProcess           = hProc;
-			m_dictStringPatterns = new Dictionary<string, string>();
-		}
-
-		#endregion
-
-		#region Module
-
-		public void SelectModuleBySegment(string moduleName, string segmentName)
-		{
-			// Module already selected
-			if (moduleName == m_moduleName) {
-				return;
-			}
-
-			ImageSectionInfo segment = Segments.GetSegment(segmentName, moduleName);
-
-			m_rgModuleBuffer = new byte[segment.SectionSize];
-			m_lpModuleBase   = segment.SectionAddress.Address;
-			m_dictStringPatterns.Clear();
-			m_moduleName = moduleName;
-			Marshal.Copy(m_lpModuleBase, m_rgModuleBuffer, 0, segment.SectionSize);
-		}
-
-		public bool SelectModule(ProcessModule targetModule)
-		{
-			// Module already selected
-			if (targetModule.ModuleName == m_moduleName) {
-				return true;
-			}
-
-			m_lpModuleBase   = targetModule.BaseAddress;
-			m_rgModuleBuffer = new byte[targetModule.ModuleMemorySize];
-
-
-			m_dictStringPatterns.Clear();
-			ulong lpNumberOfBytesRead = 0;
-
-			m_moduleName = targetModule.ModuleName;
-			return Kernel32.ReadProcessMemory(m_hProcess, m_lpModuleBase, m_rgModuleBuffer,
-				(uint) targetModule.ModuleMemorySize, ref lpNumberOfBytesRead);
-		}
-
-		public void SelectModule(string name)
-		{
-			// Module already selected
-			if (name == m_moduleName) {
-				return;
-			}
-
-			SelectModule(Modules.GetModule(name));
-		}
-
-		#endregion
 
 
 		public void AddPattern(string szPatternName, string szPattern)
@@ -145,12 +82,11 @@ namespace RazorSharp.Memory
 				if (PatternCheck(ofsGuess, rgPattern)) {
 					return PointerUtils.Add(m_lpModuleBase, ofsGuess).Address;
 				}
-				else {
+
 //					throw new Exception($"Offset guess of {ofsGuess} failed");
 
 //					Logger.Log("Offset guess of {0} failed", Hex.ToHex(ofsGuess));
-					ofsGuessFailed = true;
-				}
+				ofsGuessFailed = true;
 			}
 
 			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
@@ -160,9 +96,11 @@ namespace RazorSharp.Memory
 
 
 				if (PatternCheck(nModuleIndex, rgPattern)) {
-					if (ofsGuessFailed)
+					if (ofsGuessFailed) {
 						Console.WriteLine("Matched opcodes: {0} (actual offset: {1:X}) (theoretical offset: {2:X})",
 							Collections.ToString(rgPattern), nModuleIndex, ofsGuess);
+					}
+
 					return m_lpModuleBase + nModuleIndex;
 				}
 			}
@@ -291,12 +229,76 @@ namespace RazorSharp.Memory
 			string[] strByteArr   = szPattern.Split(' ');
 			byte[]   patternBytes = new byte[strByteArr.Length];
 			for (int i = 0; i < strByteArr.Length; i++) {
-				patternBytes[i] = strByteArr[i] == "?" ? (byte) 0x0 : Byte.Parse(strByteArr[i], NumberStyles.HexNumber);
+				patternBytes[i] = strByteArr[i] == "?" ? (byte) 0x0 : byte.Parse(strByteArr[i], NumberStyles.HexNumber);
 			}
 
 
 			return patternBytes;
 		}
+
+		#region Constructors
+
+		public SigScanner() : this(Process.GetCurrentProcess()) { }
+
+		public SigScanner(Process proc) : this(proc.Handle) { }
+
+		public SigScanner(IntPtr hProc)
+		{
+			m_hProcess           = hProc;
+			m_dictStringPatterns = new Dictionary<string, string>();
+		}
+
+		#endregion
+
+		#region Module
+
+		public void SelectModuleBySegment(string moduleName, string segmentName)
+		{
+			// Module already selected
+			if (moduleName == m_moduleName) {
+				return;
+			}
+
+			ImageSectionInfo segment = Segments.GetSegment(segmentName, moduleName);
+
+			m_rgModuleBuffer = new byte[segment.SectionSize];
+			m_lpModuleBase   = segment.SectionAddress.Address;
+			m_dictStringPatterns.Clear();
+			m_moduleName = moduleName;
+			Marshal.Copy(m_lpModuleBase, m_rgModuleBuffer, 0, segment.SectionSize);
+		}
+
+		public bool SelectModule(ProcessModule targetModule)
+		{
+			// Module already selected
+			if (targetModule.ModuleName == m_moduleName) {
+				return true;
+			}
+
+			m_lpModuleBase   = targetModule.BaseAddress;
+			m_rgModuleBuffer = new byte[targetModule.ModuleMemorySize];
+
+
+			m_dictStringPatterns.Clear();
+			ulong lpNumberOfBytesRead = 0;
+
+			m_moduleName = targetModule.ModuleName;
+			return Kernel32.ReadProcessMemory(m_hProcess, m_lpModuleBase, m_rgModuleBuffer,
+				(uint) targetModule.ModuleMemorySize, ref lpNumberOfBytesRead);
+		}
+
+		public void SelectModule(string name)
+		{
+			// Module already selected
+			if (name == m_moduleName) {
+				return;
+			}
+
+			SelectModule(Modules.GetModule(name));
+		}
+
+		#endregion
+
 	}
 
 }

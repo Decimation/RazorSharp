@@ -38,6 +38,131 @@ namespace RazorSharp.Memory
 		private const  byte Int32Bits       = 32;
 		internal const int  BytesInKilobyte = 1024;
 
+		public static void Zero<T>(ref T t)
+		{
+			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
+		}
+
+		#region Zero
+
+		public static void Zero(Pointer<byte> ptr, int length)
+		{
+			for (int i = 0; i < length; i++) {
+				ptr[i] = 0;
+			}
+		}
+
+		#endregion
+
+		/// <summary>
+		///     Checks whether an address is in range.
+		/// </summary>
+		/// <param name="hi">The end address</param>
+		/// <param name="p">Address to check</param>
+		/// <param name="lo">The start address</param>
+		/// <returns><c>true</c> if the address is in range; <c>false</c> otherwise</returns>
+		public static bool IsAddressInRange(IntPtr hi, IntPtr p, IntPtr lo)
+		{
+			// return m_CacheStackLimit < addr && addr <= m_CacheStackBase;
+			// if (!((object < g_gc_highest_address) && (object >= g_gc_lowest_address)))
+
+			return p.ToInt64() < hi.ToInt64() && p.ToInt64() >= lo.ToInt64();
+
+//			return max.ToInt64() < p.ToInt64() && p.ToInt64() <= min.ToInt64();
+		}
+
+
+		/// <summary>
+		///     Allocates basic reference types in the unmanaged heap.
+		///     <para>
+		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free{T}" />
+		///     </para>
+		/// </summary>
+		/// <typeparam name="T">
+		///     Type to allocate; cannot be <c>string</c> or an array type (for that, use
+		///     <see cref="AllocUnmanaged{T}" />.)
+		/// </typeparam>
+		/// <returns>A double indirection pointer to the unmanaged instance.</returns>
+		public static Pointer<T> AllocUnmanagedInstance<T>() where T : class
+		{
+			Trace.Assert(!typeof(T).IsArray, "Use AllocUnmanaged for arrays");
+			Trace.Assert(typeof(T) != typeof(string));
+
+
+			// Minimum size required for an instance
+			int baseSize = Unsafe.BaseInstanceSize<T>();
+
+			// We'll allocate extra bytes (+ IntPtr.Size) for a pointer and write the address of
+			// the unmanaged "instance" there, as the CLR can only interpret
+			// reference types as a pointer.
+			Pointer<byte>        alloc       = AllocUnmanaged<byte>(baseSize + IntPtr.Size);
+			Pointer<MethodTable> methodTable = typeof(T).GetMethodTable();
+
+			// Write the pointer in the extra allocated bytes,
+			// pointing to the MethodTable* (skip over the extra pointer and the ObjHeader)
+			alloc.WriteAny(alloc.Address + sizeof(MethodTable*) * 2);
+
+			// Write the ObjHeader
+			// (this'll already be zeroed, but this is just self-documentation)
+			// +4 int (sync block)
+			// +4 int (padding, x64)
+			alloc.WriteAny(0L, 1);
+
+			// Write the MethodTable
+			// Managed pointers point to the MethodTable* in the GC heap
+			alloc.WriteAny(methodTable, 2);
+
+
+			return alloc.Reinterpret<T>();
+		}
+
+		/// <summary>
+		///     <para>
+		///         Allocates <paramref name="elemCnt" /> elements of type <typeparamref name="T" /> in zeroed, unmanaged memory
+		///         using <see cref="Marshal.AllocHGlobal(int)" />.
+		///     </para>
+		///     <para>
+		///         If <typeparamref name="T" /> is a reference type, a managed pointer of type <typeparamref name="T" /> will be
+		///         created in unmanaged memory, rather than the instance itself. For that, use
+		///         <see cref="AllocUnmanagedInstance{T}" />.
+		///     </para>
+		///     <para>
+		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free{T}" />
+		///     </para>
+		/// </summary>
+		/// <typeparam name="T">Element type to allocate</typeparam>
+		/// <returns>A pointer to the allocated memory</returns>
+		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
+		{
+			RazorContract.Requires(elemCnt > 0, "elemCnt <= 0");
+			int    size  = Unsafe.SizeOf<T>() * elemCnt;
+			IntPtr alloc = Marshal.AllocHGlobal(size);
+			Zero(alloc, size);
+
+			return alloc;
+		}
+
+		public static Pointer<T> ReAllocUnmanaged<T>(Pointer<T> ptr, int elemCnt = 1)
+		{
+			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) (elemCnt * Unsafe.SizeOf<T>()));
+		}
+
+
+		/// <summary>
+		///     <para>Frees memory allocated from <see cref="AllocUnmanaged{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>
+		/// </summary>
+		/// <param name="p">Pointer to allocated memory</param>
+		public static void Free<T>(Pointer<T> p)
+		{
+//			if (bZero) {
+			// AllocHGlobal is a wrapper of LocalAlloc
+//				uint size = Kernel32.LocalSize(p.ToPointer());
+//				Zero(p, (int) size);
+//			}
+
+			Marshal.FreeHGlobal(p.Address);
+		}
+
 
 		#region Swap
 
@@ -120,11 +245,6 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-		public static void Zero<T>(ref T t)
-		{
-			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
-		}
-
 
 		#region Read / write
 
@@ -139,7 +259,7 @@ namespace RazorSharp.Memory
 		public static TTo ReinterpretCast<TFrom, TTo>(TFrom value)
 		{
 			Pointer<TFrom> addr = Unsafe.AddressOf(ref value);
-			return addr.Read<TTo>();
+			return addr.ReadAny<TTo>();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -165,17 +285,6 @@ namespace RazorSharp.Memory
 		public static ref T AsRef<T>(Pointer<byte> p, int byteOffset = 0)
 		{
 			return ref CSUnsafe.AsRef<T>(PointerUtils.Add(p, byteOffset).ToPointer());
-		}
-
-		#endregion
-
-		#region Zero
-
-		public static void Zero(Pointer<byte> ptr, int length)
-		{
-			for (int i = 0; i < length; i++) {
-				ptr[i] = 0;
-			}
 		}
 
 		#endregion
@@ -226,119 +335,10 @@ namespace RazorSharp.Memory
 			b += sizeof(MethodTable*);
 			Pointer<MethodTable> mt  = typeof(T).GetMethodTable();
 			Pointer<MethodTable> pMt = b;
-			pMt.Write(mt);
+			pMt.WriteAny(mt);
 		}
 
 		#endregion
-
-		/// <summary>
-		///     Checks whether an address is in range.
-		/// </summary>
-		/// <param name="hi">The end address</param>
-		/// <param name="p">Address to check</param>
-		/// <param name="lo">The start address</param>
-		/// <returns><c>true</c> if the address is in range; <c>false</c> otherwise</returns>
-		public static bool IsAddressInRange(IntPtr hi, IntPtr p, IntPtr lo)
-		{
-			// return m_CacheStackLimit < addr && addr <= m_CacheStackBase;
-			// if (!((object < g_gc_highest_address) && (object >= g_gc_lowest_address)))
-
-			return p.ToInt64() < hi.ToInt64() && p.ToInt64() >= lo.ToInt64();
-
-//			return max.ToInt64() < p.ToInt64() && p.ToInt64() <= min.ToInt64();
-		}
-
-
-		/// <summary>
-		///     Allocates basic reference types in the unmanaged heap.
-		///     <para>
-		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free{T}" />
-		///     </para>
-		/// </summary>
-		/// <typeparam name="T">
-		///     Type to allocate; cannot be <c>string</c> or an array type (for that, use
-		///     <see cref="AllocUnmanaged{T}" />.)
-		/// </typeparam>
-		/// <returns>A double indirection pointer to the unmanaged instance.</returns>
-		public static Pointer<T> AllocUnmanagedInstance<T>() where T : class
-		{
-			Trace.Assert(!typeof(T).IsArray, "Use AllocUnmanaged for arrays");
-			Trace.Assert(typeof(T) != typeof(string));
-
-
-			// Minimum size required for an instance
-			int baseSize = Unsafe.BaseInstanceSize<T>();
-
-			// We'll allocate extra bytes (+ IntPtr.Size) for a pointer and write the address of
-			// the unmanaged "instance" there, as the CLR can only interpret
-			// reference types as a pointer.
-			Pointer<byte>        alloc       = AllocUnmanaged<byte>(baseSize + IntPtr.Size);
-			Pointer<MethodTable> methodTable = typeof(T).GetMethodTable();
-
-			// Write the pointer in the extra allocated bytes,
-			// pointing to the MethodTable* (skip over the extra pointer and the ObjHeader)
-			alloc.Write(alloc.Address + sizeof(MethodTable*) * 2);
-
-			// Write the ObjHeader
-			// (this'll already be zeroed, but this is just self-documentation)
-			// +4 int (sync block)
-			// +4 int (padding, x64)
-			alloc.Write(0L, 1);
-
-			// Write the MethodTable
-			// Managed pointers point to the MethodTable* in the GC heap
-			alloc.Write(methodTable, 2);
-
-
-			return alloc.Reinterpret<T>();
-		}
-
-		/// <summary>
-		///     <para>
-		///         Allocates <paramref name="elemCnt" /> elements of type <typeparamref name="T" /> in zeroed, unmanaged memory
-		///         using <see cref="Marshal.AllocHGlobal(int)" />.
-		///     </para>
-		///     <para>
-		///         If <typeparamref name="T" /> is a reference type, a managed pointer of type <typeparamref name="T" /> will be
-		///         created in unmanaged memory, rather than the instance itself. For that, use
-		///         <see cref="AllocUnmanagedInstance{T}" />.
-		///     </para>
-		///     <para>
-		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free{T}" />
-		///     </para>
-		/// </summary>
-		/// <typeparam name="T">Element type to allocate</typeparam>
-		/// <returns>A pointer to the allocated memory</returns>
-		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
-		{
-			RazorContract.Requires(elemCnt > 0, "elemCnt <= 0");
-			int    size  = Unsafe.SizeOf<T>() * elemCnt;
-			IntPtr alloc = Marshal.AllocHGlobal(size);
-			Zero(alloc, size);
-
-			return alloc;
-		}
-
-		public static Pointer<T> ReAllocUnmanaged<T>(Pointer<T> ptr, int elemCnt = 1)
-		{
-			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) (elemCnt * Unsafe.SizeOf<T>()));
-		}
-
-
-		/// <summary>
-		///     <para>Frees memory allocated from <see cref="AllocUnmanaged{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>
-		/// </summary>
-		/// <param name="p">Pointer to allocated memory</param>
-		public static void Free<T>(Pointer<T> p)
-		{
-//			if (bZero) {
-			// AllocHGlobal is a wrapper of LocalAlloc
-//				uint size = Kernel32.LocalSize(p.ToPointer());
-//				Zero(p, (int) size);
-//			}
-
-			Marshal.FreeHGlobal(p.Address);
-		}
 
 		// todo: the Copy methods should probably be implemented in Pointer for consistency
 
@@ -394,7 +394,6 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
-
 
 	}
 

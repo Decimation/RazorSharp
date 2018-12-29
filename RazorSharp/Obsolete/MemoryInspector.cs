@@ -24,15 +24,15 @@ namespace RazorSharp.Obsolete
 	///     </remarks>
 	/// </summary>
 	[Obsolete]
-	internal static unsafe class MemoryInspector
+	internal static class MemoryInspector
 	{
+
+		private const int SleepMs = 600;
 
 		public static string Create<T>(IntPtr p)
 		{
 			return Create<T>(p, Unsafe.SizeOf<T>());
 		}
-
-		private const int SleepMs = 600;
 
 		public static void Step<T>(IntPtr p, int elemLen)
 		{
@@ -76,7 +76,7 @@ namespace RazorSharp.Obsolete
 			long addr = p.ToInt64() + offset * Unsafe.SizeOf<T>();
 
 			// [type] [address]
-			string addrStr = String.Format("{0}{1} {2}", new string(' ', adjOffset),
+			string addrStr = string.Format("{0}{1} {2}", new string(' ', adjOffset),
 				typeof(T).Name, Hex.ToHex(addr));
 
 			Console.WriteLine("{0}\n{1}\n{2} [{3}]", str, pt, addrStr, offset);

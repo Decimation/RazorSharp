@@ -12,8 +12,6 @@ namespace RazorSharp
 		private readonly IntPtr m_ptr;
 		private readonly int    m_size;
 
-		public bool IsAllocated { get; private set; }
-
 		public AssemblyHandle(int size)
 		{
 			m_size = size;
@@ -23,6 +21,8 @@ namespace RazorSharp
 
 			IsAllocated = true;
 		}
+
+		public bool IsAllocated { get; private set; }
 
 		public TDelegate Write<TDelegate>(params byte[] opCodes) where TDelegate : Delegate
 		{

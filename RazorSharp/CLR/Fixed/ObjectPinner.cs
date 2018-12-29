@@ -52,8 +52,6 @@ namespace RazorSharp.CLR.Fixed
 		{
 			PinImpl(obj, action);
 		}
-
-
 	}
 
 }

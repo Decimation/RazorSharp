@@ -15,6 +15,11 @@ namespace RazorSharp.Common
 	public static class Collections
 	{
 
+		public static void OrderBy<TSource, TKey>(ref TSource[] arr, Func<TSource, TKey> order)
+		{
+			arr = arr.OrderBy(order).ToArray();
+		}
+
 		#region Remove
 
 		public static T[] RemoveAt<T>(T[] arr, int index)
@@ -51,11 +56,6 @@ namespace RazorSharp.Common
 		}
 
 		#endregion
-
-		public static void OrderBy<TSource, TKey>(ref TSource[] arr, Func<TSource, TKey> order)
-		{
-			arr = arr.OrderBy(order).ToArray();
-		}
 
 
 		#region ToString
@@ -123,7 +123,6 @@ namespace RazorSharp.Common
 		}
 
 		#endregion
-
 
 	}
 

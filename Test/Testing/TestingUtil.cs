@@ -135,7 +135,7 @@ namespace Test.Testing
 		{
 			Pointer<long> lpRg = Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData).Address;
 			for (int i = 0; i < arr.Length; i++) {
-				Console.WriteLine("{0} : {1}", Hex.ToHex(lpRg.Read<long>()), lpRg.Read<T>());
+				Console.WriteLine("{0} : {1}", Hex.ToHex(lpRg.ReadAny<long>()), lpRg.ReadAny<T>());
 				lpRg++;
 			}
 		}

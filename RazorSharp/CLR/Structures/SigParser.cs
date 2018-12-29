@@ -265,9 +265,8 @@ namespace RazorSharp.CLR.Structures
 			if (_len > 0) {
 				return _sig[_offs] == ELEMENT_TYPE_SENTINEL;
 			}
-			else {
-				return false;
-			}
+
+			return false;
 		}
 
 		public bool GetToken(out int token)
@@ -577,10 +576,9 @@ namespace RazorSharp.CLR.Structures
 				if (_len < 1) {
 					return false;
 				}
-				else {
-					pDataOut = byte0;
-					pDataLen = 1;
-				}
+
+				pDataOut = byte0;
+				pDataLen = 1;
 			}
 
 			// Medium.
@@ -589,20 +587,18 @@ namespace RazorSharp.CLR.Structures
 				if (_len < 2) {
 					return false;
 				}
-				else {
-					pDataOut = (int) (((byte0 & 0x3f) << 8) | GetSig(1));
-					pDataLen = 2;
-				}
+
+				pDataOut = ((byte0 & 0x3f) << 8) | GetSig(1);
+				pDataLen = 2;
 			}
 			else if ((byte0 & 0xE0) == 0xC0) // 110? ????
 			{
 				if (_len < 4) {
 					return false;
 				}
-				else {
-					pDataOut = (int) (((byte0 & 0x1f) << 24) | (GetSig(1) << 16) | (GetSig(2) << 8) | GetSig(3));
-					pDataLen = 4;
-				}
+
+				pDataOut = ((byte0 & 0x1f) << 24) | (GetSig(1) << 16) | (GetSig(2) << 8) | GetSig(3);
+				pDataLen = 4;
 			}
 			else // We don't recognize this encoding
 			{
@@ -656,7 +652,7 @@ namespace RazorSharp.CLR.Structures
 		private const int mdtBaseType =
 			0x72000000; // Leave this on the high end value. This does not correspond to metadata table
 
-		private static readonly int[] s_tkCorEncodeToken = new int[] {mdtTypeDef, mdtTypeRef, mdtTypeSpec, mdtBaseType};
+		private static readonly int[] s_tkCorEncodeToken = {mdtTypeDef, mdtTypeRef, mdtTypeSpec, mdtBaseType};
 
 		private const int IMAGE_CEE_CS_CALLCONV_DEFAULT = 0x0;
 

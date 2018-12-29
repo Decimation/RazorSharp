@@ -14,10 +14,6 @@ namespace RazorSharp.Analysis
 
 	public unsafe class ReferenceInspector<T> : Inspector<T> where T : class
 	{
-		public new ReferenceSizeInfo     Sizes     => (ReferenceSizeInfo) base.Sizes;
-		public new ReferenceMetadataInfo Metadata  => (ReferenceMetadataInfo) base.Metadata;
-		public new ReferenceAddressInfo  Addresses => (ReferenceAddressInfo) base.Addresses;
-		public new ReferenceInternalInfo Internal  => (ReferenceInternalInfo) base.Internal;
 
 		public ReferenceInspector(ref T t, InspectorMode mode = InspectorMode.Default) : base(ref t, mode)
 		{
@@ -27,15 +23,29 @@ namespace RazorSharp.Analysis
 			base.Internal  = new ReferenceInternalInfo(ref t);
 		}
 
+		public new ReferenceSizeInfo     Sizes     => (ReferenceSizeInfo) base.Sizes;
+		public new ReferenceMetadataInfo Metadata  => (ReferenceMetadataInfo) base.Metadata;
+		public new ReferenceAddressInfo  Addresses => (ReferenceAddressInfo) base.Addresses;
+		public new ReferenceInternalInfo Internal  => (ReferenceInternalInfo) base.Internal;
+
+
+		internal new static void Write(ref T t, bool printStructures = false,
+			InspectorMode mode = InspectorMode.Default)
+		{
+			ReferenceInspector<T> inspector = new ReferenceInspector<T>(ref t, mode);
+			WriteInspector(inspector, printStructures);
+		}
+
 		public sealed class ReferenceInternalInfo : InternalInfo
 		{
-			// todo: was public
-			internal ObjHeader* Header { get; }
 
 			internal ReferenceInternalInfo(ref T t) : base(ref t)
 			{
 				Header = Runtime.ReadObjHeader(ref t);
 			}
+
+			// todo: was public
+			internal ObjHeader* Header { get; }
 
 			protected override ConsoleTable ToTable()
 			{
@@ -48,12 +58,13 @@ namespace RazorSharp.Analysis
 
 		public sealed class ReferenceMetadataInfo : MetadataInfo
 		{
-			public bool IsHeapPointer { get; }
 
 			internal ReferenceMetadataInfo(ref T t) : base(ref t)
 			{
 				IsHeapPointer = GCHeap.GlobalHeap.Reference.IsHeapPointer(t);
 			}
+
+			public bool IsHeapPointer { get; }
 
 			protected override ConsoleTable ToTable()
 			{
@@ -65,9 +76,6 @@ namespace RazorSharp.Analysis
 
 		public sealed class ReferenceSizeInfo : SizeInfo
 		{
-			public int Heap              { get; }
-			public int BaseInstance      { get; }
-			public int BaseFieldsUnboxed { get; }
 
 			private readonly string m_typeName;
 
@@ -78,6 +86,10 @@ namespace RazorSharp.Analysis
 				BaseFieldsUnboxed = Unsafe.BaseFieldsSize(t);
 				m_typeName        = t.GetType().Name;
 			}
+
+			public int Heap              { get; }
+			public int BaseInstance      { get; }
+			public int BaseFieldsUnboxed { get; }
 
 			protected override ConsoleTable ToTable()
 			{
@@ -107,15 +119,6 @@ namespace RazorSharp.Analysis
 
 		public sealed class ReferenceAddressInfo : AddressInfo
 		{
-			public IntPtr Heap   { get; }
-			public IntPtr Fields { get; }
-			public IntPtr Header { get; }
-
-			/// <summary>
-			///     String data if the type is a string,
-			///     Array data if the type is an array
-			/// </summary>
-			public IntPtr HeapMisc { get; }
 
 			internal ReferenceAddressInfo(ref T t) : base(ref t)
 			{
@@ -132,6 +135,16 @@ namespace RazorSharp.Analysis
 					HeapMisc = IntPtr.Zero;
 				}
 			}
+
+			public IntPtr Heap   { get; }
+			public IntPtr Fields { get; }
+			public IntPtr Header { get; }
+
+			/// <summary>
+			///     String data if the type is a string,
+			///     Array data if the type is an array
+			/// </summary>
+			public IntPtr HeapMisc { get; }
 
 			protected override ConsoleTable ToTable()
 			{
@@ -152,14 +165,6 @@ namespace RazorSharp.Analysis
 
 				return table;
 			}
-		}
-
-
-		internal new static void Write(ref T t, bool printStructures = false,
-			InspectorMode mode = InspectorMode.Default)
-		{
-			ReferenceInspector<T> inspector = new ReferenceInspector<T>(ref t, mode);
-			WriteInspector(inspector, printStructures);
 		}
 	}
 

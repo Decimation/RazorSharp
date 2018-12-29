@@ -50,22 +50,6 @@ namespace RazorSharp.CLR.Meta
 		/// </summary>
 		public bool IsFat => m_value.Reference.IsFat;
 
-		public void WriteIL(byte[] opCodes)
-		{
-			m_value.Reference.WriteIL(opCodes);
-		}
-
-		/// <summary>
-		///     <remarks>
-		///         Equals <see cref="System.Reflection.MethodBody.GetILAsByteArray()" />
-		///     </remarks>
-		/// </summary>
-		/// <returns></returns>
-		public byte[] GetILAsByteArray()
-		{
-			return m_value.Reference.GetILAsByteArray();
-		}
-
 		/// <summary>
 		///     Points to the JIT IL code
 		/// </summary>
@@ -96,6 +80,22 @@ namespace RazorSharp.CLR.Meta
 		///     </remarks>
 		/// </summary>
 		public CorILMethodFlags Flags => m_value.Reference.Flags;
+
+		public void WriteIL(byte[] opCodes)
+		{
+			m_value.Reference.WriteIL(opCodes);
+		}
+
+		/// <summary>
+		///     <remarks>
+		///         Equals <see cref="System.Reflection.MethodBody.GetILAsByteArray()" />
+		///     </remarks>
+		/// </summary>
+		/// <returns></returns>
+		public byte[] GetILAsByteArray()
+		{
+			return m_value.Reference.GetILAsByteArray();
+		}
 
 		public ConsoleTable ToTable()
 		{

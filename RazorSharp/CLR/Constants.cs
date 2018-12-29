@@ -201,7 +201,7 @@ namespace RazorSharp.CLR
 		Internal          = 12,
 		Protected         = 16,
 		ProtectedInternal = 20,
-		Public            = 24,
+		Public            = 24
 	}
 
 	#endregion
@@ -245,7 +245,7 @@ namespace RazorSharp.CLR
 		mdtName                   = 0x71000000, //
 
 		mdtBaseType =
-			0x72000000, // Leave this on the high end value. This does not correspond to metadata table
+			0x72000000 // Leave this on the high end value. This does not correspond to metadata table
 	}
 
 
@@ -371,7 +371,7 @@ namespace RazorSharp.CLR
 		Max         = 0x22,
 		Modifier    = 0x40,
 		Sentinel    = 0x41,
-		Pinned      = 0x45,
+		Pinned      = 0x45
 	}
 
 
@@ -735,7 +735,7 @@ namespace RazorSharp.CLR
 		NativePassInRegisters = 0x10,
 
 		R4HFA = 0x10,
-		R8HFA = 0x20,
+		R8HFA = 0x20
 	}
 
 	/// <summary>
@@ -801,7 +801,7 @@ namespace RazorSharp.CLR
 		MarshalingTypeMask         = 0xc0000000,
 		MarshalingTypeInhibit      = 0x40000000,
 		MarshalingTypeFreeThreaded = 0x80000000,
-		MarshalingTypeStandard     = 0xc0000000,
+		MarshalingTypeStandard     = 0xc0000000
 	}
 
 	#endregion
@@ -844,7 +844,7 @@ namespace RazorSharp.CLR
 		/// <summary>
 		///     Jit may expand method as an intrinsic
 		/// </summary>
-		IsJitIntrinsic = 0x10,
+		IsJitIntrinsic = 0x10
 	}
 
 	/// <summary>
@@ -882,7 +882,7 @@ namespace RazorSharp.CLR
 		/// <summary>
 		///     Indicates that we have verified that there are no equivalent valuetype parameters for this method
 		/// </summary>
-		DoesNotHaveEquivalentValuetypeParameters = 0x8000,
+		DoesNotHaveEquivalentValuetypeParameters = 0x8000
 	}
 
 	/// <summary>
@@ -944,7 +944,7 @@ namespace RazorSharp.CLR
 		///     For <see cref="MethodDesc" /> with no metadata behind
 		/// </summary>
 		Dynamic = 7,
-		Count,
+		Count
 	}
 
 	/// <summary>
@@ -1064,7 +1064,7 @@ namespace RazorSharp.CLR
 		StateMachineMethod     = 0x36000000,
 		CustomDebugInformation = 0x37000000,
 
-		String = 0x70000000,
+		String = 0x70000000
 	}
 
 

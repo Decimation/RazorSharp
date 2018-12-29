@@ -16,10 +16,6 @@ namespace RazorSharp.Common
 	/// </summary>
 	public class ConsoleTable
 	{
-		public IList<object>   Columns { get; set; }
-		public IList<object[]> Rows    { get; protected set; }
-
-		public ConsoleTableOptions Options { get; protected set; }
 
 		public ConsoleTable(params string[] columns)
 			: this(new ConsoleTableOptions {Columns = new List<string>(columns)}) { }
@@ -30,6 +26,11 @@ namespace RazorSharp.Common
 			Rows    = new List<object[]>();
 			Columns = new List<object>(options.Columns);
 		}
+
+		public IList<object>   Columns { get; set; }
+		public IList<object[]> Rows    { get; protected set; }
+
+		public ConsoleTableOptions Options { get; protected set; }
 
 		public ConsoleTable AddColumn(IEnumerable<string> names)
 		{

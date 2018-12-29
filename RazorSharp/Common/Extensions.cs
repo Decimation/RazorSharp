@@ -11,6 +11,10 @@ namespace RazorSharp.Common
 
 	public static class Extensions
 	{
+
+		public const char Check   = '\u2713';
+		public const char BallotX = '\u2717';
+
 		private static bool HasInterface(this Type t, string interfaceType)
 		{
 			return t.GetInterface(interfaceType) != null;
@@ -45,9 +49,6 @@ namespace RazorSharp.Common
 		{
 			return type.HasInterface(nameof(IEnumerable));
 		}
-
-		public const char Check   = '\u2713';
-		public const char BallotX = '\u2717';
 
 		/// <summary>
 		///     Converts the boolean <paramref name="b" /> to a <see cref="char" /> representation.
