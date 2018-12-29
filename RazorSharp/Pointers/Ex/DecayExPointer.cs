@@ -21,8 +21,26 @@ namespace RazorSharp.Pointers.Ex
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Obsolete("Use AllocExPointer", true)]
-	internal unsafe class DecayExPointer<T> : ExPointer<T>
+	internal class DecayExPointer<T> : ExPointer<T>
 	{
+
+		private enum FixType
+		{
+			/// <summary>
+			///     Offset was 1 past the bounds, so we moved back
+			/// </summary>
+			BounceBack,
+
+			/// <summary>
+			///     Offset is >1 out of bounds
+			/// </summary>
+			OutOfBounds,
+
+			/// <summary>
+			///     Offset is OK
+			/// </summary>
+			Verified
+		}
 
 		#region Fields and accessors
 
@@ -121,24 +139,6 @@ namespace RazorSharp.Pointers.Ex
 		}
 
 		#endregion
-
-		private enum FixType
-		{
-			/// <summary>
-			///     Offset was 1 past the bounds, so we moved back
-			/// </summary>
-			BounceBack,
-
-			/// <summary>
-			///     Offset is >1 out of bounds
-			/// </summary>
-			OutOfBounds,
-
-			/// <summary>
-			///     Offset is OK
-			/// </summary>
-			Verified
-		}
 
 		#region Bounds checking
 

@@ -43,7 +43,7 @@ namespace RazorSharp.Pointers
 		/// <summary>
 		///     <see cref="char" /> (2-byte) string
 		/// </summary>
-		UniStr,
+		UniStr
 	}
 
 
@@ -333,7 +333,7 @@ namespace RazorSharp.Pointers
 
 		private string DbgToString()
 		{
-			return String.Format("Address = {0} | Value = {1}", ToString(PointerSettings.FMT_P),
+			return string.Format("Address = {0} | Value = {1}", ToString(PointerSettings.FMT_P),
 				Reference.ToString());
 		}
 
@@ -575,11 +575,11 @@ namespace RazorSharp.Pointers
 
 			if (typeof(T).IsValueType) {
 				table.AddRow(Hex.ToHex(m_value), ToString(PointerSettings.FMT_O), IsAligned.Prettify(),
-					IsNull.Prettify(), ElementSize, String.Format("<{0}>", typeof(T).Name));
+					IsNull.Prettify(), ElementSize, string.Format("<{0}>", typeof(T).Name));
 			}
 			else {
 				table.AddRow(Hex.ToHex(m_value), Hex.ToHex(Read<long>()), ToString(PointerSettings.FMT_O),
-					IsAligned.Prettify(), IsNull.Prettify(), ElementSize, String.Format("<{0}>", typeof(T).Name));
+					IsAligned.Prettify(), IsNull.Prettify(), ElementSize, string.Format("<{0}>", typeof(T).Name));
 			}
 
 			return table;
@@ -952,7 +952,7 @@ namespace RazorSharp.Pointers
 		[Pure]
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
-			if (String.IsNullOrEmpty(format)) {
+			if (string.IsNullOrEmpty(format)) {
 				format = PointerSettings.FMT_B;
 			}
 
@@ -973,7 +973,7 @@ namespace RazorSharp.Pointers
 
 				case PointerSettings.FMT_B:
 					string thisStr = ToStringSafe();
-					return String.Format("{0} @ {1}: {2}", typeof(T) == typeof(char) ? "Char*" : typeof(T).Name,
+					return string.Format("{0} @ {1}: {2}", typeof(T) == typeof(char) ? "Char*" : typeof(T).Name,
 						Hex.ToHex(Address), thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
 				default:
 					goto case PointerSettings.FMT_O;
@@ -988,7 +988,7 @@ namespace RazorSharp.Pointers
 
 
 			if (typeof(T).IsNumericType()) {
-				return String.Format("{0} ({1})", Reference, Hex.TryCreateHex(Reference));
+				return string.Format("{0} ({1})", Reference, Hex.TryCreateHex(Reference));
 			}
 
 			/* Special support for C-string */
@@ -1018,7 +1018,7 @@ namespace RazorSharp.Pointers
 				}
 
 				RETURN:
-				return String.Format("{0} ({1})", valueStr, heapPtr.ToString(PointerSettings.FMT_P));
+				return string.Format("{0} ({1})", valueStr, heapPtr.ToString(PointerSettings.FMT_P));
 			}
 
 

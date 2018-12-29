@@ -82,8 +82,8 @@ namespace RazorSharp.CLR
 
 			#region Offsets and signatures
 
-			private const long FN_ISHEAPPOINTER_OFFSET  = 0x58EAD0;
-			private const long FN_ISGCINPROGRESS_OFFSET = 0x3C3C;
+			private const long FN_ISHEAPPOINTER_OFFSET  = 0x58E6D0;
+			private const long FN_ISGCINPROGRESS_OFFSET = 0x3E3C;
 			private const long FN_GETGCCOUNT_OFFSET     = 0xC4AB0;
 
 			private static readonly byte[][] Functions =
@@ -170,8 +170,8 @@ namespace RazorSharp.CLR
 
 			#region Offsets and signatures
 
-			private const long FN_GETLOADSIZE_OFFSET    = 0x102278;
-			private const long FN_GETMETHODTABLE_OFFSET = 0x21214;
+			private const long FN_GETLOADSIZE_OFFSET    = 0x18B8B8;
+			private const long FN_GETMETHODTABLE_OFFSET = 0x1F2B4;
 
 			private static readonly byte[][] Functions =
 			{
@@ -229,14 +229,14 @@ namespace RazorSharp.CLR
 
 			#region Offsets and signatures
 
-			private const long FN_GETISCTOR_OFFSET                 = 0xAF920;
+			private const long FN_GETISCTOR_OFFSET                 = 0x21138;
 			private const long FN_GETTOKEN_OFFSET                  = 0x108A0;
-			private const long FN_GETISPOINTINGTONATIVECODE_OFFSET = 0x1A6CC4;
-			private const long FN_GETSIZEOF_OFFSET                 = 0x390E0;
-			private const long FN_RESET_OFFSET                     = 0x424714;
+			private const long FN_GETISPOINTINGTONATIVECODE_OFFSET = 0x14A484;
+			private const long FN_GETSIZEOF_OFFSET                 = 0x3FB80;
+			private const long FN_RESET_OFFSET                     = 0x424724;
 			private const long FN_GETMETHODTABLE_OFFSET            = 0xA7D0;
-			private const long FN_GETNATIVECODE_OFFSET             = 0x12280;
-			private const long FN_GETPREIMPLEMENTEDCODE_OFFSET     = 0x5A92C;
+			private const long FN_GETNATIVECODE_OFFSET             = 0x10310;
+			private const long FN_GETPREIMPLEMENTEDCODE_OFFSET     = 0x6AB4C;
 			private const long FN_GETILHEADER_OFFSET               = 0x2B5D4;
 			private const long FN_GETRVA_OFFSET                    = 0x19A10;
 			private const long FN_SETSTABLEENTRYPOINT_OFFSET       = 0x1A9418;

@@ -122,6 +122,8 @@ namespace Test
 			MethodDesc();
 			MethodTable();
 			GC();
+
+			Compare<string>();
 		}
 
 		private static void GC()

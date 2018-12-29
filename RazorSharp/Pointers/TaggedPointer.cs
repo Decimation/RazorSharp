@@ -22,7 +22,7 @@ namespace RazorSharp.Pointers
 	///     https://nikic.github.io/2012/02/02/Pointer-magic-for-efficient-dynamic-value-representations.html
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	internal unsafe struct TaggedPointer<T>
+	internal struct TaggedPointer<T>
 	{
 		/// <summary>
 		///     <c>8</c> for 64-bit
@@ -31,11 +31,11 @@ namespace RazorSharp.Pointers
 
 		// for 8 byte alignment tagMask = alignedTo - 1 = 8 - 1 = 7 = 0b111
 		// i.e. the lowest three bits are set, which is where the tag is stored
-		private const intptr_t TAG_MASK = ALIGNED_TO - 1;
+		private const long TAG_MASK = ALIGNED_TO - 1;
 
 		// pointerMask is the exact contrary: 0b...11111000
 		// i.e. all bits apart from the three lowest are set, which is where the pointer is stored
-		private const intptr_t POINTER_MASK = ~TAG_MASK;
+		private const long POINTER_MASK = ~TAG_MASK;
 
 
 		private Pointer<T> m_pAsPointer;

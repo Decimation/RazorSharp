@@ -31,47 +31,9 @@ namespace RazorSharp.Pointers.Ex
 	[Obsolete]
 	internal unsafe class ExPointer<T> : IFormattable //, IPointer<T>
 	{
-		/// <summary>
-		///     Contains metadata for operating ExPointer
-		/// </summary>
-		protected class PointerMetadata
-		{
-
-			/// <summary>
-			///     The element size (size of type pointed to)
-			/// </summary>
-			internal int ElementSize { get; }
-
-
-			protected internal PointerMetadata(int elementSize, bool isDecayed)
-			{
-				ElementSize = elementSize;
-			}
-
-			protected bool Equals(PointerMetadata m)
-			{
-				return ElementSize == m.ElementSize;
-			}
-
-			public override bool Equals(object obj)
-			{
-				if (obj.GetType() == GetType()) {
-					return Equals((PointerMetadata) obj);
-				}
-
-				return false;
-			}
-
-			public override int GetHashCode()
-			{
-				return ElementSize;
-			}
-
-			internal PointerMetadata(int elementSize) : this(elementSize, false) { }
-		}
-
-		private            IntPtr          m_addr;
 		protected readonly PointerMetadata m_metadata;
+
+		private IntPtr m_addr;
 
 		/// <summary>
 		///     The size of the type being pointed to.
@@ -100,6 +62,45 @@ namespace RazorSharp.Pointers.Ex
 		public virtual T this[int index] {
 			get => Mem.Read<T>(PointerUtils.Offset<T>(Address, index), 0);
 			set => Mem.Write(PointerUtils.Offset<T>(Address, index), 0, value);
+		}
+
+		/// <summary>
+		///     Contains metadata for operating ExPointer
+		/// </summary>
+		protected class PointerMetadata
+		{
+
+
+			protected internal PointerMetadata(int elementSize, bool isDecayed)
+			{
+				ElementSize = elementSize;
+			}
+
+			internal PointerMetadata(int elementSize) : this(elementSize, false) { }
+
+			/// <summary>
+			///     The element size (size of type pointed to)
+			/// </summary>
+			internal int ElementSize { get; }
+
+			protected bool Equals(PointerMetadata m)
+			{
+				return ElementSize == m.ElementSize;
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (obj.GetType() == GetType()) {
+					return Equals((PointerMetadata) obj);
+				}
+
+				return false;
+			}
+
+			public override int GetHashCode()
+			{
+				return ElementSize;
+			}
 		}
 
 		#region Constructors
@@ -150,7 +151,7 @@ namespace RazorSharp.Pointers.Ex
 
 		public int ToInt32()
 		{
-			return checked((int) m_addr);
+			return (int) m_addr;
 		}
 
 		protected virtual void Increment(int cnt = 1)
@@ -270,7 +271,7 @@ namespace RazorSharp.Pointers.Ex
 		/// <param name="format">O: Object, P: Pointer, T: Table</param>
 		public virtual string ToString(string format, IFormatProvider formatProvider)
 		{
-			if (String.IsNullOrEmpty(format)) {
+			if (string.IsNullOrEmpty(format)) {
 				format = "O";
 			}
 

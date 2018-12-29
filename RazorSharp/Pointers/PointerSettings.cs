@@ -3,6 +3,13 @@ namespace RazorSharp.Pointers
 
 	public static class PointerSettings
 	{
+
+
+		static PointerSettings()
+		{
+			RetainTagValue = false;
+		}
+
 		/// <summary>
 		///     <para>
 		///         When <c>true</c>, <see cref="TaggedPointer{T}.Tag" /> will retain its value
@@ -25,11 +32,6 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
-
-		static PointerSettings()
-		{
-			RetainTagValue = false;
-		}
 	}
 
 }

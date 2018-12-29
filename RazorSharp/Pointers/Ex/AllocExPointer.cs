@@ -32,19 +32,35 @@ namespace RazorSharp.Pointers.Ex
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Obsolete]
-	internal sealed unsafe class AllocExPointer<T> : ExPointer<T>, IDisposable, IEnumerable<T>
+	internal sealed class AllocExPointer<T> : ExPointer<T>, IDisposable, IEnumerable<T>
 	{
+
+		#region Collections operations
+
+		public int IndexOf(T t)
+		{
+			for (int i = Start; i <= End; i++)
+				if (this[i].Equals(t)) {
+					return i;
+				}
+
+			return -1;
+		}
+
+		#endregion
+
 		private class AllocPointerMetadata : PointerMetadata
 		{
-			protected internal bool IsAllocated { get; set; }
-
-			protected internal int AllocatedSize { get; set; }
 
 			protected internal AllocPointerMetadata(int elementSize, bool allocated, int allocSize) : base(elementSize)
 			{
 				IsAllocated   = allocated;
 				AllocatedSize = allocSize;
 			}
+
+			protected internal bool IsAllocated { get; set; }
+
+			protected internal int AllocatedSize { get; set; }
 		}
 
 		#region Accessors
@@ -73,7 +89,7 @@ namespace RazorSharp.Pointers.Ex
 		/// <summary>
 		///     Starting index
 		/// </summary>
-		public int Start => -m_offset;
+		public int Start => -Offset;
 
 		/// <summary>
 		///     Ending index
@@ -93,12 +109,10 @@ namespace RazorSharp.Pointers.Ex
 			get => (AllocPointerMetadata) m_metadata;
 		}
 
-		private int m_offset;
-
 		/// <summary>
 		///     Offset relative to the first element.
 		/// </summary>
-		public int Offset => m_offset;
+		public int Offset { get; private set; }
 
 		/// <summary>
 		///     Allocated bytes of memory
@@ -114,7 +128,7 @@ namespace RazorSharp.Pointers.Ex
 				Address      = FirstElement;
 				base.Address = Marshal.ReAllocHGlobal(Address, (IntPtr) value);
 				SetAddressBounds();
-				m_offset               = 0;
+				Offset                 = 0;
 				Metadata.AllocatedSize = value;
 				int newElements = Count - oldCount;
 
@@ -157,9 +171,8 @@ namespace RazorSharp.Pointers.Ex
 					EnsureIndexerBounds(index);
 					return base[index];
 				}
-				else {
-					return default;
-				}
+
+				return default;
 			}
 			set {
 				if (IsAllocated) {
@@ -179,20 +192,6 @@ namespace RazorSharp.Pointers.Ex
 
 		#endregion
 
-		#region Collections operations
-
-		public int IndexOf(T t)
-		{
-			for (int i = Start; i <= End; i++)
-				if (this[i].Equals(t)) {
-					return i;
-				}
-
-			return -1;
-		}
-
-		#endregion
-
 		#region Bounds checking
 
 		private void SetAddressBounds()
@@ -204,15 +203,15 @@ namespace RazorSharp.Pointers.Ex
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void MoveToStart()
 		{
-			Address  = FirstElement;
-			m_offset = 0;
+			Address = FirstElement;
+			Offset  = 0;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void MoveToEnd()
 		{
-			Address  = LastElement;
-			m_offset = Count - 1;
+			Address = LastElement;
+			Offset  = Count - 1;
 		}
 
 		private enum FixType
@@ -261,13 +260,13 @@ namespace RazorSharp.Pointers.Ex
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private string AddrBoundsString()
 		{
-			return String.Format("Address Bounds: [{0} {1}]", Hex.ToHex(FirstElement), Hex.ToHex(LastElement));
+			return string.Format("Address Bounds: [{0} {1}]", Hex.ToHex(FirstElement), Hex.ToHex(LastElement));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private string IndexBoundsString()
 		{
-			return String.Format("Index Bounds: [{0} {1}]", Start, End);
+			return string.Format("Index Bounds: [{0} {1}]", Start, End);
 		}
 
 		/// <summary>
@@ -417,7 +416,7 @@ namespace RazorSharp.Pointers.Ex
 					throw new IndexOutOfRangeException(
 						$"Index {Hex.ToHex(PointerUtils.Offset<T>(Address, cnt))} is out of bounds: {AddrBoundsString()}");
 				case FixType.Verified:
-					m_offset += cnt;
+					Offset += cnt;
 					base.Increment(cnt);
 					break;
 				default:
@@ -434,7 +433,7 @@ namespace RazorSharp.Pointers.Ex
 					throw new IndexOutOfRangeException(
 						$"Index {Hex.ToHex(PointerUtils.Offset<T>(Address, cnt))} is out of bounds: {AddrBoundsString()}");
 				case FixType.Verified:
-					m_offset -= cnt;
+					Offset -= cnt;
 					base.Decrement(cnt);
 					break;
 				default:
@@ -448,7 +447,7 @@ namespace RazorSharp.Pointers.Ex
 			table.AddRow("Allocated", IsAllocated);
 			table.AddRow("Allocated bytes", AllocatedSize);
 			table.AddRow("Count", Count);
-			table.AddRow("Offset", m_offset);
+			table.AddRow("Offset", Offset);
 			table.AddRow("First element", Hex.ToHex(FirstElement));
 			table.AddRow("Last element", Hex.ToHex(LastElement));
 			table.AddRow("Start", Start);
@@ -506,7 +505,7 @@ namespace RazorSharp.Pointers.Ex
 			Metadata.AllocatedSize = 0;
 			IsAllocated            = false;
 			base.Address           = IntPtr.Zero;
-			m_offset               = 0;
+			Offset                 = 0;
 
 
 			GC.SuppressFinalize(this);

@@ -98,16 +98,16 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		/// Calculates the element offset (count) of <paramref name="origElemCnt"/> in terms of <typeparamref name="TAs"/>
+		///     Calculates the element offset (count) of <paramref name="origElemCnt" /> in terms of <typeparamref name="TAs" />
 		/// </summary>
-		/// <param name="origElemCnt">Original element count in terms of <typeparamref name="TOriginal"/></param>
-		/// <typeparam name="TOriginal">Type of <paramref name="origElemCnt"/></typeparam>
-		/// <typeparam name="TAs">Type to return <paramref name="origElemCnt"/> as</typeparam>
+		/// <param name="origElemCnt">Original element count in terms of <typeparamref name="TOriginal" /></param>
+		/// <typeparam name="TOriginal">Type of <paramref name="origElemCnt" /></typeparam>
+		/// <typeparam name="TAs">Type to return <paramref name="origElemCnt" /> as</typeparam>
 		/// <returns></returns>
 		public static int OffsetCountAs<TOriginal, TAs>(int origElemCnt)
 		{
 			int origByteCount = origElemCnt * Unsafe.SizeOf<TOriginal>();
-			return (origByteCount / Unsafe.SizeOf<TAs>());
+			return origByteCount / Unsafe.SizeOf<TAs>();
 		}
 
 		/// <summary>

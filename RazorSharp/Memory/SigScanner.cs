@@ -162,7 +162,7 @@ namespace RazorSharp.Memory
 				if (PatternCheck(nModuleIndex, rgPattern)) {
 					if (ofsGuessFailed)
 						Console.WriteLine("Matched opcodes: {0} (actual offset: {1:X}) (theoretical offset: {2:X})",
-							Collections.ToString(rgPattern), ofsGuess, nModuleIndex);
+							Collections.ToString(rgPattern), nModuleIndex, ofsGuess);
 					return m_lpModuleBase + nModuleIndex;
 				}
 			}
