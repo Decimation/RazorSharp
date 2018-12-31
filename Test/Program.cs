@@ -7,12 +7,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using BenchmarkDotNet.Running;
+using Newtonsoft.Json;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
@@ -23,7 +25,11 @@ using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 using Test.Testing.Benchmarking;
+using Test.Testing.Tests.Metadata;
 using static RazorSharp.Unsafe;
 using Unsafe = RazorSharp.Unsafe;
 
@@ -118,7 +124,7 @@ namespace Test
 
 		public static void Main(string[] args)
 		{
-			string a = "nil";
+			/*string a = "nil";
 			string b = "nil";
 
 			var ptr  = Unsafe.AddressOf(ref a);
@@ -130,8 +136,36 @@ namespace Test
 			var s = ptr.ReadAny<Pointer<char>>().AddressOfIndex(RuntimeHelpers.OffsetToStringData / 2);
 			Console.WriteLine(s);
 			s[0] = 'g';
-			Console.WriteLine(a);
-			Console.WriteLine(b);
+			Debug.Assert(a == b);
+			Debug.Assert("gil" == a);
+			s.WriteAll("gamer");
+			Debug.Assert(s.ReadAny<int>(-1) == 3);
+			s.WriteAny(5, -1);
+			Debug.Assert(a == "gamer");
+
+
+			var levelSwitch = new LoggingLevelSwitch();
+			var log = new LoggerConfiguration()
+				.MinimumLevel.ControlledBy(levelSwitch)
+				.WriteTo.ColoredConsole()
+				.CreateLogger();
+
+			log.Information("i");
+			log.Information(Environment.Version.ToString());*/
+
+			Console.WriteLine("-> {0}", Assembly.Load("RazorSharp").GetTypes().First(t => t.Name == "FieldDesc"));
+			string f = Environment.GetEnvironmentVariable("userprofile")
+			           + "\\Desktop\\ClrFunctions.json";
+
+			Console.WriteLine(f);
+
+			//dynamic data = JsonConvert.DeserializeObject<SignatureCall.Root>(File.ReadAllText(	));
+
+
+			ClrMetaTests.MethodTable();
+			ClrMetaTests.FieldDesc();
+			ClrMetaTests.MethodDesc();
+			ClrMetaTests.GC();
 		}
 
 
@@ -316,18 +350,6 @@ namespace Test
 // @formatter:off — disable formatter after this line
 // @formatter:on — enable formatter after this line
 
-		/**
-		 * Dependencies:
-		 *
-		 * RazorSharp:
-		 * 	- CompilerServices.Unsafe
-		 *
-		 * Test:
-		 *  - CompilerServices.Unsafe
-		 * 	- NUnit
-		 *  - BenchmarkDotNet
-		 *  - ClrMD
-		 */
 
 		/**
 		 * Class this ptr:

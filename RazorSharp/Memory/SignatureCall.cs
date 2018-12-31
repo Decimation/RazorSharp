@@ -4,8 +4,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RazorSharp.CLR;
 
 #endregion
@@ -105,8 +111,6 @@ namespace RazorSharp.Memory
 		static SignatureCall()
 		{
 			SigcallMethodMap = new Dictionary<MethodInfo, Tuple<byte[], long>>();
-
-			ClrFunctions.AddAll();
 		}
 
 		/// <summary>
@@ -248,36 +252,95 @@ namespace RazorSharp.Memory
 			SigcallMethodMap.Clear();
 		}
 
-		public static void CacheFunction<T>(int token, byte[] rgBytes, long offsetGuess = 0)
+		internal static void CacheFunction<T>(int token, byte[] rgBytes, long offsetGuess = 0)
 		{
 			MethodBase mb = typeof(T).Module.ResolveMethod(token);
 			AddToMap((MethodInfo) mb, rgBytes, offsetGuess);
 		}
 
-		public static void Cache<T>(Cache<T> cache)
+		internal static void Cache<T>(Cache<T> cache)
 		{
 			foreach (PatternPair pair in cache.Pairs) {
 				CacheFunction<T>(pair.Name, pair.Pattern, pair.Offset);
 			}
 		}
 
-		public static void CacheFunction(MethodInfo mi, byte[] rgBytes, long offsetGuess = 0)
+		internal static void CacheFunction(MethodInfo mi, byte[] rgBytes, long offsetGuess = 0)
 		{
 			AddToMap(mi, rgBytes, offsetGuess);
 		}
 
-		public static void CacheFunction(Type t, string funcName, byte[] rgBytes, long offsetGuess = 0)
+		internal static void CacheFunction(Type t, string funcName, byte[] rgBytes, long offsetGuess = 0)
 		{
 			MethodInfo mi = Runtime.GetAnnotatedMethods<SigcallAttribute>(t, funcName)[0];
 			CacheFunction(mi, rgBytes, offsetGuess);
 		}
 
-		public static void CacheFunction<T>(string funcName, byte[] rgBytes, long offsetGuess = 0)
+		internal static void CacheFunction<T>(string funcName, byte[] rgBytes, long offsetGuess = 0)
 		{
 			CacheFunction(typeof(T), funcName, rgBytes, offsetGuess);
 		}
 
+		private static string Get(string url)
+		{
+			using (WebClient wc = new WebClient())
+				return wc.DownloadString(url);
+		}
+
+		public static void ReadCacheJsonF(Type[] t, string file)
+		{
+			foreach (Type type in t) {
+				ReadCacheJsonF(type, file);
+			}
+		}
+
+		public static void ReadCacheJsonF(Type t, string file)
+		{
+			string s  = File.ReadAllText(file);
+			var    js = JObject.Parse(s).GetValue(t.Name);
+			var    r  = (List<Data>) js.ToObject(typeof(List<Data>));
+
+			foreach (Data data in r) {
+				CacheFunction(t, data.Name, SigScanner.ParsePatternString(data.OpcodesSignature),
+					long.Parse(data.OffsetString, NumberStyles.HexNumber));
+			}
+		}
+
+
+		public static void ReadCacheJsonF(string asm, string file, string array)
+		{
+			string s  = File.ReadAllText(file);
+			var    js = JObject.Parse(s).GetValue(array);
+			var    r  = (List<Data>) js.ToObject(typeof(List<Data>));
+
+			var asmTypes = Assembly.Load(asm).GetTypes();
+
+			foreach (var v in r) {
+				CacheFunction(asmTypes.First(t => t.Name == array), v.Name,
+					SigScanner.ParsePatternString(v.OpcodesSignature),
+					long.Parse(v.OffsetString, NumberStyles.HexNumber));
+			}
+		}
+
 		#endregion
+
+		internal class Data
+		{
+			[JsonProperty("name")]
+			internal string Name { get; set; }
+
+			[JsonProperty("opcodes")]
+			internal string OpcodesSignature { get; set; }
+
+			[JsonProperty("offset")]
+			internal string OffsetString { get; set; }
+
+			public override string ToString()
+			{
+				return string.Format("Name: {0}\nOpcodes: {1}\nOffset: {2}\n", Name, OpcodesSignature, OffsetString);
+			}
+		}
+
 
 	}
 

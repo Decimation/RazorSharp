@@ -219,7 +219,7 @@ namespace RazorSharp.Memory
 			return dictResultFormatted;
 		}
 
-		private static byte[] ParsePatternString(string szPattern)
+		internal static byte[] ParsePatternString(string szPattern)
 		{
 //			List<byte> patternbytes = new List<byte>();
 //			foreach (string szByte in szPattern.Split(' '))
