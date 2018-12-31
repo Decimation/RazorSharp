@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using BenchmarkDotNet.Running;
 using Newtonsoft.Json;
 using RazorSharp;
@@ -23,8 +24,10 @@ using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Common;
 using RazorSharp.Memory;
+using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using RazorSharp.Utilities.Exceptions;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -153,19 +156,80 @@ namespace Test
 			log.Information("i");
 			log.Information(Environment.Version.ToString());*/
 
-			Console.WriteLine("-> {0}", Assembly.Load("RazorSharp").GetTypes().First(t => t.Name == "FieldDesc"));
-			string f = Environment.GetEnvironmentVariable("userprofile")
-			           + "\\Desktop\\ClrFunctions.json";
-
-			Console.WriteLine(f);
 
 			//dynamic data = JsonConvert.DeserializeObject<SignatureCall.Root>(File.ReadAllText(	));
 
+			/*MetaType m = Meta.GetType<string>();
+			Console.WriteLine(m);
 
 			ClrMetaTests.MethodTable();
 			ClrMetaTests.FieldDesc();
 			ClrMetaTests.MethodDesc();
-			ClrMetaTests.GC();
+			ClrMetaTests.GC();*/
+
+
+			//Console.WriteLine(Runtime.MethodTableToType(typeof(string).GetMethodTable()));
+
+
+			var mt_ptr = typeof(string).GetMethodTable();
+			Console.WriteLine(Modules.ScanSector(mt_ptr.Address).ModuleName);
+		}
+
+		public class Auto
+		{
+			[Sigcall]
+			public void a()
+			{
+				throw new SigcallException();
+			}
+
+			public void b()
+			{
+				Console.WriteLine("b");
+			}
+		}
+
+		static string create(Type t, string name, string op, string ofs)
+		{
+			string f = String.Format("{{" +
+			                         "\"{0}\"   : [" +
+			                         "{{" +
+			                         "\"name\"   : \"{1}\"," +
+			                         "\"opcodes\": \"{2}\"," +
+			                         "\"offset\" : \"{3}\"" +
+			                         "}}]" +
+			                         "}}", t.Name, name, op, ofs);
+			Console.WriteLine(f);
+			return f;
+		}
+
+
+		static byte[] getPseudoSig(Type t, string name, int cb)
+		{
+			var m = Meta.GetType(t).Methods[name];
+
+			//Console.WriteLine(m);
+			if (!m.IsPointingToNativeCode) {
+				m.Prepare();
+			}
+
+			//Console.WriteLine(m);
+
+
+			var p = Kernel32.VirtualQuery(m.NativeCode.Address);
+
+			return m.Function.CopyOut(cb);
+		}
+
+		private static string get(byte[] rgOpcodes)
+		{
+			StringBuilder sb = new StringBuilder();
+			foreach (var v in rgOpcodes) {
+				sb.AppendFormat("{0:X} ", v);
+			}
+
+			sb.Remove(sb.Length - 1, 1);
+			return sb.ToString();
 		}
 
 

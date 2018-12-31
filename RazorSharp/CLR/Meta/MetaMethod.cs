@@ -71,9 +71,9 @@ namespace RazorSharp.CLR.Meta
 		///         <see cref="set_Function" /> sets the method entry point (<see cref="SetStableEntryPoint" />).
 		///     </para>
 		/// </summary>
-		public IntPtr Function {
+		public Pointer<byte> Function {
 			get => m_value.Reference.Function;
-			set => m_value.Reference.Function = value;
+			set => m_value.Reference.Function = value.Address;
 		}
 
 		/// <summary>
@@ -82,9 +82,9 @@ namespace RazorSharp.CLR.Meta
 		///     ngened code if <see cref="IsPreImplemented" /> is <c>true</c>.
 		///     <returns><see cref="IntPtr.Zero" /> if the method has no native code.</returns>
 		/// </summary>
-		public IntPtr NativeCode => m_value.Reference.NativeCode;
+		public Pointer<byte> NativeCode => m_value.Reference.NativeCode;
 
-		public IntPtr PreImplementedCode => m_value.Reference.PreImplementedCode;
+		public Pointer<byte> PreImplementedCode => m_value.Reference.PreImplementedCode;
 
 		// ChunkIndex
 		// MethodDescChunk
@@ -175,6 +175,7 @@ namespace RazorSharp.CLR.Meta
 			table.AddRow("Flags 3", Enums.CreateString(Flags3));
 
 			table.AddRow("Function", Hex.ToHex(Function));
+			table.AddRow("Native code", Hex.ToHex(NativeCode));
 
 
 			return table;

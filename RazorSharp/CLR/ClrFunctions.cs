@@ -34,22 +34,21 @@ namespace RazorSharp.CLR
 		/// <summary>
 		///     <c>clr.dll</c>
 		/// </summary>
-		internal const string ClrDll = "clr.dll";
+		internal const string CLR_DLL = "clr.dll";
+
+		private const string JSON_CACHING_URL =
+			"https://raw.githubusercontent.com/Decimation/RazorSharp/master/RazorSharp/CLR/ClrFunctions.json";
 
 		static ClrFunctions()
 		{
 			s_setStableEntryPointInterlocked =
-				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(ClrDll,
+				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(CLR_DLL,
 					s_rgStableEntryPointInterlockedSignature);
 
-			//AddAll();
-			string f = Environment.GetEnvironmentVariable("userprofile")
-			           + "\\Desktop\\ClrFunctions.json";
-
-			SignatureCall.ReadCacheJsonF(new[]
+			SignatureCall.ReadCacheJsonUrl(new[]
 			{
 				typeof(FieldDesc), typeof(MethodDesc), typeof(ClrFunctions), typeof(GCHeap)
-			}, f);
+			}, JSON_CACHING_URL);
 
 			SignatureCall.DynamicBind(typeof(ClrFunctions));
 		}

@@ -1,16 +1,21 @@
 #region
 
 using System;
+using System.Diagnostics;
 
 #endregion
 
 namespace RazorSharp.Utilities.Exceptions
 {
 
-	internal class SigcallException : NotImplementedException
+	public class SigcallException : NotImplementedException
 	{
-		public SigcallException(string name) : base($"Sigcall method \"{name}\" has not been bound.") { }
-		public SigcallException() : base("Sigcall method has not been bound.") { }
+		public SigcallException(string name) : base($"Sigcall method \"{name}\" error") { }
+
+		public SigcallException() : base("Sigcall method error")
+		{
+			var method = new StackTrace().GetFrame(1).GetMethod();
+		}
 	}
 
 }

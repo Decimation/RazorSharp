@@ -11,7 +11,7 @@ namespace RazorSharp.Memory
 
 	internal static class Images
 	{
-		public static IntPtr GetAddress(string dll, long offset)
+		internal static IntPtr GetAddress(string dll, long offset)
 		{
 			ProcessModule module = Modules.GetModule(dll);
 			Pointer<byte> addr   = module.BaseAddress;

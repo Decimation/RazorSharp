@@ -260,13 +260,13 @@
       <Compile Include="Common\Extensions.cs"/>
       <Compile Include="Common\Hex.cs"/>
       <Compile Include="Common\Strings.cs"/>
+      <Compile Include="Global.cs"/>
       <Compile Include="ProcessHandle.cs"/>
       <Compile Include="VirtualCollection.cs"/>
       <Compile Include="LowLevel.cs"/>
       <Compile Include="Memory\AllocPool.cs"/>
     <Compile Include="Memory\Asm.cs" />
       <Compile Include="Memory\Bits.cs"/>
-      <Compile Include="Memory\Cache.cs"/>
       <Compile Include="Memory\Images.cs"/>
       <Compile Include="Memory\Mem.cs"/>
       <Compile Include="Memory\Modules.cs"/>

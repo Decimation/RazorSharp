@@ -1,95 +1,95 @@
 {
-  "FieldDesc": [
-    {
-      "name": "get_LoadSize",
-      "opcodes": "48 83 EC 28 8B 51 C 48 8D 5 0 0 0 0 C1 EA 1B",
-      "offset": "18B8B8"
-    },
-    {
-      "name": "get_EnclosingMethodTable",
-      "opcodes": "53 48 83 EC 20 83 3D 0 0 92 0 0 48 8B D9 F 85 0 0 0 0 48 0 0 48 3 C3",
-      "offset": "1F2B4"
-    }
+  "FieldDesc"   : [
+	{
+	  "name"   : "get_LoadSize",
+	  "opcodes": "48 83 EC 28 8B 51 C 48 8D 5 0 0 0 0 C1 EA 1B",
+	  "offset" : "18B8B8"
+	},
+	{
+	  "name"   : "get_EnclosingMethodTable",
+	  "opcodes": "53 48 83 EC 20 83 3D 0 0 92 0 0 48 8B D9 F 85 0 0 0 0 48 0 0 48 3 C3",
+	  "offset" : "1F2B4"
+	}
   ],
-  "MethodDesc": [
-    {
-      "name": "get_IsConstructor",
-      "opcodes": "48 89 5C 24 8 57 48 83 EC 20 48 8B F9 E8 0 0 0 FF 33 DB F BA E0 C F 82 0 0 0 0",
-      "offset": "21138"
-    },
-    {
-      "name": "get_Token",
-      "opcodes": "53 48 83 EC 20 83 3D E4 28 93 0 0 48 8B D9 F 85 73 C0 2D 0 F B6 43 2 F B7 B",
-      "offset": "108A0"
-    },
-    {
-      "name": "get_IsPointingToNativeCode",
-      "opcodes": "48 89 5C 24 8 57 48 83 EC 20 8A 41 3 48 8B F9 A8 1 F 85 0 0 0 0 33 C0 EB 1 CC",
-      "offset": "14A484"
-    },
-    {
-      "name": "get_SizeOf",
-      "opcodes": "F B7 41 6 4C 8D 5 0 0 6F 0 8B D0 83 E2 1F",
-      "offset": "3FB80"
-    },
-    {
-      "name": "Reset",
-      "opcodes": "48 89 5C 24 8 57 48 83 EC 20 BA 0 18 0 0 45 33 C0 48 8B F9 E8 0 0 0 FF BA 0 20 0 0 45 33 C0 48 8B CF",
-      "offset": "424724"
-    },
-    {
-      "name": "get_EnclosingMethodTable",
-      "opcodes": "53 48 83 EC 20 83 3D B4 89 93 0 0 48 8B D9 F 85 4C 20 2E 0 F B6 43 2 C1 E0 3 48 63 D0 48 2B DA 48 83 EB 18 48 8B 3 48 3 C3 A8 1 F 85 37 20 2E 0 48 83 C4 20 5B C3",
-      "offset": "A7D0"
-    },
-    {
-      "name": "get_NativeCode",
-      "opcodes": "48 89 5C 24 8 57 48 83 EC 20 8B 5 0 0 93 0",
-      "offset": "10310"
-    },
-    {
-      "name": "get_PreImplementedCode",
-      "opcodes": "48 89 5C 24 8 57 48 83 EC 20 48 8B F9 E8 0 0 0 FF 48 8B D8",
-      "offset": "6AB4C"
-    },
-    {
-      "name": "GetILHeader",
-      "opcodes": "48 89 5C 24 8 48 89 74 24 10 57 48 83 EC 20 8B DA 48 8B F9 E8 1B 24 FE FF 48 8B CF",
-      "offset": "2B5D4"
-    },
-    {
-      "name": "get_RVA",
-      "opcodes": "48 89 5C 24 8 55 56 57 48 83 EC 20 48 8B F9 E8 CC FF FF FF 33 ED",
-      "offset": "19A10"
-    },
-    {
-      "name": "SetStableEntryPointInterlocked",
-      "opcodes": "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20 48 8B FA 48 8B F1 E8 1E 57 E7 FF",
-      "offset": "1A9418"
-    }
+  "MethodDesc"  : [
+	{
+	  "name"   : "get_IsConstructor",
+	  "opcodes": "48 89 5C 24 8 57 48 83 EC 20 48 8B F9 E8 0 0 0 FF 33 DB F BA E0 C F 82 0 0 0 0",
+	  "offset" : "21138"
+	},
+	{
+	  "name"   : "get_Token",
+	  "opcodes": "53 48 83 EC 20 83 3D E4 28 93 0 0 48 8B D9 F 85 73 C0 2D 0 F B6 43 2 F B7 B",
+	  "offset" : "108A0"
+	},
+	{
+	  "name"   : "get_IsPointingToNativeCode",
+	  "opcodes": "48 89 5C 24 8 57 48 83 EC 20 8A 41 3 48 8B F9 A8 1 F 85 0 0 0 0 33 C0 EB 1 CC",
+	  "offset" : "14A484"
+	},
+	{
+	  "name"   : "get_SizeOf",
+	  "opcodes": "F B7 41 6 4C 8D 5 0 0 6F 0 8B D0 83 E2 1F",
+	  "offset" : "3FB80"
+	},
+	{
+	  "name"   : "Reset",
+	  "opcodes": "48 89 5C 24 8 57 48 83 EC 20 BA 0 18 0 0 45 33 C0 48 8B F9 E8 0 0 0 FF BA 0 20 0 0 45 33 C0 48 8B CF",
+	  "offset" : "424724"
+	},
+	{
+	  "name"   : "get_EnclosingMethodTable",
+	  "opcodes": "53 48 83 EC 20 83 3D B4 89 93 0 0 48 8B D9 F 85 4C 20 2E 0 F B6 43 2 C1 E0 3 48 63 D0 48 2B DA 48 83 EB 18 48 8B 3 48 3 C3 A8 1 F 85 37 20 2E 0 48 83 C4 20 5B C3",
+	  "offset" : "A7D0"
+	},
+	{
+	  "name"   : "get_NativeCode",
+	  "opcodes": "48 89 5C 24 8 57 48 83 EC 20 8B 5 0 0 93 0",
+	  "offset" : "10310"
+	},
+	{
+	  "name"   : "get_PreImplementedCode",
+	  "opcodes": "48 89 5C 24 8 57 48 83 EC 20 48 8B F9 E8 0 0 0 FF 48 8B D8",
+	  "offset" : "6AB4C"
+	},
+	{
+	  "name"   : "GetILHeader",
+	  "opcodes": "48 89 5C 24 8 48 89 74 24 10 57 48 83 EC 20 8B DA 48 8B F9 E8 1B 24 FE FF 48 8B CF",
+	  "offset" : "2B5D4"
+	},
+	{
+	  "name"   : "get_RVA",
+	  "opcodes": "48 89 5C 24 8 55 56 57 48 83 EC 20 48 8B F9 E8 CC FF FF FF 33 ED",
+	  "offset" : "19A10"
+	},
+	{
+	  "name"   : "SetStableEntryPointInterlocked",
+	  "opcodes": "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20 48 8B FA 48 8B F1 E8 1E 57 E7 FF",
+	  "offset" : "1A9418"
+	}
   ],
-  "GCHeap": [
-    {
-      "name": "IsHeapPointer",
-      "opcodes": "48 83 EC 28 48 3B 15 0 0 3B 0 48 8B C2 73 20",
-      "offset": "58E6D0"
-    },
-    {
-      "name": "IsGCInProgress",
-      "opcodes": "48 89 5C 24 8 48 89 74 24 10 57 48 83 EC 20 48 8B 3D DE 0 93 0 33 C0",
-      "offset": "3E3C"
-    },
-    {
-      "name": "get_GCCount",
-      "opcodes": "48 8B 5 0 0 0 0 48 89 44 24 10 48 8B 44 24 10 C3",
-      "offset": "C4AB0"
-    }
+  "GCHeap"      : [
+	{
+	  "name"   : "IsHeapPointer",
+	  "opcodes": "48 83 EC 28 48 3B 15 0 0 3B 0 48 8B C2 73 20",
+	  "offset" : "58E6D0"
+	},
+	{
+	  "name"   : "IsGCInProgress",
+	  "opcodes": "48 89 5C 24 8 48 89 74 24 10 57 48 83 EC 20 48 8B 3D DE 0 93 0 33 C0",
+	  "offset" : "3E3C"
+	},
+	{
+	  "name"   : "get_GCCount",
+	  "opcodes": "48 8B 5 0 0 0 0 48 89 44 24 10 48 8B 44 24 10 C3",
+	  "offset" : "C4AB0"
+	}
   ],
   "ClrFunctions": [
-    {
-      "name": "JIT_GetRuntimeType",
-      "opcodes": "48 83 EC 28 4C 8B C1 F6 C1 2 75 2E 48 8B 41 20 48 8B 50 8 F6 C2 1 74 9 48 8B 42 FF 48 83 C4 28 C3",
-      "offset": "E560"
-    }
+	{
+	  "name"   : "JIT_GetRuntimeType",
+	  "opcodes": "48 83 EC 28 4C 8B C1 F6 C1 2 75 2E 48 8B 41 20 48 8B 50 8 F6 C2 1 74 9 48 8B 42 FF 48 83 C4 28 C3",
+	  "offset" : "E560"
+	}
   ]
 }

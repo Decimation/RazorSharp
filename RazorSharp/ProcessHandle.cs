@@ -8,7 +8,8 @@ using RazorSharp.Pointers;
 namespace RazorSharp
 {
 
-	public class ProcessHandle : IDisposable
+	// todo: WIP
+	internal class ProcessHandle : IDisposable
 	{
 		private readonly Pointer<byte> m_handlePtr;
 		private readonly IntPtr        m_procHandle;

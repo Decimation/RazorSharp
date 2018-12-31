@@ -171,7 +171,7 @@ namespace RazorSharp.CLR.Structures
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 
-			ImageSectionInfo dataSegment = Segments.GetSegment(".data", ClrFunctions.ClrDll);
+			ImageSectionInfo dataSegment = Segments.GetSegment(".data", ClrFunctions.CLR_DLL);
 
 
 			g_pGCHeap        = Mem.ReadPointer<byte>(dataSegment.SectionAddress, GLOBAL_GCHEAP_OFFSET).Address;

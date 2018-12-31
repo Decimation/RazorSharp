@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -72,16 +73,16 @@ namespace RazorSharp.Memory
 
 	/// <inheritdoc />
 	/// <summary>
-	///     <see cref="T:RazorSharp.Memory.SigcallAttribute" /> for module <see cref="RazorSharp.CLR.ClrFunctions.ClrDll" />
+	///     <see cref="T:RazorSharp.Memory.SigcallAttribute" /> for module <see cref="ClrFunctions.CLR_DLL" />
 	/// </summary>
 	public class ClrSigcallAttribute : SigcallAttribute
 	{
-		public ClrSigcallAttribute() : base(ClrFunctions.ClrDll, null)
+		public ClrSigcallAttribute() : base(ClrFunctions.CLR_DLL, null)
 		{
 			IsInFunctionMap = true;
 		}
 
-		public ClrSigcallAttribute(string signature) : base(ClrFunctions.ClrDll, signature) { }
+		public ClrSigcallAttribute(string signature) : base(ClrFunctions.CLR_DLL, signature) { }
 	}
 
 	// todo: WIP
@@ -132,6 +133,7 @@ namespace RazorSharp.Memory
 
 		private static IntPtr GetCorrespondingFunctionPointer(SigcallAttribute attr, MethodInfo methodInfo)
 		{
+			//Console.WriteLine("{0} | {1}",attr.Signature, attr.IsInFunctionMap);
 			IntPtr fn = attr.IsInFunctionMap
 				? SigScanner.FindPattern(SigcallMethodMap[methodInfo].Item1,
 					attr.OffsetGuess == 0 ? SigcallMethodMap[methodInfo].Item2 : attr.OffsetGuess)
@@ -144,9 +146,16 @@ namespace RazorSharp.Memory
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void ApplySigcallIndependent(MethodInfo methodInfo)
 		{
+			Debug.Assert(methodInfo != null);
 			SigcallAttribute attr = methodInfo.GetCustomAttribute<SigcallAttribute>();
 			if (attr != null) {
 				SelectModule(attr);
+
+				// todo: this is a cheap fix
+				if (!attr.IsInFunctionMap && SigcallMethodMap.ContainsKey(methodInfo)) {
+					attr.IsInFunctionMap = true;
+				}
+
 
 				IntPtr fn = GetCorrespondingFunctionPointer(attr, methodInfo);
 
@@ -176,7 +185,7 @@ namespace RazorSharp.Memory
 		#endregion
 
 
-		#region Normal
+		#region Bind
 
 		/// <summary>
 		///     Binds all functions in type <typeparamref name="T" /> attributed with <see cref="SigcallAttribute" />
@@ -199,6 +208,7 @@ namespace RazorSharp.Memory
 			}
 
 			MethodInfo[] methodInfos = Runtime.GetMethods(t);
+
 
 			foreach (MethodInfo mi in methodInfos) {
 				ApplySigcallIndependent(mi);
@@ -258,19 +268,12 @@ namespace RazorSharp.Memory
 			AddToMap((MethodInfo) mb, rgBytes, offsetGuess);
 		}
 
-		internal static void Cache<T>(Cache<T> cache)
-		{
-			foreach (PatternPair pair in cache.Pairs) {
-				CacheFunction<T>(pair.Name, pair.Pattern, pair.Offset);
-			}
-		}
-
-		internal static void CacheFunction(MethodInfo mi, byte[] rgBytes, long offsetGuess = 0)
+		private static void CacheFunction(MethodInfo mi, byte[] rgBytes, long offsetGuess = 0)
 		{
 			AddToMap(mi, rgBytes, offsetGuess);
 		}
 
-		internal static void CacheFunction(Type t, string funcName, byte[] rgBytes, long offsetGuess = 0)
+		private static void CacheFunction(Type t, string funcName, byte[] rgBytes, long offsetGuess = 0)
 		{
 			MethodInfo mi = Runtime.GetAnnotatedMethods<SigcallAttribute>(t, funcName)[0];
 			CacheFunction(mi, rgBytes, offsetGuess);
@@ -287,38 +290,26 @@ namespace RazorSharp.Memory
 				return wc.DownloadString(url);
 		}
 
-		public static void ReadCacheJsonF(Type[] t, string file)
+		public static void ReadCacheJsonUrl(Type[] t, string url)
 		{
 			foreach (Type type in t) {
-				ReadCacheJsonF(type, file);
+				ReadCacheJsonUrl(type, url);
 			}
 		}
 
-		public static void ReadCacheJsonF(Type t, string file)
+		public static void ReadCacheJsonUrl(Type t, string url)
 		{
-			string s  = File.ReadAllText(file);
-			var    js = JObject.Parse(s).GetValue(t.Name);
-			var    r  = (List<Data>) js.ToObject(typeof(List<Data>));
+			ReadCacheJson(t, Get(url));
+		}
+
+		public static void ReadCacheJson(Type t, string json)
+		{
+			var js = JObject.Parse(json).GetValue(t.Name);
+			var r  = (List<Data>) js.ToObject(typeof(List<Data>));
 
 			foreach (Data data in r) {
 				CacheFunction(t, data.Name, SigScanner.ParsePatternString(data.OpcodesSignature),
 					long.Parse(data.OffsetString, NumberStyles.HexNumber));
-			}
-		}
-
-
-		public static void ReadCacheJsonF(string asm, string file, string array)
-		{
-			string s  = File.ReadAllText(file);
-			var    js = JObject.Parse(s).GetValue(array);
-			var    r  = (List<Data>) js.ToObject(typeof(List<Data>));
-
-			var asmTypes = Assembly.Load(asm).GetTypes();
-
-			foreach (var v in r) {
-				CacheFunction(asmTypes.First(t => t.Name == array), v.Name,
-					SigScanner.ParsePatternString(v.OpcodesSignature),
-					long.Parse(v.OffsetString, NumberStyles.HexNumber));
 			}
 		}
 

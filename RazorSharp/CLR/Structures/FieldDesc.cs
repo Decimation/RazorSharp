@@ -20,10 +20,6 @@ using static RazorSharp.Memory.Mem;
 namespace RazorSharp.CLR.Structures
 {
 
-	#region
-
-	#endregion
-
 
 	/// <summary>
 	///     <para>

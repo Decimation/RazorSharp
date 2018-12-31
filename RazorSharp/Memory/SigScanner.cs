@@ -97,11 +97,13 @@ namespace RazorSharp.Memory
 
 				if (PatternCheck(nModuleIndex, rgPattern)) {
 					if (ofsGuessFailed) {
-						Console.WriteLine("Matched opcodes: {0} (actual offset: {1:X}) (theoretical offset: {2:X})",
-							Collections.ToString(rgPattern), nModuleIndex, ofsGuess);
+//						Console.WriteLine("Matched opcodes: {0} (actual offset: {1:X}) (theoretical offset: {2:X})",
+//							Collections.ToString(rgPattern), nModuleIndex, ofsGuess);
 					}
 
-					return m_lpModuleBase + nModuleIndex;
+					var p = m_lpModuleBase + nModuleIndex;
+
+					return p;
 				}
 			}
 
@@ -114,9 +116,13 @@ namespace RazorSharp.Memory
 			ModuleCheck();
 
 
+			//Debug.Assert(szPattern!=null);
 			byte[] arrPattern = ParsePatternString(szPattern);
 
-			return FindPattern(arrPattern, ofsGuess);
+			Debug.Assert(arrPattern != null);
+			var p = FindPattern(arrPattern, ofsGuess);
+
+			return p;
 		}
 
 		public static IntPtr QuickScan(string module, string szPattern, long ofsGuess = 0)
@@ -225,6 +231,7 @@ namespace RazorSharp.Memory
 //			foreach (string szByte in szPattern.Split(' '))
 //				patternbytes.Add(szByte == "?" ? (byte) 0x0 : Convert.ToByte(szByte, 16));
 //			return patternbytes.ToArray();
+
 
 			string[] strByteArr   = szPattern.Split(' ');
 			byte[]   patternBytes = new byte[strByteArr.Length];
