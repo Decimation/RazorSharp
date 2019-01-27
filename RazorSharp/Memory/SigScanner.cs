@@ -117,7 +117,7 @@ namespace RazorSharp.Memory
 
 
 			//Debug.Assert(szPattern!=null);
-			byte[] arrPattern = ParsePatternString(szPattern);
+			byte[] arrPattern = Strings.ParseByteArray(szPattern);
 
 			Debug.Assert(arrPattern != null);
 			var p = FindPattern(arrPattern, ofsGuess);
@@ -127,7 +127,7 @@ namespace RazorSharp.Memory
 
 		public static IntPtr QuickScan(string module, string szPattern, long ofsGuess = 0)
 		{
-			return QuickScan(module, ParsePatternString(szPattern), ofsGuess);
+			return QuickScan(module, Strings.ParseByteArray(szPattern), ofsGuess);
 		}
 
 		public static IntPtr QuickScan(string module, byte[] rgPattern, long ofsGuess = 0)
@@ -148,7 +148,7 @@ namespace RazorSharp.Memory
 		public static TDelegate QuickScanDelegate<TDelegate>(string module, string szPattern, long ofsGuess = 0)
 			where TDelegate : Delegate
 		{
-			return QuickScanDelegate<TDelegate>(module, ParsePatternString(szPattern), ofsGuess);
+			return QuickScanDelegate<TDelegate>(module, Strings.ParseByteArray(szPattern), ofsGuess);
 		}
 
 		/*public IntPtr FindPattern(string szPattern, out long lTime)
@@ -186,7 +186,7 @@ namespace RazorSharp.Memory
 
 		public TDelegate GetDelegate<TDelegate>(string szPattern, long ofsGuess = 0) where TDelegate : Delegate
 		{
-			return GetDelegate<TDelegate>(ParsePatternString(szPattern), ofsGuess);
+			return GetDelegate<TDelegate>(Strings.ParseByteArray(szPattern), ofsGuess);
 		}
 
 
@@ -201,7 +201,7 @@ namespace RazorSharp.Memory
 
 			// PARSE PATTERNS
 			for (int nIndex = 0; nIndex < m_dictStringPatterns.Count; nIndex++)
-				arrBytePatterns[nIndex] = ParsePatternString(m_dictStringPatterns.ElementAt(nIndex).Value);
+				arrBytePatterns[nIndex] = Strings.ParseByteArray(m_dictStringPatterns.ElementAt(nIndex).Value);
 
 			// SCAN FOR PATTERNS
 			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++)
@@ -223,24 +223,6 @@ namespace RazorSharp.Memory
 
 			lTime = stopwatch.ElapsedMilliseconds;
 			return dictResultFormatted;
-		}
-
-		internal static byte[] ParsePatternString(string szPattern)
-		{
-//			List<byte> patternbytes = new List<byte>();
-//			foreach (string szByte in szPattern.Split(' '))
-//				patternbytes.Add(szByte == "?" ? (byte) 0x0 : Convert.ToByte(szByte, 16));
-//			return patternbytes.ToArray();
-
-
-			string[] strByteArr   = szPattern.Split(' ');
-			byte[]   patternBytes = new byte[strByteArr.Length];
-			for (int i = 0; i < strByteArr.Length; i++) {
-				patternBytes[i] = strByteArr[i] == "?" ? (byte) 0x0 : byte.Parse(strByteArr[i], NumberStyles.HexNumber);
-			}
-
-
-			return patternBytes;
 		}
 
 		#region Constructors

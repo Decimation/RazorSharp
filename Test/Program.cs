@@ -14,9 +14,6 @@ using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using BenchmarkDotNet.Running;
-using Newtonsoft.Json;
-using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Meta;
@@ -28,11 +25,6 @@ using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
-using Test.Testing.Benchmarking;
-using Test.Testing.Tests.Metadata;
 using static RazorSharp.Unsafe;
 using Unsafe = RazorSharp.Unsafe;
 
@@ -171,8 +163,40 @@ namespace Test
 			//Console.WriteLine(Runtime.MethodTableToType(typeof(string).GetMethodTable()));
 
 
-			var mt_ptr = typeof(string).GetMethodTable();
-			Console.WriteLine(Modules.ScanSector(mt_ptr.Address).ModuleName);
+//			var mt_ptr = typeof(string).GetMethodTable();
+//			Console.WriteLine(Modules.ScanSector(mt_ptr.Address).ModuleName);
+
+//			string s = "val";
+//			Console.WriteLine(Unsafe.AddressOf(ref s));
+//			Console.WriteLine(Hex.ToHex(ProxyCast<string,long>(s)));
+//			Console.WriteLine(add(0xFF,0xFF));
+
+
+			byte[] mem = Strings.ParseByteArray("77 36 6f 1f 26 22 3f 7f 7e 3e 7d");
+
+			var str = Encoding.UTF8.GetString(mem);
+
+			Console.WriteLine(str);
+			foreach (var v in Array.ConvertAll(mem, Convert.ToSByte)) {
+				Console.Write("{0:X} ",v);
+			}
+
+			float f = float.NaN;
+			Console.WriteLine(f);
+			var memv = MemoryOfVal(f);
+			Console.WriteLine(memv.Length);
+			Console.WriteLine(Collections.ToString(memv));
+
+		}
+
+		private static TNumber add<TNumber>(TNumber a, TNumber b)
+		{
+			return ProxyCast<long, TNumber>(ProxyCast<TNumber, long>(a) + ProxyCast<TNumber, long>(b));
+		}
+
+		private static TProxy ProxyCast<TOld, TProxy>(TOld value)
+		{
+			return Unsafe.AddressOf(ref value).ReadAs<TOld, TProxy>();
 		}
 
 		public class Auto
@@ -387,10 +411,6 @@ namespace Test
 		}
 
 
-		private static void RunBenchmark<T>()
-		{
-			BenchmarkRunner.Run<T>(new AllowNonOptimized());
-		}
 
 		private static void VmMap()
 		{

@@ -14,6 +14,7 @@ using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RazorSharp.CLR;
+using RazorSharp.Common;
 
 #endregion
 
@@ -308,7 +309,7 @@ namespace RazorSharp.Memory
 			var r  = (List<Data>) js.ToObject(typeof(List<Data>));
 
 			foreach (Data data in r) {
-				CacheFunction(t, data.Name, SigScanner.ParsePatternString(data.OpcodesSignature),
+				CacheFunction(t, data.Name, Strings.ParseByteArray(data.OpcodesSignature),
 					long.Parse(data.OffsetString, NumberStyles.HexNumber));
 			}
 		}
