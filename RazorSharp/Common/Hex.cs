@@ -102,9 +102,16 @@ namespace RazorSharp.Common
 		public static string TryCreateHex<T>(T t, ToStringOptions options = ToStringOptions.PrefixHex)
 		{
 			string value = null;
-			if (t.GetType().IsNumericType()) {
-				long l = long.Parse(t.ToString());
-				value = $"{l:X}";
+			var type = t.GetType();
+			if (type.IsNumericType()) {
+				if (type.IsIntegerType()) {
+					long l = long.Parse(t.ToString());
+					value = $"{l:X}";
+				}
+				else {
+					value = "0";
+				}
+				
 
 				if (value.Length == 1 && options.HasFlag(ToStringOptions.ZeroPadHex)) {
 					value = 0 + value;
@@ -116,7 +123,7 @@ namespace RazorSharp.Common
 				}
 			}
 
-			return string.IsNullOrEmpty(value) ? t.ToString() : value;
+			return string.IsNullOrWhiteSpace(value) ? t.ToString() : value;
 		}
 	}
 

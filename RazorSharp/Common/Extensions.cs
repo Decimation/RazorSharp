@@ -20,6 +20,22 @@ namespace RazorSharp.Common
 			return t.GetInterface(interfaceType) != null;
 		}
 
+		public static bool IsIntegerType(this Type t)
+		{
+			switch (Type.GetTypeCode(t)) {
+				case TypeCode.Byte:
+				case TypeCode.SByte:
+				case TypeCode.UInt16:
+				case TypeCode.UInt32:
+				case TypeCode.UInt64:
+				case TypeCode.Int16:
+				case TypeCode.Int32:
+				case TypeCode.Int64:
+					return true;
+				default:
+					return false;
+			}
+		}
 		public static bool IsNumericType(this Type o)
 		{
 			switch (Type.GetTypeCode(o)) {

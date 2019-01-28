@@ -63,6 +63,7 @@ namespace RazorSharp.Memory
 		private void ModuleCheck()
 		{
 			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero) {
+				
 				throw new Exception("Selected module is null");
 			}
 		}
@@ -284,6 +285,11 @@ namespace RazorSharp.Memory
 			}
 
 			SelectModule(Modules.GetModule(name));
+		}
+
+		public void SelectMainModule()
+		{
+			SelectModule(Process.GetCurrentProcess().MainModule);
 		}
 
 		#endregion

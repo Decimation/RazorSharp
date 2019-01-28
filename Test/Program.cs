@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +15,8 @@ using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using Pastel;
+using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Meta;
@@ -36,7 +39,6 @@ using Unsafe = RazorSharp.Unsafe;
 
 namespace Test
 {
-
 	#region
 
 	using DWORD = UInt32;
@@ -63,12 +65,10 @@ namespace Test
 	 */
 	internal static unsafe class Program
 	{
-
-
 #if DEBUG
 		static Program()
 		{
-			StandardOut.ModConsole();
+//			StandardOut.ModConsole();
 
 			/**
 			 * RazorSharp is tested on and targets:
@@ -171,32 +171,38 @@ namespace Test
 //			Console.WriteLine(Hex.ToHex(ProxyCast<string,long>(s)));
 //			Console.WriteLine(add(0xFF,0xFF));
 
+			ProcessModule get(Pointer<byte> p)
+			{
+				foreach (ProcessModule processModule in Process.GetCurrentProcess().Modules) {
+					Pointer<byte> addr    = processModule.BaseAddress;
+					Pointer<byte> endAddr = addr + processModule.ModuleMemorySize;
+					if (Mem.IsAddressInRange(endAddr, p, addr)) {
+						return processModule;
+					}
+				}
 
-			byte[] mem = Strings.ParseByteArray("77 36 6f 1f 26 22 3f 7f 7e 3e 7d");
-
-			var str = Encoding.UTF8.GetString(mem);
-
-			Console.WriteLine(str);
-			foreach (var v in Array.ConvertAll(mem, Convert.ToSByte)) {
-				Console.Write("{0:X} ",v);
+				return null;
 			}
+			
+			
+			
+			float f = 3.14f;
+			Console.WriteLine(get(Unsafe.AddressOf(ref f).Address).ModuleName);
 
-			float f = float.NaN;
-			Console.WriteLine(f);
-			var memv = MemoryOfVal(f);
-			Console.WriteLine(memv.Length);
-			Console.WriteLine(Collections.ToString(memv));
+			Console.WriteLine("&f = {0}", Unsafe.AddressOf(ref f));
 
+			Debug.Assert(RazorConvert.Convert<float>(MemoryOfVal(f)) == f);
+			var ss = new SigScanner();
+			ss.SelectMainModule();
+			Pointer<float> ptr = ss.FindPattern(MemoryOfVal(f));
+
+			Console.WriteLine("{0}", ptr);
 		}
 
 		private static TNumber add<TNumber>(TNumber a, TNumber b)
 		{
-			return ProxyCast<long, TNumber>(ProxyCast<TNumber, long>(a) + ProxyCast<TNumber, long>(b));
-		}
-
-		private static TProxy ProxyCast<TOld, TProxy>(TOld value)
-		{
-			return Unsafe.AddressOf(ref value).ReadAs<TOld, TProxy>();
+			return RazorConvert.ProxyCast<long, TNumber>(RazorConvert.ProxyCast<TNumber, long>(a) +
+			                                             RazorConvert.ProxyCast<TNumber, long>(b));
 		}
 
 		public class Auto
@@ -365,7 +371,8 @@ namespace Test
 
 
 				private DumpObjInfo(string szName, Pointer<MethodTable> pMt, Pointer<EEClass> pEEClass,
-					int cbSize, string szStringValue, Pointer<FieldDesc>[] rgpFieldDescs)
+					int                    cbSize, string               szStringValue,
+					Pointer<FieldDesc>[]   rgpFieldDescs)
 				{
 					m_szName        = szName;
 					m_pMT           = pMt;
@@ -409,7 +416,6 @@ namespace Test
 				}
 			}
 		}
-
 
 
 		private static void VmMap()
@@ -472,7 +478,5 @@ namespace Test
 		 * FEATURE_COMINTEROP
 		 * _TARGET_64BIT_
 		 */
-
 	}
-
 }

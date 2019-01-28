@@ -50,3 +50,4 @@ C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.cspro
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorSharp.pdb
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.dll
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.pdb
+C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Pastel.dll

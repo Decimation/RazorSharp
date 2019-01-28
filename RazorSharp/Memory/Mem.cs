@@ -61,7 +61,7 @@ namespace RazorSharp.Memory
 		/// <param name="p">Address to check</param>
 		/// <param name="lo">The start address</param>
 		/// <returns><c>true</c> if the address is in range; <c>false</c> otherwise</returns>
-		public static bool IsAddressInRange(IntPtr hi, IntPtr p, IntPtr lo)
+		public static bool IsAddressInRange(Pointer<byte> hi, Pointer<byte> p, Pointer<byte> lo)
 		{
 			// return m_CacheStackLimit < addr && addr <= m_CacheStackBase;
 			// if (!((object < g_gc_highest_address) && (object >= g_gc_lowest_address)))
