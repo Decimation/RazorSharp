@@ -292,7 +292,8 @@ namespace RazorSharp
 			Pointer<MethodDesc> md = t.GetMethodDesc(name);
 
 			// Function must be jitted
-			Debug.Assert(md.Reference.IsPointingToNativeCode);
+			
+			if (!md.Reference.IsPointingToNativeCode)md.Reference.Prepare();
 
 			return md.Reference.Function;
 		}

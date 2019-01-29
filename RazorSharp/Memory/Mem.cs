@@ -38,6 +38,8 @@ namespace RazorSharp.Memory
 		private const  byte Int32Bits       = 32;
 		internal const int  BytesInKilobyte = 1024;
 
+		
+		
 		public static void Zero<T>(ref T t)
 		{
 			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());

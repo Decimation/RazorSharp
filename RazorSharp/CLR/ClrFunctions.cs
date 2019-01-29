@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Memory;
@@ -45,12 +46,18 @@ namespace RazorSharp.CLR
 				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(CLR_DLL,
 					s_rgStableEntryPointInterlockedSignature);
 
+			
 			SignatureCall.ReadCacheJsonUrl(new[]
 			{
 				typeof(FieldDesc), typeof(MethodDesc), typeof(ClrFunctions), typeof(GCHeap)
 			}, JSON_CACHING_URL);
 
 			SignatureCall.DynamicBind(typeof(ClrFunctions));
+		}
+
+		public static void dummy()
+		{
+			Debug.Assert(SignatureCall.IsBound(typeof(ClrFunctions)));
 		}
 
 		/// <summary>

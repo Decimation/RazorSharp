@@ -443,14 +443,14 @@ namespace RazorSharp.Pointers
 		[Pure]
 		public T Read(int elemOffset = 0)
 		{
-			return Mem.Read<T>(Offset(elemOffset));
+			return ReadAny<T>(elemOffset);
 		}
 
 
 		[Pure]
 		public ref T AsRef(int elemOffset = 0)
 		{
-			return ref Mem.AsRef<T>(Offset(elemOffset));
+			return ref AsRefAny<T>(elemOffset);
 		}
 
 		#region Any
@@ -833,6 +833,18 @@ namespace RazorSharp.Pointers
 			return left.ToInt64() < right.ToInt64();
 		}
 
+		public static Pointer<T> operator +(Pointer<T> l, Pointer<T> r)
+		{
+			
+			return l.ToInt64() + r.ToInt64();
+		}
+		
+		public static Pointer<T> operator -(Pointer<T> l, Pointer<T> r)
+		{
+			
+			return l.ToInt64() - r.ToInt64();
+		}
+		
 		#endregion
 
 
@@ -956,7 +968,7 @@ namespace RazorSharp.Pointers
 			}
 
 
-			if (typeof(T).IsNumericType()) {
+			if (typeof(T).IsIntegerType()) {
 				return string.Format("{0} ({1})", Reference, Hex.TryCreateHex(Reference));
 			}
 

@@ -71,6 +71,7 @@ namespace RazorSharp.CLR.Structures
 
 		static MethodDesc()
 		{
+			
 			SignatureCall.DynamicBind<MethodDesc>();
 		}
 

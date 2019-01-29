@@ -12,9 +12,9 @@ namespace RazorSharp.Common
 
 	public static class Enums
 	{
-		private const string JoinEnumStr = ", ";
+		private const string JOIN_ENUM_STR = ", ";
 
-		public static string Join(this Enum e, string joinStr = JoinEnumStr)
+		public static string Join(this Enum e, string joinStr = JOIN_ENUM_STR)
 		{
 			return string.Join(joinStr, e.GetFlags());
 		}

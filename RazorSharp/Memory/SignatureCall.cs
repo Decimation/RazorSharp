@@ -94,8 +94,6 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public static class SignatureCall
 	{
-
-
 		/// <summary>
 		///     <para>Fully bound types</para>
 		///     <para>Not including individual methods</para>
@@ -134,7 +132,7 @@ namespace RazorSharp.Memory
 
 		private static IntPtr GetCorrespondingFunctionPointer(SigcallAttribute attr, MethodInfo methodInfo)
 		{
-			//Console.WriteLine("{0} | {1}",attr.Signature, attr.IsInFunctionMap);
+			
 			IntPtr fn = attr.IsInFunctionMap
 				? SigScanner.FindPattern(SigcallMethodMap[methodInfo].Item1,
 					attr.OffsetGuess == 0 ? SigcallMethodMap[methodInfo].Item2 : attr.OffsetGuess)
@@ -148,7 +146,7 @@ namespace RazorSharp.Memory
 		private static void ApplySigcallIndependent(MethodInfo methodInfo)
 		{
 			Debug.Assert(methodInfo != null);
-			SigcallAttribute attr = methodInfo.GetCustomAttribute<SigcallAttribute>();
+			var attr = methodInfo.GetCustomAttribute<SigcallAttribute>();
 			if (attr != null) {
 				SelectModule(attr);
 
@@ -287,26 +285,32 @@ namespace RazorSharp.Memory
 
 		private static string Get(string url)
 		{
-			using (WebClient wc = new WebClient())
+			using (var wc = new WebClient())
 				return wc.DownloadString(url);
 		}
 
 		public static void ReadCacheJsonUrl(Type[] t, string url)
 		{
-			foreach (Type type in t) {
-				ReadCacheJsonUrl(type, url);
+			string js = Get(url);
+			Debug.Assert(!string.IsNullOrWhiteSpace(js));
+			foreach (var type in t) {
+				
+				ReadCacheJson(type, js);
 			}
 		}
 
 		public static void ReadCacheJsonUrl(Type t, string url)
 		{
-			ReadCacheJson(t, Get(url));
+			ReadCacheJsonUrl(new []{t},url);
 		}
 
 		public static void ReadCacheJson(Type t, string json)
 		{
+			
 			var js = JObject.Parse(json).GetValue(t.Name);
 			var r  = (List<Data>) js.ToObject(typeof(List<Data>));
+
+			
 
 			foreach (Data data in r) {
 				CacheFunction(t, data.Name, Strings.ParseByteArray(data.OpcodesSignature),

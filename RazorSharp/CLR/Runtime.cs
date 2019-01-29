@@ -213,6 +213,16 @@ namespace RazorSharp.CLR
 
 		// todo: add support for getting FieldDesc of fixed buffers (like isAutoProperty) - use an enum probably
 
+		internal static Pointer<FieldDesc> GetFieldDesc(this FieldInfo fieldInfo)
+		{
+			RazorContract.RequiresNotNull(fieldInfo);
+			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
+			RazorContract.Assert(fieldDesc.Reference.Info == fieldInfo);
+			RazorContract.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
+
+
+			return fieldDesc;
+		}
 		/// <summary>
 		///     Gets the corresponding <see cref="FieldDesc" /> for a specified field
 		/// </summary>
@@ -223,16 +233,10 @@ namespace RazorSharp.CLR
 		/// <exception cref="RuntimeException">If the type is an array</exception>
 		internal static Pointer<FieldDesc> GetFieldDesc(this Type t, string name, BindingFlags flags = DefaultFlags)
 		{
-			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
+			RazorContract.Requires(!t.IsArray, "Arrays do not have fields"); // ehh...
 
-			FieldInfo fieldInfo = t.GetField(name, flags);
-			RazorContract.RequiresNotNull(fieldInfo);
-			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
-			RazorContract.Assert(fieldDesc.Reference.Info == fieldInfo);
-			RazorContract.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
-
-
-			return fieldDesc;
+			return t.GetField(name, flags).GetFieldDesc();
+			
 		}
 
 
@@ -258,10 +262,8 @@ namespace RazorSharp.CLR
 
 		#region MethodDesc
 
-		internal static Pointer<MethodDesc> GetMethodDesc(this Type t, string name, BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc> GetMethodDesc(this MethodInfo methodInfo)
 		{
-			MethodInfo methodInfo = t.GetMethod(name, flags);
-
 			RazorContract.RequiresNotNull(methodInfo);
 
 			RuntimeMethodHandle methodHandle = methodInfo.MethodHandle;
@@ -272,6 +274,12 @@ namespace RazorSharp.CLR
 			// todo
 //			RazorContract.Assert(md->Info == methodInfo);
 			return md;
+		}
+		
+		internal static Pointer<MethodDesc> GetMethodDesc(this Type t, string name, BindingFlags flags = DefaultFlags)
+		{
+			return t.GetMethod(name, flags).GetMethodDesc();
+
 		}
 
 		internal static Pointer<MethodDesc>[] GetMethodDescs(this Type t, BindingFlags flags = DefaultFlags)

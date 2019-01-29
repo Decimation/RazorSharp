@@ -11,9 +11,8 @@ namespace RazorSharp.Common
 
 	public static class Extensions
 	{
-
-		public const char Check   = '\u2713';
-		public const char BallotX = '\u2717';
+		private const char CHECK   = '\u2713';
+		private const char BALLOT_X = '\u2717';
 
 		private static bool HasInterface(this Type t, string interfaceType)
 		{
@@ -38,15 +37,17 @@ namespace RazorSharp.Common
 		}
 		public static bool IsNumericType(this Type o)
 		{
+			if (IsIntegerType(o)) return true;
 			switch (Type.GetTypeCode(o)) {
-				case TypeCode.Byte:
+				// IsIntegerType tests these cases
+				/*case TypeCode.Byte:
 				case TypeCode.SByte:
 				case TypeCode.UInt16:
 				case TypeCode.UInt32:
 				case TypeCode.UInt64:
 				case TypeCode.Int16:
 				case TypeCode.Int32:
-				case TypeCode.Int64:
+				case TypeCode.Int64:*/
 				case TypeCode.Decimal:
 				case TypeCode.Double:
 				case TypeCode.Single:
@@ -71,13 +72,18 @@ namespace RazorSharp.Common
 		/// </summary>
 		/// <param name="b"><see cref="bool" /> value</param>
 		/// <returns>
-		///     <see cref="Check" /> if <paramref name="b" /> is <c>true</c>; <see cref="BallotX" /> if <paramref name="b" />
+		///     <see cref="CHECK" /> if <paramref name="b" /> is <c>true</c>; <see cref="BALLOT_X" /> if <paramref name="b" />
 		///     is <c>false</c>
 		/// </returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static char Prettify(this bool b)
 		{
-			return b ? Check : BallotX;
+			return b ? CHECK : BALLOT_X;
+		}
+
+		public static bool IsInterned(this string text)
+		{
+			return String.IsInterned(text) != null;
 		}
 	}
 

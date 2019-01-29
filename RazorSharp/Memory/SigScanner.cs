@@ -22,7 +22,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.Memory
 {
-
 	/// <summary>
 	///     Edited by Decimation (not entirely original)
 	/// </summary>
@@ -35,7 +34,6 @@ namespace RazorSharp.Memory
 		private Dictionary<string, string> m_dictStringPatterns { get; }
 
 		public IntPtr BaseAddress => m_lpModuleBase;
-
 
 		public void AddPattern(string szPatternName, string szPattern)
 		{
@@ -63,7 +61,6 @@ namespace RazorSharp.Memory
 		private void ModuleCheck()
 		{
 			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero) {
-				
 				throw new Exception("Selected module is null");
 			}
 		}
@@ -249,13 +246,34 @@ namespace RazorSharp.Memory
 				return;
 			}
 
-			ImageSectionInfo segment = Segments.GetSegment(segmentName, moduleName);
+			var segment = Segments.GetSegment(segmentName, moduleName);
+			Setup(segment.SectionSize, segment.SectionAddress.Address, moduleName);
+		}
 
-			m_rgModuleBuffer = new byte[segment.SectionSize];
-			m_lpModuleBase   = segment.SectionAddress.Address;
+		public void SelectModuleByPage(ProcessModule module, Pointer<byte> pageBase)
+		{
+			SelectModuleAsPage(module.ModuleName, pageBase);
+		}
+
+		private void Setup(int bufSize, Pointer<byte> baseAddr, string moduleName)
+		{
+			m_rgModuleBuffer = new byte[bufSize];
+			m_lpModuleBase   = baseAddr.Address;
 			m_dictStringPatterns.Clear();
 			m_moduleName = moduleName;
-			Marshal.Copy(m_lpModuleBase, m_rgModuleBuffer, 0, segment.SectionSize);
+			Marshal.Copy(m_lpModuleBase, m_rgModuleBuffer, 0, bufSize);
+		}
+
+		public void SelectModuleAsPage(string moduleName, Pointer<byte> pageBase)
+		{
+			// Module already selected
+			if (moduleName == m_moduleName) {
+				return;
+			}
+
+			var page = Kernel32.VirtualQuery(pageBase.Address);
+
+			Setup(page.RegionSize.ToInt32(), pageBase, moduleName);
 		}
 
 		public bool SelectModule(ProcessModule targetModule)
@@ -293,7 +311,5 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
-
 	}
-
 }

@@ -110,66 +110,14 @@ namespace Test
 		// todo: Contract-oriented programming
 		// todo: read module memory
 
-		private static Pointer<byte> virtaddr(string module, long ofs)
-		{
-			// 0x18fd1c
-			Pointer<byte> ptr = Modules.GetModule(module).BaseAddress;
-			return ptr.Add(ofs);
-		}
 
 		public static void Main(string[] args)
 		{
-			/*string a = "nil";
-			string b = "nil";
+			ClrFunctions.dummy();
+			float f   = 3.14f;
+			var   ptr = Unsafe.AddressOf(ref f);
+			Console.WriteLine("&f = {0}", ptr);
 
-			var ptr  = Unsafe.AddressOf(ref a);
-			var ptrx = Unsafe.AddressOf(ref b);
-
-			Console.WriteLine(ptr);
-			Console.WriteLine(ptrx);
-
-			var s = ptr.ReadAny<Pointer<char>>().AddressOfIndex(RuntimeHelpers.OffsetToStringData / 2);
-			Console.WriteLine(s);
-			s[0] = 'g';
-			Debug.Assert(a == b);
-			Debug.Assert("gil" == a);
-			s.WriteAll("gamer");
-			Debug.Assert(s.ReadAny<int>(-1) == 3);
-			s.WriteAny(5, -1);
-			Debug.Assert(a == "gamer");
-
-
-			var levelSwitch = new LoggingLevelSwitch();
-			var log = new LoggerConfiguration()
-				.MinimumLevel.ControlledBy(levelSwitch)
-				.WriteTo.ColoredConsole()
-				.CreateLogger();
-
-			log.Information("i");
-			log.Information(Environment.Version.ToString());*/
-
-
-			//dynamic data = JsonConvert.DeserializeObject<SignatureCall.Root>(File.ReadAllText(	));
-
-			/*MetaType m = Meta.GetType<string>();
-			Console.WriteLine(m);
-
-			ClrMetaTests.MethodTable();
-			ClrMetaTests.FieldDesc();
-			ClrMetaTests.MethodDesc();
-			ClrMetaTests.GC();*/
-
-
-			//Console.WriteLine(Runtime.MethodTableToType(typeof(string).GetMethodTable()));
-
-
-//			var mt_ptr = typeof(string).GetMethodTable();
-//			Console.WriteLine(Modules.ScanSector(mt_ptr.Address).ModuleName);
-
-//			string s = "val";
-//			Console.WriteLine(Unsafe.AddressOf(ref s));
-//			Console.WriteLine(Hex.ToHex(ProxyCast<string,long>(s)));
-//			Console.WriteLine(add(0xFF,0xFF));
 
 			ProcessModule get(Pointer<byte> p)
 			{
@@ -183,20 +131,33 @@ namespace Test
 
 				return null;
 			}
-			
-			
-			
-			float f = 3.14f;
-			Console.WriteLine(get(Unsafe.AddressOf(ref f).Address).ModuleName);
 
-			Console.WriteLine("&f = {0}", Unsafe.AddressOf(ref f));
+			var fn = AddressOfFunction(typeof(Program), "AddOp");
+			Console.WriteLine("fn: {0:P}", fn);
+			AddOp(0,1);
+			InjectJmp(fn, () => { Console.WriteLine("g"); });
+			AddOp(0,1);
+		}
 
-			Debug.Assert(RazorConvert.Convert<float>(MemoryOfVal(f)) == f);
-			var ss = new SigScanner();
-			ss.SelectMainModule();
-			Pointer<float> ptr = ss.FindPattern(MemoryOfVal(f));
+		
 
-			Console.WriteLine("{0}", ptr);
+		
+
+		static void InjectJmp(Pointer<byte> addr, Action fn)
+		{
+			var mm = new MetaMethod(fn.Method.GetMethodDesc());
+			if (!mm.IsPointingToNativeCode) mm.Prepare();
+			var targetAddr = mm.Function;
+
+			// Opcode: E9 cd
+			// Mnemonic: JMP rel32
+			// Description: Jump near, relative, displacement relative to next instruction.
+			addr.Write(0xE9);
+
+			Pointer<byte> rel32 = targetAddr - addr;
+			rel32 += 5; // Add size of jmp instruction
+
+			addr.WriteAny(rel32.ToInt32());
 		}
 
 		private static TNumber add<TNumber>(TNumber a, TNumber b)
@@ -205,19 +166,6 @@ namespace Test
 			                                             RazorConvert.ProxyCast<TNumber, long>(b));
 		}
 
-		public class Auto
-		{
-			[Sigcall]
-			public void a()
-			{
-				throw new SigcallException();
-			}
-
-			public void b()
-			{
-				Console.WriteLine("b");
-			}
-		}
 
 		static string create(Type t, string name, string op, string ofs)
 		{
@@ -231,35 +179,6 @@ namespace Test
 			                         "}}", t.Name, name, op, ofs);
 			Console.WriteLine(f);
 			return f;
-		}
-
-
-		static byte[] getPseudoSig(Type t, string name, int cb)
-		{
-			var m = Meta.GetType(t).Methods[name];
-
-			//Console.WriteLine(m);
-			if (!m.IsPointingToNativeCode) {
-				m.Prepare();
-			}
-
-			//Console.WriteLine(m);
-
-
-			var p = Kernel32.VirtualQuery(m.NativeCode.Address);
-
-			return m.Function.CopyOut(cb);
-		}
-
-		private static string get(byte[] rgOpcodes)
-		{
-			StringBuilder sb = new StringBuilder();
-			foreach (var v in rgOpcodes) {
-				sb.AppendFormat("{0:X} ", v);
-			}
-
-			sb.Remove(sb.Length - 1, 1);
-			return sb.ToString();
 		}
 
 
@@ -279,12 +198,6 @@ namespace Test
 		private static int AddOp(int a, int b)
 		{
 			return a + b;
-		}
-
-
-		public static bool IsInterned(this string text)
-		{
-			return string.IsInterned(text) != null;
 		}
 
 

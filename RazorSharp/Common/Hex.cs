@@ -103,14 +103,9 @@ namespace RazorSharp.Common
 		{
 			string value = null;
 			var type = t.GetType();
-			if (type.IsNumericType()) {
-				if (type.IsIntegerType()) {
-					long l = long.Parse(t.ToString());
-					value = $"{l:X}";
-				}
-				else {
-					value = "0";
-				}
+			if (type.IsIntegerType()) {
+				long l = long.Parse(t.ToString());
+				value = $"{l:X}";
 				
 
 				if (value.Length == 1 && options.HasFlag(ToStringOptions.ZeroPadHex)) {
