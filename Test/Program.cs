@@ -134,7 +134,7 @@ namespace Test
 
 			var fn = AddressOfFunction(typeof(Program), "AddOp");
 			Console.WriteLine("fn: {0:P}", fn);
-			AddOp(0,1);
+			
 			InjectJmp(fn, () => { Console.WriteLine("g"); });
 			AddOp(0,1);
 		}
@@ -153,9 +153,9 @@ namespace Test
 			// Mnemonic: JMP rel32
 			// Description: Jump near, relative, displacement relative to next instruction.
 			addr.Write(0xE9);
-
+			addr++; // Move over jmp opcode
 			Pointer<byte> rel32 = targetAddr - addr;
-			rel32 += 5; // Add size of jmp instruction
+			rel32 += sizeof(int); // Add size of rel32 arg
 
 			addr.WriteAny(rel32.ToInt32());
 		}
