@@ -55,7 +55,10 @@ namespace RazorSharp.CLR
 			SignatureCall.DynamicBind(typeof(ClrFunctions));
 		}
 
-		public static void dummy()
+		/// <summary>
+		/// Used just to invoke the type initializer
+		/// </summary>
+		internal static void dummy()
 		{
 			Debug.Assert(SignatureCall.IsBound(typeof(ClrFunctions)));
 		}

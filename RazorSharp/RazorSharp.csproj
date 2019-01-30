@@ -187,6 +187,7 @@
     <Compile Include="Common\Hex.cs" />
     <Compile Include="Common\Strings.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="Memory\Functions.cs" />
     <Compile Include="ProcessHandle.cs" />
     <Compile Include="RazorConvert.cs" />
     <Compile Include="VirtualCollection.cs" />
@@ -214,7 +215,7 @@
     <Compile Include="Native\Enums\ProcessorArchitecture.cs" />
     <Compile Include="Native\Enums\StandardHandles.cs" />
     <Compile Include="Native\Enums\ThreadAccess.cs" />
-    <Compile Include="Native\Functions.cs" />
+    <Compile Include="Native\NativeFunctions.cs" />
     <Compile Include="Native\Kernel32.cs" />
     <Compile Include="Native\Structures\Images\ImageDataDirectory.cs" />
     <Compile Include="Native\Structures\Images\ImageFileHeader.cs" />

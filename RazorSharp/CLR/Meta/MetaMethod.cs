@@ -68,7 +68,8 @@ namespace RazorSharp.CLR.Meta
 		///         (<see cref="RuntimeMethodHandle.GetFunctionPointer()" />) of this method.
 		///     </para>
 		///     <para>
-		///         <see cref="set_Function" /> sets the method entry point (<see cref="SetStableEntryPoint" />).
+		///         <see cref="set_Function" /> sets the method entry point
+		/// (<see cref="MethodDesc.SetStableEntryPoint"/>).
 		///     </para>
 		/// </summary>
 		public Pointer<byte> Function {
@@ -89,8 +90,8 @@ namespace RazorSharp.CLR.Meta
 		// ChunkIndex
 		// MethodDescChunk
 		// SizeOf
-
 		// EnclosingMethodTable
+		
 		public MetaType EnclosingMetaType => new MetaType(m_value.Reference.EnclosingMethodTable);
 
 		public int SizeOf => m_value.Reference.SizeOf;
@@ -126,19 +127,21 @@ namespace RazorSharp.CLR.Meta
 
 		#region Methods
 
+		/// <summary>
+		/// Prepares this method if this method will be the goal of a hook (not the method being hooked).
+		/// </summary>
+		internal void PrepareOverride()
+		{
+			Reset();
+			if (!IsPointingToNativeCode) {
+				Prepare();
+			}
+		}
+
 		public MetaIL GetILHeader(int fAllowOverrides = 0)
 		{
 			RazorContract.Requires(IsIL);
 			return new MetaIL(m_value.Reference.GetILHeader(fAllowOverrides));
-		}
-
-		/// <summary>
-		///     Sets the entry point for this method.
-		/// </summary>
-		/// <param name="pCode">Pointer to the new entry point</param>
-		public void SetStableEntryPoint(Pointer<byte> pCode)
-		{
-			m_value.Reference.SetStableEntryPoint(pCode);
 		}
 
 		public void Reset()

@@ -29,6 +29,7 @@ using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 using static RazorSharp.Unsafe;
+using Functions = RazorSharp.Memory.Functions;
 using Unsafe = RazorSharp.Unsafe;
 
 #endregion
@@ -118,52 +119,17 @@ namespace Test
 			var   ptr = Unsafe.AddressOf(ref f);
 			Console.WriteLine("&f = {0}", ptr);
 
-
-			ProcessModule get(Pointer<byte> p)
-			{
-				foreach (ProcessModule processModule in Process.GetCurrentProcess().Modules) {
-					Pointer<byte> addr    = processModule.BaseAddress;
-					Pointer<byte> endAddr = addr + processModule.ModuleMemorySize;
-					if (Mem.IsAddressInRange(endAddr, p, addr)) {
-						return processModule;
-					}
-				}
-
-				return null;
-			}
-
-			var fn = AddressOfFunction(typeof(Program), "AddOp");
-			Console.WriteLine("fn: {0:P}", fn);
+			var target      = typeof(Program).GetMethod("AddOp", BindingFlags.Static | BindingFlags.NonPublic);
+			var replacement = typeof(Program).GetMethod("SubOp", BindingFlags.Static | BindingFlags.NonPublic);
 			
-			InjectJmp(fn, () => { Console.WriteLine("g"); });
-			AddOp(0,1);
+			Functions.Hook(target, replacement);
+			Debug.Assert(AddOp(1,2) == -1);
 		}
 
-		
 
-		
-
-		static void InjectJmp(Pointer<byte> addr, Action fn)
+		private static int SubOp(int a, int b)
 		{
-			var mm = new MetaMethod(fn.Method.GetMethodDesc());
-			if (!mm.IsPointingToNativeCode) mm.Prepare();
-			var targetAddr = mm.Function;
-
-			// Opcode: E9 cd
-			// Mnemonic: JMP rel32
-			// Description: Jump near, relative, displacement relative to next instruction.
-			addr.Write(0xE9);
-			addr++; // Move over jmp opcode
-			Pointer<byte> rel32 = targetAddr - addr;
-			rel32 += sizeof(int); // Add size of rel32 arg
-
-			addr.WriteAny(rel32.ToInt32());
-		}
-
-		private static TNumber add<TNumber>(TNumber a, TNumber b)
-		{
-			return RazorConvert.ProxyCast<long, TNumber>(RazorConvert.ProxyCast<TNumber, long>(a) +
-			                                             RazorConvert.ProxyCast<TNumber, long>(b));
+			return a - b;
 		}
 
 

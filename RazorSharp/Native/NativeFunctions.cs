@@ -51,7 +51,7 @@ namespace RazorSharp.Native
 	///         </item>
 	///     </list>
 	/// </summary>
-	public static class Functions
+	public static class NativeFunctions
 	{
 		public static TDelegate GetFunction<TDelegate>(string dllName, string fn) where TDelegate : Delegate
 		{

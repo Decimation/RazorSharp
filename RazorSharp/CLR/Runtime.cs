@@ -18,8 +18,6 @@ using RazorSharp.Utilities.Exceptions;
 
 namespace RazorSharp.CLR
 {
-
-
 	/// <summary>
 	///     Provides utilities for manipulating, reading, and writing CLR structures.
 	///     <para>Related files:</para>
@@ -34,7 +32,6 @@ namespace RazorSharp.CLR
 	/// </summary>
 	internal static unsafe class Runtime
 	{
-
 		/// <summary>
 		///     These specific <see cref="BindingFlags" /> are used because they correspond with the metadata and structures
 		///     in CLR structures such as <see cref="MethodTable" />
@@ -223,6 +220,7 @@ namespace RazorSharp.CLR
 
 			return fieldDesc;
 		}
+
 		/// <summary>
 		///     Gets the corresponding <see cref="FieldDesc" /> for a specified field
 		/// </summary>
@@ -236,7 +234,6 @@ namespace RazorSharp.CLR
 			RazorContract.Requires(!t.IsArray, "Arrays do not have fields"); // ehh...
 
 			return t.GetField(name, flags).GetFieldDesc();
-			
 		}
 
 
@@ -275,11 +272,10 @@ namespace RazorSharp.CLR
 //			RazorContract.Assert(md->Info == methodInfo);
 			return md;
 		}
-		
+
 		internal static Pointer<MethodDesc> GetMethodDesc(this Type t, string name, BindingFlags flags = DefaultFlags)
 		{
 			return t.GetMethod(name, flags).GetMethodDesc();
-
 		}
 
 		internal static Pointer<MethodDesc>[] GetMethodDescs(this Type t, BindingFlags flags = DefaultFlags)
@@ -319,10 +315,11 @@ namespace RazorSharp.CLR
 		}
 
 		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(Type t, string name,
-			BindingFlags flags = DefaultFlags) where TAttribute : Attribute
+			BindingFlags                                                  flags = DefaultFlags)
+			where TAttribute : Attribute
 		{
 			MethodInfo[]     methods = GetAnnotatedMethods<TAttribute>(t, flags);
-			List<MethodInfo> matches = new List<MethodInfo>();
+			var matches = new List<MethodInfo>();
 			foreach (MethodInfo v in methods) {
 				if (v.Name == name) {
 					matches.Add(v);
@@ -344,7 +341,5 @@ namespace RazorSharp.CLR
 		}
 
 		#endregion
-
 	}
-
 }
