@@ -114,16 +114,26 @@ namespace Test
 
 		public static void Main(string[] args)
 		{
-			ClrFunctions.dummy();
+			ClrFunctions.init();
 			float f   = 3.14f;
 			var   ptr = Unsafe.AddressOf(ref f);
 			Console.WriteLine("&f = {0}", ptr);
 
-			var target      = typeof(Program).GetMethod("AddOp", BindingFlags.Static | BindingFlags.NonPublic);
-			var replacement = typeof(Program).GetMethod("SubOp", BindingFlags.Static | BindingFlags.NonPublic);
-			
-			Functions.Hook(target, replacement);
-			Debug.Assert(AddOp(1,2) == -1);
+//			var target      = typeof(Program).GetMethod("AddOp", BindingFlags.Static | BindingFlags.NonPublic);
+//			var replacement = typeof(Program).GetMethod("SubOp", BindingFlags.Static | BindingFlags.NonPublic);			
+//			Functions.Hook(target, replacement);
+//			Debug.Assert(AddOp(1,2) == -1);
+
+			Pointer<string> mptr = Mem.AllocUnmanaged<string>(3);
+			mptr.WriteAll("anime","gf","pls");
+			for (int i = 0; i < 3; i++) {
+				Console.Write("ptr[{0}] = {1}\n",i,mptr[i]);
+			}
+			Mem.Free(mptr);
+			GC.Collect();
+
+
+
 		}
 
 

@@ -1,16 +1,19 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Meta;
 using RazorSharp.Pointers;
 
 namespace RazorSharp.Memory
 {
+	// todo: WIP
 	public static class Functions
 	{
 		public static void Hook(MethodInfo target, Pointer<byte> replacement)
 		{
-			new MetaMethod(target.GetMethodDesc())
+			var mm = new MetaMethod(target.GetMethodDesc())
 			{
 				Function = replacement
 			};

@@ -190,7 +190,6 @@
     <Compile Include="Memory\Functions.cs" />
     <Compile Include="ProcessHandle.cs" />
     <Compile Include="RazorConvert.cs" />
-    <Compile Include="VirtualCollection.cs" />
     <Compile Include="LowLevel.cs" />
     <Compile Include="Memory\AllocPool.cs" />
     <Compile Include="Memory\Asm.cs" />
@@ -259,6 +258,7 @@
     <Compile Include="Utilities\Exceptions\TypeException.cs" />
     <Compile Include="Utilities\RazorContract.cs" />
     <Compile Include="Utilities\StandardOut.cs" />
+    <Compile Include="Utilities\VirtualCollection.cs" />
   </ItemGroup>
   
   <ItemGroup>
