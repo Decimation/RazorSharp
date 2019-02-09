@@ -92,7 +92,8 @@ namespace RazorSharp.Common
 					current = PointerSettings.NULLPTR;
 				}
 
-				else if (options.HasFlag(ToStringOptions.Hex) && list[i].GetType().IsNumericType()) {
+				else if (options.HasFlag(ToStringOptions.Hex) 
+				         && (list[i].GetType().IsNumericType() || list[i] is IntPtr)) {
 					current = Hex.TryCreateHex(list[i], options);
 				}
 

@@ -232,6 +232,7 @@ namespace RazorSharp.CLR
 		internal static Pointer<FieldDesc> GetFieldDesc(this Type t, string name, BindingFlags flags = DefaultFlags)
 		{
 			RazorContract.Requires(!t.IsArray, "Arrays do not have fields"); // ehh...
+			// (they have implicit fields such as length)
 
 			return t.GetField(name, flags).GetFieldDesc();
 		}
@@ -318,8 +319,8 @@ namespace RazorSharp.CLR
 			BindingFlags                                                  flags = DefaultFlags)
 			where TAttribute : Attribute
 		{
-			MethodInfo[]     methods = GetAnnotatedMethods<TAttribute>(t, flags);
-			var matches = new List<MethodInfo>();
+			MethodInfo[] methods = GetAnnotatedMethods<TAttribute>(t, flags);
+			var          matches = new List<MethodInfo>();
 			foreach (MethodInfo v in methods) {
 				if (v.Name == name) {
 					matches.Add(v);

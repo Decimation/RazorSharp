@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Native;
+using RazorSharp.Native.Enums;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -35,6 +36,7 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public static unsafe class Mem
 	{
+		// todo: make all consts match SCREAMING_SNAKE_CASE
 		private const  byte Int32Bits       = 32;
 		internal const int  BytesInKilobyte = 1024;
 
@@ -249,6 +251,8 @@ namespace RazorSharp.Memory
 
 
 		#region Read / write
+		
+		
 
 		/// <summary>
 		///     Reinterprets <paramref name="value" /> of type <typeparamref name="TFrom" /> as a value of type
@@ -288,6 +292,8 @@ namespace RazorSharp.Memory
 		{
 			return ref CSUnsafe.AsRef<T>(PointerUtils.Add(p, byteOffset).ToPointer());
 		}
+		
+		
 
 		#endregion
 

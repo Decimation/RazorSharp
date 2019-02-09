@@ -13,6 +13,7 @@ using RazorSharp.Common;
 using RazorSharp.Native;
 using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
+using Serilog.Context;
 
 #endregion
 
@@ -22,6 +23,8 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.Memory
 {
+	// todo: make a memory scanner (sigscanner for memory rather than sigs)
+	
 	/// <summary>
 	///     Edited by Decimation (not entirely original)
 	/// </summary>
@@ -41,8 +44,9 @@ namespace RazorSharp.Memory
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private bool PatternCheck(long nOffset, IReadOnlyList<byte> arrPattern)
+		private bool PatternCheck(long nOffset, IReadOnlyList<byte> arrPattern, int byteTolerance = 0)
 		{
+			int failedMatches = 0;
 			// ReSharper disable once LoopCanBeConvertedToQuery
 			for (int i = 0; i < arrPattern.Count; i++) {
 				if (arrPattern[i] == 0x0) {
@@ -50,12 +54,22 @@ namespace RazorSharp.Memory
 				}
 
 				if (arrPattern[i] != m_rgModuleBuffer[nOffset + i]) {
-					return false;
+					failedMatches++;
+					if (failedMatches > byteTolerance)
+						return false;
 				}
 			}
 
+
+			using (LogContext.PushProperty(Global.CONTEXT_PROP,"SigScanner")) {
+				Global.Log.Debug("Failed bytes: {Count} (tolerance: {N})", failedMatches, byteTolerance);
+			}
+			
+			if (failedMatches <= byteTolerance) return true;
 			return true;
 		}
+
+		
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void ModuleCheck()
@@ -71,13 +85,13 @@ namespace RazorSharp.Memory
 		/// <param name="rgPattern"></param>
 		/// <param name="ofsGuess"></param>
 		/// <returns><see cref="IntPtr.Zero" /> if the pattern could not be found</returns>
-		public IntPtr FindPattern(byte[] rgPattern, long ofsGuess = 0)
+		public IntPtr FindPattern(byte[] rgPattern, long ofsGuess = 0, int byteTolerance = 0)
 		{
 			ModuleCheck();
 			bool ofsGuessFailed = false;
 
 			if (ofsGuess != 0) {
-				if (PatternCheck(ofsGuess, rgPattern)) {
+				if (PatternCheck(ofsGuess, rgPattern, byteTolerance)) {
 					return PointerUtils.Add(m_lpModuleBase, ofsGuess).Address;
 				}
 
@@ -109,7 +123,7 @@ namespace RazorSharp.Memory
 			return IntPtr.Zero;
 		}
 
-		public IntPtr FindPattern(string szPattern, long ofsGuess = 0)
+		public IntPtr FindPattern(string szPattern, long ofsGuess = 0, int byteTolerance = 0)
 		{
 			ModuleCheck();
 
@@ -118,11 +132,13 @@ namespace RazorSharp.Memory
 			byte[] arrPattern = Strings.ParseByteArray(szPattern);
 
 			Debug.Assert(arrPattern != null);
-			var p = FindPattern(arrPattern, ofsGuess);
+			var p = FindPattern(arrPattern, ofsGuess, byteTolerance);
 
 			return p;
 		}
 
+		// todo: add byteTolerance params
+		
 		public static IntPtr QuickScan(string module, string szPattern, long ofsGuess = 0)
 		{
 			return QuickScan(module, Strings.ParseByteArray(szPattern), ofsGuess);

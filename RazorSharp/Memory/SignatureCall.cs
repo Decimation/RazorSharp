@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RazorSharp.CLR;
 using RazorSharp.Common;
+using Serilog.Context;
 
 #endregion
 
@@ -24,68 +25,6 @@ using RazorSharp.Common;
 
 namespace RazorSharp.Memory
 {
-
-
-	/// <inheritdoc />
-	/// <summary>
-	///     <para>
-	///         Indicates that the attributed function is exposed via signature scanning (using
-	///         <see cref="T:RazorSharp.Memory.SigScanner" /> internally).
-	///     </para>
-	///     <para>
-	///         The annotated method's entry point (<see cref="RazorSharp.CLR.Structures.MethodDesc.Function" />)
-	///         will be set (<see cref="ClrFunctions.SetStableEntryPoint" />) to the address of the matched signature found by
-	///         <see cref="SigScanner" />.
-	///     </para>
-	///     <para>This allows the calling of non-exported DLL functions, so long as the function signature matches.</para>
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Method)]
-	public class SigcallAttribute : Attribute
-	{
-
-		/// <summary>
-		/// </summary>
-		public bool IsInFunctionMap;
-
-		/// <summary>
-		///     Module (DLL) containing <see cref="Signature" />
-		/// </summary>
-		public string Module;
-
-		/// <summary>
-		///     Relative to the module's <see cref="SigScanner.BaseAddress" />
-		/// </summary>
-		public long OffsetGuess;
-
-		/// <summary>
-		///     Unique byte-sequence-string signature of the function
-		/// </summary>
-		public string Signature;
-
-		public SigcallAttribute() { }
-
-		public SigcallAttribute(string module, string signature)
-		{
-			Module          = module;
-			Signature       = signature;
-			IsInFunctionMap = false;
-		}
-	}
-
-	/// <inheritdoc />
-	/// <summary>
-	///     <see cref="T:RazorSharp.Memory.SigcallAttribute" /> for module <see cref="ClrFunctions.CLR_DLL" />
-	/// </summary>
-	public class ClrSigcallAttribute : SigcallAttribute
-	{
-		public ClrSigcallAttribute() : base(ClrFunctions.CLR_DLL, null)
-		{
-			IsInFunctionMap = true;
-		}
-
-		public ClrSigcallAttribute(string signature) : base(ClrFunctions.CLR_DLL, signature) { }
-	}
-
 	// todo: WIP
 	// todo: make caching more efficient
 
@@ -132,13 +71,16 @@ namespace RazorSharp.Memory
 
 		private static IntPtr GetCorrespondingFunctionPointer(SigcallAttribute attr, MethodInfo methodInfo)
 		{
-			
-			IntPtr fn = attr.IsInFunctionMap
-				? SigScanner.FindPattern(SigcallMethodMap[methodInfo].Item1,
-					attr.OffsetGuess == 0 ? SigcallMethodMap[methodInfo].Item2 : attr.OffsetGuess)
-				: SigScanner.FindPattern(attr.Signature, attr.OffsetGuess);
+			const int BYTE_TOL = 3;
 
-			return fn;
+
+			return attr.IsInFunctionMap
+				? SigScanner.FindPattern(SigcallMethodMap[methodInfo].Item1,
+					attr.OffsetGuess == 0
+						? SigcallMethodMap[methodInfo].Item2
+						: attr.OffsetGuess, BYTE_TOL)
+				: SigScanner.FindPattern(attr.Signature, attr.OffsetGuess, BYTE_TOL);
+			;
 		}
 
 
@@ -156,7 +98,14 @@ namespace RazorSharp.Memory
 				}
 
 
-				IntPtr fn = GetCorrespondingFunctionPointer(attr, methodInfo);
+				var fn = GetCorrespondingFunctionPointer(attr, methodInfo);
+				using (SignatureCallLogContext) {
+					Global.Log.Debug("Binding {Name} to {Addr:X}", methodInfo.Name, fn.ToInt64());
+					if (fn == IntPtr.Zero) {
+						Global.Log.Warning("Could not resolve address for func {Name}", methodInfo.Name);
+					}
+				}
+
 
 				ClrFunctions.SetStableEntryPoint(methodInfo, fn);
 
@@ -168,6 +117,17 @@ namespace RazorSharp.Memory
 #endif
 			}
 		}
+
+		#region Serilog
+
+		// todo: maybe follow this pattern for other classes
+
+		private static IDisposable SignatureCallLogContext =>
+			LogContext.PushProperty(Global.CONTEXT_PROP, CONTEXT_PROP_TAG);
+
+		private const string CONTEXT_PROP_TAG = "SignatureCall";
+
+		#endregion
 
 		#region IsBound
 
@@ -294,23 +254,20 @@ namespace RazorSharp.Memory
 			string js = Get(url);
 			Debug.Assert(!string.IsNullOrWhiteSpace(js));
 			foreach (var type in t) {
-				
 				ReadCacheJson(type, js);
 			}
 		}
 
 		public static void ReadCacheJsonUrl(Type t, string url)
 		{
-			ReadCacheJsonUrl(new []{t},url);
+			ReadCacheJsonUrl(new[] {t}, url);
 		}
 
 		public static void ReadCacheJson(Type t, string json)
 		{
-			
 			var js = JObject.Parse(json).GetValue(t.Name);
 			var r  = (List<Data>) js.ToObject(typeof(List<Data>));
 
-			
 
 			foreach (Data data in r) {
 				CacheFunction(t, data.Name, Strings.ParseByteArray(data.OpcodesSignature),
@@ -322,22 +279,16 @@ namespace RazorSharp.Memory
 
 		internal class Data
 		{
-			[JsonProperty("name")]
-			internal string Name { get; set; }
+			[JsonProperty("name")] internal string Name { get; set; }
 
-			[JsonProperty("opcodes")]
-			internal string OpcodesSignature { get; set; }
+			[JsonProperty("opcodes")] internal string OpcodesSignature { get; set; }
 
-			[JsonProperty("offset")]
-			internal string OffsetString { get; set; }
+			[JsonProperty("offset")] internal string OffsetString { get; set; }
 
 			public override string ToString()
 			{
 				return string.Format("Name: {0}\nOpcodes: {1}\nOffset: {2}\n", Name, OpcodesSignature, OffsetString);
 			}
 		}
-
-
 	}
-
 }

@@ -24,10 +24,9 @@ namespace RazorSharp.CLR
 
 
 	/// <summary>
-	///     Some CLR functions are too complex to replicate in C# so we'll use <see cref="SigcallAttribute" />
-	///     to execute them.
+	///     Provides an interface for interacting with and calling native CLR functions
 	///     <remarks>
-	///         All functions are WKS, not SVR
+	///         All GC-related functions are WKS, not SVR
 	///     </remarks>
 	/// </summary>
 	internal static unsafe class ClrFunctions

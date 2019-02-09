@@ -103,7 +103,7 @@ namespace RazorSharp.Common
 		{
 			string value = null;
 			var type = t.GetType();
-			if (type.IsIntegerType()) {
+			if (type.IsIntegerType() || t is IntPtr) {
 				long l = long.Parse(t.ToString());
 				value = $"{l:X}";
 				

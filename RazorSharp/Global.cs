@@ -1,20 +1,29 @@
 using Serilog;
 using Serilog.Core;
+using Serilog.Events;
 
 namespace RazorSharp
 {
 
 	internal static class Global
 	{
-		internal static readonly Logger GLogger;
+		internal static readonly Logger Log;
 
+		internal const string CONTEXT_PROP = "Context";
+		
 		static Global()
 		{
 			var levelSwitch = new LoggingLevelSwitch();
-			GLogger = new LoggerConfiguration()
+			
+			levelSwitch.MinimumLevel = LogEventLevel.Information;
+			
+			Log = new LoggerConfiguration()
+				.Enrich.FromLogContext()
 				.MinimumLevel.ControlledBy(levelSwitch)
-				.WriteTo.ColoredConsole()
+				.WriteTo.ColoredConsole(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{Context}] {Message:lj}{NewLine}{Exception}")
 				.CreateLogger();
+			
+			
 		}
 	}
 

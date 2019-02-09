@@ -22,6 +22,7 @@ namespace RazorSharp.Utilities
 	#endregion
 
 	// todo: verify all new changes work as of Oct 12 2018
+	// todo: find a better solution
 
 	/// <summary>
 	///     Poor man's <see cref="System.Diagnostics.Contracts.Contract" /> because

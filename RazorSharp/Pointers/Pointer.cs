@@ -398,6 +398,21 @@ namespace RazorSharp.Pointers
 			WriteAny(t, elemOffset);
 		}
 
+		#region Safe read
+
+		// todo: verify this works
+		public T SafeRead(int elemOffset = 0)
+		{
+			Kernel32.VirtualProtect(Address,ElementSize+ elemOffset, MemoryProtection.ExecuteReadWrite,
+				out MemoryProtection oldProtect);
+
+			var buf = Read(elemOffset);
+
+			Kernel32.VirtualProtect(Address,ElementSize+ elemOffset, oldProtect, out oldProtect);
+			return buf;
+		}
+
+		#endregion
 		#region Safe write
 
 		/// <summary>
@@ -509,6 +524,18 @@ namespace RazorSharp.Pointers
 		public T[] CopyOut(int elemCnt)
 		{
 			return CopyOut(0, elemCnt);
+		}
+		
+		// todo: verify this works
+		public T[] SafeCopyOut(int elemCnt)
+		{
+			Kernel32.VirtualProtect(Address,elemCnt * ElementSize, MemoryProtection.ExecuteReadWrite,
+				out MemoryProtection oldProtect);
+
+			var buf = CopyOut(elemCnt);
+
+			Kernel32.VirtualProtect(Address,elemCnt * ElementSize, oldProtect, out oldProtect);
+			return buf;
 		}
 
 		#endregion

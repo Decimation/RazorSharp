@@ -15,6 +15,7 @@ using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using Pastel;
 using RazorSharp;
 using RazorSharp.Analysis;
@@ -25,6 +26,7 @@ using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Native;
+using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
@@ -124,16 +126,134 @@ namespace Test
 //			Functions.Hook(target, replacement);
 //			Debug.Assert(AddOp(1,2) == -1);
 
+
+			Console.WriteLine(AddressOfFunction(typeof(Program), "Main"));
+			Console.WriteLine(Kernel32.VirtualQuery(new IntPtr(&f)));
+			var stackPage = Kernel32.VirtualQuery(Mem.StackBase);
+			Console.WriteLine(stackPage);
+
+
 			Pointer<string> mptr = Mem.AllocUnmanaged<string>(3);
-			mptr.WriteAll("anime","gf","pls");
+			string[]        rg   = {"anime", "gf", "pls"};
+			mptr.WriteAll(rg);
 			for (int i = 0; i < 3; i++) {
-				Console.Write("ptr[{0}] = {1}\n",i,mptr[i]);
+				Debug.Assert(rg[i] == mptr[i]);
 			}
+
 			Mem.Free(mptr);
 			GC.Collect();
 
 
+			var fmem = MemoryOfVal(f);
+			Debug.Assert(RazorConvert.Convert<float>(fmem) == f);
+			Global.Log.Information("f mem {rg}", Collections.ToString(fmem));
 
+
+			var sfh = Type.GetType("System.Diagnostics.StackFrameHelper");
+			Debug.Assert(sfh != null);
+			var ctor = sfh.GetConstructor(new[] {typeof(Thread)});
+			Debug.Assert(ctor != null);
+			var inst = ctor.Invoke(new[] {Thread.CurrentThread});
+			dump(inst);
+
+			var isi = sfh.GetMethod("InitializeSourceInfo", BindingFlags.Instance | BindingFlags.NonPublic);
+			isi.Invoke(inst, new object[]
+			{
+				0,     // iSkip
+				false, // fNeedFileInfo
+				null   // Exception
+			});
+			dump(inst);
+
+			
+		}
+		
+		
+		static void dump<T>(T t, int recursivePasses = 0)
+		{
+			var fields = Runtime.GetFields(t.GetType());
+
+			var ct = new ConsoleTable("Field", "Type", "Value");
+			foreach (var f in fields) {
+				object val = f.GetValue(t);
+				string valStr;
+				if (f.FieldType == typeof(IntPtr)) {
+					valStr = Hex.TryCreateHex(val);
+				}
+				else if (val != null) {
+					if (val.GetType().IsArray) {
+						valStr = Collections.ToString(((Array)val), ToStringOptions.Hex | ToStringOptions.UseCommas);
+					}
+					else valStr = val.ToString();
+				}
+				else {
+					valStr = "(null)";
+				}
+
+				ct.AddRow(f.Name, f.FieldType.Name, valStr);
+			}
+
+			Console.WriteLine(ct.ToMarkDownString());
+		}
+
+		private static readonly int[] Empty = new int[0];
+
+		private static bool IsEmptyLocate(byte[] array, byte[] candidate)
+		{
+			return array == null
+			       || candidate == null
+			       || array.Length == 0
+			       || candidate.Length == 0
+			       || candidate.Length > array.Length;
+		}
+
+		public static int[] Locate(this byte[] self, byte[] candidate)
+		{
+			if (IsEmptyLocate(self, candidate))
+				return Empty;
+
+			var list = new List<int>();
+
+			for (int i = 0; i < self.Length; i++) {
+				if (!IsMatch(self, i, candidate))
+					continue;
+
+				list.Add(i);
+			}
+
+			return list.Count == 0 ? Empty : list.ToArray();
+		}
+
+		static bool IsMatch(byte[] array, int position, byte[] candidate)
+		{
+			if (candidate.Length > (array.Length - position))
+				return false;
+
+			for (int i = 0; i < candidate.Length; i++)
+				if (array[position + i] != candidate[i])
+					return false;
+
+			return true;
+		}
+
+		static byte[] cop()
+		{
+			var proc = Process.GetCurrentProcess();
+			return Kernel32.ReadCurrentProcessMemory(proc.MainModule.BaseAddress, (int) proc.WorkingSet64);
+		}
+
+		static void get()
+		{
+			Console.ReadLine();
+		}
+
+		static void fn()
+		{
+			int f = 0;
+
+			Console.WriteLine(Unsafe.AddressOf(ref f));
+			Global.Log.Information("{Base:X} {Lim:X} ({sz} b)", Mem.StackBase.ToInt64(), Mem.StackLimit.ToInt64(),
+				Mem.StackSize);
 		}
 
 
