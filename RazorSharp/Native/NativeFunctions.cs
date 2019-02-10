@@ -2,6 +2,8 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorSharp.Memory;
+using RazorSharp.Native.Enums;
 using RazorSharp.Native.Structures;
 
 #endregion
@@ -65,6 +67,32 @@ namespace RazorSharp.Native
 			Kernel32.GetNativeSystemInfo(out SystemInfo systemInfo);
 			uint processorType = Convert.ToUInt32(systemInfo.ProcessorType.ToString(), 16);
 			return processorType;
+		}
+
+		public static void CodeFree(IntPtr fn)
+		{
+			if (!Kernel32.VirtualFree(fn, 0, FreeTypes.Release)) {
+				throw new Exception();
+			}
+		}
+
+		public static IntPtr CodeAlloc(byte[] opCodes)
+		{
+			Kernel32.GetNativeSystemInfo(out SystemInfo si);
+
+			// VirtualAlloc(nullptr, page_size, MEM_COMMIT, PAGE_READWRITE);
+
+			// @formatter:off
+			var alloc = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) si.PageSize, AllocationType.Commit,MemoryProtection.ReadWrite);
+			// @formatter:on
+
+			Mem.Copy(alloc, opCodes);
+
+			// VirtualProtect(buffer, code.size(), PAGE_EXECUTE_READ, &dummy);
+
+			Kernel32.VirtualProtect(alloc, (uint) opCodes.Length, MemoryProtection.ExecuteRead, out _);
+
+			return alloc;
 		}
 	}
 

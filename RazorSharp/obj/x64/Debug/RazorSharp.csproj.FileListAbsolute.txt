@@ -28,14 +28,16 @@ C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.cspr
 C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.dll
 C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.pdb
 C:\Users\Viper\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.csprojAssemblyReference.cache
-C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.csprojAssemblyReference.cache
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.csproj.CoreCompileInputs.cache
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorSharp.dll.config
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorSharp.dll
+C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorSharp.pdb
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Runtime.CompilerServices.Unsafe.dll
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\JetBrains.Annotations.dll
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Newtonsoft.Json.dll
+C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Pastel.dll
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Serilog.dll
+C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Serilog.Enrichers.Context.dll
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Serilog.Sinks.ColoredConsole.dll
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Serilog.Sinks.Console.dll
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Collections.Immutable.dll
@@ -47,7 +49,5 @@ C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Serilog.xml
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Serilog.Sinks.Console.xml
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Collections.Immutable.xml
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.csproj.CopyComplete
-C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorSharp.pdb
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.dll
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.pdb
-C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Pastel.dll

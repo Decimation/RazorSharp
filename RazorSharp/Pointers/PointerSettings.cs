@@ -28,6 +28,7 @@ namespace RazorSharp.Pointers
 		internal const string FMT_P   = "P";
 		internal const string FMT_I   = "I";
 		internal const string FMT_B   = "B";
+		internal const string FMT_N = "N";
 		internal const string NULLPTR = "(null)";
 
 		#endregion

@@ -954,6 +954,7 @@ namespace RazorSharp.Pointers
 		///     <para>
 		///         <c>"B"</c>: Both <c>"P"</c> and <c>"O"</c>
 		///     </para>
+		/// 	<para><c>"N"</c>: 64-bit integer (<see cref="ToInt64"/>) </para>
 		/// </param>
 		/// <param name="formatProvider"></param>
 		/// <returns></returns>
@@ -970,6 +971,8 @@ namespace RazorSharp.Pointers
 
 
 			switch (format.ToUpperInvariant()) {
+				case PointerSettings.FMT_N:
+					return ToInt64().ToString();
 				case PointerSettings.FMT_O:
 					return ToStringSafe();
 

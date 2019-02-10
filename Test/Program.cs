@@ -26,6 +26,7 @@ using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Common;
 using RazorSharp.Memory;
 using RazorSharp.Native;
+using RazorSharp.Native.Enums;
 using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -116,7 +117,8 @@ namespace Test
 
 		public static void Main(string[] args)
 		{
-			ClrFunctions.init();
+			Debug.Assert(IntPtr.Size == 8);
+//			ClrFunctions.init();
 			float f   = 3.14f;
 			var   ptr = Unsafe.AddressOf(ref f);
 			Console.WriteLine("&f = {0}", ptr);
@@ -127,11 +129,9 @@ namespace Test
 //			Debug.Assert(AddOp(1,2) == -1);
 
 
-			Console.WriteLine(AddressOfFunction(typeof(Program), "Main"));
-			Console.WriteLine(Kernel32.VirtualQuery(new IntPtr(&f)));
-			var stackPage = Kernel32.VirtualQuery(Mem.StackBase);
-			Console.WriteLine(stackPage);
+			
 
+			#region Alloc unmanaged test
 
 			Pointer<string> mptr = Mem.AllocUnmanaged<string>(3);
 			string[]        rg   = {"anime", "gf", "pls"};
@@ -143,32 +143,60 @@ namespace Test
 			Mem.Free(mptr);
 			GC.Collect();
 
+			#endregion
 
 			var fmem = MemoryOfVal(f);
 			Debug.Assert(RazorConvert.Convert<float>(fmem) == f);
 			Global.Log.Information("f mem {rg}", Collections.ToString(fmem));
 
 
-			var sfh = Type.GetType("System.Diagnostics.StackFrameHelper");
-			Debug.Assert(sfh != null);
-			var ctor = sfh.GetConstructor(new[] {typeof(Thread)});
-			Debug.Assert(ctor != null);
-			var inst = ctor.Invoke(new[] {Thread.CurrentThread});
-			dump(inst);
+			#region Get RSP
 
-			var isi = sfh.GetMethod("InitializeSourceInfo", BindingFlags.Instance | BindingFlags.NonPublic);
-			isi.Invoke(inst, new object[]
-			{
-				0,     // iSkip
-				false, // fNeedFileInfo
-				null   // Exception
-			});
-			dump(inst);
+			byte[] opCodes = {0x48, 0x89, 0xE0, 0x48, 0x83, 0xC0, 0x08, 0xC3};
+
+			var code = NativeFunctions.CodeAlloc(opCodes);
+
+			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRSP>(code)();
+			Console.WriteLine("rsp: {0:P}", rsp);
+			Console.WriteLine("rsp: {0:P}", rsp+0xB0);
+			Pointer<float> fptr = &f;
+
+			Console.WriteLine("diff {0:N}", fptr - rsp);
+			NativeFunctions.CodeFree(code);
+
+			#endregion
+
+
+			var rsp2 = getRSP();
+			Console.WriteLine("_rsp {0:P}", rsp2);
+
+			Debug.Assert(rsp2 == rsp);
+		}
+
+		static Pointer<byte> getRSP()
+		{
+			byte[] opCodes = { 0x48, 0x89, 0xE0, 0x48, 0x83, 0xC0, 0x08, 0xC3 };
+
+			var code = NativeFunctions.CodeAlloc(opCodes);
+
+			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRSP>(code)();
 
 			
+			//rsp += 0xB0; //
+			rsp += 150;
+			rsp += 0xCA;
+			
+
+
+
+			NativeFunctions.CodeFree(code);
+			return rsp;
 		}
-		
-		
+
+
+		delegate IntPtr GetRSP();
+
+
 		static void dump<T>(T t, int recursivePasses = 0)
 		{
 			var fields = Runtime.GetFields(t.GetType());
@@ -182,7 +210,7 @@ namespace Test
 				}
 				else if (val != null) {
 					if (val.GetType().IsArray) {
-						valStr = Collections.ToString(((Array)val), ToStringOptions.Hex | ToStringOptions.UseCommas);
+						valStr = Collections.ToString(((Array) val), ToStringOptions.Hex | ToStringOptions.UseCommas);
 					}
 					else valStr = val.ToString();
 				}
