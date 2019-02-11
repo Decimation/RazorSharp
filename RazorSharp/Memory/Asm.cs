@@ -26,6 +26,7 @@ namespace RazorSharp.Memory
 	/// <summary>
 	///     Class for executing Assembly code
 	/// </summary>
+	[Obsolete]
 	public static unsafe class Asm
 	{
 

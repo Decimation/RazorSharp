@@ -119,46 +119,35 @@ namespace Test
 		public static void Main(string[] args)
 		{
 			PointerSettings.DefaultFormat = PointerSettings.FMT_P;
-			
-			#region Get RSP
 
-			byte[] opCodes = {0x48, 0x89, 0xE0, 0x48, 0x83, 0xC0, 0x08, 0xC3};
-
-			var code = NativeFunctions.CodeAlloc(opCodes);
-
-			Pointer<byte> rsp1 = Marshal.GetDelegateForFunctionPointer<GetRSP>(code)();
-			var rsp1Alt = rsp1 + 0xB0;
-			
 			using (LogContext.PushProperty(Global.CONTEXT_PROP, "Main")) {
-				Global.Log.Information("rsp: {Ptr}", rsp1);
-				Global.Log.Information("rsp + 0xB0: {Ptr}", rsp1Alt);
-				Global.Log.Information("rsp__: {Ptr}", getRSP());
-			}
-			
-			NativeFunctions.CodeFree(code);
-
-			#endregion
-
-
-			var rsp2 = getRSP();
-			using (LogContext.PushProperty(Global.CONTEXT_PROP, "Main")) {
-				Global.Log.Information("getRSP(): {Ptr}",rsp2);
+				Global.Log.Information("Stack base {Ptr}", (Pointer<byte>) Mem.StackBase);
 			}
 
-			Debug.Assert(rsp2 == rsp1Alt);
+
+			var rsp = getRSP();
+			using (LogContext.PushProperty(Global.CONTEXT_PROP, "Main")) {
+				Global.Log.Information("getRSP(): {Ptr}", rsp);
+			}
+
+//			Debug.Assert(rsp2 == rsp1Alt);
 			testRSP();
 
-			Console.ReadLine();
-			using (LogContext.PushProperty(Global.CONTEXT_PROP, "Main"))
-			{
+//			Console.ReadLine();
+			using (LogContext.PushProperty(Global.CONTEXT_PROP, "Main")) {
 				Global.Log.Information("getRSP(): {Ptr}", getRSP());
 			}
-			Global.Log.Information("{Helo:X}",new Pointer<byte>());
 		}
+
 
 		static void testRSP()
 		{
-			byte[] opCodes = {0x48, 0x89, 0xE0, 0x48, 0x83, 0xC0, 0x08, 0xC3};
+			byte[] opCodes =
+			{
+				0x48, 0x89, 0xE0,       // mov 		rax,rsp
+				0x48, 0x83, 0xC0, 0x08, // add    	rax,0x8
+				0xC3                    // ret
+			};
 
 			var code = NativeFunctions.CodeAlloc(opCodes);
 
@@ -166,22 +155,27 @@ namespace Test
 			using (LogContext.PushProperty(Global.CONTEXT_PROP, "testRSP")) {
 				Global.Log.Information("rsp: {Ptr}", rsp);
 				Global.Log.Information("rsp + 0xB0: {Ptr}", rsp + 0xB0);
-				Global.Log.Information("getRSP(): {Ptr}",getRSP());
+				Global.Log.Information("getRSP(): {Ptr}", getRSP());
 			}
-			
+
 			NativeFunctions.CodeFree(code);
 		}
 
 		static Pointer<byte> getRSP()
 		{
-			byte[] opCodes = {0x48, 0x89, 0xE0, 0x48, 0x83, 0xC0, 0x08, 0xC3};
+			byte[] opCodes =
+			{
+				0x48, 0x89, 0xE0,       // mov 		rax,rsp
+				0x48, 0x83, 0xC0, 0x08, // add    	rax,0x8
+				0xC3                    // ret
+			};
 
 			var code = NativeFunctions.CodeAlloc(opCodes);
 
 			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRSP>(code)();
 
 
-			//rsp += 0xB0; //
+			// rsp += 0xB0; //
 			rsp += 150;
 			rsp += 0xCA;
 
