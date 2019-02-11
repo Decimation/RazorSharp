@@ -168,9 +168,26 @@ namespace Test
 
 
 			var rsp2 = getRSP();
-			Console.WriteLine("_rsp {0:P}", rsp2);
+			Console.WriteLine("rsp2 {0:P}", rsp2);
 
-			Debug.Assert(rsp2 == rsp);
+			
+
+			testRSP();
+
+			Console.ReadLine();
+		}
+
+		static void testRSP()
+		{
+			byte[] opCodes = { 0x48, 0x89, 0xE0, 0x48, 0x83, 0xC0, 0x08, 0xC3 };
+
+			var code = NativeFunctions.CodeAlloc(opCodes);
+
+			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRSP>(code)();
+			Console.WriteLine("rsp: {0:P}", rsp);
+			Console.WriteLine("rsp: {0:P}", rsp + 0xB0);
+			Console.WriteLine("rsp2 {0:P}", getRSP());
+			NativeFunctions.CodeFree(code);
 		}
 
 		static Pointer<byte> getRSP()
