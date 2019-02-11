@@ -19,8 +19,9 @@ namespace RazorSharp
 			
 			Log = new LoggerConfiguration()
 				.Enrich.FromLogContext()
+				.Enrich.WithThreadId()
 				.MinimumLevel.ControlledBy(levelSwitch)
-				.WriteTo.ColoredConsole(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{Context}] {Message:lj}{NewLine}{Exception}")
+				.WriteTo.ColoredConsole(outputTemplate: "[{Timestamp:HH:mm:ss} ({ThreadId}) {Level:u3}] [{Context}] {Message:lj}{NewLine}{Exception}")
 				.CreateLogger();
 			
 			

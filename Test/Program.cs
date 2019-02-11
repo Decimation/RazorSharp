@@ -136,7 +136,12 @@ namespace Test
 //			Console.ReadLine();
 			using (LogContext.PushProperty(Global.CONTEXT_PROP, "Main")) {
 				Global.Log.Information("getRSP(): {Ptr}", getRSP());
+				
 			}
+
+
+			
+			Console.ReadLine();
 		}
 
 
@@ -178,6 +183,7 @@ namespace Test
 			// rsp += 0xB0; //
 			rsp += 150;
 			rsp += 0xCA;
+			rsp -= 0x3A8; // Subtracting this offset makes RSP match in WinDbg but breaks it in VS registers view?
 
 
 			NativeFunctions.CodeFree(code);
