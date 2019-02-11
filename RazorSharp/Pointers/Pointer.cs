@@ -962,7 +962,7 @@ namespace RazorSharp.Pointers
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			if (string.IsNullOrEmpty(format)) {
-				format = PointerSettings.FMT_B;
+				format = PointerSettings.DefaultFormat;
 			}
 
 			if (formatProvider == null) {
@@ -1045,7 +1045,7 @@ namespace RazorSharp.Pointers
 		[Pure]
 		public override string ToString()
 		{
-			return ToString(PointerSettings.FMT_B);
+			return ToString(PointerSettings.DefaultFormat);
 		}
 
 		#endregion

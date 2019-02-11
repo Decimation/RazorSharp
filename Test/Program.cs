@@ -31,6 +31,7 @@ using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
+using Serilog.Context;
 using static RazorSharp.Unsafe;
 using Functions = RazorSharp.Memory.Functions;
 using Unsafe = RazorSharp.Unsafe;
@@ -117,93 +118,72 @@ namespace Test
 
 		public static void Main(string[] args)
 		{
-			Debug.Assert(IntPtr.Size == 8);
-//			ClrFunctions.init();
-			float f   = 3.14f;
-			var   ptr = Unsafe.AddressOf(ref f);
-			Console.WriteLine("&f = {0}", ptr);
-
-//			var target      = typeof(Program).GetMethod("AddOp", BindingFlags.Static | BindingFlags.NonPublic);
-//			var replacement = typeof(Program).GetMethod("SubOp", BindingFlags.Static | BindingFlags.NonPublic);			
-//			Functions.Hook(target, replacement);
-//			Debug.Assert(AddOp(1,2) == -1);
-
-
+			PointerSettings.DefaultFormat = PointerSettings.FMT_P;
 			
-
-			#region Alloc unmanaged test
-
-			Pointer<string> mptr = Mem.AllocUnmanaged<string>(3);
-			string[]        rg   = {"anime", "gf", "pls"};
-			mptr.WriteAll(rg);
-			for (int i = 0; i < 3; i++) {
-				Debug.Assert(rg[i] == mptr[i]);
-			}
-
-			Mem.Free(mptr);
-			GC.Collect();
-
-			#endregion
-
-			var fmem = MemoryOfVal(f);
-			Debug.Assert(RazorConvert.Convert<float>(fmem) == f);
-			Global.Log.Information("f mem {rg}", Collections.ToString(fmem));
-
-
 			#region Get RSP
 
 			byte[] opCodes = {0x48, 0x89, 0xE0, 0x48, 0x83, 0xC0, 0x08, 0xC3};
 
 			var code = NativeFunctions.CodeAlloc(opCodes);
 
-			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRSP>(code)();
-			Console.WriteLine("rsp: {0:P}", rsp);
-			Console.WriteLine("rsp: {0:P}", rsp+0xB0);
-			Pointer<float> fptr = &f;
-
-			Console.WriteLine("diff {0:N}", fptr - rsp);
+			Pointer<byte> rsp1 = Marshal.GetDelegateForFunctionPointer<GetRSP>(code)();
+			var rsp1Alt = rsp1 + 0xB0;
+			
+			using (LogContext.PushProperty(Global.CONTEXT_PROP, "Main")) {
+				Global.Log.Information("rsp: {Ptr}", rsp1);
+				Global.Log.Information("rsp + 0xB0: {Ptr}", rsp1Alt);
+				Global.Log.Information("rsp__: {Ptr}", getRSP());
+			}
+			
 			NativeFunctions.CodeFree(code);
 
 			#endregion
 
 
 			var rsp2 = getRSP();
-			Console.WriteLine("rsp2 {0:P}", rsp2);
+			using (LogContext.PushProperty(Global.CONTEXT_PROP, "Main")) {
+				Global.Log.Information("getRSP(): {Ptr}",rsp2);
+			}
 
-			
-
+			Debug.Assert(rsp2 == rsp1Alt);
 			testRSP();
 
 			Console.ReadLine();
+			using (LogContext.PushProperty(Global.CONTEXT_PROP, "Main"))
+			{
+				Global.Log.Information("getRSP(): {Ptr}", getRSP());
+			}
+			Global.Log.Information("{Helo:X}",new Pointer<byte>());
 		}
 
 		static void testRSP()
 		{
-			byte[] opCodes = { 0x48, 0x89, 0xE0, 0x48, 0x83, 0xC0, 0x08, 0xC3 };
+			byte[] opCodes = {0x48, 0x89, 0xE0, 0x48, 0x83, 0xC0, 0x08, 0xC3};
 
 			var code = NativeFunctions.CodeAlloc(opCodes);
 
 			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRSP>(code)();
-			Console.WriteLine("rsp: {0:P}", rsp);
-			Console.WriteLine("rsp: {0:P}", rsp + 0xB0);
-			Console.WriteLine("rsp2 {0:P}", getRSP());
+			using (LogContext.PushProperty(Global.CONTEXT_PROP, "testRSP")) {
+				Global.Log.Information("rsp: {Ptr}", rsp);
+				Global.Log.Information("rsp + 0xB0: {Ptr}", rsp + 0xB0);
+				Global.Log.Information("getRSP(): {Ptr}",getRSP());
+			}
+			
 			NativeFunctions.CodeFree(code);
 		}
 
 		static Pointer<byte> getRSP()
 		{
-			byte[] opCodes = { 0x48, 0x89, 0xE0, 0x48, 0x83, 0xC0, 0x08, 0xC3 };
+			byte[] opCodes = {0x48, 0x89, 0xE0, 0x48, 0x83, 0xC0, 0x08, 0xC3};
 
 			var code = NativeFunctions.CodeAlloc(opCodes);
 
 			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRSP>(code)();
 
-			
+
 			//rsp += 0xB0; //
 			rsp += 150;
 			rsp += 0xCA;
-			
-
 
 
 			NativeFunctions.CodeFree(code);

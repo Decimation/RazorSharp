@@ -22,6 +22,8 @@ namespace RazorSharp.Pointers
 		/// </summary>
 		public static bool RetainTagValue { get; set; }
 
+		public static string DefaultFormat = FMT_B;
+
 		#region Format specifiers
 
 		internal const string FMT_O   = "O";
