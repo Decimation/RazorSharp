@@ -8,7 +8,6 @@ using RazorSharp.Common;
 
 namespace Test.Testing.Tests.Metadata
 {
-
 	public static class ClrMetaTests
 	{
 		public static void GC()
@@ -110,5 +109,4 @@ namespace Test.Testing.Tests.Metadata
 			return true;
 		}
 	}
-
 }

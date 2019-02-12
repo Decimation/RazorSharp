@@ -6,7 +6,6 @@ using System;
 
 namespace RazorSharp.CLR.Meta
 {
-
 	public static class Meta
 	{
 		public static MetaType GetType<T>()
@@ -19,5 +18,4 @@ namespace RazorSharp.CLR.Meta
 			return new MetaType(t.GetMethodTable());
 		}
 	}
-
 }

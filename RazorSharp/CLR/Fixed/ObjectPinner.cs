@@ -7,7 +7,6 @@ using System.Reflection.Emit;
 
 namespace RazorSharp.CLR.Fixed
 {
-
 	/// <summary>
 	///     Pins an object in memory even if the type is unblittable.
 	///     <remarks>
@@ -20,13 +19,13 @@ namespace RazorSharp.CLR.Fixed
 
 		private static Action<object, Action<object>> CreatePinImpl()
 		{
-			DynamicMethod method = new DynamicMethod("InvokeWhilePinnedImpl", typeof(void),
+			var method = new DynamicMethod("InvokeWhilePinnedImpl", typeof(void),
 				new[] {typeof(object), typeof(Action<object>)}, typeof(ObjectPinner).Module);
-			ILGenerator il = method.GetILGenerator();
+			var il = method.GetILGenerator();
 
 			// create a pinned local variable of type object
 			// this wouldn't be valid in C#, but the runtime doesn't complain about the IL
-			LocalBuilder local = il.DeclareLocal(typeof(object), true);
+			var local = il.DeclareLocal(typeof(object), true);
 
 
 			// store first argument obj in the pinned local variable
@@ -53,5 +52,4 @@ namespace RazorSharp.CLR.Fixed
 			PinImpl(obj, action);
 		}
 	}
-
 }

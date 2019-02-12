@@ -14,7 +14,6 @@ using RazorSharp.Common;
 
 namespace RazorSharp.CLR.Structures
 {
-
 	#region
 
 	using WORD = UInt16;
@@ -31,7 +30,6 @@ namespace RazorSharp.CLR.Structures
 	[StructLayout(LayoutKind.Explicit)]
 	internal struct DWFlags
 	{
-
 		#region Fields
 
 		[FieldOffset(0)] private readonly WORD m_componentSize;
@@ -53,7 +51,7 @@ namespace RazorSharp.CLR.Structures
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Component size", m_componentSize);
 			table.AddRow("Flags", m_flags);
 
@@ -65,7 +63,7 @@ namespace RazorSharp.CLR.Structures
 		public override bool Equals(object obj)
 		{
 			if (obj?.GetType() == GetType()) {
-				DWFlags dwOther = (DWFlags) obj;
+				var dwOther = (DWFlags) obj;
 				return m_componentSize == dwOther.m_componentSize && m_flags == dwOther.m_flags;
 			}
 
@@ -95,7 +93,5 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		#endregion
-
 	}
-
 }

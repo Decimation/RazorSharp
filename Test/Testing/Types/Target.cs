@@ -1,6 +1,5 @@
 namespace Test.Testing.Types
 {
-
 	public class Target
 	{
 		private int m_value;
@@ -37,7 +36,5 @@ namespace Test.Testing.Types
 			t.add(i);
 			return t;
 		}
-
 	}
-
 }

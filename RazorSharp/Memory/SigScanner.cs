@@ -5,13 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.Common;
 using RazorSharp.Native;
-using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
 using Serilog.Context;
 
@@ -24,7 +22,7 @@ using Serilog.Context;
 namespace RazorSharp.Memory
 {
 	// todo: make a memory scanner (sigscanner for memory rather than sigs)
-	
+
 	/// <summary>
 	///     Edited by Decimation (not entirely original)
 	/// </summary>
@@ -49,9 +47,7 @@ namespace RazorSharp.Memory
 			int failedMatches = 0;
 			// ReSharper disable once LoopCanBeConvertedToQuery
 			for (int i = 0; i < arrPattern.Count; i++) {
-				if (arrPattern[i] == 0x0) {
-					continue;
-				}
+				if (arrPattern[i] == 0x0) continue;
 
 				if (arrPattern[i] != m_rgModuleBuffer[nOffset + i]) {
 					failedMatches++;
@@ -61,22 +57,20 @@ namespace RazorSharp.Memory
 			}
 
 
-			using (LogContext.PushProperty(Global.CONTEXT_PROP,"SigScanner")) {
+			using (LogContext.PushProperty(Global.CONTEXT_PROP, "SigScanner")) {
 				Global.Log.Debug("Failed bytes: {Count} (tolerance: {N})", failedMatches, byteTolerance);
 			}
-			
+
 			if (failedMatches <= byteTolerance) return true;
 			return true;
 		}
 
-		
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void ModuleCheck()
 		{
-			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero) {
+			if (m_rgModuleBuffer == null || m_lpModuleBase == IntPtr.Zero)
 				throw new Exception("Selected module is null");
-			}
 		}
 
 		/// <summary>
@@ -91,9 +85,8 @@ namespace RazorSharp.Memory
 			bool ofsGuessFailed = false;
 
 			if (ofsGuess != 0) {
-				if (PatternCheck(ofsGuess, rgPattern, byteTolerance)) {
+				if (PatternCheck(ofsGuess, rgPattern, byteTolerance))
 					return PointerUtils.Add(m_lpModuleBase, ofsGuess).Address;
-				}
 
 //					throw new Exception($"Offset guess of {ofsGuess} failed");
 
@@ -102,9 +95,7 @@ namespace RazorSharp.Memory
 			}
 
 			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
-				if (m_rgModuleBuffer[nModuleIndex] != rgPattern[0]) {
-					continue;
-				}
+				if (m_rgModuleBuffer[nModuleIndex] != rgPattern[0]) continue;
 
 
 				if (PatternCheck(nModuleIndex, rgPattern)) {
@@ -138,7 +129,7 @@ namespace RazorSharp.Memory
 		}
 
 		// todo: add byteTolerance params
-		
+
 		public static IntPtr QuickScan(string module, string szPattern, long ofsGuess = 0)
 		{
 			return QuickScan(module, Strings.ParseByteArray(szPattern), ofsGuess);
@@ -146,7 +137,7 @@ namespace RazorSharp.Memory
 
 		public static IntPtr QuickScan(string module, byte[] rgPattern, long ofsGuess = 0)
 		{
-			SigScanner ss = new SigScanner();
+			var ss = new SigScanner();
 			ss.SelectModule(module);
 			return ss.FindPattern(rgPattern, ofsGuess);
 		}
@@ -154,7 +145,7 @@ namespace RazorSharp.Memory
 		public static TDelegate QuickScanDelegate<TDelegate>(string module, byte[] rgPattern, long ofsGuess = 0)
 			where TDelegate : Delegate
 		{
-			SigScanner ss = new SigScanner();
+			var ss = new SigScanner();
 			ss.SelectModule(module);
 			return ss.GetDelegate<TDelegate>(rgPattern, ofsGuess);
 		}
@@ -190,10 +181,9 @@ namespace RazorSharp.Memory
 
 		public TDelegate GetDelegate<TDelegate>(byte[] rgPattern, long ofsGuess = 0) where TDelegate : Delegate
 		{
-			IntPtr addr = FindPattern(rgPattern, ofsGuess);
-			if (addr == IntPtr.Zero) {
+			var addr = FindPattern(rgPattern, ofsGuess);
+			if (addr == IntPtr.Zero)
 				throw new Exception($"Could not find function with opcodes {Collections.ToString(rgPattern)}");
-			}
 
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
 		}
@@ -208,10 +198,10 @@ namespace RazorSharp.Memory
 		{
 			ModuleCheck();
 
-			Stopwatch stopwatch = Stopwatch.StartNew();
+			var stopwatch = Stopwatch.StartNew();
 
-			byte[][] arrBytePatterns = new byte[m_dictStringPatterns.Count][];
-			IntPtr[] arrResult       = new IntPtr[m_dictStringPatterns.Count];
+			var arrBytePatterns = new byte[m_dictStringPatterns.Count][];
+			var arrResult       = new IntPtr[m_dictStringPatterns.Count];
 
 			// PARSE PATTERNS
 			for (int nIndex = 0; nIndex < m_dictStringPatterns.Count; nIndex++)
@@ -220,16 +210,13 @@ namespace RazorSharp.Memory
 			// SCAN FOR PATTERNS
 			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++)
 			for (int nPatternIndex = 0; nPatternIndex < arrBytePatterns.Length; nPatternIndex++) {
-				if (arrResult[nPatternIndex] != IntPtr.Zero) {
-					continue;
-				}
+				if (arrResult[nPatternIndex] != IntPtr.Zero) continue;
 
-				if (PatternCheck(nModuleIndex, arrBytePatterns[nPatternIndex])) {
+				if (PatternCheck(nModuleIndex, arrBytePatterns[nPatternIndex]))
 					arrResult[nPatternIndex] = m_lpModuleBase + nModuleIndex;
-				}
 			}
 
-			Dictionary<string, IntPtr> dictResultFormatted = new Dictionary<string, IntPtr>();
+			var dictResultFormatted = new Dictionary<string, IntPtr>();
 
 			// FORMAT PATTERNS
 			for (int nPatternIndex = 0; nPatternIndex < arrBytePatterns.Length; nPatternIndex++)
@@ -258,9 +245,7 @@ namespace RazorSharp.Memory
 		public void SelectModuleBySegment(string moduleName, string segmentName)
 		{
 			// Module already selected
-			if (moduleName == m_moduleName) {
-				return;
-			}
+			if (moduleName == m_moduleName) return;
 
 			var segment = Segments.GetSegment(segmentName, moduleName);
 			Setup(segment.SectionSize, segment.SectionAddress.Address, moduleName);
@@ -283,9 +268,7 @@ namespace RazorSharp.Memory
 		public void SelectModuleAsPage(string moduleName, Pointer<byte> pageBase)
 		{
 			// Module already selected
-			if (moduleName == m_moduleName) {
-				return;
-			}
+			if (moduleName == m_moduleName) return;
 
 			var page = Kernel32.VirtualQuery(pageBase.Address);
 
@@ -295,9 +278,7 @@ namespace RazorSharp.Memory
 		public bool SelectModule(ProcessModule targetModule)
 		{
 			// Module already selected
-			if (targetModule.ModuleName == m_moduleName) {
-				return true;
-			}
+			if (targetModule.ModuleName == m_moduleName) return true;
 
 			m_lpModuleBase   = targetModule.BaseAddress;
 			m_rgModuleBuffer = new byte[targetModule.ModuleMemorySize];
@@ -314,9 +295,7 @@ namespace RazorSharp.Memory
 		public void SelectModule(string name)
 		{
 			// Module already selected
-			if (name == m_moduleName) {
-				return;
-			}
+			if (name == m_moduleName) return;
 
 			SelectModule(Modules.GetModule(name));
 		}

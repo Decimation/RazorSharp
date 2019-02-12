@@ -15,7 +15,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.CLR.Structures.ILMethods
 {
-
 	/// <summary>
 	///     <para>
 	///         CLR <see cref="FatILMethod" />. Functionality is implemented in this <c>struct</c> and exposed via
@@ -71,7 +70,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		/// </summary>
 		private uint FlagsValue {
 			get {
-				byte* p = (byte*) Unsafe.AddressOf(ref this);
+				var p = (byte*) Unsafe.AddressOf(ref this);
 				return ((uint) *p + 0) | ((((uint) *p + 1) & 0x0F) << 8);
 			}
 		}
@@ -96,7 +95,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		/// </summary>
 		private int Size {
 			get {
-				byte* p = (byte*) Unsafe.AddressOf(ref this);
+				var p = (byte*) Unsafe.AddressOf(ref this);
 				return (*p + 1) >> 4;
 			}
 		}
@@ -110,7 +109,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Flags", Enums.CreateFlagsString(FlagsValue, Flags));
 			table.AddRow("Size", Size);
 			table.AddRow("Code size", CodeSize);
@@ -158,6 +157,4 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		[FieldOffset(4)] internal readonly uint m_codeSize;
 		[FieldOffset(8)] internal readonly uint m_sigTok;
 	}
-
-
 }

@@ -6,7 +6,6 @@ using System;
 
 namespace RazorSharp.Utilities.Exceptions
 {
-
 	/// <inheritdoc />
 	/// <summary>
 	///     CLR-related exception
@@ -16,5 +15,4 @@ namespace RazorSharp.Utilities.Exceptions
 		public RuntimeException() { }
 		public RuntimeException(string msg) : base(msg) { }
 	}
-
 }

@@ -14,14 +14,13 @@ using Test.Testing.Types;
 
 namespace Test.Testing.Tests
 {
-
 	[TestFixture]
 	internal class StructureTests
 	{
 		private static void AssertFieldInfo<TType, TField>(string fieldName,
-			ProtectionLevel prot = ProtectionLevel.Private)
+			ProtectionLevel                                       prot = ProtectionLevel.Private)
 		{
-			FieldInfo fieldActual =
+			var fieldActual =
 				typeof(TType).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
 			Pointer<FieldDesc> fieldDesc = typeof(TType).GetFieldDesc(fieldName);
@@ -44,6 +43,20 @@ namespace Test.Testing.Tests
 			Debug.Assert(fieldDesc.Reference.EnclosingMethodTable == typeof(TType).GetMethodTable());
 		}
 
+
+		private static void AssertMethodInfo<TType>(string fnName)
+		{
+			var methodInfoActual = typeof(TType).GetMethod(fnName,
+				BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic);
+			Pointer<MethodDesc> methodDesc = typeof(TType).GetMethodDesc(fnName);
+
+
+			Debug.Assert(methodDesc.Reference.Info == methodInfoActual);
+			Debug.Assert(methodDesc.Reference.EnclosingMethodTable == typeof(TType).GetMethodTable());
+			Debug.Assert(methodDesc.Reference.Token == methodInfoActual.MetadataToken);
+			Debug.Assert(!methodDesc.Reference.IsConstructor);
+		}
+
 		[Test]
 		public void TestFieldDesc()
 		{
@@ -58,20 +71,5 @@ namespace Test.Testing.Tests
 		{
 			AssertMethodInfo<Dummy>("doSomething");
 		}
-
-
-		private static void AssertMethodInfo<TType>(string fnName)
-		{
-			MethodInfo methodInfoActual = typeof(TType).GetMethod(fnName,
-				BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic);
-			Pointer<MethodDesc> methodDesc = typeof(TType).GetMethodDesc(fnName);
-
-
-			Debug.Assert(methodDesc.Reference.Info == methodInfoActual);
-			Debug.Assert(methodDesc.Reference.EnclosingMethodTable == typeof(TType).GetMethodTable());
-			Debug.Assert(methodDesc.Reference.Token == methodInfoActual.MetadataToken);
-			Debug.Assert(!methodDesc.Reference.IsConstructor);
-		}
 	}
-
 }

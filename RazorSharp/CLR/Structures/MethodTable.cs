@@ -19,7 +19,6 @@ using RazorSharp.Utilities.Exceptions;
 
 namespace RazorSharp.CLR.Structures
 {
-
 	#region
 
 	using DWORD = UInt32;
@@ -62,14 +61,13 @@ namespace RazorSharp.CLR.Structures
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct MethodTable
 	{
-
 		#region Properties and Accessors
 
 		#region Flags
 
 		private DWORD FlagsValue {
 			get {
-				IntPtr dwPtr = Unsafe.AddressOf(ref m_dwFlags).Address;
+				var dwPtr = Unsafe.AddressOf(ref m_dwFlags).Address;
 				return *(DWORD*) dwPtr;
 			}
 		}
@@ -119,9 +117,7 @@ namespace RazorSharp.CLR.Structures
 			// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
 			// for enum_flag_HasIndirectParentMethodTable.
 			get {
-				if (!Flags.HasFlag(MethodTableFlags.HasIndirectParent)) {
-					return m_pParentMethodTable;
-				}
+				if (!Flags.HasFlag(MethodTableFlags.HasIndirectParent)) return m_pParentMethodTable;
 
 				throw new NotImplementedException("Parent is indirect");
 			}
@@ -198,9 +194,7 @@ namespace RazorSharp.CLR.Structures
 		/// <exception cref="RuntimeException">If this is not an array <see cref="MethodTable" />.</exception>
 		internal Pointer<MethodTable> ElementTypeHandle {
 			get {
-				if (IsArray) {
-					return (MethodTable*) m_ElementTypeHnd;
-				}
+				if (IsArray) return (MethodTable*) m_ElementTypeHnd;
 
 				throw new RuntimeException("Element type handles cannot be accessed when type is not an array");
 			}
@@ -310,32 +304,26 @@ namespace RazorSharp.CLR.Structures
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 
 			table.AddRow("Name", RuntimeType.Name);
 			table.AddRow("Base size", m_BaseSize);
 
-			if (HasComponentSize) {
-				table.AddRow("Component size", m_dwFlags.ComponentSize);
-			}
+			if (HasComponentSize) table.AddRow("Component size", m_dwFlags.ComponentSize);
 
 			table.AddRow("Flags", Enums.CreateFlagsString(FlagsValue, Flags));
 			table.AddRow("Flags 2", Enums.CreateFlagsString(Flags2Value, Flags2));
 			table.AddRow("Low flags", Enums.CreateFlagsString(FlagsLowValue, FlagsLow));
 			table.AddRow("Token", Token);
 
-			if (m_pParentMethodTable != null) {
-				table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));
-			}
+			if (m_pParentMethodTable != null) table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));
 
 			table.AddRow("Module", Hex.ToHex(m_pLoaderModule));
 			table.AddRow("Union type", UnionType);
 			table.AddRow("EEClass", Hex.ToHex(EEClass.Address));
 			table.AddRow("Canon MT", Hex.ToHex(Canon.Address));
 
-			if (IsArray) {
-				table.AddRow("Element type handle", Hex.ToHex(m_ElementTypeHnd));
-			}
+			if (IsArray) table.AddRow("Element type handle", Hex.ToHex(m_ElementTypeHnd));
 
 
 			// EEClass fields
@@ -415,16 +403,11 @@ namespace RazorSharp.CLR.Structures
 
 		public override bool Equals(object obj)
 		{
-			if (ReferenceEquals(null, obj)) {
-				return false;
-			}
+			if (ReferenceEquals(null, obj)) return false;
 
 			return obj is MethodTable && Equals((MethodTable) obj);
 		}
 
 		#endregion
-
-
 	}
-
 }

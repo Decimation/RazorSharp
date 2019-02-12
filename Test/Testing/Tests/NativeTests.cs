@@ -9,7 +9,6 @@ using RazorSharp.Native;
 
 namespace Test.Testing.Tests
 {
-
 	[TestFixture]
 	public class NativeTests
 	{
@@ -24,8 +23,5 @@ namespace Test.Testing.Tests
 			Kernel32.WriteCurrentProcessMemory(Unsafe.AddressOf(ref str).Address, "bar");
 			Debug.Assert(str == "bar");
 		}
-
-
 	}
-
 }

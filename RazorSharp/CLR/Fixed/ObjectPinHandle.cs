@@ -6,7 +6,6 @@ using System.Threading;
 
 namespace RazorSharp.CLR.Fixed
 {
-
 	/// <inheritdoc />
 	/// <summary>
 	///     <para>Pins an object on the heap, so its address stays unchanged during the lifetime of this object.</para>
@@ -21,7 +20,6 @@ namespace RazorSharp.CLR.Fixed
 	/// </summary>
 	public class ObjectPinHandle : PinHandle
 	{
-
 		/// <summary>
 		///     Pins an object in a memory and constructs its pin handle.
 		/// </summary>
@@ -30,8 +28,8 @@ namespace RazorSharp.CLR.Fixed
 		{
 			Object = obj;
 
-			using (AutoResetEvent re1 = new AutoResetEvent(false)) {
-				Thread thr = new Thread(
+			using (var re1 = new AutoResetEvent(false)) {
+				var thr = new Thread(
 					delegate()
 					{
 						ObjectPinner.InvokeWhilePinned(obj,
@@ -52,5 +50,4 @@ namespace RazorSharp.CLR.Fixed
 		/// </summary>
 		public object Object { get; }
 	}
-
 }

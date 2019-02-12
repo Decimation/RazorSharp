@@ -9,7 +9,6 @@ using System.Runtime.CompilerServices;
 
 namespace RazorSharp.Common
 {
-
 	public static class Enums
 	{
 		private const string JOIN_ENUM_STR = ", ";
@@ -21,19 +20,17 @@ namespace RazorSharp.Common
 
 		internal static object AsNumeric<T>(T e) where T : Enum
 		{
-			Type underlyingType = Enum.GetUnderlyingType(typeof(T));
+			var underlyingType = Enum.GetUnderlyingType(typeof(T));
 			return Misc.InvokeGenericMethod(typeof(Unsafe), "Unbox", underlyingType, null, e);
 		}
 
 		public static string CreateString<T>(T e) where T : Enum
 		{
-			object asNum    = AsNumeric(e);
+			var    asNum    = AsNumeric(e);
 			string join     = e.ToString();
 			string asNumStr = string.Format("({0})", asNum);
 
-			if (asNum.ToString() == join) {
-				return asNumStr;
-			}
+			if (asNum.ToString() == join) return asNumStr;
 
 			return join.Length == 0 ? asNumStr : string.Format("{0} {1}", join, asNumStr);
 		}
@@ -50,5 +47,4 @@ namespace RazorSharp.Common
 			return join == string.Empty ? $"{num}" : $"{num} ({e.Join()})";
 		}
 	}
-
 }

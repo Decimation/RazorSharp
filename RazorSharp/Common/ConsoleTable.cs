@@ -10,13 +10,11 @@ using System.Text.RegularExpressions;
 
 namespace RazorSharp.Common
 {
-
 	/// <summary>
 	///     Source: https://github.com/khalidabuhakmeh/ConsoleTables
 	/// </summary>
 	public class ConsoleTable
 	{
-
 		public ConsoleTable(params string[] columns)
 			: this(new ConsoleTableOptions {Columns = new List<string>(columns)}) { }
 
@@ -41,18 +39,13 @@ namespace RazorSharp.Common
 
 		public ConsoleTable AddRow(params object[] values)
 		{
-			if (values == null) {
-				throw new ArgumentNullException(nameof(values));
-			}
+			if (values == null) throw new ArgumentNullException(nameof(values));
 
-			if (!Columns.Any()) {
-				throw new Exception("Please set the columns first");
-			}
+			if (!Columns.Any()) throw new Exception("Please set the columns first");
 
-			if (Columns.Count != values.Length) {
+			if (Columns.Count != values.Length)
 				throw new Exception(
 					$"The number columns in the row ({Columns.Count}) does not match the values ({values.Length}");
-			}
 
 			Rows.Add(values);
 			return this;
@@ -110,16 +103,13 @@ namespace RazorSharp.Common
 			// | Size value | 8    | 36        |
 
 
-			for (int i = Rows.Count - 1; i >= 0; i--) {
-				for (int j = Rows[i].Length - 1; j >= 0; j--) {
-					for (int k = 0; k < args.Length; k++) {
-						if (Rows[i][j].Equals(args[k])) {
-							Rows[i] = Collections.RemoveAt(Rows[i], j);
-							Columns.RemoveAt(j);
-						}
-					}
+			for (int i = Rows.Count - 1; i >= 0; i--)
+			for (int j = Rows[i].Length - 1; j >= 0; j--)
+			for (int k = 0; k < args.Length; k++)
+				if (Rows[i][j].Equals(args[k])) {
+					Rows[i] = Collections.RemoveAt(Rows[i], j);
+					Columns.RemoveAt(j);
 				}
-			}
 
 
 			return this;
@@ -129,9 +119,7 @@ namespace RazorSharp.Common
 		public ConsoleTable RemoveColumn(int index)
 		{
 			Columns.RemoveAt(index);
-			for (int i = Rows.Count - 1; i >= 0; i--) {
-				Rows[i] = Collections.RemoveAt(Rows[i], index);
-			}
+			for (int i = Rows.Count - 1; i >= 0; i--) Rows[i] = Collections.RemoveAt(Rows[i], index);
 
 			return this;
 		}
@@ -152,9 +140,7 @@ namespace RazorSharp.Common
 		{
 			AddColumn(new[] {col});
 
-			if (rowval.Length != Rows.Count) {
-				throw new Exception();
-			}
+			if (rowval.Length != Rows.Count) throw new Exception();
 
 			List<object> ls = Rows[0].ToList();
 			ls.AddRange(rowval);
@@ -166,7 +152,7 @@ namespace RazorSharp.Common
 
 		public static ConsoleTable From<T>(IEnumerable<T> values)
 		{
-			ConsoleTable table = new ConsoleTable();
+			var table = new ConsoleTable();
 
 			IEnumerable<string> columns = GetColumns<T>();
 
@@ -181,7 +167,7 @@ namespace RazorSharp.Common
 
 		public override string ToString()
 		{
-			StringBuilder builder = new StringBuilder();
+			var builder = new StringBuilder();
 
 			// find the longest column by searching each row
 			List<int> columnLengths = ColumnLengths();
@@ -229,7 +215,7 @@ namespace RazorSharp.Common
 
 		private string ToMarkDownString(char delimiter)
 		{
-			StringBuilder builder = new StringBuilder();
+			var builder = new StringBuilder();
 
 			// find the longest column by searching each row
 			List<int> columnLengths = ColumnLengths();
@@ -249,9 +235,7 @@ namespace RazorSharp.Common
 
 			// custom subroutine:
 			// remove the first delimiter if the first column is empty
-			if (Columns[0].ToString() == string.Empty) {
-				columnHeaders = ' ' + columnHeaders.Substring(1);
-			}
+			if (Columns[0].ToString() == string.Empty) columnHeaders = ' ' + columnHeaders.Substring(1);
 
 			builder.AppendLine(columnHeaders);
 			builder.AppendLine(divider);
@@ -267,7 +251,7 @@ namespace RazorSharp.Common
 
 		public string ToStringAlternative()
 		{
-			StringBuilder builder = new StringBuilder();
+			var builder = new StringBuilder();
 
 			// find the longest column by searching each row
 			List<int> columnLengths = ColumnLengths();
@@ -362,5 +346,4 @@ namespace RazorSharp.Common
 		Alternative = 2,
 		Minimal     = 3
 	}
-
 }

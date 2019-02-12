@@ -1,6 +1,5 @@
 #region
 
-using System;
 using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
@@ -12,7 +11,6 @@ using RazorSharp.Pointers;
 
 namespace Test.Testing.Tests
 {
-
 	[TestFixture]
 	public class StackAllocateTests
 	{
@@ -24,7 +22,7 @@ namespace Test.Testing.Tests
 
 			public override string ToString()
 			{
-				return String.Format("m_s = [{0}]", m_s);
+				return string.Format("m_s = [{0}]", m_s);
 			}
 		}
 
@@ -53,5 +51,4 @@ namespace Test.Testing.Tests
 			/* << - >> */
 		}
 	}
-
 }

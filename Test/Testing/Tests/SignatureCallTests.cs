@@ -1,6 +1,5 @@
 #region
 
-using System;
 using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp.CLR;
@@ -12,23 +11,9 @@ using Test.Testing.Types;
 
 namespace Test.Testing.Tests
 {
-
 	[TestFixture]
-	public unsafe class SignatureCallTests
+	public class SignatureCallTests
 	{
-		[Test]
-		public void MethodDesc()
-		{
-			Pointer<MethodDesc> md = typeof(Dummy).GetMethodDesc("doSomething");
-
-			bool                 isCtor                 = md.Reference.IsConstructor;
-			int                  memberDef              = md.Reference.Token;
-			bool                 isPointingToNativeCode = md.Reference.IsPointingToNativeCode;
-			int                  size                   = md.Reference.SizeOf;
-			Pointer<MethodTable> mt                     = md.Reference.EnclosingMethodTable;
-			md.Reference.Reset();
-		}
-
 		[Test]
 		public void FieldDesc()
 		{
@@ -61,6 +46,18 @@ namespace Test.Testing.Tests
 			Pointer<MethodTable> mt = typeof(string).GetMethodTable();
 			Debug.Assert(Runtime.MethodTableToType(mt) == typeof(string));
 		}
-	}
 
+		[Test]
+		public void MethodDesc()
+		{
+			Pointer<MethodDesc> md = typeof(Dummy).GetMethodDesc("doSomething");
+
+			bool                 isCtor                 = md.Reference.IsConstructor;
+			int                  memberDef              = md.Reference.Token;
+			bool                 isPointingToNativeCode = md.Reference.IsPointingToNativeCode;
+			int                  size                   = md.Reference.SizeOf;
+			Pointer<MethodTable> mt                     = md.Reference.EnclosingMethodTable;
+			md.Reference.Reset();
+		}
+	}
 }

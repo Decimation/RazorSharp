@@ -6,7 +6,6 @@ using System;
 
 namespace RazorSharp.Native.Enums
 {
-
 	[Flags]
 	public enum ThreadAccess
 	{
@@ -24,5 +23,4 @@ namespace RazorSharp.Native.Enums
 		SuspendResume           = 0x002,
 		Terminate               = 0x001
 	}
-
 }

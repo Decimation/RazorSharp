@@ -18,7 +18,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.CLR.Meta
 {
-
 	/// <summary>
 	///     Exposes metadata from:
 	///     <list type="bullet">
@@ -41,7 +40,6 @@ namespace RazorSharp.CLR.Meta
 	/// </summary>
 	public class MetaType : IMeta, IFormattable
 	{
-
 		/// <summary>
 		///     Exhaustive
 		/// </summary>
@@ -58,17 +56,12 @@ namespace RazorSharp.CLR.Meta
 		{
 			m_value = p;
 
-			if (!p.Reference.Canon.IsNull && p.Reference.Canon.Address != p.Address) {
+			if (!p.Reference.Canon.IsNull && p.Reference.Canon.Address != p.Address)
 				Canon = new MetaType(p.Reference.Canon);
-			}
 
-			if (p.Reference.IsArray) {
-				ElementType = new MetaType(p.Reference.ElementTypeHandle);
-			}
+			if (p.Reference.IsArray) ElementType = new MetaType(p.Reference.ElementTypeHandle);
 
-			if (!p.Reference.Parent.IsNull) {
-				Parent = new MetaType(p.Reference.Parent);
-			}
+			if (!p.Reference.Parent.IsNull) Parent = new MetaType(p.Reference.Parent);
 
 			Fields  = new VirtualCollection<MetaField>(GetField, GetFields);
 			Methods = new VirtualCollection<MetaMethod>(GetMethod, GetMethods);
@@ -78,13 +71,9 @@ namespace RazorSharp.CLR.Meta
 
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
-			if (string.IsNullOrEmpty(format)) {
-				format = FMT_B;
-			}
+			if (string.IsNullOrEmpty(format)) format = FMT_B;
 
-			if (formatProvider == null) {
-				formatProvider = CultureInfo.CurrentCulture;
-			}
+			if (formatProvider == null) formatProvider = CultureInfo.CurrentCulture;
 
 
 			switch (format.ToUpperInvariant()) {
@@ -106,11 +95,9 @@ namespace RazorSharp.CLR.Meta
 
 		private MetaField[] GetFields()
 		{
-			Pointer<FieldDesc>[] fields = RuntimeType.GetFieldDescs();
-			MetaField[]          meta   = new MetaField[fields.Length];
-			for (int i = 0; i < fields.Length; i++) {
-				meta[i] = new MetaField(fields[i]);
-			}
+			Pointer<FieldDesc>[] fields                     = RuntimeType.GetFieldDescs();
+			var                  meta                       = new MetaField[fields.Length];
+			for (int i = 0; i < fields.Length; i++) meta[i] = new MetaField(fields[i]);
 
 			return meta;
 		}
@@ -123,18 +110,16 @@ namespace RazorSharp.CLR.Meta
 		private MetaMethod[] GetMethods()
 		{
 			Pointer<MethodDesc>[] methods = RuntimeType.GetMethodDescs();
-			MetaMethod[]          meta    = new MetaMethod[methods.Length];
+			var                   meta    = new MetaMethod[methods.Length];
 
-			for (int i = 0; i < meta.Length; i++) {
-				meta[i] = new MetaMethod(methods[i]);
-			}
+			for (int i = 0; i < meta.Length; i++) meta[i] = new MetaMethod(methods[i]);
 
 			return meta;
 		}
 
 		private ConsoleTable ToTable()
 		{
-			ConsoleTable table = new ConsoleTable("Info", "Value");
+			var table = new ConsoleTable("Info", "Value");
 			table.AddRow("Name", Name);
 			table.AddRow("Token", Token);
 
@@ -322,7 +307,5 @@ namespace RazorSharp.CLR.Meta
 		#endregion
 
 		#endregion
-
 	}
-
 }

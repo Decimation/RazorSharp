@@ -6,7 +6,6 @@ using RazorSharp.Pointers;
 
 namespace Test.Testing.Tests
 {
-
 	public class AllocPoolTests2
 	{
 		public static void Test()
@@ -48,5 +47,4 @@ namespace Test.Testing.Tests
 			AllocPool.Free(integers);
 		}
 	}
-
 }

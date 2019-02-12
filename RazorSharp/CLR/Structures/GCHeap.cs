@@ -20,8 +20,6 @@ using static RazorSharp.CLR.Offsets;
 
 namespace RazorSharp.CLR.Structures
 {
-
-
 	/// <summary>
 	///     <para>Represents the entire GC heap. This includes Gen 0, 1, 2, LOH, and other segments.</para>
 	///     <para>Corresponding files:</para>
@@ -39,8 +37,6 @@ namespace RazorSharp.CLR.Structures
 	/// </summary>
 	public unsafe struct GCHeap
 	{
-
-
 		/// <summary>
 		///     <para>Global CLR variable <c>g_pGCHeap</c></para>
 		///     <para>Global VM GC</para>
@@ -121,7 +117,7 @@ namespace RazorSharp.CLR.Structures
 		/// <returns><c>true</c> if the address of <paramref name="t" /> is in the GC heap; <c>false</c> otherwise</returns>
 		public static bool IsInGCHeap<T>(ref T t)
 		{
-			IntPtr addr = Unsafe.AddressOf(ref t).Address;
+			var addr = Unsafe.AddressOf(ref t).Address;
 			return IsInGCHeap(addr);
 		}
 
@@ -171,7 +167,7 @@ namespace RazorSharp.CLR.Structures
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 
-			ImageSectionInfo dataSegment = Segments.GetSegment(".data", ClrFunctions.CLR_DLL);
+			var dataSegment = Segments.GetSegment(".data", ClrFunctions.CLR_DLL);
 
 
 			g_pGCHeap        = Mem.ReadPointer<byte>(dataSegment.SectionAddress, GLOBAL_GCHEAP_OFFSET).Address;
@@ -182,5 +178,4 @@ namespace RazorSharp.CLR.Structures
 			SignatureCall.DynamicBind<GCHeap>();
 		}
 	}
-
 }

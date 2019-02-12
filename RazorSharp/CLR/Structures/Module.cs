@@ -9,7 +9,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.CLR.Structures
 {
-
 	#region
 
 	using DWORD = UInt32;
@@ -80,6 +79,4 @@ namespace RazorSharp.CLR.Structures
 
 		// Current line: https://github.com/dotnet/coreclr/blob/93955d4b58380068df9d99c58a699de6ad03f532/src/vm/ceeload.h#L1428
 	}
-
-
 }

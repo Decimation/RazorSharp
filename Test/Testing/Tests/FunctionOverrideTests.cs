@@ -3,7 +3,6 @@
 using System;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
-using System.Reflection;
 using NUnit.Framework;
 using RazorSharp;
 using RazorSharp.CLR;
@@ -14,7 +13,6 @@ using RazorSharp.Pointers;
 
 namespace Test.Testing.Tests
 {
-
 	[TestFixture]
 	public class FunctionOverrideTests
 	{
@@ -53,10 +51,30 @@ namespace Test.Testing.Tests
 			Switch.Flag = true;
 		}
 
+		private static object ManualInvokeTarget(string name, object instance = null, params object[] args)
+		{
+			return ManualInvoke(typeof(Target), name, instance, args);
+		}
+
+		private static object ManualInvoke(Type target, string targetName, object targetInstance = null,
+			params object[]                     args)
+		{
+			var method = Runtime.GetMethod(target, targetName);
+			return method.Invoke(targetInstance, args);
+		}
+
+		private static void Override(Type target, string targetName, Type src, string srcName)
+		{
+			Pointer<MethodDesc> mdTarget = target.GetMethodDesc(targetName);
+			Pointer<byte>       pSrc     = Unsafe.AddressOfFunction(src, srcName);
+
+			mdTarget.Reference.SetStableEntryPoint(pSrc);
+		}
+
 		[Test]
 		public void OverrideAdditionOperator()
 		{
-			Target target = new Target();
+			var target = new Target();
 			target += target;
 
 //			Debug.Assert(!Switch.Flag.Value);
@@ -71,7 +89,7 @@ namespace Test.Testing.Tests
 		[Test]
 		public void OverrideFinalizer()
 		{
-			Target target = new Target();
+			var target = new Target();
 			ManualInvokeTarget("Finalize", target);
 
 //			Debug.Assert(!Switch.Flag.Value);
@@ -82,26 +100,5 @@ namespace Test.Testing.Tests
 			ManualInvokeTarget("Finalize", target);
 			Debug.Assert(Switch.Flag.Value);
 		}
-
-		private static object ManualInvokeTarget(string name, object instance = null, params object[] args)
-		{
-			return ManualInvoke(typeof(Target), name, instance, args);
-		}
-
-		private static object ManualInvoke(Type target, string targetName, object targetInstance = null,
-			params object[] args)
-		{
-			MethodInfo method = Runtime.GetMethod(target, targetName);
-			return method.Invoke(targetInstance, args);
-		}
-
-		private static void Override(Type target, string targetName, Type src, string srcName)
-		{
-			Pointer<MethodDesc> mdTarget = target.GetMethodDesc(targetName);
-			Pointer<byte>       pSrc     = Unsafe.AddressOfFunction(src, srcName);
-
-			mdTarget.Reference.SetStableEntryPoint(pSrc);
-		}
 	}
-
 }

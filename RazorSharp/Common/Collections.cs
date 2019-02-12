@@ -11,10 +11,8 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.Common
 {
-
 	public static class Collections
 	{
-
 		public static void OrderBy<TSource, TKey>(ref TSource[] arr, Func<TSource, TKey> order)
 		{
 			arr = arr.OrderBy(order).ToArray();
@@ -35,16 +33,12 @@ namespace RazorSharp.Common
 		{
 			T[] arr = src.ToArray();
 
-			foreach (int i in indices) {
-				arr[i] = null;
-			}
+			foreach (int i in indices) arr[i] = null;
 
 			src.Clear();
-			foreach (T v in arr) {
-				if (v != null) {
+			foreach (var v in arr)
+				if (v != null)
 					src.Add(v);
-				}
-			}
 		}
 
 
@@ -82,39 +76,33 @@ namespace RazorSharp.Common
 
 		public static string ToString(IList list, ToStringOptions options = ToStringOptions.UseCommas)
 		{
-			StringBuilder sb = new StringBuilder();
-			string        current;
+			var    sb = new StringBuilder();
+			string current;
 
 			for (int i = 0; i < list.Count; i++) {
 				#region Format current element
 
-				if (list[i] == null) {
+				if (list[i] == null)
 					current = PointerSettings.NULLPTR;
-				}
 
-				else if (options.HasFlag(ToStringOptions.Hex) 
-				         && (list[i].GetType().IsNumericType() || list[i] is IntPtr)) {
+				else if (options.HasFlag(ToStringOptions.Hex)
+				         && (list[i].GetType().IsNumericType() || list[i] is IntPtr))
 					current = Hex.TryCreateHex(list[i], options);
-				}
 
-				else if (list[i].GetType().IsIListType()) {
+				else if (list[i].GetType().IsIListType())
 					current = $"[{ToString((IList) list[i], options)}]";
-				}
 
-				else {
+				else
 					current = list[i].ToString();
-				}
 
 				#endregion
 
 				#region Separate elements
 
-				if (options.HasFlag(ToStringOptions.UseCommas)) {
+				if (options.HasFlag(ToStringOptions.UseCommas))
 					sb.AppendFormat(i + 1 != list.Count ? "{0}, " : "{0}", current);
-				}
-				else {
+				else
 					sb.AppendFormat("{0} ", current);
-				}
 
 				#endregion
 			}
@@ -124,7 +112,5 @@ namespace RazorSharp.Common
 		}
 
 		#endregion
-
 	}
-
 }

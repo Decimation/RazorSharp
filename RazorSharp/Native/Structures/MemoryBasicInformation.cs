@@ -11,7 +11,6 @@ using RazorSharp.Native.Enums;
 
 namespace RazorSharp.Native.Structures
 {
-
 	/// <summary>
 	///     Contains information about a range of pages in the virtual address space of a process.
 	///     The <see cref="Kernel32.VirtualQuery(IntPtr)" />,
@@ -64,7 +63,7 @@ namespace RazorSharp.Native.Structures
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Base address", Hex.ToHex(BaseAddress));
 			table.AddRow("Allocation base", Hex.ToHex(AllocationBase));
 			table.AddRow("Allocation protect", AllocationProtect);
@@ -75,5 +74,4 @@ namespace RazorSharp.Native.Structures
 			return table.ToMarkDownString();
 		}
 	}
-
 }

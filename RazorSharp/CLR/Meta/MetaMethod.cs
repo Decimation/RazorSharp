@@ -13,7 +13,6 @@ using RazorSharp.Utilities;
 
 namespace RazorSharp.CLR.Meta
 {
-
 	/// <summary>
 	///     Exposes metadata from:
 	///     <list type="bullet">
@@ -69,7 +68,7 @@ namespace RazorSharp.CLR.Meta
 		///     </para>
 		///     <para>
 		///         <see cref="set_Function" /> sets the method entry point
-		/// (<see cref="MethodDesc.SetStableEntryPoint"/>).
+		///         (<see cref="MethodDesc.SetStableEntryPoint" />).
 		///     </para>
 		/// </summary>
 		public Pointer<byte> Function {
@@ -91,7 +90,7 @@ namespace RazorSharp.CLR.Meta
 		// MethodDescChunk
 		// SizeOf
 		// EnclosingMethodTable
-		
+
 		public MetaType EnclosingMetaType => new MetaType(m_value.Reference.EnclosingMethodTable);
 
 		public int SizeOf => m_value.Reference.SizeOf;
@@ -128,14 +127,12 @@ namespace RazorSharp.CLR.Meta
 		#region Methods
 
 		/// <summary>
-		/// Prepares this method if this method will be the goal of a hook (not the method being hooked).
+		///     Prepares this method if this method will be the goal of a hook (not the method being hooked).
 		/// </summary>
 		internal void PrepareOverride()
 		{
 			Reset();
-			if (!IsPointingToNativeCode) {
-				Prepare();
-			}
+			if (!IsPointingToNativeCode) Prepare();
 		}
 
 		public MetaIL GetILHeader(int fAllowOverrides = 0)
@@ -165,7 +162,7 @@ namespace RazorSharp.CLR.Meta
 
 		public ConsoleTable ToTable()
 		{
-			ConsoleTable table = new ConsoleTable("Info", "Value");
+			var table = new ConsoleTable("Info", "Value");
 			table.AddRow("Name", Name);
 			table.AddRow("Token", Token);
 
@@ -185,7 +182,5 @@ namespace RazorSharp.CLR.Meta
 		}
 
 		#endregion
-
 	}
-
 }

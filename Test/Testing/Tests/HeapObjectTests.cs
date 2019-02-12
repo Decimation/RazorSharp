@@ -8,7 +8,6 @@ using RazorSharp.CLR.Structures.HeapObjects;
 
 namespace Test.Testing.Tests
 {
-
 	[TestFixture]
 	internal unsafe class HeapObjectTests
 	{
@@ -31,5 +30,4 @@ namespace Test.Testing.Tests
 			Assert.That(s.Length, Is.EqualTo((**strObj).Length));
 		}
 	}
-
 }

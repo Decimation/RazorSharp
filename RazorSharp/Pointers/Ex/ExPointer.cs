@@ -10,7 +10,6 @@ using RazorSharp.Memory;
 
 namespace RazorSharp.Pointers.Ex
 {
-
 	#region
 
 	#endregion
@@ -69,8 +68,6 @@ namespace RazorSharp.Pointers.Ex
 		/// </summary>
 		protected class PointerMetadata
 		{
-
-
 			protected internal PointerMetadata(int elementSize, bool isDecayed)
 			{
 				ElementSize = elementSize;
@@ -90,9 +87,7 @@ namespace RazorSharp.Pointers.Ex
 
 			public override bool Equals(object obj)
 			{
-				if (obj.GetType() == GetType()) {
-					return Equals((PointerMetadata) obj);
-				}
+				if (obj.GetType() == GetType()) return Equals((PointerMetadata) obj);
 
 				return false;
 			}
@@ -134,7 +129,7 @@ namespace RazorSharp.Pointers.Ex
 
 		protected virtual ConsoleTable ToTable()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Address", Hex.ToHex(Address));
 			table.AddRow("Value", Value);
 			table.AddRow("Type", typeof(T).Name);
@@ -166,7 +161,7 @@ namespace RazorSharp.Pointers.Ex
 
 		protected virtual ConsoleTable ToElementTable(int length)
 		{
-			ConsoleTable table = new ConsoleTable("Address", "Index", "Value");
+			var table = new ConsoleTable("Address", "Index", "Value");
 			for (int i = 0; i < length; i++) table.AddRow(Hex.ToHex(PointerUtils.Offset<T>(Address, i)), i, this[i]);
 
 			return table;
@@ -231,7 +226,7 @@ namespace RazorSharp.Pointers.Ex
 		public override bool Equals(object obj)
 		{
 			if (obj?.GetType() == GetType()) {
-				ExPointer<object> ptr = (ExPointer<object>) obj;
+				var ptr = (ExPointer<object>) obj;
 				return ptr.Address == Address;
 			}
 
@@ -271,13 +266,9 @@ namespace RazorSharp.Pointers.Ex
 		/// <param name="format">O: Object, P: Pointer, T: Table</param>
 		public virtual string ToString(string format, IFormatProvider formatProvider)
 		{
-			if (string.IsNullOrEmpty(format)) {
-				format = "O";
-			}
+			if (string.IsNullOrEmpty(format)) format = "O";
 
-			if (formatProvider == null) {
-				formatProvider = CultureInfo.CurrentCulture;
-			}
+			if (formatProvider == null) formatProvider = CultureInfo.CurrentCulture;
 
 
 			/**
@@ -287,9 +278,7 @@ namespace RazorSharp.Pointers.Ex
 			 */
 			switch (format.ToUpperInvariant()) {
 				case "O":
-					if (typeof(T).IsIListType()) {
-						return Collections.ToString((IList) Value);
-					}
+					if (typeof(T).IsIListType()) return Collections.ToString((IList) Value);
 
 					return Value.ToString();
 				case "P":
@@ -307,7 +296,5 @@ namespace RazorSharp.Pointers.Ex
 		}
 
 		#endregion
-
 	}
-
 }

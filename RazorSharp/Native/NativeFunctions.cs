@@ -4,13 +4,11 @@ using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Memory;
 using RazorSharp.Native.Enums;
-using RazorSharp.Native.Structures;
 
 #endregion
 
 namespace RazorSharp.Native
 {
-
 	/// <summary>
 	///     Methods of finding and executing DLL functions:
 	///     <para>1. Sig scanning (<see cref="Memory.SigScanner" />)</para>
@@ -57,28 +55,26 @@ namespace RazorSharp.Native
 	{
 		public static TDelegate GetFunction<TDelegate>(string dllName, string fn) where TDelegate : Delegate
 		{
-			IntPtr hModule = Kernel32.GetModuleHandle(dllName);
-			IntPtr hFn     = Kernel32.GetProcAddress(hModule, fn);
+			var hModule = Kernel32.GetModuleHandle(dllName);
+			var hFn     = Kernel32.GetProcAddress(hModule, fn);
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(hFn);
 		}
 
 		public static uint GetProcessorType()
 		{
-			Kernel32.GetNativeSystemInfo(out SystemInfo systemInfo);
+			Kernel32.GetNativeSystemInfo(out var systemInfo);
 			uint processorType = Convert.ToUInt32(systemInfo.ProcessorType.ToString(), 16);
 			return processorType;
 		}
 
 		public static void CodeFree(IntPtr fn)
 		{
-			if (!Kernel32.VirtualFree(fn, 0, FreeTypes.Release)) {
-				throw new Exception();
-			}
+			if (!Kernel32.VirtualFree(fn, 0, FreeTypes.Release)) throw new Exception();
 		}
 
 		public static IntPtr CodeAlloc(byte[] opCodes)
 		{
-			Kernel32.GetNativeSystemInfo(out SystemInfo si);
+			Kernel32.GetNativeSystemInfo(out var si);
 
 			// VirtualAlloc(nullptr, page_size, MEM_COMMIT, PAGE_READWRITE);
 
@@ -95,5 +91,4 @@ namespace RazorSharp.Native
 			return alloc;
 		}
 	}
-
 }

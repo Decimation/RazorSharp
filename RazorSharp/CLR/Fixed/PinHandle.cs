@@ -7,7 +7,6 @@ using System.Threading;
 
 namespace RazorSharp.CLR.Fixed
 {
-
 	/// <inheritdoc />
 	/// <summary>
 	///     An object that pins a reference (so it doesn't change its address), at the cost of the overhead of a thread.
@@ -17,7 +16,6 @@ namespace RazorSharp.CLR.Fixed
 	/// </summary>
 	public abstract class PinHandle : IDisposable
 	{
-
 		/// <summary>
 		///     Initializes the pin handle.
 		/// </summary>
@@ -57,5 +55,4 @@ namespace RazorSharp.CLR.Fixed
 			Reset.Set();
 		}
 	}
-
 }

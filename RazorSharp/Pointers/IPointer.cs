@@ -12,7 +12,6 @@ using System;
 
 namespace RazorSharp.Pointers
 {
-
 	/// <inheritdoc />
 	/// <summary>
 	///     <para>
@@ -122,5 +121,4 @@ namespace RazorSharp.Pointers
 		/// <returns></returns>
 		bool Equals(Pointer<T> other);
 	}
-
 }

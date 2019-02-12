@@ -14,9 +14,7 @@ namespace Test.Testing.Tests
 			Pointer<string> mptr = Mem.AllocUnmanaged<string>(3);
 			string[]        rg   = {"anime", "gf", "pls"};
 			mptr.WriteAll(rg);
-			for (int i = 0; i < 3; i++) {
-				Debug.Assert(rg[i] == mptr[i]);
-			}
+			for (int i = 0; i < 3; i++) Debug.Assert(rg[i] == mptr[i]);
 
 			Mem.Free(mptr);
 			GC.Collect();

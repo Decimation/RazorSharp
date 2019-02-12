@@ -10,7 +10,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.CLR.Meta
 {
-
 	/// <summary>
 	///     Exposes metadata from:
 	///     <list type="bullet">
@@ -99,7 +98,7 @@ namespace RazorSharp.CLR.Meta
 
 		public ConsoleTable ToTable()
 		{
-			ConsoleTable table = new ConsoleTable("Info", "Value");
+			var table = new ConsoleTable("Info", "Value");
 
 			table.AddRow("Type", IsTiny ? "Tiny" : "Fat");
 			table.AddRow("Code", Code.ToString("P"));
@@ -116,5 +115,4 @@ namespace RazorSharp.CLR.Meta
 			return ToTable().ToMarkDownString();
 		}
 	}
-
 }

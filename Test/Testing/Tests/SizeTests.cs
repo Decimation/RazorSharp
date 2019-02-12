@@ -9,7 +9,6 @@ using RazorSharp;
 
 namespace Test.Testing.Tests
 {
-
 	/*public struct SizeInfo
 	{
 		/// <summary>
@@ -99,79 +98,9 @@ namespace Test.Testing.Tests
 	[TestFixture]
 	internal class SizeTests
 	{
-
-		/// <summary>
-		///     Size: 32 bytes
-		/// </summary>
-		[Test]
-		public void IComparable_String()
+		private static void AssertHeapSize<T>(ref T t, int heapSize) where T : class
 		{
-			IComparable c = "foo";
-			AssertHeapSize(ref c, 32);
-		}
-
-		/// <summary>
-		///     Size: 24 bytes
-		/// </summary>
-		[Test]
-		public void IComparable_Boxed_Int()
-		{
-			IComparable c = 1;
-			AssertHeapSize(ref c, 24);
-		}
-
-		/// <summary>
-		///     Size:		26 bytes
-		/// </summary>
-		[Test]
-		public void String_Empty()
-		{
-			string blank = "";
-			AssertHeapSize(ref blank, 26);
-		}
-
-		/// <summary>
-		///     Size:        32(0x20) bytes
-		///     sizeof(00000183c0a72f18) = 32 (0x20) bytes (System.String)
-		/// </summary>
-		[Test]
-		public void String_Foo()
-		{
-			string foo = "foo";
-			AssertHeapSize(ref foo, 32);
-		}
-
-		/// <summary>
-		///     Size:        46(0x2e) bytes
-		///     sizeof(00000183c0a8f078) = 48 (0x30) bytes (System.String)
-		/// </summary>
-		[Test]
-		public void String_10()
-		{
-			string randStr = new string(' ', 10);
-			AssertHeapSize(ref randStr, 46);
-		}
-
-		/// <summary>
-		///     Size:        24(0x18) bytes
-		///     sizeof(000001ef8003da50) = 24 (0x18) bytes (System.Int64)
-		/// </summary>
-		[Test]
-		public void Object_Boxed()
-		{
-			object obj = 0xFFL;
-			AssertHeapSize(ref obj, 24);
-		}
-
-		/// <summary>
-		///     Size:        40(0x28) bytes
-		///     sizeof(0000026d80047588) = 96 (0x60) bytes (System.Collections.Generic.List`1[[System.Int32, mscorlib]])
-		/// </summary>
-		[Test]
-		public void List_Int()
-		{
-			List<int> list = new List<int> {1, 2, 3, 4, 5};
-			AssertHeapSize(ref list, 40);
+			Assert.That(heapSize, Is.EqualTo(Unsafe.HeapSize(ref t)));
 		}
 
 		/// <summary>
@@ -207,11 +136,78 @@ namespace Test.Testing.Tests
 			AssertHeapSize(ref strArr, 64);
 		}
 
-
-		private static void AssertHeapSize<T>(ref T t, int heapSize) where T : class
+		/// <summary>
+		///     Size: 24 bytes
+		/// </summary>
+		[Test]
+		public void IComparable_Boxed_Int()
 		{
-			Assert.That(heapSize, Is.EqualTo(Unsafe.HeapSize(ref t)));
+			IComparable c = 1;
+			AssertHeapSize(ref c, 24);
+		}
+
+		/// <summary>
+		///     Size: 32 bytes
+		/// </summary>
+		[Test]
+		public void IComparable_String()
+		{
+			IComparable c = "foo";
+			AssertHeapSize(ref c, 32);
+		}
+
+		/// <summary>
+		///     Size:        40(0x28) bytes
+		///     sizeof(0000026d80047588) = 96 (0x60) bytes (System.Collections.Generic.List`1[[System.Int32, mscorlib]])
+		/// </summary>
+		[Test]
+		public void List_Int()
+		{
+			var list = new List<int> {1, 2, 3, 4, 5};
+			AssertHeapSize(ref list, 40);
+		}
+
+		/// <summary>
+		///     Size:        24(0x18) bytes
+		///     sizeof(000001ef8003da50) = 24 (0x18) bytes (System.Int64)
+		/// </summary>
+		[Test]
+		public void Object_Boxed()
+		{
+			object obj = 0xFFL;
+			AssertHeapSize(ref obj, 24);
+		}
+
+		/// <summary>
+		///     Size:        46(0x2e) bytes
+		///     sizeof(00000183c0a8f078) = 48 (0x30) bytes (System.String)
+		/// </summary>
+		[Test]
+		public void String_10()
+		{
+			string randStr = new string(' ', 10);
+			AssertHeapSize(ref randStr, 46);
+		}
+
+		/// <summary>
+		///     Size:		26 bytes
+		/// </summary>
+		[Test]
+		public void String_Empty()
+		{
+			string blank = "";
+			AssertHeapSize(ref blank, 26);
+		}
+
+		/// <summary>
+		///     Size:        32(0x20) bytes
+		///     sizeof(00000183c0a72f18) = 32 (0x20) bytes (System.String)
+		/// </summary>
+		[Test]
+		public void String_Foo()
+		{
+			string foo = "foo";
+			AssertHeapSize(ref foo, 32);
 		}
 	}
-
 }

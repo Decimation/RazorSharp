@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 
 namespace RazorSharp.Native.Structures.Images
 {
-
 	[StructLayout(LayoutKind.Sequential)]
 	public struct ImageDataDirectory
 	{
@@ -16,5 +15,4 @@ namespace RazorSharp.Native.Structures.Images
 		/// DWORD->unsigned int
 		public readonly uint Size;
 	}
-
 }

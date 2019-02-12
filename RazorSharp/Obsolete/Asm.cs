@@ -16,7 +16,6 @@ using RazorSharp.Native.Enums;
 
 namespace RazorSharp.Memory
 {
-
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
@@ -29,14 +28,13 @@ namespace RazorSharp.Memory
 	[Obsolete]
 	public static unsafe class Asm
 	{
-
 		/// <summary>
 		///     Execute arbitrary Assembly opcodes
 		/// </summary>
 		/// <param name="memory">Opcodes</param>
 		public static void asm(params byte[] memory)
 		{
-			IntPtr buf = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) memory.Length, AllocationType.Commit,
+			var buf = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) memory.Length, AllocationType.Commit,
 				MemoryProtection.ExecuteReadWrite);
 			Marshal.Copy(memory, 0, buf, memory.Length);
 			Marshal.GetDelegateForFunctionPointer<Exec>(buf)();
@@ -54,13 +52,11 @@ namespace RazorSharp.Memory
 		public static T asm<T>(string hex)
 		{
 			string[] bytestrs = hex.Split(' ');
-			byte[]   mem      = new byte[bytestrs.Length];
+			var      mem      = new byte[bytestrs.Length];
 
 			for (int i = 0; i < mem.Length; i++) {
 				bytestrs[i] = bytestrs[i].Replace("0x", "");
-				if (bytestrs[i] == "0") {
-					bytestrs[i] += "0";
-				}
+				if (bytestrs[i] == "0") bytestrs[i] += "0";
 
 				mem[i] = byte.Parse(bytestrs[i], NumberStyles.HexNumber);
 			}
@@ -82,10 +78,10 @@ namespace RazorSharp.Memory
 		/// <returns>The value returned by the execution</returns>
 		public static T asm<T>(params byte[] memory)
 		{
-			IntPtr buf = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) memory.Length, AllocationType.Commit,
+			var buf = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) memory.Length, AllocationType.Commit,
 				MemoryProtection.ExecuteReadWrite);
 			Marshal.Copy(memory, 0, buf, memory.Length);
-			IntPtr p = Marshal.GetDelegateForFunctionPointer<GetValue>(buf)();
+			var p = Marshal.GetDelegateForFunctionPointer<GetValue>(buf)();
 
 			if (!Kernel32.VirtualFree(buf, (uint) memory.Length, FreeTypes.Decommit)) {
 //				Logger.Log(Level.Error, Flags.Memory, "Asm::asm failed to free memory");
@@ -98,5 +94,4 @@ namespace RazorSharp.Memory
 
 		private delegate IntPtr GetValue();
 	}
-
 }

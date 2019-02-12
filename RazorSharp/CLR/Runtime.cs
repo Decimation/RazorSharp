@@ -57,7 +57,7 @@ namespace RazorSharp.CLR
 		/// <returns>A pointer to the reference type's header</returns>
 		internal static ObjHeader* ReadObjHeader<T>(ref T t) where T : class
 		{
-			IntPtr data = Unsafe.AddressOfHeap(ref t).Address;
+			var data = Unsafe.AddressOfHeap(ref t).Address;
 
 			return (ObjHeader*) (data - IntPtr.Size);
 		}
@@ -79,9 +79,7 @@ namespace RazorSharp.CLR
 		{
 			// We'll say arrays and strings are blittable cause they're
 			// usable with GCHandle
-			if (typeof(T).IsArray || typeof(T) == typeof(string)) {
-				return true;
-			}
+			if (typeof(T).IsArray || typeof(T) == typeof(string)) return true;
 
 			return typeof(T).GetMethodTable().Reference.IsBlittable;
 		}
@@ -103,7 +101,7 @@ namespace RazorSharp.CLR
 
 		internal static HeapObject** GetHeapObject<T>(ref T t) where T : class
 		{
-			HeapObject** h = (HeapObject**) Unsafe.AddressOf(ref t);
+			var h = (HeapObject**) Unsafe.AddressOf(ref t);
 			return h;
 		}
 
@@ -132,12 +130,10 @@ namespace RazorSharp.CLR
 		internal static Pointer<MethodTable> ReadMethodTable<T>(ref T t)
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
-			if (typeof(T).IsValueType) {
-				return typeof(T).GetMethodTable();
-			}
+			if (typeof(T).IsValueType) return typeof(T).GetMethodTable();
 
 			// We need to get the heap pointer manually because of type constraints
-			IntPtr       ptr = *(IntPtr*) Unsafe.AddressOf(ref t);
+			var          ptr = *(IntPtr*) Unsafe.AddressOf(ref t);
 			MethodTable* mt  = *(MethodTable**) ptr;
 
 			return mt;
@@ -152,7 +148,7 @@ namespace RazorSharp.CLR
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static Pointer<MethodTable> GetMethodTable(this Type t)
 		{
-			IntPtr typeHandle = t.TypeHandle.Value;
+			var typeHandle = t.TypeHandle.Value;
 
 
 			// Special case:
@@ -183,12 +179,10 @@ namespace RazorSharp.CLR
 		/// <returns></returns>
 		private static Pointer<FieldDesc>[] ReadFieldDescs(Pointer<MethodTable> mt)
 		{
-			int                  len  = mt.Reference.FieldDescListLength;
-			Pointer<FieldDesc>[] lpFd = new Pointer<FieldDesc>[len];
+			int len  = mt.Reference.FieldDescListLength;
+			var lpFd = new Pointer<FieldDesc>[len];
 
-			for (int i = 0; i < len; i++) {
-				lpFd[i] = &mt.Reference.FieldDescList[i];
-			}
+			for (int i = 0; i < len; i++) lpFd[i] = &mt.Reference.FieldDescList[i];
 
 			return lpFd;
 		}
@@ -264,8 +258,8 @@ namespace RazorSharp.CLR
 		{
 			RazorContract.RequiresNotNull(methodInfo);
 
-			RuntimeMethodHandle methodHandle = methodInfo.MethodHandle;
-			MethodDesc*         md           = (MethodDesc*) methodHandle.Value;
+			var methodHandle = methodInfo.MethodHandle;
+			var md           = (MethodDesc*) methodHandle.Value;
 
 			RazorContract.Assert(md->Info.MetadataToken == methodInfo.MetadataToken);
 
@@ -283,7 +277,7 @@ namespace RazorSharp.CLR
 		{
 			MethodInfo[] methods = t.GetMethods(flags);
 			RazorContract.RequiresNotNull(methods);
-			Pointer<MethodDesc>[] arr = new Pointer<MethodDesc>[methods.Length];
+			var arr = new Pointer<MethodDesc>[methods.Length];
 
 			for (int i = 0; i < arr.Length; i++) {
 				arr[i] = methods[i].MethodHandle.Value;
@@ -302,14 +296,12 @@ namespace RazorSharp.CLR
 		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(Type t, BindingFlags flags = DefaultFlags)
 			where TAttribute : Attribute
 		{
-			MethodInfo[]     methods           = t.GetMethods(flags);
-			List<MethodInfo> attributedMethods = new List<MethodInfo>();
+			MethodInfo[] methods           = t.GetMethods(flags);
+			var          attributedMethods = new List<MethodInfo>();
 
-			foreach (MethodInfo t1 in methods) {
-				TAttribute attr = t1.GetCustomAttribute<TAttribute>();
-				if (attr != null) {
-					attributedMethods.Add(t1);
-				}
+			foreach (var t1 in methods) {
+				var attr = t1.GetCustomAttribute<TAttribute>();
+				if (attr != null) attributedMethods.Add(t1);
 			}
 
 			return attributedMethods.ToArray();
@@ -321,11 +313,9 @@ namespace RazorSharp.CLR
 		{
 			MethodInfo[] methods = GetAnnotatedMethods<TAttribute>(t, flags);
 			var          matches = new List<MethodInfo>();
-			foreach (MethodInfo v in methods) {
-				if (v.Name == name) {
+			foreach (var v in methods)
+				if (v.Name == name)
 					matches.Add(v);
-				}
-			}
 
 			return matches.ToArray();
 		}

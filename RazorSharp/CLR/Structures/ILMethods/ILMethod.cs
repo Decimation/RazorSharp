@@ -10,7 +10,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.CLR.Structures.ILMethods
 {
-
 	/// <summary>
 	///     <para>Aggregates both <see cref="FatILMethod" /> and <see cref="TinyILMethod" /></para>
 	///     <para>Internal name: <c>COR_ILMETHOD</c></para>
@@ -102,9 +101,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		internal CorILMethodFlags Flags {
 			get {
 				// todo: I don't know if the type has to be Fat or not, but just to be safe...
-				if (!IsFat) {
-					throw new Exception("IL method type must be Fat");
-				}
+				if (!IsFat) throw new Exception("IL method type must be Fat");
 
 				return Fat.Reference.Flags;
 			}
@@ -122,5 +119,4 @@ namespace RazorSharp.CLR.Structures.ILMethods
 
 		internal int LocalVarSigTok => (int) (IsTiny ? Tiny.Reference.LocalVarSigTok : Fat.Reference.LocalVarSigTok);
 	}
-
 }

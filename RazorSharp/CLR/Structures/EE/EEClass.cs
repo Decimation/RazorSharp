@@ -17,7 +17,6 @@ using static RazorSharp.CLR.Offsets;
 
 namespace RazorSharp.CLR.Structures.EE
 {
-
 	#region
 
 	using DWORD = UInt32;
@@ -54,7 +53,6 @@ namespace RazorSharp.CLR.Structures.EE
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct EEClass
 	{
-
 		#region Fields
 
 		[FieldOffset(0)]  private readonly void*        m_pGuidInfo;
@@ -154,7 +152,7 @@ namespace RazorSharp.CLR.Structures.EE
 
 
 				//IntPtr thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass)).Address;
-				IntPtr thisptr = Unsafe.AddressOf(ref this).Add(sizeof(EEClass)).Address;
+				var thisptr = Unsafe.AddressOf(ref this).Add(sizeof(EEClass)).Address;
 
 				// ReSharper disable once ArrangeRedundantParentheses
 				return &((LayoutEEClass*) thisptr)->m_LayoutInfo;
@@ -218,9 +216,7 @@ namespace RazorSharp.CLR.Structures.EE
 				int                  fieldCount = pClass.Reference.NumInstanceFields + pClass.Reference.NumStaticFields;
 				Pointer<MethodTable> pParentMT  = m_pMethodTable->Parent;
 
-				if (!pParentMT.IsNull) {
-					fieldCount -= pParentMT.Reference.EEClass.Reference.NumInstanceFields;
-				}
+				if (!pParentMT.IsNull) fieldCount -= pParentMT.Reference.EEClass.Reference.NumInstanceFields;
 
 				return fieldCount;
 			}
@@ -232,7 +228,6 @@ namespace RazorSharp.CLR.Structures.EE
 		///     </remarks>
 		/// </summary>
 		internal FieldDesc* FieldDescList {
-
 			get {
 				//PTR_HOST_MEMBER_TADDR(EEClass, this, m_pFieldDescList)
 				Pointer<FieldDesc> p = Unsafe.AddressOf(ref this).Address;
@@ -261,7 +256,7 @@ namespace RazorSharp.CLR.Structures.EE
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 
 //			table.AddRow(nameof(m_pGuidInfo), Hex.ToHex(m_pGuidInfo));
 //			table.AddRow(nameof(m_rpOptionalFields), Hex.ToHex(m_rpOptionalFields));
@@ -296,5 +291,4 @@ namespace RazorSharp.CLR.Structures.EE
 			return table.ToMarkDownString();
 		}
 	}
-
 }

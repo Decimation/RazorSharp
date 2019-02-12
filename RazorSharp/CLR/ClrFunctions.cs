@@ -15,7 +15,6 @@ using RazorSharp.Utilities.Exceptions;
 
 namespace RazorSharp.CLR
 {
-
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
@@ -45,7 +44,7 @@ namespace RazorSharp.CLR
 				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(CLR_DLL,
 					s_rgStableEntryPointInterlockedSignature);
 
-			
+
 			SignatureCall.ReadCacheJsonUrl(new[]
 			{
 				typeof(FieldDesc), typeof(MethodDesc), typeof(ClrFunctions), typeof(GCHeap)
@@ -55,7 +54,7 @@ namespace RazorSharp.CLR
 		}
 
 		/// <summary>
-		/// Used just to invoke the type initializer
+		///     Used just to invoke the type initializer
 		/// </summary>
 		internal static void init()
 		{
@@ -103,12 +102,10 @@ namespace RazorSharp.CLR
 		/// <param name="pCode"></param>
 		internal static void SetStableEntryPoint(MethodInfo mi, IntPtr pCode)
 		{
-			MethodDesc* pMd = (MethodDesc*) mi.MethodHandle.Value;
+			var pMd = (MethodDesc*) mi.MethodHandle.Value;
 			s_setStableEntryPointInterlocked(pMd, (ulong) pCode);
 		}
 
 		#endregion
-
 	}
-
 }

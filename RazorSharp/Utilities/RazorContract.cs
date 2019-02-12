@@ -13,7 +13,6 @@ using RazorSharp.Utilities.Exceptions;
 
 namespace RazorSharp.Utilities
 {
-
 	#region
 
 	using AsrtCnd = AssertionConditionAttribute;
@@ -51,9 +50,7 @@ namespace RazorSharp.Utilities
 		private static void ResolveTypeAction<TExpected, TActual>(Action notArray, Action notActual)
 		{
 			if (typeof(TExpected) == typeof(Array)) {
-				if (!typeof(TActual).IsArray) {
-					notArray();
-				}
+				if (!typeof(TActual).IsArray) notArray();
 			}
 			else if (typeof(TExpected) != typeof(TActual)) {
 				notActual();
@@ -75,9 +72,7 @@ namespace RazorSharp.Utilities
 		[DebuggerHidden]
 		internal static void AssertEqual<T>(params T[] values)
 		{
-			if (values == null || values.Length == 0) {
-				return;
-			}
+			if (values == null || values.Length == 0) return;
 
 			Assert(values.All(v => v.Equals(values[0])));
 		}
@@ -205,19 +200,16 @@ namespace RazorSharp.Utilities
 			msg = string.Format(msg, args);
 			msg = string.Format("Precondition failed: {0}", msg);
 
-			if (typeof(TException) == typeof(NullReferenceException)) {
+			if (typeof(TException) == typeof(NullReferenceException))
 				throw new NullReferenceException(NULLREF_EXCEPTION);
-			}
 
 			// Special support for PreconditionException
-			if (typeof(TException) == typeof(PreconditionException)) {
-				throw new PreconditionException(msg);
-			}
+			if (typeof(TException) == typeof(PreconditionException)) throw new PreconditionException(msg);
 
 			TException Create()
 			{
 				// TException better have a constructor with a string parameter
-				ConstructorInfo ctor = typeof(TException).GetConstructor(
+				var ctor = typeof(TException).GetConstructor(
 					BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null,
 					CallingConventions.HasThis, new[] {typeof(string)}, null);
 
@@ -237,12 +229,11 @@ namespace RazorSharp.Utilities
 		[AssertionMethod]
 		[ContractAnnotation(COND_FALSE_HALT)]
 		[StringFormatMethod(STRING_FORMAT_PARAM)]
-		internal static void Requires<TException>([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null,
-			params object[] args) where TException : Exception, new()
+		internal static void Requires<TException>([AsrtCnd(AsrtCndType.IS_TRUE)] bool     cond, string msg = null,
+			params                                                               object[] args)
+			where TException : Exception, new()
 		{
-			if (!cond) {
-				FailPrecondition<TException>(msg, args);
-			}
+			if (!cond) FailPrecondition<TException>(msg, args);
 		}
 
 
@@ -276,7 +267,5 @@ namespace RazorSharp.Utilities
 		}
 
 		#endregion
-
 	}
-
 }

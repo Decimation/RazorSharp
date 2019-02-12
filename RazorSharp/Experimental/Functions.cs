@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Meta;
 using RazorSharp.Pointers;
 
-namespace RazorSharp.Memory
+namespace RazorSharp.Experimental
 {
 	// todo: WIP
 	public static class Functions
@@ -56,7 +54,7 @@ namespace RazorSharp.Memory
 		{
 			var mm = new MetaMethod(methodInfo.GetMethodDesc());
 			mm.PrepareOverride();
-			var targetAddr = mm.Function;
+			Pointer<byte> targetAddr = mm.Function;
 
 			// Opcode: E9 cd
 			// Mnemonic: JMP rel32

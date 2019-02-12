@@ -16,7 +16,6 @@ using RazorSharp.Utilities;
 
 namespace RazorSharp
 {
-
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
@@ -95,7 +94,7 @@ namespace RazorSharp
 		/// <returns>A CLR-compliant reference type pointer to access the data pointed to by <paramref name="rawMem" /></returns>
 		public static T RawInterpret<T>(Pointer<byte> rawMem) where T : class
 		{
-			IntPtr cpy = rawMem.Address;
+			var cpy = rawMem.Address;
 			return Mem.Read<T>(&cpy);
 		}
 
@@ -133,25 +132,19 @@ namespace RazorSharp
 
 			// Not using LINQ is faster
 			Pointer<FieldDesc>[] fieldDescsPtrs = typeof(TType).GetFieldDescs();
-			List<FieldDesc>      fieldDescs     = new List<FieldDesc>();
-			foreach (Pointer<FieldDesc> p in fieldDescsPtrs) {
-				if (p.Reference.CorType == Constants.TypeToCorType<TMember>()) {
+			var                  fieldDescs     = new List<FieldDesc>();
+			foreach (Pointer<FieldDesc> p in fieldDescsPtrs)
+				if (p.Reference.CorType == Constants.TypeToCorType<TMember>())
 					fieldDescs.Add(p.Reference);
-				}
-			}
 
 
 			Pointer<TMember> rawMemory = AddressOf(ref type).Address;
 
-			if (!typeof(TType).IsValueType) {
-				rawMemory = Marshal.ReadIntPtr(rawMemory.Address) + IntPtr.Size;
-			}
+			if (!typeof(TType).IsValueType) rawMemory = Marshal.ReadIntPtr(rawMemory.Address) + IntPtr.Size;
 
-			foreach (FieldDesc t in fieldDescs) {
+			foreach (var t in fieldDescs) {
 				int adjustedOfs = t.Offset / memberSize;
-				if (rawMemory[adjustedOfs].Equals(val)) {
-					return t.Offset;
-				}
+				if (rawMemory[adjustedOfs].Equals(val)) return t.Offset;
 			}
 
 
@@ -192,7 +185,7 @@ namespace RazorSharp
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<T> AddressOf<T>(ref T t)
 		{
-			TypedReference tr = __makeref(t);
+			var tr = __makeref(t);
 			return *(IntPtr*) (&tr);
 		}
 
@@ -211,7 +204,7 @@ namespace RazorSharp
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<byte> AddressOfHeap<T>(ref T t) where T : class
 		{
-			TypedReference tr = __makeref(t);
+			var tr = __makeref(t);
 
 			// NOTE:
 			// Strings have their data offset by RuntimeHelpers.OffsetToStringData
@@ -292,8 +285,8 @@ namespace RazorSharp
 			Pointer<MethodDesc> md = t.GetMethodDesc(name);
 
 			// Function must be jitted
-			
-			if (!md.Reference.IsPointingToNativeCode)md.Reference.Prepare();
+
+			if (!md.Reference.IsPointingToNativeCode) md.Reference.Prepare();
 
 			return md.Reference.Function;
 		}
@@ -415,9 +408,7 @@ namespace RazorSharp
 
 			Pointer<MethodTable> mt = typeof(T).GetMethodTable();
 			Pointer<EEClass>     ee = mt.Reference.EEClass;
-			if (ee.Reference.HasLayout) {
-				return (int) ee.Reference.LayoutInfo->ManagedSize;
-			}
+			if (ee.Reference.HasLayout) return (int) ee.Reference.LayoutInfo->ManagedSize;
 
 			return INVALID_VALUE;
 		}
@@ -537,7 +528,7 @@ namespace RazorSharp
 			 */
 
 			if (typeof(T).IsArray) {
-				Array arr = t as Array;
+				var arr = t as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
 				// We already know it's not null because the type is an array.
@@ -685,7 +676,7 @@ namespace RazorSharp
 			// Subtract the size of the ObjHeader and MethodTable*
 			int fieldSize = HeapSize(ref t) - IntPtr.Size * 2;
 
-			byte[] fields = new byte[fieldSize];
+			var fields = new byte[fieldSize];
 
 			// Skip over the MethodTable*
 			Marshal.Copy((AddressOfHeap(ref t) + IntPtr.Size).Address, fields, 0, fieldSize);
@@ -698,7 +689,5 @@ namespace RazorSharp
 		}
 
 		#endregion
-
 	}
-
 }

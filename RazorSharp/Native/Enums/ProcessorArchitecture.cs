@@ -2,8 +2,6 @@
 
 namespace RazorSharp.Native.Enums
 {
-
-
 	public enum ProcessorArchitecture : ushort
 	{
 		/// <summary>
@@ -33,5 +31,4 @@ namespace RazorSharp.Native.Enums
 
 		Unknown = 0xFFFF
 	}
-
 }

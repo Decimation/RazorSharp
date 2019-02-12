@@ -23,7 +23,6 @@ using RazorSharp.Utilities.Exceptions;
 
 namespace RazorSharp.CLR.Structures
 {
-
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
@@ -63,7 +62,6 @@ namespace RazorSharp.CLR.Structures
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct MethodDesc
 	{
-
 		// method.hpp: 213
 		private const int ALIGNMENT_SHIFT = 3;
 		private const int ALIGNMENT       = 1 << ALIGNMENT_SHIFT;
@@ -71,7 +69,6 @@ namespace RazorSharp.CLR.Structures
 
 		static MethodDesc()
 		{
-			
 			SignatureCall.DynamicBind<MethodDesc>();
 		}
 
@@ -262,7 +259,7 @@ namespace RazorSharp.CLR.Structures
 		public override bool Equals(object obj)
 		{
 			if (obj != null && obj.GetType() == GetType()) {
-				MethodDesc md = (MethodDesc) obj;
+				var md = (MethodDesc) obj;
 				return md.Equals(this);
 			}
 
@@ -349,15 +346,14 @@ namespace RazorSharp.CLR.Structures
 
 		internal void Prepare()
 		{
-			if (!Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) || !Flags2.HasFlag(MethodDescFlags2.HasPrecode)) {
+			if (!Flags2.HasFlag(MethodDescFlags2.HasStableEntryPoint) || !Flags2.HasFlag(MethodDescFlags2.HasPrecode))
 				RuntimeHelpers.PrepareMethod(Info.MethodHandle);
-			}
 		}
 
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Name", Name);
 			table.AddRow("Enclosing type", EnclosingType.Name);
 			table.AddRow("MethodTable", Hex.ToHex(EnclosingMethodTable.Address));
@@ -367,9 +363,7 @@ namespace RazorSharp.CLR.Structures
 			table.AddRow("Function", Hex.ToHex(Function));
 			table.AddRow("Non-MI Function", Hex.ToHex(m_pFunction));
 			table.AddRow("Native code", Hex.ToHex(NativeCode));
-			if (HasILHeader) {
-				table.AddRow("IL code", Hex.ToHex(GetILHeader().Reference.Code.Address));
-			}
+			if (HasILHeader) table.AddRow("IL code", Hex.ToHex(GetILHeader().Reference.Code.Address));
 
 //			table.AddRow("Chunk index", m_chunkIndex);
 //			table.AddRow("Slot number", m_wSlotNumber);
@@ -393,8 +387,5 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		#endregion
-
 	}
-
-
 }

@@ -1,6 +1,5 @@
 namespace RazorSharp.Memory
 {
-
 	public static class Bits
 	{
 		/// <summary>
@@ -14,5 +13,4 @@ namespace RazorSharp.Memory
 			return ((1 << nBits) - 1) & (number >> bitPos);
 		}
 	}
-
 }

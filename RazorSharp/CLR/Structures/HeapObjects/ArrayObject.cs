@@ -12,7 +12,6 @@ using RazorSharp.Common;
 
 namespace RazorSharp.CLR.Structures.HeapObjects
 {
-
 	/// <summary>
 	///     <para>Represents the layout of an array in heap memory.</para>
 	///     <para>Corresponding files:</para>
@@ -60,7 +59,7 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Header*", Hex.ToHex(Header));
 			table.AddRow("MethodTable*", Hex.ToHex(m_methodTablePtr));
 			table.AddRow("Length", Length);
@@ -69,5 +68,4 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 			return table.ToMarkDownString();
 		}
 	}
-
 }

@@ -7,7 +7,6 @@ using System.Runtime.ExceptionServices;
 
 namespace RazorSharp
 {
-
 	/// <summary>
 	///     Describes a type of low-level exception / segmentation fault
 	/// </summary>
@@ -33,8 +32,6 @@ namespace RazorSharp
 
 	internal static class LowLevel
 	{
-
-
 		/// <summary>
 		///     Determines whether <paramref name="action" /> causes a segmentation fault.
 		/// </summary>
@@ -65,5 +62,4 @@ namespace RazorSharp
 			return true;
 		}
 	}
-
 }

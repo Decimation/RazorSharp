@@ -8,7 +8,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.CLR
 {
-
 	internal static unsafe class ReflectionUtil
 	{
 		/**
@@ -31,7 +30,7 @@ namespace RazorSharp.CLR
 
 		internal static Pointer<byte> GetPointerForPointerField<TInstance>(Pointer<FieldDesc> pFd, ref TInstance inst)
 		{
-			object value = pFd.Reference.GetValue(inst);
+			var value = pFd.Reference.GetValue(inst);
 			return Pointer.Unbox(value);
 		}
 
@@ -126,5 +125,4 @@ namespace RazorSharp.CLR
 			return rgOpCodes;
 		}*/
 	}
-
 }

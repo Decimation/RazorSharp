@@ -8,8 +8,6 @@ using System;
 
 namespace RazorSharp.CLR.Structures.ILMethods
 {
-
-
 	/// <summary>
 	///     Use with <see cref="FatILMethod.FlagsValue" /> or <see cref="TinyILMethod.Flags_CodeSize" />.
 	///     The only semantic flag at present is <see cref="InitLocals" />
@@ -50,5 +48,4 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		/// </summary>
 		TinyFormat1 = 0x0006
 	}
-
 }

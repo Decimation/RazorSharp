@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 
 namespace RazorSharp.Pointers
 {
-
 	/// <summary>
 	///     Provides utilities for pointer arithmetic
 	/// </summary>
@@ -123,5 +122,4 @@ namespace RazorSharp.Pointers
 			return (int) byteDelta / Unsafe.SizeOf<TElement>();
 		}
 	}
-
 }

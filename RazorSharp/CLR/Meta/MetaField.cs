@@ -15,7 +15,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.CLR.Meta
 {
-
 	/// <summary>
 	///     Exposes metadata from:
 	///     <list type="bullet">
@@ -143,7 +142,5 @@ namespace RazorSharp.CLR.Meta
 		}
 
 		#endregion
-
 	}
-
 }

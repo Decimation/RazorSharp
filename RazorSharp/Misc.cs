@@ -9,7 +9,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp
 {
-
 	/// <summary>
 	///     Unsorted methods
 	/// </summary>
@@ -50,13 +49,12 @@ namespace RazorSharp
 		}
 
 		internal static object InvokeGenericMethod(Type t, string name, Type typeArgs, object instance,
-			params object[] args)
+			params object[]                             args)
 		{
-			MethodInfo method = t.GetMethod(name,
+			var method = t.GetMethod(name,
 				BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic);
 			method = method.MakeGenericMethod(typeArgs);
 			return method.Invoke(method.IsStatic ? null : instance, args);
 		}
 	}
-
 }

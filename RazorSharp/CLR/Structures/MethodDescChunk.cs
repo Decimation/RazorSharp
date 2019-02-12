@@ -2,7 +2,6 @@
 
 #region
 
-using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Common;
 using RazorSharp.Pointers;
@@ -15,7 +14,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.CLR.Structures
 {
-
 	//todo: verify
 	/// <summary>
 	///     <para>Corresponding files:</para>
@@ -40,7 +38,6 @@ namespace RazorSharp.CLR.Structures
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct MethodDescChunk
 	{
-
 		#region Fields
 
 		/// <summary>
@@ -103,7 +100,7 @@ namespace RazorSharp.CLR.Structures
 		internal Pointer<MethodDesc> FirstMethodDesc {
 			get {
 				// return PTR_MethodDesc(dac_cast<TADDR>(this) + sizeof(MethodDescChunk));
-				IntPtr              __this = Unsafe.AddressOf(ref this).Address;
+				var                 __this = Unsafe.AddressOf(ref this).Address;
 				Pointer<MethodDesc> pMD    = __this;
 				pMD.Add(sizeof(MethodDescChunk));
 				return pMD;
@@ -112,7 +109,7 @@ namespace RazorSharp.CLR.Structures
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("MethodTable", Hex.ToHex(MethodTable.Address));
 
 //			table.AddRow("m_methodTable", (int) m_methodTable);
@@ -127,5 +124,4 @@ namespace RazorSharp.CLR.Structures
 			return table.ToMarkDownString();
 		}
 	}
-
 }

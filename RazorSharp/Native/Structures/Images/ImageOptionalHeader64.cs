@@ -6,11 +6,9 @@ using System.Runtime.InteropServices;
 
 namespace RazorSharp.Native.Structures.Images
 {
-
 	[StructLayout(LayoutKind.Sequential)]
 	public struct ImageOptionalHeader64
 	{
-
 		/// WORD->unsigned short
 		public ushort Magic;
 
@@ -117,5 +115,4 @@ namespace RazorSharp.Native.Structures.Images
 		public ImageDataDirectory DataDirectory_14;
 		public ImageDataDirectory DataDirectory_15;
 	}
-
 }

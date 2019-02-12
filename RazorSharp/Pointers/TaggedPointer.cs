@@ -8,7 +8,6 @@ using RazorSharp.Common;
 
 namespace RazorSharp.Pointers
 {
-
 	#region
 
 	using intptr_t = Int64;
@@ -45,9 +44,7 @@ namespace RazorSharp.Pointers
 			set {
 				int oldTagValue = 0;
 
-				if (PointerSettings.RetainTagValue) {
-					oldTagValue = Tag;
-				}
+				if (PointerSettings.RetainTagValue) oldTagValue = Tag;
 
 				m_pAsPointer =  value;
 				m_pAsPointer |= oldTagValue;
@@ -85,10 +82,9 @@ namespace RazorSharp.Pointers
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Pointer", "Tag");
+			var table = new ConsoleTable("Pointer", "Tag");
 			table.AddRow(Hex.ToHex(Pointer.Address), Tag);
 			return table.ToMarkDownString();
 		}
 	}
-
 }

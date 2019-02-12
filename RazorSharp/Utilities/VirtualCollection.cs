@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace RazorSharp
 {
-
 	public class VirtualCollection<T> : IEnumerable<T>
 	{
 		public delegate T GetItem(string name);
@@ -25,9 +24,7 @@ namespace RazorSharp
 
 		public IEnumerator<T> GetEnumerator()
 		{
-			foreach (T v in ToArray()) {
-				yield return v;
-			}
+			foreach (var v in ToArray()) yield return v;
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -40,5 +37,4 @@ namespace RazorSharp
 			return m_fnGetItems();
 		}
 	}
-
 }

@@ -6,7 +6,6 @@ using RazorSharp.Native.Enums;
 
 namespace RazorSharp
 {
-
 	public class AssemblyHandle
 	{
 		private readonly IntPtr m_ptr;
@@ -38,5 +37,4 @@ namespace RazorSharp
 			IsAllocated = false;
 		}
 	}
-
 }

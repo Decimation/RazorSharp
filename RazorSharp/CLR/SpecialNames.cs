@@ -6,7 +6,6 @@ using RazorSharp.Common;
 
 namespace RazorSharp.CLR
 {
-
 	internal static class SpecialNames
 	{
 		/// <summary>
@@ -69,5 +68,4 @@ namespace RazorSharp.CLR
 			return GET_PREFIX + propname;
 		}
 	}
-
 }

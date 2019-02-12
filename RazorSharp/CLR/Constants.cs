@@ -12,7 +12,6 @@ using RazorSharp.CLR.Structures.EE;
 
 namespace RazorSharp.CLR
 {
-
 	internal static unsafe class Constants
 	{
 		/// <summary>
@@ -530,7 +529,6 @@ namespace RazorSharp.CLR
 		NonTrivialInterfaceCast = Array
 		                          | ComObject
 		                          | ICastable
-
 	}
 
 	/// <summary>
@@ -641,7 +639,6 @@ namespace RazorSharp.CLR
 		HasBoxedRegularStatics                = 0x2000,
 		HasSingleNonVirtualSlot               = 0x4000,
 		DependsOnEquivalentOrForwardedStructs = 0x8000
-
 	}
 
 	#endregion
@@ -861,7 +858,6 @@ namespace RazorSharp.CLR
 	[Flags]
 	public enum MethodDescFlags3 : ushort
 	{
-
 		TokenRemainderMask = 0x3FFF,
 
 		// These are separate to allow the flags space available and used to be obvious here
@@ -955,8 +951,6 @@ namespace RazorSharp.CLR
 	[Flags]
 	public enum MethodDescClassification : ushort
 	{
-
-
 		/// <summary>
 		///     Method is <see cref="MethodClassification.IL" />, <see cref="MethodClassification.FCall" /> etc., see
 		///     <see cref="MethodClassification" /> above.
@@ -1066,6 +1060,4 @@ namespace RazorSharp.CLR
 
 		String = 0x70000000
 	}
-
-
 }

@@ -9,7 +9,6 @@ using RazorSharp.Native.Enums;
 
 namespace RazorSharp.Utilities
 {
-
 	public static class StandardOut
 	{
 		/// <summary>
@@ -18,13 +17,12 @@ namespace RazorSharp.Utilities
 		public static void ModConsole()
 		{
 			Console.OutputEncoding = Encoding.Unicode; // todo: Encoding.Unicode / UTF8? Any difference?
-			IntPtr handle = Kernel32.GetConsoleHandle();
-			Kernel32.GetConsoleMode(handle, out ConsoleOutputModes mode);
+			var handle = Kernel32.GetConsoleHandle();
+			Kernel32.GetConsoleMode(handle, out var mode);
 			mode |= ConsoleOutputModes.EnableVirtualTerminalProcessing;
 			Kernel32.SetConsoleMode(handle, mode);
 
 //			Logger.Log(Level.Standard, Flags.Info, "Console modded");
 		}
 	}
-
 }

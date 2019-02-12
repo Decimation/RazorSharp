@@ -11,7 +11,6 @@ using System.Runtime.InteropServices;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Native;
-using RazorSharp.Native.Enums;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -23,7 +22,6 @@ using RazorSharp.Utilities;
 
 namespace RazorSharp.Memory
 {
-
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
@@ -40,8 +38,7 @@ namespace RazorSharp.Memory
 		private const  byte Int32Bits       = 32;
 		internal const int  BytesInKilobyte = 1024;
 
-		
-		
+
 		public static void Zero<T>(ref T t)
 		{
 			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
@@ -51,9 +48,7 @@ namespace RazorSharp.Memory
 
 		public static void Zero(Pointer<byte> ptr, int length)
 		{
-			for (int i = 0; i < length; i++) {
-				ptr[i] = 0;
-			}
+			for (int i = 0; i < length; i++) ptr[i] = 0;
 		}
 
 		#endregion
@@ -139,8 +134,8 @@ namespace RazorSharp.Memory
 		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
 		{
 			RazorContract.Requires(elemCnt > 0, "elemCnt <= 0");
-			int    size  = Unsafe.SizeOf<T>() * elemCnt;
-			IntPtr alloc = Marshal.AllocHGlobal(size);
+			int size  = Unsafe.SizeOf<T>() * elemCnt;
+			var alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
 
 			return alloc;
@@ -172,15 +167,15 @@ namespace RazorSharp.Memory
 
 		public static void Swap<T>(void* a, void* b)
 		{
-			T aval = CSUnsafe.Read<T>(a);
-			T bval = CSUnsafe.Read<T>(b);
+			var aval = CSUnsafe.Read<T>(a);
+			var bval = CSUnsafe.Read<T>(b);
 			CSUnsafe.Write(a, bval);
 			CSUnsafe.Write(b, aval);
 		}
 
 		public static void Swap<T>(ref T a, ref T b)
 		{
-			T buf = a;
+			var buf = a;
 			a = b;
 			b = buf;
 		}
@@ -196,7 +191,7 @@ namespace RazorSharp.Memory
 
 		public static byte[] ReadBytes(Pointer<byte> p, int byteOffset, int size)
 		{
-			byte[] rg = new byte[size];
+			var rg = new byte[size];
 			fixed (byte* b = rg) {
 				Copy(b, byteOffset, p, size);
 			}
@@ -206,9 +201,7 @@ namespace RazorSharp.Memory
 
 		public static void WriteBytes(Pointer<byte> dest, byte[] src)
 		{
-			for (int i = 0; i < src.Length; i++) {
-				dest[i] = src[i];
-			}
+			for (int i = 0; i < src.Length; i++) dest[i] = src[i];
 		}
 
 		#endregion
@@ -228,16 +221,14 @@ namespace RazorSharp.Memory
 
 		public static int ReadBits(int b, int bitIndexBegin, int bitLen)
 		{
-			if (bitLen > Int32Bits) {
-				throw new Exception();
-			}
+			if (bitLen > Int32Bits) throw new Exception();
 
-			bool[] bits = new bool[bitLen];
+			var bits = new bool[bitLen];
 			for (int i = 0; i < bitLen; i++)
 				bits[i] = ReadBit(b, bitIndexBegin + i);
 
-			BitArray bitArray = new BitArray(bits);
-			int[]    array    = new int[1];
+			var bitArray = new BitArray(bits);
+			var array    = new int[1];
 			bitArray.CopyTo(array, 0);
 			return array[0];
 		}
@@ -251,8 +242,6 @@ namespace RazorSharp.Memory
 
 
 		#region Read / write
-		
-		
 
 		/// <summary>
 		///     Reinterprets <paramref name="value" /> of type <typeparamref name="TFrom" /> as a value of type
@@ -292,8 +281,6 @@ namespace RazorSharp.Memory
 		{
 			return ref CSUnsafe.AsRef<T>(PointerUtils.Add(p, byteOffset).ToPointer());
 		}
-		
-		
 
 		#endregion
 
@@ -354,9 +341,7 @@ namespace RazorSharp.Memory
 
 		public static void Copy<T>(Pointer<T> dest, int startOfs, Pointer<T> src, int elemCnt)
 		{
-			for (int i = startOfs; i < elemCnt + startOfs; i++) {
-				dest[i - startOfs] = src[i];
-			}
+			for (int i = startOfs; i < elemCnt + startOfs; i++) dest[i - startOfs] = src[i];
 		}
 
 		public static void Copy<T>(Pointer<T> dest, Pointer<T> src, int elemCnt)
@@ -402,7 +387,5 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
-
 	}
-
 }

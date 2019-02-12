@@ -6,7 +6,6 @@ using System;
 
 namespace RazorSharp.Native.Enums
 {
-
 	// todo: compare to ProcessAccessFlags
 
 	[Flags]
@@ -20,7 +19,5 @@ namespace RazorSharp.Native.Enums
 		CreateProcess           = 0x000080,
 		QueryInformation        = 0x000400,
 		QueryLimitedInformation = 0x001000
-
 	}
-
 }

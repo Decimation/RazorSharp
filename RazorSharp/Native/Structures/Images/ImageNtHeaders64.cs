@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 
 namespace RazorSharp.Native.Structures.Images
 {
-
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	public struct ImageNtHeaders64
 	{
@@ -14,5 +13,4 @@ namespace RazorSharp.Native.Structures.Images
 		public          ImageFileHeader       FileHeader;
 		public          ImageOptionalHeader64 OptionalHeader;
 	}
-
 }

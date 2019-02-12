@@ -11,10 +11,9 @@ using RazorSharp.Common;
 
 namespace RazorSharp.Analysis
 {
-
+	[Obsolete]
 	public unsafe class ReferenceInspector<T> : Inspector<T> where T : class
 	{
-
 		public ReferenceInspector(ref T t, InspectorMode mode = InspectorMode.Default) : base(ref t, mode)
 		{
 			base.Metadata  = new ReferenceMetadataInfo(ref t);
@@ -30,15 +29,14 @@ namespace RazorSharp.Analysis
 
 
 		internal new static void Write(ref T t, bool printStructures = false,
-			InspectorMode mode = InspectorMode.Default)
+			InspectorMode                    mode = InspectorMode.Default)
 		{
-			ReferenceInspector<T> inspector = new ReferenceInspector<T>(ref t, mode);
+			var inspector = new ReferenceInspector<T>(ref t, mode);
 			WriteInspector(inspector, printStructures);
 		}
 
 		public sealed class ReferenceInternalInfo : InternalInfo
 		{
-
 			internal ReferenceInternalInfo(ref T t) : base(ref t)
 			{
 				Header = Runtime.ReadObjHeader(ref t);
@@ -49,7 +47,7 @@ namespace RazorSharp.Analysis
 
 			protected override ConsoleTable ToTable()
 			{
-				ConsoleTable table = base.ToTable();
+				var table = base.ToTable();
 
 				table.AttachColumn("Object Header", Hex.ToHex(Header));
 				return table;
@@ -58,7 +56,6 @@ namespace RazorSharp.Analysis
 
 		public sealed class ReferenceMetadataInfo : MetadataInfo
 		{
-
 			internal ReferenceMetadataInfo(ref T t) : base(ref t)
 			{
 				IsHeapPointer = GCHeap.GlobalHeap.Reference.IsHeapPointer(t);
@@ -68,7 +65,7 @@ namespace RazorSharp.Analysis
 
 			protected override ConsoleTable ToTable()
 			{
-				ConsoleTable table = base.ToTable();
+				var table = base.ToTable();
 				table.AddRow("Heap pointer", IsHeapPointer.Prettify());
 				return table;
 			}
@@ -76,7 +73,6 @@ namespace RazorSharp.Analysis
 
 		public sealed class ReferenceSizeInfo : SizeInfo
 		{
-
 			private readonly string m_typeName;
 
 			internal ReferenceSizeInfo(ref T t)
@@ -99,7 +95,7 @@ namespace RazorSharp.Analysis
 				table.AddRow("Base fields size", BaseFieldsSize);
 				return table;*/
 
-				ConsoleTable table = base.ToTable();
+				var table = base.ToTable();
 
 				// todo: if the value is boxed
 				//if (m_typeName != typeof(T).Name) {
@@ -119,21 +115,17 @@ namespace RazorSharp.Analysis
 
 		public sealed class ReferenceAddressInfo : AddressInfo
 		{
-
 			internal ReferenceAddressInfo(ref T t) : base(ref t)
 			{
 				Heap   = Unsafe.AddressOfHeap(ref t).Address;
 				Fields = Unsafe.AddressOfHeap(ref t, OffsetType.Fields).Address;
 				Header = (IntPtr) Runtime.ReadObjHeader(ref t);
-				if (typeof(T).IsArray) {
+				if (typeof(T).IsArray)
 					HeapMisc = Unsafe.AddressOfHeap(ref t, OffsetType.ArrayData).Address;
-				}
-				else if (typeof(T) == typeof(string)) {
+				else if (typeof(T) == typeof(string))
 					HeapMisc = Unsafe.AddressOfHeap(ref t, OffsetType.StringData).Address;
-				}
-				else {
+				else
 					HeapMisc = IntPtr.Zero;
-				}
 			}
 
 			public IntPtr Heap   { get; }
@@ -148,24 +140,20 @@ namespace RazorSharp.Analysis
 
 			protected override ConsoleTable ToTable()
 			{
-				ConsoleTable table = base.ToTable();
+				var table = base.ToTable();
 				table.AttachColumn("Heap", Hex.ToHex(Heap));
 				table.AttachColumn("Fields", Hex.ToHex(Fields));
 				table.AttachColumn("Header", Hex.ToHex(Header));
 
 
-				if (typeof(T).IsArray) {
+				if (typeof(T).IsArray)
 					table.AttachColumn("Array data", Hex.ToHex(HeapMisc));
-				}
 
-				else if (typeof(T) == typeof(string)) {
-					table.AttachColumn("String data", Hex.ToHex(HeapMisc));
-				}
+				else if (typeof(T) == typeof(string)) table.AttachColumn("String data", Hex.ToHex(HeapMisc));
 
 
 				return table;
 			}
 		}
 	}
-
 }

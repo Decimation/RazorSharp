@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 
 namespace RazorSharp.CLR.Structures.EE
 {
-
 	[StructLayout(LayoutKind.Explicit)]
 	internal struct LayoutEEClass
 	{
@@ -17,5 +16,4 @@ namespace RazorSharp.CLR.Structures.EE
 		//		 so I'll just offset the pointer by 72 bytes
 		[FieldOffset(0)] internal EEClassLayoutInfo m_LayoutInfo;
 	}
-
 }

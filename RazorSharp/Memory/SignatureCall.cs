@@ -6,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -61,12 +59,10 @@ namespace RazorSharp.Memory
 
 		private static void SelectModule(SigcallAttribute attr)
 		{
-			if (UseTextSegment) {
+			if (UseTextSegment)
 				SigScanner.SelectModuleBySegment(attr.Module, Segments.TEXT_SEGMENT);
-			}
-			else {
+			else
 				SigScanner.SelectModule(attr.Module);
-			}
 		}
 
 		private static IntPtr GetCorrespondingFunctionPointer(SigcallAttribute attr, MethodInfo methodInfo)
@@ -93,17 +89,14 @@ namespace RazorSharp.Memory
 				SelectModule(attr);
 
 				// todo: this is a cheap fix
-				if (!attr.IsInFunctionMap && SigcallMethodMap.ContainsKey(methodInfo)) {
-					attr.IsInFunctionMap = true;
-				}
+				if (!attr.IsInFunctionMap && SigcallMethodMap.ContainsKey(methodInfo)) attr.IsInFunctionMap = true;
 
 
 				var fn = GetCorrespondingFunctionPointer(attr, methodInfo);
 				using (SignatureCallLogContext) {
 					Global.Log.Debug("Binding {Name} to {Addr:X}", methodInfo.Name, fn.ToInt64());
-					if (fn == IntPtr.Zero) {
+					if (fn == IntPtr.Zero)
 						Global.Log.Warning("Could not resolve address for func {Name}", methodInfo.Name);
-					}
 				}
 
 
@@ -115,6 +108,20 @@ namespace RazorSharp.Memory
 //				Console.WriteLine("{0} | {1} | {2}", methodInfo.Name, Hex.ToHex(fn),
 //					Hex.ToHex(PointerUtils.Subtract(fn, SigScanner.BaseAddress).Address));
 #endif
+			}
+		}
+
+		internal class Data
+		{
+			[JsonProperty("name")] internal string Name { get; set; }
+
+			[JsonProperty("opcodes")] internal string OpcodesSignature { get; set; }
+
+			[JsonProperty("offset")] internal string OffsetString { get; set; }
+
+			public override string ToString()
+			{
+				return string.Format("Name: {0}\nOpcodes: {1}\nOffset: {2}\n", Name, OpcodesSignature, OffsetString);
 			}
 		}
 
@@ -162,16 +169,12 @@ namespace RazorSharp.Memory
 		/// <param name="t">Type containing unbound <see cref="SigcallAttribute" /> functions </param>
 		public static void DynamicBind(Type t)
 		{
-			if (IsBound(t)) {
-				return;
-			}
+			if (IsBound(t)) return;
 
 			MethodInfo[] methodInfos = Runtime.GetMethods(t);
 
 
-			foreach (MethodInfo mi in methodInfos) {
-				ApplySigcallIndependent(mi);
-			}
+			foreach (var mi in methodInfos) ApplySigcallIndependent(mi);
 
 			BoundTypes.Add(t);
 		}
@@ -197,11 +200,9 @@ namespace RazorSharp.Memory
 		/// <param name="isGetProperty">Whether the function is a <c>get</c> function of a property </param>
 		public static void DynamicBind(Type t, string name, bool isGetProperty = false)
 		{
-			if (isGetProperty) {
-				name = SpecialNames.NameOfGetPropertyMethod(name);
-			}
+			if (isGetProperty) name = SpecialNames.NameOfGetPropertyMethod(name);
 
-			MethodInfo mi = Runtime.GetMethod(t, name);
+			var mi = Runtime.GetMethod(t, name);
 			ApplySigcallIndependent(mi);
 		}
 
@@ -211,9 +212,8 @@ namespace RazorSharp.Memory
 
 		private static void AddToMap(MethodInfo mi, byte[] rgBytes, long offsetGuess = 0)
 		{
-			if (!SigcallMethodMap.ContainsKey(mi)) {
+			if (!SigcallMethodMap.ContainsKey(mi))
 				SigcallMethodMap.Add(mi, new Tuple<byte[], long>(rgBytes, offsetGuess));
-			}
 		}
 
 		public static void Clear()
@@ -223,7 +223,7 @@ namespace RazorSharp.Memory
 
 		internal static void CacheFunction<T>(int token, byte[] rgBytes, long offsetGuess = 0)
 		{
-			MethodBase mb = typeof(T).Module.ResolveMethod(token);
+			var mb = typeof(T).Module.ResolveMethod(token);
 			AddToMap((MethodInfo) mb, rgBytes, offsetGuess);
 		}
 
@@ -234,7 +234,7 @@ namespace RazorSharp.Memory
 
 		private static void CacheFunction(Type t, string funcName, byte[] rgBytes, long offsetGuess = 0)
 		{
-			MethodInfo mi = Runtime.GetAnnotatedMethods<SigcallAttribute>(t, funcName)[0];
+			var mi = Runtime.GetAnnotatedMethods<SigcallAttribute>(t, funcName)[0];
 			CacheFunction(mi, rgBytes, offsetGuess);
 		}
 
@@ -245,17 +245,16 @@ namespace RazorSharp.Memory
 
 		private static string Get(string url)
 		{
-			using (var wc = new WebClient())
+			using (var wc = new WebClient()) {
 				return wc.DownloadString(url);
+			}
 		}
 
 		public static void ReadCacheJsonUrl(Type[] t, string url)
 		{
 			string js = Get(url);
 			Debug.Assert(!string.IsNullOrWhiteSpace(js));
-			foreach (var type in t) {
-				ReadCacheJson(type, js);
-			}
+			foreach (var type in t) ReadCacheJson(type, js);
 		}
 
 		public static void ReadCacheJsonUrl(Type t, string url)
@@ -269,26 +268,11 @@ namespace RazorSharp.Memory
 			var r  = (List<Data>) js.ToObject(typeof(List<Data>));
 
 
-			foreach (Data data in r) {
+			foreach (var data in r)
 				CacheFunction(t, data.Name, Strings.ParseByteArray(data.OpcodesSignature),
 					long.Parse(data.OffsetString, NumberStyles.HexNumber));
-			}
 		}
 
 		#endregion
-
-		internal class Data
-		{
-			[JsonProperty("name")] internal string Name { get; set; }
-
-			[JsonProperty("opcodes")] internal string OpcodesSignature { get; set; }
-
-			[JsonProperty("offset")] internal string OffsetString { get; set; }
-
-			public override string ToString()
-			{
-				return string.Format("Name: {0}\nOpcodes: {1}\nOffset: {2}\n", Name, OpcodesSignature, OffsetString);
-			}
-		}
 	}
 }

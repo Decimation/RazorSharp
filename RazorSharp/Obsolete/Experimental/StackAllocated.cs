@@ -11,7 +11,6 @@ using RazorSharp.Utilities.Exceptions;
 
 namespace RazorSharp.Obsolete.Experimental
 {
-
 	#region
 
 	#endregion
@@ -73,25 +72,23 @@ namespace RazorSharp.Obsolete.Experimental
 		/// <param name="stackPtr"></param>
 		public StackAllocated(byte* stackPtr)
 		{
-			if (DisallowedTypes.Contains(typeof(T))) {
+			if (DisallowedTypes.Contains(typeof(T)))
 				throw new TypeException($"Type {typeof(T).Name} cannot be created in stack memory.");
-			}
 
 			m_stackPtr = stackPtr;
 
-			T dummy = Activator.CreateInstance<T>();
+			var dummy = Activator.CreateInstance<T>();
 			m_dummy = dummy;
 			m_dummy = ReAllocateRefOnStack(ref dummy);
 		}
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Value", Value);
 			table.AddRow("Stack", Hex.ToHex(m_stackPtr));
 			table.AddRow("Dummy heap pointer", Hex.ToHex(Unsafe.AddressOfHeap(ref m_dummy).Address));
 			return table.ToMarkDownString();
 		}
 	}
-
 }

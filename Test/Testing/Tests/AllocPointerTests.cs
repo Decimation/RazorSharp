@@ -16,14 +16,13 @@ using RazorSharp.Pointers.Ex;
 
 namespace Test.Testing.Tests
 {
-
 	[TestFixture]
 	internal class AllocPointerTests
 	{
 		[Test]
 		public void Test()
 		{
-			AllocExPointer<string> alloc = new AllocExPointer<string>(5)
+			var alloc = new AllocExPointer<string>(5)
 			{
 				[0] = "g",
 				[1] = "anime",
@@ -44,13 +43,13 @@ namespace Test.Testing.Tests
 
 			Assert.Throws<IndexOutOfRangeException>(delegate
 			{
-				AllocExPointer<string> p = new AllocExPointer<string>(5);
+				var p = new AllocExPointer<string>(5);
 				p += p.Count + 1;
 			});
 
 			Assert.Throws<IndexOutOfRangeException>(delegate
 			{
-				AllocExPointer<string> p = new AllocExPointer<string>(5);
+				var p = new AllocExPointer<string>(5);
 				p -= p.Count + 1;
 			});
 
@@ -113,7 +112,7 @@ namespace Test.Testing.Tests
 			alloc.Dispose();
 
 
-			AllocExPointer<int> allocI = new AllocExPointer<int>(5)
+			var allocI = new AllocExPointer<int>(5)
 			{
 				[0] = zero,
 				[4] = end
@@ -133,8 +132,5 @@ namespace Test.Testing.Tests
 
 			Debug.Assert(!allocI.AddressInBounds(allocI.Address + 1));
 		}
-
-
 	}
-
 }

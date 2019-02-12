@@ -10,7 +10,6 @@ using Unsafe = System.Runtime.CompilerServices.Unsafe;
 
 namespace Test.Testing.Tests
 {
-
 	#region
 
 	using CSUnsafe = Unsafe;
@@ -29,11 +28,11 @@ namespace Test.Testing.Tests
 			string s = "foo";
 			Assert.That(new IntPtr(CSUnsafe.AsPointer(ref s)), Is.EqualTo(RazorSharp.Unsafe.AddressOf(ref s)));
 
-			IntPtr sChars = RazorSharp.Unsafe.AddressOfHeap(ref s, OffsetType.StringData).Address;
+			var sChars = RazorSharp.Unsafe.AddressOfHeap(ref s, OffsetType.StringData).Address;
 			Assert.That(Marshal.ReadInt16(sChars), Is.EqualTo(s[0]));
 
-			int[]  arr     = {1, 2, 3};
-			IntPtr arrData = RazorSharp.Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData).Address;
+			int[] arr     = {1, 2, 3};
+			var   arrData = RazorSharp.Unsafe.AddressOfHeap(ref arr, OffsetType.ArrayData).Address;
 			Assert.That(Marshal.ReadInt32(arrData), Is.EqualTo(arr[0]));
 
 			//Dummy d = new Dummy(100, "bar");
@@ -42,5 +41,4 @@ namespace Test.Testing.Tests
 			//Assert.That(Marshal.ReadInt32(dData, IntPtr.Size), Is.EqualTo(100));
 		}
 	}
-
 }

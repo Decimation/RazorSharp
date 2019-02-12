@@ -7,10 +7,8 @@ using RazorSharp.CLR.Structures;
 
 namespace RazorSharp.CLR
 {
-
 	public static class Offsets
 	{
-
 		/// <summary>
 		///     The offset, in bytes, of an array's actual <see cref="MethodTable" /> pointer, relative to the
 		///     address pointed to by an array type's <see cref="RuntimeTypeHandle.Value" />.
@@ -105,7 +103,5 @@ namespace RazorSharp.CLR
 		internal const long GLOBAL_HIGHEST_ADDRESS_OFFSET = 464;
 
 		#endregion
-
 	}
-
 }

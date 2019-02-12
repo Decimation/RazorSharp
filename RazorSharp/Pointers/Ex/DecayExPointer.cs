@@ -10,7 +10,6 @@ using RazorSharp.Utilities;
 
 namespace RazorSharp.Pointers.Ex
 {
-
 	/// <summary>
 	///     This won't work when:
 	///     - A string is changed (i.e. concatenations)
@@ -23,7 +22,6 @@ namespace RazorSharp.Pointers.Ex
 	[Obsolete("Use AllocExPointer", true)]
 	internal class DecayExPointer<T> : ExPointer<T>
 	{
-
 		private enum FixType
 		{
 			/// <summary>
@@ -101,20 +99,18 @@ namespace RazorSharp.Pointers.Ex
 			IntPtr sizePtr;
 
 			// Calculate the size ptr
-			if (isString) {
+			if (isString)
 				sizePtr = _origin - sizeof(int);
-			}
-			else {
+			else
 				sizePtr = _origin - sizeof(long);
-			}
 
 			Count = Marshal.ReadInt32(sizePtr);
 		}
 
 		private static DecayExPointer<T> CreateDecayedPointer(IntPtr pHeap, bool isString)
 		{
-			PointerMetadata   meta = new PointerMetadata(Unsafe.SizeOf<T>(), true);
-			DecayExPointer<T> p    = new DecayExPointer<T>(pHeap, meta, isString);
+			var meta = new PointerMetadata(Unsafe.SizeOf<T>(), true);
+			var p    = new DecayExPointer<T>(pHeap, meta, isString);
 
 
 			return p;
@@ -145,13 +141,11 @@ namespace RazorSharp.Pointers.Ex
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void EnsureIndexerBounds(int requestedIndex)
 		{
-			if (requestedIndex > End) {
+			if (requestedIndex > End)
 				throw new IndexOutOfRangeException($"Requested index of {requestedIndex} > {End}");
-			}
 
-			if (requestedIndex < Start) {
+			if (requestedIndex < Start)
 				throw new IndexOutOfRangeException($"Requested index of {requestedIndex} < {Start}");
-			}
 		}
 
 		private FixType EnsureOffsetBounds(int requestedOffset = 1)
@@ -199,17 +193,11 @@ namespace RazorSharp.Pointers.Ex
 
 		public override bool Equals(object obj)
 		{
-			if (ReferenceEquals(null, obj)) {
-				return false;
-			}
+			if (ReferenceEquals(null, obj)) return false;
 
-			if (ReferenceEquals(this, obj)) {
-				return true;
-			}
+			if (ReferenceEquals(this, obj)) return true;
 
-			if (obj.GetType() != GetType()) {
-				return false;
-			}
+			if (obj.GetType() != GetType()) return false;
 
 			return Equals((DecayExPointer<T>) obj);
 		}
@@ -293,7 +281,7 @@ namespace RazorSharp.Pointers.Ex
 
 		protected override ConsoleTable ToTable()
 		{
-			ConsoleTable table = base.ToTable();
+			var table = base.ToTable();
 			table.AddRow("Start", Start);
 			table.AddRow("End", End);
 			table.AddRow("Offset", m_offset);
@@ -305,7 +293,7 @@ namespace RazorSharp.Pointers.Ex
 
 		protected override ConsoleTable ToElementTable(int length)
 		{
-			ConsoleTable table = new ConsoleTable("Address", "Offset", "Value");
+			var table = new ConsoleTable("Address", "Offset", "Value");
 
 			for (int i = Start; i <= End; i++) table.AddRow(Hex.ToHex(PointerUtils.Offset<T>(Address, i)), i, this[i]);
 
@@ -372,7 +360,5 @@ namespace RazorSharp.Pointers.Ex
 		}
 
 		#endregion
-
 	}
-
 }

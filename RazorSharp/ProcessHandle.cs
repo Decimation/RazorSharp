@@ -7,7 +7,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp
 {
-
 	// todo: WIP
 	internal class ProcessHandle : IDisposable
 	{
@@ -98,8 +97,8 @@ namespace RazorSharp
 
 		public byte[] ReadBytes(Pointer<byte> addr, int count)
 		{
-			byte[] mem               = new byte[count];
-			ulong  numberOfBytesRead = 0;
+			var   mem               = new byte[count];
+			ulong numberOfBytesRead = 0;
 
 
 			// Read the memory
@@ -144,5 +143,4 @@ namespace RazorSharp
 			return string.Format("Process: {0} ({1})", Process.ProcessName, Process.Id);
 		}
 	}
-
 }

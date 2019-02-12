@@ -10,7 +10,6 @@ using RazorSharp.Native.Enums;
 
 namespace RazorSharp.Native.Structures
 {
-
 	[StructLayout(LayoutKind.Sequential)]
 	public struct SystemInfo
 	{
@@ -26,5 +25,4 @@ namespace RazorSharp.Native.Structures
 		public readonly ushort                ProcessorLevel;
 		public readonly ushort                ProcessorRevision;
 	}
-
 }

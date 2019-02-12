@@ -6,7 +6,6 @@ using System;
 
 namespace RazorSharp.Native.Enums
 {
-
 	/// <summary>
 	///     <a href="https://docs.microsoft.com/en-us/windows/desktop/memory/memory-protection-constants">Doc</a>
 	/// </summary>
@@ -105,5 +104,4 @@ namespace RazorSharp.Native.Enums
 
 		// PAGE_TARGETS_NO_UPDATE 0x40000000
 	}
-
 }

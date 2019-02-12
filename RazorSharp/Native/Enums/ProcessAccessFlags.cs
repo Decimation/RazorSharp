@@ -6,7 +6,6 @@ using System;
 
 namespace RazorSharp.Native.Enums
 {
-
 	[Flags]
 	public enum ProcessAccessFlags : uint
 	{
@@ -21,5 +20,4 @@ namespace RazorSharp.Native.Enums
 		QueryInformation = 0x00000400,
 		Synchronize      = 0x00100000
 	}
-
 }

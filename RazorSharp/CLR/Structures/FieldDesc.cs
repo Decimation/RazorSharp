@@ -19,8 +19,6 @@ using static RazorSharp.Memory.Mem;
 
 namespace RazorSharp.CLR.Structures
 {
-
-
 	/// <summary>
 	///     <para>
 	///         CLR <see cref="FieldDesc" />. Functionality is implemented in this <c>struct</c> and exposed via
@@ -89,10 +87,9 @@ namespace RazorSharp.CLR.Structures
 		internal int Token {
 			get {
 				// Check if this FieldDesc is using the packed mb layout
-				if (!RequiresFullMBValue) {
+				if (!RequiresFullMBValue)
 					return Constants.TokenFromRid(OrigToken & (int) MbMask.PackedMbLayoutMbMask,
 						CorTokenType.mdtFieldDef);
-				}
 
 				return Constants.TokenFromRid(OrigToken, CorTokenType.mdtFieldDef);
 			}
@@ -140,9 +137,7 @@ namespace RazorSharp.CLR.Structures
 		internal bool IsAutoProperty {
 			get {
 				string demangled = SpecialNames.DemangledAutoPropertyName(Name);
-				if (demangled != null) {
-					return SpecialNames.NameOfAutoPropertyBackingField(demangled) == Name;
-				}
+				if (demangled != null) return SpecialNames.NameOfAutoPropertyBackingField(demangled) == Name;
 
 				return false;
 			}
@@ -240,10 +235,8 @@ namespace RazorSharp.CLR.Structures
 			RazorContract.Assert(Offset != FieldOffsetNewEnC);
 
 
-			IntPtr data = Unsafe.AddressOf(ref t).Address;
-			if (typeof(TInstance).IsValueType) {
-				return data + Offset;
-			}
+			var data = Unsafe.AddressOf(ref t).Address;
+			if (typeof(TInstance).IsValueType) return data + Offset;
 
 			data =  Marshal.ReadIntPtr(data);
 			data += IntPtr.Size + Offset;
@@ -256,7 +249,7 @@ namespace RazorSharp.CLR.Structures
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 
 			// !NOTE NOTE NOTE!
 			// this->ToString() must be used to view this
@@ -288,8 +281,5 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		#endregion
-
 	}
-
-
 }

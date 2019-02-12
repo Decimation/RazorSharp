@@ -6,7 +6,6 @@ using System;
 
 namespace RazorSharp.Native.Enums
 {
-
 	[Flags]
 	public enum StandardHandles
 	{
@@ -14,5 +13,4 @@ namespace RazorSharp.Native.Enums
 		StdOutputHandle = -11,
 		StdErrorHandle  = -12
 	}
-
 }

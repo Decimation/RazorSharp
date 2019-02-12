@@ -11,7 +11,6 @@ using RazorSharp.CLR.Structures.EE;
 
 namespace RazorSharp.CLR.Structures
 {
-
 	#region
 
 	using DWORD = UInt32;
@@ -104,5 +103,4 @@ namespace RazorSharp.CLR.Structures
 			return dwReturn;
 		}
 	}
-
 }

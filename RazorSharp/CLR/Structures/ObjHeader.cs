@@ -15,11 +15,9 @@ using RazorSharp.Utilities;
 
 namespace RazorSharp.CLR.Structures
 {
-
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct ObjHeader
 	{
-
 		#region Fields
 
 #if !WIN32
@@ -79,12 +77,10 @@ namespace RazorSharp.CLR.Structures
 
 		public override string ToString()
 		{
-			byte[]        bytes = BitConverter.GetBytes(m_uSyncBlockValue);
-			StringBuilder sb    = new StringBuilder();
+			byte[] bytes = BitConverter.GetBytes(m_uSyncBlockValue);
+			var    sb    = new StringBuilder();
 
-			foreach (byte v in bytes) {
-				sb.AppendFormat("{0} ", Convert.ToString(v, 2));
-			}
+			foreach (byte v in bytes) sb.AppendFormat("{0} ", Convert.ToString(v, 2));
 
 			sb.Remove(sb.Length - 1, 1);
 			return $"Sync block: {m_uSyncBlockValue} ({SyncBlockAsFlags}) [{Collections.ToString(bytes)}] [{sb}]";
@@ -117,7 +113,7 @@ namespace RazorSharp.CLR.Structures
 		public override bool Equals(object obj)
 		{
 			if (obj?.GetType() == GetType()) {
-				ObjHeader h = (ObjHeader) obj;
+				var h = (ObjHeader) obj;
 				return Equals(h);
 			}
 
@@ -125,8 +121,5 @@ namespace RazorSharp.CLR.Structures
 		}
 
 		#endregion
-
-
 	}
-
 }

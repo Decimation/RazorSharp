@@ -12,7 +12,6 @@ using RazorSharp.Pointers;
 
 namespace Test.Testing.Tests
 {
-
 	[TestFixture]
 	public unsafe class ILTests
 	{
@@ -37,15 +36,13 @@ namespace Test.Testing.Tests
 
 		private class Substrate
 		{
-			private int m_value;
+			public int Value { get; private set; }
 
-			public int Value => m_value;
-
-			public int this[int index] => m_value;
+			public int this[int index] => Value;
 
 			public void incr()
 			{
-				m_value++;
+				Value++;
 			}
 		}
 
@@ -56,7 +53,7 @@ namespace Test.Testing.Tests
 			Pointer<MethodDesc> mdItemOp         = typeof(Substrate).GetMethodDesc("get_Item");
 			Pointer<MethodDesc> mdItemOpOverride = typeof(ILTests).GetMethodDesc("get_ItemOp");
 			mdItemOp.Reference.SetStableEntryPoint(mdItemOpOverride.Reference.Function);
-			Substrate a = new Substrate();
+			var a = new Substrate();
 			Debug.Assert(a[0] == -0xFF);
 		}
 
@@ -69,5 +66,4 @@ namespace Test.Testing.Tests
 			Debug.Assert(Operations.AddOp(1, 1) == 0);
 		}
 	}
-
 }

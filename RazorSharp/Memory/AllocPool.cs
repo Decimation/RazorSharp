@@ -12,7 +12,6 @@ using static RazorSharp.Unsafe;
 
 namespace RazorSharp.Memory
 {
-
 	// todo: WIP
 
 	/// <summary>
@@ -32,17 +31,17 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     List of <see cref="Range" />s
 		/// </summary>
-		private static readonly IList<Range> s_rgPool;
+		private static readonly IList<Range> Pool;
 
 		static AllocPool()
 		{
-			s_rgPool = new List<Range>();
+			Pool = new List<Range>();
 		}
 
 		public static Pointer<T> Alloc<T>(int elemCnt = 1)
 		{
-			Range rg = new Range(Mem.AllocUnmanaged<T>(elemCnt).Address, elemCnt * SizeOf<T>());
-			s_rgPool.Add(rg);
+			var rg = new Range(Mem.AllocUnmanaged<T>(elemCnt).Address, elemCnt * SizeOf<T>());
+			Pool.Add(rg);
 			return rg.LowAddr;
 		}
 
@@ -51,9 +50,9 @@ namespace RazorSharp.Memory
 			Pointer<T> orig  = GetOrigin(ptr);
 			int        index = IndexOf(orig.Address);
 
-			s_rgPool.RemoveAt(index);
-			Range rg = new Range(Mem.ReAllocUnmanaged<byte>(orig.Address, elemCnt).Address, elemCnt * SizeOf<T>());
-			s_rgPool.Add(rg);
+			Pool.RemoveAt(index);
+			var rg = new Range(Mem.ReAllocUnmanaged<byte>(orig.Address, elemCnt).Address, elemCnt * SizeOf<T>());
+			Pool.Add(rg);
 			return rg.LowAddr;
 		}
 
@@ -61,21 +60,19 @@ namespace RazorSharp.Memory
 		{
 			Trace.Assert(IsAllocated(ptr));
 
-			Range  rg     = GetRange(ptr.Address);
-			IntPtr origin = rg.LowAddr;
+			var rg     = GetRange(ptr.Address);
+			var origin = rg.LowAddr;
 
 			Mem.Zero(origin, rg.Size);
 			Mem.Free((Pointer<byte>) origin);
-			s_rgPool.Remove(rg);
+			Pool.Remove(rg);
 		}
 
 		private static int IndexOf(IntPtr p)
 		{
-			for (int i = 0; i < s_rgPool.Count; i++) {
-				if (s_rgPool[i].IsAddrInRange(p)) {
+			for (int i = 0; i < Pool.Count; i++)
+				if (Pool[i].IsAddrInRange(p))
 					return i;
-				}
-			}
 
 			return -1;
 		}
@@ -93,9 +90,7 @@ namespace RazorSharp.Memory
 		private static Range GetRange(IntPtr p)
 		{
 			int index = IndexOf(p);
-			if (index != -1) {
-				return s_rgPool[index];
-			}
+			if (index != -1) return Pool[index];
 
 			throw new Exception($"Pointer {Hex.ToHex(p)} is either out of bounds, not allocated, or not in pool");
 		}
@@ -123,7 +118,7 @@ namespace RazorSharp.Memory
 
 		public static void Info<T>(Pointer<T> ptr)
 		{
-			ConsoleTable table = new ConsoleTable("Info", "Value");
+			var table = new ConsoleTable("Info", "Value");
 
 			table.AddRow("Origin", GetOrigin(ptr).ToString("P"));
 			table.AddRow("Limit", GetLimit(ptr).ToString("P"));
@@ -143,7 +138,6 @@ namespace RazorSharp.Memory
 		/// </summary>
 		private struct Range
 		{
-
 			internal IntPtr HighAddr => LowAddr + Size;
 
 			internal IntPtr LowAddr { get; }
@@ -160,9 +154,6 @@ namespace RazorSharp.Memory
 			{
 				return Mem.IsAddressInRange(HighAddr, p, LowAddr);
 			}
-
-
 		}
 	}
-
 }

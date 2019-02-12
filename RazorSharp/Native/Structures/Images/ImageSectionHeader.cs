@@ -9,7 +9,6 @@ using System.Runtime.InteropServices;
 
 namespace RazorSharp.Native.Structures.Images
 {
-
 	#region
 
 	using DWORD = UInt32;
@@ -34,5 +33,4 @@ namespace RazorSharp.Native.Structures.Images
 		[FieldOffset(32)] public readonly WORD                        NumberOfLinenumbers;
 		[FieldOffset(36)] public readonly ImageSectionCharacteristics Characteristics;
 	}
-
 }

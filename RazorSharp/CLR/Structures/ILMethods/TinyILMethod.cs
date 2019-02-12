@@ -11,7 +11,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.CLR.Structures.ILMethods
 {
-
 	/// <summary>
 	///     <para>
 	///         CLR <see cref="TinyILMethod" />. Functionality is implemented in this <c>struct</c> and exposed via
@@ -89,6 +88,4 @@ namespace RazorSharp.CLR.Structures.ILMethods
 	{
 		[FieldOffset(0)] internal readonly byte Flags_CodeSize;
 	}
-
-
 }

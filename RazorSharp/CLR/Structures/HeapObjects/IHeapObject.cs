@@ -1,6 +1,5 @@
 namespace RazorSharp.CLR.Structures.HeapObjects
 {
-
 	internal unsafe interface IHeapObject
 	{
 		// The object header is at a negative offset of
@@ -8,5 +7,4 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 		ObjHeader*   Header      { get; }
 		MethodTable* MethodTable { get; }
 	}
-
 }

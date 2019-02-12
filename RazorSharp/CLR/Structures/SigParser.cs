@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 
 namespace RazorSharp.CLR.Structures
 {
-
 	// todo
 	internal struct SigParser
 	{
@@ -107,14 +106,13 @@ namespace RazorSharp.CLR.Structures
 
 		private bool GetElemTypeSlow(out int etype)
 		{
-			SigParser sigTemp = new SigParser(this);
-			if (sigTemp.SkipCustomModifiers()) {
+			var sigTemp = new SigParser(this);
+			if (sigTemp.SkipCustomModifiers())
 				if (sigTemp.GetByte(out byte elemType)) {
 					etype = elemType;
 					CopyFrom(sigTemp);
 					return true;
 				}
-			}
 
 			etype = 0;
 			return false;
@@ -171,7 +169,7 @@ namespace RazorSharp.CLR.Structures
 
 		private bool PeekElemTypeSlow(out int etype)
 		{
-			SigParser sigTemp = new SigParser(this);
+			var sigTemp = new SigParser(this);
 			return sigTemp.GetElemType(out etype);
 		}
 
@@ -191,15 +189,11 @@ namespace RazorSharp.CLR.Structures
 		private bool PeekElemTypeSize(out int pSize)
 		{
 			pSize = 0;
-			SigParser sigTemp = new SigParser(this);
+			var sigTemp = new SigParser(this);
 
-			if (!sigTemp.SkipAnyVASentinel()) {
-				return false;
-			}
+			if (!sigTemp.SkipAnyVASentinel()) return false;
 
-			if (!sigTemp.GetByte(out byte bElementType)) {
-				return false;
-			}
+			if (!sigTemp.GetByte(out byte bElementType)) return false;
 
 
 			switch (bElementType) {
@@ -262,9 +256,7 @@ namespace RazorSharp.CLR.Structures
 
 		private bool AtSentinel()
 		{
-			if (_len > 0) {
-				return _sig[_offs] == ELEMENT_TYPE_SENTINEL;
-			}
+			if (_len > 0) return _sig[_offs] == ELEMENT_TYPE_SENTINEL;
 
 			return false;
 		}
@@ -281,38 +273,29 @@ namespace RazorSharp.CLR.Structures
 
 		public bool SkipCustomModifiers()
 		{
-			SigParser sigTemp = new SigParser(this);
+			var sigTemp = new SigParser(this);
 
-			if (!sigTemp.SkipAnyVASentinel()) {
-				return false;
-			}
+			if (!sigTemp.SkipAnyVASentinel()) return false;
 
-			if (!sigTemp.PeekByte(out byte bElementType)) {
-				return false;
-			}
+			if (!sigTemp.PeekByte(out byte bElementType)) return false;
 
 			while (ELEMENT_TYPE_CMOD_REQD == bElementType || ELEMENT_TYPE_CMOD_OPT == bElementType) {
 				sigTemp.SkipBytes(1);
 
-				if (!sigTemp.GetToken(out int token)) {
-					return false;
-				}
+				if (!sigTemp.GetToken(out int token)) return false;
 
-				if (!sigTemp.PeekByte(out bElementType)) {
-					return false;
-				}
+				if (!sigTemp.PeekByte(out bElementType)) return false;
 			}
 
 			// Following custom modifiers must be an element type value which is less than ELEMENT_TYPE_MAX, or one of the other element types
 			// that we support while parsing various signatures
-			if (bElementType >= ELEMENT_TYPE_MAX) {
+			if (bElementType >= ELEMENT_TYPE_MAX)
 				switch (bElementType) {
 					case ELEMENT_TYPE_PINNED:
 						break;
 					default:
 						return false;
 				}
-			}
 
 			CopyFrom(sigTemp);
 			return true;
@@ -320,14 +303,10 @@ namespace RazorSharp.CLR.Structures
 
 		private bool SkipFunkyAndCustomModifiers()
 		{
-			SigParser sigTemp = new SigParser(this);
-			if (!sigTemp.SkipAnyVASentinel()) {
-				return false;
-			}
+			var sigTemp = new SigParser(this);
+			if (!sigTemp.SkipAnyVASentinel()) return false;
 
-			if (!sigTemp.PeekByte(out byte bElementType)) {
-				return false;
-			}
+			if (!sigTemp.PeekByte(out byte bElementType)) return false;
 
 			while (ELEMENT_TYPE_CMOD_REQD == bElementType ||
 			       ELEMENT_TYPE_CMOD_OPT == bElementType ||
@@ -335,25 +314,20 @@ namespace RazorSharp.CLR.Structures
 			       ELEMENT_TYPE_PINNED == bElementType) {
 				sigTemp.SkipBytes(1);
 
-				if (!sigTemp.GetToken(out int token)) {
-					return false;
-				}
+				if (!sigTemp.GetToken(out int token)) return false;
 
-				if (!sigTemp.PeekByte(out bElementType)) {
-					return false;
-				}
+				if (!sigTemp.PeekByte(out bElementType)) return false;
 			}
 
 			// Following custom modifiers must be an element type value which is less than ELEMENT_TYPE_MAX, or one of the other element types
 			// that we support while parsing various signatures
-			if (bElementType >= ELEMENT_TYPE_MAX) {
+			if (bElementType >= ELEMENT_TYPE_MAX)
 				switch (bElementType) {
 					case ELEMENT_TYPE_PINNED:
 						break;
 					default:
 						return false;
 				}
-			}
 
 			CopyFrom(sigTemp);
 			return true;
@@ -361,13 +335,9 @@ namespace RazorSharp.CLR.Structures
 
 		private bool SkipAnyVASentinel()
 		{
-			if (!PeekByte(out byte bElementType)) {
-				return false;
-			}
+			if (!PeekByte(out byte bElementType)) return false;
 
-			if (bElementType == ELEMENT_TYPE_SENTINEL) {
-				SkipBytes(1);
-			}
+			if (bElementType == ELEMENT_TYPE_SENTINEL) SkipBytes(1);
 
 			return true;
 		} // SkipAnyVASentinel
@@ -375,21 +345,17 @@ namespace RazorSharp.CLR.Structures
 
 		public bool SkipExactlyOne()
 		{
-			if (!GetElemType(out int typ)) {
-				return false;
-			}
+			if (!GetElemType(out int typ)) return false;
 
 			int tmp;
-			if (!Constants.IsPrimitive((CorElementType) typ)) {
+			if (!Constants.IsPrimitive((CorElementType) typ))
 				switch (typ) {
 					default:
 						return false;
 
 					case ELEMENT_TYPE_VAR:
 					case ELEMENT_TYPE_MVAR:
-						if (!GetData(out tmp)) {
-							return false;
-						}
+						if (!GetData(out tmp)) return false;
 
 						break;
 
@@ -402,58 +368,42 @@ namespace RazorSharp.CLR.Structures
 					case ELEMENT_TYPE_PTR:
 					case ELEMENT_TYPE_PINNED:
 					case ELEMENT_TYPE_SZARRAY:
-						if (!SkipExactlyOne()) {
-							return false;
-						}
+						if (!SkipExactlyOne()) return false;
 
 						break;
 
 					case ELEMENT_TYPE_VALUETYPE:
 					case ELEMENT_TYPE_CLASS:
-						if (!GetToken(out tmp)) {
-							return false;
-						}
+						if (!GetToken(out tmp)) return false;
 
 						break;
 
 					case ELEMENT_TYPE_FNPTR:
-						if (!SkipSignature()) {
-							return false;
-						}
+						if (!SkipSignature()) return false;
 
 						break;
 
 					case ELEMENT_TYPE_ARRAY:
 
 						// Skip element type
-						if (!SkipExactlyOne()) {
-							return false;
-						}
+						if (!SkipExactlyOne()) return false;
 
 						// Get rank;
 						int rank;
-						if (!GetData(out rank)) {
-							return false;
-						}
+						if (!GetData(out rank)) return false;
 
 						if (rank > 0) {
-							if (!GetData(out int sizes)) {
-								return false;
-							}
+							if (!GetData(out int sizes)) return false;
 
 							while (sizes-- != 0)
-								if (!GetData(out tmp)) {
+								if (!GetData(out tmp))
 									return false;
-								}
 
-							if (!GetData(out int bounds)) {
-								return false;
-							}
+							if (!GetData(out int bounds)) return false;
 
 							while (bounds-- != 0)
-								if (!GetData(out tmp)) {
+								if (!GetData(out tmp))
 									return false;
-								}
 						}
 
 						break;
@@ -464,31 +414,24 @@ namespace RazorSharp.CLR.Structures
 						break;
 
 					case ELEMENT_TYPE_INTERNAL:
-						if (!GetData(out tmp)) {
-							return false;
-						}
+						if (!GetData(out tmp)) return false;
 
 						break;
 
 					case ELEMENT_TYPE_GENERICINST:
 
 						// Skip generic type
-						if (!SkipExactlyOne()) {
-							return false;
-						}
+						if (!SkipExactlyOne()) return false;
 
 						// Get number of parameters
 						int argCnt;
-						if (!GetData(out argCnt)) {
-							return false;
-						}
+						if (!GetData(out argCnt)) return false;
 
 						// Skip the parameters
 						while (argCnt-- != 0)
 							SkipExactlyOne();
 						break;
 				}
-			}
 
 			return true;
 		}
@@ -498,30 +441,20 @@ namespace RazorSharp.CLR.Structures
 			pcArgs = 0;
 
 			// Skip calling convention
-			if (!GetCallingConvInfo(out int uCallConv)) {
-				return false;
-			}
+			if (!GetCallingConvInfo(out int uCallConv)) return false;
 
-			if (uCallConv == IMAGE_CEE_CS_CALLCONV_FIELD || uCallConv == IMAGE_CEE_CS_CALLCONV_LOCAL_SIG) {
-				return false;
-			}
+			if (uCallConv == IMAGE_CEE_CS_CALLCONV_FIELD || uCallConv == IMAGE_CEE_CS_CALLCONV_LOCAL_SIG) return false;
 
 			// Skip type parameter count
-			if ((uCallConv & IMAGE_CEE_CS_CALLCONV_GENERIC) == IMAGE_CEE_CS_CALLCONV_GENERIC) {
-				if (!GetData(out int tmp)) {
+			if ((uCallConv & IMAGE_CEE_CS_CALLCONV_GENERIC) == IMAGE_CEE_CS_CALLCONV_GENERIC)
+				if (!GetData(out int tmp))
 					return false;
-				}
-			}
 
 			// Get arg count;
-			if (!GetData(out pcArgs)) {
-				return false;
-			}
+			if (!GetData(out pcArgs)) return false;
 
 			// Skip return type;
-			if (!SkipExactlyOne()) {
-				return false;
-			}
+			if (!SkipExactlyOne()) return false;
 
 			return true;
 		} // SigParser::SkipMethodHeaderSignature
@@ -529,24 +462,19 @@ namespace RazorSharp.CLR.Structures
 
 		private bool SkipSignature()
 		{
-			if (!SkipMethodHeaderSignature(out int args)) {
-				return false;
-			}
+			if (!SkipMethodHeaderSignature(out int args)) return false;
 
 			// Skip args.
 			while (args-- > 0)
-				if (!SkipExactlyOne()) {
+				if (!SkipExactlyOne())
 					return false;
-				}
 
 			return false;
 		}
 
 		private bool UncompressToken(out int token, out int size)
 		{
-			if (!UncompressData(out token, out size)) {
-				return false;
-			}
+			if (!UncompressData(out token, out size)) return false;
 
 			int tkType = s_tkCorEncodeToken[token & 3];
 			token = (token >> 2) | tkType;
@@ -564,18 +492,14 @@ namespace RazorSharp.CLR.Structures
 			pDataOut = 0;
 			pDataLen = 0;
 
-			if (_len <= 0) {
-				return false;
-			}
+			if (_len <= 0) return false;
 
 			byte byte0 = GetSig(0);
 
 			// Smallest.
 			if ((byte0 & 0x80) == 0x00) // 0??? ????
 			{
-				if (_len < 1) {
-					return false;
-				}
+				if (_len < 1) return false;
 
 				pDataOut = byte0;
 				pDataLen = 1;
@@ -584,18 +508,14 @@ namespace RazorSharp.CLR.Structures
 			// Medium.
 			else if ((byte0 & 0xC0) == 0x80) // 10?? ????
 			{
-				if (_len < 2) {
-					return false;
-				}
+				if (_len < 2) return false;
 
 				pDataOut = ((byte0 & 0x3f) << 8) | GetSig(1);
 				pDataLen = 2;
 			}
 			else if ((byte0 & 0xE0) == 0xC0) // 110? ????
 			{
-				if (_len < 4) {
-					return false;
-				}
+				if (_len < 4) return false;
 
 				pDataOut = ((byte0 & 0x1f) << 24) | (GetSig(1) << 16) | (GetSig(2) << 8) | GetSig(3);
 				pDataLen = 4;
@@ -714,5 +634,4 @@ namespace RazorSharp.CLR.Structures
 		private const int ELEMENT_TYPE_SENTINEL = 0x01 | ELEMENT_TYPE_MODIFIER;
 		private const int ELEMENT_TYPE_PINNED   = 0x05 | ELEMENT_TYPE_MODIFIER;
 	}
-
 }

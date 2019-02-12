@@ -11,7 +11,6 @@ using RazorSharp.Pointers;
 
 namespace Test.Testing.Tests
 {
-
 	[TestFixture]
 	public class AddrInRangeTests
 	{
@@ -29,7 +28,7 @@ namespace Test.Testing.Tests
 
 			Mem.Free((Pointer<byte>) rgPtr.Address);
 
-			IntPtr orig = rgPtr.Address;
+			var orig = rgPtr.Address;
 
 			for (int i = 0; i < 5; i++) {
 				Debug.Assert(InRange(rgPtr.Address));
@@ -46,5 +45,4 @@ namespace Test.Testing.Tests
 			}
 		}
 	}
-
 }

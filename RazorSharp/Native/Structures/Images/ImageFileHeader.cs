@@ -6,11 +6,9 @@ using System.Runtime.InteropServices;
 
 namespace RazorSharp.Native.Structures.Images
 {
-
 	[StructLayout(LayoutKind.Sequential)]
 	public struct ImageFileHeader
 	{
-
 		/// WORD->unsigned short
 		public readonly ushort Machine;
 
@@ -32,5 +30,4 @@ namespace RazorSharp.Native.Structures.Images
 		/// WORD->unsigned short
 		public readonly ushort Characteristics;
 	}
-
 }

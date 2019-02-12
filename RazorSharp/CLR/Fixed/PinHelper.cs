@@ -4,7 +4,6 @@
 
 namespace RazorSharp.CLR.Fixed
 {
-
 	#region
 
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
@@ -17,7 +16,6 @@ namespace RazorSharp.CLR.Fixed
 	/// </summary>
 	public static class PinHelper
 	{
-
 		/// <summary>
 		///     Used for unsafe pinning of arbitrary objects.
 		/// </summary>
@@ -52,5 +50,4 @@ namespace RazorSharp.CLR.Fixed
 			private PinningHelper() { }
 		}
 	}
-
 }

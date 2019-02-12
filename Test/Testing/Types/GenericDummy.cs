@@ -1,37 +1,28 @@
 #region
 
-using System;
-
 #endregion
 
 namespace Test.Testing.Types
 {
-
 	internal class GenericDummy<T>
 	{
-		private T m_value;
-
-		public T Value {
-			get => m_value;
-			set => m_value = value;
-		}
-
 		public GenericDummy()
 		{
-			m_value = default;
+			Value = default;
 		}
 
 		public GenericDummy(T value)
 		{
-			m_value = value;
+			Value = value;
 		}
+
+		public T Value { get; set; }
 
 		public void hello() { }
 
 		public override string ToString()
 		{
-			return String.Format("Value: {0}", m_value);
+			return string.Format("Value: {0}", Value);
 		}
 	}
-
 }

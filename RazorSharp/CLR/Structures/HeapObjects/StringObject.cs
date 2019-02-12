@@ -13,7 +13,6 @@ using RazorSharp.Utilities;
 
 namespace RazorSharp.CLR.Structures.HeapObjects
 {
-
 	#region
 
 	#endregion
@@ -70,7 +69,7 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 		/// </summary>
 		public char this[int index] {
 			get {
-				char* __this = (char*) Unsafe.AddressOf(ref this);
+				var __this = (char*) Unsafe.AddressOf(ref this);
 				RazorContract.RequiresNotNull(__this);
 
 				return __this[index + RuntimeHelpers.OffsetToStringData / sizeof(char)];
@@ -79,7 +78,7 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 
 		public string StringValue {
 			get {
-				char* __this = (char*) Unsafe.AddressOf(ref this);
+				var __this = (char*) Unsafe.AddressOf(ref this);
 				__this += RuntimeHelpers.OffsetToStringData / sizeof(char);
 				return new string(__this);
 
@@ -90,7 +89,7 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Header*", Hex.ToHex(Header));
 			table.AddRow("MethodTable*", Hex.ToHex(m_methodTablePtr));
 			table.AddRow("Length", m_stringLength);
@@ -99,5 +98,4 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 			return table.ToMarkDownString();
 		}
 	}
-
 }

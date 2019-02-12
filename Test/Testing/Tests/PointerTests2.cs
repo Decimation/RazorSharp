@@ -10,28 +10,23 @@ using RazorSharp.Pointers;
 
 namespace Test.Testing.Tests
 {
-
 	[TestFixture]
 	public class PointerTests2
 	{
 		private struct Target
 		{
-			private readonly string _str;
-			private readonly int    _int;
+			public string Str { get; }
 
-			public string Str => _str;
-			public int    I   => _int;
+			public int I { get; }
 
 			public bool Equals(Target other)
 			{
-				return string.Equals(_str, other._str) && _int == other._int;
+				return string.Equals(Str, other.Str) && I == other.I;
 			}
 
 			public override bool Equals(object obj)
 			{
-				if (ReferenceEquals(null, obj)) {
-					return false;
-				}
+				if (ReferenceEquals(null, obj)) return false;
 
 				return obj is Target other && Equals(other);
 			}
@@ -39,7 +34,7 @@ namespace Test.Testing.Tests
 			public override int GetHashCode()
 			{
 				unchecked {
-					return ((_str != null ? _str.GetHashCode() : 0) * 397) ^ _int;
+					return ((Str != null ? Str.GetHashCode() : 0) * 397) ^ I;
 				}
 			}
 
@@ -55,15 +50,15 @@ namespace Test.Testing.Tests
 
 			public Target(string str, int i)
 			{
-				_str = str;
-				_int = i;
+				Str = str;
+				I   = i;
 			}
 		}
 
 		[Test]
 		public void Test()
 		{
-			Target        t   = new Target("foo", 123);
+			var           t   = new Target("foo", 123);
 			Pointer<byte> ptr = Unsafe.AddressOf(ref t).Address;
 
 			Debug.Assert(ptr.ReadAny<string>() == t.Str);
@@ -112,5 +107,4 @@ namespace Test.Testing.Tests
 			Debug.Assert(a.IsNull);
 		}
 	}
-
 }

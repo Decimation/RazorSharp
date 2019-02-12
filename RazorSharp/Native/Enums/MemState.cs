@@ -6,7 +6,6 @@ using System;
 
 namespace RazorSharp.Native.Enums
 {
-
 	/// <summary>
 	///     <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-_memory_basic_information">
 	///         Doc
@@ -33,5 +32,4 @@ namespace RazorSharp.Native.Enums
 		/// </summary>
 		Free = 0x10000
 	}
-
 }

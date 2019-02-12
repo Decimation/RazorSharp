@@ -1,4 +1,5 @@
 using RazorSharp.Memory;
+using RazorSharp.Pointers;
 
 namespace RazorSharp
 {
@@ -22,7 +23,7 @@ namespace RazorSharp
 
 		public static TTo Convert<TTo>(byte[] mem) where TTo : struct
 		{
-			var alloc = Mem.AllocUnmanaged<byte>(mem.Length);
+			Pointer<byte> alloc = Mem.AllocUnmanaged<byte>(mem.Length);
 			alloc.WriteAll(mem);
 			var read = alloc.ReadAny<TTo>();
 			Mem.Free(alloc);

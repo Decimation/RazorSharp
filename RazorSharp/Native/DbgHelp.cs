@@ -10,7 +10,6 @@ using RazorSharp.Native.Structures.Images;
 
 namespace RazorSharp.Native
 {
-
 	public static unsafe class DbgHelp
 	{
 		private const string DbgHelpDll = "DbgHelp.dll";
@@ -26,13 +25,13 @@ namespace RazorSharp.Native
 			ImageNtHeaders64* pNtHdr = ImageNtHeader(hModule);
 
 			// section table immediately follows the IMAGE_NT_HEADERS
-			IntPtr pSectionHdr = (IntPtr) (pNtHdr + 1);
-			IntPtr imageBase   = hModule;
+			var pSectionHdr = (IntPtr) (pNtHdr + 1);
+			var imageBase   = hModule;
 
-			ImageSectionInfo[] arr = new ImageSectionInfo[pNtHdr->FileHeader.NumberOfSections];
+			var arr = new ImageSectionInfo[pNtHdr->FileHeader.NumberOfSections];
 
 			for (int scn = 0; scn < pNtHdr->FileHeader.NumberOfSections; ++scn) {
-				ImageSectionHeader struc = Marshal.PtrToStructure<ImageSectionHeader>(pSectionHdr);
+				var struc = Marshal.PtrToStructure<ImageSectionHeader>(pSectionHdr);
 
 				arr[scn] = new ImageSectionInfo(scn, struc.Name, (void*) (imageBase.ToInt64() + struc.VirtualAddress),
 					(int) struc.VirtualSize, struc);
@@ -43,5 +42,4 @@ namespace RazorSharp.Native
 			return arr;
 		}
 	}
-
 }

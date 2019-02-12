@@ -8,11 +8,9 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.Common
 {
-
 	[Flags]
 	public enum ToStringOptions
 	{
-
 		/// <summary>
 		///     Separate elements with a comma
 		/// </summary>
@@ -81,10 +79,8 @@ namespace RazorSharp.Common
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static string ToHexInternal(long l)
 		{
-			string s = l.ToString("X");
-			if (Options.HasFlag(ToStringOptions.PrefixHex)) {
-				s = PrefixString + s;
-			}
+			string s                                          = l.ToString("X");
+			if (Options.HasFlag(ToStringOptions.PrefixHex)) s = PrefixString + s;
 
 
 			return s;
@@ -102,24 +98,19 @@ namespace RazorSharp.Common
 		public static string TryCreateHex<T>(T t, ToStringOptions options = ToStringOptions.PrefixHex)
 		{
 			string value = null;
-			var type = t.GetType();
+			var    type  = t.GetType();
 			if (type.IsIntegerType() || t is IntPtr) {
 				long l = long.Parse(t.ToString());
 				value = $"{l:X}";
-				
-
-				if (value.Length == 1 && options.HasFlag(ToStringOptions.ZeroPadHex)) {
-					value = 0 + value;
-				}
 
 
-				if (options.HasFlag(ToStringOptions.PrefixHex)) {
-					value = PrefixString + value;
-				}
+				if (value.Length == 1 && options.HasFlag(ToStringOptions.ZeroPadHex)) value = 0 + value;
+
+
+				if (options.HasFlag(ToStringOptions.PrefixHex)) value = PrefixString + value;
 			}
 
 			return string.IsNullOrWhiteSpace(value) ? t.ToString() : value;
 		}
 	}
-
 }

@@ -9,7 +9,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.Native.Structures.Images
 {
-
 	/// <summary>
 	///     Wraps an <see cref="ImageSectionHeader" />
 	/// </summary>
@@ -44,7 +43,7 @@ namespace RazorSharp.Native.Structures.Images
 
 
 		public ImageSectionInfo(int sectionNumber, string sectionName, void* sectionAddress, int sectionSize,
-			ImageSectionHeader header)
+			ImageSectionHeader      header)
 		{
 			SectionNumber    = sectionNumber;
 			SectionName      = sectionName;
@@ -56,7 +55,7 @@ namespace RazorSharp.Native.Structures.Images
 
 		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			sb.AppendFormat("Section #: {0}", SectionNumber).AppendLine();
 			sb.AppendFormat("Name: {0}", SectionName).AppendLine();
 			sb.AppendFormat("Address: {0:P}", SectionAddress).AppendLine();
@@ -66,5 +65,4 @@ namespace RazorSharp.Native.Structures.Images
 			return sb.ToString();
 		}
 	}
-
 }

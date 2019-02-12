@@ -7,7 +7,6 @@ using System.Diagnostics;
 
 namespace RazorSharp.Utilities.Exceptions
 {
-
 	public class SigcallException : NotImplementedException
 	{
 		public SigcallException(string name) : base($"Sigcall method \"{name}\" error") { }
@@ -17,5 +16,4 @@ namespace RazorSharp.Utilities.Exceptions
 			var method = new StackTrace().GetFrame(1).GetMethod();
 		}
 	}
-
 }

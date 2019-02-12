@@ -13,7 +13,6 @@ using RazorSharp.Common;
 
 namespace RazorSharp.CLR.Structures.EE
 {
-
 	#region
 
 	using UINT32 = UInt32;
@@ -32,7 +31,6 @@ namespace RazorSharp.CLR.Structures.EE
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct EEClassLayoutInfo
 	{
-
 		#region Fields
 
 		// why is there an m_cbNativeSize in EEClassLayoutInfo and EEClass?
@@ -90,7 +88,7 @@ namespace RazorSharp.CLR.Structures.EE
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 
 			table.AddRow("Native size", m_cbNativeSize);
 			table.AddRow("Managed size", m_cbManagedSize);
@@ -105,5 +103,4 @@ namespace RazorSharp.CLR.Structures.EE
 			return table.ToMarkDownString();
 		}
 	}
-
 }

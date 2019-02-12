@@ -17,11 +17,8 @@ using Test.Testing.Types;
 
 namespace Test.Testing
 {
-
 	internal static unsafe class TestingUtil
 	{
-
-
 		private const int MaxPasses  = 1000;
 		private const int MaxObjects = 9000;
 
@@ -36,7 +33,7 @@ namespace Test.Testing
 
 			int passes = 0;
 			while (passes++ < MaxPasses) {
-				object[] oArr = new object[MaxObjects];
+				var oArr = new object[MaxObjects];
 				for (int i = 0; i < oArr.Length; i++)
 					oArr[i] = new object();
 
@@ -53,7 +50,7 @@ namespace Test.Testing
 
 			int passes = 0;
 			while (passes++ < MaxPasses) {
-				object[] oArr                                 = new object[MaxObjects];
+				var oArr                                      = new object[MaxObjects];
 				for (int i = 0; i < oArr.Length; i++) oArr[i] = new object();
 
 				// pass when reference is pinned
@@ -74,7 +71,7 @@ namespace Test.Testing
 		{
 			int passes = 0;
 			while (passes++ < MaxPasses) {
-				object[] oArr = new object[MaxObjects];
+				var oArr = new object[MaxObjects];
 				for (int i = 0; i < oArr.Length; i++)
 					oArr[i] = new object();
 			}
@@ -85,7 +82,7 @@ namespace Test.Testing
 		{
 			int passes = 0;
 			while (passes++ < MaxPasses) {
-				object[] oArr = new object[MaxObjects];
+				var oArr = new object[MaxObjects];
 				for (int i = 0; i < oArr.Length; i++)
 					oArr[i] = new object();
 
@@ -125,7 +122,7 @@ namespace Test.Testing
 		{
 			int passes = 0;
 			while (passes++ < MaxPasses) {
-				object[] oArr = new object[MaxObjects];
+				var oArr = new object[MaxObjects];
 				for (int i = 0; i < oArr.Length; i++)
 					oArr[i] = new object();
 			}
@@ -184,7 +181,7 @@ namespace Test.Testing
 			 * Generic:		no
 			 * Type:		reference
 			 */
-			Dummy d = new Dummy();
+			var d = new Dummy();
 			InspectorHelper.Inspect(ref d);
 
 			/**
@@ -193,7 +190,7 @@ namespace Test.Testing
 			 * Generic:		yes
 			 * Type:		reference
 			 */
-			List<int> ls = new List<int>();
+			var ls = new List<int>();
 			InspectorHelper.Inspect(ref ls);
 
 			/**
@@ -203,7 +200,7 @@ namespace Test.Testing
 			 * Type:		value
 			 *
 			 */
-			Point pt = new Point();
+			var pt = new Point();
 			InspectorHelper.InspectVal(ref pt);
 
 			/**
@@ -215,14 +212,13 @@ namespace Test.Testing
 
 		internal static void TableMethods<T>()
 		{
-			ConsoleTable table = new ConsoleTable("Function", "MethodDesc", "Name", "Virtual");
-			foreach (MethodInfo v in typeof(T).GetMethods(BindingFlags.Instance | BindingFlags.Public |
-			                                              BindingFlags.NonPublic))
+			var table = new ConsoleTable("Function", "MethodDesc", "Name", "Virtual");
+			foreach (var v in typeof(T).GetMethods(BindingFlags.Instance | BindingFlags.Public |
+			                                       BindingFlags.NonPublic))
 				table.AddRow(Hex.ToHex(v.MethodHandle.GetFunctionPointer()), Hex.ToHex(v.MethodHandle.Value),
 					v.Name, v.IsVirtual.Prettify());
 
 			Console.WriteLine(table.ToMarkDownString());
 		}
 	}
-
 }

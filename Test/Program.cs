@@ -5,18 +5,11 @@
 #region
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using Pastel;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
@@ -25,16 +18,10 @@ using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Common;
 using RazorSharp.Memory;
-using RazorSharp.Native;
-using RazorSharp.Native.Enums;
-using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
-using RazorSharp.Utilities.Exceptions;
-using Serilog.Context;
 using static RazorSharp.Unsafe;
-using Functions = RazorSharp.Memory.Functions;
-using Unsafe = RazorSharp.Unsafe;
+using Unsafe = System.Runtime.CompilerServices.Unsafe;
 
 #endregion
 
@@ -47,7 +34,7 @@ namespace Test
 	#region
 
 	using DWORD = UInt32;
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+	using CSUnsafe = Unsafe;
 
 	#endregion
 
@@ -68,7 +55,7 @@ namespace Test
 	 *  - Provide identical and better functionality of ClrMD, SOS, and Reflection
 	 * 	  but in a faster and more efficient way
 	 */
-	internal static unsafe class Program
+	internal static class Program
 	{
 #if DEBUG
 		static Program()
@@ -120,95 +107,51 @@ namespace Test
 		{
 			PointerSettings.DefaultFormat = PointerSettings.FMT_P;
 
-			using (LogContext.PushProperty(Global.CONTEXT_PROP, "Main")) {
-				Global.Log.Information("Stack base {Ptr}", (Pointer<byte>) Mem.StackBase);
-			}
 
+			ClrFunctions.init();
 
-			var rsp = getRSP();
-			using (LogContext.PushProperty(Global.CONTEXT_PROP, "Main")) {
-				Global.Log.Information("getRSP(): {Ptr}", rsp);
-			}
+			var mt = Meta.GetType<string>();
+			Console.WriteLine(mt.BaseSize);
+			Console.WriteLine(Debugger.IsAttached);
 
-//			Debug.Assert(rsp2 == rsp1Alt);
-			testRSP();
+			string        str  = "foo";
+			Pointer<byte> addr = AddressOfHeap(str);
+			Console.WriteLine(Identify(addr));
 
-//			Console.ReadLine();
-			using (LogContext.PushProperty(Global.CONTEXT_PROP, "Main")) {
-				Global.Log.Information("getRSP(): {Ptr}", getRSP());
-				
-			}
+			var c = new Class();
+			Console.WriteLine("[{0}]", c.s.m_value);
+			c.s.Op("foo");
+			Console.WriteLine("[{0}]", c.s.m_value);
+		}
 
+		private static MetaType Identify(Pointer<byte> ptr)
+		{
+			return new MetaType(ptr.ReadAny<Pointer<MethodTable>>());
+		}
 
-			
-			Console.ReadLine();
+		private static string Id<T>(ref T t)
+		{
+			var sb = new StringBuilder();
+			sb.AppendFormat("Address: {0, 10}", AddressOf(ref t));
+
+			return sb.ToString();
 		}
 
 
-		static void testRSP()
+		private static void dump<T>(T t, int recursivePasses = 0)
 		{
-			byte[] opCodes =
-			{
-				0x48, 0x89, 0xE0,       // mov 		rax,rsp
-				0x48, 0x83, 0xC0, 0x08, // add    	rax,0x8
-				0xC3                    // ret
-			};
-
-			var code = NativeFunctions.CodeAlloc(opCodes);
-
-			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRSP>(code)();
-			using (LogContext.PushProperty(Global.CONTEXT_PROP, "testRSP")) {
-				Global.Log.Information("rsp: {Ptr}", rsp);
-				Global.Log.Information("rsp + 0xB0: {Ptr}", rsp + 0xB0);
-				Global.Log.Information("getRSP(): {Ptr}", getRSP());
-			}
-
-			NativeFunctions.CodeFree(code);
-		}
-
-		static Pointer<byte> getRSP()
-		{
-			byte[] opCodes =
-			{
-				0x48, 0x89, 0xE0,       // mov 		rax,rsp
-				0x48, 0x83, 0xC0, 0x08, // add    	rax,0x8
-				0xC3                    // ret
-			};
-
-			var code = NativeFunctions.CodeAlloc(opCodes);
-
-			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRSP>(code)();
-
-
-			// rsp += 0xB0; //
-			rsp += 150;
-			rsp += 0xCA;
-			rsp -= 0x3A8; // Subtracting this offset makes RSP match in WinDbg but breaks it in VS registers view?
-
-
-			NativeFunctions.CodeFree(code);
-			return rsp;
-		}
-
-
-		delegate IntPtr GetRSP();
-
-
-		static void dump<T>(T t, int recursivePasses = 0)
-		{
-			var fields = Runtime.GetFields(t.GetType());
+			FieldInfo[] fields = Runtime.GetFields(t.GetType());
 
 			var ct = new ConsoleTable("Field", "Type", "Value");
 			foreach (var f in fields) {
-				object val = f.GetValue(t);
+				var    val = f.GetValue(t);
 				string valStr;
 				if (f.FieldType == typeof(IntPtr)) {
 					valStr = Hex.TryCreateHex(val);
 				}
 				else if (val != null) {
-					if (val.GetType().IsArray) {
-						valStr = Collections.ToString(((Array) val), ToStringOptions.Hex | ToStringOptions.UseCommas);
-					}
+					if (val.GetType().IsArray)
+						valStr  = Collections.ToString((Array) val, ToStringOptions.Hex | ToStringOptions.UseCommas);
 					else valStr = val.ToString();
 				}
 				else {
@@ -221,62 +164,12 @@ namespace Test
 			Console.WriteLine(ct.ToMarkDownString());
 		}
 
-		private static readonly int[] Empty = new int[0];
 
-		private static bool IsEmptyLocate(byte[] array, byte[] candidate)
-		{
-			return array == null
-			       || candidate == null
-			       || array.Length == 0
-			       || candidate.Length == 0
-			       || candidate.Length > array.Length;
-		}
-
-		public static int[] Locate(this byte[] self, byte[] candidate)
-		{
-			if (IsEmptyLocate(self, candidate))
-				return Empty;
-
-			var list = new List<int>();
-
-			for (int i = 0; i < self.Length; i++) {
-				if (!IsMatch(self, i, candidate))
-					continue;
-
-				list.Add(i);
-			}
-
-			return list.Count == 0 ? Empty : list.ToArray();
-		}
-
-		static bool IsMatch(byte[] array, int position, byte[] candidate)
-		{
-			if (candidate.Length > (array.Length - position))
-				return false;
-
-			for (int i = 0; i < candidate.Length; i++)
-				if (array[position + i] != candidate[i])
-					return false;
-
-			return true;
-		}
-
-		static byte[] cop()
-		{
-			var proc = Process.GetCurrentProcess();
-			return Kernel32.ReadCurrentProcessMemory(proc.MainModule.BaseAddress, (int) proc.WorkingSet64);
-		}
-
-		static void get()
-		{
-			Console.ReadLine();
-		}
-
-		static void fn()
+		private static void fn()
 		{
 			int f = 0;
 
-			Console.WriteLine(Unsafe.AddressOf(ref f));
+			Console.WriteLine(AddressOf(ref f));
 			Global.Log.Information("{Base:X} {Lim:X} ({sz} b)", Mem.StackBase.ToInt64(), Mem.StackLimit.ToInt64(),
 				Mem.StackSize);
 		}
@@ -288,9 +181,9 @@ namespace Test
 		}
 
 
-		static string create(Type t, string name, string op, string ofs)
+		private static string create(Type t, string name, string op, string ofs)
 		{
-			string f = String.Format("{{" +
+			string f = string.Format("{{" +
 			                         "\"{0}\"   : [" +
 			                         "{{" +
 			                         "\"name\"   : \"{1}\"," +
@@ -319,6 +212,21 @@ namespace Test
 		private static int AddOp(int a, int b)
 		{
 			return a + b;
+		}
+
+		private class Class
+		{
+			public readonly Str s;
+		}
+
+		private struct Str
+		{
+			public string m_value;
+
+			public void Op(string s)
+			{
+				m_value = s;
+			}
 		}
 
 
@@ -396,7 +304,7 @@ namespace Test
 					Pointer<MethodTable> mt = Runtime.ReadMethodTable(ref t);
 					string               sz = t is string s ? s : "-";
 
-					DumpObjInfo dump = new DumpObjInfo(mt.Reference.Name, mt, mt.Reference.EEClass, AutoSizeOf(t), sz,
+					var dump = new DumpObjInfo(mt.Reference.Name, mt, mt.Reference.EEClass, AutoSizeOf(t), sz,
 						typeof(T).GetFieldDescs());
 					dump.m_fieldTable = dump.FieldsTable(ref t);
 
@@ -421,9 +329,9 @@ namespace Test
 				{
 					// A few differences:
 					// - FieldInfo.Attributes is used for the Attr column; I don't know what WinDbg uses
-					ConsoleTable table =
+					var table =
 						new ConsoleTable("MT", "Field", "Offset", "Type", "VT", "Attr", "Value", "Name");
-					foreach (Pointer<FieldDesc> v in m_rgpFieldDescs) {
+					foreach (Pointer<FieldDesc> v in m_rgpFieldDescs)
 						table.AddRow(
 							Hex.ToHex(v.Reference.FieldMethodTable.Address),
 							Hex.ToHex(v.Reference.Token),
@@ -431,21 +339,20 @@ namespace Test
 							v.Reference.Info.FieldType.Name, v.Reference.Info.FieldType.IsValueType,
 							v.Reference.Info.Attributes, v.Reference.GetValue(t),
 							v.Reference.Name);
-					}
 
 					return table;
 				}
 
 				public override string ToString()
 				{
-					ConsoleTable table = new ConsoleTable("Attribute", "Value");
+					var table = new ConsoleTable("Attribute", "Value");
 					table.AddRow("Name", m_szName);
 					table.AddRow("MethodTable", Hex.ToHex(m_pMT.Address));
 					table.AddRow("EEClass", Hex.ToHex(m_pEEClass.Address));
-					table.AddRow("Size", String.Format("{0} ({1}) bytes", m_cbSize, Hex.ToHex(m_cbSize)));
+					table.AddRow("Size", string.Format("{0} ({1}) bytes", m_cbSize, Hex.ToHex(m_cbSize)));
 					table.AddRow("String", m_szStringValue);
 
-					return String.Format("{0}\nFields:\n{1}", table.ToMarkDownString(),
+					return string.Format("{0}\nFields:\n{1}", table.ToMarkDownString(),
 						m_fieldTable.ToMarkDownString());
 				}
 			}
@@ -454,18 +361,18 @@ namespace Test
 
 		private static void VmMap()
 		{
-			ConsoleTable table = new ConsoleTable("Low address", "High address", "Size");
+			var table = new ConsoleTable("Low address", "High address", "Size");
 
 			// Stack of current thread
 			table.AddRow(Hex.ToHex(Mem.StackLimit), Hex.ToHex(Mem.StackBase),
-				String.Format("{0} ({1} K)", Mem.StackSize, Mem.StackSize / Mem.BytesInKilobyte));
+				string.Format("{0} ({1} K)", Mem.StackSize, Mem.StackSize / Mem.BytesInKilobyte));
 			Console.WriteLine(InspectorHelper.CreateLabelString("Stack:", table));
 
 			table.Rows.RemoveAt(0);
 
 			// GC heap
 			table.AddRow(Hex.ToHex(GCHeap.LowestAddress), Hex.ToHex(GCHeap.HighestAddress),
-				String.Format("{0} ({1} K)", GCHeap.Size, GCHeap.Size / Mem.BytesInKilobyte));
+				string.Format("{0} ({1} K)", GCHeap.Size, GCHeap.Size / Mem.BytesInKilobyte));
 			Console.WriteLine(InspectorHelper.CreateLabelString("GC:", table));
 		}
 

@@ -8,7 +8,6 @@ using System.Globalization;
 
 namespace RazorSharp.Common
 {
-
 	public static class Strings
 	{
 		/// <summary>
@@ -47,12 +46,10 @@ namespace RazorSharp.Common
 		public static string SubstringAfter(this string value, string a)
 		{
 			int posA = value.LastIndexOf(a, StringComparison.Ordinal);
-			if (posA == -1) {
-				return String.Empty;
-			}
+			if (posA == -1) return string.Empty;
 
 			int adjustedPosA = posA + a.Length;
-			return adjustedPosA >= value.Length ? String.Empty : value.Substring(adjustedPosA);
+			return adjustedPosA >= value.Length ? string.Empty : value.Substring(adjustedPosA);
 		}
 
 		/// <summary>
@@ -61,7 +58,7 @@ namespace RazorSharp.Common
 		public static string SubstringBefore(this string value, string a)
 		{
 			int posA = value.IndexOf(a, StringComparison.Ordinal);
-			return posA == -1 ? String.Empty : value.Substring(0, posA);
+			return posA == -1 ? string.Empty : value.Substring(0, posA);
 		}
 
 		/// <summary>
@@ -71,16 +68,12 @@ namespace RazorSharp.Common
 		{
 			int posA = value.IndexOf(a, StringComparison.Ordinal);
 			int posB = value.LastIndexOf(b, StringComparison.Ordinal);
-			if (posA == -1) {
-				return String.Empty;
-			}
+			if (posA == -1) return string.Empty;
 
-			if (posB == -1) {
-				return String.Empty;
-			}
+			if (posB == -1) return string.Empty;
 
 			int adjustedPosA = posA + a.Length;
-			return adjustedPosA >= posB ? String.Empty : value.Substring(adjustedPosA, posB - adjustedPosA);
+			return adjustedPosA >= posB ? string.Empty : value.Substring(adjustedPosA, posB - adjustedPosA);
 		}
 
 		public static IEnumerable<int> AllIndexesOf(this string str, string searchString)
@@ -101,14 +94,12 @@ namespace RazorSharp.Common
 
 
 			string[] strByteArr   = szPattern.Split(' ');
-			byte[]   patternBytes = new byte[strByteArr.Length];
-			for (int i = 0; i < strByteArr.Length; i++) {
-				patternBytes[i] = strByteArr[i] == "?" ? (byte) 0x0 : Byte.Parse(strByteArr[i], NumberStyles.HexNumber);
-			}
+			var      patternBytes = new byte[strByteArr.Length];
+			for (int i = 0; i < strByteArr.Length; i++)
+				patternBytes[i] = strByteArr[i] == "?" ? (byte) 0x0 : byte.Parse(strByteArr[i], NumberStyles.HexNumber);
 
 
 			return patternBytes;
 		}
 	}
-
 }

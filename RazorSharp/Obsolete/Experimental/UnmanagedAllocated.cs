@@ -13,7 +13,6 @@ using RazorSharp.Utilities.Exceptions;
 
 namespace RazorSharp.Obsolete.Experimental
 {
-
 	/// <summary>
 	///     Creates types in unmanaged memory. AllocExPointer can also be used.
 	///     <para></para>
@@ -60,11 +59,10 @@ namespace RazorSharp.Obsolete.Experimental
 
 		public static UnmanagedAllocated<T> Alloc()
 		{
-			if (DisallowedTypes.Contains(typeof(T))) {
+			if (DisallowedTypes.Contains(typeof(T)))
 				throw new TypeException($"Type {typeof(T).Name} cannot be created in unmanaged memory.");
-			}
 
-			UnmanagedAllocated<T> unmanaged =
+			var unmanaged =
 				new UnmanagedAllocated<T>(Marshal.AllocHGlobal(Unsafe.BaseInstanceSize<T>()),
 					Activator.CreateInstance<T>());
 
@@ -90,7 +88,7 @@ namespace RazorSharp.Obsolete.Experimental
 
 		public override string ToString()
 		{
-			ConsoleTable table = new ConsoleTable("Field", "Value");
+			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Value", m_dummy);
 			table.AddRow("Unmanaged", Hex.ToHex(m_unmanaged));
 			table.AddRow("Dummy heap pointer", Hex.ToHex(Unsafe.AddressOfHeap(ref m_dummy).Address));
@@ -102,5 +100,4 @@ namespace RazorSharp.Obsolete.Experimental
 			Marshal.FreeHGlobal(m_unmanaged);
 		}
 	}
-
 }

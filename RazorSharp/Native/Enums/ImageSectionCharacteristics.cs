@@ -6,7 +6,6 @@ using System;
 
 namespace RazorSharp.Native.Structures.Images
 {
-
 	/// <summary>
 	///     https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-_image_section_header
 	/// </summary>
@@ -208,5 +207,4 @@ namespace RazorSharp.Native.Structures.Images
 
 		// Reserved 0x00010000
 	}
-
 }

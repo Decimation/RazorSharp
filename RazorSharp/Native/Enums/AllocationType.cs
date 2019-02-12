@@ -6,7 +6,6 @@ using System;
 
 namespace RazorSharp.Native.Enums
 {
-
 	/// <summary>
 	///     <para>
 	///         <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa366887(v=vs.85).aspx"> Doc </a>
@@ -47,6 +46,4 @@ namespace RazorSharp.Native.Enums
 
 		LargePages = 0x20000000
 	}
-
-
 }

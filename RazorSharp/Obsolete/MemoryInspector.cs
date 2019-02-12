@@ -12,7 +12,6 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.Obsolete
 {
-
 	#region
 
 	#endregion
@@ -26,7 +25,6 @@ namespace RazorSharp.Obsolete
 	[Obsolete]
 	internal static class MemoryInspector
 	{
-
 		private const int SleepMs = 600;
 
 		public static string Create<T>(IntPtr p)
@@ -62,12 +60,10 @@ namespace RazorSharp.Obsolete
 			int[] indexes = str.AllIndexesOf(" ").ToArray();
 
 			int adjOffset;
-			if (offset == 0) {
+			if (offset == 0)
 				adjOffset = 0;
-			}
-			else {
+			else
 				adjOffset = indexes[offset] - str.JSubstring(indexes[offset - 1], indexes[offset] - 1).Length;
-			}
 
 			// Line 2: Arrow
 			string pt = new string(' ', adjOffset) + "^";
@@ -87,13 +83,9 @@ namespace RazorSharp.Obsolete
 		{
 			int possibleTypes = mem.Length / Unsafe.SizeOf<T>();
 
-			if (typeof(T) == typeof(byte)) {
-				return Collections.ToString(mem, options);
-			}
+			if (typeof(T) == typeof(byte)) return Collections.ToString(mem, options);
 
-			if (possibleTypes < 1) {
-				throw new Exception($"Insufficient memory for type {typeof(T).Name}");
-			}
+			if (possibleTypes < 1) throw new Exception($"Insufficient memory for type {typeof(T).Name}");
 
 			string res = null;
 
@@ -109,7 +101,7 @@ namespace RazorSharp.Obsolete
 					return s;
 				}
 
-				string[] @out                                   = new string[possibleTypes];
+				var @out                                        = new string[possibleTypes];
 				for (int i = 0; i < possibleTypes; i++) @out[i] = OfsAs(i);
 
 				res = Collections.ToString(list: @out, options & ~ToStringOptions.UseCommas);
@@ -125,5 +117,4 @@ namespace RazorSharp.Obsolete
 			return Create<T>(Mem.ReadBytes(p, 0, byteLen), options);
 		}
 	}
-
 }

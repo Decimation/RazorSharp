@@ -6,7 +6,6 @@ using System;
 
 namespace RazorSharp.Native.Enums
 {
-
 	[Flags]
 	public enum ConsoleOutputModes : uint
 	{
@@ -16,5 +15,4 @@ namespace RazorSharp.Native.Enums
 		DisableNewlineAutoReturn        = 0x0008,
 		EnableLvbGridWorldwide          = 0x0010
 	}
-
 }

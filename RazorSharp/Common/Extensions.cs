@@ -8,10 +8,9 @@ using System.Runtime.CompilerServices;
 
 namespace RazorSharp.Common
 {
-
 	public static class Extensions
 	{
-		private const char CHECK   = '\u2713';
+		private const char CHECK    = '\u2713';
 		private const char BALLOT_X = '\u2717';
 
 		private static bool HasInterface(this Type t, string interfaceType)
@@ -35,6 +34,7 @@ namespace RazorSharp.Common
 					return false;
 			}
 		}
+
 		public static bool IsNumericType(this Type o)
 		{
 			if (IsIntegerType(o)) return true;
@@ -83,8 +83,7 @@ namespace RazorSharp.Common
 
 		public static bool IsInterned(this string text)
 		{
-			return String.IsInterned(text) != null;
+			return string.IsInterned(text) != null;
 		}
 	}
-
 }

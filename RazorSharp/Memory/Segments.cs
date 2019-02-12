@@ -13,14 +13,12 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.Memory
 {
-
 	/// <summary>
 	///     Provides utilities for operating with module (DLL) data segments.
 	///     todo: data segment sizes seem to be a few Ks off from VMMap
 	/// </summary>
 	public static class Segments
 	{
-
 		//todo
 		/// <summary>
 		///     http://www.hexacorn.com/blog/2016/12/15/pe-section-names-re-visited/
@@ -91,11 +89,9 @@ namespace RazorSharp.Memory
 		public static SegmentType GetSegmentType(Pointer<byte> addr, string moduleName = null)
 		{
 			ImageSectionInfo[] sections = DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
-			foreach (ImageSectionInfo s in sections) {
-				if (Mem.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address)) {
+			foreach (var s in sections)
+				if (Mem.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address))
 					return Parse(s.SectionName);
-				}
-			}
 
 			throw new Exception($"Could not find corresponding segment for {Hex.ToHex(addr.Address)}");
 		}
@@ -117,11 +113,9 @@ namespace RazorSharp.Memory
 		{
 			ImageSectionInfo[] arr = DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
 
-			foreach (ImageSectionInfo t in arr) {
-				if (t.SectionName == segment) {
+			foreach (var t in arr)
+				if (t.SectionName == segment)
 					return t;
-				}
-			}
 
 			throw new Exception(
 				$"Could not find segment: \"{segment}\". Try prefixing \"{segment}\" with a period: (e.g. \".{segment}\")");
@@ -140,8 +134,8 @@ namespace RazorSharp.Memory
 		public static void DumpSegments(string moduleName = null)
 		{
 			ImageSectionInfo[] segments = GetSegments(moduleName);
-			foreach (ImageSectionInfo v in segments) {
-				ConsoleTable table =
+			foreach (var v in segments) {
+				var table =
 					new ConsoleTable("Number", "Name", "Size", "Address", "End Address", "Characteristics");
 				table.AddRow(v.SectionNumber, v.SectionName,
 					string.Format("{0} ({1} K)", v.SectionSize, v.SectionSize / Mem.BytesInKilobyte),
@@ -180,16 +174,13 @@ namespace RazorSharp.Memory
 
 		internal static IntPtr ScanSegment(string segment, string module, byte[] mem)
 		{
-			ImageSectionInfo s      = GetSegment(segment, module);
-			byte[]           segMem = Mem.ReadBytes(s.SectionAddress, 0, s.SectionSize);
-			for (int i = 0; i < s.SectionSize; i += IntPtr.Size) {
-				if (new ArraySegment<byte>(segMem, i, IntPtr.Size).SequenceEqual(mem)) {
+			var    s      = GetSegment(segment, module);
+			byte[] segMem = Mem.ReadBytes(s.SectionAddress, 0, s.SectionSize);
+			for (int i = 0; i < s.SectionSize; i += IntPtr.Size)
+				if (new ArraySegment<byte>(segMem, i, IntPtr.Size).SequenceEqual(mem))
 					return (s.SectionAddress + i).Address;
-				}
-			}
 
 			return IntPtr.Zero;
 		}
 	}
-
 }

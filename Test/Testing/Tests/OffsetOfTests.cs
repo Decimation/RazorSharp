@@ -10,14 +10,13 @@ using Test.Testing.Types;
 
 namespace Test.Testing.Tests
 {
-
 	[TestFixture]
 	internal class OffsetOfTests
 	{
 		[Test]
 		public void Test()
 		{
-			Dummy d = new Dummy();
+			var d = new Dummy();
 
 			assertOffset<object>(0, 8);
 			assertOffset(0UL, 16);
@@ -46,5 +45,4 @@ namespace Test.Testing.Tests
 			}
 		}
 	}
-
 }

@@ -12,10 +12,8 @@ using System;
 
 namespace Test.Testing.Types
 {
-
 	internal unsafe struct Point
 	{
-
 		public int X { get; set; }
 
 		public int Y { get; set; }
@@ -47,8 +45,7 @@ namespace Test.Testing.Types
 
 		public override string ToString()
 		{
-			return String.Format("x: {0}, y: {1}", X, Y);
+			return string.Format("x: {0}, y: {1}", X, Y);
 		}
 	}
-
 }

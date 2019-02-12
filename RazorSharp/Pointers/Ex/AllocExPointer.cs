@@ -12,7 +12,6 @@ using RazorSharp.Common;
 
 namespace RazorSharp.Pointers.Ex
 {
-
 	#region
 
 	#endregion
@@ -34,15 +33,13 @@ namespace RazorSharp.Pointers.Ex
 	[Obsolete]
 	internal sealed class AllocExPointer<T> : ExPointer<T>, IDisposable, IEnumerable<T>
 	{
-
 		#region Collections operations
 
 		public int IndexOf(T t)
 		{
 			for (int i = Start; i <= End; i++)
-				if (this[i].Equals(t)) {
+				if (this[i].Equals(t))
 					return i;
-				}
 
 			return -1;
 		}
@@ -51,7 +48,6 @@ namespace RazorSharp.Pointers.Ex
 
 		private class AllocPointerMetadata : PointerMetadata
 		{
-
 			protected internal AllocPointerMetadata(int elementSize, bool allocated, int allocSize) : base(elementSize)
 			{
 				IsAllocated   = allocated;
@@ -133,9 +129,7 @@ namespace RazorSharp.Pointers.Ex
 				int newElements = Count - oldCount;
 
 				// We have new memory we need to initialize
-				if (newElements > 0) {
-					Init(oldCount, Count - 1);
-				}
+				if (newElements > 0) Init(oldCount, Count - 1);
 			}
 		}
 
@@ -147,9 +141,7 @@ namespace RazorSharp.Pointers.Ex
 
 			// This actually probably shouldn't be changed
 			set {
-				if (IsAllocated && AddressInBounds(value)) {
-					base.Address = value;
-				}
+				if (IsAllocated && AddressInBounds(value)) base.Address = value;
 			}
 		}
 
@@ -159,9 +151,7 @@ namespace RazorSharp.Pointers.Ex
 		public override T Value {
 			get => IsAllocated ? base.Value : default;
 			set {
-				if (IsAllocated) {
-					base.Value = value;
-				}
+				if (IsAllocated) base.Value = value;
 			}
 		}
 
@@ -241,17 +231,11 @@ namespace RazorSharp.Pointers.Ex
 		public bool AddressInBounds(IntPtr p)
 		{
 			// C++ pattern
-			if (p == IntPtr.Zero || p == new IntPtr(-1)) {
-				Dispose();
-			}
+			if (p == IntPtr.Zero || p == new IntPtr(-1)) Dispose();
 
-			if (p.ToInt64() > LastElement.ToInt64()) {
-				return false;
-			}
+			if (p.ToInt64() > LastElement.ToInt64()) return false;
 
-			if (p.ToInt64() < FirstElement.ToInt64()) {
-				return false;
-			}
+			if (p.ToInt64() < FirstElement.ToInt64()) return false;
 
 
 			return true;
@@ -281,7 +265,7 @@ namespace RazorSharp.Pointers.Ex
 		/// </summary>
 		private FixType EnsureOffsetBounds(int requestedOffset = 1)
 		{
-			IntPtr reqAddr = PointerUtils.Offset<T>(Address, requestedOffset);
+			var reqAddr = PointerUtils.Offset<T>(Address, requestedOffset);
 			if (!AddressInBounds(reqAddr)) {
 				// This is for isolated incidents when iterators
 				// and pointer arithmetic move past the end by 1 element.
@@ -313,13 +297,11 @@ namespace RazorSharp.Pointers.Ex
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void EnsureIndexerBounds(int requestedIndex)
 		{
-			if (requestedIndex > End) {
+			if (requestedIndex > End)
 				throw new IndexOutOfRangeException($"Requested index of {requestedIndex} > {End} [{Start} - {End}]");
-			}
 
-			if (requestedIndex < Start) {
+			if (requestedIndex < Start)
 				throw new IndexOutOfRangeException($"Requested index of {requestedIndex} < {Start} [{Start} - {End}]");
-			}
 		}
 
 		#endregion
@@ -391,18 +373,14 @@ namespace RazorSharp.Pointers.Ex
 		private void Init(int start, int end, T value = default)
 		{
 			// We only need to init one element
-			if (start - end == 0) {
-				this[start] = value;
-			}
+			if (start - end == 0) this[start] = value;
 
 			for (int i = start; i <= end; i++) this[i] = value;
 		}
 
 		public void Init(params T[] args)
 		{
-			if (args.Length > Count) {
-				throw new ArgumentOutOfRangeException();
-			}
+			if (args.Length > Count) throw new ArgumentOutOfRangeException();
 
 			for (int i = 0; i < args.Length; i++) this[i] = args[i];
 		}
@@ -443,7 +421,7 @@ namespace RazorSharp.Pointers.Ex
 
 		protected override ConsoleTable ToTable()
 		{
-			ConsoleTable table = base.ToTable();
+			var table = base.ToTable();
 			table.AddRow("Allocated", IsAllocated);
 			table.AddRow("Allocated bytes", AllocatedSize);
 			table.AddRow("Count", Count);
@@ -459,28 +437,22 @@ namespace RazorSharp.Pointers.Ex
 		{
 			bool         refType = !typeof(T).IsValueType;
 			ConsoleTable table;
-			if (refType) {
+			if (refType)
 				table = new ConsoleTable("Index", "Address", "Value", "Heap pointer", "Allocated");
-			}
-			else {
+			else
 				table = new ConsoleTable("Index", "Address", "Value", "Allocated");
-			}
 
 
 			for (int i = Start; i <= End; i++) {
-				IntPtr addr = PointerUtils.Offset<T>(Address, i);
-				if (!AddressInBounds(addr)) {
-					break;
-				}
+				var addr = PointerUtils.Offset<T>(Address, i);
+				if (!AddressInBounds(addr)) break;
 
-				if (refType) {
+				if (refType)
 					table.AddRow(i, Hex.ToHex(addr), this[i], Hex.ToHex(Marshal.ReadIntPtr(addr)),
 						AddressInBounds(addr).Prettify());
-				}
-				else {
+				else
 					table.AddRow(i, Hex.ToHex(addr), this[i],
 						AddressInBounds(addr).Prettify());
-				}
 			}
 
 
@@ -557,7 +529,5 @@ namespace RazorSharp.Pointers.Ex
 		}
 
 		#endregion
-
 	}
-
 }
