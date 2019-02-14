@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using RazorSharp;
@@ -112,6 +113,7 @@ namespace Test
 		// todo: read module memory
 
 
+		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
 			PointerSettings.DefaultFormat = PointerSettings.FMT_P;
@@ -119,41 +121,45 @@ namespace Test
 
 			ClrFunctions.init();
 
-			var mt = Meta.GetType<string>();
-			Console.WriteLine(mt.BaseSize);
-			Console.WriteLine(Debugger.IsAttached);
+			Console.WriteLine("Stack base: {0}",Hex.ToHex(Mem.StackBase));
+			Console.WriteLine("Stack lim: {0}",Hex.ToHex(Mem.StackLimit));
 
-			string        str  = "foo";
-			Pointer<byte> addr = AddressOfHeap(str);
-			Console.WriteLine(Identify(addr));
+			long i = 0;
+			Pointer<Pointer<byte>> ptr = &i;
 
+			for (int j = 0; j < 20; j++) {
+				var val = ptr[-j];
+				string arg;
 
-			Debug.Assert(Compare<string>());
-
-			var t  = Meta.GetType(typeof(Program));
-			var fn = t.Methods["AddOp"];
-
-			Segments.DumpAllSegments();
-
-			PointerSettings.DefaultFormat = PointerSettings.FMT_B;
-			var c = new Class();
-			fixed (byte* b = &PinHelper.GetPinningHelper(c).Data) {
-				Pointer<Struct> ptr = b;
-				ptr.Reference.String = "foo";
-				Console.WriteLine(ptr);
-				Console.WriteLine();
-				Console.WriteLine(c);
-				Console.WriteLine(c.Op());
-
-				Functions.Hook(typeof(Class), "Op", typeof(Program), "Func");
-				Console.WriteLine(c.Op());
+				try {
+					arg = Hex.ToHex((val == IntPtr.Zero) ? IntPtr.Zero : val.ReadAny<IntPtr>());
+				}
+				catch  {
+					arg = "nil";
+				}
+				
+				Console.WriteLine("ptr[{0}] = [{1}] = {2}",-j, Hex.ToHex(val), Hex.ToHex(val.Address));
 			}
+
 			
-			
+
+			// 4176
+			var rbp = Mem.StackBase - 4176;
+			Console.WriteLine("rbp {0}", Hex.ToHex(rbp));
+
+			var rbp2=ptr[-1] - 0xC0;
+			Console.WriteLine("rbp2 {0}", Hex.ToHex(rbp2));
+
+			Console.WriteLine(Hex.ToHex(ptr[-1].Address + 0x100));
+
+			Console.WriteLine(Hex.ToHex(ptr[3] - 0x3C0));
+			Console.ReadLine();
 		}
 
+		
 
-		delegate IntPtr Rsp();
+
+		
 		delegate string Fn();
 
 		static string Func()
