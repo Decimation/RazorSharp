@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using RazorSharp.Common;
 using RazorSharp.Native;
@@ -131,18 +132,26 @@ namespace RazorSharp.Memory
 			return DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
 		}
 
+		public static void DumpAllSegments()
+		{
+			foreach (ProcessModule v in Process.GetCurrentProcess().Modules) {
+				DumpSegments(v.ModuleName);
+			}
+		}
+
 		public static void DumpSegments(string moduleName = null)
 		{
 			ImageSectionInfo[] segments = GetSegments(moduleName);
+			var table = new ConsoleTable("Number", "Name", "Size", "Address", "End Address", "Characteristics", "Module");
+			string moduleNameTable = moduleName ?? Process.GetCurrentProcess().MainModule.ModuleName; // todo
 			foreach (var v in segments) {
-				var table =
-					new ConsoleTable("Number", "Name", "Size", "Address", "End Address", "Characteristics");
-				table.AddRow(v.SectionNumber, v.SectionName,
-					string.Format("{0} ({1} K)", v.SectionSize, v.SectionSize / Mem.BytesInKilobyte),
-					Hex.ToHex(v.SectionAddress),
-					Hex.ToHex(v.EndAddress), v.SectionHeader.Characteristics);
-				Console.WriteLine(table.ToMarkDownString());
+				var rowCpy = v.Row;
+				rowCpy[rowCpy.Length - 1] = moduleNameTable;
+				table.AddRow(rowCpy);
+				
 			}
+
+			Console.WriteLine(table.ToMarkDownString());
 		}
 
 		private static SegmentType Parse(string name)

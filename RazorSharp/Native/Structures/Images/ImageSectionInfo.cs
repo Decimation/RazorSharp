@@ -3,6 +3,8 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using RazorSharp.Common;
+using RazorSharp.Memory;
 using RazorSharp.Pointers;
 
 #endregion
@@ -51,6 +53,18 @@ namespace RazorSharp.Native.Structures.Images
 			SectionSize      = sectionSize;
 			SectionHeader    = header;
 		}
+
+		internal object[] Row =>
+			new object[]
+			{
+				SectionNumber, 
+				SectionName,
+				string.Format("{0} ({1} K)", SectionSize, SectionSize / Mem.BytesInKilobyte),
+				Hex.ToHex(SectionAddress),
+				Hex.ToHex(EndAddress), 
+				SectionHeader.Characteristics,
+				"-"
+			};
 
 
 		public override string ToString()

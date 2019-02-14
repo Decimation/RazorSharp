@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Meta;
 using RazorSharp.Pointers;
@@ -9,20 +12,62 @@ namespace RazorSharp.Experimental
 	// todo: WIP
 	public static class Functions
 	{
-		public static void Hook(MethodInfo target, Pointer<byte> replacement)
+		static Functions()
 		{
-			var mm = new MetaMethod(target.GetMethodDesc())
-			{
-				Function = replacement
-			};
+			if (Debugger.IsAttached) //todo
+				throw new NotSupportedException("Hooking is not yet supported when a debugger is attached");
+
+			FuncMap = new Dictionary<MethodInfo, Pointer<byte>>();
+			OrigMap = new Dictionary<MethodInfo, Pointer<byte>>();
 		}
 
+		/// <summary>
+		/// MethodInfo: Hooked function
+		/// Pointer: New function pointer
+		/// </summary>
+		private static readonly Dictionary<MethodInfo, Pointer<byte>> FuncMap;
+
+		/// <summary>
+		/// MethodInfo: New function
+		/// Pointer: Old function pointer
+		/// </summary>
+		private static readonly Dictionary<MethodInfo, Pointer<byte>> OrigMap;
+
+		public static TDelegate Orig<TDelegate>(MethodInfo current) where TDelegate : Delegate
+		{
+			return Marshal.GetDelegateForFunctionPointer<TDelegate>(OrigMap[current].Address);
+		}
+
+
+		// todo: rewrite these methods because of duplicate code
+
+		// Base
 		public static void Hook(MethodInfo target, MethodInfo replacement)
 		{
 			var mmReplacement = new MetaMethod(replacement.GetMethodDesc());
 			mmReplacement.PrepareOverride();
 
-			Hook(target, replacement.GetMethodDesc().Reference.Function);
+			var replacementFunc = mmReplacement.Function;
+			OrigMap.Add(replacement, replacementFunc);
+
+
+			// ...
+
+			var md = target.GetMethodDesc();
+
+			var mm = new MetaMethod(md);
+			mm.PrepareOverride();
+			var origFunc = md.Reference.Function;
+
+			mm.Function = replacementFunc;
+
+			FuncMap.Add(target, origFunc);
+		}
+
+		public static void Hook(Type host, string hostName, Type subject, string subjName)
+		{
+			Hook(Meta.GetType(host).Methods[hostName].MethodInfo,
+				Meta.GetType(subject).Methods[subjName].MethodInfo);
 		}
 
 		public static void Hook(MethodInfo target, Action replacement)

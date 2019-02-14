@@ -6,6 +6,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.InteropServices;
@@ -13,13 +14,17 @@ using System.Text;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CLR;
+using RazorSharp.CLR.Fixed;
 using RazorSharp.CLR.Meta;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Common;
+using RazorSharp.Experimental;
 using RazorSharp.Memory;
+using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using Test.Testing;
 using static RazorSharp.Unsafe;
 using Unsafe = System.Runtime.CompilerServices.Unsafe;
 
@@ -55,7 +60,7 @@ namespace Test
 	 *  - Provide identical and better functionality of ClrMD, SOS, and Reflection
 	 * 	  but in a faster and more efficient way
 	 */
-	internal static class Program
+	internal static unsafe class Program
 	{
 #if DEBUG
 		static Program()
@@ -93,6 +98,10 @@ namespace Test
 //			Logger.Log(Flags.Info, "Architecture: x64");
 //			Logger.Log(Flags.Info, "Byte order: {0}", BitConverter.IsLittleEndian ? "Little Endian" : "Big Endian");
 //			Logger.Log(Flags.Info, "CLR {0}", Environment.Version);
+
+			if (Debugger.IsAttached) {
+				Global.Log.Warning("Debugging is enabled: some features may not work correctly");
+			}
 		}
 #endif
 
@@ -118,23 +127,83 @@ namespace Test
 			Pointer<byte> addr = AddressOfHeap(str);
 			Console.WriteLine(Identify(addr));
 
+
+			Debug.Assert(Compare<string>());
+
+			var t  = Meta.GetType(typeof(Program));
+			var fn = t.Methods["AddOp"];
+
+			Segments.DumpAllSegments();
+
+			PointerSettings.DefaultFormat = PointerSettings.FMT_B;
 			var c = new Class();
-			Console.WriteLine("[{0}]", c.s.m_value);
-			c.s.Op("foo");
-			Console.WriteLine("[{0}]", c.s.m_value);
+			fixed (byte* b = &PinHelper.GetPinningHelper(c).Data) {
+				Pointer<Struct> ptr = b;
+				ptr.Reference.String = "foo";
+				Console.WriteLine(ptr);
+				Console.WriteLine();
+				Console.WriteLine(c);
+				Console.WriteLine(c.Op());
+
+				Functions.Hook(typeof(Class), "Op", typeof(Program), "Func");
+				Console.WriteLine(c.Op());
+			}
+			
+			
+		}
+
+
+		delegate IntPtr Rsp();
+		delegate string Fn();
+
+		static string Func()
+		{
+			
+			return "bar";
+		}
+
+
+		class Class
+		{
+			public string String;
+			public int    Int;
+
+			public string Op()
+			{
+				return "foo";
+			}
+		}
+
+		struct Struct
+		{
+			public string String;
+			public int    Int;
+
+			public override string ToString()
+			{
+				return string.Format("String: {0}\nInt: {1}", String, Int);
+			}
+		}
+
+		static bool Compare<T>()
+		{
+			return Compare(typeof(T), Meta.GetType<T>());
+		}
+
+		static bool Compare(Type t, MetaType m)
+		{
+			bool[] rg =
+			{
+				t.Name == m.Name,
+				t.IsArray == m.IsArray,
+				t == m.RuntimeType
+			};
+			return rg.All(b => b);
 		}
 
 		private static MetaType Identify(Pointer<byte> ptr)
 		{
 			return new MetaType(ptr.ReadAny<Pointer<MethodTable>>());
-		}
-
-		private static string Id<T>(ref T t)
-		{
-			var sb = new StringBuilder();
-			sb.AppendFormat("Address: {0, 10}", AddressOf(ref t));
-
-			return sb.ToString();
 		}
 
 
@@ -165,34 +234,9 @@ namespace Test
 		}
 
 
-		private static void fn()
-		{
-			int f = 0;
-
-			Console.WriteLine(AddressOf(ref f));
-			Global.Log.Information("{Base:X} {Lim:X} ({sz} b)", Mem.StackBase.ToInt64(), Mem.StackLimit.ToInt64(),
-				Mem.StackSize);
-		}
-
-
 		private static int SubOp(int a, int b)
 		{
 			return a - b;
-		}
-
-
-		private static string create(Type t, string name, string op, string ofs)
-		{
-			string f = string.Format("{{" +
-			                         "\"{0}\"   : [" +
-			                         "{{" +
-			                         "\"name\"   : \"{1}\"," +
-			                         "\"opcodes\": \"{2}\"," +
-			                         "\"offset\" : \"{3}\"" +
-			                         "}}]" +
-			                         "}}", t.Name, name, op, ofs);
-			Console.WriteLine(f);
-			return f;
 		}
 
 
@@ -212,21 +256,6 @@ namespace Test
 		private static int AddOp(int a, int b)
 		{
 			return a + b;
-		}
-
-		private class Class
-		{
-			public readonly Str s;
-		}
-
-		private struct Str
-		{
-			public string m_value;
-
-			public void Op(string s)
-			{
-				m_value = s;
-			}
 		}
 
 

@@ -29,7 +29,7 @@ namespace RazorSharp.Experimental
 			NativeFunctions.CodeFree(code);
 		}
 
-		private static Pointer<byte> GetRspValue()
+		public static Pointer<byte> GetRspValue()
 		{
 			byte[] opCodes =
 			{
