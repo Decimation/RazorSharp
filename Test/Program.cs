@@ -134,7 +134,7 @@ namespace Test
 			
 			Debugger.Break();
 			RuntimeHelpers.PrepareMethod(method.MethodInfo.MethodHandle);
-			Console.WriteLine(method);
+			Console.WriteLine(method);//
 
 
 			Console.ReadLine();
