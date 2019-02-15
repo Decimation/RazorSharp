@@ -390,17 +390,35 @@ namespace RazorSharp.Pointers
 			WriteAny(t, elemOffset);
 		}
 
+		private MemoryProtection VirtualProtectAccessible(int cb)
+		{
+			Kernel32.VirtualProtect(Address, cb, MemoryProtection.ExecuteReadWrite,
+				out var oldProtect);
+
+			return oldProtect;
+		}
+
+		private void VirtualProtectRestore(int cb, MemoryProtection oldProtect)
+		{
+			Kernel32.VirtualProtect(Address, cb, oldProtect, out oldProtect);
+		}
+
 		#region Safe read
 
 		// todo: verify this works
 		public T SafeRead(int elemOffset = 0)
 		{
-			Kernel32.VirtualProtect(Address, ElementSize + elemOffset, MemoryProtection.ExecuteReadWrite,
-				out var oldProtect);
+			
+
+			int cb = ElementSize + elemOffset;
+
+			var oldProtect = VirtualProtectAccessible(cb);
 
 			var buf = Read(elemOffset);
+			
+			VirtualProtectRestore(cb, oldProtect);
 
-			Kernel32.VirtualProtect(Address, ElementSize + elemOffset, oldProtect, out oldProtect);
+			
 			return buf;
 		}
 
@@ -417,12 +435,15 @@ namespace RazorSharp.Pointers
 		/// <param name="data">Value to write</param>
 		public void SafeWrite(T data, int elemOffset = 0)
 		{
-			var ptr = Offset(elemOffset);
+			
+			// todo: use new VirtualProtect methods here for consistency
+			
+			Pointer<byte> ptr = Offset(elemOffset);
 
 			Kernel32.VirtualProtect(ptr, ElementSize, MemoryProtection.ExecuteReadWrite,
 				out var oldProtect);
 
-			WriteAny(data);
+			ptr.WriteAny(data);
 
 			Kernel32.VirtualProtect(ptr, ElementSize, oldProtect, out oldProtect);
 		}
@@ -436,6 +457,8 @@ namespace RazorSharp.Pointers
 		/// <param name="mem">Byte values to write</param>
 		public void SafeWrite(byte[] mem, int byteOffset = 0)
 		{
+			// todo: use new VirtualProtect methods here for consistency
+			
 			Pointer<byte> ptr = Offset<byte>(byteOffset);
 
 			Kernel32.VirtualProtect(ptr, mem.Length, MemoryProtection.ExecuteReadWrite,

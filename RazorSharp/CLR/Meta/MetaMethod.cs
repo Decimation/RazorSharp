@@ -176,7 +176,7 @@ namespace RazorSharp.CLR.Meta
 
 			table.AddRow("Function", Hex.ToHex(Function));
 			table.AddRow("Native code", Hex.ToHex(NativeCode));
-
+			table.AddRow("Pointing to native code", string.Format("{0} ({1})", IsPointingToNativeCode.Prettify(), IsPointingToNativeCode));
 
 			return table;
 		}

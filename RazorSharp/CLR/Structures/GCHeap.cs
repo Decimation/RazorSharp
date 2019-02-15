@@ -109,6 +109,7 @@ namespace RazorSharp.CLR.Structures
 		}
 
 
+		/*
 		/// <summary>
 		///     Returns true if the address of <paramref name="t" /> is in the GC heap.
 		/// </summary>
@@ -130,7 +131,8 @@ namespace RazorSharp.CLR.Structures
 		{
 			return Mem.IsAddressInRange(g_highest_address, p, g_lowest_address);
 		}
-
+		*/
+		
 		// 85
 		[ClrSigcall]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)

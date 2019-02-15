@@ -13,7 +13,7 @@ namespace Test.Testing.Tests.Metadata
 		public static void GC()
 		{
 			string s = "nil";
-			Console.WriteLine("IsInGCHeap: {0}", GCHeap.IsInGCHeap(ref s));
+//			Console.WriteLine("IsInGCHeap: {0}", GCHeap.IsInGCHeap(ref s));
 			Console.WriteLine("GCCount: {0}", GCHeap.GlobalHeap.Reference.GCCount);
 			Console.WriteLine("IsHeapPointer: {0}", GCHeap.GlobalHeap.Reference.IsHeapPointer(s));
 			Console.WriteLine("IsGCInProgress: {0}", GCHeap.GlobalHeap.Reference.IsGCInProgress());

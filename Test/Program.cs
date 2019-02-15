@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -116,60 +117,39 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			PointerSettings.DefaultFormat = PointerSettings.FMT_P;
+//			PointerSettings.DefaultFormat = PointerSettings.FMT_P;
 
 
 			ClrFunctions.init();
 
-			Console.WriteLine("Stack base: {0}",Hex.ToHex(Mem.StackBase));
-			Console.WriteLine("Stack lim: {0}",Hex.ToHex(Mem.StackLimit));
+			var             mgd = new Class();
+			Pointer<Struct> p   = AddressOfHeap(mgd, OffsetType.Fields);
+			Console.WriteLine(p);
 
-			long i = 0;
-			Pointer<Pointer<byte>> ptr = &i;
+			Console.WriteLine(GCHeap.GlobalHeap.Reference.IsHeapPointer(mgd));
 
-			for (int j = 0; j < 20; j++) {
-				var val = ptr[-j];
-				string arg;
-
-				try {
-					arg = Hex.ToHex((val == IntPtr.Zero) ? IntPtr.Zero : val.ReadAny<IntPtr>());
-				}
-				catch  {
-					arg = "nil";
-				}
-				
-				Console.WriteLine("ptr[{0}] = [{1}] = {2}",-j, Hex.ToHex(val), Hex.ToHex(val.Address));
-			}
+			var method = Meta.GetType(typeof(Program)).Methods["Func"];
+			Console.WriteLine(method);
 
 			
+			Debugger.Break();
+			RuntimeHelpers.PrepareMethod(method.MethodInfo.MethodHandle);
+			Console.WriteLine(method);
 
-			// 4176
-			var rbp = Mem.StackBase - 4176;
-			Console.WriteLine("rbp {0}", Hex.ToHex(rbp));
 
-			var rbp2=ptr[-1] - 0xC0;
-			Console.WriteLine("rbp2 {0}", Hex.ToHex(rbp2));
-
-			Console.WriteLine(Hex.ToHex(ptr[-1].Address + 0x100));
-
-			Console.WriteLine(Hex.ToHex(ptr[3] - 0x3C0));
 			Console.ReadLine();
 		}
 
-		
 
-
-		
 		delegate string Fn();
 
 		static string Func()
 		{
-			
 			return "bar";
 		}
 
 
-		class Class
+		private class Class
 		{
 			public string String;
 			public int    Int;
@@ -180,7 +160,7 @@ namespace Test
 			}
 		}
 
-		struct Struct
+		private struct Struct
 		{
 			public string String;
 			public int    Int;
@@ -191,12 +171,12 @@ namespace Test
 			}
 		}
 
-		static bool Compare<T>()
+		private static bool Compare<T>()
 		{
 			return Compare(typeof(T), Meta.GetType<T>());
 		}
 
-		static bool Compare(Type t, MetaType m)
+		private static bool Compare(Type t, MetaType m)
 		{
 			bool[] rg =
 			{
