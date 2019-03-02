@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorSharp.Common;
+using RazorCommon;
 using RazorSharp.Utilities;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -70,7 +70,7 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 		public char this[int index] {
 			get {
 				var __this = (char*) Unsafe.AddressOf(ref this);
-				RazorContract.RequiresNotNull(__this);
+				Conditions.RequiresNotNull(__this);
 
 				return __this[index + RuntimeHelpers.OffsetToStringData / sizeof(char)];
 			}

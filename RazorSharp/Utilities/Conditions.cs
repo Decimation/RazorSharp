@@ -5,7 +5,9 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
+using System.Runtime;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using RazorSharp.Utilities.Exceptions;
 
@@ -20,21 +22,68 @@ namespace RazorSharp.Utilities
 
 	#endregion
 
-	// todo: verify all new changes work as of Oct 12 2018
-	// todo: find a better solution
-	// todo: phase this out
-
 	/// <summary>
 	///     Poor man's <see cref="System.Diagnostics.Contracts.Contract" /> because
 	///     <see cref="System.Diagnostics.Contracts.Contract" /> is dead and doesn't work with JetBrains Rider
 	/// </summary>
-	internal static class RazorContract
+	internal static class Conditions
 	{
 		private const string COND_FALSE_HALT     = "cond:false => halt";
 		private const string VALUE_NULL_HALT     = "value:null => halt";
 		private const string STRING_FORMAT_PARAM = "msg";
 		private const string NULLREF_EXCEPTION   = "value == null";
 
+
+		internal static void CheckCompatibility()
+		{
+			/**
+			 * RazorSharp
+			 *
+			 * History:
+			 * 	- RazorSharp (deci-common-c)
+			 * 	- RazorSharpNeue
+			 * 	- RazorCLR
+			 * 	- RazorSharp
+			 *
+			 * Notes:
+			 *  - 32-bit is not fully supported
+			 *  - Most types are probably not thread-safe
+			 *
+			 * Goals:
+			 *  - Provide identical and better functionality of ClrMD, SOS, and Reflection
+			 * 	  but in a faster and more efficient way
+			 */
+
+			/**
+			 * RazorSharp is tested on and targets:
+			 *
+			 * - x64
+			 * - Windows
+			 * - .NET CLR 4.7.2
+			 * - Workstation Concurrent GC
+			 *
+			 */
+			Requires64Bit();
+			RequiresOS(OSPlatform.Windows);
+
+			/**
+			 * 4.0.30319.42000
+			 * The version we've been testing and targeting.
+			 * Other versions will probably work but we're just making sure
+			 * todo - determine compatibility
+			 */
+			AssertAll(Environment.Version.Major == 4,
+			          Environment.Version.Minor == 0,
+			          Environment.Version.Build == 30319,
+			          Environment.Version.Revision == 42000);
+
+			Assert(!GCSettings.IsServerGC);
+			RequiresDotNet();
+
+			if (Debugger.IsAttached) {
+				Global.Log.Warning("Debugging is enabled: some features may not work correctly");
+			}
+		}
 
 		/// <summary>
 		/// </summary>
@@ -58,8 +107,7 @@ namespace RazorSharp.Utilities
 			}
 		}
 
-		[DebuggerHidden]
-		internal static bool TypeEqual<TExpected, TActual>()
+		internal static bool AssertTypeEqual<TExpected, TActual>()
 		{
 			bool val = true;
 			ResolveTypeAction<TExpected, TActual>(() => val = false, () => val = false);
@@ -70,7 +118,6 @@ namespace RazorSharp.Utilities
 		/// </summary>
 		/// <param name="values"></param>
 		/// <typeparam name="T"></typeparam>
-		[DebuggerHidden]
 		internal static void AssertEqual<T>(params T[] values)
 		{
 			if (values == null || values.Length == 0) return;
@@ -86,7 +133,6 @@ namespace RazorSharp.Utilities
 		/// <param name="cond">Condition to assert</param>
 		/// <param name="msg">Message</param>
 		/// <param name="args">Formatting elements</param>
-		[DebuggerHidden]
 		[AssertionMethod]
 		[ContractAnnotation(COND_FALSE_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -100,7 +146,6 @@ namespace RazorSharp.Utilities
 		///     Checks for a condition; if <paramref name="cond" /> is <c>false</c>, displays the stack trace.
 		/// </summary>
 		/// <param name="cond">Condition to assert</param>
-		[DebuggerHidden]
 		[AssertionMethod]
 		[ContractAnnotation(COND_FALSE_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -109,36 +154,62 @@ namespace RazorSharp.Utilities
 			Contract.Assert(cond);
 		}
 
+		internal static void AssertAll([AsrtCnd(AsrtCndType.IS_TRUE)] params bool[] conds)
+		{
+			foreach (bool b in conds) {
+				Assert(b);
+			}
+		}
+
 		#endregion
 
 		#region Requires (precondition)
 
+		internal static void RequiresDotNet()
+		{
+			bool isRunningOnMono = Type.GetType("Mono.Runtime") != null;
+			Assert(!isRunningOnMono);
+		}
+
+		internal static void RequiresOS(OSPlatform os)
+		{
+			Assert(RuntimeInformation.IsOSPlatform(os), "OS version");
+		}
+
+		internal static void Requires64Bit()
+		{
+			Assert(IntPtr.Size == 8 && Environment.Is64BitProcess, "64-bit");
+		}
+
 		#region Not null
+
+		private static void AssertNull(bool b)
+		{
+			Assert(b, "Null");
+		}
 
 		/// <summary>
 		///     Specifies a precondition: checks to see if <paramref name="value" /> is <c>null</c>
 		/// </summary>
 		/// <param name="value">Pointer to check</param>
-		[DebuggerHidden]
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static unsafe void RequiresNotNull([AsrtCnd(AsrtCndType.IS_NOT_NULL)] void* value)
 		{
-			Requires<NullReferenceException>(value != null);
+			AssertNull(value != null);
 		}
 
 		/// <summary>
 		///     Specifies a precondition: checks to see if <paramref name="value" /> is <see cref="IntPtr.Zero" />
 		/// </summary>
 		/// <param name="value"><see cref="IntPtr" /> to check</param>
-		[DebuggerHidden]
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresNotNull(IntPtr value)
 		{
-			Requires<NullReferenceException>(value != IntPtr.Zero);
+			AssertNull(value != IntPtr.Zero);
 		}
 
 		/// <summary>
@@ -149,13 +220,12 @@ namespace RazorSharp.Utilities
 		/// </summary>
 		/// <param name="value">Value to check</param>
 		/// <typeparam name="T"></typeparam>
-		[DebuggerHidden]
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] T value)
 		{
-			Requires<NullReferenceException>(value != null);
+			AssertNull(value != null);
 		}
 
 		/// <summary>
@@ -163,79 +233,15 @@ namespace RazorSharp.Utilities
 		/// </summary>
 		/// <param name="value">Value to check</param>
 		/// <typeparam name="T"></typeparam>
-		[DebuggerHidden]
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] in T value) where T : class
 		{
-			Requires<NullReferenceException>(value != null);
+			AssertNull(value != null);
 		}
 
 		#endregion
-
-		/// <summary>
-		///     Specifies a precondition: checks to see if <paramref name="cond" /> is <c>true</c>
-		/// </summary>
-		/// <param name="cond">Condition to check</param>
-		/// <param name="msg">Optional message</param>
-		/// <param name="args">Optional formatting elements</param>
-		[DebuggerHidden]
-		[ContractAnnotation(COND_FALSE_HALT)]
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		[StringFormatMethod(STRING_FORMAT_PARAM)]
-		internal static void Requires([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg = null, params object[] args)
-		{
-			Requires<PreconditionException>(cond, msg);
-		}
-
-
-		private static void FailPrecondition<TException>(string msg = null, params object[] args)
-			where TException : Exception, new()
-		{
-			if (msg == null) {
-				msg = "Precondition failed";
-				throw Create();
-			}
-
-			msg = string.Format(msg, args);
-			msg = string.Format("Precondition failed: {0}", msg);
-
-			if (typeof(TException) == typeof(NullReferenceException))
-				throw new NullReferenceException(NULLREF_EXCEPTION);
-
-			// Special support for PreconditionException
-			if (typeof(TException) == typeof(PreconditionException)) throw new PreconditionException(msg);
-
-			TException Create()
-			{
-				// TException better have a constructor with a string parameter
-				var ctor = typeof(TException).GetConstructor(
-					BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null,
-					CallingConventions.HasThis, new[] {typeof(string)}, null);
-
-				return (TException) ctor.Invoke(new object[] {msg});
-			}
-		}
-
-		/// <summary>
-		///     Specifies a precondition: checks to see if <paramref name="cond" /> is <c>true</c>.
-		///     If <paramref name="cond" /> is <c>false</c>, throws <typeparamref name="TException" />
-		/// </summary>
-		/// <param name="cond">Condition</param>
-		/// <param name="msg">Optional message for <typeparamref name="TException"></typeparamref> </param>
-		/// <param name="args">Optional formatting elements</param>
-		/// <typeparam name="TException">Exception type to throw</typeparam>
-		[DebuggerHidden]
-		[AssertionMethod]
-		[ContractAnnotation(COND_FALSE_HALT)]
-		[StringFormatMethod(STRING_FORMAT_PARAM)]
-		internal static void Requires<TException>([AsrtCnd(AsrtCndType.IS_TRUE)] bool     cond, string msg = null,
-			params                                                               object[] args)
-			where TException : Exception, new()
-		{
-			if (!cond) FailPrecondition<TException>(msg, args);
-		}
 
 
 		/// <summary>
@@ -249,22 +255,20 @@ namespace RazorSharp.Utilities
 		/// <exception cref="TypeException">
 		///     If <typeparamref name="TExpected" /> is not <typeparamref name="TActual" />
 		/// </exception>
-		[DebuggerHidden]
 		internal static void RequiresType<TExpected, TActual>()
 		{
 			ResolveTypeAction<TExpected, TActual>(TypeException.Throw<Array, TActual>,
-				TypeException.Throw<TExpected, TActual>);
+			                                      TypeException.Throw<TExpected, TActual>);
 		}
 
 		/// <summary>
 		///     Specifies a precondition: checks to see if <typeparamref name="T" /> is a reference type.
 		/// </summary>
 		/// <typeparam name="T">Type to verify</typeparam>
-		[DebuggerHidden]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresClassType<T>()
 		{
-			Requires(!typeof(T).IsValueType, "Type parameter <{0}> must be a reference type", typeof(T).Name);
+			Assert(!typeof(T).IsValueType, "Type parameter <{0}> must be a reference type", typeof(T).Name);
 		}
 
 		#endregion

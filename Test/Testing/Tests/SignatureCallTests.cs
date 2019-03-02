@@ -6,6 +6,8 @@ using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
 using Test.Testing.Types;
+// ReSharper disable InconsistentNaming
+#pragma warning disable 219
 
 #endregion
 

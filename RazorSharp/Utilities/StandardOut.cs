@@ -16,6 +16,8 @@ namespace RazorSharp.Utilities
 		/// </summary>
 		public static void ModConsole()
 		{
+			throw new NotSupportedException("This feature is disabled");
+			
 			Console.OutputEncoding = Encoding.Unicode; // todo: Encoding.Unicode / UTF8? Any difference?
 			var handle = Kernel32.GetConsoleHandle();
 			Kernel32.GetConsoleMode(handle, out var mode);

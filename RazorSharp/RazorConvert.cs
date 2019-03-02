@@ -11,6 +11,14 @@ namespace RazorSharp
 			LOW_LEVEL
 		}
 
+		public static unsafe TTo[] ConvertArray<TTo>(byte[] mem)
+		{
+			fixed (byte* ptr = mem) {
+				Pointer<TTo> memPtr = ptr;
+				return memPtr.CopyOut(mem.Length / memPtr.ElementSize);
+			}
+		}
+		
 		public static TTo Convert<TFrom, TTo>(TFrom t, ConversionType c = ConversionType.LOW_LEVEL)
 		{
 			switch (c) {

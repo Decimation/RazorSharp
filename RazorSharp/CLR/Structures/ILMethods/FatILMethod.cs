@@ -4,7 +4,8 @@
 
 using System.Runtime.InteropServices;
 using RazorSharp.CLR.Meta;
-using RazorSharp.Common;
+using RazorCommon;
+using RazorCommon.Utilities;
 using RazorSharp.Pointers;
 
 #endregion
@@ -110,7 +111,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		public override string ToString()
 		{
 			var table = new ConsoleTable("Field", "Value");
-			table.AddRow("Flags", Enums.CreateFlagsString(FlagsValue, Flags));
+			table.AddRow("Flags", EnumUtil.CreateFlagsString(FlagsValue, Flags));
 			table.AddRow("Size", Size);
 			table.AddRow("Code size", CodeSize);
 			table.AddRow("Code", Hex.ToHex(Code.Address));

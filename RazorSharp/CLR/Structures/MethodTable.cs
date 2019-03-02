@@ -6,7 +6,8 @@ using System;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR.Meta;
 using RazorSharp.CLR.Structures.EE;
-using RazorSharp.Common;
+using RazorCommon;
+using RazorCommon.Utilities;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
 
@@ -311,9 +312,9 @@ namespace RazorSharp.CLR.Structures
 
 			if (HasComponentSize) table.AddRow("Component size", m_dwFlags.ComponentSize);
 
-			table.AddRow("Flags", Enums.CreateFlagsString(FlagsValue, Flags));
-			table.AddRow("Flags 2", Enums.CreateFlagsString(Flags2Value, Flags2));
-			table.AddRow("Low flags", Enums.CreateFlagsString(FlagsLowValue, FlagsLow));
+			table.AddRow("Flags", EnumUtil.CreateFlagsString(FlagsValue, Flags));
+			table.AddRow("Flags 2", EnumUtil.CreateFlagsString(Flags2Value, Flags2));
+			table.AddRow("Low flags", EnumUtil.CreateFlagsString(FlagsLowValue, FlagsLow));
 			table.AddRow("Token", Token);
 
 			if (m_pParentMethodTable != null) table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));

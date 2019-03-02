@@ -11,7 +11,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using RazorSharp.CLR.Fixed;
-using RazorSharp.Common;
+using RazorCommon;
+using RazorCommon.Extensions;
+using RazorCommon.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;
@@ -241,7 +243,7 @@ namespace RazorSharp.Pointers
 			IEnumerator<T> enumerator = enumerable.GetEnumerator();
 			int            i          = 0;
 			while (enumerator.MoveNext()) {
-				RazorContract.RequiresNotNull(enumerator.Current);
+				Conditions.RequiresNotNull(enumerator.Current);
 
 				if (!enumerator.Current.Equals(this[i++])) {
 					enumerator.Dispose();
@@ -574,7 +576,7 @@ namespace RazorSharp.Pointers
 
 		public PinHandle TryPin()
 		{
-			RazorContract.Requires(!typeof(T).IsValueType, "Value types do not need to be pinned");
+			Conditions.Assert(!typeof(T).IsValueType, "Value types do not need to be pinned");
 			return new ObjectPinHandle(Value);
 		}
 
@@ -986,7 +988,7 @@ namespace RazorSharp.Pointers
 					return ToInfoTable().ToMarkDownString();
 
 				case PointerSettings.FMT_P:
-					return Hex.ToHex(this);
+					return Hex.ToHex(this.ToInt64());
 
 				case PointerSettings.FMT_B:
 					string thisStr = ToStringSafe();
@@ -1022,7 +1024,7 @@ namespace RazorSharp.Pointers
 				}
 
 				if (typeof(T).IsIListType())
-					valueStr = $"[{Collections.ToString((IList) Reference)}]";
+					valueStr = $"[{Collections.CreateString((IList) Reference)}]";
 				else
 					valueStr = Reference == null ? PointerSettings.NULLPTR : Reference.ToString();
 

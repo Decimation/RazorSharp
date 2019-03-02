@@ -7,7 +7,8 @@ using System.Globalization;
 using System.Reflection;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.EE;
-using RazorSharp.Common;
+using RazorCommon;
+using RazorCommon.Utilities;
 using RazorSharp.Pointers;
 
 #endregion
@@ -129,12 +130,12 @@ namespace RazorSharp.CLR.Meta
 			table.AddRow("Base fields size", BaseFieldsSize);
 
 			/* -- Flags -- */
-			table.AddRow("Flags", Enums.CreateString(Flags));
-			table.AddRow("Flags 2", Enums.CreateString(Flags2));
-			table.AddRow("Low flags", Enums.CreateString(FlagsLow));
-			table.AddRow("Attributes", Enums.CreateString(TypeAttributes));
-			table.AddRow("Layout flags", HasLayout ? Enums.CreateString(LayoutFlags) : "-");
-			table.AddRow("VM Flags", Enums.CreateString(VMFlags));
+			table.AddRow("Flags", EnumUtil.CreateString(Flags));
+			table.AddRow("Flags 2", EnumUtil.CreateString(Flags2));
+			table.AddRow("Low flags", EnumUtil.CreateString(FlagsLow));
+			table.AddRow("Attributes", EnumUtil.CreateString(TypeAttributes));
+			table.AddRow("Layout flags", HasLayout ? EnumUtil.CreateString(LayoutFlags) : "-");
+			table.AddRow("VM Flags", EnumUtil.CreateString(VMFlags));
 
 			/* -- Aux types -- */
 			table.AddRow("Canon type", Canon?.Name);

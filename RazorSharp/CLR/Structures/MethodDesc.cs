@@ -7,7 +7,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR.Meta;
 using RazorSharp.CLR.Structures.ILMethods;
-using RazorSharp.Common;
+using RazorCommon;
+using RazorCommon.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -238,9 +239,9 @@ namespace RazorSharp.CLR.Structures
 
 		internal void Compare(MethodInfo info)
 		{
-			RazorContract.Assert(Token == info.MetadataToken);
-			RazorContract.Assert(Name == info.Name);
-			RazorContract.Assert(Info == info);
+			Conditions.Assert(Token == info.MetadataToken);
+			Conditions.Assert(Name == info.Name);
+			Conditions.Assert(Info == info);
 		}
 
 		#region Equality
@@ -329,7 +330,7 @@ namespace RazorSharp.CLR.Structures
 		[Obsolete("Use SetStableEntryPoint", true)]
 		internal void SetFunctionPointer(IntPtr p)
 		{
-			RazorContract.Requires(
+			Conditions.Assert(
 				!Attributes.HasFlag(MethodAttributes.Virtual) && !Attributes.HasFlag(MethodAttributes.Abstract),
 				"Function is virtual/abstract");
 
@@ -377,9 +378,9 @@ namespace RazorSharp.CLR.Structures
 
 
 			table.AddRow("Classification", Classification.Join());
-			table.AddRow("Flags", Enums.CreateFlagsString(m_wFlags, Flags));
-			table.AddRow("Flags 2", Enums.CreateFlagsString(m_bFlags2, Flags2));
-			table.AddRow("Flags 3", Enums.CreateFlagsString(m_wFlags3AndTokenRemainder, Flags3));
+			table.AddRow("Flags", EnumUtil.CreateFlagsString(m_wFlags, Flags));
+			table.AddRow("Flags 2", EnumUtil.CreateFlagsString(m_bFlags2, Flags2));
+			table.AddRow("Flags 3", EnumUtil.CreateFlagsString(m_wFlags3AndTokenRemainder, Flags3));
 			table.AddRow("SizeOf", SizeOf);
 
 

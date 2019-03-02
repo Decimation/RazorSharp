@@ -3,7 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using RazorSharp.Common;
+using RazorCommon;
 using RazorSharp.Native;
 using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
@@ -27,49 +27,49 @@ namespace RazorSharp.Memory
 		public enum SegmentType
 		{
 			/// <summary>
-			///     <c>const</c> data; readonly of <see cref="data" />
+			///     <c>const</c> data; readonly of <see cref="DATA" />
 			/// </summary>
-			rdata,
+			RDATA,
 
 			/// <summary>
 			///     Import directory; designates the imported and exported functions
 			/// </summary>
-			idata,
+			IDATA,
 
 			/// <summary>
 			///     Initialized data
 			/// </summary>
-			data,
+			DATA,
 
 			/// <summary>
 			///     Exception information
 			/// </summary>
-			pdata,
+			PDATA,
 
 			/// <summary>
 			///     Uninitialized data
 			/// </summary>
-			bss,
+			BSS,
 
 			/// <summary>
 			///     Resource directory
 			/// </summary>
-			rsrc,
+			RSRC,
 
 			/// <summary>
 			///     Image relocations
 			/// </summary>
-			reloc,
+			RELOC,
 
 			/// <summary>
 			///     Executable code. Also known as the <c>code</c> segment.
 			/// </summary>
-			text,
+			TEXT,
 
 			/// <summary>
 			///     Delay import section
 			/// </summary>
-			didat
+			DIDAT
 		}
 
 		internal const string TEXT_SEGMENT = ".text";
@@ -156,25 +156,25 @@ namespace RazorSharp.Memory
 
 		private static SegmentType Parse(string name)
 		{
-			switch (name) {
+			switch (name.ToLower()) {
 				case ".rdata":
-					return SegmentType.rdata;
+					return SegmentType.RDATA;
 				case ".idata":
-					return SegmentType.idata;
+					return SegmentType.IDATA;
 				case ".data":
-					return SegmentType.data;
+					return SegmentType.DATA;
 				case ".pdata":
-					return SegmentType.pdata;
+					return SegmentType.PDATA;
 				case ".bss":
-					return SegmentType.bss;
+					return SegmentType.BSS;
 				case ".rsrc":
-					return SegmentType.rsrc;
+					return SegmentType.RSRC;
 				case ".reloc":
-					return SegmentType.reloc;
+					return SegmentType.RELOC;
 				case TEXT_SEGMENT:
-					return SegmentType.text;
+					return SegmentType.TEXT;
 				case ".didat":
-					return SegmentType.didat;
+					return SegmentType.DIDAT;
 				default:
 					throw new Exception();
 			}

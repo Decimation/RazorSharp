@@ -3,7 +3,8 @@
 using System;
 using System.Reflection;
 using RazorSharp.CLR.Structures;
-using RazorSharp.Common;
+using RazorCommon;
+using RazorCommon.Utilities;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -137,7 +138,7 @@ namespace RazorSharp.CLR.Meta
 
 		public MetaIL GetILHeader(int fAllowOverrides = 0)
 		{
-			RazorContract.Requires(IsIL);
+			Conditions.Assert(IsIL);
 			return new MetaIL(m_value.Reference.GetILHeader(fAllowOverrides));
 		}
 
@@ -168,14 +169,14 @@ namespace RazorSharp.CLR.Meta
 
 			table.AddRow("Signature", Info);
 
-			table.AddRow("Classification", Enums.CreateString(Classification));
-			table.AddRow("Attributes", Enums.CreateString(Attributes));
-			table.AddRow("Flags", Enums.CreateString(Flags));
-			table.AddRow("Flags 2", Enums.CreateString(Flags2));
-			table.AddRow("Flags 3", Enums.CreateString(Flags3));
+			table.AddRow("Classification", EnumUtil.CreateString(Classification));
+			table.AddRow("Attributes", EnumUtil.CreateString(Attributes));
+			table.AddRow("Flags", EnumUtil.CreateString(Flags));
+			table.AddRow("Flags 2", EnumUtil.CreateString(Flags2));
+			table.AddRow("Flags 3", EnumUtil.CreateString(Flags3));
 
-			table.AddRow("Function", Hex.ToHex(Function));
-			table.AddRow("Native code", Hex.ToHex(NativeCode));
+			table.AddRow("Function", Hex.ToHex(Function.ToInt64()));
+			table.AddRow("Native code", Hex.ToHex(NativeCode.ToInt64()));
 			table.AddRow("Pointing to native code", string.Format("{0} ({1})", IsPointingToNativeCode.Prettify(), IsPointingToNativeCode));
 
 			return table;

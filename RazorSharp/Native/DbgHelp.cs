@@ -12,10 +12,10 @@ namespace RazorSharp.Native
 {
 	public static unsafe class DbgHelp
 	{
-		private const string DbgHelpDll = "DbgHelp.dll";
+		private const string DBG_HELP_DLL = "DbgHelp.dll";
 
 
-		[DllImport(DbgHelpDll)]
+		[DllImport(DBG_HELP_DLL)]
 		private static extern ImageNtHeaders64* ImageNtHeader(IntPtr hModule);
 
 
@@ -34,7 +34,7 @@ namespace RazorSharp.Native
 				var struc = Marshal.PtrToStructure<ImageSectionHeader>(pSectionHdr);
 
 				arr[scn] = new ImageSectionInfo(scn, struc.Name, (void*) (imageBase.ToInt64() + struc.VirtualAddress),
-					(int) struc.VirtualSize, struc);
+				                                (int) struc.VirtualSize, struc);
 
 				pSectionHdr += Marshal.SizeOf<ImageSectionHeader>();
 			}

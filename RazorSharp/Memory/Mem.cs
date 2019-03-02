@@ -133,7 +133,7 @@ namespace RazorSharp.Memory
 		/// <returns>A pointer to the allocated memory</returns>
 		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
 		{
-			RazorContract.Requires(elemCnt > 0, "elemCnt <= 0");
+			Conditions.Assert(elemCnt > 0, "elemCnt <= 0");
 			int size  = Unsafe.SizeOf<T>() * elemCnt;
 			var alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);

@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using RazorSharp.Common;
+using RazorCommon;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 
@@ -60,8 +60,8 @@ namespace RazorSharp.Native.Structures.Images
 				SectionNumber, 
 				SectionName,
 				string.Format("{0} ({1} K)", SectionSize, SectionSize / Mem.BytesInKilobyte),
-				Hex.ToHex(SectionAddress),
-				Hex.ToHex(EndAddress), 
+				Hex.ToHex(SectionAddress.ToInt64()),
+				Hex.ToHex(EndAddress.ToInt64()), 
 				SectionHeader.Characteristics,
 				"-"
 			};

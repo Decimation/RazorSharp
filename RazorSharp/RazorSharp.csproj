@@ -56,6 +56,9 @@
     <OutputPath>bin\x64\Debug\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="JetBrains.Annotations, Version=2018.3.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
       <HintPath>..\packages\JetBrains.Annotations.2018.3.0\lib\net20\JetBrains.Annotations.dll</HintPath>
@@ -64,7 +67,6 @@
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=2.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -73,6 +75,9 @@
     <Reference Include="Pastel, Version=1.1.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\Pastel.1.1.0\lib\netstandard2.0\Pastel.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="RazorCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\RazorCommon\RazorCommon\bin\x64\Debug\RazorCommon.dll</HintPath>
     </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
       <HintPath>..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
@@ -98,9 +103,8 @@
     <Reference Include="System.AppContext, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.AppContext.4.3.0\lib\net463\System.AppContext.dll</HintPath>
     </Reference>
-    <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
-      <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
     </Reference>
     <Reference Include="System.Collections.Immutable, Version=1.2.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\packages\System.Collections.Immutable.1.6.0-preview.18571.3\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
@@ -112,7 +116,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Diagnostics.FileVersionInfo, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Diagnostics.FileVersionInfo.4.3.0\lib\net46\System.Diagnostics.FileVersionInfo.dll</HintPath>
     </Reference>
@@ -145,19 +148,20 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\packages\System.Numerics.Vectors.4.4.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
     </Reference>
     <Reference Include="System.Reflection, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Reflection.4.3.0\lib\net462\System.Reflection.dll</HintPath>
     </Reference>
-    <Reference Include="System.Runtime, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\packages\System.Runtime.4.3.0\lib\net462\System.Runtime.dll</HintPath>
+    <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
+      <Private>True</Private>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Runtime.Extensions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\packages\System.Runtime.Extensions.4.3.0\lib\net462\System.Runtime.Extensions.dll</HintPath>
+    <Reference Include="System.Runtime.Extensions, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.Extensions.4.3.1\lib\net462\System.Runtime.Extensions.dll</HintPath>
+      <Private>True</Private>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Runtime.InteropServices, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -177,13 +181,10 @@
     <Reference Include="System.Threading.Thread, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Threading.Thread.4.3.0\lib\net46\System.Threading.Thread.dll</HintPath>
     </Reference>
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Analysis\Inspector.cs" />
+    <Compile Include="Analysis\Inspect.cs" />
     <Compile Include="Analysis\ObjectLayout.cs" />
-    <Compile Include="Analysis\ReferenceInspector.cs" />
     <Compile Include="AssemblyHandle.cs" />
     <Compile Include="CLR\Fixed\ObjectPinHandle.cs" />
     <Compile Include="CLR\Fixed\ObjectPinner.cs" />
@@ -197,7 +198,6 @@
     <Compile Include="CLR\Meta\MetaMethod.cs" />
     <Compile Include="CLR\Meta\MetaType.cs" />
     <Compile Include="CLR\Offsets.cs" />
-    <Compile Include="CLR\ReflectionUtil.cs" />
     <Compile Include="CLR\SpecialNames.cs" />
     <Compile Include="CLR\Structures\EE\EEClass.cs" />
     <Compile Include="CLR\Structures\EE\EEClassLayoutInfo.cs" />
@@ -208,25 +208,16 @@
     <Compile Include="CLR\Structures\ILMethods\FatILMethod.cs" />
     <Compile Include="CLR\Structures\ILMethods\TinyILMethod.cs" />
     <Compile Include="CLR\Structures\SigParser.cs" />
-    <Compile Include="Common\Collections.cs" />
-    <Compile Include="Common\ConsoleTable.cs" />
-    <Compile Include="Common\Enums.cs" />
-    <Compile Include="Common\Extensions.cs" />
-    <Compile Include="Common\Hex.cs" />
-    <Compile Include="Common\Strings.cs" />
     <Compile Include="Experimental\Functions.cs" />
     <Compile Include="Experimental\Registers.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Memory\ClrSigcallAttribute.cs" />
     <Compile Include="Memory\MemScanner.cs" />
     <Compile Include="Memory\SigcallAttribute.cs" />
-    <Compile Include="Obsolete\Asm.cs" />
     <Compile Include="ProcessHandle.cs" />
     <Compile Include="RazorConvert.cs" />
-    <Compile Include="LowLevel.cs" />
     <Compile Include="Memory\AllocPool.cs" />
     <Compile Include="Memory\Bits.cs" />
-    <Compile Include="Memory\Images.cs" />
     <Compile Include="Memory\Mem.cs" />
     <Compile Include="Memory\Modules.cs" />
     <Compile Include="Memory\Segments.cs" />
@@ -256,17 +247,10 @@
     <Compile Include="Native\Structures\Images\ImageSectionInfo.cs" />
     <Compile Include="Native\Structures\MemoryBasicInformation.cs" />
     <Compile Include="Native\Structures\SystemInfo.cs" />
-    <Compile Include="Obsolete\Experimental\StackAllocated.cs" />
-    <Compile Include="Obsolete\Experimental\UnmanagedAllocated.cs" />
-    <Compile Include="Obsolete\MemoryInspector.cs" />
-    <Compile Include="Pointers\Ex\AllocExPointer.cs" />
-    <Compile Include="Pointers\Ex\DecayExPointer.cs" />
-    <Compile Include="Pointers\Ex\ExPointer.cs" />
     <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
     <Compile Include="Pointers\PointerSettings.cs" />
     <Compile Include="Pointers\PointerUtils.cs" />
-    <Compile Include="Pointers\TaggedPointer.cs" />
     <Compile Include="CLR\ClrFunctions.cs" />
     <Compile Include="CLR\Structures\DWFlags.cs" />
     <Compile Include="CLR\Structures\FieldDesc.cs" />
@@ -288,12 +272,15 @@
     <Compile Include="Utilities\Exceptions\SigcallException.cs" />
     <Compile Include="Utilities\Exceptions\RuntimeException.cs" />
     <Compile Include="Utilities\Exceptions\TypeException.cs" />
-    <Compile Include="Utilities\RazorContract.cs" />
+    <Compile Include="Utilities\Conditions.cs" />
     <Compile Include="Utilities\StandardOut.cs" />
     <Compile Include="Utilities\VirtualCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="app.manifest">
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config">

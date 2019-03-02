@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using RazorSharp.Common;
+using RazorCommon;
 using RazorSharp.Utilities;
 
 // ReSharper disable BuiltInTypeReferenceStyle
@@ -38,7 +38,7 @@ namespace RazorSharp.CLR.Structures
 
 		static ObjHeader()
 		{
-			RazorContract.Assert(sizeof(ObjHeader) == IntPtr.Size);
+			Conditions.Assert(sizeof(ObjHeader) == IntPtr.Size);
 		}
 
 		public void SetBit(uint uBit)
@@ -83,7 +83,7 @@ namespace RazorSharp.CLR.Structures
 			foreach (byte v in bytes) sb.AppendFormat("{0} ", Convert.ToString(v, 2));
 
 			sb.Remove(sb.Length - 1, 1);
-			return $"Sync block: {m_uSyncBlockValue} ({SyncBlockAsFlags}) [{Collections.ToString(bytes)}] [{sb}]";
+			return $"Sync block: {m_uSyncBlockValue} ({SyncBlockAsFlags}) [{Collections.CreateString(bytes)}] [{sb}]";
 		}
 
 		#region Equality

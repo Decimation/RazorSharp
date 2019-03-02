@@ -8,7 +8,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorSharp.Common;
+using RazorCommon;
+using RazorCommon.Utilities;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using Serilog.Context;
@@ -36,6 +37,8 @@ namespace RazorSharp.Memory
 
 		public IntPtr BaseAddress => m_lpModuleBase;
 
+		private const string CONTEXT_PROP_TAG = "SigScanner";
+		
 		public void AddPattern(string szPatternName, string szPattern)
 		{
 			m_dictStringPatterns.Add(szPatternName, szPattern);
@@ -57,8 +60,8 @@ namespace RazorSharp.Memory
 			}
 
 
-			using (LogContext.PushProperty(Global.CONTEXT_PROP, "SigScanner")) {
-				Global.Log.Debug("Failed bytes: {Count} (tolerance: {N})", failedMatches, byteTolerance);
+			using (LogContext.PushProperty(Global.CONTEXT_PROP, CONTEXT_PROP_TAG)) {
+				Global.Log.Verbose("Failed bytes: {Count} (tolerance: {N})", failedMatches, byteTolerance);
 			}
 
 			if (failedMatches <= byteTolerance) return true;
@@ -101,7 +104,7 @@ namespace RazorSharp.Memory
 				if (PatternCheck(nModuleIndex, rgPattern)) {
 					if (ofsGuessFailed) {
 //						Console.WriteLine("Matched opcodes: {0} (actual offset: {1:X}) (theoretical offset: {2:X})",
-//							Collections.ToString(rgPattern), nModuleIndex, ofsGuess);
+//							Collections.CreateString(rgPattern), nModuleIndex, ofsGuess);
 					}
 
 					var p = m_lpModuleBase + nModuleIndex;
@@ -120,7 +123,7 @@ namespace RazorSharp.Memory
 
 
 			//Debug.Assert(szPattern!=null);
-			byte[] arrPattern = Strings.ParseByteArray(szPattern);
+			byte[] arrPattern = StringUtil.ParseByteArray(szPattern);
 
 			Debug.Assert(arrPattern != null);
 			var p = FindPattern(arrPattern, ofsGuess, byteTolerance);
@@ -132,7 +135,7 @@ namespace RazorSharp.Memory
 
 		public static IntPtr QuickScan(string module, string szPattern, long ofsGuess = 0)
 		{
-			return QuickScan(module, Strings.ParseByteArray(szPattern), ofsGuess);
+			return QuickScan(module, StringUtil.ParseByteArray(szPattern), ofsGuess);
 		}
 
 		public static IntPtr QuickScan(string module, byte[] rgPattern, long ofsGuess = 0)
@@ -153,7 +156,7 @@ namespace RazorSharp.Memory
 		public static TDelegate QuickScanDelegate<TDelegate>(string module, string szPattern, long ofsGuess = 0)
 			where TDelegate : Delegate
 		{
-			return QuickScanDelegate<TDelegate>(module, Strings.ParseByteArray(szPattern), ofsGuess);
+			return QuickScanDelegate<TDelegate>(module, StringUtil.ParseByteArray(szPattern), ofsGuess);
 		}
 
 		/*public IntPtr FindPattern(string szPattern, out long lTime)
@@ -183,14 +186,14 @@ namespace RazorSharp.Memory
 		{
 			var addr = FindPattern(rgPattern, ofsGuess);
 			if (addr == IntPtr.Zero)
-				throw new Exception($"Could not find function with opcodes {Collections.ToString(rgPattern)}");
+				throw new Exception($"Could not find function with opcodes {Collections.CreateString(rgPattern)}");
 
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
 		}
 
 		public TDelegate GetDelegate<TDelegate>(string szPattern, long ofsGuess = 0) where TDelegate : Delegate
 		{
-			return GetDelegate<TDelegate>(Strings.ParseByteArray(szPattern), ofsGuess);
+			return GetDelegate<TDelegate>(StringUtil.ParseByteArray(szPattern), ofsGuess);
 		}
 
 
@@ -205,7 +208,7 @@ namespace RazorSharp.Memory
 
 			// PARSE PATTERNS
 			for (int nIndex = 0; nIndex < m_dictStringPatterns.Count; nIndex++)
-				arrBytePatterns[nIndex] = Strings.ParseByteArray(m_dictStringPatterns.ElementAt(nIndex).Value);
+				arrBytePatterns[nIndex] = StringUtil.ParseByteArray(m_dictStringPatterns.ElementAt(nIndex).Value);
 
 			// SCAN FOR PATTERNS
 			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++)

@@ -3,7 +3,8 @@
 #region
 
 using RazorSharp.CLR.Structures.ILMethods;
-using RazorSharp.Common;
+using RazorCommon;
+using RazorCommon.Utilities;
 using RazorSharp.Pointers;
 
 #endregion
@@ -105,7 +106,7 @@ namespace RazorSharp.CLR.Meta
 			table.AddRow("Code size", CodeSize);
 			table.AddRow("Max stack", MaxStack);
 			table.AddRow("Local sig token", LocalVarSigTok);
-			table.AddRow("Flags", IsFat ? Enums.CreateString(Flags) : "-");
+			table.AddRow("Flags", IsFat ? EnumUtil.CreateString(Flags) : "-");
 
 			return table;
 		}

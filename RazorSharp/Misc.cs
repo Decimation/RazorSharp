@@ -48,13 +48,6 @@ namespace RazorSharp
 			});
 		}
 
-		internal static object InvokeGenericMethod(Type t, string name, Type typeArgs, object instance,
-			params object[]                             args)
-		{
-			var method = t.GetMethod(name,
-				BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic);
-			method = method.MakeGenericMethod(typeArgs);
-			return method.Invoke(method.IsStatic ? null : instance, args);
-		}
+		
 	}
 }

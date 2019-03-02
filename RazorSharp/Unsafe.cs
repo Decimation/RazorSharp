@@ -232,13 +232,13 @@ namespace RazorSharp
 			switch (offset) {
 				case OffsetType.StringData:
 
-					RazorContract.RequiresType<string, T>();
+					Conditions.RequiresType<string, T>();
 					string s = t as string;
 					return AddressOfHeap(ref s) + RuntimeHelpers.OffsetToStringData;
 
 				case OffsetType.ArrayData:
 
-					RazorContract.RequiresType<Array, T>();
+					Conditions.RequiresType<Array, T>();
 					return AddressOfHeap(ref t) + Offsets.OffsetToArrayData;
 
 				case OffsetType.Fields:
@@ -302,84 +302,6 @@ namespace RazorSharp
 
 		// todo: make an AutoSize method
 
-		/*public enum SizeType
-		{
-			/// <summary>
-			/// Requires an argument
-			/// <see cref="Unsafe.AutoSizeOf{T}"/>
-			/// </summary>
-			Auto,
-
-			/// <summary>
-			/// <see cref="Unsafe.SizeOf{T}"/>
-			/// </summary>
-			Default,
-
-			/// <summary>
-			/// <see cref="Unsafe.ManagedSizeOf{T}"/>
-			/// </summary>
-			Managed,
-
-			/// <summary>
-			/// <see cref="Unsafe.NativeSizeOf{T}"/>
-			/// </summary>
-			Native,
-
-			/// <summary>
-			/// Requires an argument
-			/// <see cref="Unsafe.HeapSize{T}"/>
-			/// </summary>
-			Heap,
-
-			/// <summary>
-			/// <see cref="Unsafe.BaseInstanceSize{T}"/>
-			/// </summary>
-			BaseInstance,
-
-			/// <summary>
-			/// Requires an argument
-			/// <see cref="Unsafe.BaseFieldsSize{T}(T)"/>
-			/// </summary>
-			BaseFields,
-
-			/// <summary>
-			/// <see cref="Unsafe.BaseFieldsSize{T}()"/>
-			/// </summary>
-			BaseFields2,
-		}
-
-		// todo: WIP
-
-		public static int SizeOf__<T>(T t = default, SizeType type = SizeType.Auto)
-		{
-			switch (type) {
-				case SizeType.Auto:
-					return AutoSizeOf(t);
-				case SizeType.Default:
-					return SizeOf<T>();
-				case SizeType.Managed:
-					return ManagedSizeOf<T>();
-				case SizeType.Native:
-					return NativeSizeOf<T>();
-				case SizeType.Heap:
-					return HeapSizeInternal(t);
-				case SizeType.BaseInstance:
-					return BaseInstanceSizeInternal<T>();
-				case SizeType.BaseFields:
-					return BaseFieldsSizeInternal(t);
-				case SizeType.BaseFields2:
-					return BaseFieldsSize<T>();
-
-				default:
-					throw new ArgumentOutOfRangeException(nameof(type), type, null);
-			}
-		}*/
-
-
-		/*static int SizeOf<T>(this T val)
-		{
-			return AutoSizeOf(val);
-		}*/
 
 		/// <summary>
 		///     Calculates the complete size of <paramref name="t" />'s data. If <typeparamref name="T" /> is
@@ -489,7 +411,7 @@ namespace RazorSharp
 
 		private static int HeapSizeInternal<T>(T t)
 		{
-			RazorContract.RequiresClassType<T>();
+			Conditions.RequiresClassType<T>();
 
 			// By manually reading the MethodTable*, we can calculate the size correctly if the reference
 			// is boxed or cloaked
@@ -528,6 +450,7 @@ namespace RazorSharp
 			 */
 
 			if (typeof(T).IsArray) {
+				Conditions.RequiresType<Array, T>();
 				var arr = t as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
@@ -598,7 +521,7 @@ namespace RazorSharp
 
 		private static int BaseFieldsSizeInternal<T>(T t)
 		{
-			RazorContract.RequiresClassType<T>();
+			Conditions.RequiresClassType<T>();
 			return Runtime.ReadMethodTable(ref t).Reference.NumInstanceFieldBytes;
 		}
 
@@ -624,7 +547,7 @@ namespace RazorSharp
 
 		private static int BaseInstanceSizeInternal<T>()
 		{
-			RazorContract.RequiresClassType<T>();
+			Conditions.RequiresClassType<T>();
 			return typeof(T).GetMethodTable().Reference.BaseSize;
 		}
 

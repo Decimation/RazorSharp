@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using RazorCommon;
 using RazorSharp.CLR.Meta;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.HeapObjects;
-using RazorSharp.Common;
+using RazorCommon.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -32,20 +33,15 @@ namespace RazorSharp.CLR
 	/// </summary>
 	internal static unsafe class Runtime
 	{
-		/// <summary>
-		///     These specific <see cref="BindingFlags" /> are used because they correspond with the metadata and structures
-		///     in CLR structures such as <see cref="MethodTable" />
-		/// </summary>
-		private const BindingFlags DefaultFlags = BindingFlags.Instance | BindingFlags.NonPublic |
-		                                          BindingFlags.Public | BindingFlags.Static;
+		
 
 		#region Compare
 
 		private static void AssertCompare(MemberInfo info, IMetaMember meta)
 		{
-			RazorContract.Assert(info.MetadataToken == meta.Token);
-			RazorContract.Assert(info.Name == meta.Name);
-			RazorContract.Assert(info == meta.Info);
+			Conditions.Assert(info.MetadataToken == meta.Token);
+			Conditions.Assert(info.Name == meta.Name);
+			Conditions.Assert(info == meta.Info);
 		}
 
 		#endregion
@@ -55,7 +51,7 @@ namespace RazorSharp.CLR
 		///     Reads a reference type's <see cref="ObjHeader" />
 		/// </summary>
 		/// <returns>A pointer to the reference type's header</returns>
-		internal static ObjHeader* ReadObjHeader<T>(ref T t) where T : class
+		internal static Pointer<ObjHeader> ReadObjHeader<T>(T t) where T : class
 		{
 			var data = Unsafe.AddressOfHeap(ref t).Address;
 
@@ -89,7 +85,7 @@ namespace RazorSharp.CLR
 
 		internal static ArrayObject** GetArrayObject<T>(ref T t) where T : class
 		{
-			RazorContract.RequiresType<Array, T>();
+			Conditions.RequiresType<Array, T>();
 
 			return (ArrayObject**) Unsafe.AddressOf(ref t);
 		}
@@ -206,10 +202,10 @@ namespace RazorSharp.CLR
 
 		internal static Pointer<FieldDesc> GetFieldDesc(this FieldInfo fieldInfo)
 		{
-			RazorContract.RequiresNotNull(fieldInfo);
+			Conditions.RequiresNotNull(fieldInfo);
 			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
-			RazorContract.Assert(fieldDesc.Reference.Info == fieldInfo);
-			RazorContract.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
+			Conditions.Assert(fieldDesc.Reference.Info == fieldInfo);
+			Conditions.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
 
 
 			return fieldDesc;
@@ -223,14 +219,19 @@ namespace RazorSharp.CLR
 		/// <param name="flags"></param>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		internal static Pointer<FieldDesc> GetFieldDesc(this Type t, string name, BindingFlags flags = DefaultFlags)
+		internal static Pointer<FieldDesc> GetFieldDesc(this Type t, string name, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 		{
-			RazorContract.Requires(!t.IsArray, "Arrays do not have fields"); // ehh...
+			Conditions.Assert(!t.IsArray, "Arrays do not have fields"); // ehh...
 			// (they have implicit fields such as length)
 
 			return t.GetField(name, flags).GetFieldDesc();
 		}
 
+		internal static byte[] ReadObjHeaderBytes<T>(T t) where T : class
+		{
+			var ptr = Unsafe.AddressOfHeap(t, OffsetType.Header);
+			return ptr.CopyOut(IntPtr.Size);
+		}
 
 		internal static FieldInfo[] GetFields<T>()
 		{
@@ -245,7 +246,7 @@ namespace RazorSharp.CLR
 		/// <returns></returns>
 		internal static FieldInfo[] GetFields(Type t)
 		{
-			FieldInfo[] fields = t.GetFields(DefaultFlags);
+			FieldInfo[] fields = t.GetFields(ReflectionUtil.ALL_FLAGS);
 			Collections.RemoveAll(ref fields, f => f.IsLiteral);
 			return fields;
 		}
@@ -256,32 +257,32 @@ namespace RazorSharp.CLR
 
 		internal static Pointer<MethodDesc> GetMethodDesc(this MethodInfo methodInfo)
 		{
-			RazorContract.RequiresNotNull(methodInfo);
+			Conditions.RequiresNotNull(methodInfo);
 
 			var methodHandle = methodInfo.MethodHandle;
 			var md           = (MethodDesc*) methodHandle.Value;
 
-			RazorContract.Assert(md->Info.MetadataToken == methodInfo.MetadataToken);
+			Conditions.Assert(md->Info.MetadataToken == methodInfo.MetadataToken);
 
 			// todo
 //			RazorContract.Assert(md->Info == methodInfo);
 			return md;
 		}
 
-		internal static Pointer<MethodDesc> GetMethodDesc(this Type t, string name, BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc> GetMethodDesc(this Type t, string name, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 		{
 			return t.GetMethod(name, flags).GetMethodDesc();
 		}
 
-		internal static Pointer<MethodDesc>[] GetMethodDescs(this Type t, BindingFlags flags = DefaultFlags)
+		internal static Pointer<MethodDesc>[] GetMethodDescs(this Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 		{
 			MethodInfo[] methods = t.GetMethods(flags);
-			RazorContract.RequiresNotNull(methods);
+			Conditions.RequiresNotNull(methods);
 			var arr = new Pointer<MethodDesc>[methods.Length];
 
 			for (int i = 0; i < arr.Length; i++) {
 				arr[i] = methods[i].MethodHandle.Value;
-				RazorContract.Assert(arr[i].Reference.Info.MetadataToken == methods[i].MetadataToken);
+				Conditions.Assert(arr[i].Reference.Info.MetadataToken == methods[i].MetadataToken);
 			}
 
 //			arr = arr.OrderBy(x => x.ToInt64()).ToArray();
@@ -293,7 +294,7 @@ namespace RazorSharp.CLR
 
 		#region Sigcall functions
 
-		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(Type t, BindingFlags flags = DefaultFlags)
+		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 			where TAttribute : Attribute
 		{
 			MethodInfo[] methods           = t.GetMethods(flags);
@@ -308,7 +309,7 @@ namespace RazorSharp.CLR
 		}
 
 		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(Type t, string name,
-			BindingFlags                                                  flags = DefaultFlags)
+			BindingFlags                                                  flags = ReflectionUtil.ALL_FLAGS)
 			where TAttribute : Attribute
 		{
 			MethodInfo[] methods = GetAnnotatedMethods<TAttribute>(t, flags);
@@ -321,12 +322,12 @@ namespace RazorSharp.CLR
 		}
 
 
-		internal static MethodInfo GetMethod(Type t, string name, BindingFlags flags = DefaultFlags)
+		internal static MethodInfo GetMethod(Type t, string name, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 		{
 			return t.GetMethod(name, flags);
 		}
 
-		internal static MethodInfo[] GetMethods(Type t, BindingFlags flags = DefaultFlags)
+		internal static MethodInfo[] GetMethods(Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 		{
 			return t.GetMethods(flags);
 		}

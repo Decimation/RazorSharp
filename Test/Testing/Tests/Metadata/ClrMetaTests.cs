@@ -1,13 +1,16 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using JetBrains.Annotations;
+using NUnit.Framework;
+using RazorCommon;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Meta;
 using RazorSharp.CLR.Structures;
-using RazorSharp.Common;
 
 namespace Test.Testing.Tests.Metadata
 {
+	
 	public static class ClrMetaTests
 	{
 		public static void GC()

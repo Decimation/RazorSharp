@@ -4,7 +4,8 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR.Meta;
-using RazorSharp.Common;
+using RazorCommon;
+using RazorCommon.Utilities;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using static RazorSharp.CLR.Offsets;
@@ -148,7 +149,7 @@ namespace RazorSharp.CLR.Structures.EE
 		internal EEClassLayoutInfo* LayoutInfo {
 			get {
 				//return &((LayoutEEClass *) this)->m_LayoutInfo;
-				RazorContract.Requires(HasLayout, "EEClass does not have LayoutInfo");
+				Conditions.Assert(HasLayout, "EEClass does not have LayoutInfo");
 
 
 				//IntPtr thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass)).Address;

@@ -12,7 +12,8 @@ using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RazorSharp.CLR;
-using RazorSharp.Common;
+using RazorCommon;
+using RazorCommon.Utilities;
 using Serilog.Context;
 
 #endregion
@@ -72,9 +73,9 @@ namespace RazorSharp.Memory
 
 			return attr.IsInFunctionMap
 				? SigScanner.FindPattern(SigcallMethodMap[methodInfo].Item1,
-					attr.OffsetGuess == 0
-						? SigcallMethodMap[methodInfo].Item2
-						: attr.OffsetGuess, BYTE_TOL)
+				                         attr.OffsetGuess == 0
+					                         ? SigcallMethodMap[methodInfo].Item2
+					                         : attr.OffsetGuess, BYTE_TOL)
 				: SigScanner.FindPattern(attr.Signature, attr.OffsetGuess, BYTE_TOL);
 			;
 		}
@@ -89,14 +90,15 @@ namespace RazorSharp.Memory
 				SelectModule(attr);
 
 				// todo: this is a cheap fix
-				if (!attr.IsInFunctionMap && SigcallMethodMap.ContainsKey(methodInfo)) attr.IsInFunctionMap = true;
+				if (!attr.IsInFunctionMap && SigcallMethodMap.ContainsKey(methodInfo)) 
+					attr.IsInFunctionMap = true;
 
 
 				var fn = GetCorrespondingFunctionPointer(attr, methodInfo);
 				using (SignatureCallLogContext) {
-					Global.Log.Debug("Binding {Name} to {Addr:X}", methodInfo.Name, fn.ToInt64());
+					Global.Log.Verbose("Binding {Name} to {Addr:X}", methodInfo.Name, fn.ToInt64());
 					if (fn == IntPtr.Zero)
-						Global.Log.Warning("Could not resolve address for func {Name}", methodInfo.Name);
+						Global.Log.Error("Could not resolve address for func {Name}", methodInfo.Name);
 				}
 
 
@@ -113,11 +115,14 @@ namespace RazorSharp.Memory
 
 		internal class Data
 		{
-			[JsonProperty("name")] internal string Name { get; set; }
+			[JsonProperty("name")]
+			internal string Name { get; set; }
 
-			[JsonProperty("opcodes")] internal string OpcodesSignature { get; set; }
+			[JsonProperty("opcodes")]
+			internal string OpcodesSignature { get; set; }
 
-			[JsonProperty("offset")] internal string OffsetString { get; set; }
+			[JsonProperty("offset")]
+			internal string OffsetString { get; set; }
 
 			public override string ToString()
 			{
@@ -269,8 +274,8 @@ namespace RazorSharp.Memory
 
 
 			foreach (var data in r)
-				CacheFunction(t, data.Name, Strings.ParseByteArray(data.OpcodesSignature),
-					long.Parse(data.OffsetString, NumberStyles.HexNumber));
+				CacheFunction(t, data.Name, StringUtil.ParseByteArray(data.OpcodesSignature),
+				              long.Parse(data.OffsetString, NumberStyles.HexNumber));
 		}
 
 		#endregion

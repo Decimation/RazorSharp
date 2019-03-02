@@ -56,7 +56,7 @@ namespace RazorSharp.CLR
 		/// <summary>
 		///     Used just to invoke the type initializer
 		/// </summary>
-		internal static void init()
+		internal static void Init()
 		{
 			Debug.Assert(SignatureCall.IsBound(typeof(ClrFunctions)));
 		}

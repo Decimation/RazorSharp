@@ -60,12 +60,7 @@ namespace RazorSharp.Native
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(hFn);
 		}
 
-		public static uint GetProcessorType()
-		{
-			Kernel32.GetNativeSystemInfo(out var systemInfo);
-			uint processorType = Convert.ToUInt32(systemInfo.ProcessorType.ToString(), 16);
-			return processorType;
-		}
+		
 
 		public static void CodeFree(IntPtr fn)
 		{

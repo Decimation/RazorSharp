@@ -4,7 +4,8 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR.Meta;
-using RazorSharp.Common;
+using RazorCommon;
+using RazorCommon.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -230,9 +231,9 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		internal IntPtr GetAddress<TInstance>(ref TInstance t)
 		{
-			RazorContract.Requires(!IsStatic, "You cannot get the address of a static field (yet)");
-			RazorContract.Assert(Runtime.ReadMethodTable(ref t) == EnclosingMethodTable);
-			RazorContract.Assert(Offset != FieldOffsetNewEnC);
+			Conditions.Assert(!IsStatic, "You cannot get the address of a static field (yet)");
+			Conditions.Assert(Runtime.ReadMethodTable(ref t) == EnclosingMethodTable);
+			Conditions.Assert(Offset != FieldOffsetNewEnC);
 
 
 			var data = Unsafe.AddressOf(ref t).Address;

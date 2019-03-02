@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
-using RazorSharp.Common;
+using RazorCommon;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using static RazorSharp.Memory.Mem;
@@ -77,7 +77,7 @@ namespace RazorSharp.Analysis
 					OBJHEADER_NAME_STR,
 					objHeaderMem == null
 						? Omitted.ToString()
-						: string.Format("[{0}]", Collections.ToString(objHeaderMem)),
+						: string.Format("[{0}]", Collections.CreateString(objHeaderMem)),
 					UniqueAttributes.None);
 
 				// MethodTable*
@@ -222,7 +222,7 @@ namespace RazorSharp.Analysis
 
 		public override string ToString()
 		{
-			return InspectorHelper.CreateLabelString("Memory layout:", Table);
+			return Table.ToMarkDownString();
 		}
 
 		private enum UniqueAttributes
@@ -294,7 +294,7 @@ namespace RazorSharp.Analysis
 		/// </param>
 		public ObjectLayout(bool bFieldsOnly = true) : this(IntPtr.Zero, default, bFieldsOnly, false, true)
 		{
-			RazorContract.Requires(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");
+			Conditions.Assert(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");
 
 //			m_bFullOffset = bFullOffset;
 
@@ -329,7 +329,7 @@ namespace RazorSharp.Analysis
 		public ObjectLayout(ref T t, bool bFieldsOnly = true) : this(Unsafe.AddressOf(ref t).Address, t, bFieldsOnly,
 			false, false)
 		{
-			RazorContract.Requires(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");
+			Conditions.Assert(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");
 
 //			m_bFullOffset = bFullOffset;
 
