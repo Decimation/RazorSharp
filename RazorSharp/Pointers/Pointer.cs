@@ -307,7 +307,7 @@ namespace RazorSharp.Pointers
 		private string DbgToString()
 		{
 			return string.Format("Address = {0} | Value = {1}", ToString(PointerSettings.FMT_P),
-				Reference.ToString());
+			                     Reference.ToString());
 		}
 
 		#region Read / write
@@ -395,7 +395,7 @@ namespace RazorSharp.Pointers
 		private MemoryProtection VirtualProtectAccessible(int cb)
 		{
 			Kernel32.VirtualProtect(Address, cb, MemoryProtection.ExecuteReadWrite,
-				out var oldProtect);
+			                        out var oldProtect);
 
 			return oldProtect;
 		}
@@ -410,17 +410,15 @@ namespace RazorSharp.Pointers
 		// todo: verify this works
 		public T SafeRead(int elemOffset = 0)
 		{
-			
-
 			int cb = ElementSize + elemOffset;
 
 			var oldProtect = VirtualProtectAccessible(cb);
 
 			var buf = Read(elemOffset);
-			
+
 			VirtualProtectRestore(cb, oldProtect);
 
-			
+
 			return buf;
 		}
 
@@ -437,13 +435,12 @@ namespace RazorSharp.Pointers
 		/// <param name="data">Value to write</param>
 		public void SafeWrite(T data, int elemOffset = 0)
 		{
-			
 			// todo: use new VirtualProtect methods here for consistency
-			
+
 			Pointer<byte> ptr = Offset(elemOffset);
 
 			Kernel32.VirtualProtect(ptr, ElementSize, MemoryProtection.ExecuteReadWrite,
-				out var oldProtect);
+			                        out var oldProtect);
 
 			ptr.WriteAny(data);
 
@@ -460,11 +457,11 @@ namespace RazorSharp.Pointers
 		public void SafeWrite(byte[] mem, int byteOffset = 0)
 		{
 			// todo: use new VirtualProtect methods here for consistency
-			
+
 			Pointer<byte> ptr = Offset<byte>(byteOffset);
 
 			Kernel32.VirtualProtect(ptr, mem.Length, MemoryProtection.ExecuteReadWrite,
-				out var oldProtect);
+			                        out var oldProtect);
 
 			ptr.WriteAll(mem);
 
@@ -549,12 +546,24 @@ namespace RazorSharp.Pointers
 		public T[] SafeCopyOut(int elemCnt)
 		{
 			Kernel32.VirtualProtect(Address, elemCnt * ElementSize, MemoryProtection.ExecuteReadWrite,
-				out var oldProtect);
+			                        out var oldProtect);
 
 			T[] buf = CopyOut(elemCnt);
 
 			Kernel32.VirtualProtect(Address, elemCnt * ElementSize, oldProtect, out oldProtect);
 			return buf;
+		}
+
+		[Pure]
+		public byte[] CopyOutBytes(int elemCnt)
+		{
+			return Reinterpret<byte>().CopyOut(elemCnt);
+		}
+
+		[Pure]
+		public byte[] CopyOutBytes(int startIndex, int elemCnt)
+		{
+			return Reinterpret<byte>().CopyOut(startIndex, elemCnt);
 		}
 
 		#endregion
@@ -589,10 +598,11 @@ namespace RazorSharp.Pointers
 
 			if (typeof(T).IsValueType)
 				table.AddRow(Hex.ToHex(m_value), ToString(PointerSettings.FMT_O), IsAligned.Prettify(),
-					IsNull.Prettify(), ElementSize, string.Format("<{0}>", typeof(T).Name));
+				             IsNull.Prettify(), ElementSize, string.Format("<{0}>", typeof(T).Name));
 			else
 				table.AddRow(Hex.ToHex(m_value), Hex.ToHex(ReadAny<long>()), ToString(PointerSettings.FMT_O),
-					IsAligned.Prettify(), IsNull.Prettify(), ElementSize, string.Format("<{0}>", typeof(T).Name));
+				             IsAligned.Prettify(), IsNull.Prettify(), ElementSize,
+				             string.Format("<{0}>", typeof(T).Name));
 
 			return table;
 		}
@@ -607,7 +617,7 @@ namespace RazorSharp.Pointers
 				Pointer<T> ptr = AddressOfIndex(i);
 				if (!typeof(T).IsValueType)
 					table.AddRow(ptr.ToString(PointerSettings.FMT_P), i, Hex.ToHex(ReadAny<long>(i)), ptr.ToStringSafe
-						());
+						             ());
 				else
 					table.AddRow(ptr.ToString(PointerSettings.FMT_P), i, ptr.ToStringSafe());
 			}
@@ -993,7 +1003,7 @@ namespace RazorSharp.Pointers
 				case PointerSettings.FMT_B:
 					string thisStr = ToStringSafe();
 					return string.Format("{0} @ {1}: {2}", typeof(T) == typeof(char) ? "Char*" : typeof(T).Name,
-						Hex.ToHex(Address), thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
+					                     Hex.ToHex(Address), thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
 				default:
 					goto case PointerSettings.FMT_O;
 			}

@@ -271,6 +271,16 @@ namespace RazorSharp.Utilities
 			Assert(!typeof(T).IsValueType, "Type parameter <{0}> must be a reference type", typeof(T).Name);
 		}
 
+		/// <summary>
+		///     Specifies a precondition: checks to see if <typeparamref name="T" /> is a value type.
+		/// </summary>
+		/// <typeparam name="T">Type to verify</typeparam>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static void RequiresValueType<T>()
+		{
+			Assert(typeof(T).IsValueType, "Type parameter <{0}> must be a value type", typeof(T).Name);
+		}
+
 		#endregion
 	}
 }

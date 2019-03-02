@@ -78,8 +78,11 @@ namespace Test
 
 			string[] str = {"foo", "bar"};
 			Inspect.Heap<string[], string>(str);
+
+			int i = 0;
+			Inspect.Stack(ref i);
 			
-			
+			Inspect.Stack(ref s);
 		}
 
 

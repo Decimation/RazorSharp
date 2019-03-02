@@ -1,5 +1,6 @@
 #region
 
+using System;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 
@@ -39,7 +40,7 @@ namespace RazorSharp.CLR
 
 		internal static string TypeNameOfFixedBuffer(string fieldName)
 		{
-			return string.Format(FIXED_BUFFER_NAME, fieldName);
+			return String.Format(FIXED_BUFFER_NAME, fieldName);
 		}
 
 		internal static string DemangledAutoPropertyName(string fieldName)

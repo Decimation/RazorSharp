@@ -6,7 +6,7 @@ using RazorSharp.Native.Enums;
 
 namespace RazorSharp
 {
-	public class AssemblyHandle
+	public class AssemblyHandle : IDisposable
 	{
 		private readonly IntPtr m_ptr;
 		private readonly int    m_size;
@@ -30,7 +30,7 @@ namespace RazorSharp
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(m_ptr);
 		}
 
-		public void Free()
+		public void Dispose()
 		{
 			Debug.Assert(IsAllocated);
 			Debug.Assert(Kernel32.VirtualFree(m_ptr, (uint) m_size, FreeTypes.Decommit));
