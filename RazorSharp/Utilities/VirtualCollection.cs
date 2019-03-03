@@ -1,7 +1,11 @@
+#region
+
 using System.Collections;
 using System.Collections.Generic;
 
-namespace RazorSharp
+#endregion
+
+namespace RazorSharp.Utilities
 {
 	public class VirtualCollection<T> : IEnumerable<T>
 	{

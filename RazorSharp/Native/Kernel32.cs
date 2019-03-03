@@ -75,7 +75,7 @@ namespace RazorSharp.Native
 
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
 		internal static extern IntPtr OpenProcess(ProcessAccessFlags processAccess, bool bInheritHandle,
-			int                                                      processId);
+		                                          int                processId);
 
 		internal static IntPtr OpenProcess(Process proc, ProcessAccessFlags flags = ProcessAccessFlags.All)
 		{
@@ -107,7 +107,7 @@ namespace RazorSharp.Native
 		internal static (IntPtr Low, IntPtr High) GetCurrentThreadStackLimits()
 		{
 			IntPtr l,
-				h;
+			       h;
 
 			GetCurrentThreadStackLimits(&l, &h);
 			return (l, h);
@@ -214,8 +214,8 @@ namespace RazorSharp.Native
 		///     function fails, the return value is NULL. To get extended error information, call GetLastError.
 		/// </returns>
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		internal static extern IntPtr VirtualAlloc(IntPtr lpAddress,        UIntPtr          dwSize,
-			AllocationType                                flAllocationType, MemoryProtection flProtect);
+		internal static extern IntPtr VirtualAlloc(IntPtr         lpAddress,        UIntPtr          dwSize,
+		                                           AllocationType flAllocationType, MemoryProtection flProtect);
 
 		[DllImport(KERNEL32_DLL)]
 		[return: MarshalAs(UnmanagedType.Bool)]
@@ -223,12 +223,12 @@ namespace RazorSharp.Native
 
 		[DllImport(KERNEL32_DLL)]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool VirtualProtect([In] IntPtr lpAddress, uint dwSize,
-			MemoryProtection                                   flNewProtect,
-			[Out] out MemoryProtection                         lpflOldProtect);
+		internal static extern bool VirtualProtect([In] IntPtr                lpAddress, uint dwSize,
+		                                           MemoryProtection           flNewProtect,
+		                                           [Out] out MemoryProtection lpflOldProtect);
 
-		internal static void VirtualProtect(Pointer<byte> lpAddress, int dwSize, MemoryProtection flNewProtect,
-			out MemoryProtection                          lpflOldProtect)
+		internal static void VirtualProtect(Pointer<byte>        lpAddress, int dwSize, MemoryProtection flNewProtect,
+		                                    out MemoryProtection lpflOldProtect)
 		{
 			Conditions.Assert(VirtualProtect(lpAddress.Address, (uint) dwSize, flNewProtect, out lpflOldProtect));
 		}
@@ -262,7 +262,7 @@ namespace RazorSharp.Native
 
 			// Read the memory
 			Trace.Assert(ReadProcessMemory(hProc, lpBaseAddress.Address, mem, size,
-				ref numberOfBytesRead));
+			                               ref numberOfBytesRead));
 
 			Trace.Assert(numberOfBytesRead == size);
 
@@ -280,7 +280,7 @@ namespace RazorSharp.Native
 
 			// Read the memory
 			Trace.Assert(ReadProcessMemory(hProc, lpBaseAddress.Address, Unsafe.AddressOf(ref t).Address, size,
-				ref numberOfBytesRead));
+			                               ref numberOfBytesRead));
 
 			Trace.Assert(numberOfBytesRead == size);
 
@@ -301,7 +301,7 @@ namespace RazorSharp.Native
 		/// <returns></returns>
 		[DllImport(KERNEL32_DLL)]
 		internal static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr    lpBaseAddress, IntPtr lpBuffer,
-			ulong                                            nSize,    ref ulong lpNumberOfBytesRead);
+		                                              ulong  nSize,    ref ulong lpNumberOfBytesRead);
 
 		/// <summary>
 		///     Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the
@@ -315,7 +315,7 @@ namespace RazorSharp.Native
 		/// <returns></returns>
 		[DllImport(KERNEL32_DLL)]
 		internal static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr    lpBaseAddress, byte[] lpBuffer,
-			ulong                                            nSize,    ref ulong lpNumberOfBytesRead);
+		                                              ulong  nSize,    ref ulong lpNumberOfBytesRead);
 
 		#endregion
 
@@ -334,7 +334,7 @@ namespace RazorSharp.Native
 
 			// Write the memory
 			Trace.Assert(WriteProcessMemory(hProc, lpBaseAddress.Address, Unsafe.AddressOf(ref value).Address, dwSize,
-				ref numberOfBytesWritten));
+			                                ref numberOfBytesWritten));
 
 			Trace.Assert(numberOfBytesWritten == dwSize);
 
@@ -343,15 +343,15 @@ namespace RazorSharp.Native
 		}
 
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		internal static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer,
-			int                                               dwSize,
-			ref int                                           lpNumberOfBytesWritten);
+		internal static extern bool WriteProcessMemory(IntPtr  hProcess, IntPtr lpBaseAddress, byte[] lpBuffer,
+		                                               int     dwSize,
+		                                               ref int lpNumberOfBytesWritten);
 
 
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		internal static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, IntPtr lpBuffer,
-			int                                               dwSize,
-			ref int                                           lpNumberOfBytesWritten);
+		internal static extern bool WriteProcessMemory(IntPtr  hProcess, IntPtr lpBaseAddress, IntPtr lpBuffer,
+		                                               int     dwSize,
+		                                               ref int lpNumberOfBytesWritten);
 
 		#endregion
 

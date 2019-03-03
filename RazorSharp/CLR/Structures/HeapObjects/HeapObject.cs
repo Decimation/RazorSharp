@@ -4,8 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using  RazorCommon;
-
+using RazorCommon;
 
 #endregion
 
@@ -46,8 +45,11 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 	internal unsafe struct HeapObject : IHeapObject
 	{
 // 		[FieldOffset(-8) public ObjHeader _header
-		[FieldOffset(0)] private          MethodTable* m_methodTablePtr;
-		[FieldOffset(8)] private readonly byte         m_fields;
+		[FieldOffset(0)]
+		private MethodTable* m_methodTablePtr;
+
+		[FieldOffset(8)]
+		private readonly byte m_fields;
 
 
 		/// <summary>

@@ -3,9 +3,9 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using RazorSharp.CLR.Meta;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.CLR.Meta;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using static RazorSharp.CLR.Offsets;
@@ -56,9 +56,14 @@ namespace RazorSharp.CLR.Structures.EE
 	{
 		#region Fields
 
-		[FieldOffset(0)]  private readonly void*        m_pGuidInfo;
-		[FieldOffset(8)]  private readonly void*        m_rpOptionalFields;
-		[FieldOffset(16)] private readonly MethodTable* m_pMethodTable;
+		[FieldOffset(0)]
+		private readonly void* m_pGuidInfo;
+
+		[FieldOffset(8)]
+		private readonly void* m_rpOptionalFields;
+
+		[FieldOffset(16)]
+		private readonly MethodTable* m_pMethodTable;
 
 		// @formatter:off — disable formatter after this line
 		[FieldOffset(FIELD_DESC_LIST_FIELD_OFFSET)]
@@ -70,20 +75,38 @@ namespace RazorSharp.CLR.Structures.EE
 
 		#region Union
 
-		[FieldOffset(40)] private readonly uint  m_cbNativeSize;
-		[FieldOffset(40)] private readonly void* m_ohDelegate;
-		[FieldOffset(40)] private readonly int   m_ComInterfaceType;
+		[FieldOffset(40)]
+		private readonly uint m_cbNativeSize;
+
+		[FieldOffset(40)]
+		private readonly void* m_ohDelegate;
+
+		[FieldOffset(40)]
+		private readonly int m_ComInterfaceType;
 
 		#endregion
 
 
-		[FieldOffset(48)] private readonly void* m_pccwTemplate;
-		[FieldOffset(56)] private readonly DWORD m_dwAttrClass;
-		[FieldOffset(60)] private readonly DWORD m_VMFlags;
-		[FieldOffset(64)] private readonly byte  m_NormType;
-		[FieldOffset(65)] private readonly byte  m_fFieldsArePacked;
-		[FieldOffset(66)] private readonly byte  m_cbFixedEEClassFields;
-		[FieldOffset(67)] private readonly byte  m_cbBaseSizePadding;
+		[FieldOffset(48)]
+		private readonly void* m_pccwTemplate;
+
+		[FieldOffset(56)]
+		private readonly DWORD m_dwAttrClass;
+
+		[FieldOffset(60)]
+		private readonly DWORD m_VMFlags;
+
+		[FieldOffset(64)]
+		private readonly byte m_NormType;
+
+		[FieldOffset(65)]
+		private readonly byte m_fFieldsArePacked;
+
+		[FieldOffset(66)]
+		private readonly byte m_cbFixedEEClassFields;
+
+		[FieldOffset(67)]
+		private readonly byte m_cbBaseSizePadding;
 
 		#endregion
 

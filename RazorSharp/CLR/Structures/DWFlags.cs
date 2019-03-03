@@ -32,8 +32,11 @@ namespace RazorSharp.CLR.Structures
 	{
 		#region Fields
 
-		[FieldOffset(0)] private readonly WORD m_componentSize;
-		[FieldOffset(2)] private readonly WORD m_flags;
+		[FieldOffset(0)]
+		private readonly WORD m_componentSize;
+
+		[FieldOffset(2)]
+		private readonly WORD m_flags;
 
 		#endregion
 

@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Reflection;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -139,7 +138,7 @@ namespace RazorSharp.Utilities
 		[StringFormatMethod(STRING_FORMAT_PARAM)]
 		internal static void Assert([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond, string msg, params object[] args)
 		{
-			Contract.Assert(cond, string.Format(msg, args));
+			Contract.Assert(cond, String.Format(msg, args));
 		}
 
 		/// <summary>

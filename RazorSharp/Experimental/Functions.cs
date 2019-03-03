@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -5,13 +7,28 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Meta;
+using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace RazorSharp.Experimental
 {
 	// todo: WIP
 	public static class Functions
 	{
+		/// <summary>
+		///     MethodInfo: Hooked function
+		///     Pointer: New function pointer
+		/// </summary>
+		private static readonly Dictionary<MethodInfo, Pointer<byte>> FuncMap;
+
+		/// <summary>
+		///     MethodInfo: New function
+		///     Pointer: Old function pointer
+		/// </summary>
+		private static readonly Dictionary<MethodInfo, Pointer<byte>> OrigMap;
+
 		static Functions()
 		{
 			if (Debugger.IsAttached) //todo
@@ -20,18 +37,6 @@ namespace RazorSharp.Experimental
 			FuncMap = new Dictionary<MethodInfo, Pointer<byte>>();
 			OrigMap = new Dictionary<MethodInfo, Pointer<byte>>();
 		}
-
-		/// <summary>
-		/// MethodInfo: Hooked function
-		/// Pointer: New function pointer
-		/// </summary>
-		private static readonly Dictionary<MethodInfo, Pointer<byte>> FuncMap;
-
-		/// <summary>
-		/// MethodInfo: New function
-		/// Pointer: Old function pointer
-		/// </summary>
-		private static readonly Dictionary<MethodInfo, Pointer<byte>> OrigMap;
 
 		public static TDelegate Orig<TDelegate>(MethodInfo current) where TDelegate : Delegate
 		{
@@ -47,13 +52,13 @@ namespace RazorSharp.Experimental
 			var mmReplacement = new MetaMethod(replacement.GetMethodDesc());
 			mmReplacement.PrepareOverride();
 
-			var replacementFunc = mmReplacement.Function;
+			Pointer<byte> replacementFunc = mmReplacement.Function;
 			OrigMap.Add(replacement, replacementFunc);
 
 
 			// ...
 
-			var md = target.GetMethodDesc();
+			Pointer<MethodDesc> md = target.GetMethodDesc();
 
 			var mm = new MetaMethod(md);
 			mm.PrepareOverride();
@@ -67,7 +72,7 @@ namespace RazorSharp.Experimental
 		public static void Hook(Type host, string hostName, Type subject, string subjName)
 		{
 			Hook(Meta.GetType(host).Methods[hostName].MethodInfo,
-				Meta.GetType(subject).Methods[subjName].MethodInfo);
+			     Meta.GetType(subject).Methods[subjName].MethodInfo);
 		}
 
 		public static void Hook(MethodInfo target, Action replacement)

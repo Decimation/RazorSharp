@@ -38,7 +38,8 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		/// <summary>
 		///     This value is inherited from <see cref="IMAGE_COR_ILMETHOD_TINY" />
 		/// </summary>
-		[FieldOffset(0)] private readonly IMAGE_COR_ILMETHOD_TINY m_inheritedValue;
+		[FieldOffset(0)]
+		private readonly IMAGE_COR_ILMETHOD_TINY m_inheritedValue;
 
 		/// <summary>
 		///     Contains both <see cref="CodeSize" /> and <see cref="CorILMethodFlags" />
@@ -86,6 +87,7 @@ namespace RazorSharp.CLR.Structures.ILMethods
 	[StructLayout(LayoutKind.Explicit)]
 	internal struct IMAGE_COR_ILMETHOD_TINY
 	{
-		[FieldOffset(0)] internal readonly byte Flags_CodeSize;
+		[FieldOffset(0)]
+		internal readonly byte Flags_CodeSize;
 	}
 }

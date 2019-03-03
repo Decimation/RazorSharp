@@ -1,12 +1,9 @@
-// ReSharper disable RedundantUsingDirective
-
 #region
 
 using System;
 using System.Diagnostics;
 using System.Runtime;
 using RazorSharp.Memory;
-using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
 using static RazorSharp.CLR.Offsets;
@@ -77,7 +74,8 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		public int GCCount {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
@@ -132,7 +130,7 @@ namespace RazorSharp.CLR.Structures
 			return Mem.IsAddressInRange(g_highest_address, p, g_lowest_address);
 		}
 		*/
-		
+
 		// 85
 		[ClrSigcall]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
@@ -175,7 +173,7 @@ namespace RazorSharp.CLR.Structures
 			g_pGCHeap        = Mem.ReadPointer<byte>(dataSegment.SectionAddress, GLOBAL_GCHEAP_OFFSET).Address;
 			g_lowest_address = Mem.ReadPointer<byte>(dataSegment.SectionAddress, GLOBAL_LOWEST_ADDRESS_OFFSET).Address;
 			g_highest_address = Mem.ReadPointer<byte>(dataSegment.SectionAddress, GLOBAL_HIGHEST_ADDRESS_OFFSET)
-				.Address;
+			                       .Address;
 
 			SignatureCall.DynamicBind<GCHeap>();
 		}

@@ -142,13 +142,13 @@ namespace RazorSharp.Memory
 		public static void DumpSegments(string moduleName = null)
 		{
 			ImageSectionInfo[] segments = GetSegments(moduleName);
-			var table = new ConsoleTable("Number", "Name", "Size", "Address", "End Address", "Characteristics", "Module");
+			var table = new ConsoleTable("Number", "Name", "Size", "Address", "End Address", "Characteristics",
+			                             "Module");
 			string moduleNameTable = moduleName ?? Process.GetCurrentProcess().MainModule.ModuleName; // todo
 			foreach (var v in segments) {
-				var rowCpy = v.Row;
+				object[] rowCpy = v.Row;
 				rowCpy[rowCpy.Length - 1] = moduleNameTable;
 				table.AddRow(rowCpy);
-				
 			}
 
 			Console.WriteLine(table.ToMarkDownString());

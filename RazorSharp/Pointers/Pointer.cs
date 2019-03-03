@@ -10,10 +10,10 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
-using RazorSharp.CLR.Fixed;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Utilities;
+using RazorSharp.CLR.Fixed;
 using RazorSharp.Memory;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;
@@ -306,7 +306,7 @@ namespace RazorSharp.Pointers
 
 		private string DbgToString()
 		{
-			return string.Format("Address = {0} | Value = {1}", ToString(PointerSettings.FMT_P),
+			return String.Format("Address = {0} | Value = {1}", ToString(FMT_P),
 			                     Reference.ToString());
 		}
 
@@ -597,12 +597,12 @@ namespace RazorSharp.Pointers
 				: new ConsoleTable("Address", "Pointer", "Value", "Aligned", "Null", "Element size", "Type");
 
 			if (typeof(T).IsValueType)
-				table.AddRow(Hex.ToHex(m_value), ToString(PointerSettings.FMT_O), IsAligned.Prettify(),
-				             IsNull.Prettify(), ElementSize, string.Format("<{0}>", typeof(T).Name));
+				table.AddRow(Hex.ToHex(m_value), ToString(FMT_O), IsAligned.Prettify(),
+				             IsNull.Prettify(), ElementSize, String.Format("<{0}>", typeof(T).Name));
 			else
-				table.AddRow(Hex.ToHex(m_value), Hex.ToHex(ReadAny<long>()), ToString(PointerSettings.FMT_O),
+				table.AddRow(Hex.ToHex(m_value), Hex.ToHex(ReadAny<long>()), ToString(FMT_O),
 				             IsAligned.Prettify(), IsNull.Prettify(), ElementSize,
-				             string.Format("<{0}>", typeof(T).Name));
+				             String.Format("<{0}>", typeof(T).Name));
 
 			return table;
 		}
@@ -616,10 +616,10 @@ namespace RazorSharp.Pointers
 			for (int i = 0; i < elemCnt; i++) {
 				Pointer<T> ptr = AddressOfIndex(i);
 				if (!typeof(T).IsValueType)
-					table.AddRow(ptr.ToString(PointerSettings.FMT_P), i, Hex.ToHex(ReadAny<long>(i)), ptr.ToStringSafe
+					table.AddRow(ptr.ToString(FMT_P), i, Hex.ToHex(ReadAny<long>(i)), ptr.ToStringSafe
 						             ());
 				else
-					table.AddRow(ptr.ToString(PointerSettings.FMT_P), i, ptr.ToStringSafe());
+					table.AddRow(ptr.ToString(FMT_P), i, ptr.ToStringSafe());
 			}
 
 			return table;
@@ -983,41 +983,44 @@ namespace RazorSharp.Pointers
 		[Pure]
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
-			if (string.IsNullOrEmpty(format)) format = PointerSettings.DefaultFormat;
+			if (String.IsNullOrEmpty(format)) format = DefaultFormat;
 
 			if (formatProvider == null) formatProvider = CultureInfo.CurrentCulture;
 
 
 			switch (format.ToUpperInvariant()) {
-				case PointerSettings.FMT_N:
+				case FMT_N:
 					return ToInt64().ToString();
-				case PointerSettings.FMT_O:
+				case FMT_O:
 					return ToStringSafe();
 
-				case PointerSettings.FMT_I:
+				case FMT_I:
 					return ToInfoTable().ToMarkDownString();
 
-				case PointerSettings.FMT_P:
-					return Hex.ToHex(this.ToInt64());
+				case FMT_P:
+					return Hex.ToHex(ToInt64());
 
-				case PointerSettings.FMT_B:
+				case FMT_B:
 					string thisStr = ToStringSafe();
-					return string.Format("{0} @ {1}: {2}", typeof(T) == typeof(char) ? "Char*" : typeof(T).Name,
+					return String.Format("{0} @ {1}: {2}", typeof(T) == typeof(char) ? "Char*" : typeof(T).Name,
 					                     Hex.ToHex(Address), thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
 				default:
-					goto case PointerSettings.FMT_O;
+					goto case FMT_O;
 			}
 		}
 
 		public string ToStringSafe()
 		{
-			if (IsNull) return PointerSettings.NULLPTR;
+			if (IsNull)
+				return NULLPTR;
 
 
-			if (typeof(T).IsIntegerType()) return string.Format("{0} ({1})", Reference, Hex.TryCreateHex(Reference));
+			if (typeof(T).IsIntegerType())
+				return String.Format("{0} ({1})", Reference, Hex.TryCreateHex(Reference));
 
 			/* Special support for C-string */
-			if (typeof(T) == typeof(char)) return ReadString(StringTypes.UniStr);
+			if (typeof(T) == typeof(char))
+				return ReadString(StringTypes.UniStr);
 
 			/*if (typeof(T) == typeof(sbyte)) {
 				return inst.ReadString(StringTypes.AnsiStr);
@@ -1029,17 +1032,17 @@ namespace RazorSharp.Pointers
 				string valueStr;
 
 				if (heapPtr.IsNull) {
-					valueStr = PointerSettings.NULLPTR;
+					valueStr = NULLPTR;
 					goto RETURN;
 				}
 
 				if (typeof(T).IsIListType())
 					valueStr = $"[{Collections.CreateString((IList) Reference)}]";
 				else
-					valueStr = Reference == null ? PointerSettings.NULLPTR : Reference.ToString();
+					valueStr = Reference == null ? NULLPTR : Reference.ToString();
 
 				RETURN:
-				return string.Format("{0} ({1})", valueStr, heapPtr.ToString(PointerSettings.FMT_P));
+				return String.Format("{0} ({1})", valueStr, heapPtr.ToString(FMT_P));
 			}
 
 
@@ -1055,9 +1058,22 @@ namespace RazorSharp.Pointers
 		[Pure]
 		public override string ToString()
 		{
-			return ToString(PointerSettings.DefaultFormat);
+			return ToString(DefaultFormat);
 		}
 
 		#endregion
+
+		#region Constants
+
+		private const string FMT_O   = "O";
+		private const string FMT_P   = "P";
+		private const string FMT_I   = "I";
+		private const string FMT_B   = "B";
+		private const string FMT_N   = "N";
+		private const string NULLPTR = "(null)";
+
+		#endregion
+
+		public static string DefaultFormat { get; set; } = FMT_B;
 	}
 }

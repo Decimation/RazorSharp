@@ -112,4 +112,3 @@ C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Buffers.x
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Memory.xml
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Numerics.Vectors.xml
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.csprojAssemblyReference.cache
-C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\Pastel.dll

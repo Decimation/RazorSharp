@@ -43,21 +43,26 @@ namespace RazorSharp.CLR.Structures
 		/// <summary>
 		///     Relative fixup pointer
 		/// </summary>
-		[FieldOffset(0)] private /*readonly*/ MethodTable* m_methodTable;
+		[FieldOffset(0)]
+		private /*readonly*/ MethodTable* m_methodTable;
 
 		/// <summary>
 		///     Relative pointer
 		/// </summary>
-		[FieldOffset(8)] private readonly MethodDescChunk* m_next;
+		[FieldOffset(8)]
+		private readonly MethodDescChunk* m_next;
 
-		[FieldOffset(16)] private readonly byte m_size;
+		[FieldOffset(16)]
+		private readonly byte m_size;
 
 		/// <summary>
 		///     The number of <see cref="MethodDesc" />s in this chunk minus 1
 		/// </summary>
-		[FieldOffset(17)] private readonly byte m_count;
+		[FieldOffset(17)]
+		private readonly byte m_count;
 
-		[FieldOffset(18)] private readonly ushort m_flagsAndTokenRange;
+		[FieldOffset(18)]
+		private readonly ushort m_flagsAndTokenRange;
 
 		#endregion
 

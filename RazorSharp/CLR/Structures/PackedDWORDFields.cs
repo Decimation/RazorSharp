@@ -34,8 +34,11 @@ namespace RazorSharp.CLR.Structures
 		private const int kMaxLengthBits = 5;
 		private const int kBitsPerDWORD  = 32;
 
-		[FieldOffset(0)] private fixed DWORD m_rgUnpackedFields[kLength];
-		[FieldOffset(0)] private fixed DWORD m_rgPackedFields[1];
+		[FieldOffset(0)]
+		private fixed DWORD m_rgUnpackedFields[kLength];
+
+		[FieldOffset(0)]
+		private fixed DWORD m_rgPackedFields[1];
 
 		// Get the value of the given field when the structure is in its unpacked state.
 		internal DWORD GetUnpackedField(DWORD dwFieldIndex)

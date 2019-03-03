@@ -1,5 +1,9 @@
+#region
+
 using System;
 using RazorSharp.CLR;
+
+#endregion
 
 namespace RazorSharp.Memory
 {

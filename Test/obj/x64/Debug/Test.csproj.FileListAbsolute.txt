@@ -161,4 +161,3 @@ C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Memory.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Numerics.Vectors.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\RazorCommon.pdb
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\Serilog.Enrichers.Thread.xml
-C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\Pastel.dll

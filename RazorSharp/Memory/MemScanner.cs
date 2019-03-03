@@ -1,8 +1,12 @@
+#region
+
 using System;
 using System.Diagnostics;
 using RazorSharp.CLR.Structures;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace RazorSharp.Memory
 {

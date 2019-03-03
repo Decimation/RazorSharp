@@ -3,9 +3,9 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using RazorSharp.CLR.Meta;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.CLR.Meta;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -58,7 +58,8 @@ namespace RazorSharp.CLR.Structures
 
 		#region Fields
 
-		[FieldOffset(0)] private readonly MethodTable* m_pMTOfEnclosingClass;
+		[FieldOffset(0)]
+		private readonly MethodTable* m_pMTOfEnclosingClass;
 
 		// unsigned m_mb                  	: 24;
 		// unsigned m_isStatic            	: 1;
@@ -66,11 +67,13 @@ namespace RazorSharp.CLR.Structures
 		// unsigned m_isRVA               	: 1;
 		// unsigned m_prot                	: 3;
 		// unsigned m_requiresFullMbValue 	: 1;
-		[FieldOffset(8)] private readonly uint m_dword1;
+		[FieldOffset(8)]
+		private readonly uint m_dword1;
 
 		// unsigned m_dwOffset         		: 27;
 		// unsigned m_type             		: 5;
-		[FieldOffset(12)] private readonly uint m_dword2;
+		[FieldOffset(12)]
+		private readonly uint m_dword2;
 
 		#endregion
 
@@ -90,7 +93,7 @@ namespace RazorSharp.CLR.Structures
 				// Check if this FieldDesc is using the packed mb layout
 				if (!RequiresFullMBValue)
 					return Constants.TokenFromRid(OrigToken & (int) MbMask.PackedMbLayoutMbMask,
-						CorTokenType.mdtFieldDef);
+					                              CorTokenType.mdtFieldDef);
 
 				return Constants.TokenFromRid(OrigToken, CorTokenType.mdtFieldDef);
 			}
@@ -133,12 +136,12 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		internal bool IsRVA => ReadBit(m_dword1, 26);
 
-		internal bool IsFixedBuffer => SpecialNames.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
+		internal bool IsFixedBuffer => Identifiers.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
 
 		internal bool IsAutoProperty {
 			get {
-				string demangled = SpecialNames.DemangledAutoPropertyName(Name);
-				if (demangled != null) return SpecialNames.NameOfAutoPropertyBackingField(demangled) == Name;
+				string demangled = Identifiers.DemangledAutoPropertyName(Name);
+				if (demangled != null) return Identifiers.NameOfAutoPropertyBackingField(demangled) == Name;
 
 				return false;
 			}
@@ -169,7 +172,8 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		private int LoadSize {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 
@@ -200,7 +204,8 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 		#endregion

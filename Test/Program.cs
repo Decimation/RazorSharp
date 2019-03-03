@@ -1,6 +1,5 @@
-﻿#region
-
-//using Microsoft.Diagnostics.Runtime;
+﻿//using Microsoft.Diagnostics.Runtime;
+// ReSharper disable InconsistentNaming
 
 #region
 
@@ -17,7 +16,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using NUnit.Framework;
-using Pastel;
 using RazorCommon;
 using RazorSharp;
 using RazorSharp.Analysis;
@@ -32,22 +30,18 @@ using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing;
-using static RazorSharp.Unsafe;
 using Constants = RazorCommon.Constants;
-using Unsafe = System.Runtime.CompilerServices.Unsafe;
+using Unsafe = RazorSharp.Unsafe;
 
 #endregion
 
-// ReSharper disable InconsistentNaming
-
-#endregion
 
 namespace Test
 {
 	#region
 
 	using DWORD = UInt32;
-	using CSUnsafe = Unsafe;
+	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
 
@@ -81,8 +75,19 @@ namespace Test
 
 			int i = 0;
 			Inspect.Stack(ref i);
-			
+
 			Inspect.Stack(ref s);
+
+			Console.WriteLine(Single.NaN);
+			Console.WriteLine(Single.PositiveInfinity);
+			Console.WriteLine(Single.NegativeInfinity);
+			Console.WriteLine(Collections.CreateString(Unsafe.MemoryOfVal(Single.Epsilon),
+			                                           ToStringOptions.Hex |
+			                                           ToStringOptions.PrefixHex |
+			                                           ToStringOptions.ZeroPadHex));
+
+			var (Str, Int) = ("", 1);
+			
 		}
 
 
@@ -103,7 +108,7 @@ namespace Test
 		}
 
 
-		private static void dump<T>(T t, int recursivePasses = 0)
+		private static void Dump<T>(T t, int recursivePasses = 0)
 		{
 			FieldInfo[] fields = Runtime.GetFields(t.GetType());
 

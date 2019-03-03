@@ -37,7 +37,7 @@ namespace RazorSharp.CLR.Meta
 
 		public override string ToString()
 		{
-			return string.Format("{0} (offset: {1}) (size: {2})", m_value.Reference.Info, Offset, Size);
+			return String.Format("{0} (offset: {1}) (size: {2})", m_value.Reference.Info, Offset, Size);
 		}
 
 		#region Accessors

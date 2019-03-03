@@ -2,13 +2,12 @@
 
 using System;
 using RazorCommon.Extensions;
-using RazorCommon.Strings;
 
 #endregion
 
 namespace RazorSharp.CLR
 {
-	internal static class SpecialNames
+	internal static class Identifiers
 	{
 		/// <summary>
 		///     <example>
@@ -62,7 +61,7 @@ namespace RazorSharp.CLR
 		/// <returns>Internal name of the auto-property's backing field</returns>
 		internal static string NameOfAutoPropertyBackingField(string propname)
 		{
-			return string.Format(BACKING_FIELD_NAME, propname);
+			return String.Format(BACKING_FIELD_NAME, propname);
 		}
 
 		internal static string NameOfGetPropertyMethod(string propname)

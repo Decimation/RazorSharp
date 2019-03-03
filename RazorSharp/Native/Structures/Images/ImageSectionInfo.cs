@@ -44,8 +44,9 @@ namespace RazorSharp.Native.Structures.Images
 		#endregion
 
 
-		public ImageSectionInfo(int sectionNumber, string sectionName, void* sectionAddress, int sectionSize,
-			ImageSectionHeader      header)
+		public ImageSectionInfo(int                sectionNumber, string sectionName, void* sectionAddress,
+		                        int                sectionSize,
+		                        ImageSectionHeader header)
 		{
 			SectionNumber    = sectionNumber;
 			SectionName      = sectionName;
@@ -57,11 +58,11 @@ namespace RazorSharp.Native.Structures.Images
 		internal object[] Row =>
 			new object[]
 			{
-				SectionNumber, 
+				SectionNumber,
 				SectionName,
-				string.Format("{0} ({1} K)", SectionSize, SectionSize / Mem.BytesInKilobyte),
+				String.Format("{0} ({1} K)", SectionSize, SectionSize / Mem.BytesInKilobyte),
 				Hex.ToHex(SectionAddress.ToInt64()),
-				Hex.ToHex(EndAddress.ToInt64()), 
+				Hex.ToHex(EndAddress.ToInt64()),
 				SectionHeader.Characteristics,
 				"-"
 			};

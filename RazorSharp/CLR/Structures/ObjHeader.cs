@@ -21,8 +21,11 @@ namespace RazorSharp.CLR.Structures
 		#region Fields
 
 #if !WIN32
-		[FieldOffset(0)] private readonly UInt32 m_uAlignpad;
-		[FieldOffset(4)] private          UInt32 m_uSyncBlockValue;
+		[FieldOffset(0)]
+		private readonly UInt32 m_uAlignpad;
+
+		[FieldOffset(4)]
+		private UInt32 m_uSyncBlockValue;
 #else
 		[FieldOffset(0)] private          UInt32 m_uSyncBlockValue;
 #endif

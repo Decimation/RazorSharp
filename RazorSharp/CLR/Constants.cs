@@ -39,8 +39,6 @@ namespace RazorSharp.CLR
 		/// </summary>
 		internal static int SizeOfCorElementType(CorElementType t)
 		{
-			const int specialSize = -1;
-
 			switch (t) {
 				case CorElementType.Void:
 					return 0;
@@ -97,7 +95,7 @@ namespace RazorSharp.CLR
 				case CorElementType.CModOpt:
 				case CorElementType.Internal:
 				case CorElementType.MVar:
-					return specialSize;
+					return Unsafe.INVALID_VALUE;
 
 				case CorElementType.TypedByRef:
 					return IntPtr.Size * 2;

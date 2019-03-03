@@ -3,9 +3,9 @@
 #region
 
 using System.Runtime.InteropServices;
-using RazorSharp.CLR.Meta;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.CLR.Meta;
 using RazorSharp.Pointers;
 
 #endregion
@@ -44,7 +44,8 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		/// <summary>
 		///     This value is inherited from <see cref="IMAGE_COR_ILMETHOD_FAT" />
 		/// </summary>
-		[FieldOffset(0)] private readonly IMAGE_COR_ILMETHOD_FAT m_inheritedValue;
+		[FieldOffset(0)]
+		private readonly IMAGE_COR_ILMETHOD_FAT m_inheritedValue;
 
 		// public uint Flags    => m_inlineValue.m_dword1 & 0xFFF;
 		// public uint Size     => (m_inlineValue.m_dword1 >> 4) & 0xFFF;
@@ -153,9 +154,13 @@ namespace RazorSharp.CLR.Structures.ILMethods
 		// unsigned Flags    	: 12;     // Flags see code:CorILMethodFlags
 		// unsigned Size     	:  4;     // size in DWords of this structure (currently 3)
 		// unsigned MaxStack 	: 16;     // maximum number of items (I4, I, I8, obj ...), on the operand stack
-		[FieldOffset(0)] internal readonly uint m_dword1;
+		[FieldOffset(0)]
+		internal readonly uint m_dword1;
 
-		[FieldOffset(4)] internal readonly uint m_codeSize;
-		[FieldOffset(8)] internal readonly uint m_sigTok;
+		[FieldOffset(4)]
+		internal readonly uint m_codeSize;
+
+		[FieldOffset(8)]
+		internal readonly uint m_sigTok;
 	}
 }

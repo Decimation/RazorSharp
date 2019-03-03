@@ -2,9 +2,9 @@
 
 using System;
 using System.Reflection;
-using RazorSharp.CLR.Structures;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.CLR.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -177,7 +177,8 @@ namespace RazorSharp.CLR.Meta
 
 			table.AddRow("Function", Hex.ToHex(Function.ToInt64()));
 			table.AddRow("Native code", Hex.ToHex(NativeCode.ToInt64()));
-			table.AddRow("Pointing to native code", string.Format("{0} ({1})", IsPointingToNativeCode.Prettify(), IsPointingToNativeCode));
+			table.AddRow("Pointing to native code",
+			             String.Format("{0} ({1})", IsPointingToNativeCode.Prettify(), IsPointingToNativeCode));
 
 			return table;
 		}

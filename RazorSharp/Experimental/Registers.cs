@@ -1,8 +1,12 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using Serilog.Context;
+
+#endregion
 
 namespace RazorSharp.Experimental
 {

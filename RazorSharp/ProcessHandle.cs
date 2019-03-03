@@ -1,9 +1,13 @@
+#region
+
 using System;
 using System.Diagnostics;
 using System.Text;
 using RazorSharp.Memory;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace RazorSharp
 {
@@ -90,7 +94,7 @@ namespace RazorSharp
 
 			// Write the memory
 			Trace.Assert(Kernel32.WriteProcessMemory(m_procHandle, addr.Address, mem, dwSize,
-				ref numberOfBytesWritten));
+			                                         ref numberOfBytesWritten));
 
 			Trace.Assert(numberOfBytesWritten == dwSize);
 		}
@@ -103,7 +107,7 @@ namespace RazorSharp
 
 			// Read the memory
 			Trace.Assert(Kernel32.ReadProcessMemory(m_procHandle, addr.Address, mem, (uint) count, ref
-				numberOfBytesRead));
+			                                        numberOfBytesRead));
 
 			Trace.Assert(numberOfBytesRead == (ulong) count);
 			return mem;
@@ -116,7 +120,7 @@ namespace RazorSharp
 
 			// Write the memory
 			Trace.Assert(Kernel32.WriteProcessMemory(m_procHandle, addr.Address, Unsafe.AddressOf(ref value).Address,
-				dwSize, ref numberOfBytesWritten));
+			                                         dwSize, ref numberOfBytesWritten));
 
 			Trace.Assert(numberOfBytesWritten == dwSize);
 		}
@@ -129,7 +133,7 @@ namespace RazorSharp
 
 			// Read the memory
 			Trace.Assert(Kernel32.ReadProcessMemory(m_procHandle, addr.Address, Unsafe.AddressOf(ref t).Address, size,
-				ref numberOfBytesRead));
+			                                        ref numberOfBytesRead));
 
 			Trace.Assert(numberOfBytesRead == size);
 
@@ -140,7 +144,7 @@ namespace RazorSharp
 
 		public override string ToString()
 		{
-			return string.Format("Process: {0} ({1})", Process.ProcessName, Process.Id);
+			return String.Format("Process: {0} ({1})", Process.ProcessName, Process.Id);
 		}
 	}
 }

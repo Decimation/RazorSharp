@@ -29,16 +29,15 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public class SigScanner
 	{
-		private string                     m_moduleName;
-		private IntPtr                     m_hProcess           { get; }
-		private byte[]                     m_rgModuleBuffer     { get; set; }
-		private IntPtr                     m_lpModuleBase       { get; set; }
-		private Dictionary<string, string> m_dictStringPatterns { get; }
+		private const string                     CONTEXT_PROP_TAG = "SigScanner";
+		private       string                     m_moduleName;
+		private       IntPtr                     m_hProcess           { get; }
+		private       byte[]                     m_rgModuleBuffer     { get; set; }
+		private       IntPtr                     m_lpModuleBase       { get; set; }
+		private       Dictionary<string, string> m_dictStringPatterns { get; }
 
 		public IntPtr BaseAddress => m_lpModuleBase;
 
-		private const string CONTEXT_PROP_TAG = "SigScanner";
-		
 		public void AddPattern(string szPatternName, string szPattern)
 		{
 			m_dictStringPatterns.Add(szPatternName, szPattern);
@@ -292,7 +291,7 @@ namespace RazorSharp.Memory
 
 			m_moduleName = targetModule.ModuleName;
 			return Kernel32.ReadProcessMemory(m_hProcess, m_lpModuleBase, m_rgModuleBuffer,
-				(uint) targetModule.ModuleMemorySize, ref lpNumberOfBytesRead);
+			                                  (uint) targetModule.ModuleMemorySize, ref lpNumberOfBytesRead);
 		}
 
 		public void SelectModule(string name)

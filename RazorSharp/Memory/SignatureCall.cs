@@ -11,9 +11,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using RazorSharp.CLR;
-using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.CLR;
 using Serilog.Context;
 
 #endregion
@@ -90,7 +89,7 @@ namespace RazorSharp.Memory
 				SelectModule(attr);
 
 				// todo: this is a cheap fix
-				if (!attr.IsInFunctionMap && SigcallMethodMap.ContainsKey(methodInfo)) 
+				if (!attr.IsInFunctionMap && SigcallMethodMap.ContainsKey(methodInfo))
 					attr.IsInFunctionMap = true;
 
 
@@ -126,7 +125,7 @@ namespace RazorSharp.Memory
 
 			public override string ToString()
 			{
-				return string.Format("Name: {0}\nOpcodes: {1}\nOffset: {2}\n", Name, OpcodesSignature, OffsetString);
+				return String.Format("Name: {0}\nOpcodes: {1}\nOffset: {2}\n", Name, OpcodesSignature, OffsetString);
 			}
 		}
 
@@ -205,7 +204,7 @@ namespace RazorSharp.Memory
 		/// <param name="isGetProperty">Whether the function is a <c>get</c> function of a property </param>
 		public static void DynamicBind(Type t, string name, bool isGetProperty = false)
 		{
-			if (isGetProperty) name = SpecialNames.NameOfGetPropertyMethod(name);
+			if (isGetProperty) name = Identifiers.NameOfGetPropertyMethod(name);
 
 			var mi = Runtime.GetMethod(t, name);
 			ApplySigcallIndependent(mi);
@@ -258,7 +257,7 @@ namespace RazorSharp.Memory
 		public static void ReadCacheJsonUrl(Type[] t, string url)
 		{
 			string js = Get(url);
-			Debug.Assert(!string.IsNullOrWhiteSpace(js));
+			Debug.Assert(!String.IsNullOrWhiteSpace(js));
 			foreach (var type in t) ReadCacheJson(type, js);
 		}
 
@@ -275,7 +274,7 @@ namespace RazorSharp.Memory
 
 			foreach (var data in r)
 				CacheFunction(t, data.Name, StringUtil.ParseByteArray(data.OpcodesSignature),
-				              long.Parse(data.OffsetString, NumberStyles.HexNumber));
+				              Int64.Parse(data.OffsetString, NumberStyles.HexNumber));
 		}
 
 		#endregion

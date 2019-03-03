@@ -39,8 +39,11 @@ namespace RazorSharp.CLR.Structures.ILMethods
 	     *     // any sections (COR_ILMETHOD_SECT).
 		 */
 
-		[FieldOffset(0)] private TinyILMethod m_tiny;
-		[FieldOffset(0)] private FatILMethod  m_fat;
+		[FieldOffset(0)]
+		private TinyILMethod m_tiny;
+
+		[FieldOffset(0)]
+		private FatILMethod m_fat;
 
 		private Pointer<TinyILMethod> Tiny => Unsafe.AddressOf(ref m_tiny);
 		private Pointer<FatILMethod>  Fat  => Unsafe.AddressOf(ref m_fat);

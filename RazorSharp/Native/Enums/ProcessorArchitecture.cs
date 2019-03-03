@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 namespace RazorSharp.Native.Enums
 {
 	public enum ProcessorArchitecture : ushort

@@ -6,10 +6,10 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Utilities;
 using RazorSharp.CLR.Meta;
 using RazorSharp.CLR.Structures;
 using RazorSharp.CLR.Structures.HeapObjects;
-using RazorCommon.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -33,8 +33,6 @@ namespace RazorSharp.CLR
 	/// </summary>
 	internal static unsafe class Runtime
 	{
-		
-
 		#region Compare
 
 		private static void AssertCompare(MemberInfo info, IMetaMember meta)
@@ -219,7 +217,8 @@ namespace RazorSharp.CLR
 		/// <param name="flags"></param>
 		/// <returns></returns>
 		/// <exception cref="RuntimeException">If the type is an array</exception>
-		internal static Pointer<FieldDesc> GetFieldDesc(this Type t, string name, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
+		internal static Pointer<FieldDesc> GetFieldDesc(this Type    t, string name,
+		                                                BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 		{
 			Conditions.Assert(!t.IsArray, "Arrays do not have fields"); // ehh...
 			// (they have implicit fields such as length)
@@ -229,7 +228,7 @@ namespace RazorSharp.CLR
 
 		internal static byte[] ReadObjHeaderBytes<T>(T t) where T : class
 		{
-			var ptr = Unsafe.AddressOfHeap(t, OffsetType.Header);
+			Pointer<byte> ptr = Unsafe.AddressOfHeap(t, OffsetType.Header);
 			return ptr.CopyOut(IntPtr.Size);
 		}
 
@@ -269,7 +268,8 @@ namespace RazorSharp.CLR
 			return md;
 		}
 
-		internal static Pointer<MethodDesc> GetMethodDesc(this Type t, string name, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
+		internal static Pointer<MethodDesc> GetMethodDesc(this Type    t, string name,
+		                                                  BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 		{
 			return t.GetMethod(name, flags).GetMethodDesc();
 		}
@@ -294,7 +294,8 @@ namespace RazorSharp.CLR
 
 		#region Sigcall functions
 
-		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
+		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(
+			Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 			where TAttribute : Attribute
 		{
 			MethodInfo[] methods           = t.GetMethods(flags);
@@ -308,8 +309,8 @@ namespace RazorSharp.CLR
 			return attributedMethods.ToArray();
 		}
 
-		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(Type t, string name,
-			BindingFlags                                                  flags = ReflectionUtil.ALL_FLAGS)
+		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(Type         t, string name,
+		                                                             BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 			where TAttribute : Attribute
 		{
 			MethodInfo[] methods = GetAnnotatedMethods<TAttribute>(t, flags);

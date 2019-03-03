@@ -5,10 +5,10 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorSharp.CLR.Meta;
-using RazorSharp.CLR.Structures.ILMethods;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.CLR.Meta;
+using RazorSharp.CLR.Structures.ILMethods;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -75,16 +75,26 @@ namespace RazorSharp.CLR.Structures
 
 		#region Fields
 
-		[FieldOffset(0)] private readonly ushort m_wFlags3AndTokenRemainder;
-		[FieldOffset(2)] private readonly byte   m_chunkIndex;
-		[FieldOffset(3)] private readonly byte   m_bFlags2;
-		[FieldOffset(4)] private readonly ushort m_wSlotNumber;
-		[FieldOffset(6)] private readonly ushort m_wFlags;
+		[FieldOffset(0)]
+		private readonly ushort m_wFlags3AndTokenRemainder;
+
+		[FieldOffset(2)]
+		private readonly byte m_chunkIndex;
+
+		[FieldOffset(3)]
+		private readonly byte m_bFlags2;
+
+		[FieldOffset(4)]
+		private readonly ushort m_wSlotNumber;
+
+		[FieldOffset(6)]
+		private readonly ushort m_wFlags;
 
 		/// <summary>
 		///     Valid only if the function is non-virtual and non-abstract (<see cref="SizeOf" /> <c>== 16</c>)
 		/// </summary>
-		[FieldOffset(8)] private void* m_pFunction;
+		[FieldOffset(8)]
+		private void* m_pFunction;
 
 		#endregion
 
@@ -112,7 +122,8 @@ namespace RazorSharp.CLR.Structures
 		/// </summary>
 		/// <exception cref="SigcallException"></exception>
 		internal IntPtr NativeCode {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 
@@ -122,7 +133,8 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		internal IntPtr PreImplementedCode {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 		/// <summary>
@@ -156,7 +168,8 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		internal int SizeOf {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 		/// <summary>
@@ -165,7 +178,8 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 
@@ -175,12 +189,14 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		internal uint RVA {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 
 		internal int Token {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 		#region bool accessors
@@ -192,7 +208,8 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		internal bool IsConstructor {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 		internal bool IsPreImplemented => PreImplementedCode != IntPtr.Zero;
@@ -204,7 +221,8 @@ namespace RazorSharp.CLR.Structures
 		///     </remarks>
 		/// </summary>
 		internal bool IsPointingToNativeCode {
-			[ClrSigcall] get => throw new SigcallException();
+			[ClrSigcall]
+			get => throw new SigcallException();
 		}
 
 		internal bool HasThis => Info.CallingConvention.HasFlag(CallingConventions.HasThis);

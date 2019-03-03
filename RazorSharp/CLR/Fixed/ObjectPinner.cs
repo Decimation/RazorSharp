@@ -20,7 +20,7 @@ namespace RazorSharp.CLR.Fixed
 		private static Action<object, Action<object>> CreatePinImpl()
 		{
 			var method = new DynamicMethod("InvokeWhilePinnedImpl", typeof(void),
-				new[] {typeof(object), typeof(Action<object>)}, typeof(ObjectPinner).Module);
+			                               new[] {typeof(object), typeof(Action<object>)}, typeof(ObjectPinner).Module);
 			var il = method.GetILGenerator();
 
 			// create a pinned local variable of type object

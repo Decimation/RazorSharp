@@ -4,10 +4,10 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorSharp.CLR.Meta;
-using RazorSharp.CLR.Structures.EE;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.CLR.Meta;
+using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
 
@@ -253,35 +253,63 @@ namespace RazorSharp.CLR.Structures
 
 		#region Fields
 
-		[FieldOffset(0)]  private          DWFlags      m_dwFlags;
-		[FieldOffset(4)]  private readonly DWORD        m_BaseSize;
-		[FieldOffset(8)]  private readonly WORD         m_wFlags2;
-		[FieldOffset(10)] private readonly WORD         m_wToken;
-		[FieldOffset(12)] private readonly WORD         m_wNumVirtuals;
-		[FieldOffset(14)] private readonly WORD         m_wNumInterfaces;
-		[FieldOffset(16)] private readonly MethodTable* m_pParentMethodTable;
-		[FieldOffset(24)] private readonly void*        m_pLoaderModule;
-		[FieldOffset(32)] private readonly void*        m_pWriteableData;
+		[FieldOffset(0)]
+		private DWFlags m_dwFlags;
+
+		[FieldOffset(4)]
+		private readonly DWORD m_BaseSize;
+
+		[FieldOffset(8)]
+		private readonly WORD m_wFlags2;
+
+		[FieldOffset(10)]
+		private readonly WORD m_wToken;
+
+		[FieldOffset(12)]
+		private readonly WORD m_wNumVirtuals;
+
+		[FieldOffset(14)]
+		private readonly WORD m_wNumInterfaces;
+
+		[FieldOffset(16)]
+		private readonly MethodTable* m_pParentMethodTable;
+
+		[FieldOffset(24)]
+		private readonly void* m_pLoaderModule;
+
+		[FieldOffset(32)]
+		private readonly void* m_pWriteableData;
 
 		#region Union
 
-		[FieldOffset(40)] private readonly EEClass*     m_pEEClass;
-		[FieldOffset(40)] private readonly MethodTable* m_pCanonMT;
+		[FieldOffset(40)]
+		private readonly EEClass* m_pEEClass;
+
+		[FieldOffset(40)]
+		private readonly MethodTable* m_pCanonMT;
 
 		#endregion
 
 		#region Union
 
-		[FieldOffset(48)] private readonly void* m_pPerInstInfo;
-		[FieldOffset(48)] private readonly void* m_ElementTypeHnd;
-		[FieldOffset(48)] private readonly void* m_pMultipurposeSlot1;
+		[FieldOffset(48)]
+		private readonly void* m_pPerInstInfo;
+
+		[FieldOffset(48)]
+		private readonly void* m_ElementTypeHnd;
+
+		[FieldOffset(48)]
+		private readonly void* m_pMultipurposeSlot1;
 
 		#endregion
 
 		#region Union
 
-		[FieldOffset(56)] private readonly void* m_pInterfaceMap;
-		[FieldOffset(56)] private readonly void* m_pMultipurposeSlot2;
+		[FieldOffset(56)]
+		private readonly void* m_pInterfaceMap;
+
+		[FieldOffset(56)]
+		private readonly void* m_pMultipurposeSlot2;
 
 		#endregion
 

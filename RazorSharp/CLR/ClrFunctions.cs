@@ -42,7 +42,7 @@ namespace RazorSharp.CLR
 		{
 			s_setStableEntryPointInterlocked =
 				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(CLR_DLL,
-					s_rgStableEntryPointInterlockedSignature);
+				                                                                     s_rgStableEntryPointInterlockedSignature);
 
 
 			SignatureCall.ReadCacheJsonUrl(new[]

@@ -1,7 +1,3 @@
-// ReSharper disable ClassNeverInstantiated.Global
-
-// ReSharper disable ClassCannotBeInstantiated
-
 namespace RazorSharp.CLR.Fixed
 {
 	#region

@@ -40,9 +40,14 @@ namespace RazorSharp.CLR.Structures.HeapObjects
 	internal unsafe struct ArrayObject : IHeapObject
 	{
 // 		[FieldOffset(-8) public ObjHeader _header
-		[FieldOffset(0)]  private readonly MethodTable* m_methodTablePtr;
-		[FieldOffset(8)]  private readonly uint         m_numComponents;
-		[FieldOffset(12)] private readonly uint         m_pad;
+		[FieldOffset(0)]
+		private readonly MethodTable* m_methodTablePtr;
+
+		[FieldOffset(8)]
+		private readonly uint m_numComponents;
+
+		[FieldOffset(12)]
+		private readonly uint m_pad;
 
 
 		public uint Length => m_numComponents;

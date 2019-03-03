@@ -33,11 +33,11 @@ namespace RazorSharp.CLR.Fixed
 					delegate()
 					{
 						ObjectPinner.InvokeWhilePinned(obj,
-							delegate
-							{
-								re1.Set();
-								Reset.WaitOne();
-							});
+						                               delegate
+						                               {
+							                               re1.Set();
+							                               Reset.WaitOne();
+						                               });
 					}
 				);
 				thr.Start();

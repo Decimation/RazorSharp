@@ -1,5 +1,9 @@
+#region
+
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace RazorSharp
 {
@@ -18,7 +22,7 @@ namespace RazorSharp
 				return memPtr.CopyOut(mem.Length / memPtr.ElementSize);
 			}
 		}
-		
+
 		public static TTo Convert<TFrom, TTo>(TFrom t, ConversionType c = ConversionType.LOW_LEVEL)
 		{
 			switch (c) {

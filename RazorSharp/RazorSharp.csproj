@@ -194,7 +194,7 @@
     <Compile Include="CLR\Meta\MetaMethod.cs" />
     <Compile Include="CLR\Meta\MetaType.cs" />
     <Compile Include="CLR\Offsets.cs" />
-    <Compile Include="CLR\SpecialNames.cs" />
+    <Compile Include="CLR\Identifiers.cs" />
     <Compile Include="CLR\Structures\EE\EEClass.cs" />
     <Compile Include="CLR\Structures\EE\EEClassLayoutInfo.cs" />
     <Compile Include="CLR\Structures\EE\LayoutEEClass.cs" />
@@ -219,7 +219,6 @@
     <Compile Include="Memory\Segments.cs" />
     <Compile Include="Memory\SigScanner.cs" />
     <Compile Include="Memory\SignatureCall.cs" />
-    <Compile Include="Misc.cs" />
     <Compile Include="Native\DbgHelp.cs" />
     <Compile Include="Native\Enums\AllocationType.cs" />
     <Compile Include="Native\Enums\ConsoleOutputModes.cs" />
@@ -245,7 +244,6 @@
     <Compile Include="Native\Structures\SystemInfo.cs" />
     <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
-    <Compile Include="Pointers\PointerSettings.cs" />
     <Compile Include="Pointers\PointerUtils.cs" />
     <Compile Include="CLR\ClrFunctions.cs" />
     <Compile Include="CLR\Structures\DWFlags.cs" />

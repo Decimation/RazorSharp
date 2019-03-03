@@ -60,7 +60,6 @@ namespace RazorSharp.Native
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(hFn);
 		}
 
-		
 
 		public static void CodeFree(IntPtr fn)
 		{

@@ -1,10 +1,11 @@
 #region
 
 using System;
+using RazorSharp.Native.Structures.Images;
 
 #endregion
 
-namespace RazorSharp.Native.Structures.Images
+namespace RazorSharp.Native.Enums
 {
 	/// <summary>
 	///     https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-_image_section_header

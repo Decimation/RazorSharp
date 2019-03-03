@@ -5,11 +5,12 @@
 using System;
 using System.Globalization;
 using System.Reflection;
-using RazorSharp.CLR.Structures;
-using RazorSharp.CLR.Structures.EE;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.CLR.Structures;
+using RazorSharp.CLR.Structures.EE;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 
 #endregion
 
@@ -72,7 +73,7 @@ namespace RazorSharp.CLR.Meta
 
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
-			if (string.IsNullOrEmpty(format)) format = FMT_B;
+			if (String.IsNullOrEmpty(format)) format = FMT_B;
 
 			if (formatProvider == null) formatProvider = CultureInfo.CurrentCulture;
 
@@ -80,8 +81,8 @@ namespace RazorSharp.CLR.Meta
 			switch (format.ToUpperInvariant()) {
 				case FMT_B:
 					return
-						string.Format("{0} (token: {1}) (base size: {2}) (component size: {3}) (base fields size: {4})",
-							Name, Token, BaseSize, ComponentSize, BaseFieldsSize);
+						String.Format("{0} (token: {1}) (base size: {2}) (component size: {3}) (base fields size: {4})",
+						              Name, Token, BaseSize, ComponentSize, BaseFieldsSize);
 				case FMT_E:
 					return ToTable().ToMarkDownString();
 				default:

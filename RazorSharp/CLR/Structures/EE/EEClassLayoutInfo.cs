@@ -2,9 +2,9 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorSharp.CLR.Meta;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.CLR.Meta;
 
 #endregion
 
@@ -35,23 +35,35 @@ namespace RazorSharp.CLR.Structures.EE
 		#region Fields
 
 		// why is there an m_cbNativeSize in EEClassLayoutInfo and EEClass?
-		[FieldOffset(0)] private readonly UINT32 m_cbNativeSize;
-		[FieldOffset(4)] private readonly UINT32 m_cbManagedSize;
+		[FieldOffset(0)]
+		private readonly UINT32 m_cbNativeSize;
+
+		[FieldOffset(4)]
+		private readonly UINT32 m_cbManagedSize;
 
 		// 1,2,4 or 8: this is equal to the largest of the alignment requirements
 		// of each of the EEClass's members. If the NStruct extends another NStruct,
 		// the base NStruct is treated as the first member for the purpose of
 		// this calculation.
-		[FieldOffset(8)] private readonly BYTE m_LargestAlignmentRequirementOfAllMembers;
+		[FieldOffset(8)]
+		private readonly BYTE m_LargestAlignmentRequirementOfAllMembers;
 
 		// Post V1.0 addition: This is the equivalent of m_LargestAlignmentRequirementOfAllMember
 		// for the managed layout.
-		[FieldOffset(9)] private readonly BYTE m_ManagedLargestAlignmentRequirementOfAllMembers;
+		[FieldOffset(9)]
+		private readonly BYTE m_ManagedLargestAlignmentRequirementOfAllMembers;
 
-		[FieldOffset(10)] private readonly BYTE  m_bFlags;
-		[FieldOffset(11)] private readonly BYTE  m_cbPackingSize;
-		[FieldOffset(12)] private readonly UINT  m_numCTMFields;
-		[FieldOffset(16)] private readonly void* m_pFieldMarshalers;
+		[FieldOffset(10)]
+		private readonly BYTE m_bFlags;
+
+		[FieldOffset(11)]
+		private readonly BYTE m_cbPackingSize;
+
+		[FieldOffset(12)]
+		private readonly UINT m_numCTMFields;
+
+		[FieldOffset(16)]
+		private readonly void* m_pFieldMarshalers;
 
 		#endregion
 

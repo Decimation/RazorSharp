@@ -3,9 +3,9 @@
 using System;
 using System.Linq;
 using System.Runtime.InteropServices;
+using RazorCommon;
 using RazorSharp.CLR;
 using RazorSharp.CLR.Structures;
-using RazorCommon;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using static RazorSharp.Memory.Mem;
@@ -59,11 +59,11 @@ namespace RazorSharp.Analysis
 				if (m_bIsDefault) {
 					// ObjHeader
 					Table.AddRow(-IntPtr.Size, Omitted, IntPtr.Size, OBJHEADER_TYPE_STR,
-						OBJHEADER_NAME_STR, Omitted, UniqueAttributes.None);
+					             OBJHEADER_NAME_STR, Omitted, UniqueAttributes.None);
 
 					// MethodTable*
 					Table.AddRow(0, Omitted, IntPtr.Size, METHODTABLE_TYPE_STR, METHODTABLE_NAME_STR,
-						Omitted, UniqueAttributes.None);
+					             Omitted, UniqueAttributes.None);
 
 					return;
 				}
@@ -74,16 +74,16 @@ namespace RazorSharp.Analysis
 
 				// ObjHeader
 				Table.AddRow(-IntPtr.Size, Hex.ToHex(m_pAddr - IntPtr.Size), IntPtr.Size, OBJHEADER_TYPE_STR,
-					OBJHEADER_NAME_STR,
-					objHeaderMem == null
-						? Omitted.ToString()
-						: string.Format("[{0}]", Collections.CreateString(objHeaderMem)),
-					UniqueAttributes.None);
+				             OBJHEADER_NAME_STR,
+				             objHeaderMem == null
+					             ? Omitted.ToString()
+					             : String.Format("[{0}]", Collections.CreateString(objHeaderMem)),
+				             UniqueAttributes.None);
 
 				// MethodTable*
 				Table.AddRow(0, Hex.ToHex(m_pAddr), IntPtr.Size, METHODTABLE_TYPE_STR, METHODTABLE_NAME_STR,
-					methodTablePtr == IntPtr.Zero ? Omitted.ToString() : Hex.ToHex(methodTablePtr),
-					UniqueAttributes.None);
+				             methodTablePtr == IntPtr.Zero ? Omitted.ToString() : Hex.ToHex(methodTablePtr),
+				             UniqueAttributes.None);
 			}
 		}
 
@@ -103,7 +103,7 @@ namespace RazorSharp.Analysis
 
 				var addr = m_pAddr + charOffset + i * sizeof(char) + baseOfs;
 				Table.AddRow(ofsStr, Hex.ToHex(addr), sizeof(char), typeof(char).Name, $"(Character {i + 2})",
-					Read<char>(addr), UniqueAttributes.None);
+				             Read<char>(addr), UniqueAttributes.None);
 			}
 		}
 
@@ -134,13 +134,13 @@ namespace RazorSharp.Analysis
 
 			// Array length int
 			Table.AddRow(baseOfs, Hex.ToHex(rgPtr.Address), sizeof(int), typeof(int).Name, arrayLengthStr,
-				rgPtr.Reference, UniqueAttributes.None);
+			             rgPtr.Reference, UniqueAttributes.None);
 			rgPtr.Add(sizeof(int));
 			baseOfs += sizeof(int);
 
 			// Padding int
 			Table.AddRow(baseOfs, Hex.ToHex(rgPtr.Address), sizeof(int), typeof(int).Name, PADDING_STR, rgPtr.Reference,
-				UniqueAttributes.None);
+			             UniqueAttributes.None);
 			rgPtr.Add(sizeof(int));
 			baseOfs += sizeof(int);
 
@@ -153,8 +153,8 @@ namespace RazorSharp.Analysis
 
 
 				Table.AddRow(ofsStr, Hex.ToHex(rgPtr.Address), rgPtr.ElementSize,
-					typeof(T).Name, $"(Element {i})", rgPtr.Reference,
-					UniqueAttributes.None);
+				             typeof(T).Name, $"(Element {i})", rgPtr.Reference,
+				             UniqueAttributes.None);
 
 
 				rgPtr++;
@@ -185,11 +185,11 @@ namespace RazorSharp.Analysis
 
 				if (m_bIsDefault)
 					Table.AddRow(ofsStr, Omitted, v.Reference.Size,
-						v.Reference.Info.FieldType.Name, v.Reference.Name, Omitted, FindUniqueAttributes(v));
+					             v.Reference.Info.FieldType.Name, v.Reference.Name, Omitted, FindUniqueAttributes(v));
 				else
 					Table.AddRow(ofsStr, Hex.ToHex(v.Reference.GetAddress(ref t)), v.Reference.Size,
-						v.Reference.Info.FieldType.Name, v.Reference.Name, v.Reference.GetValue(t),
-						FindUniqueAttributes(v));
+					             v.Reference.Info.FieldType.Name, v.Reference.Name, v.Reference.GetValue(t),
+					             FindUniqueAttributes(v));
 
 
 				// start padding
@@ -207,10 +207,10 @@ namespace RazorSharp.Analysis
 
 					if (m_bIsDefault)
 						Table.AddRow(GetOffsetString(baseOfs, ro, lo), Omitted, padSize,
-							paddingByte, PADDING_STR, 0, UniqueAttributes.Padding);
+						             paddingByte, PADDING_STR, 0, UniqueAttributes.Padding);
 					else
 						Table.AddRow(GetOffsetString(baseOfs, ro, lo), Hex.ToHex(m_pAddr + padOffset), padSize,
-							paddingByte, PADDING_STR, 0, UniqueAttributes.Padding);
+						             paddingByte, PADDING_STR, 0, UniqueAttributes.Padding);
 				}
 
 				// end padding
@@ -282,7 +282,7 @@ namespace RazorSharp.Analysis
 
 			// If we're only displaying fields, we'll display the offset relative to the first field
 			Table = new ConsoleTable(bFieldsOnly ? "Field Offset" : "Memory Offset", "Address", "Size", "Type", "Name",
-				"Value", "Unique attributes");
+			                         "Value", "Unique attributes");
 		}
 
 		/// <summary>
@@ -311,7 +311,7 @@ namespace RazorSharp.Analysis
 		///     pointer is also included.
 		/// </param>
 		public ObjectLayout(ref T[] t, bool bFieldsOnly = true) : this(Unsafe.AddressOfHeap(ref t).Address, default,
-			bFieldsOnly, true, false)
+		                                                               bFieldsOnly, true, false)
 		{
 //			m_bFullOffset = bFullOffset;
 
@@ -327,7 +327,7 @@ namespace RazorSharp.Analysis
 		///     pointer is also included.
 		/// </param>
 		public ObjectLayout(ref T t, bool bFieldsOnly = true) : this(Unsafe.AddressOf(ref t).Address, t, bFieldsOnly,
-			false, false)
+		                                                             false, false)
 		{
 			Conditions.Assert(!typeof(T).IsArray, "You cannot get the layout of an array (yet)");
 
