@@ -27,7 +27,7 @@ using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing;
-using Constants = RazorCommon.Constants;
+using Constants = RazorSharp.Clr.Constants;
 using Unsafe = RazorSharp.Unsafe;
 
 #endregion
@@ -57,9 +57,20 @@ namespace Test
 		// todo: replace native pointers* with Pointer<T> for consistency
 		// todo: RazorSharp, ClrMD, Reflection comparison
 
+		private static object _static;
+		
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
+			Console.WriteLine(Constants.IS_64_BIT);
+			Console.WriteLine(IntPtr.Size);
+			Console.WriteLine(Offsets.PTR_SIZE);
+			Console.WriteLine(Environment.Is64BitProcess);
+			Console.WriteLine(Unsafe.AddressOf(ref _static));
+			Console.WriteLine("\n-\n");
+
+			var fd=Meta.GetType(typeof(Program)).Fields["_static"];
+			Console.WriteLine(fd.GetStaticAddr());
 			
 			int[] rg = {1, 2, 3};
 			Inspect.Heap<int[], int>(rg);
@@ -134,7 +145,7 @@ namespace Test
 					else valStr = val.ToString();
 				}
 				else {
-					valStr = Constants.NULL_STR;
+					valStr = RazorCommon.Constants.NULL_STR;
 				}
 
 				ct.AddRow(f.Name, f.FieldType.Name, valStr);

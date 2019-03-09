@@ -185,7 +185,7 @@ namespace RazorSharp.Memory
 		{
 			var addr = FindPattern(rgPattern, ofsGuess);
 			if (addr == IntPtr.Zero)
-				throw new Exception($"Could not find function with opcodes {Collections.CreateString(rgPattern)}");
+				throw new Exception($"Could not find function with opcodes {Collections.CreateString(rgPattern, ToStringOptions.Hex)}");
 
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
 		}

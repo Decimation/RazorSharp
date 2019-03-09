@@ -191,6 +191,8 @@ namespace RazorSharp.Clr.Meta
 
 		public MetaType Parent { get; }
 
+		
+
 		public CorElementType NormalType => m_value.Reference.EEClass.Reference.NormalType;
 
 		public string Name => m_value.Reference.Name;

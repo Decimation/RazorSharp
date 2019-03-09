@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -151,6 +152,24 @@ namespace RazorSharp.Utilities
 		internal static void Assert([AsrtCnd(AsrtCndType.IS_TRUE)] bool cond)
 		{
 			Contract.Assert(cond);
+		}
+
+
+		internal static void AssertAllEqual<TSource, TResult>(Func<TSource, TResult> selector,
+		                                                      IEnumerable<TSource>   values)
+		{
+			AssertAllEqual(values.Select(selector).ToArray());
+		}
+
+
+		internal static void AssertAllEqual<T>(T def, T[] values)
+		{
+			Assert(values.Any(o => o.Equals(def)));
+		}
+
+		internal static void AssertAllEqual<T>(T[] values)
+		{
+			AssertAllEqual(values[0], values);
 		}
 
 		internal static void AssertAll([AsrtCnd(AsrtCndType.IS_TRUE)] params bool[] conds)

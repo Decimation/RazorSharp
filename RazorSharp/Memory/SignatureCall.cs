@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -13,6 +14,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RazorCommon.Utilities;
 using RazorSharp.Clr;
+using RazorSharp.Utilities;
 using Serilog.Context;
 
 #endregion
@@ -114,14 +116,21 @@ namespace RazorSharp.Memory
 
 		internal class Data
 		{
-			[JsonProperty("name")]
-			internal string Name { get; set; }
+			internal string Name { get; }
 
-			[JsonProperty("opcodes")]
-			internal string OpcodesSignature { get; set; }
 
-			[JsonProperty("offset")]
-			internal string OffsetString { get; set; }
+			internal string OpcodesSignature { get; }
+
+
+			internal string OffsetString { get; }
+
+			public Data(string name, string opcodesSignature, string offsetString)
+			{
+				Name             = name;
+				OpcodesSignature = opcodesSignature;
+				OffsetString     = offsetString;
+			}
+
 
 			public override string ToString()
 			{
@@ -257,8 +266,9 @@ namespace RazorSharp.Memory
 		public static void ReadCacheJsonUrl(Type[] t, string url)
 		{
 			string js = Get(url);
-			Debug.Assert(!String.IsNullOrWhiteSpace(js));
-			foreach (var type in t) ReadCacheJson(type, js);
+			Debug.Assert(!String.IsNullOrWhiteSpace(js),"!String.IsNullOrWhiteSpace(js)");
+			foreach (var type in t)
+				ReadCacheJson(type, js);
 		}
 
 		public static void ReadCacheJsonUrl(Type t, string url)
@@ -268,9 +278,20 @@ namespace RazorSharp.Memory
 
 		public static void ReadCacheJson(Type t, string json)
 		{
-			var js = JObject.Parse(json).GetValue(t.Name);
-			var r  = (List<Data>) js.ToObject(typeof(List<Data>));
+			var js      = JObject.Parse(json).GetValue(t.Name);
+			
+			var r       = new List<Data>();
+			var names   = js.Values<string>("name").ToArray();
+			var offsets = js.Values<string>(IntPtr.Size == 4 ? "offset64" : "offset64").ToArray();
+			var sigs    = js.Values<string>(IntPtr.Size == 4 ? "opcodes32" : "opcodes64").ToArray();
+			
+			Conditions.AssertAllEqual(x => x.Length, new[] {names, offsets, sigs});
 
+			for (int i = 0; i < names.Length; i++) {
+				r.Add(new Data(names[i],
+				               sigs[i],
+				               offsets[i]));
+			}
 
 			foreach (var data in r)
 				CacheFunction(t, data.Name, StringUtil.ParseByteArray(data.OpcodesSignature),

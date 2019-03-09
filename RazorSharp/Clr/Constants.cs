@@ -28,6 +28,14 @@ namespace RazorSharp.Clr
 		//todo
 //		private const uint GC_MARKED = 0x1;
 
+		internal const bool IS_64_BIT =
+#if WIN32
+		 false;
+#else
+		 true;
+#endif
+
+
 		/// <summary>
 		///     <para>Sources:</para>
 		///     <list type="bullet">

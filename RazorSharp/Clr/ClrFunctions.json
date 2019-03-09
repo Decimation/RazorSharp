@@ -107,6 +107,11 @@
 	  "opcodes64":   "48 83 EC 28 4C 8B C1 F6 C1 2 75 2E 48 8B 41 20 48 8B 50 8 F6 C2 1 74 9 48 8B 42 FF 48 83 C4 28 C3",
 	  "opcodes32": "8B D1 F6 C2 02 0F 85 3A 2C 00 00 8B 42 18 8B 48 04 F6 C1 01 0F 84 C0 15 09 00 8B 41 FF C3",
 	  "offset64":    "E560"
+	},
+	{
+	  "name": "JIT_GetStaticFieldAddr_Context",
+	  "opcodes32": "6A 64 B8 64 45 5A 10 E8 2F DB CB FF 8B",
+	  "offset64": "0"
 	}
   ]
 }

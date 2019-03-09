@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Memory;
+using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
 
 // ReSharper disable IdentifierTypo
@@ -34,14 +35,17 @@ namespace RazorSharp.Clr
 		internal const string CLR_DLL = "clr.dll";
 
 		private const string JSON_CACHING_URL =
-			"https://raw.githubusercontent.com/Decimation/RazorSharp/master/RazorSharp/CLR/ClrFunctions.json";
+			"https://raw.githubusercontent.com/Decimation/RazorSharp/master/RazorSharp/Clr/ClrFunctions.json";
 
 		static ClrFunctions()
 		{
+			
 			s_setStableEntryPointInterlocked =
-				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(CLR_DLL,
-				                                                                     s_rgStableEntryPointInterlockedSignature);
-
+				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(
+					CLR_DLL,
+					IntPtr.Size==8
+						? s_rgStableEntryPointInterlockedSignature
+						: s_rgStableEntryPointInterlockedSignature32);
 
 			SignatureCall.ReadCacheJsonUrl(new[]
 			{
@@ -70,7 +74,12 @@ namespace RazorSharp.Clr
 		{
 			throw new SigcallException();
 		}
-
+		
+		[ClrSigcall]
+		internal static Pointer<byte> JIT_GetStaticFieldAddr_Context(FieldDesc* value)
+		{
+			throw new SigcallException();
+		}
 
 		#region SetStableEntryPoint
 
@@ -89,6 +98,11 @@ namespace RazorSharp.Clr
 		{
 			0x48, 0x89, 0x5C, 0x24, 0x10, 0x48, 0x89, 0x74, 0x24, 0x18, 0x57, 0x48, 0x83, 0xEC, 0x20, 0x48, 0x8B, 0xFA,
 			0x48, 0x8B, 0xF1, 0xE8, 0x1E, 0x57, 0xE7, 0xFF
+		};
+
+		private static readonly byte[] s_rgStableEntryPointInterlockedSignature32 =
+		{
+			0x55, 0x8B, 0xEC, 0x53, 0x56, 0x57, 0x8B, 0xD9, 0xE8, 0x11, 0x68, 0xF8, 0xFF
 		};
 
 		/// <summary>
