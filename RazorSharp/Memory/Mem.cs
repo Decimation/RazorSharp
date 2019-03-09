@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using RazorSharp.Clr;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Native;
@@ -146,6 +147,28 @@ namespace RazorSharp.Memory
 			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) (elemCnt * Unsafe.SizeOf<T>()));
 		}
 
+		/// <summary>
+		/// Allocates a LPCUTF8 native string from a UTF16 C# string
+		/// </summary>
+		/// <param name="s">Standard UTF16 C# string</param>
+		/// <returns></returns>
+		public static Pointer<byte> AllocString(string s)
+		{
+			var size = s.Length + 1;
+			Pointer<byte> ptr = AllocUnmanaged<byte>(size);
+			ptr.WriteString(s, StringTypes.AnsiStr);
+			Debug.Assert(ptr.ReadString(StringTypes.AnsiStr) == s);
+
+			return ptr;
+		}
+
+		public static void FreeString(Pointer<byte> ptr)
+		{
+			int size = ptr.ReadUntil(x => x == Byte.MinValue) + 1;
+			ptr.Zero(size);
+			Free(ptr);
+		}
+		
 
 		/// <summary>
 		///     <para>Frees memory allocated from <see cref="AllocUnmanaged{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>

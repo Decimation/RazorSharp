@@ -201,7 +201,7 @@ namespace RazorSharp.Clr
 
 		internal static Pointer<FieldDesc> GetFieldDesc(this FieldInfo fieldInfo)
 		{
-			Conditions.RequiresNotNull(fieldInfo);
+			Conditions.RequiresNotNull(fieldInfo,nameof(fieldInfo));
 			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
 			Conditions.Assert(fieldDesc.Reference.Info == fieldInfo);
 			Conditions.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
@@ -257,7 +257,7 @@ namespace RazorSharp.Clr
 
 		internal static Pointer<MethodDesc> GetMethodDesc(this MethodInfo methodInfo)
 		{
-			Conditions.RequiresNotNull(methodInfo);
+			Conditions.RequiresNotNull(methodInfo,nameof(methodInfo));
 
 			var methodHandle = methodInfo.MethodHandle;
 			var md           = (MethodDesc*) methodHandle.Value;
@@ -278,7 +278,7 @@ namespace RazorSharp.Clr
 		internal static Pointer<MethodDesc>[] GetMethodDescs(this Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 		{
 			MethodInfo[] methods = t.GetMethods(flags);
-			Conditions.RequiresNotNull(methods);
+			Conditions.RequiresNotNull(methods,nameof(methods));
 			var arr = new Pointer<MethodDesc>[methods.Length];
 
 			for (int i = 0; i < arr.Length; i++) {

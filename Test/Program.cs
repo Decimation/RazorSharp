@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -17,10 +18,12 @@ using System.Text;
 using System.Threading;
 using NUnit.Framework;
 using RazorCommon;
+using RazorCommon.Utilities;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.Clr;
 using RazorSharp.Clr.Meta;
+using RazorSharp.Clr.Structures;
 using RazorSharp.Experimental;
 using RazorSharp.Memory;
 using RazorSharp.Native;
@@ -43,13 +46,16 @@ namespace Test
 	#endregion
 
 
+	[StructLayout(LayoutKind.Sequential)]
 	public static unsafe class Program
 	{
 #if DEBUG
 		static Program()
 		{
+			Clr.Reorganize();
 			Conditions.CheckCompatibility();
 			ClrFunctions.Init();
+			Console.OutputEncoding = Encoding.Unicode;
 		}
 #endif
 
@@ -58,20 +64,20 @@ namespace Test
 		// todo: RazorSharp, ClrMD, Reflection comparison
 
 		private static object _static;
-		
+		private const  string CONST_STR = "foo";
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			Console.WriteLine(Constants.IS_64_BIT);
-			Console.WriteLine(IntPtr.Size);
-			Console.WriteLine(Offsets.PTR_SIZE);
-			Console.WriteLine(Environment.Is64BitProcess);
-			Console.WriteLine(Unsafe.AddressOf(ref _static));
-			Console.WriteLine("\n-\n");
-
-			var fd=Meta.GetType(typeof(Program)).Fields["_static"];
-			Console.WriteLine(fd.GetStaticAddr());
+			Conditions.AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
+			Conditions.Assert(Environment.Is64BitProcess);
 			
+			
+
+
+			
+
+			/*
 			int[] rg = {1, 2, 3};
 			Inspect.Heap<int[], int>(rg);
 
@@ -93,23 +99,51 @@ namespace Test
 			var obj = Runtime.GetArrayObject(ref irg);
 			
 
-			Pointer<int> ptr = Marshal.UnsafeAddrOfPinnedArrayElement(irg, 1);
-			Console.WriteLine(ptr);
-
 			var m = Meta.GetType<int>();
 			Console.WriteLine(m);
-			Debug.Assert(Compare<int>());
+			Debug.Assert(Compare<int>());*/
+		}
+
+		static string LayoutString<T>()
+		{
+			var type   = Meta.GetType<T>();
+			var table  = new ConsoleTable("Name", "Type", "Offset", "Size");
+			var fields = type.Fields.OrderBy(x => x.Offset).ToList();
+
+			foreach (var field in fields) {
+				table.AddRow(field.Name, field.FieldType.Name, field.Offset, field.Size);
+			}
+
+			return table.ToMarkDownString();
+		}
+
+		[StructLayout(LayoutKind.Explicit)]
+		struct Struct
+		{
+			[FieldOffset(0)]
+			public Pointer<int> m_int;
+
+			[FieldOffset(8)]
+			public int m_int2;
+
+			public override string ToString()
+			{
+				return String.Format("m_int: {0:P} | m_int2: {1}", m_int, m_int2);
+			}
 		}
 
 		[Flags]
 		private enum Flags
 		{
-			One = 1,
-			Two = 2,
+			One   = 1,
+			Two   = 2,
 			Three = 4
 		}
 
-		private static bool HasFlagFast(this Flags v, Flags f) { return (v & f) == f; }
+		private static bool HasFlagFast(this Flags v, Flags f)
+		{
+			return (v & f) == f;
+		}
 
 		private static bool Compare<T>()
 		{

@@ -283,12 +283,12 @@ namespace RazorSharp.Clr.Structures
 
 		private const int MISC2_UNION_OFFSET_32 = 36;
 		private const int MISC2_UNION_OFFSET_64 = 56;
-		
 
-		[FieldOffset(16+PTR_SIZE)]
+
+		[FieldOffset(16 + PTR_SIZE)]
 		private readonly void* m_pLoaderModule;
 
-		[FieldOffset(16+(PTR_SIZE*2))]
+		[FieldOffset(16 + (PTR_SIZE * 2))]
 		private readonly void* m_pWriteableData;
 
 		#region Union

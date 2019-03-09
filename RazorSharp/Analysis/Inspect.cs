@@ -169,7 +169,7 @@ namespace RazorSharp.Analysis
 				}
 			}
 			else {
-				Conditions.RequiresNotNull(fields);
+				Conditions.RequiresNotNull(fields,nameof(fields));
 
 				foreach (var f in fields) {
 					Pointer<byte> rowPtr = f.GetAddress(ref t);

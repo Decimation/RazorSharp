@@ -12,5 +12,26 @@ namespace RazorSharp.Memory
 		{
 			return ((1 << nBits) - 1) & (number >> bitPos);
 		}
+
+		/**
+		 * #define GETMASK(index, size) (((1 << (size)) - 1) << (index))
+		 * #define READFROM(data, index, size) (((data) & GETMASK((index), (size))) >> (index))
+		 * #define WRITETO(data, index, size, value) ((data) = ((data) & (~GETMASK((index), (size)))) | ((value) << (index)))
+		 */
+
+		private static int GetMask(int index, int size)
+		{
+			return (((1 << (size)) - 1) << (index));
+		}
+
+		public static int ReadFrom(int data, int index, int size)
+		{
+			return (((data) & GetMask((index), (size))) >> (index));
+		}
+
+		public static int WriteTo(int data, int index, int size, int value)
+		{
+			return ((data) = ((data) & (~GetMask((index), (size)))) | ((value) << (index)));
+		}
 	}
 }

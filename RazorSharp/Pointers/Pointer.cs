@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using JetBrains.Annotations;
 using RazorCommon;
 using RazorCommon.Extensions;
@@ -37,7 +38,7 @@ namespace RazorSharp.Pointers
 	public enum StringTypes
 	{
 		/// <summary>
-		///     <see cref="sbyte" /> (1-byte) string
+		///     LPCUTF8 native string (<see cref="sbyte" /> (1-byte) string)
 		/// </summary>
 		AnsiStr,
 
@@ -243,9 +244,10 @@ namespace RazorSharp.Pointers
 			IEnumerator<T> enumerator = enumerable.GetEnumerator();
 			int            i          = 0;
 			while (enumerator.MoveNext()) {
-				Conditions.RequiresNotNull(enumerator.Current);
+				var current = enumerator.Current;
+				Conditions.RequiresNotNull(current,nameof(current));
 
-				if (!enumerator.Current.Equals(this[i++])) {
+				if (!current.Equals(this[i++])) {
 					enumerator.Dispose();
 					return false;
 				}
@@ -312,6 +314,33 @@ namespace RazorSharp.Pointers
 
 		#region Read / write
 
+		public void WriteString(string s, StringTypes type)
+		{
+			byte[] bytes;
+			switch (type) {
+				case StringTypes.AnsiStr:
+					bytes = Encoding.UTF8.GetBytes(s);
+					break;
+				case StringTypes.UniStr:
+					bytes = Encoding.Unicode.GetBytes(s);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(type), type, null);
+			}
+			Reinterpret<byte>().WriteAll(bytes);
+		}
+
+		public int ReadUntil(Predicate<T> predicate)
+		{
+			int i = 0;
+			bool match;
+			do {
+				match = predicate(this[i++]);
+			} while (!match);
+
+			return i - 1;
+		}
+
 		#region WriteAll
 
 		/// <summary>
@@ -333,7 +362,9 @@ namespace RazorSharp.Pointers
 		/// <param name="values">Values to write</param>
 		public void WriteAll(params T[] values)
 		{
-			for (int i = 0; i < values.Length; i++) this[i] = values[i];
+			Conditions.Assert(values.Length > 0);
+			for (int i = 0; i < values.Length; i++) 
+				this[i] = values[i];
 		}
 
 		#endregion
@@ -639,6 +670,12 @@ namespace RazorSharp.Pointers
 		public void* ToPointer()
 		{
 			return m_value;
+		}
+
+		[Pure]
+		public TUnmanaged* ToPointer<TUnmanaged>() where TUnmanaged : unmanaged
+		{
+			return (TUnmanaged*) m_value;
 		}
 
 		#region Integer conversions

@@ -76,7 +76,7 @@ namespace RazorSharp.Clr.Structures.HeapObjects
 		public char this[int index] {
 			get {
 				var __this = (char*) Unsafe.AddressOf(ref this);
-				Conditions.RequiresNotNull(__this);
+				Conditions.RequiresNotNull(__this,nameof(__this));
 
 				return __this[index + RuntimeHelpers.OffsetToStringData / sizeof(char)];
 			}

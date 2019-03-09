@@ -63,7 +63,7 @@ namespace RazorSharp.Utilities
 			 * - Workstation Concurrent GC
 			 *
 			 */
-			//Requires64Bit();
+			Requires64Bit();
 			RequiresOS(OSPlatform.Windows);
 
 			/**
@@ -78,7 +78,7 @@ namespace RazorSharp.Utilities
 			          Environment.Version.Revision == 42000);
 
 			Assert(!GCSettings.IsServerGC);
-			RequiresDotNet();
+			RequiresClr();
 
 			if (Debugger.IsAttached) {
 				Global.Log.Warning("Debugging is enabled: some features may not work correctly");
@@ -172,6 +172,11 @@ namespace RazorSharp.Utilities
 			AssertAllEqual(values[0], values);
 		}
 
+		internal static void AssertAllEqualQ<T>(params T[] values)
+		{
+			AssertAllEqual(values);
+		}
+
 		internal static void AssertAll([AsrtCnd(AsrtCndType.IS_TRUE)] params bool[] conds)
 		{
 			foreach (bool b in conds) {
@@ -181,29 +186,54 @@ namespace RazorSharp.Utilities
 
 		#endregion
 
-		#region Requires (precondition)
+		#region Requires (exception)
 
-		internal static void RequiresDotNet()
+		internal static void Requires(bool b)
 		{
-			bool isRunningOnMono = Type.GetType("Mono.Runtime") != null;
-			Assert(!isRunningOnMono);
+			if (!b) {
+				var exception = new Exception();
+				throw exception;
+			}
 		}
 
+		internal static void Requires(bool b, string s)
+		{
+			if (!b) {
+				var exception = new Exception(s);
+				throw exception;
+			}
+		}
+
+		internal static void RequiresNotNullOrWhiteSpace(string s, string arg)
+		{
+			Requires(!String.IsNullOrWhiteSpace(s), $"String cannot {arg} be null or whitespace");
+		}
+
+
+		internal static void RequiresClr()
+		{
+			bool isRunningOnMono = Type.GetType("Mono.Runtime") != null;
+			Requires(!isRunningOnMono);
+		}
+
+		// ReSharper disable once InconsistentNaming
 		internal static void RequiresOS(OSPlatform os)
 		{
-			Assert(RuntimeInformation.IsOSPlatform(os), "OS type");
+			Requires(RuntimeInformation.IsOSPlatform(os), "OS type");
 		}
 
 		internal static void Requires64Bit()
 		{
-			Assert(IntPtr.Size == 8 && Environment.Is64BitProcess, "64-bit");
+			Requires(IntPtr.Size == 8 && Environment.Is64BitProcess, "64-bit");
 		}
 
 		#region Not null
 
-		private static void AssertNull(bool b)
+		private static void CheckNull(bool b, string arg)
 		{
-			Assert(b, "Null");
+			if (!b) {
+				throw new ArgumentNullException(arg);
+			}
 		}
 
 		/// <summary>
@@ -213,9 +243,9 @@ namespace RazorSharp.Utilities
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static unsafe void RequiresNotNull([AsrtCnd(AsrtCndType.IS_NOT_NULL)] void* value)
+		internal static unsafe void RequiresNotNull([AsrtCnd(AsrtCndType.IS_NOT_NULL)] void* value, string arg)
 		{
-			AssertNull(value != null);
+			CheckNull(value != null, arg);
 		}
 
 		/// <summary>
@@ -225,9 +255,9 @@ namespace RazorSharp.Utilities
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void RequiresNotNull(IntPtr value)
+		internal static void RequiresNotNull(IntPtr value, string arg)
 		{
-			AssertNull(value != IntPtr.Zero);
+			CheckNull(value != IntPtr.Zero, arg);
 		}
 
 		/// <summary>
@@ -241,9 +271,10 @@ namespace RazorSharp.Utilities
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] T value)
+		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] T value, string arg)
 		{
-			AssertNull(value != null);
+			if (!typeof(T).IsValueType)
+				CheckNull(value != null, arg);
 		}
 
 		/// <summary>
@@ -254,9 +285,10 @@ namespace RazorSharp.Utilities
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] in T value) where T : class
+		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] in T value, string arg)
+			where T : class
 		{
-			AssertNull(value != null);
+			CheckNull(value != null, arg);
 		}
 
 		#endregion

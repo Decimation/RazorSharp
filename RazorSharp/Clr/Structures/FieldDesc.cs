@@ -11,6 +11,7 @@ using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 using static RazorSharp.Clr.Offsets;
+
 // ReSharper disable MemberCanBeMadeStatic.Local
 // ReSharper disable InconsistentNaming
 // ReSharper disable MemberCanBeMadeStatic.Global
@@ -57,7 +58,6 @@ namespace RazorSharp.Clr.Structures
 
 		#region Fields
 
-
 		[FieldOffset(0)]
 		private readonly MethodTable* m_pMTOfEnclosingClass;
 
@@ -73,9 +73,8 @@ namespace RazorSharp.Clr.Structures
 
 		// unsigned m_dwOffset         		: 27;
 		// unsigned m_type             		: 5;
-		[FieldOffset(PTR_SIZE+sizeof(uint))]
+		[FieldOffset(PTR_SIZE + sizeof(uint))]
 		private readonly uint m_dword2;
-		
 
 		#endregion
 
@@ -100,7 +99,26 @@ namespace RazorSharp.Clr.Structures
 			}
 		}
 
-		internal int Offset => (int) (m_dword2 & 0x7FFFFFF);
+		
+
+		private const int OFFSET_BITS = 27;
+		
+
+
+		internal int Offset {
+			get {
+				return (int) (m_dword2 & 0x7FFFFFF);
+			}
+			set {
+				fixed (FieldDesc* __this = &this) {
+					Pointer<uint> pDw2 = __this;
+					pDw2.Add(PTR_SIZE + sizeof(uint));
+					pDw2.Reference = (uint)Bits.WriteTo((int)m_dword2, 0, OFFSET_BITS, value);
+					
+				}
+				
+			}
+		}
 
 		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
 		private int ProtectionInt => (int) ((m_dword1 >> 26) & 0x3FFFFFF);

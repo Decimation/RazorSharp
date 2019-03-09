@@ -208,6 +208,7 @@
     <Compile Include="Analysis\Inspect.cs" />
     <Compile Include="Analysis\ObjectLayout.cs" />
     <Compile Include="AssemblyHandle.cs" />
+    <Compile Include="Clr\Clr.cs" />
     <Compile Include="Clr\Fixed\ObjectPinHandle.cs" />
     <Compile Include="Clr\Fixed\ObjectPinner.cs" />
     <Compile Include="Clr\Fixed\PinHandle.cs" />

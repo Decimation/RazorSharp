@@ -101,7 +101,12 @@ namespace RazorSharp.Clr.Meta
 		///         <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Offset"</c> column in hexadecimal format.</para>
 		///     </remarks>
 		/// </summary>
-		public int Offset => m_value.Reference.Offset;
+		public int Offset {
+			get {
+				return m_value.Reference.Offset;
+			}
+			set { m_value.Reference.Offset = value; }
+		}
 
 		/// <summary>
 		///     The corresponding <see cref="FieldInfo" /> of this <see cref="FieldDesc" />
@@ -118,6 +123,8 @@ namespace RazorSharp.Clr.Meta
 
 		public MetaType EnclosingMetaType => new MetaType(m_value.Reference.EnclosingMethodTable);
 
+		
+
 //		public Pointer<MethodTable> FieldMethodTable => m_pFieldDesc.Reference.FieldMethodTable;
 
 //		public Pointer<MethodTable> EnclosingMethodTable => m_pFieldDesc.Reference.EnclosingMethodTable;
@@ -128,7 +135,7 @@ namespace RazorSharp.Clr.Meta
 
 		public unsafe Pointer<byte> GetStaticAddr()
 		{
-			return ClrFunctions.JIT_GetStaticFieldAddr_Context((FieldDesc*)m_value.ToPointer());
+			return ClrFunctions.JIT_GetStaticFieldAddr_Context(m_value.ToPointer<FieldDesc>());
 		}
 
 		public object GetValue<TInstance>(TInstance t)

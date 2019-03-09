@@ -2,10 +2,13 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 
 // ReSharper disable IdentifierTypo
@@ -39,11 +42,10 @@ namespace RazorSharp.Clr
 
 		static ClrFunctions()
 		{
-			
 			s_setStableEntryPointInterlocked =
 				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(
 					CLR_DLL,
-					IntPtr.Size==8
+					IntPtr.Size == 8
 						? s_rgStableEntryPointInterlockedSignature
 						: s_rgStableEntryPointInterlockedSignature32);
 
@@ -74,7 +76,7 @@ namespace RazorSharp.Clr
 		{
 			throw new SigcallException();
 		}
-		
+
 		[ClrSigcall]
 		internal static Pointer<byte> JIT_GetStaticFieldAddr_Context(FieldDesc* value)
 		{
@@ -118,6 +120,75 @@ namespace RazorSharp.Clr
 			s_setStableEntryPointInterlocked(pMd, (ulong) pCode);
 		}
 
+		[ClrSigcall]
+		internal static uint GetSignatureCorElementType(Pointer<MethodTable> pMT)
+		{
+			throw new SigcallException();
+		}
+
+		internal static Pointer<FieldDesc> FindField(Type t, string name)
+		{
+			return FindField(t.GetMethodTable(), name);
+		}
+		
+		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT, string name)
+		{
+			var module = pMT.Reference.Module;
+			var pStr = Mem.AllocString(name);
+			var cSig = GetSignatureCorElementType(pMT);
+			var field = FindField(pMT, pStr, IntPtr.Zero, cSig, module, 0);
+			Mem.FreeString(pStr);
+			return field;
+
+		}
+
+		/*
+		static FieldDesc * FindField(
+			MethodTable *   pMT,
+			LPCUTF8         pszName,
+			PCCOR_SIGNATURE pSignature,
+			DWORD           cSignature,
+			Module*         pModule,
+			BOOL            bCaseSensitive = TRUE);
+		*/
+		[ClrSigcall]
+		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT,
+		                                             Pointer<byte> pszName,
+		                                             Pointer<byte> pSig,
+		                                             uint                 cSig,
+		                                             Pointer<byte> pModule,
+		                                             int                  bCaseSens)
+		{
+			// pSignature can be NULL to find any field with the given name
+			throw new SigcallException();
+		}
+
 		#endregion
+
+		internal static T ClrCall<T>(string hex) where T : Delegate
+		{
+			var fnPtr = SigScanner.QuickScan(CLR_DLL, hex);
+			return Marshal.GetDelegateForFunctionPointer<T>(fnPtr);
+		}
+
+		internal static void ReorganizeSequential<T>()
+		{
+			ReorganizeSequential(typeof(T));
+		}
+
+		internal static void ReorganizeSequential(Type t)
+		{
+			var type      = Meta.Meta.GetType(t);
+			var fields    = type.Fields.OrderBy(x => x.Offset).ToList();
+			var prevField = fields[0];
+
+			for (int i = 1; i < fields.Count; i++) {
+				var currentField = fields[i];
+				currentField.Offset = prevField.Size;
+				var diff = currentField.Offset - prevField.Size;
+				Conditions.Assert(diff == 0, diff.ToString());
+				prevField = currentField;
+			}
+		}
 	}
 }

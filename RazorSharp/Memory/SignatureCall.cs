@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -78,7 +79,6 @@ namespace RazorSharp.Memory
 					                         ? SigcallMethodMap[methodInfo].Item2
 					                         : attr.OffsetGuess, BYTE_TOL)
 				: SigScanner.FindPattern(attr.Signature, attr.OffsetGuess, BYTE_TOL);
-			;
 		}
 
 
@@ -114,7 +114,7 @@ namespace RazorSharp.Memory
 			}
 		}
 
-		internal class Data
+		private class Data
 		{
 			internal string Name { get; }
 
@@ -265,8 +265,12 @@ namespace RazorSharp.Memory
 
 		public static void ReadCacheJsonUrl(Type[] t, string url)
 		{
-			string js = Get(url);
-			Debug.Assert(!String.IsNullOrWhiteSpace(js),"!String.IsNullOrWhiteSpace(js)");
+			string localFile =
+				Environment.CurrentDirectory + @"\..\..\..\..\RazorSharp\Clr\ClrFunctions.json";
+			
+			
+			string js = File.Exists(localFile) ? File.ReadAllText(localFile) : Get(url);
+			Conditions.RequiresNotNullOrWhiteSpace(js,nameof(js));
 			foreach (var type in t)
 				ReadCacheJson(type, js);
 		}
@@ -278,13 +282,13 @@ namespace RazorSharp.Memory
 
 		public static void ReadCacheJson(Type t, string json)
 		{
-			var js      = JObject.Parse(json).GetValue(t.Name);
-			
+			var js = JObject.Parse(json).GetValue(t.Name);
+
 			var r       = new List<Data>();
 			var names   = js.Values<string>("name").ToArray();
 			var offsets = js.Values<string>(IntPtr.Size == 4 ? "offset64" : "offset64").ToArray();
 			var sigs    = js.Values<string>(IntPtr.Size == 4 ? "opcodes32" : "opcodes64").ToArray();
-			
+
 			Conditions.AssertAllEqual(x => x.Length, new[] {names, offsets, sigs});
 
 			for (int i = 0; i < names.Length; i++) {
@@ -293,9 +297,11 @@ namespace RazorSharp.Memory
 				               offsets[i]));
 			}
 
-			foreach (var data in r)
+			foreach (var data in r) {
+				Global.Log.Debug("Binding {Name}",data.Name);
 				CacheFunction(t, data.Name, StringUtil.ParseByteArray(data.OpcodesSignature),
 				              Int64.Parse(data.OffsetString, NumberStyles.HexNumber));
+			}
 		}
 
 		#endregion
