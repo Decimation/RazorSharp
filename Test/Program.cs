@@ -19,11 +19,8 @@ using NUnit.Framework;
 using RazorCommon;
 using RazorSharp;
 using RazorSharp.Analysis;
-using RazorSharp.CLR;
-using RazorSharp.CLR.Fixed;
-using RazorSharp.CLR.Meta;
-using RazorSharp.CLR.Structures;
-using RazorSharp.CLR.Structures.EE;
+using RazorSharp.Clr;
+using RazorSharp.Clr.Meta;
 using RazorSharp.Experimental;
 using RazorSharp.Memory;
 using RazorSharp.Native;
@@ -63,6 +60,7 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
+			
 			int[] rg = {1, 2, 3};
 			Inspect.Heap<int[], int>(rg);
 
@@ -78,18 +76,29 @@ namespace Test
 
 			Inspect.Stack(ref s);
 
-			Console.WriteLine(Single.NaN);
-			Console.WriteLine(Single.PositiveInfinity);
-			Console.WriteLine(Single.NegativeInfinity);
-			Console.WriteLine(Collections.CreateString(Unsafe.MemoryOfVal(Single.Epsilon),
-			                                           ToStringOptions.Hex |
-			                                           ToStringOptions.PrefixHex |
-			                                           ToStringOptions.ZeroPadHex));
+			Console.WriteLine(PrettyPrint.GenericName(typeof(KeyValuePair<int,string>)));
 
-			var (Str, Int) = ("", 1);
+			int[] irg = {1, 2, 3};
+			var obj = Runtime.GetArrayObject(ref irg);
 			
+
+			Pointer<int> ptr = Marshal.UnsafeAddrOfPinnedArrayElement(irg, 1);
+			Console.WriteLine(ptr);
+
+			var m = Meta.GetType<int>();
+			Console.WriteLine(m);
+			Debug.Assert(Compare<int>());
 		}
 
+		[Flags]
+		private enum Flags
+		{
+			One = 1,
+			Two = 2,
+			Three = 4
+		}
+
+		private static bool HasFlagFast(this Flags v, Flags f) { return (v & f) == f; }
 
 		private static bool Compare<T>()
 		{

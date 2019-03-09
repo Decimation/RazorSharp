@@ -3,7 +3,7 @@
 using System;
 using System.Diagnostics;
 using NUnit.Framework;
-using RazorSharp.CLR.Structures;
+using RazorSharp.Clr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 

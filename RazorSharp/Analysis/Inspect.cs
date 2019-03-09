@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RazorCommon;
-using RazorSharp.CLR;
-using RazorSharp.CLR.Meta;
-using RazorSharp.CLR.Structures;
+using RazorSharp.Clr;
+using RazorSharp.Clr.Meta;
+using RazorSharp.Clr.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 

@@ -1,8 +1,8 @@
 #region
 
 using NUnit.Framework;
-using RazorSharp.CLR;
-using RazorSharp.CLR.Structures.HeapObjects;
+using RazorSharp.Clr;
+using RazorSharp.Clr.Structures.HeapObjects;
 
 #endregion
 

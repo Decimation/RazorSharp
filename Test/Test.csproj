@@ -58,6 +58,31 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+      <DebugSymbols>true</DebugSymbols>
+      <DebugType>full</DebugType>
+      <Optimize>false</Optimize>
+      <DefineConstants>DEBUG;TRACE;JETBRAINS_ANNOTATIONS</DefineConstants>
+      <ErrorReport>prompt</ErrorReport>
+      <WarningLevel>4</WarningLevel>
+      <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+      <LangVersion>latest</LangVersion>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+      <DebugType>pdbonly</DebugType>
+      <Optimize>true</Optimize>
+      <DefineConstants>TRACE;JETBRAINS_ANNOTATIONS</DefineConstants>
+      <ErrorReport>prompt</ErrorReport>
+      <WarningLevel>4</WarningLevel>
+      <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+      <LangVersion>latest</LangVersion>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="JetBrains.Annotations, Version=2018.3.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
       <HintPath>..\packages\JetBrains.Annotations.2018.3.0\lib\net20\JetBrains.Annotations.dll</HintPath>
@@ -77,7 +102,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RazorCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\RazorCommon\RazorCommon\bin\x64\Debug\RazorCommon.dll</HintPath>
+      <HintPath>..\..\RazorCommon\RazorCommon\bin\Release\RazorCommon.dll</HintPath>
     </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
       <HintPath>..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>

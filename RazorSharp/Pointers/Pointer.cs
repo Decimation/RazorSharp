@@ -13,7 +13,7 @@ using JetBrains.Annotations;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Utilities;
-using RazorSharp.CLR.Fixed;
+using RazorSharp.Clr.Fixed;
 using RazorSharp.Memory;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;

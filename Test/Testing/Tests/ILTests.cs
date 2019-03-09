@@ -2,8 +2,8 @@
 
 using System.Diagnostics;
 using NUnit.Framework;
-using RazorSharp.CLR;
-using RazorSharp.CLR.Structures;
+using RazorSharp.Clr;
+using RazorSharp.Clr.Structures;
 using RazorSharp.Pointers;
 
 #endregion

@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RazorCommon.Utilities;
-using RazorSharp.CLR;
+using RazorSharp.Clr;
 using Serilog.Context;
 
 #endregion

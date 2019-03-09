@@ -9,8 +9,8 @@ using RazorCommon;
 using RazorCommon.Utilities;
 using RazorSharp;
 using RazorSharp.Analysis;
-using RazorSharp.CLR;
-using RazorSharp.CLR.Structures.HeapObjects;
+using RazorSharp.Clr;
+using RazorSharp.Clr.Structures.HeapObjects;
 using RazorSharp.Pointers;
 using Test.Testing.Types;
 

@@ -5,8 +5,8 @@ using System.Diagnostics;
 using System.Reflection;
 using NUnit.Framework;
 using RazorSharp;
-using RazorSharp.CLR;
-using RazorSharp.CLR.Structures;
+using RazorSharp.Clr;
+using RazorSharp.Clr.Structures;
 using RazorSharp.Pointers;
 using Test.Testing.Types;
 

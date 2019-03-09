@@ -1,5 +1,5 @@
 using RazorSharp;
-using RazorSharp.CLR.Fixed;
+using RazorSharp.Clr.Fixed;
 using RazorSharp.Pointers;
 
 namespace Test.Samples

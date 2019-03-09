@@ -59,6 +59,32 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+      <DebugSymbols>true</DebugSymbols>
+      <DebugType>full</DebugType>
+      <Optimize>false</Optimize>
+      <DefineConstants>DEBUG;TRACE;JETBRAINS_ANNOTATIONS</DefineConstants>
+      <ErrorReport>prompt</ErrorReport>
+      <WarningLevel>4</WarningLevel>
+      <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+      <LangVersion>latest</LangVersion>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      
+      <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+      <DebugType>pdbonly</DebugType>
+      <Optimize>true</Optimize>
+      <DefineConstants>TRACE;JETBRAINS_ANNOTATIONS</DefineConstants>
+      <ErrorReport>prompt</ErrorReport>
+      <WarningLevel>4</WarningLevel>
+      <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+      <LangVersion>latest</LangVersion>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="JetBrains.Annotations, Version=2018.3.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
       <HintPath>..\packages\JetBrains.Annotations.2018.3.0\lib\net20\JetBrains.Annotations.dll</HintPath>
@@ -73,7 +99,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="RazorCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\RazorCommon\RazorCommon\bin\x64\Debug\RazorCommon.dll</HintPath>
+      <HintPath>..\..\RazorCommon\RazorCommon\bin\Release\RazorCommon.dll</HintPath>
     </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
       <HintPath>..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
@@ -182,28 +208,28 @@
     <Compile Include="Analysis\Inspect.cs" />
     <Compile Include="Analysis\ObjectLayout.cs" />
     <Compile Include="AssemblyHandle.cs" />
-    <Compile Include="CLR\Fixed\ObjectPinHandle.cs" />
-    <Compile Include="CLR\Fixed\ObjectPinner.cs" />
-    <Compile Include="CLR\Fixed\PinHandle.cs" />
-    <Compile Include="CLR\Fixed\PinHelper.cs" />
-    <Compile Include="CLR\Meta\IMeta.cs" />
-    <Compile Include="CLR\Meta\IMetaMember.cs" />
-    <Compile Include="CLR\Meta\Meta.cs" />
-    <Compile Include="CLR\Meta\MetaField.cs" />
-    <Compile Include="CLR\Meta\MetaIL.cs" />
-    <Compile Include="CLR\Meta\MetaMethod.cs" />
-    <Compile Include="CLR\Meta\MetaType.cs" />
-    <Compile Include="CLR\Offsets.cs" />
-    <Compile Include="CLR\Identifiers.cs" />
-    <Compile Include="CLR\Structures\EE\EEClass.cs" />
-    <Compile Include="CLR\Structures\EE\EEClassLayoutInfo.cs" />
-    <Compile Include="CLR\Structures\EE\LayoutEEClass.cs" />
-    <Compile Include="CLR\Structures\GCHeap.cs" />
-    <Compile Include="CLR\Structures\ILMethods\CorILMethodFlags.cs" />
-    <Compile Include="CLR\Structures\ILMethods\ILMethod.cs" />
-    <Compile Include="CLR\Structures\ILMethods\FatILMethod.cs" />
-    <Compile Include="CLR\Structures\ILMethods\TinyILMethod.cs" />
-    <Compile Include="CLR\Structures\SigParser.cs" />
+    <Compile Include="Clr\Fixed\ObjectPinHandle.cs" />
+    <Compile Include="Clr\Fixed\ObjectPinner.cs" />
+    <Compile Include="Clr\Fixed\PinHandle.cs" />
+    <Compile Include="Clr\Fixed\PinHelper.cs" />
+    <Compile Include="Clr\Meta\IMeta.cs" />
+    <Compile Include="Clr\Meta\IMetaMember.cs" />
+    <Compile Include="Clr\Meta\Meta.cs" />
+    <Compile Include="Clr\Meta\MetaField.cs" />
+    <Compile Include="Clr\Meta\MetaIL.cs" />
+    <Compile Include="Clr\Meta\MetaMethod.cs" />
+    <Compile Include="Clr\Meta\MetaType.cs" />
+    <Compile Include="Clr\Offsets.cs" />
+    <Compile Include="Clr\Identifiers.cs" />
+    <Compile Include="Clr\Structures\EE\EEClass.cs" />
+    <Compile Include="Clr\Structures\EE\EEClassLayoutInfo.cs" />
+    <Compile Include="Clr\Structures\EE\LayoutEEClass.cs" />
+    <Compile Include="Clr\Structures\GCHeap.cs" />
+    <Compile Include="Clr\Structures\ILMethods\CorILMethodFlags.cs" />
+    <Compile Include="Clr\Structures\ILMethods\ILMethod.cs" />
+    <Compile Include="Clr\Structures\ILMethods\FatILMethod.cs" />
+    <Compile Include="Clr\Structures\ILMethods\TinyILMethod.cs" />
+    <Compile Include="Clr\Structures\SigParser.cs" />
     <Compile Include="Experimental\Functions.cs" />
     <Compile Include="Experimental\Registers.cs" />
     <Compile Include="Global.cs" />
@@ -245,21 +271,20 @@
     <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
     <Compile Include="Pointers\PointerUtils.cs" />
-    <Compile Include="CLR\ClrFunctions.cs" />
-    <Compile Include="CLR\Structures\DWFlags.cs" />
-    <Compile Include="CLR\Structures\FieldDesc.cs" />
-    <Compile Include="CLR\Structures\HeapObjects\ArrayObject.cs" />
-    <Compile Include="CLR\Structures\HeapObjects\HeapObject.cs" />
-    <Compile Include="CLR\Structures\HeapObjects\IHeapObject.cs" />
-    <Compile Include="CLR\Structures\HeapObjects\StringObject.cs" />
-    <Compile Include="CLR\Structures\MethodDesc.cs" />
-    <Compile Include="CLR\Structures\MethodDescChunk.cs" />
-    <Compile Include="CLR\Structures\MethodTable.cs" />
-    <Compile Include="CLR\Structures\Module.cs" />
-    <Compile Include="CLR\Structures\ObjHeader.cs" />
-    <Compile Include="CLR\Structures\PackedDWORDFields.cs" />
-    <Compile Include="CLR\Constants.cs" />
-    <Compile Include="CLR\Runtime.cs" />
+    <Compile Include="Clr\ClrFunctions.cs" />
+    <Compile Include="Clr\Structures\DWFlags.cs" />
+    <Compile Include="Clr\Structures\FieldDesc.cs" />
+    <Compile Include="Clr\Structures\HeapObjects\ArrayObject.cs" />
+    <Compile Include="Clr\Structures\HeapObjects\HeapObject.cs" />
+    <Compile Include="Clr\Structures\HeapObjects\IHeapObject.cs" />
+    <Compile Include="Clr\Structures\HeapObjects\StringObject.cs" />
+    <Compile Include="Clr\Structures\MethodDesc.cs" />
+    <Compile Include="Clr\Structures\MethodDescChunk.cs" />
+    <Compile Include="Clr\Structures\MethodTable.cs" />
+    <Compile Include="Clr\Structures\ObjHeader.cs" />
+    <Compile Include="Clr\Structures\PackedDWORDFields.cs" />
+    <Compile Include="Clr\Constants.cs" />
+    <Compile Include="Clr\Runtime.cs" />
     <Compile Include="Unsafe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\Exceptions\PreconditionException.cs" />
@@ -282,7 +307,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="CLR\ClrFunctions.json" />
+    <Content Include="Clr\ClrFunctions.json" />
     <Content Include="Documentation.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

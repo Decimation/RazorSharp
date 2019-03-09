@@ -62,7 +62,7 @@ namespace RazorSharp.Utilities
 			 * - Workstation Concurrent GC
 			 *
 			 */
-			Requires64Bit();
+			//Requires64Bit();
 			RequiresOS(OSPlatform.Windows);
 
 			/**
@@ -172,7 +172,7 @@ namespace RazorSharp.Utilities
 
 		internal static void RequiresOS(OSPlatform os)
 		{
-			Assert(RuntimeInformation.IsOSPlatform(os), "OS version");
+			Assert(RuntimeInformation.IsOSPlatform(os), "OS type");
 		}
 
 		internal static void Requires64Bit()

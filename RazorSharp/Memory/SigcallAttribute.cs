@@ -1,7 +1,8 @@
 #region
 
 using System;
-using RazorSharp.CLR;
+using RazorSharp.Clr;
+using RazorSharp.Clr.Structures;
 
 #endregion
 
@@ -14,7 +15,7 @@ namespace RazorSharp.Memory
 	///         <see cref="T:RazorSharp.Memory.SigScanner" /> internally).
 	///     </para>
 	///     <para>
-	///         The annotated method's entry point (<see cref="RazorSharp.CLR.Structures.MethodDesc.Function" />)
+	///         The annotated method's entry point (<see cref="MethodDesc.Function" />)
 	///         will be set (<see cref="ClrFunctions.SetStableEntryPoint" />) to the address of the matched signature found by
 	///         <see cref="SigScanner" />.
 	///     </para>

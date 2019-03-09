@@ -1,6 +1,6 @@
 #region
 
-using RazorSharp.CLR;
+using RazorSharp.Clr;
 
 #endregion
 
