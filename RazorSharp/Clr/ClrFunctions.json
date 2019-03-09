@@ -110,6 +110,7 @@
 	},
 	{
 	  "name": "JIT_GetStaticFieldAddr_Context",
+	  "opcodes64": "48 8B C4 48 89 48 8 57 41 56 41 57 48",
 	  "opcodes32": "6A 64 B8 64 45 5A 10 E8 2F DB CB FF 8B",
 	  "offset64": "0"
 	}
