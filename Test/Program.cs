@@ -70,7 +70,8 @@ namespace Test
 			//Console.WriteLine(Meta.GetType<Struct>().Fields[0].Size);
 
 
-			//Clr.Reorganize();
+			//Conditions.AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
+			//Conditions.Assert(Environment.Is64BitProcess);
 			Conditions.CheckCompatibility();
 
 			ClrFunctions.Init();
@@ -80,31 +81,24 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			
-			
-			//if (Environment.Is64BitProcess) {
 			init();
-			//Conditions.AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
-			//Conditions.Assert(Environment.Is64BitProcess);
-			//}
-			Clr.Setup();
+			
+			//Clr.Setup();
 
-			var fdf = typeof(FieldDesc).GetField("m_dword1", ReflectionUtil.ALL_INSTANCE_FLAGS);
-			var fdffd = fdf.GetFieldDesc();
-			Console.WriteLine(fdffd.Reference.Offset);
-			//Clr.Reorganize();
+			var clr = Modules.GetModule("clr.dll");
+			Pointer<byte> mem = clr.BaseAddress;
+			Console.WriteLine(mem.Add(62816));
 
-			var intf = typeof(Struct).GetField("m_int", ReflectionUtil.ALL_INSTANCE_FLAGS);
-			var fd = intf.GetFieldDesc();
-			Console.WriteLine(fd.Reference.Offset);
-			Structures.ReorganizeAuto(typeof(Struct));
-			Struct s = new Struct();
-			s.m_int2 = 1;
-			Console.WriteLine(s.m_int2);
+			string img = @"C:\Users\Deci\Desktop\clrx.pdb";
+			string ctx = "JIT_GetRuntimeType";
+
+			Console.WriteLine("{0:P}",ClrFunctions.GetClrFunctionAddress("JIT_GetRuntimeType"));
 
 			
 			
-			Structures.ReorganizeAuto(typeof(MethodTable));
+
+
+
 
 
 			/*

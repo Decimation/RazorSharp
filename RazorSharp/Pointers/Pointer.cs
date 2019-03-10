@@ -328,6 +328,7 @@ namespace RazorSharp.Pointers
 					throw new ArgumentOutOfRangeException(nameof(type), type, null);
 			}
 			Reinterpret<byte>().WriteAll(bytes);
+			WriteAny<byte>(0, bytes.Length+1);
 		}
 
 		public int ReadUntil(Predicate<T> predicate)

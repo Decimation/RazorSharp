@@ -239,6 +239,7 @@
     <Compile Include="Memory\SigCache.cs" />
     <Compile Include="Memory\MemScanner.cs" />
     <Compile Include="Memory\Structures.cs" />
+    <Compile Include="Native\Structures\SymbolInfo.cs" />
     <Compile Include="ProcessHandle.cs" />
     <Compile Include="RazorConvert.cs" />
     <Compile Include="Memory\AllocPool.cs" />

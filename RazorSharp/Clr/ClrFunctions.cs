@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Memory;
+using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
@@ -42,11 +43,17 @@ namespace RazorSharp.Clr
 
 		static ClrFunctions()
 		{
-			s_setStableEntryPointInterlocked =
+			/*s_setStableEntryPointInterlocked =
 				SigScanner.QuickScanDelegateClr<SetStableEntryPointInterlockedDelegate>(
 					Environment.Is64BitProcess
 						? s_rgStableEntryPointInterlockedSignature
-						: s_rgStableEntryPointInterlockedSignature32);
+						: s_rgStableEntryPointInterlockedSignature32);*/
+
+			var fn = GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked").Address;
+			
+			s_setStableEntryPointInterlocked =
+				Marshal.GetDelegateForFunctionPointer<SetStableEntryPointInterlockedDelegate>(
+					fn);
 
 			SignatureCall.ReadCacheJsonUrl(new[]
 			{
@@ -140,6 +147,13 @@ namespace RazorSharp.Clr
 			Mem.FreeString(pStr);
 			return field;
 
+		}
+
+		private const string CLR_PDB = @"C:\Users\Deci\Desktop\clrx.pdb";
+		
+		internal static Pointer<byte> GetClrFunctionAddress(string name)
+		{
+			return DbgHelp.GetFuncAddr(CLR_PDB, CLR_DLL, name);
 		}
 
 		/*
