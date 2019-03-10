@@ -75,7 +75,7 @@ namespace RazorSharp.Clr.Structures
 		// unsigned m_dwOffset         		: 27;
 		// unsigned m_type             		: 5;
 		[FieldOffset(PTR_SIZE + sizeof(uint))]
-		private readonly uint m_dword2;
+		private /*readonly*/ uint m_dword2;
 
 		#endregion
 
@@ -103,16 +103,7 @@ namespace RazorSharp.Clr.Structures
 
 		internal int Offset {
 			get { return (int) (m_dword2 & 0x7FFFFFF); }
-			set {
-				fixed (FieldDesc* __this = &this) {
-					Pointer<uint> pDw2 = __this;
-					pDw2.Add(IntPtr.Size + sizeof(uint));
-					pDw2.Reference = (uint) Bits.WriteTo((int) m_dword2, 
-					                                     0, 
-					                                     Constants.FIELDDESC_DW2_OFFSET_BITS, 
-					                                     value);
-				}
-			}
+			set { m_dword2 = (uint)Bits.WriteTo((int)m_dword2, 0, Constants.FIELDDESC_DW2_OFFSET_BITS, value); }
 		}
 
 		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
@@ -184,7 +175,7 @@ namespace RazorSharp.Clr.Structures
 		/// </summary>
 		private int LoadSize {
 			[ClrSigcall]
-			get => throw new SigcallException();
+			get => throw new SigcallException(nameof(LoadSize));
 		}
 
 		internal FieldInfo Info => EnclosingType.Module.ResolveField(Token);

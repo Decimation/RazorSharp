@@ -15,10 +15,6 @@ namespace RazorSharp.Memory
 	{
 		internal static void ReorganizeQ(Type t, params int[] offsets)
 		{
-			if (!LayoutMismatch(t)) {
-				Global.Log.Debug("Verified layout integrity of {Name}",t.Name);
-				return;
-			}
 			var fields = t.GetFields(ReflectionUtil.ALL_INSTANCE_FLAGS).ToList();
 			Conditions.Assert(fields.Count == offsets.Length);
 
@@ -35,7 +31,7 @@ namespace RazorSharp.Memory
 			(FieldInfo[] fields, FieldOffsetAttribute[] attributes) =
 				Runtime.GetAnnotatedFields<FieldOffsetAttribute>(t);
 			var metaFields = fields.Select(x => new MetaField(x.GetFieldDesc())).ToArray();
-			
+
 			for (int i = 0; i < fields.Length; i++) {
 				if (metaFields[i].Offset != attributes[i].Value) {
 					return true;
@@ -47,14 +43,6 @@ namespace RazorSharp.Memory
 
 		internal static void ReorganizeAuto(Type t)
 		{
-			if (!LayoutMismatch(t)) {
-				Global.Log.Debug("Verified layout integrity of {Name}",t.Name);
-				return;
-			}
-			else {
-				Global.Log.Debug("Correcting layout of {Name}",t.Name);
-			}
-			
 			(FieldInfo[] fields, FieldOffsetAttribute[] attributes) =
 				Runtime.GetAnnotatedFields<FieldOffsetAttribute>(t);
 
@@ -65,14 +53,13 @@ namespace RazorSharp.Memory
 			var unions = new Dictionary<int, MetaField[]>();
 
 			for (int i = 1; i < fields.Length; i++) {
-				
-				var currentField  = fields[i];
-				var currentMField = new MetaField(currentField.GetFieldDesc());
+				var currentField   = fields[i];
+				var currentMField  = new MetaField(currentField.GetFieldDesc());
 				int expectedOffset = prevMField.Size + prevMField.Offset;
 
 
 				if (!(i + 1 >= fields.Length)) {
-					var nextField = fields[i + 1];
+					var nextField  = fields[i + 1];
 					var nextMField = new MetaField(nextField.GetFieldDesc());
 
 					if (currentMField.Offset == nextMField.Offset) {
@@ -92,8 +79,8 @@ namespace RazorSharp.Memory
 							foreach (var field in unions[key]) {
 								var oldOfs = field.Offset;
 								field.Offset = expectedOffset;
-								Global.Log.Debug("Adjusted union field {Name} ({OldOfs} -> {NewOfs})",
-								                 field.Name, oldOfs, expectedOffset);
+//								Global.Log.Debug("Adjusted union field {Name} ({OldOfs} -> {NewOfs})",
+//								                 field.Name, oldOfs, expectedOffset);
 							}
 						}
 					}
@@ -103,8 +90,8 @@ namespace RazorSharp.Memory
 						var oldOfs = currentMField.Offset;
 						currentMField.Offset = expectedOffset;
 
-						Global.Log.Debug("Adjusted field {Name} ({OldOfs} -> {NewOfs})",
-						                 currentField.Name, oldOfs, expectedOffset);
+//						Global.Log.Debug("Adjusted field {Name} ({OldOfs} -> {NewOfs})",
+//						                 currentField.Name, oldOfs, expectedOffset);
 					}
 				}
 
@@ -115,9 +102,9 @@ namespace RazorSharp.Memory
 
 			Global.Log.Debug("Detected unions: {Count}", unions.Count);
 
-			foreach (var union in unions) {
-				Global.Log.Debug("Union: {Str} {Key}", Collections.CreateString(union.Value), union.Key);
-			}
+//			foreach (var union in unions) {
+//				Global.Log.Debug("Union: {Key} {Str}", union.Key,Collections.CreateString(union.Value));
+//			}
 		}
 
 		internal static void ReorganizeSequential(Type t)

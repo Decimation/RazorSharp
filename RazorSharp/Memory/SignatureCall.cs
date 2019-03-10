@@ -13,8 +13,10 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RazorCommon;
 using RazorCommon.Utilities;
 using RazorSharp.Clr;
+using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Serilog.Context;
 
@@ -81,29 +83,84 @@ namespace RazorSharp.Memory
 				: SigScanner.FindPattern(attr.Signature, attr.OffsetGuess, BYTE_TOL);
 		}
 
+		private static void Relink(SigcallAttribute attr, MethodInfo methodInfo)
+		{
+			// todo: this is a cheap fix
+			if (!attr.IsInFunctionMap && SigcallMethodMap.ContainsKey(methodInfo))
+				attr.IsInFunctionMap = true;
+		}
+
+
+		private static IntPtr Resolve32(SigcallAttribute attr, MethodInfo methodInfo)
+		{
+			ProcessModule module = Modules.GetModule(attr.Module);
+			//Console.WriteLine(module.FileVersionInfo);
+
+			byte[] sig;
+			long   ofs;
+
+			if (attr.IsInFunctionMap) {
+				sig = SigcallMethodMap[methodInfo].Item1;
+				ofs = SigcallMethodMap[methodInfo].Item2;
+			}
+			else {
+				sig = StringUtil.ParseByteArray(attr.Signature);
+				ofs = attr.OffsetGuess;
+			}
+
+			Pointer<byte> modPtr = module.BaseAddress;
+			var           rg     = modPtr.CopyOut(module.ModuleMemorySize);
+
+
+			const int BYTE_SCAN = 5;
+
+			for (int i = 0; i < rg.Length - BYTE_SCAN; i++) {
+				if (rg[i] == sig[0]
+				    && rg[i + 1] == sig[1]
+				    && rg[i + 2] == sig[2]
+				    && rg[i + 3] == sig[3]
+				    && rg[i + 4] == sig[4]) {
+					Global.Log.Debug("Resolve32::Success {Name} [{Array}]",
+					                 methodInfo.Name,
+					                 Collections.CreateString(rg.Skip(i).Take(BYTE_SCAN+5).ToArray(),
+					                                          ToStringOptions.Hex));
+					return (modPtr + i).Address;
+				}
+			}
+
+			Global.Log.Debug("Resolve32::Fail {Name}", methodInfo.Name);
+			return IntPtr.Zero;
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void ApplySigcallIndependent(MethodInfo methodInfo)
 		{
 			Debug.Assert(methodInfo != null);
 			var attr = methodInfo.GetCustomAttribute<SigcallAttribute>();
+
 			if (attr != null) {
 				SelectModule(attr);
-
-				// todo: this is a cheap fix
-				if (!attr.IsInFunctionMap && SigcallMethodMap.ContainsKey(methodInfo))
-					attr.IsInFunctionMap = true;
-
+				Relink(attr, methodInfo);
 
 				var fn = GetCorrespondingFunctionPointer(attr, methodInfo);
 				using (SignatureCallLogContext) {
 					Global.Log.Verbose("Binding {Name} to {Addr:X}", methodInfo.Name, fn.ToInt64());
-					if (fn == IntPtr.Zero)
+
+					if (fn == IntPtr.Zero) {
 						Global.Log.Error("Could not resolve address for func {Name}", methodInfo.Name);
+
+						//fn = Resolve32(attr, methodInfo);
+
+						//throw new Exception(String.Format("SS: {0}\nName: {1}",SigScanner.Dump(),methodInfo.Name));
+					}
 				}
 
-				if (fn != IntPtr.Zero)
-				ClrFunctions.SetStableEntryPoint(methodInfo, fn);
+				if (fn != IntPtr.Zero) {
+					Global.Log.Debug("Setting entry point for {Name} to {Addr}", 
+					                 methodInfo.Name, fn.ToInt64().ToString("X"));
+					ClrFunctions.SetStableEntryPoint(methodInfo, fn);
+				}
+					
 			}
 		}
 
@@ -152,13 +209,13 @@ namespace RazorSharp.Memory
 		/// <param name="t">Type containing unbound <see cref="SigcallAttribute" /> functions </param>
 		public static void DynamicBind(Type t)
 		{
-			if (IsBound(t)) 
+			if (IsBound(t))
 				return;
 
 			MethodInfo[] methodInfos = Runtime.GetMethods(t);
 
 
-			foreach (var mi in methodInfos) 
+			foreach (var mi in methodInfos)
 				ApplySigcallIndependent(mi);
 
 			BoundTypes.Add(t);

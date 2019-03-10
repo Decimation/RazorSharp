@@ -1,7 +1,12 @@
 using System;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using RazorSharp.Clr.Meta;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Clr.Structures.EE;
 using RazorSharp.Clr.Structures.HeapObjects;
+using RazorSharp.Utilities;
 
 namespace RazorSharp.Clr
 {
@@ -15,7 +20,10 @@ namespace RazorSharp.Clr
 
 		internal static void Setup()
 		{
-			Memory.Structures.ReorganizeQ(typeof(FieldDesc),0,IntPtr.Size, IntPtr.Size+sizeof(uint));
+			int[] offsets = new[] {0, IntPtr.Size, IntPtr.Size + sizeof(uint)};
+			Memory.Structures.ReorganizeQ(typeof(FieldDesc),offsets: offsets);
+			
+			
 		}
 		
 		internal static void Reorganize()

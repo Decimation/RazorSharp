@@ -43,9 +43,8 @@ namespace RazorSharp.Clr
 		static ClrFunctions()
 		{
 			s_setStableEntryPointInterlocked =
-				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(
-					CLR_DLL,
-					IntPtr.Size == 8
+				SigScanner.QuickScanDelegateClr<SetStableEntryPointInterlockedDelegate>(
+					Environment.Is64BitProcess
 						? s_rgStableEntryPointInterlockedSignature
 						: s_rgStableEntryPointInterlockedSignature32);
 
@@ -104,7 +103,8 @@ namespace RazorSharp.Clr
 
 		private static readonly byte[] s_rgStableEntryPointInterlockedSignature32 =
 		{
-			0x55, 0x8B, 0xEC, 0x53, 0x56, 0x57, 0x8B, 0xD9, 0xE8, 0x11, 0x68, 0xF8, 0xFF
+			0x55, 0x8B, 0xEC, 0x53, 0x56, 0x57, 0x8B, 0xD9, 0xE8, 0x11, 0x68, 0xF8, 0xFF,
+			0x8B,0xCB,0x8B,0xF8, 0xE8, 0x57, 0x41, 0xF8, 0xFF, 0x8B, 0x75, 0x8, 0x8B 
 		};
 
 		/// <summary>

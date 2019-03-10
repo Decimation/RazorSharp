@@ -10,8 +10,10 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.Clr;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities.Exceptions;
 using Serilog.Context;
 
 #endregion
@@ -75,6 +77,29 @@ namespace RazorSharp.Memory
 				throw new Exception("Selected module is null");
 		}
 
+		private IntPtr Resolve32(byte[] sig)
+		{
+			Global.Log.Debug("SigScanner::Resolve32");
+			var module = Modules.GetModule(m_moduleName);
+			Pointer<byte> modPtr = module.BaseAddress;
+			var           rg     = modPtr.CopyOut(module.ModuleMemorySize);
+
+
+			const int BYTE_SCAN = 9;
+
+			for (int i = 0; i < rg.Length - BYTE_SCAN; i++) {
+				if (new ArraySegment<byte>(rg,i,BYTE_SCAN).SequenceEqual(sig)) {
+					Global.Log.Debug("Resolve32::Success [{Array}]",
+					                 
+					                 Collections.CreateString(rg.Skip(i).Take(BYTE_SCAN+5).ToArray(),
+					                                          ToStringOptions.Hex));
+					return (modPtr + i).Address;
+				}
+			}
+
+			Global.Log.Debug("Resolve32::Fail (sig: {Array})", Collections.CreateString(sig, ToStringOptions.Hex));
+			return IntPtr.Zero;
+		}
 		/// <summary>
 		///     Use <c>0x00</c> for <c>"?"</c>
 		/// </summary>
@@ -112,10 +137,18 @@ namespace RazorSharp.Memory
 				}
 			}
 
-
+			var fn32 = Resolve32(rgPattern);
+			if (fn32 != IntPtr.Zero) {
+				return fn32;
+			}
+			
 			return IntPtr.Zero;
 		}
 
+		internal  string Dump()
+		{
+			return String.Format("Module buffer size: {0}", m_rgModuleBuffer.Length);
+		}
 		public IntPtr FindPattern(string szPattern, long ofsGuess = 0, int byteTolerance = 0)
 		{
 			ModuleCheck();
@@ -144,6 +177,16 @@ namespace RazorSharp.Memory
 			return ss.FindPattern(rgPattern, ofsGuess);
 		}
 
+		public static TDelegate QuickScanDelegateClr<TDelegate>(byte[] rgPattern, long ofsGuess = 0)where TDelegate : Delegate
+		{
+			var ss = new SigScanner();
+			ss.SelectModule("clr.dll"); //todo
+			if (!Environment.Is64BitProcess) {
+				return Marshal.GetDelegateForFunctionPointer<TDelegate>(ss.Resolve32(rgPattern));
+			}
+			else return ss.GetDelegate<TDelegate>(rgPattern, ofsGuess);
+		}
+		
 		public static TDelegate QuickScanDelegate<TDelegate>(string module, byte[] rgPattern, long ofsGuess = 0)
 			where TDelegate : Delegate
 		{

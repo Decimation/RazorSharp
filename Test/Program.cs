@@ -80,14 +80,31 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
+			
+			
 			//if (Environment.Is64BitProcess) {
 			init();
 			//Conditions.AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
 			//Conditions.Assert(Environment.Is64BitProcess);
 			//}
-
 			Clr.Setup();
-			Clr.Reorganize();
+
+			var fdf = typeof(FieldDesc).GetField("m_dword1", ReflectionUtil.ALL_INSTANCE_FLAGS);
+			var fdffd = fdf.GetFieldDesc();
+			Console.WriteLine(fdffd.Reference.Offset);
+			//Clr.Reorganize();
+
+			var intf = typeof(Struct).GetField("m_int", ReflectionUtil.ALL_INSTANCE_FLAGS);
+			var fd = intf.GetFieldDesc();
+			Console.WriteLine(fd.Reference.Offset);
+			Structures.ReorganizeAuto(typeof(Struct));
+			Struct s = new Struct();
+			s.m_int2 = 1;
+			Console.WriteLine(s.m_int2);
+
+			
+			
+			Structures.ReorganizeAuto(typeof(MethodTable));
 
 
 			/*
@@ -122,7 +139,7 @@ namespace Test
 		struct Struct
 		{
 			[FieldOffset(0)]
-			public Pointer<int> m_int;
+			public void* m_int;
 
 			[FieldOffset(12)]
 			public int m_int2;
@@ -130,10 +147,6 @@ namespace Test
 			[FieldOffset(12)]
 			public int m_int3;
 
-			public override string ToString()
-			{
-				return String.Format("m_int: {0:P} | m_int2: {1}", m_int, m_int2);
-			}
 		}
 
 		private delegate Type JIT_GetRuntimeType_MaybeNull(long mt);

@@ -121,9 +121,9 @@
 	{
 	  "name":      "JIT_GetRuntimeType",
 	  "opcodes64": "48 83 EC 28 4C 8B C1 F6 C1 2 75 2E 48 8B 41 20 48 8B 50 8 F6 C2 1 74 9 48 8B 42 FF 48 83 C4 28 C3",
-	  "opcodes32": "8B D1 F6 C2 2 F 85 3A 2C 0 0 8B 42 18 8B 48 4 F6 C1 1 F 84 C0 15 9 0 8B 41 FF C3 90 90 51 3B CA F 84 CA 16 18 0 85 C9 74 8 85",
+	  "opcodes32": "8B D1 F6 C2 2 F 85 3A 2C 0 0 8B 42 18 8B 48 4 F6 C1 1 F 84 C0 15 9 0 8B 41 FF C3",
 	  "offset64":  "E560",
-	  "offset32":  "EED2"
+	  "offset32":  "1C5D0"
 	},
 	{
 	  "name":      "JIT_GetStaticFieldAddr_Context",
