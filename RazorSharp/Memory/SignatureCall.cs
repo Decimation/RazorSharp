@@ -62,7 +62,7 @@ namespace RazorSharp.Memory
 
 		private static void SelectModule(SigcallAttribute attr)
 		{
-			if (UseTextSegment)
+			if (UseTextSegment && Environment.Is64BitProcess) // todo: Segments 32-bit
 				SigScanner.SelectModuleBySegment(attr.Module, Segments.TEXT_SEGMENT);
 			else
 				SigScanner.SelectModule(attr.Module);
@@ -102,41 +102,11 @@ namespace RazorSharp.Memory
 						Global.Log.Error("Could not resolve address for func {Name}", methodInfo.Name);
 				}
 
-
+				if (fn != IntPtr.Zero)
 				ClrFunctions.SetStableEntryPoint(methodInfo, fn);
-
-//				Console.WriteLine("Bind {0} @ {1}", methodInfo.Name, Hex.ToHex(fn));
-#if DEBUG
-
-//				Console.WriteLine("{0} | {1} | {2}", methodInfo.Name, Hex.ToHex(fn),
-//					Hex.ToHex(PointerUtils.Subtract(fn, SigScanner.BaseAddress).Address));
-#endif
 			}
 		}
 
-		private class Data
-		{
-			internal string Name { get; }
-
-
-			internal string OpcodesSignature { get; }
-
-
-			internal string OffsetString { get; }
-
-			public Data(string name, string opcodesSignature, string offsetString)
-			{
-				Name             = name;
-				OpcodesSignature = opcodesSignature;
-				OffsetString     = offsetString;
-			}
-
-
-			public override string ToString()
-			{
-				return String.Format("Name: {0}\nOpcodes: {1}\nOffset: {2}\n", Name, OpcodesSignature, OffsetString);
-			}
-		}
 
 		#region Serilog
 
@@ -182,12 +152,14 @@ namespace RazorSharp.Memory
 		/// <param name="t">Type containing unbound <see cref="SigcallAttribute" /> functions </param>
 		public static void DynamicBind(Type t)
 		{
-			if (IsBound(t)) return;
+			if (IsBound(t)) 
+				return;
 
 			MethodInfo[] methodInfos = Runtime.GetMethods(t);
 
 
-			foreach (var mi in methodInfos) ApplySigcallIndependent(mi);
+			foreach (var mi in methodInfos) 
+				ApplySigcallIndependent(mi);
 
 			BoundTypes.Add(t);
 		}
@@ -266,11 +238,22 @@ namespace RazorSharp.Memory
 		public static void ReadCacheJsonUrl(Type[] t, string url)
 		{
 			string localFile =
-				Environment.CurrentDirectory + @"\..\..\..\..\RazorSharp\Clr\ClrFunctions.json";
-			
-			
-			string js = File.Exists(localFile) ? File.ReadAllText(localFile) : Get(url);
-			Conditions.RequiresNotNullOrWhiteSpace(js,nameof(js));
+				Environment.CurrentDirectory + @"\..\..\..\RazorSharp\Clr\ClrFunctions.json";
+
+			localFile = Path.GetFullPath(localFile);
+
+			string js;
+
+			if (File.Exists(localFile)) {
+				Global.Log.Debug("Using local js");
+				js = File.ReadAllText(localFile);
+			}
+			else {
+				js = Get(url);
+			}
+
+
+			Conditions.RequiresNotNullOrWhiteSpace(js, nameof(js));
 			foreach (var type in t)
 				ReadCacheJson(type, js);
 		}
@@ -283,24 +266,23 @@ namespace RazorSharp.Memory
 		public static void ReadCacheJson(Type t, string json)
 		{
 			var js = JObject.Parse(json).GetValue(t.Name);
+			var r  = (List<SigCache>) js.ToObject(typeof(List<SigCache>));
 
-			var r       = new List<Data>();
-			var names   = js.Values<string>("name").ToArray();
-			var offsets = js.Values<string>(IntPtr.Size == 4 ? "offset64" : "offset64").ToArray();
-			var sigs    = js.Values<string>(IntPtr.Size == 4 ? "opcodes32" : "opcodes64").ToArray();
-
-			Conditions.AssertAllEqual(x => x.Length, new[] {names, offsets, sigs});
-
-			for (int i = 0; i < names.Length; i++) {
-				r.Add(new Data(names[i],
-				               sigs[i],
-				               offsets[i]));
-			}
 
 			foreach (var data in r) {
-				Global.Log.Debug("Binding {Name}",data.Name);
-				CacheFunction(t, data.Name, StringUtil.ParseByteArray(data.OpcodesSignature),
-				              Int64.Parse(data.OffsetString, NumberStyles.HexNumber));
+				//Global.Log.Debug("Binding {Name}", data.Name);
+				byte[] opcodes;
+				string offset;
+				if (Environment.Is64BitProcess) {
+					opcodes = StringUtil.ParseByteArray(data.Opcodes64Signature);
+					offset  = data.Offset64String;
+				}
+				else {
+					opcodes = StringUtil.ParseByteArray(data.Opcodes32Signature);
+					offset  = data.Offset32String;
+				}
+
+				CacheFunction(t, data.Name, opcodes, Int64.Parse(offset, NumberStyles.HexNumber));
 			}
 		}
 

@@ -170,25 +170,5 @@ namespace RazorSharp.Clr
 			var fnPtr = SigScanner.QuickScan(CLR_DLL, hex);
 			return Marshal.GetDelegateForFunctionPointer<T>(fnPtr);
 		}
-
-		internal static void ReorganizeSequential<T>()
-		{
-			ReorganizeSequential(typeof(T));
-		}
-
-		internal static void ReorganizeSequential(Type t)
-		{
-			var type      = Meta.Meta.GetType(t);
-			var fields    = type.Fields.OrderBy(x => x.Offset).ToList();
-			var prevField = fields[0];
-
-			for (int i = 1; i < fields.Count; i++) {
-				var currentField = fields[i];
-				currentField.Offset = prevField.Size;
-				var diff = currentField.Offset - prevField.Size;
-				Conditions.Assert(diff == 0, diff.ToString());
-				prevField = currentField;
-			}
-		}
 	}
 }

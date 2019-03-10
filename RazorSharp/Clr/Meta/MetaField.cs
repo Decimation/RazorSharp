@@ -29,6 +29,7 @@ namespace RazorSharp.Clr.Meta
 	{
 		private readonly Pointer<FieldDesc> m_value;
 
+		
 		internal MetaField(Pointer<FieldDesc> p)
 		{
 			m_value = p;
@@ -37,7 +38,8 @@ namespace RazorSharp.Clr.Meta
 
 		public override string ToString()
 		{
-			return String.Format("{0} (offset: {1}) (size: {2})", m_value.Reference.Info, Offset, Size);
+			var info = m_value.Reference.Info;
+			return String.Format("{0} {1} (offset: {2}) (size: {3})", info.FieldType.Name, info.Name, Offset, Size);
 		}
 
 		#region Accessors
@@ -103,9 +105,13 @@ namespace RazorSharp.Clr.Meta
 		/// </summary>
 		public int Offset {
 			get {
+				
 				return m_value.Reference.Offset;
+				
 			}
-			set { m_value.Reference.Offset = value; }
+			set {
+				m_value.Reference.Offset = value;
+			}
 		}
 
 		/// <summary>

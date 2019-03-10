@@ -73,7 +73,7 @@ namespace RazorSharp.Clr
 		{
 			// We'll say arrays and strings are blittable cause they're
 			// usable with GCHandle
-			if (typeof(T).IsArray || typeof(T) == typeof(string)) 
+			if (typeof(T).IsArray || typeof(T) == typeof(string))
 				return true;
 
 			return typeof(T).GetMethodTable().Reference.IsBlittable;
@@ -165,6 +165,27 @@ namespace RazorSharp.Clr
 
 		#region FieldDesc
 
+		private static Pointer<byte> GetFieldDescAddress(FieldInfo fi)
+		{
+			Pointer<byte> fieldDesc = fi.FieldHandle.Value;
+			fieldDesc.Add(IntPtr.Size);
+			return fieldDesc;
+		}
+		internal static int ReadOffset(FieldInfo fi)
+		{
+			Pointer<byte> fieldDesc = GetFieldDescAddress(fi);
+			var dword2 = fieldDesc.ReadAny<uint>(1);
+			return Bits.ReadBits((int) dword2, Constants.FIELDDESC_DW2_OFFSET_BITS, 0);
+		}
+
+		internal static void WriteOffset(FieldInfo fi, int offset)
+		{
+			Pointer<byte> fieldDesc = GetFieldDescAddress(fi);
+			var dword2 = fieldDesc.ReadAny<uint>(1);
+			fieldDesc.WriteAny(Bits.WriteTo(data:(int)dword2, index: 0, 
+			                                Constants.FIELDDESC_DW2_OFFSET_BITS,offset),1);
+		}
+
 		/// <summary>
 		///     Reads all <see cref="FieldDesc" />s from <paramref name="mt" />'s <see cref="MethodTable.FieldDescList" />
 		///     <remarks>
@@ -201,10 +222,14 @@ namespace RazorSharp.Clr
 
 		internal static Pointer<FieldDesc> GetFieldDesc(this FieldInfo fieldInfo)
 		{
-			Conditions.RequiresNotNull(fieldInfo,nameof(fieldInfo));
+			Conditions.RequiresNotNull(fieldInfo, nameof(fieldInfo));
 			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
-			Conditions.Assert(fieldDesc.Reference.Info == fieldInfo);
-			Conditions.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
+			if (Environment.Is64BitProcess) {
+				Conditions.Assert(fieldDesc.Reference.Info == fieldInfo);
+			
+				Conditions.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
+			}
+			
 
 
 			return fieldDesc;
@@ -257,7 +282,7 @@ namespace RazorSharp.Clr
 
 		internal static Pointer<MethodDesc> GetMethodDesc(this MethodInfo methodInfo)
 		{
-			Conditions.RequiresNotNull(methodInfo,nameof(methodInfo));
+			Conditions.RequiresNotNull(methodInfo, nameof(methodInfo));
 
 			var methodHandle = methodInfo.MethodHandle;
 			var md           = (MethodDesc*) methodHandle.Value;
@@ -278,7 +303,7 @@ namespace RazorSharp.Clr
 		internal static Pointer<MethodDesc>[] GetMethodDescs(this Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 		{
 			MethodInfo[] methods = t.GetMethods(flags);
-			Conditions.RequiresNotNull(methods,nameof(methods));
+			Conditions.RequiresNotNull(methods, nameof(methods));
 			var arr = new Pointer<MethodDesc>[methods.Length];
 
 			for (int i = 0; i < arr.Length; i++) {
@@ -293,11 +318,28 @@ namespace RazorSharp.Clr
 
 		#endregion
 
+		internal static (FieldInfo[], TAttribute[]) GetAnnotatedFields<TAttribute>(
+			Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS) where TAttribute : Attribute
+		{
+			FieldInfo[] field            = t.GetFields(flags);
+			var         attributedFields = new List<FieldInfo>();
+			var         attributes       = new List<TAttribute>();
+			
+			foreach (var t1 in field) {
+				var attr = t1.GetCustomAttribute<TAttribute>();
+				if (attr != null) {
+					attributedFields.Add(t1);
+					attributes.Add(attr);
+				}
+			}
+
+			return (attributedFields.ToArray(), attributes.ToArray());
+		}
+
 		#region Sigcall functions
 
 		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(
-			Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
-			where TAttribute : Attribute
+			Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS) where TAttribute : Attribute
 		{
 			MethodInfo[] methods           = t.GetMethods(flags);
 			var          attributedMethods = new List<MethodInfo>();

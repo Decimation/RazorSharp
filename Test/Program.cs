@@ -50,13 +50,7 @@ namespace Test
 	public static unsafe class Program
 	{
 #if DEBUG
-		static Program()
-		{
-			Clr.Reorganize();
-			Conditions.CheckCompatibility();
-			ClrFunctions.Init();
-			Console.OutputEncoding = Encoding.Unicode;
-		}
+		static Program() { }
 #endif
 
 		// todo: protect address-sensitive functions
@@ -66,16 +60,35 @@ namespace Test
 		private static object _static;
 		private const  string CONST_STR = "foo";
 
+		static void init()
+		{
+			// EED2
+			//71470000
+
+			// 8B D1 F6 C2 2 F 85 3A 2C 0 0 8B 42 18 8B 48 4 F6 C1 1 F 84 C0 15 9 0 8B 41 FF C3 90 90 51 3B CA F 84 CA 16 18 0 85 C9 74 8 85
+
+			//Console.WriteLine(Meta.GetType<Struct>().Fields[0].Size);
+
+
+			//Clr.Reorganize();
+			Conditions.CheckCompatibility();
+
+			ClrFunctions.Init();
+			Console.OutputEncoding = Encoding.Unicode;
+		}
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			Conditions.AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
-			Conditions.Assert(Environment.Is64BitProcess);
-			
-			
+			//if (Environment.Is64BitProcess) {
+			init();
+			//Conditions.AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
+			//Conditions.Assert(Environment.Is64BitProcess);
+			//}
 
+			Clr.Setup();
+			Clr.Reorganize();
 
-			
 
 			/*
 			int[] rg = {1, 2, 3};
@@ -104,6 +117,27 @@ namespace Test
 			Debug.Assert(Compare<int>());*/
 		}
 
+
+		[StructLayout(LayoutKind.Explicit)]
+		struct Struct
+		{
+			[FieldOffset(0)]
+			public Pointer<int> m_int;
+
+			[FieldOffset(12)]
+			public int m_int2;
+
+			[FieldOffset(12)]
+			public int m_int3;
+
+			public override string ToString()
+			{
+				return String.Format("m_int: {0:P} | m_int2: {1}", m_int, m_int2);
+			}
+		}
+
+		private delegate Type JIT_GetRuntimeType_MaybeNull(long mt);
+
 		static string LayoutString<T>()
 		{
 			var type   = Meta.GetType<T>();
@@ -117,20 +151,6 @@ namespace Test
 			return table.ToMarkDownString();
 		}
 
-		[StructLayout(LayoutKind.Explicit)]
-		struct Struct
-		{
-			[FieldOffset(0)]
-			public Pointer<int> m_int;
-
-			[FieldOffset(8)]
-			public int m_int2;
-
-			public override string ToString()
-			{
-				return String.Format("m_int: {0:P} | m_int2: {1}", m_int, m_int2);
-			}
-		}
 
 		[Flags]
 		private enum Flags

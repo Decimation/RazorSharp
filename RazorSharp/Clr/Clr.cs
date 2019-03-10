@@ -13,10 +13,16 @@ namespace RazorSharp.Clr
 			typeof(ArrayObject), typeof(HeapObject), typeof(StringObject),typeof(EEClass)
 		};
 
+		internal static void Setup()
+		{
+			Memory.Structures.ReorganizeQ(typeof(FieldDesc),0,IntPtr.Size, IntPtr.Size+sizeof(uint));
+		}
+		
 		internal static void Reorganize()
 		{
+			
 			foreach (var type in ClrTypes) {
-				ClrFunctions.ReorganizeSequential(type);
+				Memory.Structures.ReorganizeAuto(type);
 			}
 		}
 	}

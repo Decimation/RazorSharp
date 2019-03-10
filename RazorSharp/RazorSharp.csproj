@@ -234,9 +234,11 @@
     <Compile Include="Experimental\Functions.cs" />
     <Compile Include="Experimental\Registers.cs" />
     <Compile Include="Global.cs" />
-    <Compile Include="Memory\ClrSigcallAttribute.cs" />
+    <Compile Include="Memory\Attributes\ClrSigcallAttribute.cs" />
+    <Compile Include="Memory\Attributes\SigcallAttribute.cs" />
+    <Compile Include="Memory\SigCache.cs" />
     <Compile Include="Memory\MemScanner.cs" />
-    <Compile Include="Memory\SigcallAttribute.cs" />
+    <Compile Include="Memory\Structures.cs" />
     <Compile Include="ProcessHandle.cs" />
     <Compile Include="RazorConvert.cs" />
     <Compile Include="Memory\AllocPool.cs" />

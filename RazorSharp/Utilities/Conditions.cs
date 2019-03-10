@@ -63,7 +63,7 @@ namespace RazorSharp.Utilities
 			 * - Workstation Concurrent GC
 			 *
 			 */
-			Requires64Bit();
+			//Requires64Bit();
 			RequiresOS(OSPlatform.Windows);
 
 			/**

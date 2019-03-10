@@ -25,6 +25,8 @@ namespace RazorSharp.Clr
 		/// </summary>
 		internal static readonly int MinObjectSize = 2 * IntPtr.Size + sizeof(ObjHeader);
 
+		internal const int FIELDDESC_DW2_OFFSET_BITS = 27;
+		
 		//todo
 //		private const uint GC_MARKED = 0x1;
 
@@ -92,10 +94,11 @@ namespace RazorSharp.Clr
 				case CorElementType.FnPtr:
 				case CorElementType.Object:
 				case CorElementType.SzArray:
+				case CorElementType.End:
 					return IntPtr.Size;
 
 
-				case CorElementType.End:
+				
 				case CorElementType.ValueType:
 				case CorElementType.Var:
 				case CorElementType.GenericInst:

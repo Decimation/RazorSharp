@@ -56,6 +56,7 @@ namespace RazorSharp.Clr.Structures
 		private const int FieldOffsetMax    = (1 << 27) - 1;
 		private const int FieldOffsetNewEnC = FieldOffsetMax - 4;
 
+
 		#region Fields
 
 		[FieldOffset(0)]
@@ -99,24 +100,18 @@ namespace RazorSharp.Clr.Structures
 			}
 		}
 
-		
-
-		private const int OFFSET_BITS = 27;
-		
-
 
 		internal int Offset {
-			get {
-				return (int) (m_dword2 & 0x7FFFFFF);
-			}
+			get { return (int) (m_dword2 & 0x7FFFFFF); }
 			set {
 				fixed (FieldDesc* __this = &this) {
 					Pointer<uint> pDw2 = __this;
-					pDw2.Add(PTR_SIZE + sizeof(uint));
-					pDw2.Reference = (uint)Bits.WriteTo((int)m_dword2, 0, OFFSET_BITS, value);
-					
+					pDw2.Add(IntPtr.Size + sizeof(uint));
+					pDw2.Reference = (uint) Bits.WriteTo((int) m_dword2, 
+					                                     0, 
+					                                     Constants.FIELDDESC_DW2_OFFSET_BITS, 
+					                                     value);
 				}
-				
 			}
 		}
 

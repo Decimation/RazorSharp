@@ -97,17 +97,17 @@ namespace RazorSharp.Memory
 			}
 
 			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
-				if (m_rgModuleBuffer[nModuleIndex] != rgPattern[0]) continue;
+				if (m_rgModuleBuffer[nModuleIndex] != rgPattern[0])
+					continue;
 
 
 				if (PatternCheck(nModuleIndex, rgPattern)) {
-					if (ofsGuessFailed) {
-//						Console.WriteLine("Matched opcodes: {0} (actual offset: {1:X}) (theoretical offset: {2:X})",
-//							Collections.CreateString(rgPattern), nModuleIndex, ofsGuess);
-					}
+					
 
 					var p = m_lpModuleBase + nModuleIndex;
-
+					//Console.WriteLine("Matched opcodes: {0} (actual offset: {1:X}) (theoretical offset: {2:X}) (addr: {3:X})",
+					//                  Collections.CreateString(rgPattern, ToStringOptions.Hex), nModuleIndex, 
+					//                  ofsGuess,p.ToInt64());
 					return p;
 				}
 			}

@@ -74,6 +74,11 @@ namespace RazorSharp.Memory
 
 		internal const string TEXT_SEGMENT = ".text";
 
+		public static bool SegmentExists(string module,string segmentType)
+		{
+			return GetSegments(module).ContainsBy(x => x.SectionName, segmentType);
+		}
+
 		/// <summary>
 		///     Gets the segment type (<see cref="SegmentType" />) in which <paramref name="addr" /> resides.
 		/// </summary>
