@@ -81,6 +81,7 @@ namespace Test
 
 		class Anime
 		{
+			private const int CONST = 1;
 			public virtual string getUwu()
 			{
 				return "uwu";
@@ -97,9 +98,12 @@ namespace Test
 		{
 			// STAAARTTTT IIITTT UUUPPPP
 			init();
+//			Clr.Setup();
 
-			//Clr.Setup();
-
+			var gf = new Anime();
+			var field = typeof(Anime).GetField("CONST", ReflectionUtil.ALL_FLAGS);
+			field.SetValue(gf, 2);
+			
 
 			string img = @"C:\Users\Deci\Desktop\clrx.pdb";
 			string ctx = "JIT_GetRuntimeType";
