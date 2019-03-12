@@ -61,7 +61,7 @@ namespace Test
 		private static object _static;
 		private const  string CONST_STR = "foo";
 
-		static void init()
+		private static void init()
 		{
 			// EED2
 			//71470000
@@ -79,9 +79,23 @@ namespace Test
 			Console.OutputEncoding = Encoding.Unicode;
 		}
 
+		class Anime
+		{
+			public virtual string getUwu()
+			{
+				return "uwu";
+			}
+
+			public override string ToString()
+			{
+				return getUwu();
+			}
+		}
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
+			// STAAARTTTT IIITTT UUUPPPP
 			init();
 
 			//Clr.Setup();
@@ -97,14 +111,19 @@ namespace Test
 				})));
 			}
 
-			var ptr = Mem.AllocUnmanagedInstance<List<int>>();
+			var ptr = Mem.AllocUnmanagedInstance<Anime>();
+			Console.WriteLine(ptr);
+			string uwu = ptr.Reference.getUwu();
+			Console.WriteLine(ptr);
+			Mem.Free(ptr);
 			Console.WriteLine(ptr);
 
 
-			var add = typeof(List<int>).GetMethod("Add", ReflectionUtil.ALL_FLAGS);
-			add.Invoke(ptr.Reference, new object[] {1});
+			// Cursed number. Do not use!!!!!!!!!!!
+			const int emergence = 177013;
 
 
+			// Shut it down!
 			Global.Close();
 
 			/*
