@@ -31,7 +31,8 @@ namespace RazorSharp.Native
 		[DllImport(KERNEL32_DLL, SetLastError = true, PreserveSig = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool CloseHandle(IntPtr hObject);
-		[DllImport("kernel32.dll", SetLastError = true)]
+
+		[DllImport(KERNEL32_DLL, SetLastError = true)]
 		internal static extern IntPtr GetCurrentProcess();
 
 		/// <summary>

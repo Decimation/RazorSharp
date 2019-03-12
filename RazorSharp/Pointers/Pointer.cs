@@ -245,7 +245,7 @@ namespace RazorSharp.Pointers
 			int            i          = 0;
 			while (enumerator.MoveNext()) {
 				var current = enumerator.Current;
-				Conditions.RequiresNotNull(current,nameof(current));
+				Conditions.RequiresNotNull(current, nameof(current));
 
 				if (!current.Equals(this[i++])) {
 					enumerator.Dispose();
@@ -327,13 +327,14 @@ namespace RazorSharp.Pointers
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type), type, null);
 			}
+
 			Reinterpret<byte>().WriteAll(bytes);
-			WriteAny<byte>(0, bytes.Length+1);
+			WriteAny<byte>(0, bytes.Length + 1);
 		}
 
 		public int ReadUntil(Predicate<T> predicate)
 		{
-			int i = 0;
+			int  i = 0;
 			bool match;
 			do {
 				match = predicate(this[i++]);
@@ -364,7 +365,7 @@ namespace RazorSharp.Pointers
 		public void WriteAll(params T[] values)
 		{
 			Conditions.Assert(values.Length > 0);
-			for (int i = 0; i < values.Length; i++) 
+			for (int i = 0; i < values.Length; i++)
 				this[i] = values[i];
 		}
 

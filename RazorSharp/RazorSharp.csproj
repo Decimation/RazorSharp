@@ -239,7 +239,12 @@
     <Compile Include="Memory\SigCache.cs" />
     <Compile Include="Memory\MemScanner.cs" />
     <Compile Include="Memory\Structures.cs" />
+    <Compile Include="Native\Enums\ImageDirectoryEntry.cs" />
+    <Compile Include="Native\Enums\IMAGEHLP_SYMBOL_TYPE_INFO.cs" />
+    <Compile Include="Native\Enums\SymEnumOptions.cs" />
+    <Compile Include="Native\Enums\SymSearchOptions.cs" />
     <Compile Include="Native\Structures\SymbolInfo.cs" />
+    <Compile Include="Native\Symbolism.cs" />
     <Compile Include="ProcessHandle.cs" />
     <Compile Include="RazorConvert.cs" />
     <Compile Include="Memory\AllocPool.cs" />

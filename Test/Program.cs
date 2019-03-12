@@ -70,8 +70,8 @@ namespace Test
 			//Console.WriteLine(Meta.GetType<Struct>().Fields[0].Size);
 
 
-			//Conditions.AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
-			//Conditions.Assert(Environment.Is64BitProcess);
+			Conditions.AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
+			Conditions.Assert(Environment.Is64BitProcess);
 			Conditions.CheckCompatibility();
 
 			ClrFunctions.Init();
@@ -82,24 +82,19 @@ namespace Test
 		public static void Main(string[] args)
 		{
 			init();
-			
+
 			//Clr.Setup();
 
-			var clr = Modules.GetModule("clr.dll");
-			Pointer<byte> mem = clr.BaseAddress;
-			Console.WriteLine(mem.Add(62816));
 
 			string img = @"C:\Users\Deci\Desktop\clrx.pdb";
 			string ctx = "JIT_GetRuntimeType";
 
-			Console.WriteLine("{0:P}",ClrFunctions.GetClrFunctionAddress("JIT_GetRuntimeType"));
-
-			
-			
-
-
-
-
+			using (var sym = new Symbolism(img)) {
+				Console.WriteLine(Collections.CreateString(sym.SymCollect(new[]
+				{
+					"JIT_GetRuntimeType", "JIT_GetStaticFieldAddr_Context"
+				})));
+			}
 
 			/*
 			int[] rg = {1, 2, 3};
@@ -140,7 +135,6 @@ namespace Test
 
 			[FieldOffset(12)]
 			public int m_int3;
-
 		}
 
 		private delegate Type JIT_GetRuntimeType_MaybeNull(long mt);

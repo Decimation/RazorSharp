@@ -91,51 +91,11 @@ namespace RazorSharp.Memory
 		}
 
 
-		private static IntPtr Resolve32(SigcallAttribute attr, MethodInfo methodInfo)
-		{
-			ProcessModule module = Modules.GetModule(attr.Module);
-			//Console.WriteLine(module.FileVersionInfo);
-
-			byte[] sig;
-			long   ofs;
-
-			if (attr.IsInFunctionMap) {
-				sig = SigcallMethodMap[methodInfo].Item1;
-				ofs = SigcallMethodMap[methodInfo].Item2;
-			}
-			else {
-				sig = StringUtil.ParseByteArray(attr.Signature);
-				ofs = attr.OffsetGuess;
-			}
-
-			Pointer<byte> modPtr = module.BaseAddress;
-			var           rg     = modPtr.CopyOut(module.ModuleMemorySize);
-
-
-			const int BYTE_SCAN = 5;
-
-			for (int i = 0; i < rg.Length - BYTE_SCAN; i++) {
-				if (rg[i] == sig[0]
-				    && rg[i + 1] == sig[1]
-				    && rg[i + 2] == sig[2]
-				    && rg[i + 3] == sig[3]
-				    && rg[i + 4] == sig[4]) {
-					Global.Log.Debug("Resolve32::Success {Name} [{Array}]",
-					                 methodInfo.Name,
-					                 Collections.CreateString(rg.Skip(i).Take(BYTE_SCAN+5).ToArray(),
-					                                          ToStringOptions.Hex));
-					return (modPtr + i).Address;
-				}
-			}
-
-			Global.Log.Debug("Resolve32::Fail {Name}", methodInfo.Name);
-			return IntPtr.Zero;
-		}
-
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void ApplySigcallIndependent(MethodInfo methodInfo)
 		{
-			Debug.Assert(methodInfo != null);
+			Conditions.RequiresNotNull(methodInfo, nameof(methodInfo));
+			
 			var attr = methodInfo.GetCustomAttribute<SigcallAttribute>();
 
 			if (attr != null) {
@@ -149,18 +109,18 @@ namespace RazorSharp.Memory
 					if (fn == IntPtr.Zero) {
 						Global.Log.Error("Could not resolve address for func {Name}", methodInfo.Name);
 
-						//fn = Resolve32(attr, methodInfo);
+						//fn = ClrFunctions.GetClrFunctionAddress(methodInfo.Name).Address;
+
 
 						//throw new Exception(String.Format("SS: {0}\nName: {1}",SigScanner.Dump(),methodInfo.Name));
 					}
 				}
 
 				if (fn != IntPtr.Zero) {
-					Global.Log.Debug("Setting entry point for {Name} to {Addr}", 
+					Global.Log.Debug("Setting entry point for {Name} to {Addr}",
 					                 methodInfo.Name, fn.ToInt64().ToString("X"));
 					ClrFunctions.SetStableEntryPoint(methodInfo, fn);
 				}
-					
 			}
 		}
 
@@ -242,7 +202,8 @@ namespace RazorSharp.Memory
 		/// <param name="isGetProperty">Whether the function is a <c>get</c> function of a property </param>
 		public static void DynamicBind(Type t, string name, bool isGetProperty = false)
 		{
-			if (isGetProperty) name = Identifiers.NameOfGetPropertyMethod(name);
+			if (isGetProperty)
+				name = Identifiers.NameOfGetPropertyMethod(name);
 
 			var mi = Runtime.GetMethod(t, name);
 			ApplySigcallIndependent(mi);

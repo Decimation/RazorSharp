@@ -4,7 +4,9 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Native;
@@ -49,11 +51,11 @@ namespace RazorSharp.Clr
 						? s_rgStableEntryPointInterlockedSignature
 						: s_rgStableEntryPointInterlockedSignature32);*/
 
+
 			var fn = GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked").Address;
-			
+
 			s_setStableEntryPointInterlocked =
-				Marshal.GetDelegateForFunctionPointer<SetStableEntryPointInterlockedDelegate>(
-					fn);
+				Marshal.GetDelegateForFunctionPointer<SetStableEntryPointInterlockedDelegate>(fn);
 
 			SignatureCall.ReadCacheJsonUrl(new[]
 			{
@@ -111,7 +113,7 @@ namespace RazorSharp.Clr
 		private static readonly byte[] s_rgStableEntryPointInterlockedSignature32 =
 		{
 			0x55, 0x8B, 0xEC, 0x53, 0x56, 0x57, 0x8B, 0xD9, 0xE8, 0x11, 0x68, 0xF8, 0xFF,
-			0x8B,0xCB,0x8B,0xF8, 0xE8, 0x57, 0x41, 0xF8, 0xFF, 0x8B, 0x75, 0x8, 0x8B 
+			0x8B, 0xCB, 0x8B, 0xF8, 0xE8, 0x57, 0x41, 0xF8, 0xFF, 0x8B, 0x75, 0x8, 0x8B
 		};
 
 		/// <summary>
@@ -137,20 +139,26 @@ namespace RazorSharp.Clr
 		{
 			return FindField(t.GetMethodTable(), name);
 		}
-		
+
 		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT, string name)
 		{
 			var module = pMT.Reference.Module;
-			var pStr = Mem.AllocString(name);
-			var cSig = GetSignatureCorElementType(pMT);
-			var field = FindField(pMT, pStr, IntPtr.Zero, cSig, module, 0);
+			var pStr   = Mem.AllocString(name);
+			var cSig   = GetSignatureCorElementType(pMT);
+			var field  = FindField(pMT, pStr, IntPtr.Zero, cSig, module, 0);
 			Mem.FreeString(pStr);
 			return field;
-
 		}
 
+		// todo: make portable
 		private const string CLR_PDB = @"C:\Users\Deci\Desktop\clrx.pdb";
-		
+
+		internal static TDelegate GetClrFunctionAddress<TDelegate>(string name)
+		{
+			return Marshal.GetDelegateForFunctionPointer<TDelegate>(GetClrFunctionAddress(name).Address);
+		}
+
+
 		internal static Pointer<byte> GetClrFunctionAddress(string name)
 		{
 			return DbgHelp.GetFuncAddr(CLR_PDB, CLR_DLL, name);
@@ -167,10 +175,10 @@ namespace RazorSharp.Clr
 		*/
 		[ClrSigcall]
 		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT,
-		                                             Pointer<byte> pszName,
-		                                             Pointer<byte> pSig,
+		                                             Pointer<byte>        pszName,
+		                                             Pointer<byte>        pSig,
 		                                             uint                 cSig,
-		                                             Pointer<byte> pModule,
+		                                             Pointer<byte>        pModule,
 		                                             int                  bCaseSens)
 		{
 			// pSignature can be NULL to find any field with the given name
@@ -178,11 +186,5 @@ namespace RazorSharp.Clr
 		}
 
 		#endregion
-
-		internal static T ClrCall<T>(string hex) where T : Delegate
-		{
-			var fnPtr = SigScanner.QuickScan(CLR_DLL, hex);
-			return Marshal.GetDelegateForFunctionPointer<T>(fnPtr);
-		}
 	}
 }
