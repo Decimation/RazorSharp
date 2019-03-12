@@ -18,6 +18,7 @@ using System.Text;
 using System.Threading;
 using NUnit.Framework;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp;
 using RazorSharp.Analysis;
@@ -95,6 +96,16 @@ namespace Test
 					"JIT_GetRuntimeType", "JIT_GetStaticFieldAddr_Context"
 				})));
 			}
+
+			var ptr = Mem.AllocUnmanagedInstance<List<int>>();
+			Console.WriteLine(ptr);
+
+
+			var add = typeof(List<int>).GetMethod("Add", ReflectionUtil.ALL_FLAGS);
+			add.Invoke(ptr.Reference, new object[] {1});
+
+
+			Global.Close();
 
 			/*
 			int[] rg = {1, 2, 3};
@@ -200,7 +211,7 @@ namespace Test
 					else valStr = val.ToString();
 				}
 				else {
-					valStr = RazorCommon.Constants.NULL_STR;
+					valStr = StringConstants.NULL_STR;
 				}
 
 				ct.AddRow(f.Name, f.FieldType.Name, valStr);

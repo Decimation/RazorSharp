@@ -21,23 +21,18 @@ namespace RazorSharp.Native
 		private const uint   SIZE_DEFAULT     = 0x20000;
 		private const string MASK_STR_DEFAULT = "*!*";
 
-
-		private ulong  m_base;
-		private ulong  m_dllBase;
-		private uint   m_size;
-		private string m_mask;
+		private readonly ulong m_base;
+		private readonly ulong m_dllBase;
 
 
 		public Symbolism(string image, string mask, ulong @base, uint size)
 		{
 			m_process = Kernel32.GetCurrentProcess();
 
-			m_mask = mask;
 			m_base = @base;
-			m_size = size;
 
 			m_imgStrNative  = Mem.AllocString(image).Address;
-			m_maskStrNative = Mem.AllocString(m_mask).Address;
+			m_maskStrNative = Mem.AllocString(mask).Address;
 
 			Conditions.Assert(DbgHelp.SymInitialize(m_process, null, false));
 
@@ -45,7 +40,7 @@ namespace RazorSharp.Native
 			                                    m_imgStrNative,
 			                                    IntPtr.Zero,
 			                                    m_base,
-			                                    m_size,
+			                                    size,
 			                                    IntPtr.Zero,
 			                                    0);
 		}
@@ -109,9 +104,8 @@ namespace RazorSharp.Native
 			SymEnumSymbols(ctxStrNative);
 			SymEnumTypes(ctxStrNative);
 
-
 			Mem.FreeString(ctxStrNative);
-			
+
 			return (m_addrBuffer - (int) m_base).ToInt64();
 		}
 

@@ -9,6 +9,7 @@ using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using RazorCommon.Utilities;
 using RazorSharp.Utilities.Exceptions;
 
 #endregion
@@ -33,6 +34,7 @@ namespace RazorSharp.Utilities
 		private const string STRING_FORMAT_PARAM = "msg";
 		private const string NULLREF_EXCEPTION   = "value == null";
 
+		private static readonly Version CLR_VER = new Version(4,0,30319,42000);
 
 		internal static void CheckCompatibility()
 		{
@@ -72,11 +74,9 @@ namespace RazorSharp.Utilities
 			 * Other versions will probably work but we're just making sure
 			 * todo - determine compatibility
 			 */
-			AssertAll(Environment.Version.Major == 4,
-			          Environment.Version.Minor == 0,
-			          Environment.Version.Build == 30319,
-			          Environment.Version.Revision == 42000);
-
+			Assert(Environment.Version == CLR_VER);
+			
+			
 			Assert(!GCSettings.IsServerGC);
 			RequiresClr();
 
@@ -100,7 +100,8 @@ namespace RazorSharp.Utilities
 		private static void ResolveTypeAction<TExpected, TActual>(Action notArray, Action notActual)
 		{
 			if (typeof(TExpected) == typeof(Array)) {
-				if (!typeof(TActual).IsArray) notArray();
+				if (!typeof(TActual).IsArray)
+					notArray();
 			}
 			else if (typeof(TExpected) != typeof(TActual)) {
 				notActual();
@@ -113,6 +114,8 @@ namespace RazorSharp.Utilities
 			ResolveTypeAction<TExpected, TActual>(() => val = false, () => val = false);
 			return val;
 		}
+		
+		
 
 		/// <summary>
 		/// </summary>
@@ -120,7 +123,8 @@ namespace RazorSharp.Utilities
 		/// <typeparam name="T"></typeparam>
 		internal static void AssertEqual<T>(params T[] values)
 		{
-			if (values == null || values.Length == 0) return;
+			if (values == null || values.Length == 0) 
+				return;
 
 			Assert(values.All(v => v.Equals(values[0])));
 		}
@@ -188,18 +192,11 @@ namespace RazorSharp.Utilities
 
 		#region Requires (exception)
 
-		internal static void Requires(bool b)
+		
+		internal static void Requires(bool b, string s = null)
 		{
 			if (!b) {
-				var exception = new Exception();
-				throw exception;
-			}
-		}
-
-		internal static void Requires(bool b, string s)
-		{
-			if (!b) {
-				var exception = new Exception(s);
+				var exception = s == null ? new Exception() : new Exception(s);
 				throw exception;
 			}
 		}
@@ -240,6 +237,7 @@ namespace RazorSharp.Utilities
 		///     Specifies a precondition: checks to see if <paramref name="value" /> is <c>null</c>
 		/// </summary>
 		/// <param name="value">Pointer to check</param>
+		/// <param name="arg"></param>
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -252,6 +250,7 @@ namespace RazorSharp.Utilities
 		///     Specifies a precondition: checks to see if <paramref name="value" /> is <see cref="IntPtr.Zero" />
 		/// </summary>
 		/// <param name="value"><see cref="IntPtr" /> to check</param>
+		/// <param name="arg"></param>
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -267,6 +266,7 @@ namespace RazorSharp.Utilities
 		///     </remarks>
 		/// </summary>
 		/// <param name="value">Value to check</param>
+		/// <param name="arg"></param>
 		/// <typeparam name="T"></typeparam>
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
@@ -281,6 +281,7 @@ namespace RazorSharp.Utilities
 		///     Specifies a precondition: checks to see if <paramref name="value" /> is <c>null</c>
 		/// </summary>
 		/// <param name="value">Value to check</param>
+		/// <param name="arg"></param>
 		/// <typeparam name="T"></typeparam>
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
@@ -307,10 +308,20 @@ namespace RazorSharp.Utilities
 		/// </exception>
 		internal static void RequiresType<TExpected, TActual>()
 		{
-			ResolveTypeAction<TExpected, TActual>(TypeException.Throw<Array, TActual>,
-			                                      TypeException.Throw<TExpected, TActual>);
+			ResolveTypeAction<TExpected, TActual>(TypeException.ThrowTypesNotEqual<Array, TActual>,
+			                                      TypeException.ThrowTypesNotEqual<TExpected, TActual>);
 		}
 
+		internal static void RequiresTypeNot<TNot, TActual>(string msg = null)
+		{
+			string baseMsg = $"Type arguments cannot be equal: {typeof(TNot).Name} and {typeof(TActual).Name}";
+			
+			if (msg != null) {
+				baseMsg += $": {msg}";
+			}
+			Requires(!AssertTypeEqual<TNot, TActual>(), baseMsg);
+		}
+		
 		/// <summary>
 		///     Specifies a precondition: checks to see if <typeparamref name="T" /> is a reference type.
 		/// </summary>

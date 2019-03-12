@@ -1,5 +1,6 @@
 #region
 
+using RazorSharp.Memory;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -34,6 +35,15 @@ namespace RazorSharp
 			     .MinimumLevel.ControlledBy(levelSwitch)
 			     .WriteTo.Console(outputTemplate: OUTPUT_TEMPLATE_ALT, theme: SystemConsoleTheme.Colored)
 			     .CreateLogger();
+		}
+
+		internal static void Close()
+		{
+			if (Mem.IsMemoryInUse) {
+				Log.Warning("Memory leak: {Count} dangling pointer(s)", Mem.AllocCount);
+			}
+			Log.Dispose();
+			
 		}
 	}
 }

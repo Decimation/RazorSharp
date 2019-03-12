@@ -40,6 +40,8 @@ namespace RazorSharp.Memory
 		internal const int  BytesInKilobyte = 1024;
 
 
+		internal static int AllocCount;
+
 		public static void Zero<T>(ref T t)
 		{
 			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
@@ -85,8 +87,8 @@ namespace RazorSharp.Memory
 		/// <returns>A double indirection pointer to the unmanaged instance.</returns>
 		public static Pointer<T> AllocUnmanagedInstance<T>() where T : class
 		{
-			Trace.Assert(!typeof(T).IsArray, "Use AllocUnmanaged for arrays");
-			Trace.Assert(typeof(T) != typeof(string));
+			Conditions.RequiresTypeNot<Array, T>("Use AllocUnmanaged for arrays");
+			Conditions.RequiresTypeNot<string, T>();
 
 
 			// Minimum size required for an instance
@@ -139,6 +141,8 @@ namespace RazorSharp.Memory
 			var alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
 
+			AllocCount++;
+
 			return alloc;
 		}
 
@@ -154,8 +158,8 @@ namespace RazorSharp.Memory
 		/// <returns></returns>
 		public static Pointer<byte> AllocString(string s)
 		{
-			var size = s.Length + 1;
-			Pointer<byte> ptr = AllocUnmanaged<byte>(size);
+			var           size = s.Length + 1;
+			Pointer<byte> ptr  = AllocUnmanaged<byte>(size);
 			ptr.WriteString(s, StringTypes.AnsiStr);
 			Debug.Assert(ptr.ReadString(StringTypes.AnsiStr) == s);
 
@@ -164,11 +168,13 @@ namespace RazorSharp.Memory
 
 		public static void FreeString(Pointer<byte> ptr)
 		{
-			int size = ptr.ReadUntil(x => x == Byte.MinValue) + 1;
+			int size = ptr.ReadUntil(x => x == 0x00) + 1;
 			ptr.Zero(size);
 			Free(ptr);
 		}
-		
+
+		internal static bool IsMemoryInUse => AllocCount > 0;
+
 
 		/// <summary>
 		///     <para>Frees memory allocated from <see cref="AllocUnmanaged{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>
@@ -183,6 +189,7 @@ namespace RazorSharp.Memory
 //			}
 
 			Marshal.FreeHGlobal(p.Address);
+			AllocCount--;
 		}
 
 
