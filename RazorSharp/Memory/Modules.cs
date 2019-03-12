@@ -27,5 +27,12 @@ namespace RazorSharp.Memory
 
 			return null;
 		}
+
+		internal static Pointer<byte> GetFuncAddr(string module, long offset)
+		{
+			var           pm  = Modules.GetModule(module);
+			Pointer<byte> ptr = pm.BaseAddress;
+			return ptr + offset;
+		}
 	}
 }

@@ -161,7 +161,7 @@ namespace RazorSharp.Clr
 
 		internal static Pointer<byte> GetClrFunctionAddress(string name)
 		{
-			return DbgHelp.GetFuncAddr(CLR_PDB, CLR_DLL, name);
+			return Symbolism.GetFuncAddr(CLR_PDB, CLR_DLL, name);
 		}
 
 		/*

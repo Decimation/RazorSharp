@@ -97,7 +97,7 @@ namespace RazorSharp.Native
 			Conditions.Assert(DbgHelp.SymEnumTypes(m_process, m_dllBase, EnumSymProc, ctxStrNative));
 		}
 
-		internal long SymGet(string userContext)
+		public long SymGet(string userContext)
 		{
 			var ctxStrNative = Mem.AllocString(userContext).Address;
 
@@ -124,6 +124,14 @@ namespace RazorSharp.Native
 		{
 			ReleaseUnmanagedResources();
 			GC.SuppressFinalize(this);
+		}
+
+		public static Pointer<byte> GetFuncAddr(string image, string module, string name)
+		{
+			using (var sym = new Symbolism(image)) {
+				long offset = sym.SymGet(name);
+				return Modules.GetFuncAddr(module, offset);
+			}
 		}
 	}
 }

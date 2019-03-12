@@ -167,21 +167,6 @@ namespace RazorSharp.Native
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool SymCleanup(IntPtr hProcess);
 
-		internal static Pointer<byte> GetFuncAddr(string module, long offset)
-		{
-			var           pm  = Modules.GetModule(module);
-			Pointer<byte> ptr = pm.BaseAddress;
-			return ptr + offset;
-		}
-
-		internal static Pointer<byte> GetFuncAddr(string image, string module, string name)
-		{
-			using (var sym = new Symbolism(image)) {
-				long offset = sym.SymGet(name);
-				return GetFuncAddr(module, offset);
-			}
-		}
-
 
 		public static ImageSectionInfo[] GetPESectionInfo(IntPtr hModule)
 		{
