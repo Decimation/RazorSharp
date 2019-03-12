@@ -12,17 +12,17 @@ namespace RazorSharp.Native
 {
 	public unsafe class Symbolism : IDisposable
 	{
-		private IntPtr m_process;
-		private IntPtr m_addrBuffer;
-		private IntPtr m_imgStrNative;
-		private IntPtr m_maskStrNative;
+		private IntPtr m_process,
+		               m_addrBuffer,
+		               m_imgStrNative,
+		               m_maskStrNative;
 
 		private const ulong  BASE_DEFAULT     = 0x400000;
 		private const uint   SIZE_DEFAULT     = 0x20000;
 		private const string MASK_STR_DEFAULT = "*!*";
 
-		private readonly ulong m_base;
-		private readonly ulong m_dllBase;
+		private readonly ulong m_base,
+		                       m_dllBase;
 
 
 		public Symbolism(string image, string mask, ulong @base, uint size)
