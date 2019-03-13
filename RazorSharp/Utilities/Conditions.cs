@@ -192,6 +192,14 @@ namespace RazorSharp.Utilities
 
 		#region Requires (exception)
 
+		// todo
+		internal static void RequiresSameLength<T>(params T[][] rg)
+		{
+			var len = rg[0].Length;
+			foreach (var x in rg) {
+				Requires(x.Length == len);
+			}
+		}
 		
 		internal static void Requires(bool b, string s = null)
 		{

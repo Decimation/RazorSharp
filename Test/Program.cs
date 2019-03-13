@@ -25,8 +25,10 @@ using RazorSharp.Analysis;
 using RazorSharp.Clr;
 using RazorSharp.Clr.Meta;
 using RazorSharp.Clr.Structures;
+using RazorSharp.Clr.Structures.HeapObjects;
 using RazorSharp.Experimental;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -71,27 +73,29 @@ namespace Test
 			//Console.WriteLine(Meta.GetType<Struct>().Fields[0].Size);
 
 
-			Conditions.AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
-			Conditions.Assert(Environment.Is64BitProcess);
+			//Conditions.AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
+			//Conditions.Assert(Environment.Is64BitProcess);
 			Conditions.CheckCompatibility();
 
-			ClrFunctions.Init();
+			//ClrFunctions.Init();
 			Console.OutputEncoding = Encoding.Unicode;
 		}
 
 		class Anime
 		{
 			private const int CONST = 1;
-			public virtual string getUwu()
+
+			public string foo()
 			{
-				return "uwu";
+				return "foo";
 			}
 
-			public override string ToString()
+			public string bar()
 			{
-				return getUwu();
+				return "bar";
 			}
 		}
+
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -100,34 +104,47 @@ namespace Test
 			init();
 //			Clr.Setup();
 
-			var gf = new Anime();
-			var field = typeof(Anime).GetField("CONST", ReflectionUtil.ALL_FLAGS);
-			field.SetValue(gf, 2);
-			
+			Symcall.Setup();
 
-			string img = @"C:\Users\Deci\Desktop\clrx.pdb";
-			string ctx = "JIT_GetRuntimeType";
 
-			using (var sym = new Symbolism(img)) {
-				Console.WriteLine(Collections.CreateString(sym.SymCollect(new[]
-				{
-					"JIT_GetRuntimeType", "JIT_GetStaticFieldAddr_Context"
-				})));
+			var fn  = Symcall.GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked");
+			var fnx = Marshal.GetDelegateForFunctionPointer<Symcall.SetStableEntryPointInterlockedDelegate>(fn.Address);
+
+			var foo = typeof(Anime).GetMethod("foo");
+			var bar = typeof(Anime).GetMethod("bar");
+
+
+			fnx((MethodDesc*) foo.MethodHandle.Value, 0);
+
+			var n = new Anime();
+			n.foo();
+
+			Environment.Exit(0);
+
+
+			// Shit is kinda broken
+			try {
+				Symcall.BindQuick(typeof(MethodDesc));
+				Console.WriteLine("DONE!!!!");
+			}
+			catch (SEHException e) {
+				Console.WriteLine(e);
+				Console.WriteLine("{0:X}", e.HResult);
+				Console.WriteLine(e.Message);
+				throw;
 			}
 
-			var ptr = Mem.AllocUnmanagedInstance<Anime>();
-			Console.WriteLine(ptr);
-			string uwu = ptr.Reference.getUwu();
-			Console.WriteLine(ptr);
-			Mem.Free(ptr);
-			Console.WriteLine(ptr);
+
+			//var types = new[] {typeof(FieldDesc), typeof(MethodDesc), typeof(ClrFunctions), typeof(GCHeap)};
+			//foreach (var t in types) {
+			//	Symcall.BindQuick(t);
+			//}
 
 
 			// Cursed number. Do not use!!!!!!!!!!!
 			const int emergence = 177013;
 
-
-			// Shut it down!
+			// SHUT IT DOWN
 			Global.Close();
 
 			/*

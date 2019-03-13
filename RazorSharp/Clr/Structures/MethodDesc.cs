@@ -10,6 +10,7 @@ using RazorCommon.Utilities;
 using RazorSharp.Clr.Meta;
 using RazorSharp.Clr.Structures.ILMethods;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Attributes;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
@@ -68,6 +69,7 @@ namespace RazorSharp.Clr.Structures
 
 		static MethodDesc()
 		{
+			Global.Log.Debug("Type init");
 			SignatureCall.DynamicBind<MethodDesc>();
 		}
 
@@ -118,7 +120,7 @@ namespace RazorSharp.Clr.Structures
 		/// </summary>
 		/// <exception cref="SigcallException"></exception>
 		internal IntPtr NativeCode {
-			[ClrSigcall]
+			[ClrSymcall(Symbol = "GetNativeCode")]
 			get => throw new SigcallException();
 		}
 
@@ -129,7 +131,7 @@ namespace RazorSharp.Clr.Structures
 		///     </remarks>
 		/// </summary>
 		internal IntPtr PreImplementedCode {
-			[ClrSigcall]
+			[ClrSymcall(Symbol = "GetPreImplementedCode")]
 			get => throw new SigcallException();
 		}
 
@@ -164,7 +166,7 @@ namespace RazorSharp.Clr.Structures
 		///     </remarks>
 		/// </summary>
 		internal int SizeOf {
-			[ClrSigcall]
+			[ClrSymcall(Symbol = "SizeOf")]
 			get => throw new SigcallException();
 		}
 
@@ -174,7 +176,7 @@ namespace RazorSharp.Clr.Structures
 		///     </remarks>
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
-			[ClrSigcall]
+			[ClrSymcall(Symbol = "GetMethodTable")]
 			get => throw new SigcallException();
 		}
 
@@ -185,13 +187,13 @@ namespace RazorSharp.Clr.Structures
 		///     </remarks>
 		/// </summary>
 		internal uint RVA {
-			[ClrSigcall]
+			[ClrSymcall(Symbol = "GetRVA")]
 			get => throw new SigcallException();
 		}
 
 
 		internal int Token {
-			[ClrSigcall]
+			[ClrSymcall(Symbol = "GetMemberDef")]
 			get => throw new SigcallException();
 		}
 
@@ -204,7 +206,7 @@ namespace RazorSharp.Clr.Structures
 		///     </remarks>
 		/// </summary>
 		internal bool IsConstructor {
-			[ClrSigcall]
+			[ClrSymcall(Symbol = "IsCtor")]
 			get => throw new SigcallException();
 		}
 
@@ -217,7 +219,7 @@ namespace RazorSharp.Clr.Structures
 		///     </remarks>
 		/// </summary>
 		internal bool IsPointingToNativeCode {
-			[ClrSigcall]
+			[ClrSymcall(Symbol = "IsPointingToNativeCode")]
 			get => throw new SigcallException();
 		}
 
@@ -301,7 +303,7 @@ namespace RazorSharp.Clr.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		[ClrSigcall]
+		[ClrSymcall]
 		internal Pointer<ILMethod> GetILHeader(int fAllowOverrides = 0)
 		{
 			throw new SigcallException();
@@ -310,7 +312,7 @@ namespace RazorSharp.Clr.Structures
 		/// <summary>
 		///     <remarks>Address-sensitive</remarks>
 		/// </summary>
-		[ClrSigcall]
+		[ClrSymcall]
 		private long SetStableEntryPointInterlocked(ulong pCode)
 		{
 			throw new SigcallException();
@@ -330,7 +332,7 @@ namespace RazorSharp.Clr.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		[ClrSigcall]
+		[ClrSymcall]
 		internal void Reset()
 		{
 			throw new SigcallException();

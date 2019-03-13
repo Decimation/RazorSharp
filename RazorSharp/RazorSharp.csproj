@@ -235,10 +235,13 @@
     <Compile Include="Experimental\Registers.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Memory\Attributes\ClrSigcallAttribute.cs" />
+    <Compile Include="Memory\Attributes\ClrSymcallAttribute.cs" />
     <Compile Include="Memory\Attributes\SigcallAttribute.cs" />
+    <Compile Include="Memory\Attributes\SymcallAttribute.cs" />
     <Compile Include="Memory\SigCache.cs" />
     <Compile Include="Memory\MemScanner.cs" />
     <Compile Include="Memory\Structures.cs" />
+    <Compile Include="Memory\Symcall.cs" />
     <Compile Include="Native\Enums\ImageDirectoryEntry.cs" />
     <Compile Include="Native\Enums\IMAGEHLP_SYMBOL_TYPE_INFO.cs" />
     <Compile Include="Native\Enums\SymEnumOptions.cs" />
@@ -318,6 +321,9 @@
   <ItemGroup>
     <Content Include="Clr\ClrFunctions.json" />
     <Content Include="Documentation.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Memory\Calling" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

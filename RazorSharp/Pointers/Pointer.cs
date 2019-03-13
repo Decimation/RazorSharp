@@ -518,6 +518,21 @@ namespace RazorSharp.Pointers
 
 		#region Any
 
+		private object InvokeGenericMethod(string name, Type typeArgs, params object[] args)
+		{
+			return ReflectionUtil.InvokeGenericMethod(GetType(), name, typeArgs, this, args);
+		}
+
+		public void WriteAnyEx(Type t, object value, int elemOffset = 0)
+		{
+			InvokeGenericMethod("WriteAny", t, value, elemOffset);
+		}
+
+		public object ReadAnyEx(Type t, int elemOffset = 0)
+		{
+			return InvokeGenericMethod("ReadAny", t, args: elemOffset);
+		}
+
 		public void WriteAny<TType>(TType t, int elemOffset = 0)
 		{
 			Mem.Write(Offset<TType>(elemOffset), 0, t);

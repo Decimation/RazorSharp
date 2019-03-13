@@ -4,6 +4,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using static RazorSharp.Clr.Offsets;
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -75,11 +76,25 @@ namespace RazorSharp.Clr.Structures.HeapObjects
 		/// </summary>
 		public char this[int index] {
 			get {
-				var __this = (char*) Unsafe.AddressOf(ref this);
-				Conditions.RequiresNotNull(__this,nameof(__this));
-
-				return __this[index + RuntimeHelpers.OffsetToStringData / sizeof(char)];
+				char* __this = GetPointer();
+				return __this[GetIndex(index)];
 			}
+			set {
+				char* __this = GetPointer();
+				__this[GetIndex(index)] = value;
+			}
+		}
+
+		private char* GetPointer()
+		{
+			var __this = (char*) Unsafe.AddressOf(ref this);
+			Conditions.RequiresNotNull(__this,nameof(__this));
+			return __this;
+		}
+		
+		private static int GetIndex(int index)
+		{
+			return index + RuntimeHelpers.OffsetToStringData / sizeof(char);
 		}
 
 		public string StringValue {

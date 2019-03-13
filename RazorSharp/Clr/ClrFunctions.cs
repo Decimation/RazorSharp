@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -35,11 +36,6 @@ namespace RazorSharp.Clr
 	/// </summary>
 	internal static unsafe class ClrFunctions
 	{
-		/// <summary>
-		///     <c>clr.dll</c>
-		/// </summary>
-		internal const string CLR_DLL = "clr.dll";
-
 		private const string JSON_CACHING_URL =
 			"https://raw.githubusercontent.com/Decimation/RazorSharp/master/RazorSharp/Clr/ClrFunctions.json";
 
@@ -79,13 +75,13 @@ namespace RazorSharp.Clr
 		/// <param name="__struct"><see cref="MethodTable" /> pointer</param>
 		/// <returns></returns>
 		/// <exception cref="SigcallException">Method has not been bound</exception>
-		[ClrSigcall]
+		[ClrSymcall(UseMethodNameOnly = true)]
 		internal static Type JIT_GetRuntimeType(void* __struct)
 		{
 			throw new SigcallException();
 		}
 
-		[ClrSigcall]
+		[ClrSymcall(UseMethodNameOnly = true)]
 		internal static Pointer<byte> JIT_GetStaticFieldAddr_Context(FieldDesc* value)
 		{
 			throw new SigcallException();
@@ -129,7 +125,7 @@ namespace RazorSharp.Clr
 			s_setStableEntryPointInterlocked(pMd, (ulong) pCode);
 		}
 
-		[ClrSigcall]
+		[ClrSymcall(UseMethodNameOnly = true)]
 		internal static uint GetSignatureCorElementType(Pointer<MethodTable> pMT)
 		{
 			throw new SigcallException();
@@ -150,8 +146,7 @@ namespace RazorSharp.Clr
 			return field;
 		}
 
-		// todo: make portable
-		private const string CLR_PDB = @"C:\Users\Deci\Desktop\clrx.pdb";
+		
 
 		internal static TDelegate GetClrFunctionAddress<TDelegate>(string name)
 		{
@@ -161,7 +156,7 @@ namespace RazorSharp.Clr
 
 		internal static Pointer<byte> GetClrFunctionAddress(string name)
 		{
-			return Symbolism.GetFuncAddr(CLR_PDB, CLR_DLL, name);
+			return Symbolism.GetFuncAddr(Symbolism.CLR_PDB, Clr.CLR_DLL, name);
 		}
 
 		/*
@@ -173,7 +168,7 @@ namespace RazorSharp.Clr
 			Module*         pModule,
 			BOOL            bCaseSensitive = TRUE);
 		*/
-		[ClrSigcall]
+		[ClrSymcall(UseMethodNameOnly = true)]
 		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT,
 		                                             Pointer<byte>        pszName,
 		                                             Pointer<byte>        pSig,

@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorSharp.Memory;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using Serilog.Context;
@@ -21,16 +22,16 @@ namespace RazorSharp.Experimental
 				0xC3                    // ret
 			};
 
-			var code = NativeFunctions.CodeAlloc(opCodes);
+			var code = Mem.AllocCode(opCodes);
 
-			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRsp>(code)();
+			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRsp>(code.Address)();
 			using (LogContext.PushProperty(Global.CONTEXT_PROP, "testRSP")) {
 				Global.Log.Information("rsp: {Ptr}", rsp);
 				Global.Log.Information("rsp + 0xB0: {Ptr}", rsp + 0xB0);
 				Global.Log.Information("getRSP(): {Ptr}", GetRspValue());
 			}
 
-			NativeFunctions.CodeFree(code);
+			Mem.FreeCode(code);
 		}
 
 		public static Pointer<byte> GetRspValue()
@@ -42,9 +43,9 @@ namespace RazorSharp.Experimental
 				0xC3                    // ret
 			};
 
-			var code = NativeFunctions.CodeAlloc(opCodes);
+			var code = Mem.AllocCode(opCodes);
 
-			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRsp>(code)();
+			Pointer<byte> rsp = Marshal.GetDelegateForFunctionPointer<GetRsp>(code.Address)();
 
 
 			// rsp += 0xB0; //
@@ -53,7 +54,7 @@ namespace RazorSharp.Experimental
 			rsp -= 0x3A8; // Subtracting this offset makes RSP match in WinDbg but breaks it in VS registers view?
 
 
-			NativeFunctions.CodeFree(code);
+			Mem.FreeCode(code);
 			return rsp;
 		}
 

@@ -7,6 +7,7 @@ using RazorCommon;
 using RazorCommon.Utilities;
 using RazorSharp.Clr.Meta;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Attributes;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
@@ -174,7 +175,7 @@ namespace RazorSharp.Clr.Structures
 		///     </remarks>
 		/// </summary>
 		private int LoadSize {
-			[ClrSigcall]
+			[ClrSymcall(Symbol = "FieldDesc::LoadSize", FullyQualified = true)]
 			get => throw new SigcallException(nameof(LoadSize));
 		}
 
@@ -204,7 +205,7 @@ namespace RazorSharp.Clr.Structures
 		///     </remarks>
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
-			[ClrSigcall]
+			[ClrSymcall(Symbol = "FieldDesc::GetApproxEnclosingMethodTable", FullyQualified = true)]
 			get => throw new SigcallException();
 		}
 

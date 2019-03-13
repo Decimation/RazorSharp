@@ -286,7 +286,8 @@ namespace RazorSharp
 
 			// Function must be jitted
 
-			if (!md.Reference.IsPointingToNativeCode) md.Reference.Prepare();
+			if (!md.Reference.IsPointingToNativeCode) 
+				md.Reference.Prepare();
 
 			return md.Reference.Function;
 		}

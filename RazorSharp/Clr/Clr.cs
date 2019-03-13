@@ -30,5 +30,10 @@ namespace RazorSharp.Clr
 				Memory.Structures.ReorganizeAuto(type);
 			}
 		}
+
+		/// <summary>
+		///     <c>clr.dll</c>
+		/// </summary>
+		internal const string CLR_DLL = "clr.dll";
 	}
 }

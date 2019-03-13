@@ -16,6 +16,8 @@ using Newtonsoft.Json.Linq;
 using RazorCommon;
 using RazorCommon.Utilities;
 using RazorSharp.Clr;
+using RazorSharp.Memory.Attributes;
+using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Serilog.Context;
@@ -52,6 +54,7 @@ namespace RazorSharp.Memory
 
 		static SignatureCall()
 		{
+			Global.Log.Error("NOOOOOOOOOOO!");
 			SigcallMethodMap = new Dictionary<MethodInfo, Tuple<byte[], long>>();
 		}
 
@@ -69,6 +72,7 @@ namespace RazorSharp.Memory
 			else
 				SigScanner.SelectModule(attr.Module);
 		}
+
 
 		private static IntPtr GetCorrespondingFunctionPointer(SigcallAttribute attr, MethodInfo methodInfo)
 		{
@@ -95,7 +99,7 @@ namespace RazorSharp.Memory
 		private static void ApplySigcallIndependent(MethodInfo methodInfo)
 		{
 			Conditions.RequiresNotNull(methodInfo, nameof(methodInfo));
-			
+
 			var attr = methodInfo.GetCustomAttribute<SigcallAttribute>();
 
 			if (attr != null) {
@@ -103,16 +107,12 @@ namespace RazorSharp.Memory
 				Relink(attr, methodInfo);
 
 				var fn = GetCorrespondingFunctionPointer(attr, methodInfo);
+
 				using (SignatureCallLogContext) {
 					Global.Log.Verbose("Binding {Name} to {Addr:X}", methodInfo.Name, fn.ToInt64());
 
 					if (fn == IntPtr.Zero) {
 						Global.Log.Error("Could not resolve address for func {Name}", methodInfo.Name);
-
-						//fn = ClrFunctions.GetClrFunctionAddress(methodInfo.Name).Address;
-
-
-						//throw new Exception(String.Format("SS: {0}\nName: {1}",SigScanner.Dump(),methodInfo.Name));
 					}
 				}
 

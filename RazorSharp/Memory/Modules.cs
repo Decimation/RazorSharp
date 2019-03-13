@@ -1,5 +1,6 @@
 #region
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using RazorSharp.Pointers;
 
@@ -28,6 +29,16 @@ namespace RazorSharp.Memory
 			return null;
 		}
 
+		internal static IEnumerable<Pointer<byte>> GetFuncAddr(string module, long[] offset)
+		{
+			var           pm  = Modules.GetModule(module);
+			Pointer<byte> ptr = pm.BaseAddress;
+			
+			
+			foreach (long ofs in offset) {
+				yield return ptr + ofs;
+			}
+		}
 		internal static Pointer<byte> GetFuncAddr(string module, long offset)
 		{
 			var           pm  = Modules.GetModule(module);

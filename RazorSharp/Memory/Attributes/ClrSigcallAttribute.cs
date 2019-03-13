@@ -4,19 +4,19 @@ using RazorSharp.Clr;
 
 #endregion
 
-namespace RazorSharp.Memory
+namespace RazorSharp.Memory.Attributes
 {
 	/// <inheritdoc />
 	/// <summary>
-	///     <see cref="T:RazorSharp.Memory.SigcallAttribute" /> for module <see cref="ClrFunctions.CLR_DLL" />
+	///     <see cref="T:RazorSharp.Memory.Attributes.SigcallAttribute" /> for module <see cref="Clr.CLR_DLL" />
 	/// </summary>
 	public class ClrSigcallAttribute : SigcallAttribute
 	{
-		public ClrSigcallAttribute() : base(ClrFunctions.CLR_DLL, null)
+		public ClrSigcallAttribute() : base(Clr.Clr.CLR_DLL, null)
 		{
 			IsInFunctionMap = true;
 		}
 
-		public ClrSigcallAttribute(string signature) : base(ClrFunctions.CLR_DLL, signature) { }
+		public ClrSigcallAttribute(string signature) : base(Clr.Clr.CLR_DLL, signature) { }
 	}
 }

@@ -12,8 +12,10 @@ using System.Text;
 using RazorSharp.Clr;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Native;
+using RazorSharp.Native.Enums;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using Serilog.Context;
 
 #endregion
 
@@ -40,7 +42,10 @@ namespace RazorSharp.Memory
 		internal const int  BytesInKilobyte = 1024;
 
 
-		internal static int AllocCount;
+		/// <summary>
+		/// Counts the number of allocations (allocated pointers)
+		/// </summary>
+		internal static int AllocCount { get; private set; }
 
 		public static void Zero<T>(ref T t)
 		{
@@ -158,19 +163,28 @@ namespace RazorSharp.Memory
 		/// <returns></returns>
 		public static Pointer<byte> AllocString(string s)
 		{
-			var           size = s.Length + 1;
-			Pointer<byte> ptr  = AllocUnmanaged<byte>(size);
-			ptr.WriteString(s, StringTypes.AnsiStr);
-			Debug.Assert(ptr.ReadString(StringTypes.AnsiStr) == s);
+			using (LogContext.PushProperty(Global.CONTEXT_PROP, "AllocString")) {
+				var size = s.Length + 1;
+				Global.Log.Debug("Allocating {Count} bytes", size);
+				Pointer<byte> ptr = AllocUnmanaged<byte>(size);
+				Global.Log.Debug("Allocated memory");
+				ptr.WriteString(s, StringTypes.AnsiStr);
+				Conditions.Assert(ptr.ReadString(StringTypes.AnsiStr) == s);
 
-			return ptr;
+				return ptr;
+			}
 		}
 
 		public static void FreeString(Pointer<byte> ptr)
 		{
-			int size = ptr.ReadUntil(x => x == 0x00) + 1;
-			ptr.Zero(size);
-			Free(ptr);
+			using (LogContext.PushProperty(Global.CONTEXT_PROP, "FreeString")) {
+				Global.Log.Debug("Calculating size");
+				int size = ptr.ReadUntil(x => x == 0x00) + 1;
+				Global.Log.Debug("Str size: {Count}", size);
+				ptr.Zero(size);
+				Free(ptr);
+				Global.Log.Debug("Completed");
+			}
 		}
 
 		internal static bool IsMemoryInUse => AllocCount > 0;
@@ -292,7 +306,6 @@ namespace RazorSharp.Memory
 		{
 			return *(IntPtr*) ptr.Add(byteOffset);
 		}
-
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Write<T>(Pointer<byte> p, int byteOffset, T t)
@@ -417,5 +430,33 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
+
+		public static Pointer<byte> AllocCode(byte[] opCodes)
+		{
+			Kernel32.GetNativeSystemInfo(out var si);
+
+			// VirtualAlloc(nullptr, page_size, MEM_COMMIT, PAGE_READWRITE);
+
+			// @formatter:off
+			var alloc = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) si.PageSize, AllocationType.Commit,MemoryProtection.ReadWrite);
+			// @formatter:on
+
+			AllocCount++;
+			Copy(alloc, opCodes);
+
+			// VirtualProtect(buffer, code.size(), PAGE_EXECUTE_READ, &dummy);
+
+			Conditions.Requires(
+				Kernel32.VirtualProtect(alloc, (uint) opCodes.Length, MemoryProtection.ExecuteRead, out _));
+
+
+			return alloc;
+		}
+
+		public static void FreeCode(Pointer<byte> fn)
+		{
+			Conditions.Requires(Kernel32.VirtualFree(fn.Address, 0, FreeTypes.Release));
+			AllocCount--;
+		}
 	}
 }

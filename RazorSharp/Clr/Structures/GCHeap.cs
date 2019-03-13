@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Attributes;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
 
@@ -73,7 +74,7 @@ namespace RazorSharp.Clr.Structures
 		///     </remarks>
 		/// </summary>
 		public int GCCount {
-			[ClrSigcall]
+			[ClrSymcall(Symbol = "WKS::GCHeap::GetGcCount", FullyQualified = true)]
 			get => throw new SigcallException();
 		}
 
@@ -99,7 +100,7 @@ namespace RazorSharp.Clr.Structures
 		/// <param name="obj">Pointer to an object in the GC heap</param>
 		/// <param name="smallHeapOnly">Whether to include small GC heaps only</param>
 		/// <returns><c>true</c> if <paramref name="obj" /> is a heap pointer; <c>false</c> otherwise</returns>
-		[ClrSigcall]
+		[ClrSymcall(Symbol = "WKS::GCHeap::IsHeapPointer", FullyQualified = true)]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
 			throw new SigcallException();
@@ -108,7 +109,7 @@ namespace RazorSharp.Clr.Structures
 		
 
 		// 85
-		[ClrSigcall]
+		[ClrSymcall(Symbol = "WKS::GCHeap::IsGCInProgress", FullyQualified = true)]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
 		{
 			throw new SigcallException();
@@ -135,7 +136,7 @@ namespace RazorSharp.Clr.Structures
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 
-			var dataSegment = Segments.GetSegment(".data", ClrFunctions.CLR_DLL);
+			var dataSegment = Segments.GetSegment(".data", Clr.CLR_DLL);
 
 
 			g_pGCHeap =

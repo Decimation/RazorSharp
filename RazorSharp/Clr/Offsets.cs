@@ -87,7 +87,7 @@ namespace RazorSharp.Clr
 		///     segment of <c>clr.dll</c>
 		///     <remarks>
 		///         Relative to <see cref="RazorSharp.Native.Structures.Images.ImageSectionInfo.SectionAddress" /> of
-		///         <see cref="Segments.SegmentType.DATA" /> segment of <see cref="ClrFunctions.CLR_DLL" />
+		///         <see cref="Segments.SegmentType.DATA" /> segment of <see cref="Clr.CLR_DLL" />
 		///     </remarks>
 		/// </summary>
 		internal const long GLOBAL_GCHEAP_OFFSET = 48;
@@ -97,7 +97,7 @@ namespace RazorSharp.Clr
 		///     segment of <c>clr.dll</c>
 		///     <remarks>
 		///         Relative to <see cref="RazorSharp.Native.Structures.Images.ImageSectionInfo.SectionAddress" /> of
-		///         <see cref="Segments.SegmentType.DATA" /> segment of <see cref="ClrFunctions.CLR_DLL" />
+		///         <see cref="Segments.SegmentType.DATA" /> segment of <see cref="Clr.CLR_DLL" />
 		///     </remarks>
 		/// </summary>
 		internal const long GLOBAL_LOWEST_ADDRESS_OFFSET = 40;
@@ -107,7 +107,7 @@ namespace RazorSharp.Clr
 		///     segment of <c>clr.dll</c>
 		///     <remarks>
 		///         Relative to <see cref="RazorSharp.Native.Structures.Images.ImageSectionInfo.SectionAddress" /> of
-		///         <see cref="Segments.SegmentType.DATA" /> segment of <see cref="ClrFunctions.CLR_DLL" />
+		///         <see cref="Segments.SegmentType.DATA" /> segment of <see cref="Clr.CLR_DLL" />
 		///     </remarks>
 		/// </summary>
 		internal const long GLOBAL_HIGHEST_ADDRESS_OFFSET = 464;

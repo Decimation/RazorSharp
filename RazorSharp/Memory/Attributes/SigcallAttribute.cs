@@ -6,7 +6,7 @@ using RazorSharp.Clr.Structures;
 
 #endregion
 
-namespace RazorSharp.Memory
+namespace RazorSharp.Memory.Attributes
 {
 	/// <inheritdoc />
 	/// <summary>

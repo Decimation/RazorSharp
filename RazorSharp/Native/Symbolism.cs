@@ -53,10 +53,15 @@ namespace RazorSharp.Native
 			var offsets = new List<long>();
 
 			for (int i = 0; i < len; i++) {
+				Global.Log.Debug("SymCollect: {Name}", userContext[i]);
 				var ctxStrNative = Mem.AllocString(userContext[i]).Address;
 				SymEnumSymbols(ctxStrNative);
+				Global.Log.Debug("\t>> SymEnumSymbols");
 				SymEnumTypes(ctxStrNative);
-				offsets.Add((m_addrBuffer - (int) m_base).ToInt64());
+				Global.Log.Debug("\t>> SymEnumTypes");
+				var ofs = (m_addrBuffer - (int) m_base).ToInt64();
+				Global.Log.Debug("Offset: {Offset}", ofs.ToString("X"));
+				offsets.Add(ofs);
 				Mem.FreeString(ctxStrNative);
 			}
 
@@ -77,8 +82,7 @@ namespace RazorSharp.Native
 				if (String.CompareOrdinal(s, str) == 0) {
 					var childs = new TI_FINDCHILDREN_PARAMS();
 					DbgHelp.SymGetTypeInfo(m_addrBuffer, pSymInfo->ModBase, pSymInfo->TypeIndex,
-					                       IMAGEHLP_SYMBOL_TYPE_INFO.TI_GET_CHILDRENCOUNT,
-					                       &childs.Count);
+					                       IMAGEHLP_SYMBOL_TYPE_INFO.TI_GET_CHILDRENCOUNT, &childs.Count);
 
 					m_addrBuffer = (IntPtr) pSymInfo->Address;
 				}
@@ -89,12 +93,13 @@ namespace RazorSharp.Native
 
 		private void SymEnumSymbols(IntPtr ctxStrNative)
 		{
-			Conditions.Assert(DbgHelp.SymEnumSymbols(m_process, m_dllBase, m_maskStrNative, EnumSymProc, ctxStrNative));
+			Conditions.Assert(DbgHelp.SymEnumSymbols(m_process, m_dllBase, m_maskStrNative, EnumSymProc, 
+			ctxStrNative), "SymEnumSymbols failed");
 		}
 
 		private void SymEnumTypes(IntPtr ctxStrNative)
 		{
-			Conditions.Assert(DbgHelp.SymEnumTypes(m_process, m_dllBase, EnumSymProc, ctxStrNative));
+			Conditions.Assert(DbgHelp.SymEnumTypes(m_process, m_dllBase, EnumSymProc, ctxStrNative), "SymEnumTypes failed");
 		}
 
 		public long SymGet(string userContext)
@@ -124,6 +129,7 @@ namespace RazorSharp.Native
 		{
 			ReleaseUnmanagedResources();
 			GC.SuppressFinalize(this);
+			Global.Log.Debug("Completed disposing");
 		}
 
 		public static Pointer<byte> GetFuncAddr(string image, string module, string name)
@@ -133,5 +139,8 @@ namespace RazorSharp.Native
 				return Modules.GetFuncAddr(module, offset);
 			}
 		}
+
+		// todo: make portable
+		internal const string CLR_PDB = @"C:\Users\Deci\Desktop\clrx.pdb";
 	}
 }
