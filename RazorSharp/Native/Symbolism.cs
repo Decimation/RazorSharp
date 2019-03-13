@@ -31,8 +31,8 @@ namespace RazorSharp.Native
 
 			m_base = @base;
 
-			m_imgStrNative  = Mem.AllocString(image).Address;
-			m_maskStrNative = Mem.AllocString(mask).Address;
+			m_imgStrNative  = Marshal.StringToHGlobalAnsi(image);
+			m_maskStrNative = Marshal.StringToHGlobalAnsi(mask);
 
 			Conditions.Assert(DbgHelp.SymInitialize(m_process, null, false));
 
@@ -53,16 +53,12 @@ namespace RazorSharp.Native
 			var offsets = new List<long>();
 
 			for (int i = 0; i < len; i++) {
-				Global.Log.Debug("SymCollect: {Name}", userContext[i]);
-				var ctxStrNative = Mem.AllocString(userContext[i]).Address;
+				var ctxStrNative = Marshal.StringToHGlobalAnsi(userContext[i]);
 				SymEnumSymbols(ctxStrNative);
-				Global.Log.Debug("\t>> SymEnumSymbols");
 				SymEnumTypes(ctxStrNative);
-				Global.Log.Debug("\t>> SymEnumTypes");
 				var ofs = (m_addrBuffer - (int) m_base).ToInt64();
-				Global.Log.Debug("Offset: {Offset}", ofs.ToString("X"));
 				offsets.Add(ofs);
-				Mem.FreeString(ctxStrNative);
+				Marshal.FreeHGlobal(ctxStrNative);
 			}
 
 			return offsets.ToArray();
@@ -81,7 +77,7 @@ namespace RazorSharp.Native
 
 				if (String.CompareOrdinal(s, str) == 0) {
 					var childs = new TI_FINDCHILDREN_PARAMS();
-					DbgHelp.SymGetTypeInfo(m_addrBuffer, pSymInfo->ModBase, pSymInfo->TypeIndex,
+					DbgHelp.SymGetTypeInfo(m_process, pSymInfo->ModBase, pSymInfo->TypeIndex,
 					                       IMAGEHLP_SYMBOL_TYPE_INFO.TI_GET_CHILDRENCOUNT, &childs.Count);
 
 					m_addrBuffer = (IntPtr) pSymInfo->Address;
@@ -93,23 +89,22 @@ namespace RazorSharp.Native
 
 		private void SymEnumSymbols(IntPtr ctxStrNative)
 		{
-			Conditions.Assert(DbgHelp.SymEnumSymbols(m_process, m_dllBase, m_maskStrNative, EnumSymProc, 
-			ctxStrNative), "SymEnumSymbols failed");
+			Conditions.Assert(DbgHelp.SymEnumSymbols(m_process, m_dllBase, m_maskStrNative, EnumSymProc, ctxStrNative));
 		}
 
 		private void SymEnumTypes(IntPtr ctxStrNative)
 		{
-			Conditions.Assert(DbgHelp.SymEnumTypes(m_process, m_dllBase, EnumSymProc, ctxStrNative), "SymEnumTypes failed");
+			Conditions.Assert(DbgHelp.SymEnumTypes(m_process, m_dllBase, EnumSymProc, ctxStrNative));
 		}
 
 		public long SymGet(string userContext)
 		{
-			var ctxStrNative = Mem.AllocString(userContext).Address;
+			var ctxStrNative = Marshal.StringToHGlobalAnsi(userContext);
 
 			SymEnumSymbols(ctxStrNative);
 			SymEnumTypes(ctxStrNative);
 
-			Mem.FreeString(ctxStrNative);
+			Marshal.FreeHGlobal(ctxStrNative);
 
 			return (m_addrBuffer - (int) m_base).ToInt64();
 		}
@@ -117,8 +112,8 @@ namespace RazorSharp.Native
 		private void ReleaseUnmanagedResources()
 		{
 			Conditions.Assert(DbgHelp.SymCleanup(m_process));
-			Mem.FreeString(m_imgStrNative);
-			Mem.FreeString(m_maskStrNative);
+			Marshal.FreeHGlobal(m_imgStrNative);
+			Marshal.FreeHGlobal(m_maskStrNative);
 			m_process       = IntPtr.Zero;
 			m_addrBuffer    = IntPtr.Zero;
 			m_imgStrNative  = IntPtr.Zero;

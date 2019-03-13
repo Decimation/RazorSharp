@@ -308,8 +308,7 @@ namespace RazorSharp.Pointers
 
 		private string DbgToString()
 		{
-			return String.Format("Address = {0} | Value = {1}", ToString(FMT_P),
-			                     Reference.ToString());
+			return String.Format("Address = {0} | Value = {1}", ToString(FMT_P),Reference.ToString());
 		}
 
 		#region Read / write
@@ -443,11 +442,9 @@ namespace RazorSharp.Pointers
 		// todo: verify this works
 		public T SafeRead(int elemOffset = 0)
 		{
-			int cb = ElementSize + elemOffset;
-
+			int cb         = ElementSize + elemOffset;
 			var oldProtect = VirtualProtectAccessible(cb);
-
-			var buf = Read(elemOffset);
+			var buf        = Read(elemOffset);
 
 			VirtualProtectRestore(cb, oldProtect);
 
@@ -568,8 +565,9 @@ namespace RazorSharp.Pointers
 		[Pure]
 		public T[] CopyOut(int startIndex, int elemCnt)
 		{
-			var rg                                                                     = new T[elemCnt];
-			for (int i = startIndex; i < elemCnt + startIndex; i++) rg[i - startIndex] = Read(i);
+			var rg = new T[elemCnt];
+			for (int i = startIndex; i < elemCnt + startIndex; i++)
+				rg[i - startIndex] = Read(i);
 
 			return rg;
 		}
@@ -664,8 +662,7 @@ namespace RazorSharp.Pointers
 			for (int i = 0; i < elemCnt; i++) {
 				Pointer<T> ptr = AddressOfIndex(i);
 				if (!typeof(T).IsValueType)
-					table.AddRow(ptr.ToString(FMT_P), i, Hex.ToHex(ReadAny<long>(i)), ptr.ToStringSafe
-						             ());
+					table.AddRow(ptr.ToString(FMT_P), i, Hex.ToHex(ReadAny<long>(i)), ptr.ToStringSafe());
 				else
 					table.AddRow(ptr.ToString(FMT_P), i, ptr.ToStringSafe());
 			}

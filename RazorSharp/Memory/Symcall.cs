@@ -16,9 +16,13 @@ namespace RazorSharp.Memory
 {
 	public static unsafe class Symcall
 	{
-		internal delegate long SetStableEntryPointInterlockedDelegate(MethodDesc* __this, ulong pCode);
+		internal delegate long SetStableEntryPointInterlockedDelegate(void* __this, IntPtr pCode);
 
 		private static SetStableEntryPointInterlockedDelegate _setStableEntryPointInterlocked;
+
+		internal delegate long Reset(MethodDesc* __this);
+
+		private static Reset _reset;
 
 		internal static Pointer<byte> GetClrFunctionAddress(string name)
 		{
@@ -27,25 +31,36 @@ namespace RazorSharp.Memory
 
 		internal static void Setup()
 		{
-			var fn = GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked").Address;
+			
+				var fn = GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked").Address;
+			
+				_setStableEntryPointInterlocked =
+					Marshal.GetDelegateForFunctionPointer<SetStableEntryPointInterlockedDelegate>(fn);
 
-			_setStableEntryPointInterlocked =
-				Marshal.GetDelegateForFunctionPointer<SetStableEntryPointInterlockedDelegate>(fn);
+				var fn2 = GetClrFunctionAddress("MethodDesc::Reset").Address;
+
+				_reset = Marshal.GetDelegateForFunctionPointer<Reset>(fn2);
+			
+			
 		}
 
 		[HandleProcessCorruptedStateExceptions]
 		internal static void SetStableEntryPoint(MethodInfo mi, IntPtr pCode)
 		{
-			var pMd = (MethodDesc*) mi.MethodHandle.Value;
 			try {
-				_setStableEntryPointInterlocked(pMd, (ulong) pCode);
+				
+				var pMd = mi.MethodHandle.Value.ToPointer();
+				//_reset(pMd);
+				_setStableEntryPointInterlocked(pMd, pCode);
+				
 			}
-			catch (SEHException e) {
-				Console.WriteLine(e);
-				Console.WriteLine("HResult: {0:X}",e.HResult);
-				foreach (DictionaryEntry dic in e.Data) {
-					Console.WriteLine("> [{0}, {1}]",dic.Key, dic.Value);
-				}
+			catch (SEHException x) {
+				Global.Log.Error("SEHException");
+				Global.Log.Error("Error code {Code}", x.ErrorCode);
+				Global.Log.Debug("HResult {HR}", x.HResult.ToString("X"));
+				Console.WriteLine(x.Source);
+				Console.WriteLine(x.StackTrace);
+				
 				throw;
 			}
 		}
@@ -84,26 +99,23 @@ namespace RazorSharp.Memory
 
 
 				Conditions.RequiresNotNull(fullSym, nameof(fullSym));
-				Global.Log.Debug("Symbol: {Sym}", fullSym);
 				contexts.Add(fullSym);
 			}
 
-			Global.Log.Debug("SymCollect");
 			var offsets = sym.SymCollect(contexts.ToArray());
-			Global.Log.Debug("Offsets: {Count}", offsets);
 			
 
 			var addresses = Modules.GetFuncAddr(baseAttr.Module, offsets).ToArray();
 			Conditions.Requires(addresses.Length == methods.Length);
 
 			for (int i = 0; i < methods.Length; i++) {
-				SetStableEntryPoint(methods[i], addresses[i].Address);
 				Global.Log.Debug("Binding {Name} to {Addr}", methods[i].Name,
 				                 addresses[i].ToString("P"));
+				SetStableEntryPoint(methods[i], addresses[i].Address);
+				
 			}
 			
 			sym.Dispose();
-			Global.Log.Debug("Disposed");
 		}
 
 		public static void Bind(Type t)

@@ -96,6 +96,8 @@ namespace Test
 			}
 		}
 
+		
+
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -106,20 +108,33 @@ namespace Test
 
 			Symcall.Setup();
 
+			var fn = Symcall.GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked");
+			
+			string opCodes = "55 8B EC 53 56 57 8B D9 E8 11 68 F8 FF";
+			var    ss      = new SigScanner();
+			ss.SelectModule("clr.dll");
+			Pointer<byte> ptr = ss.FindPattern(opCodes);
+			Console.WriteLine(ptr);
+			var ofs = ptr.Address.ToInt64() - Modules.GetModule("clr.dll").BaseAddress.ToInt64();
+			Console.WriteLine("offset {0:X}",ofs);
+			Console.WriteLine("ptr {0:P} {1:X}",fn, fn[0]);
+			
 
-			var fn  = Symcall.GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked");
-			var fnx = Marshal.GetDelegateForFunctionPointer<Symcall.SetStableEntryPointInterlockedDelegate>(fn.Address);
+			
+			
+			var fnx = Marshal.GetDelegateForFunctionPointer<Symcall.SetStableEntryPointInterlockedDelegate>(ptr.Address);
 
 			var foo = typeof(Anime).GetMethod("foo");
-			var bar = typeof(Anime).GetMethod("bar");
+			
 
 
-			fnx((MethodDesc*) foo.MethodHandle.Value, 0);
+			
+			
+			fnx(foo.MethodHandle.Value.ToPointer(), IntPtr.Zero);
+			Console.ReadLine();
+			
 
-			var n = new Anime();
-			n.foo();
-
-			Environment.Exit(0);
+			
 
 
 			// Shit is kinda broken
@@ -131,7 +146,7 @@ namespace Test
 				Console.WriteLine(e);
 				Console.WriteLine("{0:X}", e.HResult);
 				Console.WriteLine(e.Message);
-				throw;
+				
 			}
 
 

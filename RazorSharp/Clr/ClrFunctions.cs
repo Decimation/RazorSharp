@@ -139,10 +139,10 @@ namespace RazorSharp.Clr
 		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT, string name)
 		{
 			var module = pMT.Reference.Module;
-			var pStr   = Mem.AllocString(name);
+			var pStr = Marshal.StringToHGlobalAnsi(name);
 			var cSig   = GetSignatureCorElementType(pMT);
 			var field  = FindField(pMT, pStr, IntPtr.Zero, cSig, module, 0);
-			Mem.FreeString(pStr);
+			Marshal.FreeHGlobal(pStr);
 			return field;
 		}
 

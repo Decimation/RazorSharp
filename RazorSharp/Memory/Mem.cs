@@ -163,28 +163,19 @@ namespace RazorSharp.Memory
 		/// <returns></returns>
 		public static Pointer<byte> AllocString(string s)
 		{
-			using (LogContext.PushProperty(Global.CONTEXT_PROP, "AllocString")) {
-				var size = s.Length + 1;
-				Global.Log.Debug("Allocating {Count} bytes", size);
-				Pointer<byte> ptr = AllocUnmanaged<byte>(size);
-				Global.Log.Debug("Allocated memory");
-				ptr.WriteString(s, StringTypes.AnsiStr);
-				Conditions.Assert(ptr.ReadString(StringTypes.AnsiStr) == s);
+			var size = s.Length + 1;
+			Pointer<byte> ptr = AllocUnmanaged<byte>(size);
+			ptr.WriteString(s, StringTypes.AnsiStr);
+			Conditions.Assert(ptr.ReadString(StringTypes.AnsiStr) == s);
 
-				return ptr;
-			}
+			return ptr;
 		}
 
 		public static void FreeString(Pointer<byte> ptr)
 		{
-			using (LogContext.PushProperty(Global.CONTEXT_PROP, "FreeString")) {
-				Global.Log.Debug("Calculating size");
-				int size = ptr.ReadUntil(x => x == 0x00) + 1;
-				Global.Log.Debug("Str size: {Count}", size);
-				ptr.Zero(size);
-				Free(ptr);
-				Global.Log.Debug("Completed");
-			}
+			int size = ptr.ReadUntil(x => x == 0x00) + 1;
+			ptr.Zero(size);
+			Free(ptr);
 		}
 
 		internal static bool IsMemoryInUse => AllocCount > 0;

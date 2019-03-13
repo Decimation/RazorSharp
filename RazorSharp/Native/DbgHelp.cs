@@ -40,6 +40,7 @@ namespace RazorSharp.Native
 		//	IMAGEHLP_SYMBOL_TYPE_INFO GetType,
 		//	PVOID                     pInfo
 		//);
+		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 		[return: MarshalAs(UnmanagedType.Bool)]
@@ -63,7 +64,7 @@ namespace RazorSharp.Native
 		                                           string                        mask,
 		                                           SYM_ENUMERATESYMBOLS_CALLBACK callback,
 		                                           IntPtr                        pUserContext);
-
+		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
@@ -104,6 +105,7 @@ namespace RazorSharp.Native
 
 
 		// BOOL SymInitialize(HANDLE hProcess, PCSTR UserSearchPath, BOOL fInvadeProcess)
+		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SymInitialize")]
 		[return: MarshalAs(UnmanagedType.Bool)]
@@ -122,6 +124,7 @@ namespace RazorSharp.Native
 		                                             /*MODLOAD_DATA*/ IntPtr Data,
 		                                             uint                    Flags);
 
+		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true)]
 		internal static extern ulong SymLoadModuleEx(IntPtr                  hProcess,
@@ -146,7 +149,7 @@ namespace RazorSharp.Native
 
 
 		// BOOL SymEnumTypes(HANDLE hProcess, ULONG64 BaseOfDll, PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, PVOID UserContext)
-
+		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 		[return: MarshalAs(UnmanagedType.Bool)]
@@ -156,6 +159,7 @@ namespace RazorSharp.Native
 		                                         IntPtr                        pUserContext);
 
 		// BOOL SymCleanup(HANDLE hProcess)
+		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 		[return: MarshalAs(UnmanagedType.Bool)]
