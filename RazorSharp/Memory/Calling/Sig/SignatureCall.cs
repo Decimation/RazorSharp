@@ -54,7 +54,7 @@ namespace RazorSharp.Memory
 
 		static SignatureCall()
 		{
-			Global.Log.Error("NOOOOOOOOOOO!");
+			//Global.Log.Error("NOOOOOOOOOOO!");
 			SigcallMethodMap = new Dictionary<MethodInfo, Tuple<byte[], long>>();
 		}
 

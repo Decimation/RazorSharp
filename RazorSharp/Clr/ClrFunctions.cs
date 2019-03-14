@@ -48,6 +48,7 @@ namespace RazorSharp.Clr
 						: s_rgStableEntryPointInterlockedSignature32);*/
 
 
+			return;
 			var fn = GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked").Address;
 
 			s_setStableEntryPointInterlocked =
@@ -58,7 +59,7 @@ namespace RazorSharp.Clr
 				typeof(FieldDesc), typeof(MethodDesc), typeof(ClrFunctions), typeof(GCHeap)
 			}, JSON_CACHING_URL);
 
-			SignatureCall.DynamicBind(typeof(ClrFunctions));
+			//SignatureCall.DynamicBind(typeof(ClrFunctions));
 		}
 
 		/// <summary>

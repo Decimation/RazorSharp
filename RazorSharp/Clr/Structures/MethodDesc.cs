@@ -70,7 +70,7 @@ namespace RazorSharp.Clr.Structures
 		static MethodDesc()
 		{
 			Global.Log.Debug("Type init");
-			SignatureCall.DynamicBind<MethodDesc>();
+			//SignatureCall.DynamicBind<MethodDesc>();
 		}
 
 		#region Fields

@@ -234,14 +234,15 @@
     <Compile Include="Experimental\Functions.cs" />
     <Compile Include="Experimental\Registers.cs" />
     <Compile Include="Global.cs" />
-    <Compile Include="Memory\Attributes\ClrSigcallAttribute.cs" />
-    <Compile Include="Memory\Attributes\ClrSymcallAttribute.cs" />
-    <Compile Include="Memory\Attributes\SigcallAttribute.cs" />
-    <Compile Include="Memory\Attributes\SymcallAttribute.cs" />
-    <Compile Include="Memory\SigCache.cs" />
+    <Compile Include="Memory\Calling\Sig\Attributes\ClrSigcallAttribute.cs" />
+    <Compile Include="Memory\Calling\Sig\Attributes\SigcallAttribute.cs" />
+    <Compile Include="Memory\Calling\Sig\SigCache.cs" />
+    <Compile Include="Memory\Calling\Sig\SignatureCall.cs" />
+    <Compile Include="Memory\Calling\Sym\Attributes\ClrSymcallAttribute.cs" />
+    <Compile Include="Memory\Calling\Sym\Attributes\SymcallAttribute.cs" />
+    <Compile Include="Memory\Calling\Sym\Symcall.cs" />
     <Compile Include="Memory\MemScanner.cs" />
     <Compile Include="Memory\Structures.cs" />
-    <Compile Include="Memory\Symcall.cs" />
     <Compile Include="Native\Enums\ImageDirectoryEntry.cs" />
     <Compile Include="Native\Enums\IMAGEHLP_SYMBOL_TYPE_INFO.cs" />
     <Compile Include="Native\Enums\SymEnumOptions.cs" />
@@ -256,7 +257,6 @@
     <Compile Include="Memory\Modules.cs" />
     <Compile Include="Memory\Segments.cs" />
     <Compile Include="Memory\SigScanner.cs" />
-    <Compile Include="Memory\SignatureCall.cs" />
     <Compile Include="Native\DbgHelp.cs" />
     <Compile Include="Native\Enums\AllocationType.cs" />
     <Compile Include="Native\Enums\ConsoleOutputModes.cs" />
@@ -321,9 +321,6 @@
   <ItemGroup>
     <Content Include="Clr\ClrFunctions.json" />
     <Content Include="Documentation.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Memory\Calling" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

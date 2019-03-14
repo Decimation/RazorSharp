@@ -16,14 +16,12 @@ namespace RazorSharp.Memory
 {
 	public static unsafe class Symcall
 	{
-		internal delegate long SetStableEntryPointInterlockedDelegate(void* __this, IntPtr pCode);
+		internal delegate int SetStableEntryPointInterlockedDelegate(void* __this, IntPtr pCode);
+		internal delegate int SetStableEntryPointInterlockedDelegate32(int __this, int pCode);
+		internal delegate IntPtr GetMultiCallableAddrOfCodeDelegate(void* __this, int x);
 
 		private static SetStableEntryPointInterlockedDelegate _setStableEntryPointInterlocked;
-
-		internal delegate long Reset(MethodDesc* __this);
-
-		private static Reset _reset;
-
+		private static SetStableEntryPointInterlockedDelegate32 _setStableEntryPointInterlocked32;
 		internal static Pointer<byte> GetClrFunctionAddress(string name)
 		{
 			return Symbolism.GetFuncAddr(Symbolism.CLR_PDB, Clr.Clr.CLR_DLL, name);
@@ -31,27 +29,40 @@ namespace RazorSharp.Memory
 
 		internal static void Setup()
 		{
-			
+			if (!Environment.Is64BitProcess) {
+				const string opCodes = "55 8B EC 53 56 57 8B D9 E8 11 68 F8 FF 8B CB 8B F8 E8 57 41 F8 FF 8B 75 8 8B";
+				var          ss      = new SigScanner();
+				ss.SelectModule("clr.dll");
+				Pointer<byte> ptr = ss.FindPattern(opCodes);
+				Console.WriteLine(ptr);
+				var ofs = ptr.Address.ToInt64() - Modules.GetModule("clr.dll").BaseAddress.ToInt64();
+
+				_setStableEntryPointInterlocked32 =
+					Marshal.GetDelegateForFunctionPointer<SetStableEntryPointInterlockedDelegate32>(ptr.Address);
+			}
+			else {
 				var fn = GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked").Address;
-			
+
 				_setStableEntryPointInterlocked =
 					Marshal.GetDelegateForFunctionPointer<SetStableEntryPointInterlockedDelegate>(fn);
-
-				var fn2 = GetClrFunctionAddress("MethodDesc::Reset").Address;
-
-				_reset = Marshal.GetDelegateForFunctionPointer<Reset>(fn2);
-			
-			
+			}
 		}
 
 		[HandleProcessCorruptedStateExceptions]
 		internal static void SetStableEntryPoint(MethodInfo mi, IntPtr pCode)
 		{
-			try {
-				
-				var pMd = mi.MethodHandle.Value.ToPointer();
-				//_reset(pMd);
-				_setStableEntryPointInterlocked(pMd, pCode);
+			try
+			{
+				var pMd = mi.MethodHandle.Value;
+				if (!Environment.Is64BitProcess)
+				{
+					
+					_setStableEntryPointInterlocked32(pMd.ToInt32(), pCode.ToInt32());
+				}
+				else
+				{
+					_setStableEntryPointInterlocked(pMd.ToPointer(), pCode);
+				}
 				
 			}
 			catch (SEHException x) {
@@ -60,7 +71,7 @@ namespace RazorSharp.Memory
 				Global.Log.Debug("HResult {HR}", x.HResult.ToString("X"));
 				Console.WriteLine(x.Source);
 				Console.WriteLine(x.StackTrace);
-				
+
 				throw;
 			}
 		}
@@ -70,7 +81,9 @@ namespace RazorSharp.Memory
 			var methods = Runtime.GetMethods(t)
 			                     .Where(x => x.GetCustomAttribute<SymcallAttribute>() != null)
 			                     .ToArray();
-
+			if (methods.Length == 0) {
+				return;
+			}
 			Global.Log.Debug("Detected {Count} decorated methods", methods.Length);
 			var baseAttr = methods[0].GetCustomAttribute<SymcallAttribute>();
 			var sym      = new Symbolism(baseAttr.Image);
@@ -103,7 +116,7 @@ namespace RazorSharp.Memory
 			}
 
 			var offsets = sym.SymCollect(contexts.ToArray());
-			
+
 
 			var addresses = Modules.GetFuncAddr(baseAttr.Module, offsets).ToArray();
 			Conditions.Requires(addresses.Length == methods.Length);
@@ -112,9 +125,8 @@ namespace RazorSharp.Memory
 				Global.Log.Debug("Binding {Name} to {Addr}", methods[i].Name,
 				                 addresses[i].ToString("P"));
 				SetStableEntryPoint(methods[i], addresses[i].Address);
-				
 			}
-			
+
 			sym.Dispose();
 		}
 

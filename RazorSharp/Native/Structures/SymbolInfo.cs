@@ -1,6 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
 // ReSharper disable BuiltInTypeReferenceStyle
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable FieldCanBeMadeReadOnly.Global
 
 namespace RazorSharp.Native.Structures
 {
@@ -9,7 +11,8 @@ namespace RazorSharp.Native.Structures
 	using CHAR = SByte;
 
 	
-	struct TI_FINDCHILDREN_PARAMS
+	[StructLayout(LayoutKind.Sequential)]
+	public struct TI_FINDCHILDREN_PARAMS
 	{
 		public ULONG Count;
 		public ULONG Start;

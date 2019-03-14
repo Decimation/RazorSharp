@@ -7,6 +7,7 @@ using RazorCommon;
 using RazorSharp.Native;
 using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 
 #endregion
 
@@ -20,6 +21,11 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public static class Segments
 	{
+		static Segments()
+		{
+			Conditions.Requires64Bit();
+		}
+		
 		//todo
 		/// <summary>
 		///     http://www.hexacorn.com/blog/2016/12/15/pe-section-names-re-visited/

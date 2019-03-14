@@ -89,7 +89,7 @@
 	{
 	  "name":      "SetStableEntryPointInterlocked",
 	  "opcodes64": "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20 48 8B FA 48 8B F1 E8 1E 57 E7 FF",
-	  "opcodes32": "55 8B EC 53 56 57 8B D9 E8 11 68 F8 FF",
+	  "opcodes32": "55 8B EC 53 56 57 8B D9 E8 11 68 F8 FF 8B CB 8B F8 E8 57 41 F8 FF 8B 75 8 8B",
 	  "offset64":  "1A9418",
 	  "offset32":  "0"
 	}

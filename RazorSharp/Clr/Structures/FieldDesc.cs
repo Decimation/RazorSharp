@@ -51,7 +51,7 @@ namespace RazorSharp.Clr.Structures
 	{
 		static FieldDesc()
 		{
-			SignatureCall.DynamicBind<FieldDesc>();
+			//SignatureCall.DynamicBind<FieldDesc>();
 		}
 
 		private const int FieldOffsetMax    = (1 << 27) - 1;
