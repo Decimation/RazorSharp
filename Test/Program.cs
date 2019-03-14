@@ -77,6 +77,11 @@ namespace Test
 			}
 		}
 
+		[ClrSymcall(Symbol = "Object::GetSize", FullyQualified = true)]
+		private static int Size(this object obj)
+		{
+			return Unsafe.INVALID_VALUE;
+		}
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -86,6 +91,9 @@ namespace Test
 //			Clr.Setup();
 			Symcall.Setup();
 
+			Symcall.BindQuick(typeof(Program));
+
+			Console.WriteLine("foo".Size());
 
 			var foo = typeof(Anime).GetMethod("foo", ReflectionUtil.ALL_FLAGS);
 			Console.WriteLine("val: {0:X}", foo.MethodHandle.Value.ToInt64());

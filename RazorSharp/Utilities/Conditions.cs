@@ -65,7 +65,7 @@ namespace RazorSharp.Utilities
 			 * - Workstation Concurrent GC
 			 *
 			 */
-			//Requires64Bit();
+			Requires64Bit();
 			RequiresOS(OSPlatform.Windows);
 
 			/**
@@ -74,10 +74,10 @@ namespace RazorSharp.Utilities
 			 * Other versions will probably work but we're just making sure
 			 * todo - determine compatibility
 			 */
-			Assert(Environment.Version == CLR_VER);
+			Requires(Environment.Version == CLR_VER);
 			
 			
-			Assert(!GCSettings.IsServerGC);
+			Requires(!GCSettings.IsServerGC);
 			RequiresClr();
 
 			if (Debugger.IsAttached) {
