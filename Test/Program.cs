@@ -86,7 +86,6 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			// STAAARTTTT IIITTT UUUPPPP
 			Global.Setup();
 //			Clr.Setup();
 			Symcall.Setup();
@@ -113,31 +112,6 @@ namespace Test
 			// SHUT IT DOWN
 			Global.Close();
 
-			/*
-			int[] rg = {1, 2, 3};
-			Inspect.Heap<int[], int>(rg);
-
-
-			string s = "foo";
-			Inspect.Heap<string, byte>(s);
-
-			string[] str = {"foo", "bar"};
-			Inspect.Heap<string[], string>(str);
-
-			int i = 0;
-			Inspect.Stack(ref i);
-
-			Inspect.Stack(ref s);
-
-			Console.WriteLine(PrettyPrint.GenericName(typeof(KeyValuePair<int,string>)));
-
-			int[] irg = {1, 2, 3};
-			var obj = Runtime.GetArrayObject(ref irg);
-			
-
-			var m = Meta.GetType<int>();
-			Console.WriteLine(m);
-			Debug.Assert(Compare<int>());*/
 		}
 
 
@@ -155,18 +129,7 @@ namespace Test
 		}
 
 
-		[Flags]
-		private enum Flags
-		{
-			One   = 1,
-			Two   = 2,
-			Three = 4
-		}
-
-		private static bool HasFlagFast(this Flags v, Flags f)
-		{
-			return (v & f) == f;
-		}
+		
 
 		private static bool Compare<T>()
 		{

@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using RazorCommon.Utilities;
+using RazorSharp.Clr;
 using RazorSharp.Utilities.Exceptions;
 
 #endregion
@@ -227,9 +228,10 @@ namespace RazorSharp.Utilities
 			Requires(RuntimeInformation.IsOSPlatform(os), "OS type");
 		}
 
-		internal static void Requires64Bit()
+		internal static unsafe void Requires64Bit()
 		{
-			Requires(IntPtr.Size == 8 && Environment.Is64BitProcess, "64-bit");
+			Requires(IntPtr.Size == 8 && Environment.Is64BitProcess, "Only 64-bit is supported at the moment.");
+			AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
 		}
 
 		#region Not null

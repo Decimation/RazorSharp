@@ -43,9 +43,9 @@ namespace RazorSharp
 
 		internal static unsafe void Setup()
 		{
-			Conditions.AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
-			Conditions.Assert(Environment.Is64BitProcess);
+			
 			Conditions.CheckCompatibility();
+			
 
 			//ClrFunctions.Init();
 			Console.OutputEncoding = Encoding.Unicode;

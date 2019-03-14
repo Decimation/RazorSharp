@@ -242,6 +242,7 @@
     <Compile Include="Memory\Calling\Sym\Attributes\SymcallAttribute.cs" />
     <Compile Include="Memory\Calling\Sym\Symcall.cs" />
     <Compile Include="Memory\MemScanner.cs" />
+    <Compile Include="Memory\SegmentType.cs" />
     <Compile Include="Memory\Structures.cs" />
     <Compile Include="Native\Enums\ImageDirectoryEntry.cs" />
     <Compile Include="Native\Enums\IMAGEHLP_SYMBOL_TYPE_INFO.cs" />
