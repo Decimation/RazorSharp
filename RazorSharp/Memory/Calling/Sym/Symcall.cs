@@ -1,18 +1,16 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using RazorSharp.Clr;
-using RazorSharp.Clr.Structures;
-using RazorSharp.Memory.Attributes;
+using RazorSharp.Memory.Calling.Sym.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
-namespace RazorSharp.Memory
+namespace RazorSharp.Memory.Calling.Sym
 {
 	public static unsafe class Symcall
 	{
@@ -24,7 +22,7 @@ namespace RazorSharp.Memory
 		private static SetStableEntryPointInterlockedDelegate32 _setStableEntryPointInterlocked32;
 		internal static Pointer<byte> GetClrFunctionAddress(string name)
 		{
-			return Symbolism.GetFuncAddr(Symbolism.CLR_PDB, Clr.Clr.CLR_DLL, name);
+			return Symbolism.GetSymAddress(Symbolism.CLR_PDB, Clr.Clr.CLR_DLL, name);
 		}
 
 		internal static void Setup()
@@ -76,6 +74,10 @@ namespace RazorSharp.Memory
 			}
 		}
 
+		private const string SCOPE_RESOLUTION_OPERATOR = "::";
+
+		
+		
 		public static void BindQuick(Type t)
 		{
 			var methods = Runtime.GetMethods(t)
@@ -84,7 +86,7 @@ namespace RazorSharp.Memory
 			if (methods.Length == 0) {
 				return;
 			}
-			Global.Log.Debug("Detected {Count} decorated methods", methods.Length);
+//			Global.Log.Debug("Detected {Count} decorated methods", methods.Length);
 			var baseAttr = methods[0].GetCustomAttribute<SymcallAttribute>();
 			var sym      = new Symbolism(baseAttr.Image);
 			var contexts = new List<string>();
@@ -103,28 +105,30 @@ namespace RazorSharp.Memory
 					fullSym = method.Name;
 				}
 				else if (attr.Symbol != null && !attr.UseMethodNameOnly && !attr.FullyQualified) {
-					fullSym = declaringName + "::" + attr.Symbol;
+					fullSym = declaringName + SCOPE_RESOLUTION_OPERATOR + attr.Symbol;
 				}
 				else if (attr.Symbol == null) {
 					// Auto resolve
-					fullSym = declaringName + "::" + method.Name;
+					fullSym = declaringName + SCOPE_RESOLUTION_OPERATOR + method.Name;
 				}
 
 
 				Conditions.RequiresNotNull(fullSym, nameof(fullSym));
+				//Global.Log.Debug("Sym {Name}", fullSym);
 				contexts.Add(fullSym);
 			}
 
-			var offsets = sym.SymCollect(contexts.ToArray());
+			var offsets = sym.GetSymOffsets(contexts.ToArray());
 
 
-			var addresses = Modules.GetFuncAddr(baseAttr.Module, offsets).ToArray();
+			var addresses = Modules.GetAddresses(baseAttr.Module, offsets).ToArray();
 			Conditions.Requires(addresses.Length == methods.Length);
 
 			for (int i = 0; i < methods.Length; i++) {
-				Global.Log.Debug("Binding {Name} to {Addr}", methods[i].Name,
-				                 addresses[i].ToString("P"));
-				SetStableEntryPoint(methods[i], addresses[i].Address);
+//				Global.Log.Debug("Binding {Name} to {Addr}", methods[i].Name,
+//				                 addresses[i].ToString("P"));
+				var addr = addresses[i].Address;
+				SetStableEntryPoint(methods[i], addr);
 			}
 
 			sym.Dispose();

@@ -6,7 +6,7 @@ using RazorSharp.Clr.Structures;
 
 #endregion
 
-namespace RazorSharp.Memory.Attributes
+namespace RazorSharp.Memory.Calling.Sig.Attributes
 {
 	/// <inheritdoc />
 	/// <summary>
@@ -25,31 +25,26 @@ namespace RazorSharp.Memory.Attributes
 	public class SigcallAttribute : Attribute
 	{
 		/// <summary>
-		/// </summary>
-		public bool IsInFunctionMap;
-
-		/// <summary>
 		///     Module (DLL) containing <see cref="Signature" />
 		/// </summary>
-		public string Module;
+		public string Module { get; set; }
 
 		/// <summary>
 		///     Relative to the module's <see cref="SigScanner.BaseAddress" />
 		/// </summary>
-		public long OffsetGuess;
+		public long OffsetGuess { get; set; }
 
 		/// <summary>
 		///     Unique byte-sequence-string signature of the function
 		/// </summary>
-		public string Signature;
+		public string Signature { get; set; }
 
 		public SigcallAttribute() { }
 
 		public SigcallAttribute(string module, string signature)
 		{
-			Module          = module;
-			Signature       = signature;
-			IsInFunctionMap = false;
+			Module    = module;
+			Signature = signature;
 		}
 	}
 }

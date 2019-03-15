@@ -29,20 +29,24 @@ namespace RazorSharp.Memory
 			return null;
 		}
 
-		internal static IEnumerable<Pointer<byte>> GetFuncAddr(string module, long[] offset)
+		internal static Pointer<byte> GetBaseAddress(string module)
 		{
 			var           pm  = Modules.GetModule(module);
 			Pointer<byte> ptr = pm.BaseAddress;
-			
-			
+			return ptr;
+		}
+		
+		internal static IEnumerable<Pointer<byte>> GetAddresses(string module, long[] offset)
+		{
+			var ptr = GetBaseAddress(module);
 			foreach (long ofs in offset) {
 				yield return ptr + ofs;
 			}
 		}
-		internal static Pointer<byte> GetFuncAddr(string module, long offset)
+		
+		internal static Pointer<byte> GetAddress(string module, long offset)
 		{
-			var           pm  = Modules.GetModule(module);
-			Pointer<byte> ptr = pm.BaseAddress;
+			var ptr = GetBaseAddress(module);
 			return ptr + offset;
 		}
 	}

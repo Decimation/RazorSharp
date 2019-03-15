@@ -4,21 +4,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using RazorCommon;
-using RazorCommon.Utilities;
 using RazorSharp.Clr;
-using RazorSharp.Memory.Attributes;
-using RazorSharp.Native;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Calling.Sig.Attributes;
 using RazorSharp.Utilities;
 using Serilog.Context;
 
@@ -28,7 +17,7 @@ using Serilog.Context;
 
 #endregion
 
-namespace RazorSharp.Memory
+namespace RazorSharp.Memory.Calling.Sig
 {
 	// todo: WIP
 	// todo: make caching more efficient
@@ -46,24 +35,12 @@ namespace RazorSharp.Memory
 
 		private static readonly SigScanner SigScanner = new SigScanner();
 
-		/// <summary>
-		///     Cached functions
-		/// </summary>
-		private static readonly Dictionary<MethodInfo, Tuple<byte[], long>> SigcallMethodMap;
-
-
-		static SignatureCall()
-		{
-			//Global.Log.Error("NOOOOOOOOOOO!");
-			SigcallMethodMap = new Dictionary<MethodInfo, Tuple<byte[], long>>();
-		}
 
 		/// <summary>
 		///     When <c>true</c>, only the text (code) segment (which contains executable code)
 		///     of the target DLL will be scanned by <see cref="SigScanner" />.
 		/// </summary>
 		public static bool UseTextSegment { get; set; } = true;
-
 
 		private static void SelectModule(SigcallAttribute attr)
 		{
@@ -73,27 +50,15 @@ namespace RazorSharp.Memory
 				SigScanner.SelectModule(attr.Module);
 		}
 
-
 		private static IntPtr GetCorrespondingFunctionPointer(SigcallAttribute attr, MethodInfo methodInfo)
 		{
 			const int BYTE_TOL = 3;
 
 
-			return attr.IsInFunctionMap
-				? SigScanner.FindPattern(SigcallMethodMap[methodInfo].Item1,
-				                         attr.OffsetGuess == 0
-					                         ? SigcallMethodMap[methodInfo].Item2
-					                         : attr.OffsetGuess, BYTE_TOL)
-				: SigScanner.FindPattern(attr.Signature, attr.OffsetGuess, BYTE_TOL);
+			return SigScanner.FindPattern(attr.Signature, attr.OffsetGuess, BYTE_TOL);
 		}
 
-		private static void Relink(SigcallAttribute attr, MethodInfo methodInfo)
-		{
-			// todo: this is a cheap fix
-			if (!attr.IsInFunctionMap && SigcallMethodMap.ContainsKey(methodInfo))
-				attr.IsInFunctionMap = true;
-		}
-
+		
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void ApplySigcallIndependent(MethodInfo methodInfo)
@@ -104,7 +69,6 @@ namespace RazorSharp.Memory
 
 			if (attr != null) {
 				SelectModule(attr);
-				Relink(attr, methodInfo);
 
 				var fn = GetCorrespondingFunctionPointer(attr, methodInfo);
 
@@ -211,99 +175,6 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-		#region Cache
-
-		private static void AddToMap(MethodInfo mi, byte[] rgBytes, long offsetGuess = 0)
-		{
-			if (!SigcallMethodMap.ContainsKey(mi))
-				SigcallMethodMap.Add(mi, new Tuple<byte[], long>(rgBytes, offsetGuess));
-		}
-
-		public static void Clear()
-		{
-			SigcallMethodMap.Clear();
-		}
-
-		internal static void CacheFunction<T>(int token, byte[] rgBytes, long offsetGuess = 0)
-		{
-			var mb = typeof(T).Module.ResolveMethod(token);
-			AddToMap((MethodInfo) mb, rgBytes, offsetGuess);
-		}
-
-		private static void CacheFunction(MethodInfo mi, byte[] rgBytes, long offsetGuess = 0)
-		{
-			AddToMap(mi, rgBytes, offsetGuess);
-		}
-
-		private static void CacheFunction(Type t, string funcName, byte[] rgBytes, long offsetGuess = 0)
-		{
-			var mi = Runtime.GetAnnotatedMethods<SigcallAttribute>(t, funcName)[0];
-			CacheFunction(mi, rgBytes, offsetGuess);
-		}
-
-		internal static void CacheFunction<T>(string funcName, byte[] rgBytes, long offsetGuess = 0)
-		{
-			CacheFunction(typeof(T), funcName, rgBytes, offsetGuess);
-		}
-
-		private static string Get(string url)
-		{
-			using (var wc = new WebClient()) {
-				return wc.DownloadString(url);
-			}
-		}
-
-		public static void ReadCacheJsonUrl(Type[] t, string url)
-		{
-			string localFile =
-				Environment.CurrentDirectory + @"\..\..\..\RazorSharp\Clr\ClrFunctions.json";
-
-			localFile = Path.GetFullPath(localFile);
-
-			string js;
-
-			if (File.Exists(localFile)) {
-				Global.Log.Debug("Using local js");
-				js = File.ReadAllText(localFile);
-			}
-			else {
-				js = Get(url);
-			}
-
-
-			Conditions.RequiresNotNullOrWhiteSpace(js, nameof(js));
-			foreach (var type in t)
-				ReadCacheJson(type, js);
-		}
-
-		public static void ReadCacheJsonUrl(Type t, string url)
-		{
-			ReadCacheJsonUrl(new[] {t}, url);
-		}
-
-		public static void ReadCacheJson(Type t, string json)
-		{
-			var js = JObject.Parse(json).GetValue(t.Name);
-			var r  = (List<SigCache>) js.ToObject(typeof(List<SigCache>));
-
-
-			foreach (var data in r) {
-				//Global.Log.Debug("Binding {Name}", data.Name);
-				byte[] opcodes;
-				string offset;
-				if (Environment.Is64BitProcess) {
-					opcodes = StringUtil.ParseByteArray(data.Opcodes64Signature);
-					offset  = data.Offset64String;
-				}
-				else {
-					opcodes = StringUtil.ParseByteArray(data.Opcodes32Signature);
-					offset  = data.Offset32String;
-				}
-
-				CacheFunction(t, data.Name, opcodes, Int64.Parse(offset, NumberStyles.HexNumber));
-			}
-		}
-
-		#endregion
+		
 	}
 }

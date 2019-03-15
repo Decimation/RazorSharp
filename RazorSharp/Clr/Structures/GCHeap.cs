@@ -4,8 +4,10 @@ using System;
 using System.Diagnostics;
 using System.Runtime;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Attributes;
+using RazorSharp.Memory.Calling.Sym.Attributes;
+using RazorSharp.Native;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -106,8 +108,6 @@ namespace RazorSharp.Clr.Structures
 			throw new SigcallException();
 		}
 
-		
-
 		// 85
 		[ClrSymcall(Symbol = "WKS::GCHeap::IsGCInProgress", FullyQualified = true)]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
@@ -115,6 +115,13 @@ namespace RazorSharp.Clr.Structures
 			throw new SigcallException();
 		}
 
+		// Object* GetContainingObject(void *pInteriorPtr, bool fCollectedGenOnly);
+		[ClrSymcall(Symbol = "WKS::GCHeap::GetContainingObject", FullyQualified = true)]
+		public void* GetContainingObject(void* pInteriorPtr, int fCollectedGenOnly)
+		{
+			throw new SigcallException();
+		}
+		
 		static GCHeap()
 		{
 			// 	   .data:0000000180944020                               ; class MethodTable * g_pStringClass
@@ -131,24 +138,16 @@ namespace RazorSharp.Clr.Structures
 			 */
 
 #if !UNIT_TEST
-			Trace.Assert(!GCSettings.IsServerGC, "Server GC");
+			Conditions.RequiresWorkstationGC();
 #endif
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 
-			var dataSegment = Segments.GetSegment(".data", Clr.CLR_DLL);
-
-
-			g_pGCHeap =
-				Mem.ReadPointer<byte>(dataSegment.SectionAddress, Offsets.GLOBAL_GCHEAP_OFFSET).Address;
-
-			g_lowest_address =
-				Mem.ReadPointer<byte>(dataSegment.SectionAddress, Offsets.GLOBAL_LOWEST_ADDRESS_OFFSET).Address;
-
-			g_highest_address =
-				Mem.ReadPointer<byte>(dataSegment.SectionAddress, Offsets.GLOBAL_HIGHEST_ADDRESS_OFFSET).Address;
-
-			SignatureCall.DynamicBind<GCHeap>();
+			using (var sym = new Symbolism(Symbolism.CLR_PDB)) {
+				g_pGCHeap = sym.GetSymAddress("g_pGCHeap", Clr.CLR_DLL).Address;
+				g_lowest_address = sym.GetSymAddress("g_lowest_address", Clr.CLR_DLL).Address;
+				g_highest_address = sym.GetSymAddress("g_highest_address", Clr.CLR_DLL).Address;
+			}
 		}
 	}
 }

@@ -77,12 +77,13 @@ namespace RazorSharp.Memory
 				throw new Exception("Selected module is null");
 		}
 
-		
+
 		/// <summary>
 		///     Use <c>0x00</c> for <c>"?"</c>
 		/// </summary>
 		/// <param name="rgPattern"></param>
 		/// <param name="ofsGuess"></param>
+		/// <param name="byteTolerance"></param>
 		/// <returns><see cref="IntPtr.Zero" /> if the pattern could not be found</returns>
 		public IntPtr FindPattern(byte[] rgPattern, long ofsGuess = 0, int byteTolerance = 0)
 		{

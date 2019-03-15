@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 using System.Runtime;
 using System.Runtime.CompilerServices;
@@ -11,6 +12,7 @@ using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using RazorCommon.Utilities;
 using RazorSharp.Clr;
+using RazorSharp.Native;
 using RazorSharp.Utilities.Exceptions;
 
 #endregion
@@ -77,8 +79,10 @@ namespace RazorSharp.Utilities
 			 */
 			Requires(Environment.Version == CLR_VER);
 			
+			Requires(File.Exists(Symbolism.CLR_PDB));
 			
-			Requires(!GCSettings.IsServerGC);
+			
+			RequiresWorkstationGC();
 			RequiresClr();
 
 			if (Debugger.IsAttached) {
@@ -193,6 +197,12 @@ namespace RazorSharp.Utilities
 
 		#region Requires (exception)
 
+		// ReSharper disable once InconsistentNaming
+		internal static void RequiresWorkstationGC()
+		{
+			Requires(!GCSettings.IsServerGC);
+		}
+		
 		// todo
 		internal static void RequiresSameLength<T>(params T[][] rg)
 		{
@@ -202,9 +212,12 @@ namespace RazorSharp.Utilities
 			}
 		}
 		
-		internal static void Requires(bool b, string s = null)
+		[AssertionMethod]
+		[ContractAnnotation(COND_FALSE_HALT)]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static void Requires(bool cond, string s = null)
 		{
-			if (!b) {
+			if (!cond) {
 				var exception = s == null ? new Exception() : new Exception(s);
 				throw exception;
 			}

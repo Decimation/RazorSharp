@@ -1,6 +1,6 @@
 using RazorSharp.Native;
 
-namespace RazorSharp.Memory.Attributes
+namespace RazorSharp.Memory.Calling.Sym.Attributes
 {
 	public class ClrSymcallAttribute : SymcallAttribute
 	{

@@ -24,6 +24,7 @@ namespace RazorSharp.Native
 		private readonly ulong m_base,
 		                       m_dllBase;
 
+		private const long INVALID_OFFSET = -4194304;
 
 		public Symbolism(string image, string mask, ulong @base, uint size)
 		{
@@ -47,7 +48,18 @@ namespace RazorSharp.Native
 
 		public Symbolism(string image) : this(image, MASK_STR_DEFAULT, BASE_DEFAULT, SIZE_DEFAULT) { }
 
-		public long[] SymCollect(string[] userContext)
+		public Pointer<byte> GetSymAddress(string userContext, string module)
+		{
+			var offset = GetSymOffset(userContext);
+			return Modules.GetAddress(module, offset);
+		}
+
+		private void CheckOffset(long offset)
+		{
+			Conditions.Requires(offset != INVALID_OFFSET, "Offset is invalid");
+		}
+
+		public long[] GetSymOffsets(string[] userContext)
 		{
 			int len     = userContext.Length;
 			var offsets = new List<long>();
@@ -57,6 +69,7 @@ namespace RazorSharp.Native
 				SymEnumSymbols(ctxStrNative);
 				SymEnumTypes(ctxStrNative);
 				var ofs = (m_addrBuffer - (int) m_base).ToInt64();
+				CheckOffset(ofs);
 				offsets.Add(ofs);
 				Marshal.FreeHGlobal(ctxStrNative);
 			}
@@ -97,7 +110,17 @@ namespace RazorSharp.Native
 			Conditions.Assert(DbgHelp.SymEnumTypes(m_process, m_dllBase, EnumSymProc, ctxStrNative));
 		}
 
-		public long SymGet(string userContext)
+		public long this[string userContext] {
+			get { return GetSymOffset(userContext); }
+		}
+
+		public TDelegate GetFunction<TDelegate>(string userContext, string module) where TDelegate : Delegate
+		{
+			var addr = GetSymAddress(userContext, module);
+			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr.Address);
+		}
+
+		public long GetSymOffset(string userContext)
 		{
 			var ctxStrNative = Marshal.StringToHGlobalAnsi(userContext);
 
@@ -106,7 +129,9 @@ namespace RazorSharp.Native
 
 			Marshal.FreeHGlobal(ctxStrNative);
 
-			return (m_addrBuffer - (int) m_base).ToInt64();
+			var offset = (m_addrBuffer - (int) m_base).ToInt64();
+			CheckOffset(offset);
+			return offset;
 		}
 
 		private void ReleaseUnmanagedResources()
@@ -124,14 +149,13 @@ namespace RazorSharp.Native
 		{
 			ReleaseUnmanagedResources();
 			GC.SuppressFinalize(this);
-			Global.Log.Debug("Completed disposing");
+//			Global.Log.Debug("Completed disposing");
 		}
 
-		public static Pointer<byte> GetFuncAddr(string image, string module, string name)
+		public static Pointer<byte> GetSymAddress(string image, string module, string name)
 		{
 			using (var sym = new Symbolism(image)) {
-				long offset = sym.SymGet(name);
-				return Modules.GetFuncAddr(module, offset);
+				return sym.GetSymAddress(name, module);
 			}
 		}
 

@@ -10,7 +10,7 @@ using RazorCommon.Utilities;
 using RazorSharp.Clr.Meta;
 using RazorSharp.Clr.Structures.ILMethods;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Attributes;
+using RazorSharp.Memory.Calling.Sym.Attributes;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;

@@ -29,7 +29,8 @@ using RazorSharp.Clr.Structures;
 using RazorSharp.Clr.Structures.HeapObjects;
 using RazorSharp.Experimental;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Attributes;
+using RazorSharp.Memory.Calling.Sym;
+using RazorSharp.Memory.Calling.Sym.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -83,6 +84,16 @@ namespace Test
 			return Unsafe.INVALID_VALUE;
 		}
 
+
+		static Delegate get(string name)
+		{
+			using (var sym = new Symbolism(Symbolism.CLR_PDB)) {
+				var addr = sym.GetSymAddress(name, "clr.dll");
+				return Marshal.GetDelegateForFunctionPointer(addr.Address, typeof(Delegate));
+			}
+		}
+
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -92,26 +103,32 @@ namespace Test
 
 			Symcall.BindQuick(typeof(Program));
 
-			Console.WriteLine("foo".Size());
 
-			var foo = typeof(Anime).GetMethod("foo", ReflectionUtil.ALL_FLAGS);
-			Console.WriteLine("val: {0:X}", foo.MethodHandle.Value.ToInt64());
+//			var str = "foo";
+//			Conditions.Assert(str.Size() == Unsafe.HeapSize(str));
 
-			Debug.Assert(foo.MethodHandle == MethodBase.GetMethodFromHandle(foo.MethodHandle).MethodHandle);
+			Symcall.BindQuick(typeof(GCHeap));
+
+			int[]        rg  = {1, 2, 3};
+			Pointer<int> ptr = Marshal.UnsafeAddrOfPinnedArrayElement(rg, 1);
+			Console.WriteLine("> {0:P}", ptr);
+			//Pointer<byte> containing = GCHeap.GlobalHeap.Reference.GetContainingObject(ptr.ToPointer(), 0);
+			//Console.WriteLine("> {0:P}",containing);
+
 
 			// Shit is kinda broken
 			var clrTypes = new[] {typeof(MethodDesc), typeof(FieldDesc), typeof(ClrFunctions), typeof(GCHeap)};
 			foreach (var type in clrTypes) {
-				Symcall.BindQuick(type);
+//				Symcall.BindQuick(type);
 			}
 
 
 			// Cursed number. Do not use!!!!!!!!!!!
 			const int emergence = 177013;
 
+
 			// SHUT IT DOWN
 			Global.Close();
-
 		}
 
 
@@ -128,8 +145,6 @@ namespace Test
 			return table.ToMarkDownString();
 		}
 
-
-		
 
 		private static bool Compare<T>()
 		{

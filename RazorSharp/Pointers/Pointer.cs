@@ -313,6 +313,11 @@ namespace RazorSharp.Pointers
 
 		#region Read / write
 
+		public Pointer<TType> ReadPointer<TType>(int elemOffset = 0)
+		{
+			return ReadAny<Pointer<TType>>(elemOffset);
+		}
+
 		public void WriteString(string s, StringTypes type)
 		{
 			byte[] bytes;
@@ -536,6 +541,7 @@ namespace RazorSharp.Pointers
 		}
 
 
+		
 		[Pure]
 		public TType ReadAny<TType>(int elemOffset = 0)
 		{

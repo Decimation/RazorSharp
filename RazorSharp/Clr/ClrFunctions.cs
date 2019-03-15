@@ -9,7 +9,8 @@ using System.Runtime.InteropServices;
 using System.Security;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Attributes;
+using RazorSharp.Memory.Calling.Sig;
+using RazorSharp.Memory.Calling.Sym.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -36,9 +37,6 @@ namespace RazorSharp.Clr
 	/// </summary>
 	internal static unsafe class ClrFunctions
 	{
-		private const string JSON_CACHING_URL =
-			"https://raw.githubusercontent.com/Decimation/RazorSharp/master/RazorSharp/Clr/ClrFunctions.json";
-
 		static ClrFunctions()
 		{
 			/*s_setStableEntryPointInterlocked =
@@ -48,18 +46,11 @@ namespace RazorSharp.Clr
 						: s_rgStableEntryPointInterlockedSignature32);*/
 
 
-			return;
+			
 			var fn = GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked").Address;
 
 			s_setStableEntryPointInterlocked =
 				Marshal.GetDelegateForFunctionPointer<SetStableEntryPointInterlockedDelegate>(fn);
-
-			SignatureCall.ReadCacheJsonUrl(new[]
-			{
-				typeof(FieldDesc), typeof(MethodDesc), typeof(ClrFunctions), typeof(GCHeap)
-			}, JSON_CACHING_URL);
-
-			//SignatureCall.DynamicBind(typeof(ClrFunctions));
 		}
 
 		/// <summary>
@@ -157,7 +148,7 @@ namespace RazorSharp.Clr
 
 		internal static Pointer<byte> GetClrFunctionAddress(string name)
 		{
-			return Symbolism.GetFuncAddr(Symbolism.CLR_PDB, Clr.CLR_DLL, name);
+			return Symbolism.GetSymAddress(Symbolism.CLR_PDB, Clr.CLR_DLL, name);
 		}
 
 		/*
