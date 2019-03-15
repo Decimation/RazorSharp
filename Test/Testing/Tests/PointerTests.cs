@@ -11,7 +11,7 @@ using RazorSharp.Pointers;
 namespace Test.Testing.Tests
 {
 	[TestFixture]
-	public class PointerTests2
+	public class PointerTests
 	{
 		private struct Target
 		{

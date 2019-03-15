@@ -103,17 +103,12 @@ namespace Test
 
 			Symcall.BindQuick(typeof(Program));
 
-
-//			var str = "foo";
-//			Conditions.Assert(str.Size() == Unsafe.HeapSize(str));
-
 			Symcall.BindQuick(typeof(GCHeap));
 
 			int[]        rg  = {1, 2, 3};
 			Pointer<int> ptr = Marshal.UnsafeAddrOfPinnedArrayElement(rg, 1);
 			Console.WriteLine("> {0:P}", ptr);
-			//Pointer<byte> containing = GCHeap.GlobalHeap.Reference.GetContainingObject(ptr.ToPointer(), 0);
-			//Console.WriteLine("> {0:P}",containing);
+			
 
 
 			// Shit is kinda broken
@@ -121,6 +116,8 @@ namespace Test
 			foreach (var type in clrTypes) {
 //				Symcall.BindQuick(type);
 			}
+		
+			
 
 
 			// Cursed number. Do not use!!!!!!!!!!!

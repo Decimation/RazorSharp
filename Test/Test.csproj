@@ -207,7 +207,6 @@
     <Compile Include="Testing\TestingUtil.cs" />
     <Compile Include="Testing\Tests\AddrInRangeTests.cs" />
     <Compile Include="Testing\Tests\AllocPoolTests.cs" />
-    <Compile Include="Testing\Tests\AllocPoolTests2.cs" />
     <Compile Include="Testing\Tests\AllocUnmanagedTest.cs" />
     <Compile Include="Testing\Tests\FunctionOverrideTests.cs" />
     <Compile Include="Testing\Tests\ILTests.cs" />
@@ -220,7 +219,7 @@
     <Compile Include="Testing\Tests\HeapObjectTests.cs" />
     <Compile Include="Testing\Tests\OffsetOfTests.cs" />
     <Compile Include="Testing\Tests\PinningTests.cs" />
-    <Compile Include="Testing\Tests\PointerTests2.cs" />
+    <Compile Include="Testing\Tests\PointerTests.cs" />
     <Compile Include="Testing\Tests\RuntimeTests.cs" />
     <Compile Include="Testing\Tests\SizeTests.cs" />
     <Compile Include="Testing\Tests\UnsafeTests.cs" />
