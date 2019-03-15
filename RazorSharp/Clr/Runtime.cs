@@ -171,19 +171,20 @@ namespace RazorSharp.Clr
 			fieldDesc.Add(IntPtr.Size);
 			return fieldDesc;
 		}
+
 		internal static int ReadOffset(FieldInfo fi)
 		{
 			Pointer<byte> fieldDesc = GetFieldDescAddress(fi);
-			var dword2 = fieldDesc.ReadAny<uint>(1);
-			return Bits.ReadBits((int) dword2, Constants.FIELDDESC_DW2_OFFSET_BITS, 0);
+			var           dword2    = fieldDesc.ReadAny<uint>(1);
+			return Bits.ReadBits((int) dword2, Offsets.FIELDDESC_DW2_OFFSET_BITS, 0);
 		}
 
 		internal static void WriteOffset(FieldInfo fi, int offset)
 		{
 			Pointer<byte> fieldDesc = GetFieldDescAddress(fi);
-			var dword2 = fieldDesc.ReadAny<uint>(1);
-			fieldDesc.WriteAny(Bits.WriteTo(data:(int)dword2, index: 0, 
-			                                Constants.FIELDDESC_DW2_OFFSET_BITS,offset),1);
+			var           dword2    = fieldDesc.ReadAny<uint>(1);
+			fieldDesc.WriteAny(Bits.WriteTo(data: (int) dword2, index: 0,
+			                                Offsets.FIELDDESC_DW2_OFFSET_BITS, offset), 1);
 		}
 
 		/// <summary>
@@ -226,10 +227,9 @@ namespace RazorSharp.Clr
 			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
 			if (Environment.Is64BitProcess) {
 				Conditions.Assert(fieldDesc.Reference.Info == fieldInfo);
-			
+
 				Conditions.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
 			}
-			
 
 
 			return fieldDesc;
@@ -324,7 +324,7 @@ namespace RazorSharp.Clr
 			FieldInfo[] field            = t.GetFields(flags);
 			var         attributedFields = new List<FieldInfo>();
 			var         attributes       = new List<TAttribute>();
-			
+
 			foreach (var t1 in field) {
 				var attr = t1.GetCustomAttribute<TAttribute>();
 				if (attr != null) {
@@ -336,7 +336,7 @@ namespace RazorSharp.Clr
 			return (attributedFields.ToArray(), attributes.ToArray());
 		}
 
-		#region Sigcall functions
+		#region
 
 		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(
 			Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS) where TAttribute : Attribute

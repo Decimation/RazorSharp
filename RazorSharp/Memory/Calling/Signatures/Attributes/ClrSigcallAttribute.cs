@@ -4,11 +4,11 @@ using RazorSharp.Clr;
 
 #endregion
 
-namespace RazorSharp.Memory.Calling.Sig.Attributes
+namespace RazorSharp.Memory.Calling.Signatures.Attributes
 {
 	/// <inheritdoc />
 	/// <summary>
-	///     <see cref="T:RazorSharp.Memory.Calling.Sig.Attributes.SigcallAttribute" /> for module <see cref="Clr.CLR_DLL" />
+	///     <see cref="T:RazorSharp.Memory.Calling.Signatures.Attributes.SigcallAttribute" /> for module <see cref="Clr.CLR_DLL" />
 	/// </summary>
 	public class ClrSigcallAttribute : SigcallAttribute
 	{

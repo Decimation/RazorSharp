@@ -4,7 +4,8 @@ using System;
 using System.Diagnostics;
 using System.Runtime;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Calling.Sym.Attributes;
+using RazorSharp.Memory.Calling.Symbols;
+using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -114,39 +115,21 @@ namespace RazorSharp.Clr.Structures
 		{
 			throw new SigcallException();
 		}
-
-		// Object* GetContainingObject(void *pInteriorPtr, bool fCollectedGenOnly);
-		[ClrSymcall(Symbol = "WKS::GCHeap::GetContainingObject", FullyQualified = true)]
-		public void* GetContainingObject(void* pInteriorPtr, int fCollectedGenOnly)
-		{
-			throw new SigcallException();
-		}
 		
 		static GCHeap()
 		{
-			// 	   .data:0000000180944020                               ; class MethodTable * g_pStringClass
-			// >>> .data:0000000180944020 00 00 00 00 00 00 00 00       ?g_pStringClass@@3PEAVMethodTable@@EA dq 0
-			// 	   .data:0000000180944020                                                                       ; DATA XREF: AllocateStringFastMP_InlineGetThread↑r
-			// 	   .data:0000000180944020                                                                       ; AllocateStringFastMP+14↑r ...
-			// 	   .data:0000000180944028 00 00 00 00 00 00 00 00       g_lowest_address dq 0                   ; DATA XREF: JIT_CheckedWriteBarrier↑r
-			// 	   .data:0000000180944028                                                                       ; JIT_ByRefWriteBarrier+6↑r ...
-			// 	   .data:0000000180944030                               ; class GCHeap * g_pGCHeap
-			// >>> .data:0000000180944030 00 00 00 00 00 00 00 00       ?g_pGCHeap@@3PEAVGCHeap@@EA dq 0        ; DATA XREF: GCHeap::IsGCInProgress(int)+F↑r
-
-			/**
-			 * Circumvent ASLR
-			 */
-
 #if !UNIT_TEST
 			Conditions.RequiresWorkstationGC();
 #endif
+			
+			Symcall.BindQuick(typeof(GCHeap));
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 
 			using (var sym = new Symbolism(Symbolism.CLR_PDB)) {
-				g_pGCHeap = sym.GetSymAddress("g_pGCHeap", Clr.CLR_DLL).Address;
-				g_lowest_address = sym.GetSymAddress("g_lowest_address", Clr.CLR_DLL).Address;
-				g_highest_address = sym.GetSymAddress("g_highest_address", Clr.CLR_DLL).Address;
+				g_pGCHeap = sym.GetSymAddress(nameof(g_pGCHeap), Clr.CLR_DLL).Address;
+				g_lowest_address = sym.GetSymAddress(nameof(g_lowest_address), Clr.CLR_DLL).Address;
+				g_highest_address = sym.GetSymAddress(nameof(g_highest_address), Clr.CLR_DLL).Address;
 			}
 		}
 	}

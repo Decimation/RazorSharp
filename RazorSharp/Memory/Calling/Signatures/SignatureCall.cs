@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using RazorSharp.Clr;
-using RazorSharp.Memory.Calling.Sig.Attributes;
+using RazorSharp.Memory.Calling.Signatures.Attributes;
 using RazorSharp.Utilities;
 using Serilog.Context;
 
@@ -17,7 +17,7 @@ using Serilog.Context;
 
 #endregion
 
-namespace RazorSharp.Memory.Calling.Sig
+namespace RazorSharp.Memory.Calling.Signatures
 {
 	// todo: WIP
 	// todo: make caching more efficient

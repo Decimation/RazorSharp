@@ -4,6 +4,7 @@ using System;
 using System.Reflection;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.Clr.Enums.MethodDesc;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;

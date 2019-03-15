@@ -1,6 +1,7 @@
 #region
 
 using System;
+using RazorSharp.Clr.Enums.MethodTable;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Clr.Structures.EE;
 using RazorSharp.Memory;
@@ -113,5 +114,7 @@ namespace RazorSharp.Clr
 		internal const long GLOBAL_HIGHEST_ADDRESS_OFFSET = 464;
 
 		#endregion
+
+		internal const int FIELDDESC_DW2_OFFSET_BITS = 27;
 	}
 }

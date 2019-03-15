@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace RazorSharp.Memory.Calling.Sig
+namespace RazorSharp.Memory.Calling.Signatures
 {
 	internal class SigCache
 	{

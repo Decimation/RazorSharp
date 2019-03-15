@@ -9,8 +9,8 @@ using System.Runtime.InteropServices;
 using System.Security;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Calling.Sig;
-using RazorSharp.Memory.Calling.Sym.Attributes;
+using RazorSharp.Memory.Calling.Signatures;
+using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -39,14 +39,6 @@ namespace RazorSharp.Clr
 	{
 		static ClrFunctions()
 		{
-			/*s_setStableEntryPointInterlocked =
-				SigScanner.QuickScanDelegateClr<SetStableEntryPointInterlockedDelegate>(
-					Environment.Is64BitProcess
-						? s_rgStableEntryPointInterlockedSignature
-						: s_rgStableEntryPointInterlockedSignature32);*/
-
-
-			
 			var fn = GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked").Address;
 
 			s_setStableEntryPointInterlocked =
@@ -98,12 +90,6 @@ namespace RazorSharp.Clr
 			0x48, 0x8B, 0xF1, 0xE8, 0x1E, 0x57, 0xE7, 0xFF
 		};
 
-		private static readonly byte[] s_rgStableEntryPointInterlockedSignature32 =
-		{
-			0x55, 0x8B, 0xEC, 0x53, 0x56, 0x57, 0x8B, 0xD9, 0xE8, 0x11, 0x68, 0xF8, 0xFF,
-			0x8B, 0xCB, 0x8B, 0xF8, 0xE8, 0x57, 0x41, 0xF8, 0xFF, 0x8B, 0x75, 0x8, 0x8B
-		};
-
 		/// <summary>
 		///     <remarks>
 		///         Equal to <see cref="MethodDesc.SetStableEntryPoint" />, but this is implemented via a <see cref="Delegate" />
@@ -131,14 +117,13 @@ namespace RazorSharp.Clr
 		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT, string name)
 		{
 			var module = pMT.Reference.Module;
-			var pStr = Marshal.StringToHGlobalAnsi(name);
+			var pStr   = Marshal.StringToHGlobalAnsi(name);
 			var cSig   = GetSignatureCorElementType(pMT);
 			var field  = FindField(pMT, pStr, IntPtr.Zero, cSig, module, 0);
 			Marshal.FreeHGlobal(pStr);
 			return field;
 		}
 
-		
 
 		internal static TDelegate GetClrFunctionAddress<TDelegate>(string name)
 		{

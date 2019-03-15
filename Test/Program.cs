@@ -4,6 +4,7 @@
 #region
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
@@ -24,13 +25,13 @@ using RazorCommon.Utilities;
 using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.Clr;
+using RazorSharp.Clr.Enums;
 using RazorSharp.Clr.Meta;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Clr.Structures.HeapObjects;
 using RazorSharp.Experimental;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Calling.Sym;
-using RazorSharp.Memory.Calling.Sym.Attributes;
+using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -63,60 +64,20 @@ namespace Test
 		// todo: RazorSharp, ClrMD, Reflection comparison
 
 
-		class Anime
-		{
-			private const int CONST = 1;
-
-			public string foo()
-			{
-				return "foo";
-			}
-
-			public string bar()
-			{
-				return "bar";
-			}
-		}
-
 		[ClrSymcall(Symbol = "Object::GetSize", FullyQualified = true)]
 		private static int Size(this object obj)
 		{
 			return Unsafe.INVALID_VALUE;
 		}
 
-
-		static Delegate get(string name)
-		{
-			using (var sym = new Symbolism(Symbolism.CLR_PDB)) {
-				var addr = sym.GetSymAddress(name, "clr.dll");
-				return Marshal.GetDelegateForFunctionPointer(addr.Address, typeof(Delegate));
-			}
-		}
-
-
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
 			Global.Setup();
 //			Clr.Setup();
-			Symcall.Setup();
 
-			Symcall.BindQuick(typeof(Program));
 
-			Symcall.BindQuick(typeof(GCHeap));
-
-			int[]        rg  = {1, 2, 3};
-			Pointer<int> ptr = Marshal.UnsafeAddrOfPinnedArrayElement(rg, 1);
-			Console.WriteLine("> {0:P}", ptr);
 			
-
-
-			// Shit is kinda broken
-			var clrTypes = new[] {typeof(MethodDesc), typeof(FieldDesc), typeof(ClrFunctions), typeof(GCHeap)};
-			foreach (var type in clrTypes) {
-//				Symcall.BindQuick(type);
-			}
-		
 			
 
 

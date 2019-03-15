@@ -208,6 +208,23 @@
     <Compile Include="Analysis\Inspect.cs" />
     <Compile Include="Analysis\ObjectLayout.cs" />
     <Compile Include="Clr\Clr.cs" />
+    <Compile Include="Clr\Enums\CorElementType.cs" />
+    <Compile Include="Clr\Enums\CorTokenType.cs" />
+    <Compile Include="Clr\Enums\EEClass\EEClassFieldId.cs" />
+    <Compile Include="Clr\Enums\EEClass\LayoutFlags.cs" />
+    <Compile Include="Clr\Enums\EEClass\VMFlags.cs" />
+    <Compile Include="Clr\Enums\FieldDesc\ProtectionLevel.cs" />
+    <Compile Include="Clr\Enums\MethodDesc\MbMask.cs" />
+    <Compile Include="Clr\Enums\MethodDesc\MethodClassification.cs" />
+    <Compile Include="Clr\Enums\MethodDesc\MethodDescClassification.cs" />
+    <Compile Include="Clr\Enums\MethodDesc\MethodDescFlags2.cs" />
+    <Compile Include="Clr\Enums\MethodDesc\MethodDescFlags3.cs" />
+    <Compile Include="Clr\Enums\MethodTable\LowBits.cs" />
+    <Compile Include="Clr\Enums\MethodTable\MethodTableFlags.cs" />
+    <Compile Include="Clr\Enums\MethodTable\MethodTableFlags2.cs" />
+    <Compile Include="Clr\Enums\MethodTable\MethodTableFlagsLow.cs" />
+    <Compile Include="Clr\Enums\ObjHeader\SyncBlockFlags.cs" />
+    <Compile Include="Clr\Enums\TokenType.cs" />
     <Compile Include="Clr\Fixed\ObjectPinHandle.cs" />
     <Compile Include="Clr\Fixed\ObjectPinner.cs" />
     <Compile Include="Clr\Fixed\PinHandle.cs" />
@@ -221,6 +238,7 @@
     <Compile Include="Clr\Meta\MetaType.cs" />
     <Compile Include="Clr\Offsets.cs" />
     <Compile Include="Clr\Identifiers.cs" />
+    <Compile Include="Clr\StructureReader.cs" />
     <Compile Include="Clr\Structures\EE\EEClass.cs" />
     <Compile Include="Clr\Structures\EE\EEClassLayoutInfo.cs" />
     <Compile Include="Clr\Structures\EE\LayoutEEClass.cs" />
@@ -229,22 +247,22 @@
     <Compile Include="Clr\Structures\ILMethods\ILMethod.cs" />
     <Compile Include="Clr\Structures\ILMethods\FatILMethod.cs" />
     <Compile Include="Clr\Structures\ILMethods\TinyILMethod.cs" />
-    <Compile Include="Clr\Structures\SigParser.cs" />
+    <Compile Include="Clr\VirtualFieldDesc.cs" />
     <Compile Include="Experimental\Functions.cs" />
     <Compile Include="Experimental\Registers.cs" />
     <Compile Include="Global.cs" />
-    <Compile Include="Memory\Calling\Sig\Attributes\ClrSigcallAttribute.cs" />
-    <Compile Include="Memory\Calling\Sig\Attributes\SigcallAttribute.cs" />
-    <Compile Include="Memory\Calling\Sig\SigCache.cs" />
-    <Compile Include="Memory\Calling\Sig\SignatureCall.cs" />
-    <Compile Include="Memory\Calling\Sym\Attributes\ClrSymcallAttribute.cs" />
-    <Compile Include="Memory\Calling\Sym\Attributes\SymcallAttribute.cs" />
-    <Compile Include="Memory\Calling\Sym\Symcall.cs" />
+    <Compile Include="Memory\Calling\Signatures\Attributes\ClrSigcallAttribute.cs" />
+    <Compile Include="Memory\Calling\Signatures\Attributes\SigcallAttribute.cs" />
+    <Compile Include="Memory\Calling\Signatures\SigCache.cs" />
+    <Compile Include="Memory\Calling\Signatures\SignatureCall.cs" />
+    <Compile Include="Memory\Calling\Symbols\Attributes\ClrSymcallAttribute.cs" />
+    <Compile Include="Memory\Calling\Symbols\Attributes\SymcallAttribute.cs" />
+    <Compile Include="Memory\Calling\Symbols\Symcall.cs" />
     <Compile Include="Memory\MemScanner.cs" />
     <Compile Include="Memory\SegmentType.cs" />
     <Compile Include="Memory\Structures.cs" />
     <Compile Include="Native\Enums\ImageDirectoryEntry.cs" />
-    <Compile Include="Native\Enums\IMAGEHLP_SYMBOL_TYPE_INFO.cs" />
+    <Compile Include="Native\Enums\ImageHelpSymbolTypeInfo.cs" />
     <Compile Include="Native\Enums\SymEnumOptions.cs" />
     <Compile Include="Native\Enums\SymSearchOptions.cs" />
     <Compile Include="Native\Structures\SymbolInfo.cs" />
@@ -316,9 +334,6 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Clr\ClrFunctions.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

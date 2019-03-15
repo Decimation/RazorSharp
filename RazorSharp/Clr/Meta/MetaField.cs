@@ -4,6 +4,8 @@
 
 using System;
 using System.Reflection;
+using RazorSharp.Clr.Enums;
+using RazorSharp.Clr.Enums.FieldDesc;
 using RazorSharp.Clr.Structures;
 using RazorSharp.Pointers;
 

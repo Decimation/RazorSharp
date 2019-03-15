@@ -6,7 +6,7 @@ using RazorSharp.Clr.Structures;
 
 #endregion
 
-namespace RazorSharp.Memory.Calling.Sig.Attributes
+namespace RazorSharp.Memory.Calling.Signatures.Attributes
 {
 	/// <inheritdoc />
 	/// <summary>

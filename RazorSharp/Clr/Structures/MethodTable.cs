@@ -6,6 +6,8 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.Clr.Enums;
+using RazorSharp.Clr.Enums.MethodTable;
 using RazorSharp.Clr.Meta;
 using RazorSharp.Clr.Structures.EE;
 using RazorSharp.Pointers;
@@ -63,6 +65,8 @@ namespace RazorSharp.Clr.Structures
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct MethodTable
 	{
+		
+		
 		#region Properties and Accessors
 
 		#region Flags
@@ -211,7 +215,7 @@ namespace RazorSharp.Clr.Structures
 		internal string Name             => RuntimeType.Name;
 
 
-		internal int Token => Constants.TokenFromRid(OrigToken, CorTokenType.mdtTypeDef);
+		internal int Token => Constants.TokenFromRid(OrigToken, CorTokenType.TypeDef);
 
 		// internal name: GetTypeDefRid
 

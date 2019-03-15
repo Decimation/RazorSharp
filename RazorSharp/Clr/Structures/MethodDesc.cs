@@ -7,10 +7,12 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.Clr.Enums.MethodDesc;
 using RazorSharp.Clr.Meta;
 using RazorSharp.Clr.Structures.ILMethods;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Calling.Sym.Attributes;
+using RazorSharp.Memory.Calling.Symbols;
+using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
@@ -69,8 +71,7 @@ namespace RazorSharp.Clr.Structures
 
 		static MethodDesc()
 		{
-			Global.Log.Debug("Type init");
-			//SignatureCall.DynamicBind<MethodDesc>();
+			Symcall.BindQuick(typeof(MethodDesc));
 		}
 
 		#region Fields

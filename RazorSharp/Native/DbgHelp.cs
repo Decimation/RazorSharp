@@ -45,7 +45,7 @@ namespace RazorSharp.Native
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool SymGetTypeInfo(IntPtr                    hProcess, ulong modBase, uint typeId,
-		                                           IMAGEHLP_SYMBOL_TYPE_INFO getType,  void* pInfo);
+		                                           ImageHelpSymbolTypeInfo getType,  void* pInfo);
 
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SymEnumTypesByNameW")]

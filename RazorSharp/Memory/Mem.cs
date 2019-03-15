@@ -52,6 +52,10 @@ namespace RazorSharp.Memory
 			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
 		}
 
+		public static bool Is64Bit {
+			get { return IntPtr.Size == sizeof(long); }
+		}
+
 		#region Zero
 
 		public static void Zero(Pointer<byte> ptr, int length)

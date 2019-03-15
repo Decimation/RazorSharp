@@ -213,13 +213,38 @@ namespace RazorSharp.Utilities
 		}
 		
 		[AssertionMethod]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static void RequiresFileExists(FileInfo file)
+		{
+			if (!file.Exists) {
+				FailRequire("File {0} does not exist in directory {1}", 
+				            file.Name, file.Directory);
+			}
+		}
+
+		[StringFormatMethod(STRING_FORMAT_PARAM)]
+		private static void FailRequire(string msg, params object[] args)
+		{
+			Exception exception;
+			if (!string.IsNullOrWhiteSpace(msg)) {
+				var format = string.Format(msg, args);
+				exception = new Exception(format);
+			}
+			else {
+				exception = new Exception();
+			}
+
+			throw exception;
+
+		}
+		
+		[AssertionMethod]
 		[ContractAnnotation(COND_FALSE_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void Requires(bool cond, string s = null)
+		internal static void Requires(bool cond, string s = null, params object[] args)
 		{
 			if (!cond) {
-				var exception = s == null ? new Exception() : new Exception(s);
-				throw exception;
+				FailRequire(s,args);
 			}
 		}
 

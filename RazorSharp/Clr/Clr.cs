@@ -12,16 +12,25 @@ namespace RazorSharp.Clr
 {
 	internal static class Clr
 	{
-		internal static readonly Type[] ClrTypes =
+		private static readonly Type[] ClrTypes =
 		{
 			typeof(FieldDesc), typeof(MethodDesc), typeof(MethodDescChunk), typeof(MethodTable),
 			typeof(ArrayObject), typeof(HeapObject), typeof(StringObject), typeof(EEClass)
 		};
 
+		private static readonly Type[] ClrTypes2 =
+		{
+			typeof(MethodDesc), typeof(FieldDesc), typeof(ClrFunctions), typeof(GCHeap)
+		};
+
 		internal static void Setup()
 		{
-			int[] offsets = new[] {0, IntPtr.Size, IntPtr.Size + sizeof(uint)};
-			Memory.Structures.ReorganizeQ(typeof(FieldDesc), offsets: offsets);
+//			int[] offsets = new[] {0, IntPtr.Size, IntPtr.Size + sizeof(uint)};
+//			Memory.Structures.ReorganizeQ(typeof(FieldDesc), offsets: offsets);
+
+			foreach (var type in ClrTypes2) {
+//				Symcall.BindQuick(type);
+			}
 		}
 
 		internal static void Reorganize()

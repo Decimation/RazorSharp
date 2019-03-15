@@ -1,6 +1,9 @@
 namespace RazorSharp.Native.Enums
 {
-	internal enum IMAGEHLP_SYMBOL_TYPE_INFO : uint
+	/// <summary>
+	/// IMAGEHLP_SYMBOL_TYPE_INFO
+	/// </summary>
+	internal enum ImageHelpSymbolTypeInfo : uint
 	{
 		/// <summary>
 		///    The symbol tag. The data type is DWORD.

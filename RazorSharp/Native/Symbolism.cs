@@ -54,7 +54,7 @@ namespace RazorSharp.Native
 			return Modules.GetAddress(module, offset);
 		}
 
-		private void CheckOffset(long offset)
+		private static void CheckOffset(long offset)
 		{
 			Conditions.Requires(offset != INVALID_OFFSET, "Offset is invalid");
 		}
@@ -91,7 +91,7 @@ namespace RazorSharp.Native
 				if (String.CompareOrdinal(s, str) == 0) {
 					var childs = new TI_FINDCHILDREN_PARAMS();
 					DbgHelp.SymGetTypeInfo(m_process, pSymInfo->ModBase, pSymInfo->TypeIndex,
-					                       IMAGEHLP_SYMBOL_TYPE_INFO.TI_GET_CHILDRENCOUNT, &childs.Count);
+					                       ImageHelpSymbolTypeInfo.TI_GET_CHILDRENCOUNT, &childs.Count);
 
 					m_addrBuffer = (IntPtr) pSymInfo->Address;
 				}

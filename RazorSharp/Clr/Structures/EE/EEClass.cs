@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.Clr.Enums;
+using RazorSharp.Clr.Enums.EEClass;
 using RazorSharp.Clr.Meta;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;

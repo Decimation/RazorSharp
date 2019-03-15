@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace RazorSharp.Memory.Calling.Sym.Attributes
+namespace RazorSharp.Memory.Calling.Symbols.Attributes
 {
 	public class SymcallAttribute : Attribute
 	{

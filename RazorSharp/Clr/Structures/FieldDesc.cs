@@ -5,9 +5,13 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Utilities;
+using RazorSharp.Clr.Enums;
+using RazorSharp.Clr.Enums.FieldDesc;
+using RazorSharp.Clr.Enums.MethodDesc;
 using RazorSharp.Clr.Meta;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Calling.Sym.Attributes;
+using RazorSharp.Memory.Calling.Symbols;
+using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
@@ -51,7 +55,7 @@ namespace RazorSharp.Clr.Structures
 	{
 		static FieldDesc()
 		{
-			//SignatureCall.DynamicBind<FieldDesc>();
+			Symcall.BindQuick(typeof(FieldDesc));
 		}
 
 		private const int FieldOffsetMax    = (1 << 27) - 1;
@@ -95,16 +99,16 @@ namespace RazorSharp.Clr.Structures
 				// Check if this FieldDesc is using the packed mb layout
 				if (!RequiresFullMBValue)
 					return Constants.TokenFromRid(OrigToken & (int) MbMask.PackedMbLayoutMbMask,
-					                              CorTokenType.mdtFieldDef);
+					                              CorTokenType.FieldDef);
 
-				return Constants.TokenFromRid(OrigToken, CorTokenType.mdtFieldDef);
+				return Constants.TokenFromRid(OrigToken, CorTokenType.FieldDef);
 			}
 		}
 
 
 		internal int Offset {
 			get { return (int) (m_dword2 & 0x7FFFFFF); }
-			set { m_dword2 = (uint)Bits.WriteTo((int)m_dword2, 0, Constants.FIELDDESC_DW2_OFFSET_BITS, value); }
+			set { m_dword2 = (uint)Bits.WriteTo((int)m_dword2, 0, FIELDDESC_DW2_OFFSET_BITS, value); }
 		}
 
 		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
