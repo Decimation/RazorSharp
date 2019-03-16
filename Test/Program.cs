@@ -24,19 +24,15 @@ using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp;
 using RazorSharp.Analysis;
-using RazorSharp.Clr;
-using RazorSharp.Clr.Enums;
-using RazorSharp.Clr.Meta;
-using RazorSharp.Clr.Structures;
-using RazorSharp.Clr.Structures.HeapObjects;
-using RazorSharp.Experimental;
+using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Meta;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing;
-using Constants = RazorSharp.Clr.Constants;
+using Constants = RazorSharp.CoreClr.Constants;
 using Unsafe = RazorSharp.Unsafe;
 
 #endregion
@@ -52,7 +48,6 @@ namespace Test
 	#endregion
 
 
-	[StructLayout(LayoutKind.Sequential)]
 	public static unsafe class Program
 	{
 #if DEBUG
@@ -74,18 +69,12 @@ namespace Test
 		public static void Main(string[] args)
 		{
 			Global.Setup();
-//			Clr.Setup();
-
-
-			
-			
-
-
-			// Cursed number. Do not use!!!!!!!!!!!
-			const int emergence = 177013;
+			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
+			Clr.Setup();
 
 
 			// SHUT IT DOWN
+			Clr.Close();
 			Global.Close();
 		}
 

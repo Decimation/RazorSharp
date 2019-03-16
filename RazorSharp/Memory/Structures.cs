@@ -5,8 +5,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Utilities;
-using RazorSharp.Clr;
-using RazorSharp.Clr.Meta;
+using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Meta;
 using RazorSharp.Utilities;
 
 namespace RazorSharp.Memory

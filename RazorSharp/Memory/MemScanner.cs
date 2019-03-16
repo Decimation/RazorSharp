@@ -2,7 +2,7 @@
 
 using System;
 using System.Diagnostics;
-using RazorSharp.Clr.Structures;
+using RazorSharp.CoreClr.Structures;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 

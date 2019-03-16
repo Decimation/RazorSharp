@@ -10,7 +10,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Utilities;
-using RazorSharp.Clr;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;

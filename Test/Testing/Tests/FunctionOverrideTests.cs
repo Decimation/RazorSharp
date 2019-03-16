@@ -5,8 +5,8 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using NUnit.Framework;
 using RazorSharp;
-using RazorSharp.Clr;
-using RazorSharp.Clr.Structures;
+using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Structures;
 using RazorSharp.Pointers;
 
 #endregion

@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using RazorSharp.Clr;
+using RazorSharp.CoreClr;
 using RazorSharp.Memory.Calling.Signatures.Attributes;
 using RazorSharp.Utilities;
 using Serilog.Context;

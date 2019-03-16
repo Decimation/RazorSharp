@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using RazorCommon.Utilities;
-using RazorSharp.Clr;
+using RazorSharp.CoreClr;
 using RazorSharp.Native;
 using RazorSharp.Utilities.Exceptions;
 
@@ -78,10 +78,7 @@ namespace RazorSharp.Utilities
 			 * todo - determine compatibility
 			 */
 			Requires(Environment.Version == CLR_VER);
-			
-			Requires(File.Exists(Symbolism.CLR_PDB));
-			
-			
+
 			RequiresWorkstationGC();
 			RequiresClr();
 
@@ -213,12 +210,22 @@ namespace RazorSharp.Utilities
 		}
 		
 		[AssertionMethod]
+		[StringFormatMethod(STRING_FORMAT_PARAM)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void RequiresFileExists(FileInfo file)
+		internal static void RequiresFileExists(FileInfo file, string msg = null, params object[] args)
 		{
 			if (!file.Exists) {
-				FailRequire("File {0} does not exist in directory {1}", 
-				            file.Name, file.Directory);
+				string msg1, msg2;
+				if (!string.IsNullOrWhiteSpace(msg)) {
+					msg1 = string.Format(msg, args);
+				}
+				else {
+					msg1 = null;
+				}
+				
+				msg2 = string.Format("File \"{0}\" does not exist in directory \"{1}\"",file.Name, file.Directory);
+				
+				FailRequire("{0}: {1}",msg1, msg2);
 			}
 		}
 

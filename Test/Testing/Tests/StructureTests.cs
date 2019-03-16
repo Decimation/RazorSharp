@@ -5,9 +5,9 @@ using System.Diagnostics;
 using System.Reflection;
 using NUnit.Framework;
 using RazorSharp;
-using RazorSharp.Clr;
-using RazorSharp.Clr.Enums.FieldDesc;
-using RazorSharp.Clr.Structures;
+using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Enums.FieldDesc;
+using RazorSharp.CoreClr.Structures;
 using RazorSharp.Pointers;
 using Test.Testing.Types;
 

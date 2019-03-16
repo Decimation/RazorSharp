@@ -14,7 +14,7 @@ using JetBrains.Annotations;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Utilities;
-using RazorSharp.Clr.Fixed;
+using RazorSharp.CoreClr.Fixed;
 using RazorSharp.Memory;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;

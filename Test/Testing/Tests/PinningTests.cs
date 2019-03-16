@@ -3,7 +3,7 @@
 using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
-using RazorSharp.Clr.Fixed;
+using RazorSharp.CoreClr.Fixed;
 
 #endregion
 

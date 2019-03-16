@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
-using RazorSharp.Clr;
+using RazorSharp.CoreClr;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
@@ -26,7 +26,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 		private static Pointer<byte> GetClrFunctionAddress(string name)
 		{
-			return Symbolism.GetSymAddress(Symbolism.CLR_PDB, Clr.Clr.CLR_DLL, name);
+			return Native.Symbols.GetSymAddress(Clr.ClrPdb.FullName, Clr.CLR_DLL_SHORT, name);
 		}
 
 
@@ -41,7 +41,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 			}
 
 			var baseAttr = methods[0].GetCustomAttribute<SymcallAttribute>();
-			var sym      = new Symbolism(baseAttr.Image);
+			var sym      = new Native.Symbols(baseAttr.Image);
 			var contexts = new List<string>();
 
 			foreach (var method in methods) {

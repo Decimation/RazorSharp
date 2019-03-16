@@ -1,3 +1,4 @@
+using RazorSharp.CoreClr;
 using RazorSharp.Native;
 
 namespace RazorSharp.Memory.Calling.Symbols.Attributes
@@ -6,8 +7,8 @@ namespace RazorSharp.Memory.Calling.Symbols.Attributes
 	{
 		public ClrSymcallAttribute()
 		{
-			Image = Symbolism.CLR_PDB;
-			Module = Clr.Clr.CLR_DLL;
+			Image = Clr.ClrPdb.FullName;
+			Module = Clr.CLR_DLL_SHORT;
 		}
 	}
 }

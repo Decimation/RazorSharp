@@ -2,8 +2,8 @@
 
 using System.Diagnostics;
 using NUnit.Framework;
-using RazorSharp.Clr;
-using RazorSharp.Clr.Structures;
+using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Structures;
 using RazorSharp.Pointers;
 using Test.Testing.Types;
 // ReSharper disable InconsistentNaming
@@ -31,7 +31,7 @@ namespace Test.Testing.Tests
 		[Test]
 		public void GCHeap()
 		{
-			Pointer<GCHeap> gc = RazorSharp.Clr.Structures.GCHeap.GlobalHeap;
+			Pointer<GCHeap> gc = RazorSharp.CoreClr.Structures.GCHeap.GlobalHeap;
 			string          o  = "foo";
 
 			// todo: weird DivideByZeroException here; passes fine without unit testing

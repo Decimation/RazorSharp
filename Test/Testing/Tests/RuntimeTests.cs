@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using NUnit.Framework;
 using RazorSharp;
-using RazorSharp.Clr;
-using RazorSharp.Clr.Structures;
+using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Structures;
 using RazorSharp.Pointers;
 using Test.Testing.Types;
 

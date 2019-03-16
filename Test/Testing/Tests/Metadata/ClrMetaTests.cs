@@ -4,9 +4,9 @@ using System.Reflection;
 using JetBrains.Annotations;
 using NUnit.Framework;
 using RazorCommon;
-using RazorSharp.Clr;
-using RazorSharp.Clr.Meta;
-using RazorSharp.Clr.Structures;
+using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Structures;
 
 namespace Test.Testing.Tests.Metadata
 {
