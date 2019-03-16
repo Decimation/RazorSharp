@@ -4,6 +4,7 @@
 
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Pointers;

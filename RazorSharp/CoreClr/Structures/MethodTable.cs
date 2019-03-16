@@ -5,6 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Enums;
 using RazorSharp.CoreClr.Enums.MethodTable;

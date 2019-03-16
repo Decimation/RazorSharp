@@ -3,6 +3,7 @@
 using System;
 using System.Reflection;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Enums.MethodDesc;
 using RazorSharp.CoreClr.Structures;

@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Enums.EEClass;
 using RazorSharp.CoreClr.Meta;

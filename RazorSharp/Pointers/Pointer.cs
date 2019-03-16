@@ -13,6 +13,7 @@ using System.Text;
 using JetBrains.Annotations;
 using RazorCommon;
 using RazorCommon.Extensions;
+using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Fixed;
 using RazorSharp.Memory;

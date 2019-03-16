@@ -4,6 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 

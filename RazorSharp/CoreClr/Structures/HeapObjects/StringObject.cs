@@ -4,6 +4,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorSharp.Utilities;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible

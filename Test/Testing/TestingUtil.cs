@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Reflection;
 using NUnit.Framework;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp;
 using RazorSharp.Analysis;

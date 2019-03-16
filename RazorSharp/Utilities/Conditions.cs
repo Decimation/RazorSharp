@@ -37,8 +37,6 @@ namespace RazorSharp.Utilities
 		private const string STRING_FORMAT_PARAM = "msg";
 		private const string NULLREF_EXCEPTION   = "value == null";
 
-		private static readonly Version CLR_VER = new Version(4,0,30319,42000);
-
 		internal static void CheckCompatibility()
 		{
 			/**
@@ -77,7 +75,7 @@ namespace RazorSharp.Utilities
 			 * Other versions will probably work but we're just making sure
 			 * todo - determine compatibility
 			 */
-			Requires(Environment.Version == CLR_VER);
+			Requires(Environment.Version == Clr.ClrVersion);
 
 			RequiresWorkstationGC();
 			RequiresClr();
@@ -116,8 +114,7 @@ namespace RazorSharp.Utilities
 			ResolveTypeAction<TExpected, TActual>(() => val = false, () => val = false);
 			return val;
 		}
-		
-		
+
 
 		/// <summary>
 		/// </summary>
@@ -125,7 +122,7 @@ namespace RazorSharp.Utilities
 		/// <typeparam name="T"></typeparam>
 		internal static void AssertEqual<T>(params T[] values)
 		{
-			if (values == null || values.Length == 0) 
+			if (values == null || values.Length == 0)
 				return;
 
 			Assert(values.All(v => v.Equals(values[0])));
@@ -199,7 +196,7 @@ namespace RazorSharp.Utilities
 		{
 			Requires(!GCSettings.IsServerGC);
 		}
-		
+
 		// todo
 		internal static void RequiresSameLength<T>(params T[][] rg)
 		{
@@ -208,24 +205,25 @@ namespace RazorSharp.Utilities
 				Requires(x.Length == len);
 			}
 		}
-		
+
 		[AssertionMethod]
 		[StringFormatMethod(STRING_FORMAT_PARAM)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresFileExists(FileInfo file, string msg = null, params object[] args)
 		{
 			if (!file.Exists) {
-				string msg1, msg2;
+				string msg1;
 				if (!string.IsNullOrWhiteSpace(msg)) {
 					msg1 = string.Format(msg, args);
 				}
 				else {
 					msg1 = null;
 				}
-				
-				msg2 = string.Format("File \"{0}\" does not exist in directory \"{1}\"",file.Name, file.Directory);
-				
-				FailRequire("{0}: {1}",msg1, msg2);
+
+				string msg2 = string.Format("File \"{0}\" does not exist in directory \"{1}\"", file.Name,
+				                            file.Directory);
+
+				FailRequire("{0}: {1}", msg1, msg2);
 			}
 		}
 
@@ -242,22 +240,16 @@ namespace RazorSharp.Utilities
 			}
 
 			throw exception;
-
 		}
-		
+
 		[AssertionMethod]
 		[ContractAnnotation(COND_FALSE_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void Requires(bool cond, string s = null, params object[] args)
 		{
 			if (!cond) {
-				FailRequire(s,args);
+				FailRequire(s, args);
 			}
-		}
-
-		internal static void RequiresNotNullOrWhiteSpace(string s, string arg)
-		{
-			Requires(!String.IsNullOrWhiteSpace(s), $"String cannot {arg} be null or whitespace");
 		}
 
 
@@ -281,10 +273,15 @@ namespace RazorSharp.Utilities
 
 		#region Not null
 
-		private static void CheckNull(bool b, string arg)
+		internal static void RequiresNotNullOrWhiteSpace(string s, string name)
+		{
+			Requires(!String.IsNullOrWhiteSpace(s), $"String cannot {name} be null or whitespace");
+		}
+
+		private static void CheckNull(bool b, string name)
 		{
 			if (!b) {
-				throw new ArgumentNullException(arg);
+				throw new ArgumentNullException(name);
 			}
 		}
 
@@ -292,26 +289,26 @@ namespace RazorSharp.Utilities
 		///     Specifies a precondition: checks to see if <paramref name="value" /> is <c>null</c>
 		/// </summary>
 		/// <param name="value">Pointer to check</param>
-		/// <param name="arg"></param>
+		/// <param name="name"></param>
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static unsafe void RequiresNotNull([AsrtCnd(AsrtCndType.IS_NOT_NULL)] void* value, string arg)
+		internal static unsafe void RequiresNotNull([AsrtCnd(AsrtCndType.IS_NOT_NULL)] void* value, string name)
 		{
-			CheckNull(value != null, arg);
+			CheckNull(value != null, name);
 		}
 
 		/// <summary>
 		///     Specifies a precondition: checks to see if <paramref name="value" /> is <see cref="IntPtr.Zero" />
 		/// </summary>
 		/// <param name="value"><see cref="IntPtr" /> to check</param>
-		/// <param name="arg"></param>
+		/// <param name="name"></param>
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void RequiresNotNull(IntPtr value, string arg)
+		internal static void RequiresNotNull(IntPtr value, string name)
 		{
-			CheckNull(value != IntPtr.Zero, arg);
+			CheckNull(value != IntPtr.Zero, name);
 		}
 
 		/// <summary>
@@ -321,30 +318,30 @@ namespace RazorSharp.Utilities
 		///     </remarks>
 		/// </summary>
 		/// <param name="value">Value to check</param>
-		/// <param name="arg"></param>
+		/// <param name="name"></param>
 		/// <typeparam name="T"></typeparam>
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] T value, string arg)
+		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] T value, string name)
 		{
 			if (!typeof(T).IsValueType)
-				CheckNull(value != null, arg);
+				CheckNull(value != null, name);
 		}
 
 		/// <summary>
 		///     Specifies a precondition: checks to see if <paramref name="value" /> is <c>null</c>
 		/// </summary>
 		/// <param name="value">Value to check</param>
-		/// <param name="arg"></param>
+		/// <param name="name"></param>
 		/// <typeparam name="T"></typeparam>
 		[AssertionMethod]
 		[ContractAnnotation(VALUE_NULL_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] in T value, string arg)
+		internal static void RequiresNotNull<T>([AsrtCnd(AsrtCndType.IS_NOT_NULL)] in T value, string name)
 			where T : class
 		{
-			CheckNull(value != null, arg);
+			CheckNull(value != null, name);
 		}
 
 		#endregion
@@ -370,13 +367,14 @@ namespace RazorSharp.Utilities
 		internal static void RequiresTypeNot<TNot, TActual>(string msg = null)
 		{
 			string baseMsg = $"Type arguments cannot be equal: {typeof(TNot).Name} and {typeof(TActual).Name}";
-			
+
 			if (msg != null) {
 				baseMsg += $": {msg}";
 			}
+
 			Requires(!AssertTypeEqual<TNot, TActual>(), baseMsg);
 		}
-		
+
 		/// <summary>
 		///     Specifies a precondition: checks to see if <typeparamref name="T" /> is a reference type.
 		/// </summary>

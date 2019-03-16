@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using RazorCommon;
 using RazorCommon.Extensions;
+using RazorCommon.Strings;
 using RazorSharp.Native;
 using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;

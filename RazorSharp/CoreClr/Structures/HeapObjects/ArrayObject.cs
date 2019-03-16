@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Strings;
 
 // ReSharper disable ConvertToAutoProperty
 // ReSharper disable ConvertToAutoPropertyWhenPossible

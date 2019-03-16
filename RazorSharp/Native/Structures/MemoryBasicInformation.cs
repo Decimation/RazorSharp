@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorSharp.Native.Enums;
 
 #endregion

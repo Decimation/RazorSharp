@@ -32,6 +32,7 @@ namespace RazorSharp.CoreClr
 
 		internal static readonly FileInfo      ClrDll;
 		internal static readonly ProcessModule ClrModule;
+		internal static readonly Version       ClrVersion;
 
 		/// <summary>
 		/// <c>clr.pdb</c>
@@ -46,8 +47,9 @@ namespace RazorSharp.CoreClr
 
 		static Clr()
 		{
-			ClrDll    = GetClrDll();
-			ClrModule = Modules.GetModule(Clr.CLR_DLL_SHORT);
+			ClrDll     = GetClrDll();
+			ClrModule  = Modules.GetModule(Clr.CLR_DLL_SHORT);
+			ClrVersion = new Version(4, 0, 30319, 42000);
 		}
 
 
