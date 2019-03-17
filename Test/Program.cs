@@ -73,8 +73,20 @@ namespace Test
 			Clr.Setup();
 
 			int i = Int32.MaxValue;
-			
 			Inspect.Stack(ref i);
+
+			string s = "foo";
+			Inspect.Heap(s);
+			
+			var layout = new ObjectLayout<string>(ref s);
+			Console.WriteLine(layout);
+
+			var layoutString = Inspect.layoutString(ref i);
+			Console.WriteLine(layoutString);
+
+			var layoutString2 = Inspect.layoutString<int>();
+			Console.WriteLine(layoutString2);
+			Console.WriteLine(Unsafe.AddressOf(ref i));
 
 			
 
@@ -86,7 +98,7 @@ namespace Test
 
 		static string LayoutString<T>()
 		{
-			var type   = Meta.GetType<T>();
+			var type   = typeof(T).GetMetaType();
 			var table  = new ConsoleTable("Name", "Type", "Offset", "Size");
 			var fields = type.Fields.OrderBy(x => x.Offset).ToList();
 
@@ -100,7 +112,7 @@ namespace Test
 
 		private static bool Compare<T>()
 		{
-			return Compare(typeof(T), Meta.GetType<T>());
+			return Compare(typeof(T), typeof(T).GetMetaType());
 		}
 
 		private static bool Compare(Type t, MetaType m)

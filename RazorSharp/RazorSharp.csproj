@@ -231,7 +231,6 @@
     <Compile Include="CoreClr\Fixed\PinHelper.cs" />
     <Compile Include="CoreClr\Meta\IMeta.cs" />
     <Compile Include="CoreClr\Meta\IMetaMember.cs" />
-    <Compile Include="CoreClr\Meta\Meta.cs" />
     <Compile Include="CoreClr\Meta\MetaField.cs" />
     <Compile Include="CoreClr\Meta\MetaIL.cs" />
     <Compile Include="CoreClr\Meta\MetaMethod.cs" />

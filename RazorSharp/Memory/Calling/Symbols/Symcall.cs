@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
@@ -29,6 +30,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 			return Native.Symbols.GetSymAddress(Clr.ClrPdb.FullName, Clr.CLR_DLL_SHORT, name);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsBound(Type t)
 		{
 			return BoundTypes.Contains(t);
@@ -36,18 +38,27 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 		public static void BindQuick(Type t)
 		{
-			MethodInfo[] methods = t.GetAnnotatedMethods<SymcallAttribute>();
-
-			if (methods.Length == 0 || IsBound(t)) {
+			if (IsBound(t)) {
 				return;
 			}
 
-			var baseAttr = methods[0].GetCustomAttribute<SymcallAttribute>();
+			(MethodInfo[] methods, SymcallAttribute[] attributes) = t.GetAnnotatedMethods<SymcallAttribute>();
+
+			if (methods.Length == 0) {
+				return;
+			}
+
+			Global.Log.Information("Binding type {Name}", t.Name);
+
+			var baseAttr = attributes[0];
 			var sym      = new Native.Symbols(baseAttr.Image);
 			var contexts = new List<string>();
 
-			foreach (var method in methods) {
-				var attr = method.GetCustomAttribute<SymcallAttribute>();
+			int lim = methods.Length;
+
+			for (int i = 0; i < lim; i++) {
+				var attr   = attributes[i];
+				var method = methods[i];
 
 				// Resolve the symbol
 				string fullSym       = null;
@@ -73,6 +84,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 				contexts.Add(fullSym);
 			}
 
+
 			var offsets = sym.GetSymOffsets(contexts.ToArray());
 
 
@@ -94,8 +106,8 @@ namespace RazorSharp.Memory.Calling.Symbols
 		{
 			throw new NotImplementedException();
 			var methods = t.GetAllMethods()
-			                     .Where(x => x.GetCustomAttribute<SymcallAttribute>() != null)
-			                     .ToArray();
+			               .Where(x => x.GetCustomAttribute<SymcallAttribute>() != null)
+			               .ToArray();
 
 			foreach (var method in methods) {
 				var attr = method.GetCustomAttribute<SymcallAttribute>();

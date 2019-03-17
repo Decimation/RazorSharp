@@ -25,14 +25,14 @@ namespace Test.Testing.Tests.Metadata
 
 		public static void MethodTable()
 		{
-			var ms = Meta.GetType<string>();
+			var ms = typeof(string).GetMetaType();
 
 			Console.WriteLine(ms);
 		}
 
 		public static void MethodDesc()
 		{
-			var mm = Meta.GetType(typeof(Program)).Methods["AddOp"];
+			var mm = typeof(Program).GetMetaType().Methods["AddOp"];
 
 			Console.WriteLine(mm);
 			Console.WriteLine("IsConstructor: {0}", mm.IsConstructor);
@@ -54,7 +54,7 @@ namespace Test.Testing.Tests.Metadata
 
 		public static void FieldDesc()
 		{
-			var mf = Meta.GetType<string>()["m_firstChar"];
+			var mf = typeof(string).GetMetaType()["m_firstChar"];
 
 
 			Console.WriteLine(mf);
@@ -64,7 +64,7 @@ namespace Test.Testing.Tests.Metadata
 
 		private static bool Compare<T>()
 		{
-			return Compare(Meta.GetType<T>(), typeof(T));
+			return Compare(typeof(T).GetMetaType(), typeof(T));
 		}
 
 		public static bool Compare(MetaType meta, Type t)
@@ -85,8 +85,8 @@ namespace Test.Testing.Tests.Metadata
 			FieldInfo[] fields     = t.GetMethodTableFields();
 			MetaField[] metaFields = meta.Fields.ToArray();
 			Debug.Assert(fields.Length == metaFields.Length);
-			Collections.OrderBy(ref fields, x => x.MetadataToken);
-			Collections.OrderBy(ref metaFields, x => x.Token);
+			Arrays.OrderBy(ref fields, x => x.MetadataToken);
+			Arrays.OrderBy(ref metaFields, x => x.Token);
 
 			for (int i = 0; i < fields.Length; i++) {
 				Debug.Assert(fields[i].MetadataToken == metaFields[i].Token);
@@ -101,8 +101,8 @@ namespace Test.Testing.Tests.Metadata
 			MethodInfo[] methods     = t.GetAllMethods();
 			MetaMethod[] metaMethods = meta.Methods.ToArray();
 			Debug.Assert(methods.Length == metaMethods.Length);
-			Collections.OrderBy(ref methods, x => x.MetadataToken);
-			Collections.OrderBy(ref metaMethods, x => x.Token);
+			Arrays.OrderBy(ref methods, x => x.MetadataToken);
+			Arrays.OrderBy(ref metaMethods, x => x.Token);
 
 			for (int i = 0; i < methods.Length; i++) {
 				Debug.Assert(methods[i].MetadataToken == metaMethods[i].Token);

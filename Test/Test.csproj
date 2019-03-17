@@ -208,6 +208,7 @@
     <Compile Include="Testing\Tests\AddrInRangeTests.cs" />
     <Compile Include="Testing\Tests\AllocPoolTests.cs" />
     <Compile Include="Testing\Tests\AllocUnmanagedTest.cs" />
+    <Compile Include="Testing\Tests\ConsoleTableTests.cs" />
     <Compile Include="Testing\Tests\FunctionOverrideTests.cs" />
     <Compile Include="Testing\Tests\ILTests.cs" />
     <Compile Include="Testing\Tests\Metadata\ClrMetaTests.cs" />

@@ -71,8 +71,8 @@ namespace RazorSharp.Memory
 						var key = currentMField.Offset;
 						if (!unions.ContainsKey(key)) {
 							unions.Add(key, unionFieldsGroup);
-							fields     = Collections.RemoveAt(fields, i);
-							attributes = Collections.RemoveAt(attributes, i);
+							fields     = Arrays.RemoveAt(fields, i);
+							attributes = Arrays.RemoveAt(attributes, i);
 						}
 
 						if (key != expectedOffset) {

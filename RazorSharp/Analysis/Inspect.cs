@@ -28,12 +28,55 @@ namespace RazorSharp.Analysis
 		// todo
 		public static bool SmartInterpret { get; set; }
 
-		public static string layoutString<T>(ref T t)
+		public static string layoutString<T>(T t) where T : class
 		{
 			return default;
 		}
+
+		public static string layoutString<T>()
+		{
+			return layoutTable<T>().ToMarkDownString();
+		}
 		
-		
+		public static string layoutString<T>(ref T t)
+		{
+			var table = layoutTable<T>();
+			var type = typeof(T).GetMetaType();
+			var fields = type.Fields.OrderBy(f => f.Offset).ToArray();
+			int lim = fields.Length;
+
+			var addresses = new object[lim];
+			var values = new object[lim];
+
+			for (int i = 0; i < lim; i++) {
+				var field = fields[i];
+				addresses[i] = field.GetAddress(ref t).ToString("P");
+				values[i] = field.GetValue(t); // todo
+			}
+
+			table.Attach(1, "Address", addresses);
+			table.Attach("Value", values);
+
+			return table.ToMarkDownString();
+		}
+
+		private static ConsoleTable layoutTable<T>()
+		{
+			var type   = typeof(T).GetMetaType();
+			var fields = type.Fields.OrderBy(f => f.Offset).ToArray();
+			var table  = new ConsoleTable("Offset", "Size", "Type", "Name");
+
+			foreach (var field in fields) {
+				
+				table.AddRow(field.Offset,
+				             field.Size,
+				             field.FieldType.Name,
+				             field.Name);
+			}
+
+			return table;
+		}
+
 		public static void Stack<T>(ref T t, ToStringOptions options = DEFAULT)
 		{
 			Console.WriteLine(StackString(ref t, options));
@@ -43,7 +86,7 @@ namespace RazorSharp.Analysis
 		{
 			Pointer<T> addr = Unsafe.AddressOf(ref t);
 			int        size = Unsafe.SizeOf<T>();
-			var        type = Meta.GetType<T>();
+			var        type = typeof(T).GetMetaType();
 
 			var table = type.RuntimeType.IsValueType ? StackValueType(ref t, options) : StackHeapType(ref t, options);
 
@@ -57,7 +100,7 @@ namespace RazorSharp.Analysis
 
 		private static ConsoleTable StackHeapType<T>(ref T t, ToStringOptions options)
 		{
-			var type = Meta.GetType<T>();
+			var type = typeof(T).GetMetaType();
 			Conditions.RequiresClassType<T>();
 			Pointer<T> addr = Unsafe.AddressOf(ref t);
 			var row = new List<object>
@@ -71,7 +114,7 @@ namespace RazorSharp.Analysis
 
 		private static ConsoleTable StackValueType<T>(ref T t, ToStringOptions options)
 		{
-			var type = Meta.GetType<T>();
+			var type = typeof(T).GetMetaType();
 			Conditions.RequiresValueType<T>();
 			List<MetaField> fields     = type.Fields.Where(x => !x.IsStatic).ToList();
 			List<string>    fieldNames = fields.Select(x => x.Name).ToList();
@@ -138,7 +181,7 @@ namespace RazorSharp.Analysis
 			int           heapSize = Unsafe.HeapSize(t);
 
 			// Type info
-			var             type       = Meta.GetType<T>();
+			var             type       = typeof(T).GetMetaType();
 			List<MetaField> fields     = type.IsArray ? null : type.Fields.Where(x => !x.IsStatic).ToList();
 			List<string>    fieldNames = fields == null ? new List<string>() : fields.Select(x => x.Name).ToList();
 			fieldNames.Insert(0, "Header");
@@ -177,7 +220,7 @@ namespace RazorSharp.Analysis
 				}
 			}
 			else {
-				Conditions.RequiresNotNull(fields,nameof(fields));
+				Conditions.RequiresNotNull(fields, nameof(fields));
 
 				foreach (var f in fields) {
 					Pointer<byte> rowPtr = f.GetAddress(ref t);

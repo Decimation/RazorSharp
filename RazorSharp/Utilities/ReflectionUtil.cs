@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using RazorCommon;
+using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
 
 namespace RazorSharp.Utilities
@@ -27,6 +29,11 @@ namespace RazorSharp.Utilities
 
 		#endregion
 
+		public static MetaType GetMetaType(this Type t)
+		{
+			return new MetaType(t.GetMethodTable());
+		}
+		
 		public static object InvokeGenericMethod(Type            t,
 		                                         string          name,
 		                                         Type            typeArgs,
@@ -74,7 +81,7 @@ namespace RazorSharp.Utilities
 		internal static FieldInfo[] GetMethodTableFields(this Type t)
 		{
 			FieldInfo[] fields = t.GetFields(ALL_FLAGS);
-			Collections.RemoveAll(ref fields, f => f.IsLiteral);
+			Arrays.RemoveAll(ref fields, f => f.IsLiteral);
 			return fields;
 		}
 

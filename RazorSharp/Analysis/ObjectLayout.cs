@@ -168,7 +168,7 @@ namespace RazorSharp.Analysis
 
 			Pointer<FieldDesc>[] fieldDescs = typeof(T).GetFieldDescs();
 			fieldDescs = fieldDescs.OrderBy(x => x.Reference.Offset).ToArray();
-			Collections.RemoveAll(ref fieldDescs, x => x.Reference.IsStatic);
+			Arrays.RemoveAll(ref fieldDescs, x => x.Reference.IsStatic);
 
 
 			int baseOfs = 0;
