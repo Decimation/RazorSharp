@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory.Calling.Signatures;
+using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
@@ -38,6 +39,8 @@ namespace RazorSharp.CoreClr
 
 			s_setStableEntryPointInterlocked =
 				Marshal.GetDelegateForFunctionPointer<SetStableEntryPointInterlockedDelegate>(fn);
+			
+			Symcall.BindQuick(typeof(ClrFunctions));
 		}
 
 		/// <summary>

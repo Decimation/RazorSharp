@@ -29,14 +29,16 @@ namespace RazorSharp.Memory.Calling.Symbols
 			return Native.Symbols.GetSymAddress(Clr.ClrPdb.FullName, Clr.CLR_DLL_SHORT, name);
 		}
 
+		public static bool IsBound(Type t)
+		{
+			return BoundTypes.Contains(t);
+		}
 
 		public static void BindQuick(Type t)
 		{
-			MethodInfo[] methods = t.GetAllMethods()
-			                              .Where(x => x.GetCustomAttribute<SymcallAttribute>() != null)
-			                              .ToArray();
+			MethodInfo[] methods = t.GetAnnotatedMethods<SymcallAttribute>();
 
-			if (methods.Length == 0 || BoundTypes.Contains(t)) {
+			if (methods.Length == 0 || IsBound(t)) {
 				return;
 			}
 

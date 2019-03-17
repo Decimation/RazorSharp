@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using AnnotationUtil = RazorSharp.Utilities.AnnotationUtil;
 
@@ -16,13 +17,7 @@ namespace RazorSharp.Utilities
 		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(this Type t, string name, BindingFlags flags)
 			where TAttribute : Attribute
 		{
-			MethodInfo[] methods = t.GetAnnotatedMethods<TAttribute>(flags);
-			var          matches = new List<MethodInfo>();
-			foreach (var v in methods)
-				if (v.Name == name)
-					matches.Add(v);
-
-			return matches.ToArray();
+			return t.GetAnnotatedMethods<TAttribute>(flags).Where(x => x.Name == name).ToArray();
 		}
 
 		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(this Type t) where TAttribute : Attribute

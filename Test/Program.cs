@@ -72,13 +72,11 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
-			string s = "foo";
-			var obj = MemConvert.Convert<string, object>(s, MemConvert.ConversionType.LIGHT);
-			Console.WriteLine(obj);
+			int i = Int32.MaxValue;
+			
+			Inspect.Stack(ref i);
 
-			int value = 0;
-			Conditions.RequiresUnsigned(value, nameof(value));
-
+			
 
 			// SHUT IT DOWN
 			Clr.Close();

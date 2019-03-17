@@ -28,6 +28,12 @@ namespace RazorSharp.Analysis
 		// todo
 		public static bool SmartInterpret { get; set; }
 
+		public static string layoutString<T>(ref T t)
+		{
+			return default;
+		}
+		
+		
 		public static void Stack<T>(ref T t, ToStringOptions options = DEFAULT)
 		{
 			Console.WriteLine(StackString(ref t, options));
@@ -54,8 +60,10 @@ namespace RazorSharp.Analysis
 			var type = Meta.GetType<T>();
 			Conditions.RequiresClassType<T>();
 			Pointer<T> addr = Unsafe.AddressOf(ref t);
-			var        row  = new List<object>();
-			row.Add(CreateRowEntry<byte>(addr.CopyOutBytes(IntPtr.Size), options));
+			var row = new List<object>
+			{
+				CreateRowEntry<byte>(addr.CopyOutBytes(IntPtr.Size), options)
+			};
 			var table = new ConsoleTable(String.Format("Pointer to {0}", type.Name));
 			table.AddRow(row.ToArray());
 			return table;
