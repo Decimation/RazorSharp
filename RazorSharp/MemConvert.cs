@@ -9,6 +9,11 @@ using System;
 namespace RazorSharp
 {
 	// todo: WIP
+	
+	/// <summary>
+	/// <seealso cref="BitConverter"/>
+	/// <seealso cref="System.Convert"/>
+	/// </summary>
 	public static class MemConvert
 	{
 		public enum ConversionType

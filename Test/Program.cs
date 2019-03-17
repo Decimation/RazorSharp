@@ -72,7 +72,7 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
-			int i = Int32.MaxValue;
+			/*int i = Int32.MaxValue;
 			Inspect.Stack(ref i);
 
 			string s = "foo";
@@ -81,14 +81,31 @@ namespace Test
 			var layout = new ObjectLayout<string>(ref s);
 			Console.WriteLine(layout);
 
-			var layoutString = Inspect.layoutString(ref i);
+			var layoutString = Inspect.LayoutString(ref i);
 			Console.WriteLine(layoutString);
 
-			var layoutString2 = Inspect.layoutString<int>();
+			var layoutString2 = Inspect.LayoutString<int>();
 			Console.WriteLine(layoutString2);
-			Console.WriteLine(Unsafe.AddressOf(ref i));
+			Console.WriteLine(Unsafe.AddressOf(ref i));*/
+
+			const int     cb  = 10;
+			Pointer<byte> ptr = Mem.AllocUnmanaged<byte>(cb);
+
+			string             s    = "foo";
+			ReadOnlySpan<char> span = s.AsSpan();
+			
+			Pointer<char> ptrStr = Unsafe.AddressOfHeap(ref s, OffsetType.StringData);
+			fixed (char* c = &ptrStr.Reference) {
+				Debug.Assert(*c == s[0]);
+			}
 
 			
+			fixed (char* x = &span.GetPinnableReference()) {
+				*x = 'g';
+			}
+
+			Console.WriteLine(s);
+
 
 			// SHUT IT DOWN
 			Clr.Close();

@@ -60,11 +60,24 @@ namespace RazorSharp.Memory
 
 		#endregion
 
+		private static readonly IDictionary<IntPtr, int> Pointers;
+
+		static Mem()
+		{
+			Pointers = new Dictionary<IntPtr, int>();
+		}
+		
 		public static Pointer<T> AllocUHeap<T>(int elemCnt = 1)
 		{
+			
+			foreach (var ptr in Pointers) {
+				
+			}
 			return null;
 		}
 
+		
+		
 		/// <summary>
 		///     Checks whether an address is in range.
 		/// </summary>
@@ -95,7 +108,8 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     Allocates basic reference types in the unmanaged heap.
 		///     <para>
-		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free{T}" />
+		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" />,
+		/// 		<see cref="Free{T}(Pointer{T})" />, or <see cref="Free{T}(Pointer{T}, int)" />
 		///     </para>
 		/// </summary>
 		/// <typeparam name="T">
@@ -147,7 +161,8 @@ namespace RazorSharp.Memory
 		///         <see cref="AllocUnmanagedInstance{T}" />.
 		///     </para>
 		///     <para>
-		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" /> or <see cref="Free{T}" />
+		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" />,
+		/// 		<see cref="Free{T}(Pointer{T})" />, or <see cref="Free{T}(Pointer{T}, int)" />
 		///     </para>
 		/// </summary>
 		/// <typeparam name="T">Element type to allocate</typeparam>
@@ -185,6 +200,11 @@ namespace RazorSharp.Memory
 			AllocCount--;
 		}
 
+		public static void Free<T>(Pointer<T> p, int length)
+		{
+			p.Zero(length);
+			Free(p);
+		}
 
 		#region String
 

@@ -21,7 +21,7 @@ namespace RazorSharp.Analysis
 	///     <para>Does not work with arrays.</para>
 	/// </summary>
 	/// <typeparam name="T">Type to get the layout of.</typeparam>
-	[Obsolete]
+	[Obsolete("Use Inspect.LayoutString")]
 	public unsafe class ObjectLayout<T>
 	{
 		private string GetOffsetString(int baseOfs, int rightOfs, int leftOfs)

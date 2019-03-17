@@ -312,6 +312,13 @@ namespace RazorSharp.Pointers
 			return String.Format("Address = {0} | Value = {1}", ToString(FMT_P),Reference.ToString());
 		}
 
+		
+		
+		public Span<T> AsSpan(int length)
+		{
+			return new Span<T>(ToPointer(), length);
+		}
+
 		#region Read / write
 
 		public Pointer<TType> ReadPointer<TType>(int elemOffset = 0)

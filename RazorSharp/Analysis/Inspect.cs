@@ -28,46 +28,47 @@ namespace RazorSharp.Analysis
 		// todo
 		public static bool SmartInterpret { get; set; }
 
-		public static string layoutString<T>(T t) where T : class
+		// layoutString
+
+		public static string LayoutString<T>(T t) where T : class
 		{
-			return default;
+			throw new NotImplementedException();
 		}
 
-		public static string layoutString<T>()
+		public static string LayoutString<T>()
 		{
-			return layoutTable<T>().ToMarkDownString();
+			return LayoutTable<T>().ToMarkDownString();
 		}
-		
-		public static string layoutString<T>(ref T t)
-		{
-			var table = layoutTable<T>();
-			var type = typeof(T).GetMetaType();
-			var fields = type.Fields.OrderBy(f => f.Offset).ToArray();
-			int lim = fields.Length;
 
+		public static string LayoutString<T>(ref T t)
+		{
+			var table     = LayoutTable<T>();
+			var type      = typeof(T).GetMetaType();
+			var fields    = type.Fields.OrderBy(f => f.Offset).ToArray();
+			int lim       = fields.Length;
 			var addresses = new object[lim];
-			var values = new object[lim];
+			var values    = new object[lim];
 
 			for (int i = 0; i < lim; i++) {
 				var field = fields[i];
+
 				addresses[i] = field.GetAddress(ref t).ToString("P");
-				values[i] = field.GetValue(t); // todo
+				values[i]    = field.GetValue(t); // todo
 			}
 
-			table.Attach(1, "Address", addresses);
-			table.Attach("Value", values);
+			table.Attach(1, "Address", addresses)
+			     .Attach("Value", values);
 
 			return table.ToMarkDownString();
 		}
 
-		private static ConsoleTable layoutTable<T>()
+		private static ConsoleTable LayoutTable<T>()
 		{
 			var type   = typeof(T).GetMetaType();
 			var fields = type.Fields.OrderBy(f => f.Offset).ToArray();
 			var table  = new ConsoleTable("Offset", "Size", "Type", "Name");
 
 			foreach (var field in fields) {
-				
 				table.AddRow(field.Offset,
 				             field.Size,
 				             field.FieldType.Name,
@@ -88,7 +89,9 @@ namespace RazorSharp.Analysis
 			int        size = Unsafe.SizeOf<T>();
 			var        type = typeof(T).GetMetaType();
 
-			var table = type.RuntimeType.IsValueType ? StackValueType(ref t, options) : StackHeapType(ref t, options);
+			var table = type.RuntimeType.IsValueType
+				? StackValueTypeTable(ref t, options)
+				: StackHeapTypeTable(ref t, options);
 
 
 			var sb = new StringBuilder();
@@ -98,7 +101,7 @@ namespace RazorSharp.Analysis
 			return sb.ToString();
 		}
 
-		private static ConsoleTable StackHeapType<T>(ref T t, ToStringOptions options)
+		private static ConsoleTable StackHeapTypeTable<T>(ref T t, ToStringOptions options)
 		{
 			var type = typeof(T).GetMetaType();
 			Conditions.RequiresClassType<T>();
@@ -112,7 +115,7 @@ namespace RazorSharp.Analysis
 			return table;
 		}
 
-		private static ConsoleTable StackValueType<T>(ref T t, ToStringOptions options)
+		private static ConsoleTable StackValueTypeTable<T>(ref T t, ToStringOptions options)
 		{
 			var type = typeof(T).GetMetaType();
 			Conditions.RequiresValueType<T>();

@@ -29,6 +29,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputPath>bin\x64\Debug\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
+      
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <DebugType>pdbonly</DebugType>
@@ -205,25 +206,26 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Samples\PinningExamples.cs" />
     <Compile Include="Testing\TestingUtil.cs" />
-    <Compile Include="Testing\Tests\AddrInRangeTests.cs" />
-    <Compile Include="Testing\Tests\AllocPoolTests.cs" />
-    <Compile Include="Testing\Tests\AllocUnmanagedTest.cs" />
-    <Compile Include="Testing\Tests\ConsoleTableTests.cs" />
-    <Compile Include="Testing\Tests\FunctionOverrideTests.cs" />
-    <Compile Include="Testing\Tests\ILTests.cs" />
+    <Compile Include="Testing\Tests\MemoryTests.cs" />
     <Compile Include="Testing\Tests\Metadata\ClrMetaTests.cs" />
     <Compile Include="Testing\Tests\Metadata\ClrRuntimeTests.cs" />
-    <Compile Include="Testing\Tests\NativeTests.cs" />
-    <Compile Include="Testing\Tests\SignatureCallTests.cs" />
-    <Compile Include="Testing\Tests\StackAllocateTests.cs" />
-    <Compile Include="Testing\Tests\StructureTests.cs" />
-    <Compile Include="Testing\Tests\HeapObjectTests.cs" />
-    <Compile Include="Testing\Tests\OffsetOfTests.cs" />
-    <Compile Include="Testing\Tests\PinningTests.cs" />
-    <Compile Include="Testing\Tests\PointerTests.cs" />
-    <Compile Include="Testing\Tests\RuntimeTests.cs" />
-    <Compile Include="Testing\Tests\SizeTests.cs" />
-    <Compile Include="Testing\Tests\UnsafeTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\AddrInRangeTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\AllocPoolTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\AllocUnmanagedTest.cs" />
+    <Compile Include="Testing\Tests\OldTests\ConsoleTableTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\FunctionOverrideTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\HeapObjectTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\ILTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\NativeTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\OffsetOfTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\PinningTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\PointerTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\RuntimeTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\SignatureCallTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\SizeTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\StackAllocateTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\StructureTests.cs" />
+    <Compile Include="Testing\Tests\OldTests\UnsafeTests.cs" />
     <Compile Include="Testing\Types\Dummy.cs" />
     <Compile Include="Testing\Types\GenericDummy.cs" />
     <Compile Include="Testing\Types\Point.cs" />
