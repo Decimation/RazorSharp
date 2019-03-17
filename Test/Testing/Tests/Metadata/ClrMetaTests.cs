@@ -7,6 +7,7 @@ using RazorCommon;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Utilities;
 
 namespace Test.Testing.Tests.Metadata
 {
@@ -81,7 +82,7 @@ namespace Test.Testing.Tests.Metadata
 			// Fields
 			//
 
-			FieldInfo[] fields     = Runtime.GetFields(t);
+			FieldInfo[] fields     = t.GetMethodTableFields();
 			MetaField[] metaFields = meta.Fields.ToArray();
 			Debug.Assert(fields.Length == metaFields.Length);
 			Collections.OrderBy(ref fields, x => x.MetadataToken);
@@ -97,7 +98,7 @@ namespace Test.Testing.Tests.Metadata
 			// Methods
 			//
 
-			MethodInfo[] methods     = Runtime.GetMethods(t);
+			MethodInfo[] methods     = t.GetAllMethods();
 			MetaMethod[] metaMethods = meta.Methods.ToArray();
 			Debug.Assert(methods.Length == metaMethods.Length);
 			Collections.OrderBy(ref methods, x => x.MetadataToken);

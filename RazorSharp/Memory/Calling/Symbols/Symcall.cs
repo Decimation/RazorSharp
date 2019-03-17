@@ -32,7 +32,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 		public static void BindQuick(Type t)
 		{
-			MethodInfo[] methods = Runtime.GetMethods(t)
+			MethodInfo[] methods = t.GetAllMethods()
 			                              .Where(x => x.GetCustomAttribute<SymcallAttribute>() != null)
 			                              .ToArray();
 
@@ -91,7 +91,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 		public static void Bind(Type t)
 		{
 			throw new NotImplementedException();
-			var methods = Runtime.GetMethods(t)
+			var methods = t.GetAllMethods()
 			                     .Where(x => x.GetCustomAttribute<SymcallAttribute>() != null)
 			                     .ToArray();
 

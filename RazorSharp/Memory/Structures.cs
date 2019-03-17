@@ -29,7 +29,7 @@ namespace RazorSharp.Memory
 		private static bool LayoutMismatch(Type t)
 		{
 			(FieldInfo[] fields, FieldOffsetAttribute[] attributes) =
-				Runtime.GetAnnotatedFields<FieldOffsetAttribute>(t);
+				t.GetAnnotatedFields<FieldOffsetAttribute>();
 			var metaFields = fields.Select(x => new MetaField(x.GetFieldDesc())).ToArray();
 
 			for (int i = 0; i < fields.Length; i++) {
@@ -44,7 +44,7 @@ namespace RazorSharp.Memory
 		internal static void ReorganizeAuto(Type t)
 		{
 			(FieldInfo[] fields, FieldOffsetAttribute[] attributes) =
-				Runtime.GetAnnotatedFields<FieldOffsetAttribute>(t);
+				t.GetAnnotatedFields<FieldOffsetAttribute>();
 
 
 			var prevField  = fields[0];

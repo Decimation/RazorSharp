@@ -175,7 +175,7 @@ namespace RazorSharp.Utilities
 			AssertAllEqual(values[0], values);
 		}
 
-		internal static void AssertAllEqualQ<T>(params T[] values)
+		internal static void AssertAllEqualAlt<T>(params T[] values)
 		{
 			AssertAllEqual(values);
 		}
@@ -190,6 +190,18 @@ namespace RazorSharp.Utilities
 		#endregion
 
 		#region Requires (exception)
+
+		/// <summary>
+		/// Requires <paramref name="value"/> be more than <c>0</c>
+		/// </summary>
+		internal static void RequiresUnsigned(int value, string name, string msg = null, params object[] args)
+		{
+			if (!(value > 0)) {
+				string error   = String.Format("Value \"{0}\" must be > 0", name);
+				var    msgFail = CreateFailString(error, msg, args);
+				FailRequire(msgFail);
+			}
+		}
 
 		// ReSharper disable once InconsistentNaming
 		internal static void RequiresWorkstationGC()
@@ -206,24 +218,45 @@ namespace RazorSharp.Utilities
 			}
 		}
 
+		[StringFormatMethod(STRING_FORMAT_PARAM)]
+		private static string CreateFailString(string error, string msg = null, params object[] args)
+		{
+			string msgFmt;
+			if (!String.IsNullOrWhiteSpace(msg)) {
+				msgFmt = String.Format(msg, args);
+			}
+			else {
+				msgFmt = null;
+			}
+
+
+			return String.Format("{0}: {1}", error, msgFmt);
+		}
+
+		// 3-16-19: Use string interpolation expression disabled cause it's fucking annoying
+		
+		private static string CreateErrorString<T>(T value, string name, string errorStub)
+		{
+			//string error = String.Format("File \"{0}\" does not exist in directory \"{1}\"", file.Name,
+			//                             file.Directory);
+
+			string typeName = value.GetType().Name;
+			string error = String.Format("{0} \"{1}\" {2}", typeName, name, errorStub);
+
+			return error;
+		}
+		
 		[AssertionMethod]
 		[StringFormatMethod(STRING_FORMAT_PARAM)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresFileExists(FileInfo file, string msg = null, params object[] args)
 		{
 			if (!file.Exists) {
-				string msg1;
-				if (!string.IsNullOrWhiteSpace(msg)) {
-					msg1 = string.Format(msg, args);
-				}
-				else {
-					msg1 = null;
-				}
+				string error = String.Format("File \"{0}\" does not exist in directory \"{1}\"", file.Name,
+				                             file.Directory);
 
-				string msg2 = string.Format("File \"{0}\" does not exist in directory \"{1}\"", file.Name,
-				                            file.Directory);
-
-				FailRequire("{0}: {1}", msg1, msg2);
+				var msgFail = CreateFailString(error, msg, args);
+				FailRequire(msgFail);
 			}
 		}
 
@@ -231,8 +264,8 @@ namespace RazorSharp.Utilities
 		private static void FailRequire(string msg, params object[] args)
 		{
 			Exception exception;
-			if (!string.IsNullOrWhiteSpace(msg)) {
-				var format = string.Format(msg, args);
+			if (!String.IsNullOrWhiteSpace(msg)) {
+				var format = String.Format(msg, args);
 				exception = new Exception(format);
 			}
 			else {
@@ -268,7 +301,7 @@ namespace RazorSharp.Utilities
 		internal static unsafe void Requires64Bit()
 		{
 			Requires(IntPtr.Size == 8 && Environment.Is64BitProcess, "Only 64-bit is supported at the moment.");
-			AssertAllEqualQ(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
+			AssertAllEqualAlt(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
 		}
 
 		#region Not null

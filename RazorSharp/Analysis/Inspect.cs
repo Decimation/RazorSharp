@@ -117,7 +117,7 @@ namespace RazorSharp.Analysis
 
 			// Byte is default for TAs
 			if (typeof(TAs) != typeof(byte)) {
-				return Collections.CreateString(" | ", RazorConvert.ConvertArray<TAs>(mem), options);
+				return Collections.CreateString(" | ", MemConvert.ConvertArray<TAs>(mem), options);
 			}
 
 			return Collections.CreateString(" | ", mem, options);

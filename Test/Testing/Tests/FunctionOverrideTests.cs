@@ -8,6 +8,7 @@ using RazorSharp;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 
 #endregion
 
@@ -59,7 +60,7 @@ namespace Test.Testing.Tests
 		private static object ManualInvoke(Type target, string targetName, object targetInstance = null,
 			params object[]                     args)
 		{
-			var method = Runtime.GetMethod(target, targetName);
+			var method = target.GetAnyMethod(targetName);
 			return method.Invoke(targetInstance, args);
 		}
 

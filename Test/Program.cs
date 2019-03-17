@@ -72,6 +72,13 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
+			string s = "foo";
+			var obj = MemConvert.Convert<string, object>(s, MemConvert.ConversionType.LIGHT);
+			Console.WriteLine(obj);
+
+			int value = 0;
+			Conditions.RequiresUnsigned(value, nameof(value));
+
 
 			// SHUT IT DOWN
 			Clr.Close();
@@ -112,7 +119,7 @@ namespace Test
 
 		private static void Dump<T>(T t, int recursivePasses = 0)
 		{
-			FieldInfo[] fields = Runtime.GetFields(t.GetType());
+			FieldInfo[] fields = t.GetType().GetMethodTableFields();
 
 			var ct = new ConsoleTable("Field", "Type", "Value");
 			foreach (var f in fields) {

@@ -265,7 +265,7 @@
     <Compile Include="Native\Enums\SymSearchOptions.cs" />
     <Compile Include="Native\Structures\SymbolInfo.cs" />
     <Compile Include="Native\Symbols.cs" />
-    <Compile Include="RazorConvert.cs" />
+    <Compile Include="MemConvert.cs" />
     <Compile Include="Memory\AllocPool.cs" />
     <Compile Include="Memory\Bits.cs" />
     <Compile Include="Memory\Mem.cs" />
@@ -314,11 +314,13 @@
     <Compile Include="CoreClr\Runtime.cs" />
     <Compile Include="Unsafe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\AnnotationUtil.cs" />
     <Compile Include="Utilities\Exceptions\PreconditionException.cs" />
     <Compile Include="Utilities\Exceptions\SigcallException.cs" />
     <Compile Include="Utilities\Exceptions\RuntimeException.cs" />
     <Compile Include="Utilities\Exceptions\TypeException.cs" />
     <Compile Include="Utilities\Conditions.cs" />
+    <Compile Include="Utilities\ReflectionUtil.cs" />
     <Compile Include="Utilities\StandardOut.cs" />
     <Compile Include="Utilities\VirtualCollection.cs" />
   </ItemGroup>

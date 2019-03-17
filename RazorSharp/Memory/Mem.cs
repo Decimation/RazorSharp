@@ -42,21 +42,16 @@ namespace RazorSharp.Memory
 		internal const int  BytesInKilobyte = 1024;
 
 
-		/// <summary>
-		/// Counts the number of allocations (allocated pointers)
-		/// </summary>
-		internal static int AllocCount { get; private set; }
-
-		public static void Zero<T>(ref T t)
-		{
-			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
-		}
-
 		public static bool Is64Bit {
 			get { return IntPtr.Size == sizeof(long); }
 		}
 
 		#region Zero
+
+		public static void Zero<T>(ref T t)
+		{
+			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
+		}
 
 		public static void Zero(Pointer<byte> ptr, int length)
 		{
@@ -64,6 +59,11 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
+
+		public static Pointer<T> AllocUHeap<T>(int elemCnt = 1)
+		{
+			return null;
+		}
 
 		/// <summary>
 		///     Checks whether an address is in range.
@@ -82,6 +82,15 @@ namespace RazorSharp.Memory
 //			return max.ToInt64() < p.ToInt64() && p.ToInt64() <= min.ToInt64();
 		}
 
+
+		#region Alloc / free
+
+		/// <summary>
+		/// Counts the number of allocations (allocated pointers)
+		/// </summary>
+		internal static int AllocCount { get; private set; }
+
+		internal static bool IsMemoryInUse => AllocCount > 0;
 
 		/// <summary>
 		///     Allocates basic reference types in the unmanaged heap.
@@ -145,7 +154,7 @@ namespace RazorSharp.Memory
 		/// <returns>A pointer to the allocated memory</returns>
 		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
 		{
-			Conditions.Assert(elemCnt > 0, "elemCnt <= 0");
+			Conditions.RequiresUnsigned(elemCnt, nameof(elemCnt));
 			int size  = Unsafe.SizeOf<T>() * elemCnt;
 			var alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
@@ -159,31 +168,6 @@ namespace RazorSharp.Memory
 		{
 			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) (elemCnt * Unsafe.SizeOf<T>()));
 		}
-
-		/// <summary>
-		/// Allocates a LPCUTF8 native string from a UTF16 C# string
-		/// </summary>
-		/// <param name="s">Standard UTF16 C# string</param>
-		/// <returns></returns>
-		public static Pointer<byte> AllocString(string s)
-		{
-			var size = s.Length + 1;
-			Pointer<byte> ptr = AllocUnmanaged<byte>(size);
-			ptr.WriteString(s, StringTypes.AnsiStr);
-			Conditions.Assert(ptr.ReadString(StringTypes.AnsiStr) == s);
-
-			return ptr;
-		}
-
-		public static void FreeString(Pointer<byte> ptr)
-		{
-			int size = ptr.ReadUntil(x => x == 0x00) + 1;
-			ptr.Zero(size);
-			Free(ptr);
-		}
-
-		internal static bool IsMemoryInUse => AllocCount > 0;
-
 
 		/// <summary>
 		///     <para>Frees memory allocated from <see cref="AllocUnmanaged{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>
@@ -201,6 +185,66 @@ namespace RazorSharp.Memory
 			AllocCount--;
 		}
 
+
+		#region String
+
+		/// <summary>
+		/// Allocates a LPCUTF8 native string from a UTF16 C# string
+		/// </summary>
+		/// <param name="s">Standard UTF16 C# string</param>
+		/// <returns></returns>
+		public static Pointer<byte> AllocString(string s)
+		{
+			var           size = s.Length + 1;
+			Pointer<byte> ptr  = AllocUnmanaged<byte>(size);
+			ptr.WriteString(s, StringTypes.AnsiStr);
+			Conditions.Assert(ptr.ReadString(StringTypes.AnsiStr) == s);
+
+			return ptr;
+		}
+
+		public static void FreeString(Pointer<byte> ptr)
+		{
+			int size = ptr.ReadUntil(x => x == 0x00) + 1;
+			ptr.Zero(size);
+			Free(ptr);
+		}
+
+		#endregion
+
+		#region Code
+
+		public static Pointer<byte> AllocCode(byte[] opCodes)
+		{
+			Kernel32.GetNativeSystemInfo(out var si);
+
+			// VirtualAlloc(nullptr, page_size, MEM_COMMIT, PAGE_READWRITE);
+
+			// @formatter:off
+			var alloc = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) si.PageSize, AllocationType.Commit,MemoryProtection.ReadWrite);
+			// @formatter:on
+
+			AllocCount++;
+			Copy(alloc, opCodes);
+
+			// VirtualProtect(buffer, code.size(), PAGE_EXECUTE_READ, &dummy);
+
+			Conditions.Requires(
+				Kernel32.VirtualProtect(alloc, (uint) opCodes.Length, MemoryProtection.ExecuteRead, out _));
+
+
+			return alloc;
+		}
+
+		public static void FreeCode(Pointer<byte> fn)
+		{
+			Conditions.Requires(Kernel32.VirtualFree(fn.Address, 0, FreeTypes.Release));
+			AllocCount--;
+		}
+
+		#endregion
+
+		#endregion
 
 		#region Swap
 
@@ -425,33 +469,5 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
-
-		public static Pointer<byte> AllocCode(byte[] opCodes)
-		{
-			Kernel32.GetNativeSystemInfo(out var si);
-
-			// VirtualAlloc(nullptr, page_size, MEM_COMMIT, PAGE_READWRITE);
-
-			// @formatter:off
-			var alloc = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) si.PageSize, AllocationType.Commit,MemoryProtection.ReadWrite);
-			// @formatter:on
-
-			AllocCount++;
-			Copy(alloc, opCodes);
-
-			// VirtualProtect(buffer, code.size(), PAGE_EXECUTE_READ, &dummy);
-
-			Conditions.Requires(
-				Kernel32.VirtualProtect(alloc, (uint) opCodes.Length, MemoryProtection.ExecuteRead, out _));
-
-
-			return alloc;
-		}
-
-		public static void FreeCode(Pointer<byte> fn)
-		{
-			Conditions.Requires(Kernel32.VirtualFree(fn.Address, 0, FreeTypes.Release));
-			AllocCount--;
-		}
 	}
 }

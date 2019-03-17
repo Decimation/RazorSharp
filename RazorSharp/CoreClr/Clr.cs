@@ -60,7 +60,7 @@ namespace RazorSharp.CoreClr
 
 			string[] dirs = {cd, Environment.SystemDirectory};
 			foreach (string dir in dirs) {
-				var fi = FileUtil.FindFile(dir, Clr.CLR_PDB_SHORT);
+				var fi = FileUtil.FindFile(dir, CLR_PDB_SHORT);
 				if (fi != null) {
 					clrSym = fi;
 					break;

@@ -258,24 +258,6 @@ namespace RazorSharp.CoreClr
 			return ptr.CopyOut(IntPtr.Size);
 		}
 
-		internal static FieldInfo[] GetFields<T>()
-		{
-			return GetFields(typeof(T));
-		}
-
-		/// <summary>
-		///     Gets the corresponding <see cref="FieldInfo" />s equivalent to the fields
-		///     in <see cref="MethodTable.FieldDescList" />
-		/// </summary>
-		/// <param name="t"></param>
-		/// <returns></returns>
-		internal static FieldInfo[] GetFields(Type t)
-		{
-			FieldInfo[] fields = t.GetFields(ReflectionUtil.ALL_FLAGS);
-			Collections.RemoveAll(ref fields, f => f.IsLiteral);
-			return fields;
-		}
-
 		#endregion
 
 		#region MethodDesc
@@ -314,66 +296,6 @@ namespace RazorSharp.CoreClr
 //			arr = arr.OrderBy(x => x.ToInt64()).ToArray();
 
 			return arr;
-		}
-
-		#endregion
-
-		internal static (FieldInfo[], TAttribute[]) GetAnnotatedFields<TAttribute>(
-			Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS) where TAttribute : Attribute
-		{
-			FieldInfo[] field            = t.GetFields(flags);
-			var         attributedFields = new List<FieldInfo>();
-			var         attributes       = new List<TAttribute>();
-
-			foreach (var t1 in field) {
-				var attr = t1.GetCustomAttribute<TAttribute>();
-				if (attr != null) {
-					attributedFields.Add(t1);
-					attributes.Add(attr);
-				}
-			}
-
-			return (attributedFields.ToArray(), attributes.ToArray());
-		}
-
-		#region
-
-		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(
-			Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS) where TAttribute : Attribute
-		{
-			MethodInfo[] methods           = t.GetMethods(flags);
-			var          attributedMethods = new List<MethodInfo>();
-
-			foreach (var t1 in methods) {
-				var attr = t1.GetCustomAttribute<TAttribute>();
-				if (attr != null) attributedMethods.Add(t1);
-			}
-
-			return attributedMethods.ToArray();
-		}
-
-		internal static MethodInfo[] GetAnnotatedMethods<TAttribute>(Type         t, string name,
-		                                                             BindingFlags flags = ReflectionUtil.ALL_FLAGS)
-			where TAttribute : Attribute
-		{
-			MethodInfo[] methods = GetAnnotatedMethods<TAttribute>(t, flags);
-			var          matches = new List<MethodInfo>();
-			foreach (var v in methods)
-				if (v.Name == name)
-					matches.Add(v);
-
-			return matches.ToArray();
-		}
-
-
-		internal static MethodInfo GetMethod(Type t, string name, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
-		{
-			return t.GetMethod(name, flags);
-		}
-
-		internal static MethodInfo[] GetMethods(Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
-		{
-			return t.GetMethods(flags);
 		}
 
 		#endregion

@@ -136,7 +136,7 @@ namespace RazorSharp.Memory.Calling.Signatures
 			if (IsBound(t))
 				return;
 
-			MethodInfo[] methodInfos = Runtime.GetMethods(t);
+			MethodInfo[] methodInfos = t.GetAllMethods();
 
 
 			foreach (var mi in methodInfos)
@@ -169,7 +169,7 @@ namespace RazorSharp.Memory.Calling.Signatures
 			if (isGetProperty)
 				name = Identifiers.NameOfGetPropertyMethod(name);
 
-			var mi = Runtime.GetMethod(t, name);
+			var mi = t.GetAnyMethod(name);
 			ApplySigcallIndependent(mi);
 		}
 

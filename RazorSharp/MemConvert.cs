@@ -2,17 +2,19 @@
 
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
+using System;
 
 #endregion
 
 namespace RazorSharp
 {
 	// todo: WIP
-	public static class RazorConvert
+	public static class MemConvert
 	{
 		public enum ConversionType
 		{
-			LOW_LEVEL
+			LOW_LEVEL,
+			LIGHT
 		}
 
 		public static unsafe TTo[] ConvertArray<TTo>(byte[] mem)
@@ -22,12 +24,14 @@ namespace RazorSharp
 				return memPtr.CopyOut(mem.Length / memPtr.ElementSize);
 			}
 		}
-
+		
 		public static TTo Convert<TFrom, TTo>(TFrom t, ConversionType c = ConversionType.LOW_LEVEL)
 		{
 			switch (c) {
 				case ConversionType.LOW_LEVEL:
 					return ProxyCast<TFrom, TTo>(t);
+				case ConversionType.LIGHT:
+					return (TTo) System.Convert.ChangeType(t, typeof(TTo));
 			}
 
 			return default;
