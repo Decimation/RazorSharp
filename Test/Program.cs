@@ -78,32 +78,23 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
-			/*int i = Int32.MaxValue;
-			Inspect.Stack(ref i);
-
-			string s = "foo";
-			Inspect.Heap(s);
 			
-			var layout = new ObjectLayout<string>(ref s);
-			Console.WriteLine(layout);
-
-			var layoutString = Inspect.LayoutString(ref i);
-			Console.WriteLine(layoutString);
-
-			var layoutString2 = Inspect.LayoutString<int>();
-			Console.WriteLine(layoutString2);
-			Console.WriteLine(Unsafe.AddressOf(ref i));*/
 
 
 			// todo: italics for extension methods?
 			
-			int          i    = 0;
+			int          i    = Int32.MaxValue;
 			Pointer<int> ptr2 = &i;
 			Console.WriteLine(ptr2.Query());
 
 			const int    cb  = 4;
 			Pointer<int> ptr = stackalloc int[cb];
 			Console.WriteLine(ptr.Query());
+			
+			var zero = Unsafe.AddressOf(ref i).Address;
+			Pointer<IntPtr> ptrx = &zero;
+			Console.WriteLine(ptrx.ReadPointer<int>());
+			
 
 			
 
