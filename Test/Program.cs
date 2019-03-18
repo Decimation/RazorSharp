@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Drawing;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -65,6 +66,11 @@ namespace Test
 			return Unsafe.INVALID_VALUE;
 		}
 
+		interface IClass
+		{
+			int Size();
+		}
+		
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -88,24 +94,18 @@ namespace Test
 			Console.WriteLine(layoutString2);
 			Console.WriteLine(Unsafe.AddressOf(ref i));*/
 
-			const int     cb  = 10;
-			Pointer<byte> ptr = Mem.AllocUnmanaged<byte>(cb);
 
-			string             s    = "foo";
-			ReadOnlySpan<char> span = s.AsSpan();
+			// todo: italics for extension methods?
 			
-			Pointer<char> ptrStr = Unsafe.AddressOfHeap(ref s, OffsetType.StringData);
-			fixed (char* c = &ptrStr.Reference) {
-				Debug.Assert(*c == s[0]);
-			}
+			int          i    = 0;
+			Pointer<int> ptr2 = &i;
+			Console.WriteLine(ptr2.Query());
+
+			const int    cb  = 4;
+			Pointer<int> ptr = stackalloc int[cb];
+			Console.WriteLine(ptr.Query());
 
 			
-			fixed (char* x = &span.GetPinnableReference()) {
-				*x = 'g';
-			}
-
-			Console.WriteLine(s);
-
 
 			// SHUT IT DOWN
 			Clr.Close();
@@ -119,6 +119,8 @@ namespace Test
 			var table  = new ConsoleTable("Name", "Type", "Offset", "Size");
 			var fields = type.Fields.OrderBy(x => x.Offset).ToList();
 
+			
+			
 			foreach (var field in fields) {
 				table.AddRow(field.Name, field.FieldType.Name, field.Offset, field.Size);
 			}
