@@ -15,6 +15,7 @@ using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
+using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Fixed;
 using RazorSharp.Memory;
 using RazorSharp.Native;
@@ -197,9 +198,7 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
-		
-		
-		
+
 		public IEnumerator<T> GetEnumerator(int elemCount)
 		{
 			for (int i = 0; i < elemCount; i++) {
@@ -319,11 +318,10 @@ namespace RazorSharp.Pointers
 
 		private string DbgToString()
 		{
-			return String.Format("Address = {0} | Value = {1}", ToString(FMT_P),Reference.ToString());
+			return String.Format("Address = {0} | Value = {1}", ToString(FMT_P), Reference.ToString());
 		}
 
-		
-		
+
 		public Span<T> AsSpan(int length)
 		{
 			return new Span<T>(ToPointer(), length);
@@ -559,7 +557,6 @@ namespace RazorSharp.Pointers
 		}
 
 
-		
 		[Pure]
 		public TType ReadAny<TType>(int elemOffset = 0)
 		{
@@ -652,7 +649,7 @@ namespace RazorSharp.Pointers
 		{
 			Mem.Zero(m_value, elemCnt * ElementSize);
 		}
-		
+
 		public void ZeroBytes(int byteCnt)
 		{
 			Mem.Zero(m_value, byteCnt);
@@ -942,12 +939,12 @@ namespace RazorSharp.Pointers
 		{
 			return left.ToInt64() >= right.ToInt64();
 		}
-		
+
 		public static bool operator <=(Pointer<T> left, Pointer<T> right)
 		{
 			return left.ToInt64() <= right.ToInt64();
 		}
-		
+
 		/// <summary>
 		///     Checks if <paramref name="left" /> <see cref="Address" /> is higher than <paramref name="right" />'s.
 		/// </summary>
@@ -1073,10 +1070,10 @@ namespace RazorSharp.Pointers
 		[Pure]
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
-			if (String.IsNullOrEmpty(format)) 
+			if (String.IsNullOrEmpty(format))
 				format = DefaultFormat;
 
-			if (formatProvider == null) 
+			if (formatProvider == null)
 				formatProvider = CultureInfo.CurrentCulture;
 
 
@@ -1094,8 +1091,15 @@ namespace RazorSharp.Pointers
 
 				case FMT_B:
 					string thisStr = ToStringSafe();
-					return String.Format("{0} @ {1}: {2}", typeof(T) == typeof(char) ? "Char*" : typeof(T).Name,
-					                     Hex.ToHex(Address), thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
+
+					string typeName = typeof(T).ContainsAnyGenericParameters()
+						? Formatting.GenericName(typeof(T))
+						: typeof(T).Name;
+
+					string typeNameDisplay = typeof(T) == typeof(char) ? "Char*" : typeName;
+
+					return String.Format("{0} @ {1}: {2}", typeNameDisplay, Hex.ToHex(Address),
+					                     thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
 				default:
 					goto case FMT_O;
 			}
@@ -1120,7 +1124,7 @@ namespace RazorSharp.Pointers
 
 
 			if (!typeof(T).IsValueType) {
-				var    heapPtr = ReadAny<Pointer<byte>>();
+				var    heapPtr = ReadPointer<byte>();
 				string valueStr;
 
 				if (heapPtr.IsNull) {

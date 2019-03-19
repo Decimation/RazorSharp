@@ -89,7 +89,44 @@ namespace Test
 			public char Char;
 		}
 
+		static void freecpy<T>(Pointer<T> value) where T : class
+		{
+			var size = Unsafe.HeapSize(value.Reference) + IntPtr.Size;
+			value.ZeroBytes(size);
+			//value.Subtract(IntPtr.Size);
+			Mem.Free(value);
+		}
 
+		static Pointer<T> memcpy<T>(T value) where T : class
+		{
+			var memory   = Unsafe.MemoryOf(value);
+			int fullSize = memory.Length + IntPtr.Size;
+			var ptr      = Mem.AllocUnmanaged<byte>(fullSize);
+
+			// Write address of actual memory
+			ptr.WriteAny(ptr.Address + (IntPtr.Size * 2));
+
+			// Move forward
+			ptr.Add(IntPtr.Size);
+
+			// Write copied memory
+			ptr.WriteAll(memory);
+
+			// Move back
+			ptr.Subtract(IntPtr.Size);
+
+			return ptr.Reinterpret<T>();
+		}
+
+
+		private static object Proxy(long l)
+		{
+			return MemConvert.ProxyCast<long, object>(l);
+		}
+
+		private delegate void* Alloc(GCHeap* __this, uint size, uint flags);
+		private delegate void* AllocateObject(MethodTable* mt, int boolValue);
+		
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -97,38 +134,55 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
-			var    s   = new Struct();
-			string str = "foo";
-			s._string = CSUnsafe.As<string, IntPtr>(ref str);
-			var value = CSUnsafe.As<IntPtr, object>(ref s._object);
 
-			Class c = (object) str as Class;
-			Console.WriteLine(c);
+			var list = new List<int>
+			{
+				1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+			};
 
-			Pointer<string> rgString = AllocHelper.Alloc<string>(10);
-			Console.WriteLine(AllocHelper.GetSize(rgString));
-			Console.WriteLine(AllocHelper.GetLength(rgString));
+			var ptr = memcpy(list);
+			Console.WriteLine(ptr);
+			freecpy(ptr);
+			var cpy=ptr.Value;
 
-			AllocHelper.Free(rgString);
-
-			Pointer<int> bptr   = Mem.AllocUnmanaged<byte>(sizeof(int));
-			var          valuei = bptr.Read();
-			Console.WriteLine(bptr.Reinterpret<byte>().ToTable(4));
-
-			AllocPointer<int> p = AllocHelper.Alloc<int>(5);
-			Console.WriteLine(p.Offset);
-			p.Pointer.WriteAll(1, 2, 3, 4, 5);
-			for (int i = 0; i < p.Length; i++) {
-				AllocHelper.Info(p.Pointer);
-				p++;
-			}
-			p.Clear();
-
+			var textSeg = Segments.GetSegment(".text", Clr.CLR_DLL_SHORT);
+			Console.WriteLine(textSeg);
+			Pointer<byte> segAddr = textSeg.SectionAddress;
 			
+			// .text:0000000180001000
+			// .text:000000018058E880
 
-			foreach (int x in p) {
-				Console.WriteLine(x);
-			}
+			var fnOffset = 0x000000018058E880 - 0x0000000180001000;
+			Console.WriteLine("offset {0}", fnOffset);
+
+			var fnAddr = segAddr + fnOffset;
+			Console.WriteLine("fn addr {0}", fnAddr);
+
+//			var allocFn = Marshal.GetDelegateForFunctionPointer<Alloc>(fnAddr.Address);
+//			var ptrAlloc = allocFn(GCHeap.GlobalHeap.ToPointer<GCHeap>(), 10, 0);
+//			Console.WriteLine(Hex.ToHex(ptrAlloc));
+
+			var allocObj    = ClrFunctions.GetClrFunctionAddress<AllocateObject>("AllocateObject");
+			var objValuePtr = allocObj(typeof(List<int>).GetMethodTable().ToPointer<MethodTable>(), 0);
+			Console.WriteLine(Hex.ToHex(objValuePtr));
+			var listNative = CSUnsafe.Read<List<int>>(&objValuePtr);
+			Console.WriteLine(listNative);
+			
+			GC.Collect();
+
+			var sz = GCHeap.AllocateObject<string>(0);
+			
+			
+			//var fn = ClrFunctions.GetClrFunctionAddressSig<Alloc>(
+			//	"56 57 41 41 56 41 57 48 83 EC 30 48 C7 44 24 20 FE FF FF FF 48 89 5C 24 60 48 89 6C 24 70 45 8B E0 4C 8B F2 E9 00 01 00 00");
+			//var ptrAlloc=fn(GCHeap.GlobalHeap.ToPointer<GCHeap>(),0,0);
+			
+			
+			
+			const string str = "foo";
+			var sptr = memcpy(str);
+			Console.WriteLine(sptr);
+			freecpy(sptr);
 
 
 //			MemoryMarshal

@@ -92,8 +92,8 @@ namespace RazorSharp.Memory.Calling.Symbols
 			Conditions.Requires(addresses.Length == methods.Length);
 
 			for (int i = 0; i < methods.Length; i++) {
-//				Global.Log.Debug("Binding {Name} to {Addr}", methods[i].Name,
-//				                 addresses[i].ToString("P"));
+				Global.Log.Debug("Binding {Name} to {Addr}", methods[i].Name,
+				                 addresses[i].ToString("P"));
 				var addr = addresses[i].Address;
 				ClrFunctions.SetStableEntryPoint(methods[i], addr);
 			}

@@ -1,6 +1,9 @@
 #region
 
 using System;
+using System.Collections.Generic;
+using RazorCommon.Strings;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
@@ -74,10 +77,13 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		public int GCCount {
-			[ClrSymcall(Symbol = "WKS::GCHeap::GetGcCount", FullyQualified = true)]
+//			[ClrSymcall(Symbol = "WKS::GCHeap::GetGcCount", FullyQualified = true)]
 			get => throw new SigcallException();
+//			get => -1;
 		}
 
+		
+		
 		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
 		{
 			return IsHeapPointer(Unsafe.AddressOfHeap(ref t).ToPointer(), smallHeapOnly);
@@ -100,14 +106,36 @@ namespace RazorSharp.CoreClr.Structures
 		/// <param name="obj">Pointer to an object in the GC heap</param>
 		/// <param name="smallHeapOnly">Whether to include small GC heaps only</param>
 		/// <returns><c>true</c> if <paramref name="obj" /> is a heap pointer; <c>false</c> otherwise</returns>
-		[ClrSymcall(Symbol = "WKS::GCHeap::IsHeapPointer", FullyQualified = true)]
+//		[ClrSymcall(Symbol = "GCHeap::IsHeapPointer", FullyQualified = true)]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
 			throw new SigcallException();
 		}
 
+		[ClrSymcall(Symbol = "AllocateObject", FullyQualified = true)]
+		internal static void* AllocateObject(MethodTable* mt, int boolValue)
+		{
+			return null;
+		}
+		
+		public static object AllocateObject(Type type, int boolValue)
+		{
+			
+			var objValuePtr = AllocateObject(type.GetMethodTable().ToPointer<MethodTable>(), boolValue);
+			
+			//var listNative = CSUnsafe.Read<List<int>>(&objValuePtr);
+			//Console.WriteLine(listNative);
+			return Mem.Read<object>(&objValuePtr);
+		}
+		
+		public static T AllocateObject<T>(int boolValue)
+		{
+			var objValuePtr = AllocateObject(typeof(T).GetMethodTable().ToPointer<MethodTable>(), boolValue);
+			return Mem.Read<T>(&objValuePtr);
+		}
+
 		// 85
-		[ClrSymcall(Symbol = "WKS::GCHeap::IsGCInProgress", FullyQualified = true)]
+//		[ClrSymcall(Symbol = "WKS::GCHeap::IsGCInProgress", FullyQualified = true)]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
 		{
 			throw new SigcallException();
@@ -119,7 +147,7 @@ namespace RazorSharp.CoreClr.Structures
 			Conditions.RequiresWorkstationGC();
 #endif
 			
-			Symcall.BindQuick(typeof(GCHeap));
+//			Symcall.BindQuick(typeof(GCHeap));
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 

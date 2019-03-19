@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Signatures;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
@@ -123,7 +124,12 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		internal static TDelegate GetClrFunctionAddress<TDelegate>(string name)
+		internal static TDelegate GetClrFunctionAddressSig<TDelegate>(string hex) where TDelegate : Delegate
+		{
+			return SigScanner.QuickScanDelegate<TDelegate>(Clr.CLR_DLL_SHORT,hex);
+		}
+
+		internal static TDelegate GetClrFunctionAddress<TDelegate>(string name) where TDelegate : Delegate
 		{
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(GetClrFunctionAddress(name).Address);
 		}
