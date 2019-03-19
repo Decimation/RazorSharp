@@ -3,7 +3,7 @@
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using System;
-
+using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 #endregion
 
 namespace RazorSharp
@@ -19,7 +19,8 @@ namespace RazorSharp
 		public enum ConversionType
 		{
 			LOW_LEVEL,
-			LIGHT
+			LIGHT,
+			AS
 		}
 
 		public static unsafe TTo[] ConvertArray<TTo>(byte[] mem)
@@ -37,6 +38,10 @@ namespace RazorSharp
 					return ProxyCast<TFrom, TTo>(t);
 				case ConversionType.LIGHT:
 					return (TTo) System.Convert.ChangeType(t, typeof(TTo));
+				case ConversionType.AS:
+					//return CSUnsafe.As<TFrom, TTo>(ref t);
+				default:
+					return default;
 			}
 
 			return default;

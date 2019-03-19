@@ -27,7 +27,9 @@ using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
@@ -68,9 +70,26 @@ namespace Test
 
 		interface IClass
 		{
+			[ClrSymcall(Symbol = "Object::GetSize", FullyQualified = true)]
 			int Size();
 		}
-		
+
+		[StructLayout(LayoutKind.Explicit)]
+		struct Struct
+		{
+			[FieldOffset(0)]
+			public IntPtr _object;
+
+			[FieldOffset(0)]
+			public IntPtr _string;
+		}
+
+		public class Class
+		{
+			public char Char;
+		}
+
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -78,11 +97,40 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
+			var    s   = new Struct();
+			string str = "foo";
+			s._string = CSUnsafe.As<string, IntPtr>(ref str);
+			var value = CSUnsafe.As<IntPtr, object>(ref s._object);
+
+			Class c = (object) str as Class;
+			Console.WriteLine(c);
+
+			Pointer<string> rgString = AllocPool.Alloc<string>(10);
+			Console.WriteLine(AllocPool.GetSize(rgString));
+			Console.WriteLine(AllocPool.GetLength(rgString));
+			
+			AllocPool.Free(rgString);
+
+			Pointer<int> bptr = Mem.AllocUnmanaged<byte>(sizeof(int));
+			var valuei = bptr.Read();
+			Console.WriteLine(bptr.Reinterpret<byte>().ToTable(4));
+
+			AllocPointer<int> p = AllocPool.Alloc<int>(5);
+			Console.WriteLine(p.Offset);
+			p.Pointer.WriteAll(1,2,3,4,5);
+			Console.WriteLine(p);
+			p.Clear();
+			
+			
+			
 			
 
+			
+			
+			
 
 			// todo: italics for extension methods?
-			
+
 			int          i    = Int32.MaxValue;
 			Pointer<int> ptr2 = &i;
 			Console.WriteLine(ptr2.Query());
@@ -90,13 +138,20 @@ namespace Test
 			const int    cb  = 4;
 			Pointer<int> ptr = stackalloc int[cb];
 			Console.WriteLine(ptr.Query());
-			
-			var zero = Unsafe.AddressOf(ref i).Address;
+
+			var             zero = Unsafe.AddressOf(ref i).Address;
 			Pointer<IntPtr> ptrx = &zero;
 			Console.WriteLine(ptrx.ReadPointer<int>());
-			
 
-			
+
+//			MemoryMarshal
+//			Marshal
+//			BitConverter
+//			Convert
+//			Span
+//			Memory
+//			Buffer
+//			etc
 
 			// SHUT IT DOWN
 			Clr.Close();
@@ -110,8 +165,7 @@ namespace Test
 			var table  = new ConsoleTable("Name", "Type", "Offset", "Size");
 			var fields = type.Fields.OrderBy(x => x.Offset).ToList();
 
-			
-			
+
 			foreach (var field in fields) {
 				table.AddRow(field.Name, field.FieldType.Name, field.Offset, field.Size);
 			}

@@ -197,6 +197,16 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+		
+		
+		
+		public IEnumerator<T> GetEnumerator(int elemCount)
+		{
+			for (int i = 0; i < elemCount; i++) {
+				yield return this[i];
+			}
+		}
+
 		public IEnumerable<T> Where(int elemCount, Func<T, bool> predicate)
 		{
 			return CopyOut(elemCount).Where(predicate);
@@ -581,7 +591,7 @@ namespace RazorSharp.Pointers
 		{
 			var rg = new T[elemCnt];
 			for (int i = startIndex; i < elemCnt + startIndex; i++)
-				rg[i - startIndex] = Read(i);
+				rg[i - startIndex] = this[i];
 
 			return rg;
 		}
@@ -638,7 +648,12 @@ namespace RazorSharp.Pointers
 			return Offset(index);
 		}
 
-		public void Zero(int byteCnt)
+		public void Zero(int elemCnt)
+		{
+			Mem.Zero(m_value, elemCnt * ElementSize);
+		}
+		
+		public void ZeroBytes(int byteCnt)
 		{
 			Mem.Zero(m_value, byteCnt);
 		}
@@ -1048,9 +1063,11 @@ namespace RazorSharp.Pointers
 		[Pure]
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
-			if (String.IsNullOrEmpty(format)) format = DefaultFormat;
+			if (String.IsNullOrEmpty(format)) 
+				format = DefaultFormat;
 
-			if (formatProvider == null) formatProvider = CultureInfo.CurrentCulture;
+			if (formatProvider == null) 
+				formatProvider = CultureInfo.CurrentCulture;
 
 
 			switch (format.ToUpperInvariant()) {

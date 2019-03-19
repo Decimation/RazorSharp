@@ -294,6 +294,7 @@
     <Compile Include="Native\Structures\Images\ImageSectionInfo.cs" />
     <Compile Include="Native\Structures\MemoryBasicInformation.cs" />
     <Compile Include="Native\Structures\SystemInfo.cs" />
+    <Compile Include="Pointers\AllocPointer.cs" />
     <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
     <Compile Include="Pointers\PointerUtils.cs" />

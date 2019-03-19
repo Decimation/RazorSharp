@@ -202,7 +202,7 @@ namespace RazorSharp.Memory
 
 		public static void Free<T>(Pointer<T> p, int length)
 		{
-			p.Zero(length);
+			p.ZeroBytes(length);
 			Free(p);
 		}
 
@@ -226,7 +226,7 @@ namespace RazorSharp.Memory
 		public static void FreeString(Pointer<byte> ptr)
 		{
 			int size = ptr.ReadUntil(x => x == 0x00) + 1;
-			ptr.Zero(size);
+			ptr.ZeroBytes(size);
 			Free(ptr);
 		}
 
@@ -443,7 +443,8 @@ namespace RazorSharp.Memory
 
 		public static void Copy<T>(Pointer<T> dest, int startOfs, Pointer<T> src, int elemCnt)
 		{
-			for (int i = startOfs; i < elemCnt + startOfs; i++) dest[i - startOfs] = src[i];
+			for (int i = startOfs; i < elemCnt + startOfs; i++) 
+				dest[i - startOfs] = src[i];
 		}
 
 		public static void Copy<T>(Pointer<T> dest, Pointer<T> src, int elemCnt)
