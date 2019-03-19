@@ -105,43 +105,21 @@ namespace Test
 			Class c = (object) str as Class;
 			Console.WriteLine(c);
 
-			Pointer<string> rgString = AllocPool.Alloc<string>(10);
-			Console.WriteLine(AllocPool.GetSize(rgString));
-			Console.WriteLine(AllocPool.GetLength(rgString));
-			
-			AllocPool.Free(rgString);
+			Pointer<string> rgString = AllocHelper.Alloc<string>(10);
+			Console.WriteLine(AllocHelper.GetSize(rgString));
+			Console.WriteLine(AllocHelper.GetLength(rgString));
 
-			Pointer<int> bptr = Mem.AllocUnmanaged<byte>(sizeof(int));
-			var valuei = bptr.Read();
+			AllocHelper.Free(rgString);
+
+			Pointer<int> bptr   = Mem.AllocUnmanaged<byte>(sizeof(int));
+			var          valuei = bptr.Read();
 			Console.WriteLine(bptr.Reinterpret<byte>().ToTable(4));
 
-			AllocPointer<int> p = AllocPool.Alloc<int>(5);
+			AllocPointer<int> p = AllocHelper.Alloc<int>(5);
 			Console.WriteLine(p.Offset);
-			p.Pointer.WriteAll(1,2,3,4,5);
+			p.Pointer.WriteAll(1, 2, 3, 4, 5);
 			Console.WriteLine(p);
 			p.Clear();
-			
-			
-			
-			
-
-			
-			
-			
-
-			// todo: italics for extension methods?
-
-			int          i    = Int32.MaxValue;
-			Pointer<int> ptr2 = &i;
-			Console.WriteLine(ptr2.Query());
-
-			const int    cb  = 4;
-			Pointer<int> ptr = stackalloc int[cb];
-			Console.WriteLine(ptr.Query());
-
-			var             zero = Unsafe.AddressOf(ref i).Address;
-			Pointer<IntPtr> ptrx = &zero;
-			Console.WriteLine(ptrx.ReadPointer<int>());
 
 
 //			MemoryMarshal

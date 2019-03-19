@@ -18,65 +18,65 @@ namespace Test.Testing.Tests
 	{
 		public void AltTest()
 		{
-			Pointer<string> alloc = AllocPool.Alloc<string>(10);
+			Pointer<string> alloc = AllocHelper.Alloc<string>(10);
 			alloc.WriteAll("foo", "bar");
 			Console.WriteLine(alloc.ToTable(10).ToMarkDownString());
-			alloc.Init(AllocPool.GetLength(alloc));
+			alloc.Init(AllocHelper.GetLength(alloc));
 			GC.Collect();
 			Console.WriteLine(alloc.ToTable(10).ToMarkDownString());
-			AllocPool.Free(alloc);
+			AllocHelper.Free(alloc);
 			GC.Collect();
 
 			Array rg = new long[1];
 			rg.SetValue(Mem.ReinterpretCast<string, long>("foo"), 0);
 
-			Pointer<int> iAlloc = AllocPool.Alloc<int>(10);
-			iAlloc.Set(0xFF, AllocPool.GetLength(iAlloc));
+			Pointer<int> iAlloc = AllocHelper.Alloc<int>(10);
+			iAlloc.Set(0xFF, AllocHelper.GetLength(iAlloc));
 			Console.WriteLine(iAlloc.ToTable(10).ToMarkDownString());
 			iAlloc.Set(int.MaxValue, 1, 9);
 			Console.WriteLine(iAlloc.ToTable(10).ToMarkDownString());
-			AllocPool.Free(iAlloc);
+			AllocHelper.Free(iAlloc);
 
-			Pointer<uint> sPtr = AllocPool.Alloc<uint>(2);
+			Pointer<uint> sPtr = AllocHelper.Alloc<uint>(2);
 			sPtr.WriteAny("foo");
 			Console.WriteLine(sPtr.ToTable(2).ToMarkDownString());
 			Console.WriteLine(sPtr.ReadAny<string>());
 			Console.WriteLine(sPtr.Reinterpret<string>().CopyOut(1).Join());
-			AllocPool.Free(sPtr);
+			AllocHelper.Free(sPtr);
 
 
-			Pointer<int> integers = AllocPool.Alloc<int>(10);
+			Pointer<int> integers = AllocHelper.Alloc<int>(10);
 			Console.WriteLine(integers.ToTable(10).ToMarkDownString());
 			integers.Set(0xFF, 10);
 			Console.WriteLine(integers.ToTable(10).ToMarkDownString());
 			integers.Set(int.MaxValue, 1, 9);
 			Console.WriteLine(integers.ToTable(10).ToMarkDownString());
 			Console.WriteLine(integers.Where(10, x => x > 1).ToArray().Join());
-			AllocPool.Free(integers);
+			AllocHelper.Free(integers);
 		}
 
 		[Test]
 		public void Test()
 		{
 			const int    alloc = 3;
-			Pointer<int> ptr   = AllocPool.Alloc<int>(alloc);
+			Pointer<int> ptr   = AllocHelper.Alloc<int>(alloc);
 
 			for (int i = 0; i < alloc; i++) {
-				Debug.Assert(AllocPool.IsAllocated(ptr));
-				Debug.Assert(AllocPool.GetLength(ptr) == alloc);
-				Debug.Assert(AllocPool.GetSize(ptr) == alloc * sizeof(int));
-				Debug.Assert(AllocPool.GetOffset(ptr) == i);
+				Debug.Assert(AllocHelper.IsAllocated(ptr));
+				Debug.Assert(AllocHelper.GetLength(ptr) == alloc);
+				Debug.Assert(AllocHelper.GetSize(ptr) == alloc * sizeof(int));
+				Debug.Assert(AllocHelper.GetOffset(ptr) == i);
 				ptr++;
 			}
 
 			--ptr;
-			ptr = AllocPool.ReAlloc(ptr, AllocPool.GetLength(ptr) * 2);
-			Debug.Assert(AllocPool.GetOffset(ptr) == 0);
-			Debug.Assert(AllocPool.GetLength(ptr) == 6);
-			Debug.Assert(AllocPool.GetSize(ptr) == AllocPool.GetLength(ptr) * Unsafe.SizeOf<int>());
-			Debug.Assert(AllocPool.IsAllocated(ptr));
-			AllocPool.Free(ptr);
-			Debug.Assert(!AllocPool.IsAllocated(ptr));
+			ptr = AllocHelper.ReAlloc(ptr, AllocHelper.GetLength(ptr) * 2);
+			Debug.Assert(AllocHelper.GetOffset(ptr) == 0);
+			Debug.Assert(AllocHelper.GetLength(ptr) == 6);
+			Debug.Assert(AllocHelper.GetSize(ptr) == AllocHelper.GetLength(ptr) * Unsafe.SizeOf<int>());
+			Debug.Assert(AllocHelper.IsAllocated(ptr));
+			AllocHelper.Free(ptr);
+			Debug.Assert(!AllocHelper.IsAllocated(ptr));
 		}
 
 		[Test]
@@ -86,24 +86,24 @@ namespace Test.Testing.Tests
 			const int LENGTH   = 10;
 			const int SIZE     = INT_SIZE * LENGTH;
 
-			Pointer<int> ptr = AllocPool.Alloc<int>(LENGTH);
+			Pointer<int> ptr = AllocHelper.Alloc<int>(LENGTH);
 
-			for (int i = 0; i < AllocPool.GetLength(ptr); i++) {
+			for (int i = 0; i < AllocHelper.GetLength(ptr); i++) {
 //				AllocPool.Info(ptr);
 //				Console.WriteLine(ptr.Query());
 //				Thread.Sleep(1000);
 //				Console.Clear();
 
-				Debug.Assert(AllocPool.GetLength(ptr) == LENGTH);
-				Debug.Assert(AllocPool.GetSize(ptr) == SIZE);
-				Debug.Assert(AllocPool.IsAllocated(ptr));
-				Debug.Assert(AllocPool.GetOffset(ptr) == i);
+				Debug.Assert(AllocHelper.GetLength(ptr) == LENGTH);
+				Debug.Assert(AllocHelper.GetSize(ptr) == SIZE);
+				Debug.Assert(AllocHelper.IsAllocated(ptr));
+				Debug.Assert(AllocHelper.GetOffset(ptr) == i);
 
 
-				if (AllocPool.GetOffset(ptr) + 1 < AllocPool.GetLength(ptr)) ptr++;
+				if (AllocHelper.GetOffset(ptr) + 1 < AllocHelper.GetLength(ptr)) ptr++;
 			}
 
-			AllocPool.Free(ptr);
+			AllocHelper.Free(ptr);
 		}
 	}
 }

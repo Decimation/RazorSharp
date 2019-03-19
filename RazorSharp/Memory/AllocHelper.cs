@@ -16,7 +16,7 @@ namespace RazorSharp.Memory
 	// todo: WIP
 
 	/// <summary>
-	///     <see cref="AllocPool" /> keeps track of allocated <see cref="Pointer{T}" />s.
+	///     <see cref="AllocHelper" /> keeps track of allocated <see cref="Pointer{T}" />s.
 	///     <para>Operations in this class work even if the pointer is offset from the original allocated address.</para>
 	///     <example>
 	///         <para>
@@ -27,14 +27,14 @@ namespace RazorSharp.Memory
 	///         </para>
 	///     </example>
 	/// </summary>
-	public static class AllocPool
+	public static class AllocHelper
 	{
 		/// <summary>
 		///     List of <see cref="Range" />s
 		/// </summary>
 		private static readonly IList<Range> Pool;
 
-		static AllocPool()
+		static AllocHelper()
 		{
 			Pool = new List<Range>();
 		}
@@ -43,7 +43,7 @@ namespace RazorSharp.Memory
 		{
 			var rg = new Range(Mem.AllocUnmanaged<T>(elemCnt).Address, elemCnt * SizeOf<T>());
 			Pool.Add(rg);
-			return rg.LowAddr;
+			return rg.LowAddress;
 		}
 
 		public static Pointer<T> ReAlloc<T>(Pointer<T> ptr, int elemCnt = 1)
@@ -54,7 +54,7 @@ namespace RazorSharp.Memory
 			Pool.RemoveAt(index);
 			var rg = new Range(Mem.ReAllocUnmanaged<byte>(orig.Address, elemCnt).Address, elemCnt * SizeOf<T>());
 			Pool.Add(rg);
-			return rg.LowAddr;
+			return rg.LowAddress;
 		}
 
 		public static void Free<T>(Pointer<T> ptr)
@@ -62,7 +62,7 @@ namespace RazorSharp.Memory
 			Trace.Assert(IsAllocated(ptr));
 
 			var rg     = GetRange(ptr.Address);
-			var origin = rg.LowAddr;
+			var origin = rg.LowAddress;
 
 			Mem.Zero(origin, rg.Size);
 			Mem.Free((Pointer<byte>) origin);
@@ -91,7 +91,8 @@ namespace RazorSharp.Memory
 		private static Range GetRange(IntPtr p)
 		{
 			int index = IndexOf(p);
-			if (index != -1) return Pool[index];
+			if (index != -1) 
+				return Pool[index];
 
 			throw new Exception($"Pointer {Hex.ToHex(p)} is either out of bounds, not allocated, or not in pool");
 		}
@@ -108,12 +109,12 @@ namespace RazorSharp.Memory
 
 		public static Pointer<T> GetOrigin<T>(Pointer<T> ptr)
 		{
-			return GetRange(ptr.Address).LowAddr;
+			return GetRange(ptr.Address).LowAddress;
 		}
 
 		public static Pointer<T> GetLimit<T>(Pointer<T> ptr)
 		{
-			return GetRange(ptr.Address).HighAddr;
+			return GetRange(ptr.Address).HighAddress;
 		}
 
 
@@ -139,21 +140,21 @@ namespace RazorSharp.Memory
 		/// </summary>
 		private struct Range
 		{
-			internal IntPtr HighAddr => LowAddr + Size;
+			internal IntPtr HighAddress => LowAddress + Size;
 
-			internal IntPtr LowAddr { get; }
+			internal IntPtr LowAddress { get; }
 
 			internal int Size { get; }
 
-			internal Range(IntPtr pLoAddr, int cb)
+			internal Range(IntPtr pLoAddress, int cb)
 			{
-				LowAddr = pLoAddr;
+				LowAddress = pLoAddress;
 				Size    = cb;
 			}
 
 			internal bool IsAddrInRange(IntPtr p)
 			{
-				return Mem.IsAddressInRange(HighAddr, p, LowAddr);
+				return Mem.IsAddressInRange(HighAddress, p, LowAddress);
 			}
 		}
 	}

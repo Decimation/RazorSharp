@@ -9,12 +9,12 @@ namespace RazorSharp.Pointers
 		private Pointer<T> m_ptr;
 
 		public int Length {
-			get { return AllocPool.GetLength(m_ptr); }
-			set { this = AllocPool.ReAlloc(m_ptr, value); }
+			get { return AllocHelper.GetLength(m_ptr); }
+			set { this = AllocHelper.ReAlloc(m_ptr, value); }
 		}
 
-		public int  Size        => AllocPool.GetSize(m_ptr);
-		public bool IsAllocated => AllocPool.IsAllocated(m_ptr);
+		public int  Size        => AllocHelper.GetSize(m_ptr);
+		public bool IsAllocated => AllocHelper.IsAllocated(m_ptr);
 
 		public Pointer<T> Pointer {
 			get { return m_ptr; }
@@ -22,15 +22,15 @@ namespace RazorSharp.Pointers
 		}
 
 		public AllocPointer<T> Limit {
-			get { return AllocPool.GetLimit(m_ptr); }
+			get { return AllocHelper.GetLimit(m_ptr); }
 		}
 
 		public AllocPointer<T> Origin {
-			get { return AllocPool.GetOrigin(m_ptr); }
+			get { return AllocHelper.GetOrigin(m_ptr); }
 		}
 
 		public int Offset {
-			get { return AllocPool.GetOffset(m_ptr); }
+			get { return AllocHelper.GetOffset(m_ptr); }
 		}
 
 
@@ -38,13 +38,13 @@ namespace RazorSharp.Pointers
 		{
 			m_ptr.Zero(Length);
 		}
-		
+
 		public void Free()
 		{
 //			Clear();
-			AllocPool.Free(m_ptr);
+			AllocHelper.Free(m_ptr);
 		}
-		
+
 		public AllocPointer(Pointer<T> ptr)
 		{
 			m_ptr = ptr;
@@ -73,7 +73,6 @@ namespace RazorSharp.Pointers
 
 		public override string ToString()
 		{
-
 			return Pointer.ToTable(Length).ToMarkDownString();
 		}
 	}
