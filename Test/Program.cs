@@ -124,6 +124,12 @@ namespace Test
 			}
 			p.Clear();
 
+			
+
+			foreach (int x in p) {
+				Console.WriteLine(x);
+			}
+
 
 //			MemoryMarshal
 //			Marshal

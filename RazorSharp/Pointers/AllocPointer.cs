@@ -49,14 +49,14 @@ namespace RazorSharp.Pointers
 
 		public static AllocPointer<T> operator ++(AllocPointer<T> ptr)
 		{
+			throw new NotImplementedException();
 			if (ptr.m_ptr + 1 >= ptr.Limit.m_ptr) {
 				return ptr;
 			}
-			else {
-				ptr.m_ptr++;
-				return ptr;
-			}
-			
+
+			ptr.m_ptr++;
+			return ptr;
+
 		}
 
 
