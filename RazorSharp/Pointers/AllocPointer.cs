@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using RazorSharp.Memory;
 
 namespace RazorSharp.Pointers
 {
+	// todo: WIP
 	public struct AllocPointer<T> : IEnumerable<T>
 	{
 		private Pointer<T> m_ptr;
@@ -15,6 +17,18 @@ namespace RazorSharp.Pointers
 
 		public int  Size        => AllocHelper.GetSize(m_ptr);
 		public bool IsAllocated => AllocHelper.IsAllocated(m_ptr);
+
+		public ref T this[int index] {
+			get {
+				var cpy = m_ptr + index;
+				
+				if (!Mem.IsAddressInRange(Limit.m_ptr.Address, cpy.Address, Origin.m_ptr.Address)) {
+					throw new IndexOutOfRangeException();
+				}
+
+				return ref m_ptr[index];
+			}
+		}
 
 		public Pointer<T> Pointer {
 			get { return m_ptr; }
@@ -33,16 +47,29 @@ namespace RazorSharp.Pointers
 			get { return AllocHelper.GetOffset(m_ptr); }
 		}
 
+		public static AllocPointer<T> operator ++(AllocPointer<T> ptr)
+		{
+			if (ptr.m_ptr + 1 >= ptr.Limit.m_ptr) {
+				return ptr;
+			}
+			else {
+				ptr.m_ptr++;
+				return ptr;
+			}
+			
+		}
+
 
 		public void Clear()
 		{
-			m_ptr.Zero(Length);
+			Origin.m_ptr.Zero(Length);
 		}
 
 		public void Free()
 		{
 //			Clear();
 			AllocHelper.Free(m_ptr);
+			m_ptr = null;
 		}
 
 		public AllocPointer(Pointer<T> ptr)

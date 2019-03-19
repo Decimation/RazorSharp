@@ -938,6 +938,16 @@ namespace RazorSharp.Pointers
 			return p;
 		}
 
+		public static bool operator >=(Pointer<T> left, Pointer<T> right)
+		{
+			return left.ToInt64() >= right.ToInt64();
+		}
+		
+		public static bool operator <=(Pointer<T> left, Pointer<T> right)
+		{
+			return left.ToInt64() <= right.ToInt64();
+		}
+		
 		/// <summary>
 		///     Checks if <paramref name="left" /> <see cref="Address" /> is higher than <paramref name="right" />'s.
 		/// </summary>

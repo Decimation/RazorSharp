@@ -226,6 +226,7 @@
     <Compile Include="Testing\Tests\OldTests\StackAllocateTests.cs" />
     <Compile Include="Testing\Tests\OldTests\StructureTests.cs" />
     <Compile Include="Testing\Tests\OldTests\UnsafeTests.cs" />
+    <Compile Include="Testing\Tests\NewPointerTests.cs" />
     <Compile Include="Testing\Types\Dummy.cs" />
     <Compile Include="Testing\Types\GenericDummy.cs" />
     <Compile Include="Testing\Types\Point.cs" />

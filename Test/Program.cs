@@ -118,7 +118,10 @@ namespace Test
 			AllocPointer<int> p = AllocHelper.Alloc<int>(5);
 			Console.WriteLine(p.Offset);
 			p.Pointer.WriteAll(1, 2, 3, 4, 5);
-			Console.WriteLine(p);
+			for (int i = 0; i < p.Length; i++) {
+				AllocHelper.Info(p.Pointer);
+				p++;
+			}
 			p.Clear();
 
 

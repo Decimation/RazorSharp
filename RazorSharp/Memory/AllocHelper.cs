@@ -117,6 +117,7 @@ namespace RazorSharp.Memory
 			return GetRange(ptr.Address).HighAddress;
 		}
 
+		
 
 		public static void Info<T>(Pointer<T> ptr)
 		{
