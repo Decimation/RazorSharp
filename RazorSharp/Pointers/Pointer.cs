@@ -334,6 +334,9 @@ namespace RazorSharp.Pointers
 			return ReadAny<Pointer<TType>>(elemOffset);
 		}
 
+		/// <summary>
+		/// Writes a native string type
+		/// </summary>
 		public void WriteString(string s, StringTypes type)
 		{
 			byte[] bytes;
@@ -426,6 +429,9 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+		/// <summary>
+		/// Reads a native string type
+		/// </summary>
 		[Pure]
 		public string ReadString(StringTypes s)
 		{
@@ -439,6 +445,12 @@ namespace RazorSharp.Pointers
 			}
 		}
 
+		public string ReadString(int len)
+		{
+			var chars = CopyOutAny<char>(len);
+			return new string(chars);
+		}
+		
 
 		public void Write(T t, int elemOffset = 0)
 		{
@@ -608,6 +620,16 @@ namespace RazorSharp.Pointers
 			return CopyOut(0, elemCnt);
 		}
 
+		public TType[] CopyOutAny<TType>(int startIndex, int elemCnt)
+		{
+			return Reinterpret<TType>().CopyOut(startIndex, elemCnt);
+		}
+		
+		public TType[] CopyOutAny<TType>(int elemCnt)
+		{
+			return Reinterpret<TType>().CopyOut(elemCnt);
+		}
+
 		// todo: verify this works
 		[Pure]
 		public T[] SafeCopyOut(int elemCnt)
@@ -624,13 +646,13 @@ namespace RazorSharp.Pointers
 		[Pure]
 		public byte[] CopyOutBytes(int elemCnt)
 		{
-			return Reinterpret<byte>().CopyOut(elemCnt);
+			return CopyOutAny<byte>(elemCnt);
 		}
 
 		[Pure]
 		public byte[] CopyOutBytes(int startIndex, int elemCnt)
 		{
-			return Reinterpret<byte>().CopyOut(startIndex, elemCnt);
+			return CopyOutAny<byte>(startIndex, elemCnt);
 		}
 
 		#endregion

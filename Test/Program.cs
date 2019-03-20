@@ -119,14 +119,8 @@ namespace Test
 		}
 
 
-		private static object Proxy(long l)
-		{
-			return MemConvert.ProxyCast<long, object>(l);
-		}
-
-		private delegate void* Alloc(GCHeap* __this, uint size, uint flags);
-		private delegate void* AllocateObject(MethodTable* mt, int boolValue);
 		
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -143,47 +137,10 @@ namespace Test
 			var ptr = memcpy(list);
 			Console.WriteLine(ptr);
 			freecpy(ptr);
-			var cpy=ptr.Value;
+			var cpy = ptr.Value;
 
-			var textSeg = Segments.GetSegment(".text", Clr.CLR_DLL_SHORT);
-			Console.WriteLine(textSeg);
-			Pointer<byte> segAddr = textSeg.SectionAddress;
-			
-			// .text:0000000180001000
-			// .text:000000018058E880
-
-			var fnOffset = 0x000000018058E880 - 0x0000000180001000;
-			Console.WriteLine("offset {0}", fnOffset);
-
-			var fnAddr = segAddr + fnOffset;
-			Console.WriteLine("fn addr {0}", fnAddr);
-
-//			var allocFn = Marshal.GetDelegateForFunctionPointer<Alloc>(fnAddr.Address);
-//			var ptrAlloc = allocFn(GCHeap.GlobalHeap.ToPointer<GCHeap>(), 10, 0);
-//			Console.WriteLine(Hex.ToHex(ptrAlloc));
-
-			var allocObj    = ClrFunctions.GetClrFunctionAddress<AllocateObject>("AllocateObject");
-			var objValuePtr = allocObj(typeof(List<int>).GetMethodTable().ToPointer<MethodTable>(), 0);
-			Console.WriteLine(Hex.ToHex(objValuePtr));
-			var listNative = CSUnsafe.Read<List<int>>(&objValuePtr);
-			Console.WriteLine(listNative);
-			
-			GC.Collect();
-
-			var sz = GCHeap.AllocateObject<string>(0);
-			
-			
-			//var fn = ClrFunctions.GetClrFunctionAddressSig<Alloc>(
-			//	"56 57 41 41 56 41 57 48 83 EC 30 48 C7 44 24 20 FE FF FF FF 48 89 5C 24 60 48 89 6C 24 70 45 8B E0 4C 8B F2 E9 00 01 00 00");
-			//var ptrAlloc=fn(GCHeap.GlobalHeap.ToPointer<GCHeap>(),0,0);
-			
-			
-			
-			const string str = "foo";
-			var sptr = memcpy(str);
-			Console.WriteLine(sptr);
-			freecpy(sptr);
-
+			Pointer<byte> str = Marshal.StringToHGlobalAnsi("foo");
+			Console.WriteLine(str.ReadString(StringTypes.AnsiStr));
 
 //			MemoryMarshal
 //			Marshal
