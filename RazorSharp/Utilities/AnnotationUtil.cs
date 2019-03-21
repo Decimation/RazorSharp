@@ -8,6 +8,29 @@ namespace RazorSharp.Utilities
 {
 	internal static class AnnotationUtil
 	{
+		private static (TType[], TAttribute[]) GetAnnotated<TType, TAttribute>(this Type                   t,
+		                                                                       Func<BindingFlags, TType[]> values,
+		                                                                       BindingFlags                flags,
+		                                                                       Func<TType, TAttribute>     getValue)
+			where TAttribute : Attribute
+		{
+			TType[] units           = values(flags);
+			var     attributedUnits = new List<TType>();
+			var     attributes      = new List<TAttribute>();
+
+			foreach (var unit in units) {
+				var attr = getValue(unit);
+				if (attr != null) {
+					attributedUnits.Add(unit);
+					attributes.Add(attr);
+				}
+			}
+
+			return (attributedUnits.ToArray(), attributes.ToArray());
+		}
+
+		#region Methods
+
 		internal static (MethodInfo[], TAttribute[]) GetAnnotatedMethods<TAttribute>(this Type t)
 			where TAttribute : Attribute
 		{
@@ -17,20 +40,12 @@ namespace RazorSharp.Utilities
 		internal static (MethodInfo[], TAttribute[]) GetAnnotatedMethods<TAttribute>(this Type t, BindingFlags flags)
 			where TAttribute : Attribute
 		{
-			MethodInfo[] methods           = t.GetMethods(flags);
-			var          attributedMethods = new List<MethodInfo>();
-			var          attributes        = new List<TAttribute>();
-
-			foreach (var t1 in methods) {
-				var attr = t1.GetCustomAttribute<TAttribute>();
-				if (attr != null) {
-					attributedMethods.Add(t1);
-					attributes.Add(attr);
-				}
-			}
-
-			return (attributedMethods.ToArray(), attributes.ToArray());
+			return t.GetAnnotated(t.GetMethods, flags, info => info.GetCustomAttribute<TAttribute>());
 		}
+
+		#endregion
+
+		#region Fields
 
 		internal static (FieldInfo[], TAttribute[]) GetAnnotatedFields<TAttribute>(this Type t)
 			where TAttribute : Attribute
@@ -41,19 +56,9 @@ namespace RazorSharp.Utilities
 		internal static (FieldInfo[], TAttribute[]) GetAnnotatedFields<TAttribute>(this Type t, BindingFlags flags)
 			where TAttribute : Attribute
 		{
-			FieldInfo[] field            = t.GetFields(flags);
-			var         attributedFields = new List<FieldInfo>();
-			var         attributes       = new List<TAttribute>();
-
-			foreach (var t1 in field) {
-				var attr = t1.GetCustomAttribute<TAttribute>();
-				if (attr != null) {
-					attributedFields.Add(t1);
-					attributes.Add(attr);
-				}
-			}
-
-			return (attributedFields.ToArray(), attributes.ToArray());
+			return t.GetAnnotated(t.GetFields, flags, info => info.GetCustomAttribute<TAttribute>());
 		}
+
+		#endregion
 	}
 }

@@ -11,9 +11,18 @@ namespace RazorSharp.Memory
 	// todo: WIP
 	internal static class Modules
 	{
+
+		private static ProcessModuleCollection ProcessModules {
+			get {
+				return Process.GetCurrentProcess().Modules;
+			}
+		}
+
+		
+		
 		internal static ProcessModule GetModule(string name)
 		{
-			foreach (ProcessModule m in Process.GetCurrentProcess().Modules)
+			foreach (ProcessModule m in ProcessModules)
 				if (m.ModuleName == name)
 					return m;
 
@@ -22,7 +31,7 @@ namespace RazorSharp.Memory
 
 		internal static ProcessModule ScanSector(Pointer<byte> ptr)
 		{
-			foreach (ProcessModule v in Process.GetCurrentProcess().Modules)
+			foreach (ProcessModule v in ProcessModules)
 				if (Mem.IsAddressInRange(v.BaseAddress + v.ModuleMemorySize, ptr.Address, v.BaseAddress))
 					return v;
 
@@ -31,7 +40,7 @@ namespace RazorSharp.Memory
 
 		internal static Pointer<byte> GetBaseAddress(string module)
 		{
-			var           pm  = Modules.GetModule(module);
+			var           pm  = GetModule(module);
 			Pointer<byte> ptr = pm.BaseAddress;
 			return ptr;
 		}
@@ -48,6 +57,20 @@ namespace RazorSharp.Memory
 		{
 			var ptr = GetBaseAddress(module);
 			return ptr + offset;
+		}
+
+		public static ProcessModule FromAddress(Pointer<byte> ptr)
+		{
+			foreach (ProcessModule module in ProcessModules) {
+				var lo = module.BaseAddress;
+				var hi = lo + module.ModuleMemorySize;
+
+				if (Mem.IsAddressInRange(hi, ptr, lo)) {
+					return module;
+				}
+			}
+
+			return null;
 		}
 	}
 }

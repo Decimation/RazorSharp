@@ -112,7 +112,7 @@ namespace RazorSharp.CoreClr.Structures
 			throw new SigcallException();
 		}
 
-		[ClrSymcall(Symbol = "AllocateObject", FullyQualified = true)]
+		[ClrSymcall(UseMethodNameOnly = true)]
 		internal static void* AllocateObject(MethodTable* mt, int boolValue)
 		{
 			return null;

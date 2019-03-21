@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 using NUnit.Framework;
@@ -14,6 +15,22 @@ namespace Test.Testing.Tests.Metadata
 	
 	public static class ClrMetaTests
 	{
+		private static bool Compare2<T>()
+		{
+			return Compare2(typeof(T), typeof(T).GetMetaType());
+		}
+
+		private static bool Compare2(Type t, MetaType m)
+		{
+			bool[] rg =
+			{
+				t.Name == m.Name,
+				t.IsArray == m.IsArray,
+				t == m.RuntimeType
+			};
+			return rg.All(b => b);
+		}
+		
 		public static void GC()
 		{
 			string s = "nil";

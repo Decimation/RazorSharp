@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using JetBrains.Annotations;
 using RazorCommon;
@@ -334,26 +335,6 @@ namespace RazorSharp.Pointers
 			return ReadAny<Pointer<TType>>(elemOffset);
 		}
 
-		/// <summary>
-		/// Writes a native string type
-		/// </summary>
-		public void WriteString(string s, StringTypes type)
-		{
-			byte[] bytes;
-			switch (type) {
-				case StringTypes.AnsiStr:
-					bytes = Encoding.UTF8.GetBytes(s);
-					break;
-				case StringTypes.UniStr:
-					bytes = Encoding.Unicode.GetBytes(s);
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(type), type, null);
-			}
-
-			Reinterpret<byte>().WriteAll(bytes);
-			WriteAny<byte>(0, bytes.Length + 1);
-		}
 
 		public int ReadUntil(Predicate<T> predicate)
 		{
@@ -429,6 +410,141 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+		#region String
+
+		/// <summary>
+		/// Writes a native string type
+		/// </summary>
+		public void WriteString(string s, StringTypes type)
+		{
+			byte[] bytes;
+			switch (type) {
+				case StringTypes.AnsiStr:
+					bytes = Encoding.UTF8.GetBytes(s);
+					break;
+				case StringTypes.UniStr:
+					bytes = Encoding.Unicode.GetBytes(s);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(type), type, null);
+			}
+
+			Reinterpret<byte>().WriteAll(bytes);
+			WriteAny<byte>(0, bytes.Length + 1);
+		}
+
+		
+		
+		public bool IsReadable()
+		{
+			if (IsNull) {
+				return false;
+			}
+
+			var mem = Query();
+			var prot = mem.Protect;
+
+			if (prot.HasFlag(MemoryProtection.ReadOnly)) {
+				
+			}
+
+			if ((prot & MemoryProtection.ReadWrite) != 0) {
+				
+			}
+			
+			
+
+			throw new Exception();
+		}
+
+		public object ReadNative(UnmanagedType type, params object[] args)
+		{
+			switch (type) {
+				case UnmanagedType.Bool:
+					int value = ReadAny<int>();
+					return value > 0;
+					break;
+				case UnmanagedType.I1:
+					break;
+				case UnmanagedType.U1:
+					break;
+				case UnmanagedType.I2:
+					break;
+				case UnmanagedType.U2:
+					break;
+				case UnmanagedType.I4:
+					break;
+				case UnmanagedType.U4:
+					break;
+				case UnmanagedType.I8:
+					break;
+				case UnmanagedType.U8:
+					break;
+				case UnmanagedType.R4:
+					break;
+				case UnmanagedType.R8:
+					break;
+				case UnmanagedType.Currency:
+					break;
+				case UnmanagedType.BStr:
+					break;
+				case UnmanagedType.LPStr:
+					break;
+				case UnmanagedType.LPWStr:
+					break;
+				case UnmanagedType.LPTStr:
+					break;
+				case UnmanagedType.ByValTStr:
+					break;
+				case UnmanagedType.IUnknown:
+					break;
+				case UnmanagedType.IDispatch:
+					break;
+				case UnmanagedType.Struct:
+					break;
+				case UnmanagedType.Interface:
+					break;
+				case UnmanagedType.SafeArray:
+					break;
+				case UnmanagedType.ByValArray:
+					break;
+				case UnmanagedType.SysInt:
+					break;
+				case UnmanagedType.SysUInt:
+					break;
+				case UnmanagedType.VBByRefStr:
+					break;
+				case UnmanagedType.AnsiBStr:
+					break;
+				case UnmanagedType.TBStr:
+					break;
+				case UnmanagedType.VariantBool:
+					break;
+				case UnmanagedType.FunctionPtr:
+					break;
+				case UnmanagedType.AsAny:
+					break;
+				case UnmanagedType.LPArray:
+					break;
+				case UnmanagedType.LPStruct:
+					break;
+				case UnmanagedType.CustomMarshaler:
+					break;
+				case UnmanagedType.Error:
+					break;
+				case UnmanagedType.IInspectable:
+					break;
+				case UnmanagedType.HString:
+					break;
+				case UnmanagedType.LPUTF8Str:
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(type), type, null);
+			}
+			
+			throw new Exception();
+		}
+		
 		/// <summary>
 		/// Reads a native string type
 		/// </summary>
@@ -450,7 +566,8 @@ namespace RazorSharp.Pointers
 			var chars = CopyOutAny<char>(len);
 			return new string(chars);
 		}
-		
+
+		#endregion
 
 		public void Write(T t, int elemOffset = 0)
 		{
@@ -624,7 +741,7 @@ namespace RazorSharp.Pointers
 		{
 			return Reinterpret<TType>().CopyOut(startIndex, elemCnt);
 		}
-		
+
 		public TType[] CopyOutAny<TType>(int elemCnt)
 		{
 			return Reinterpret<TType>().CopyOut(elemCnt);
@@ -786,6 +903,8 @@ namespace RazorSharp.Pointers
 
 		#region Implicit and explicit conversions
 
+		
+		
 		public static implicit operator Pointer<T>(Pointer<byte> v)
 		{
 			return v.Address;

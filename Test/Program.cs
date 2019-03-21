@@ -68,26 +68,6 @@ namespace Test
 			return Unsafe.INVALID_VALUE;
 		}
 
-		interface IClass
-		{
-			[ClrSymcall(Symbol = "Object::GetSize", FullyQualified = true)]
-			int Size();
-		}
-
-		[StructLayout(LayoutKind.Explicit)]
-		struct Struct
-		{
-			[FieldOffset(0)]
-			public IntPtr _object;
-
-			[FieldOffset(0)]
-			public IntPtr _string;
-		}
-
-		public class Class
-		{
-			public char Char;
-		}
 
 		static void freecpy<T>(Pointer<T> value) where T : class
 		{
@@ -119,7 +99,29 @@ namespace Test
 		}
 
 
-		
+		// https://github.com/dotnet/coreclr/blob/1f3f474a13bdde1c5fecdf8cd9ce525dbe5df000/src/vm/reflectioninvocation.cpp#L2970
+		static bool HasFlagFast<TEnum>(this TEnum value, TEnum flag)
+		{
+			var pThis  = Unsafe.AddressOf(ref value);
+			var pFlags = Unsafe.AddressOf(ref flag);
+			var size   = Unsafe.SizeOf<TEnum>();
+
+			// var underlying = typeof(TEnum).GetEnumUnderlyingType();
+
+
+			switch (size) {
+				case sizeof(byte):
+					return ((*(byte*) pThis & *(byte*) pFlags) == *(byte*) pFlags);
+				case sizeof(ushort):
+					return ((*(ushort*) pThis & *(ushort*) pFlags) == *(ushort*) pFlags);
+				case sizeof(uint):
+					return ((*(uint*) pThis & *(uint*) pFlags) == *(uint*) pFlags);
+				case sizeof(ulong):
+					return ((*(ulong*) pThis & *(ulong*) pFlags) == *(ulong*) pFlags);
+				default:
+					return false;
+			}
+		}
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -141,6 +143,17 @@ namespace Test
 
 			Pointer<byte> str = Marshal.StringToHGlobalAnsi("foo");
 			Console.WriteLine(str.ReadString(StringTypes.AnsiStr));
+
+			string s      = "foo";
+			var    module = Modules.FromAddress(typeof(string).GetMethodTable().Address);
+			Console.WriteLine(module);
+
+			var fn = ClrFunctions.GetClrFunctionAddress("JIT_GetRuntimeType");
+			Console.WriteLine(Modules.FromAddress(fn));
+
+			BindingFlags value = BindingFlags.Public | BindingFlags.Static;
+			Console.WriteLine(value.HasFlagFast(BindingFlags.Public));
+
 
 //			MemoryMarshal
 //			Marshal
@@ -169,23 +182,6 @@ namespace Test
 			}
 
 			return table.ToMarkDownString();
-		}
-
-
-		private static bool Compare<T>()
-		{
-			return Compare(typeof(T), typeof(T).GetMetaType());
-		}
-
-		private static bool Compare(Type t, MetaType m)
-		{
-			bool[] rg =
-			{
-				t.Name == m.Name,
-				t.IsArray == m.IsArray,
-				t == m.RuntimeType
-			};
-			return rg.All(b => b);
 		}
 
 

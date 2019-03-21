@@ -60,24 +60,7 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-		private static readonly IDictionary<IntPtr, int> Pointers;
 
-		static Mem()
-		{
-			Pointers = new Dictionary<IntPtr, int>();
-		}
-		
-		public static Pointer<T> AllocUHeap<T>(int elemCnt = 1)
-		{
-			
-			foreach (var ptr in Pointers) {
-				
-			}
-			return null;
-		}
-
-		
-		
 		/// <summary>
 		///     Checks whether an address is in range.
 		/// </summary>
