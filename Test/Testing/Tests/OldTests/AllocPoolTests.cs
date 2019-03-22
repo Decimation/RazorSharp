@@ -41,7 +41,7 @@ namespace Test.Testing.Tests
 			sPtr.WriteAny("foo");
 			Console.WriteLine(sPtr.ToTable(2).ToMarkDownString());
 			Console.WriteLine(sPtr.ReadAny<string>());
-			Console.WriteLine(sPtr.Reinterpret<string>().CopyOut(1).Join());
+			Console.WriteLine(sPtr.Cast<string>().CopyOut(1).Join());
 			AllocHelper.Free(sPtr);
 
 

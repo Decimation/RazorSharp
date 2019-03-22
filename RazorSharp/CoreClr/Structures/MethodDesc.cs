@@ -323,8 +323,7 @@ namespace RazorSharp.CoreClr.Structures
 		internal void SetStableEntryPoint(Pointer<byte> pCode)
 		{
 			Reset();
-			long val = SetStableEntryPointInterlocked((ulong) pCode);
-			Debug.Assert(val > 0);
+			Conditions.NativeRequire(SetStableEntryPointInterlocked((ulong) pCode) > 0);
 		}
 
 		/// <summary>

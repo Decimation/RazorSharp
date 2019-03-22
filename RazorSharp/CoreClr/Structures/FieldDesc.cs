@@ -134,15 +134,15 @@ namespace RazorSharp.CoreClr.Structures
 		internal bool IsPointer => CorType == CorElementType.Ptr;
 
 
-		internal bool IsStatic => Mem.ReadBit(m_dword1, 24);
+		internal bool IsStatic => Bits.ReadBit(m_dword1, 24);
 
 
-		internal bool IsThreadLocal => Mem.ReadBit(m_dword1, 25);
+		internal bool IsThreadLocal => Bits.ReadBit(m_dword1, 25);
 
 		/// <summary>
 		///     Unknown (Relative Virtual Address) ?
 		/// </summary>
-		internal bool IsRVA => Mem.ReadBit(m_dword1, 26);
+		internal bool IsRVA => Bits.ReadBit(m_dword1, 26);
 
 		internal bool IsFixedBuffer => Identifiers.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
 
@@ -155,7 +155,7 @@ namespace RazorSharp.CoreClr.Structures
 			}
 		}
 
-		private bool RequiresFullMBValue => Mem.ReadBit(m_dword1, 31);
+		private bool RequiresFullMBValue => Bits.ReadBit(m_dword1, 31);
 
 		#endregion
 

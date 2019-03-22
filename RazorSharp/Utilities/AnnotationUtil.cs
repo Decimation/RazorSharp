@@ -8,8 +8,7 @@ namespace RazorSharp.Utilities
 {
 	internal static class AnnotationUtil
 	{
-		private static (TType[], TAttribute[]) GetAnnotated<TType, TAttribute>(this Type                   t,
-		                                                                       Func<BindingFlags, TType[]> values,
+		private static (TType[], TAttribute[]) GetAnnotated<TType, TAttribute>(Func<BindingFlags, TType[]> values,
 		                                                                       BindingFlags                flags,
 		                                                                       Func<TType, TAttribute>     getValue)
 			where TAttribute : Attribute
@@ -40,7 +39,7 @@ namespace RazorSharp.Utilities
 		internal static (MethodInfo[], TAttribute[]) GetAnnotatedMethods<TAttribute>(this Type t, BindingFlags flags)
 			where TAttribute : Attribute
 		{
-			return t.GetAnnotated(t.GetMethods, flags, info => info.GetCustomAttribute<TAttribute>());
+			return GetAnnotated(t.GetMethods, flags, info => info.GetCustomAttribute<TAttribute>());
 		}
 
 		#endregion
@@ -56,7 +55,7 @@ namespace RazorSharp.Utilities
 		internal static (FieldInfo[], TAttribute[]) GetAnnotatedFields<TAttribute>(this Type t, BindingFlags flags)
 			where TAttribute : Attribute
 		{
-			return t.GetAnnotated(t.GetFields, flags, info => info.GetCustomAttribute<TAttribute>());
+			return GetAnnotated(t.GetFields, flags, info => info.GetCustomAttribute<TAttribute>());
 		}
 
 		#endregion

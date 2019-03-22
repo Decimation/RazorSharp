@@ -12,6 +12,7 @@ using RazorCommon;
 using RazorCommon.Utilities;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 using Serilog.Context;
 
@@ -105,8 +106,6 @@ namespace RazorSharp.Memory
 
 
 				if (PatternCheck(nModuleIndex, rgPattern)) {
-					
-
 					var p = m_lpModuleBase + nModuleIndex;
 					//Console.WriteLine("Matched opcodes: {0} (actual offset: {1:X}) (theoretical offset: {2:X}) (addr: {3:X})",
 					//                  Collections.CreateString(rgPattern, ToStringOptions.Hex), nModuleIndex, 
@@ -118,10 +117,11 @@ namespace RazorSharp.Memory
 			return IntPtr.Zero;
 		}
 
-		internal  string Dump()
+		internal string Dump()
 		{
 			return String.Format("Module buffer size: {0}", m_rgModuleBuffer.Length);
 		}
+
 		public IntPtr FindPattern(string szPattern, long ofsGuess = 0, int byteTolerance = 0)
 		{
 			ModuleCheck();
@@ -130,7 +130,7 @@ namespace RazorSharp.Memory
 			//Debug.Assert(szPattern!=null);
 			byte[] arrPattern = StringUtil.ParseByteArray(szPattern);
 
-			Debug.Assert(arrPattern != null);
+			Conditions.RequiresNotNull(arrPattern, nameof(arrPattern));
 			var p = FindPattern(arrPattern, ofsGuess, byteTolerance);
 
 			return p;
@@ -150,7 +150,7 @@ namespace RazorSharp.Memory
 			return ss.FindPattern(rgPattern, ofsGuess);
 		}
 
-		
+
 		public static TDelegate QuickScanDelegate<TDelegate>(string module, byte[] rgPattern, long ofsGuess = 0)
 			where TDelegate : Delegate
 		{
@@ -192,7 +192,8 @@ namespace RazorSharp.Memory
 		{
 			var addr = FindPattern(rgPattern, ofsGuess);
 			if (addr == IntPtr.Zero)
-				throw new Exception($"Could not find function with opcodes {Collections.CreateString(rgPattern, ToStringOptions.Hex)}");
+				throw new Exception(
+					$"Could not find function with opcodes {Collections.CreateString(rgPattern, ToStringOptions.Hex)}");
 
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
 		}

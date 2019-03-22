@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace RazorSharp.Memory
 {
 	public static class Bits
@@ -31,7 +33,18 @@ namespace RazorSharp.Memory
 
 		public static int WriteTo(int data, int index, int size, int value)
 		{
-			return ((data) = ((data) & (~GetMask((index), (size)))) | ((value) << (index)));
+			return (((data) & (~GetMask((index), (size)))) | ((value) << (index)));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool ReadBit(int b, int bitIndex)
+		{
+			return (b & (1 << bitIndex)) != 0;
+		}
+
+		public static bool ReadBit(uint b, int bitIndex)
+		{
+			return ReadBit((int) b, bitIndex);
 		}
 	}
 }

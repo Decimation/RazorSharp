@@ -254,6 +254,7 @@
     <Compile Include="Memory\Calling\Symbols\Attributes\SymcallAttribute.cs" />
     <Compile Include="Memory\Calling\Symbols\Symcall.cs" />
     <Compile Include="Memory\MemScanner.cs" />
+    <Compile Include="Memory\Region.cs" />
     <Compile Include="Memory\SegmentType.cs" />
     <Compile Include="Memory\Structures.cs" />
     <Compile Include="Native\Enums\ImageDirectoryEntry.cs" />
@@ -313,9 +314,11 @@
     <Compile Include="Unsafe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\AnnotationUtil.cs" />
+    <Compile Include="Utilities\Exceptions\NativeException.cs" />
     <Compile Include="Utilities\Exceptions\PreconditionException.cs" />
     <Compile Include="Utilities\Exceptions\SigcallException.cs" />
     <Compile Include="Utilities\Exceptions\RuntimeException.cs" />
+    <Compile Include="Utilities\Exceptions\ThrowHelper.cs" />
     <Compile Include="Utilities\Exceptions\TypeException.cs" />
     <Compile Include="Utilities\Conditions.cs" />
     <Compile Include="Utilities\ReflectionUtil.cs" />

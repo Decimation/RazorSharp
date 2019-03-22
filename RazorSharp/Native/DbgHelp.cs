@@ -44,7 +44,7 @@ namespace RazorSharp.Native
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool SymGetTypeInfo(IntPtr                    hProcess, ulong modBase, uint typeId,
+		internal static extern bool SymGetTypeInfo(IntPtr                  hProcess, ulong modBase, uint typeId,
 		                                           ImageHelpSymbolTypeInfo getType,  void* pInfo);
 
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
@@ -64,6 +64,7 @@ namespace RazorSharp.Native
 		                                           string                        mask,
 		                                           SYM_ENUMERATESYMBOLS_CALLBACK callback,
 		                                           IntPtr                        pUserContext);
+
 		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true)]
@@ -174,16 +175,17 @@ namespace RazorSharp.Native
 			// section table immediately follows the IMAGE_NT_HEADERS
 			var pSectionHdr = (IntPtr) (pNtHdr + 1);
 			var imageBase   = hModule;
-
-			var arr = new ImageSectionInfo[pNtHdr->FileHeader.NumberOfSections];
+			var arr         = new ImageSectionInfo[pNtHdr->FileHeader.NumberOfSections];
+			int size        = Marshal.SizeOf<ImageSectionHeader>();
 
 			for (int scn = 0; scn < pNtHdr->FileHeader.NumberOfSections; ++scn) {
 				var struc = Marshal.PtrToStructure<ImageSectionHeader>(pSectionHdr);
 
-				arr[scn] = new ImageSectionInfo(scn, struc.Name, (void*) (imageBase.ToInt64() + struc.VirtualAddress),
+				arr[scn] = new ImageSectionInfo(scn, struc.Name,
+				                                (void*) (imageBase.ToInt64() + struc.VirtualAddress),
 				                                (int) struc.VirtualSize, struc);
 
-				pSectionHdr += Marshal.SizeOf<ImageSectionHeader>();
+				pSectionHdr += size;
 			}
 
 			return arr;

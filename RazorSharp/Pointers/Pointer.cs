@@ -429,12 +429,12 @@ namespace RazorSharp.Pointers
 					throw new ArgumentOutOfRangeException(nameof(type), type, null);
 			}
 
-			Reinterpret<byte>().WriteAll(bytes);
+			Cast<byte>().WriteAll(bytes);
 			WriteAny<byte>(0, bytes.Length + 1);
 		}
 
 		
-		
+		// todo: WIP
 		public bool IsReadable()
 		{
 			if (IsNull) {
@@ -457,6 +457,8 @@ namespace RazorSharp.Pointers
 			throw new Exception();
 		}
 
+		
+		// todo: WIP
 		public object ReadNative(UnmanagedType type, params object[] args)
 		{
 			switch (type) {
@@ -739,12 +741,12 @@ namespace RazorSharp.Pointers
 
 		public TType[] CopyOutAny<TType>(int startIndex, int elemCnt)
 		{
-			return Reinterpret<TType>().CopyOut(startIndex, elemCnt);
+			return Cast<TType>().CopyOut(startIndex, elemCnt);
 		}
 
 		public TType[] CopyOutAny<TType>(int elemCnt)
 		{
-			return Reinterpret<TType>().CopyOut(elemCnt);
+			return Cast<TType>().CopyOut(elemCnt);
 		}
 
 		// todo: verify this works
@@ -836,11 +838,12 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		///     Creates a new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" />, pointing to <see cref="Address" />
+		///     Creates a new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" />, pointing to
+		/// <see cref="Address" />
 		/// </summary>
 		/// <typeparam name="TNew">Type to point to</typeparam>
 		/// <returns>A new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" /></returns>
-		public Pointer<TNew> Reinterpret<TNew>()
+		public Pointer<TNew> Cast<TNew>()
 		{
 			return new Pointer<TNew>(Address);
 		}

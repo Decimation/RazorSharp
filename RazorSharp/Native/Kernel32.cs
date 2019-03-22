@@ -183,7 +183,7 @@ namespace RazorSharp.Native
 		{
 			var info    = new MemoryBasicInformation();
 			var lpValue = VirtualQuery(lpAddress, ref info, (uint) sizeof(MemoryBasicInformation));
-			Debug.Assert(lpValue.ToInt64() == sizeof(MemoryBasicInformation));
+			Conditions.Requires(lpValue.ToInt64() == sizeof(MemoryBasicInformation));
 			return info;
 		}
 
@@ -232,7 +232,7 @@ namespace RazorSharp.Native
 		internal static void VirtualProtect(Pointer<byte>        lpAddress, int dwSize, MemoryProtection flNewProtect,
 		                                    out MemoryProtection lpflOldProtect)
 		{
-			Conditions.Assert(VirtualProtect(lpAddress.Address, (uint) dwSize, flNewProtect, out lpflOldProtect));
+			Conditions.NativeRequire(VirtualProtect(lpAddress.Address, (uint) dwSize, flNewProtect, out lpflOldProtect));
 		}
 
 		#endregion
@@ -263,13 +263,12 @@ namespace RazorSharp.Native
 			var   mem               = new byte[cb];
 
 			// Read the memory
-			Trace.Assert(ReadProcessMemory(hProc, lpBaseAddress.Address, mem, size,
-			                               ref numberOfBytesRead));
+			Conditions.NativeRequire(ReadProcessMemory(hProc, lpBaseAddress.Address, mem, size, ref numberOfBytesRead));
 
-			Trace.Assert(numberOfBytesRead == size);
+			Conditions.Requires(numberOfBytesRead == size);
 
 			// Close the handle
-			Trace.Assert(CloseHandle(hProc));
+			Conditions.NativeRequire(CloseHandle(hProc));
 			return mem;
 		}
 
@@ -281,13 +280,14 @@ namespace RazorSharp.Native
 			uint  size              = (uint) Unsafe.SizeOf<T>();
 
 			// Read the memory
-			Trace.Assert(ReadProcessMemory(hProc, lpBaseAddress.Address, Unsafe.AddressOf(ref t).Address, size,
-			                               ref numberOfBytesRead));
+			Conditions.NativeRequire(ReadProcessMemory(hProc, lpBaseAddress.Address,
+			                                           Unsafe.AddressOf(ref t).Address,
+			                                           size, ref numberOfBytesRead));
 
-			Trace.Assert(numberOfBytesRead == size);
+			Conditions.NativeRequire(numberOfBytesRead == size);
 
 			// Close the handle
-			Trace.Assert(CloseHandle(hProc));
+			Conditions.NativeRequire(CloseHandle(hProc));
 			return t;
 		}
 
@@ -335,25 +335,24 @@ namespace RazorSharp.Native
 			int dwSize               = Unsafe.SizeOf<T>();
 
 			// Write the memory
-			Trace.Assert(WriteProcessMemory(hProc, lpBaseAddress.Address, Unsafe.AddressOf(ref value).Address, dwSize,
-			                                ref numberOfBytesWritten));
+			Conditions.NativeRequire(WriteProcessMemory(hProc, lpBaseAddress.Address,
+			                                            Unsafe.AddressOf(ref value).Address,
+			                                            dwSize, ref numberOfBytesWritten));
 
-			Trace.Assert(numberOfBytesWritten == dwSize);
+			Conditions.NativeRequire(numberOfBytesWritten == dwSize);
 
 			// Close the handle
-			Trace.Assert(CloseHandle(hProc));
+			Conditions.NativeRequire(CloseHandle(hProc));
 		}
 
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		internal static extern bool WriteProcessMemory(IntPtr  hProcess, IntPtr lpBaseAddress, byte[] lpBuffer,
-		                                               int     dwSize,
-		                                               ref int lpNumberOfBytesWritten);
+		internal static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr  lpBaseAddress, byte[] lpBuffer,
+		                                               int    dwSize,   ref int lpNumberOfBytesWritten);
 
 
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		internal static extern bool WriteProcessMemory(IntPtr  hProcess, IntPtr lpBaseAddress, IntPtr lpBuffer,
-		                                               int     dwSize,
-		                                               ref int lpNumberOfBytesWritten);
+		internal static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr  lpBaseAddress, IntPtr lpBuffer,
+		                                               int    dwSize,   ref int lpNumberOfBytesWritten);
 
 		#endregion
 

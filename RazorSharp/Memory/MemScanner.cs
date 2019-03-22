@@ -5,6 +5,7 @@ using System.Diagnostics;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 
 #endregion
 
@@ -83,7 +84,7 @@ namespace RazorSharp.Memory
 
 			m_buf = fn(bufSize);
 			Global.Log.Information("{BufLen} {BufSize}", m_buf.Length, bufSize);
-			Debug.Assert(m_buf.Length == bufSize);
+			Conditions.Assert(m_buf.Length == bufSize);
 		}
 	}
 }

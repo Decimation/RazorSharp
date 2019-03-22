@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -32,10 +33,11 @@ namespace RazorSharp.Utilities
 	/// </summary>
 	internal static class Conditions
 	{
-		private const string COND_FALSE_HALT     = "cond:false => halt";
-		private const string VALUE_NULL_HALT     = "value:null => halt";
-		private const string STRING_FORMAT_PARAM = "msg";
-		private const string NULLREF_EXCEPTION   = "value == null";
+		private const string COND_FALSE_HALT   = "cond:false => halt";
+		private const string VALUE_NULL_HALT   = "value:null => halt";
+		private const string NULLREF_EXCEPTION = "value == null";
+
+		internal const string STRING_FORMAT_PARAM = "msg";
 
 		internal static void CheckCompatibility()
 		{
@@ -189,6 +191,33 @@ namespace RazorSharp.Utilities
 
 		#endregion
 
+		private static MethodBase PreviousMethod()
+		{
+			return new StackFrame(2).GetMethod();
+		}
+
+		/// <summary>
+		/// Commonly used for native methods or Win32 API methods which return a <see cref="bool"/> indicating
+		/// whether or not the function succeeded.
+		/// </summary>
+		internal static void NativeRequire(bool cond, string msg = null, params object[] args)
+		{
+			NativeRequire(cond, PreviousMethod().Name, msg, args);
+		}
+		
+		/// <summary>
+		/// Commonly used for native methods or Win32 API methods which return a <see cref="bool"/> indicating
+		/// whether or not the function succeeded.
+		/// </summary>
+		internal static void NativeRequire(bool cond, string name, string msg = null, params object[] args)
+		{
+			if (!cond) {
+				string error   = String.Format("P/Invoke or native method \"{0}\" failed", name);
+				var    msgFail = CreateFailString(error, msg, args);
+				ThrowHelper.FailRequire<NativeException>(msgFail);
+			}
+		}
+
 		#region Requires (exception)
 
 		/// <summary>
@@ -199,7 +228,7 @@ namespace RazorSharp.Utilities
 			if (!(value > 0)) {
 				string error   = String.Format("Value \"{0}\" must be > 0", name);
 				var    msgFail = CreateFailString(error, msg, args);
-				FailRequire(msgFail);
+				ThrowHelper.FailRequire(msgFail);
 			}
 		}
 
@@ -234,54 +263,41 @@ namespace RazorSharp.Utilities
 		}
 
 		// 3-16-19: Use string interpolation expression disabled cause it's fucking annoying
-		
+
 		private static string CreateErrorString<T>(T value, string name, string errorStub)
 		{
 			//string error = String.Format("File \"{0}\" does not exist in directory \"{1}\"", file.Name,
 			//                             file.Directory);
 
 			string typeName = value.GetType().Name;
-			string error = String.Format("{0} \"{1}\" {2}", typeName, name, errorStub);
+			string error    = String.Format("{0} \"{1}\" {2}", typeName, name, errorStub);
 
 			return error;
 		}
-		
+
 		[AssertionMethod]
 		[StringFormatMethod(STRING_FORMAT_PARAM)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresFileExists(FileInfo file, string msg = null, params object[] args)
 		{
 			if (!file.Exists) {
-				string error = String.Format("File \"{0}\" does not exist in directory \"{1}\"", file.Name,
-				                             file.Directory);
+				string error = String.Format("File \"{0}\" does not exist in directory \"{1}\"",
+				                             file.Name, file.Directory);
 
 				var msgFail = CreateFailString(error, msg, args);
-				FailRequire(msgFail);
+				ThrowHelper.FailRequire<FileNotFoundException>(msgFail);
 			}
 		}
 
-		[StringFormatMethod(STRING_FORMAT_PARAM)]
-		private static void FailRequire(string msg, params object[] args)
-		{
-			Exception exception;
-			if (!String.IsNullOrWhiteSpace(msg)) {
-				var format = String.Format(msg, args);
-				exception = new Exception(format);
-			}
-			else {
-				exception = new Exception();
-			}
-
-			throw exception;
-		}
 
 		[AssertionMethod]
+		[StringFormatMethod(STRING_FORMAT_PARAM)]
 		[ContractAnnotation(COND_FALSE_HALT)]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static void Requires(bool cond, string s = null, params object[] args)
+		internal static void Requires(bool cond, string msg = null, params object[] args)
 		{
 			if (!cond) {
-				FailRequire(s, args);
+				ThrowHelper.FailRequire(msg, args);
 			}
 		}
 
@@ -301,20 +317,20 @@ namespace RazorSharp.Utilities
 		internal static unsafe void Requires64Bit()
 		{
 			Requires(IntPtr.Size == 8 && Environment.Is64BitProcess, "Only 64-bit is supported at the moment.");
-			AssertAllEqualAlt(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
+//			AssertAllEqualAlt(Offsets.PTR_SIZE, IntPtr.Size, sizeof(void*), 8);
 		}
 
 		#region Not null
 
 		internal static void RequiresNotNullOrWhiteSpace(string s, string name)
 		{
-			Requires(!String.IsNullOrWhiteSpace(s), $"String cannot {name} be null or whitespace");
+			Requires(!String.IsNullOrWhiteSpace(s), $"String \"{name}\" cannot be null or whitespace");
 		}
 
 		private static void CheckNull(bool b, string name)
 		{
 			if (!b) {
-				throw new ArgumentNullException(name);
+				ThrowHelper.FailRequire<ArgumentNullException>(name);
 			}
 		}
 
@@ -343,6 +359,7 @@ namespace RazorSharp.Utilities
 		{
 			CheckNull(value != IntPtr.Zero, name);
 		}
+		
 
 		/// <summary>
 		///     Specifies a precondition: checks to see if <paramref name="value" /> is <c>null</c>
@@ -399,7 +416,7 @@ namespace RazorSharp.Utilities
 
 		internal static void RequiresTypeNot<TNot, TActual>(string msg = null)
 		{
-			string baseMsg = $"Type arguments cannot be equal: {typeof(TNot).Name} and {typeof(TActual).Name}";
+			string baseMsg = $"Type arguments cannot be equal: \"{typeof(TNot).Name}\" and \"{typeof(TActual).Name}\"";
 
 			if (msg != null) {
 				baseMsg += $": {msg}";
@@ -415,7 +432,7 @@ namespace RazorSharp.Utilities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresClassType<T>()
 		{
-			Assert(!typeof(T).IsValueType, "Type parameter <{0}> must be a reference type", typeof(T).Name);
+			Requires(!typeof(T).IsValueType, "Type parameter \"<{0}>\" must be a reference type", typeof(T).Name);
 		}
 
 		/// <summary>
@@ -425,7 +442,7 @@ namespace RazorSharp.Utilities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void RequiresValueType<T>()
 		{
-			Assert(typeof(T).IsValueType, "Type parameter <{0}> must be a value type", typeof(T).Name);
+			Requires(typeof(T).IsValueType, "Type parameter \"<{0}>\" must be a value type", typeof(T).Name);
 		}
 
 		#endregion

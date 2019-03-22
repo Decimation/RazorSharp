@@ -69,7 +69,7 @@ namespace Test.Testing.Tests
 
 			ptr -= IntPtr.Size;
 
-			Pointer<string> lpStr = ptr.Reinterpret<string>();
+			Pointer<string> lpStr = ptr.Cast<string>();
 			Debug.Assert(lpStr.Reference == t.Str);
 			Debug.Assert(lpStr.Value == t.Str);
 			Debug.Assert(lpStr[0] == t.Str);
@@ -82,7 +82,7 @@ namespace Test.Testing.Tests
 
 			Debug.Assert(lpStr == Unsafe.AddressOfField(ref t, "_str").Address);
 
-			Pointer<int> lpInt32 = lpStr.Reinterpret<int>();
+			Pointer<int> lpInt32 = lpStr.Cast<int>();
 			lpInt32 += 2;
 			Debug.Assert(lpInt32 == Unsafe.AddressOfField(ref t, "_int").Address);
 			lpInt32[0] = 321;
@@ -90,7 +90,7 @@ namespace Test.Testing.Tests
 			Debug.Assert(lpInt32.Value == t.I);
 			Debug.Assert(lpInt32[0] == t.I);
 
-			Pointer<Target> lpTarget = ptr.Reinterpret<Target>();
+			Pointer<Target> lpTarget = ptr.Cast<Target>();
 			lpTarget.Increment();
 			lpTarget.Decrement();
 			lpTarget.Add(lpTarget.ElementSize);

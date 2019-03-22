@@ -130,7 +130,7 @@ namespace RazorSharp.Memory
 			alloc.WriteAny(methodTable, 2);
 
 
-			return alloc.Reinterpret<T>();
+			return alloc.Cast<T>();
 		}
 
 		/// <summary>
@@ -292,39 +292,7 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-		#region Bits
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool ReadBit(int b, int bitIndex)
-		{
-			return (b & (1 << bitIndex)) != 0;
-		}
-
-		public static bool ReadBit(uint b, int bitIndex)
-		{
-			return ReadBit((int) b, bitIndex);
-		}
-
-		public static int ReadBits(int b, int bitIndexBegin, int bitLen)
-		{
-			if (bitLen > Int32Bits) throw new Exception();
-
-			var bits = new bool[bitLen];
-			for (int i = 0; i < bitLen; i++)
-				bits[i] = ReadBit(b, bitIndexBegin + i);
-
-			var bitArray = new BitArray(bits);
-			var array    = new int[1];
-			bitArray.CopyTo(array, 0);
-			return array[0];
-		}
-
-		public static int ReadBits(uint b, int bitIndexBegin, int bitLen)
-		{
-			return ReadBits((int) b, bitIndexBegin, bitLen);
-		}
-
-		#endregion
+		
 
 
 		#region Read / write
@@ -406,7 +374,7 @@ namespace RazorSharp.Memory
 
 		internal static void StackInit<T>(ref byte* b)
 		{
-			Trace.Assert(IsOnStack(b));
+			Conditions.Requires(IsOnStack(b));
 
 			// ObjHeader
 			Zero(b, sizeof(ObjHeader));

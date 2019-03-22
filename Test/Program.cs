@@ -95,7 +95,7 @@ namespace Test
 			// Move back
 			ptr.Subtract(IntPtr.Size);
 
-			return ptr.Reinterpret<T>();
+			return ptr.Cast<T>();
 		}
 
 
@@ -119,7 +119,7 @@ namespace Test
 				case sizeof(ulong):
 					return ((*(ulong*) pThis & *(ulong*) pFlags) == *(ulong*) pFlags);
 				default:
-					return false;
+					throw new Exception();
 			}
 		}
 
@@ -136,23 +136,8 @@ namespace Test
 				1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
 			};
 
-			var ptr = memcpy(list);
-			Console.WriteLine(ptr);
-			freecpy(ptr);
-			var cpy = ptr.Value;
 
-			Pointer<byte> str = Marshal.StringToHGlobalAnsi("foo");
-			Console.WriteLine(str.ReadString(StringTypes.AnsiStr));
-
-			string s      = "foo";
-			var    module = Modules.FromAddress(typeof(string).GetMethodTable().Address);
-			Console.WriteLine(module);
-
-			var fn = ClrFunctions.GetClrFunctionAddress("JIT_GetRuntimeType");
-			Console.WriteLine(Modules.FromAddress(fn));
-
-			BindingFlags value = BindingFlags.Public | BindingFlags.Static;
-			Console.WriteLine(value.HasFlagFast(BindingFlags.Public));
+			Kernel32.ReadProcessMemory(Process.GetCurrentProcess(), 0L, 10);
 
 
 //			MemoryMarshal
@@ -170,19 +155,7 @@ namespace Test
 		}
 
 
-		static string LayoutString<T>()
-		{
-			var type   = typeof(T).GetMetaType();
-			var table  = new ConsoleTable("Name", "Type", "Offset", "Size");
-			var fields = type.Fields.OrderBy(x => x.Offset).ToList();
-
-
-			foreach (var field in fields) {
-				table.AddRow(field.Name, field.FieldType.Name, field.Offset, field.Size);
-			}
-
-			return table.ToMarkDownString();
-		}
+		
 
 
 		private static void Dump<T>(T t, int recursivePasses = 0)

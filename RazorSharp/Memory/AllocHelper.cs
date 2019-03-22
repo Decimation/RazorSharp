@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 using static RazorSharp.Unsafe;
 
 #endregion
@@ -59,7 +60,7 @@ namespace RazorSharp.Memory
 
 		public static void Free<T>(Pointer<T> ptr)
 		{
-			Trace.Assert(IsAllocated(ptr));
+			Conditions.Requires(IsAllocated(ptr));
 
 			var rg     = GetRange(ptr.Address);
 			var origin = rg.LowAddress;

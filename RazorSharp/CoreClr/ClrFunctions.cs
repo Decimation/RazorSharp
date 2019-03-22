@@ -11,6 +11,7 @@ using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities;
 using RazorSharp.Utilities.Exceptions;
 
 // ReSharper disable IdentifierTypo
@@ -36,11 +37,10 @@ namespace RazorSharp.CoreClr
 	{
 		static ClrFunctions()
 		{
-			var fn = GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked").Address;
+			const string FN = "MethodDesc::SetStableEntryPointInterlocked";
+			SetStableEntryPointInterlocked = GetClrFunction<SetStableEntryPointInterlockedDelegate>(FN);
 
-			s_setStableEntryPointInterlocked =
-				Marshal.GetDelegateForFunctionPointer<SetStableEntryPointInterlockedDelegate>(fn);
-			
+
 			Symcall.BindQuick(typeof(ClrFunctions));
 		}
 
@@ -49,7 +49,7 @@ namespace RazorSharp.CoreClr
 		/// </summary>
 		internal static void Init()
 		{
-			Debug.Assert(SignatureCall.IsBound(typeof(ClrFunctions)));
+			Conditions.Requires(SignatureCall.IsBound(typeof(ClrFunctions)));
 		}
 
 		/// <summary>
@@ -81,7 +81,7 @@ namespace RazorSharp.CoreClr
 		/// <param name="pCode">Entry point</param>
 		private delegate long SetStableEntryPointInterlockedDelegate(MethodDesc* __this, ulong pCode);
 
-		private static readonly SetStableEntryPointInterlockedDelegate s_setStableEntryPointInterlocked;
+		private static readonly SetStableEntryPointInterlockedDelegate SetStableEntryPointInterlocked;
 
 		private static readonly byte[] s_rgStableEntryPointInterlockedSignature =
 		{
@@ -99,14 +99,35 @@ namespace RazorSharp.CoreClr
 		internal static void SetStableEntryPoint(MethodInfo mi, IntPtr pCode)
 		{
 			var pMd = (MethodDesc*) mi.MethodHandle.Value;
-			s_setStableEntryPointInterlocked(pMd, (ulong) pCode);
+			SetStableEntryPointInterlocked(pMd, (ulong) pCode);
 		}
+
+		#endregion
 
 		[ClrSymcall(UseMethodNameOnly = true)]
 		internal static uint GetSignatureCorElementType(Pointer<MethodTable> pMT)
 		{
 			throw new SigcallException();
 		}
+
+
+		internal static TDelegate GetClrFunctionSig<TDelegate>(string hex) where TDelegate : Delegate
+		{
+			return SigScanner.QuickScanDelegate<TDelegate>(Clr.CLR_DLL_SHORT, hex);
+		}
+
+
+		internal static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate
+		{
+			return Marshal.GetDelegateForFunctionPointer<TDelegate>(GetClrFunctionAddress(name).Address);
+		}
+
+		internal static Pointer<byte> GetClrFunctionAddress(string name)
+		{
+			return Symbols.GetSymAddress(Clr.ClrPdb.FullName, Clr.CLR_DLL_SHORT, name);
+		}
+
+		#region FieldField
 
 		internal static Pointer<FieldDesc> FindField(Type t, string name)
 		{
@@ -123,22 +144,6 @@ namespace RazorSharp.CoreClr
 			return field;
 		}
 
-
-		internal static TDelegate GetClrFunctionAddressSig<TDelegate>(string hex) where TDelegate : Delegate
-		{
-			return SigScanner.QuickScanDelegate<TDelegate>(Clr.CLR_DLL_SHORT,hex);
-		}
-
-		internal static TDelegate GetClrFunctionAddress<TDelegate>(string name) where TDelegate : Delegate
-		{
-			return Marshal.GetDelegateForFunctionPointer<TDelegate>(GetClrFunctionAddress(name).Address);
-		}
-
-
-		internal static Pointer<byte> GetClrFunctionAddress(string name)
-		{
-			return Symbols.GetSymAddress(Clr.ClrPdb.FullName, Clr.CLR_DLL_SHORT, name);
-		}
 
 		/*
 		static FieldDesc * FindField(

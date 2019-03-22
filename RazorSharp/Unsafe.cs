@@ -459,11 +459,11 @@ namespace RazorSharp
 				length = arr.Length;
 
 				// Sanity check
-				Debug.Assert(!(t is string));
+				Conditions.Assert(!(t is string));
 			}
 			else if (t is string str) {
 				// Sanity check
-				Debug.Assert(!typeof(T).IsArray);
+				Conditions.Assert(!typeof(T).IsArray);
 				length = str.Length;
 			}
 
@@ -579,7 +579,7 @@ namespace RazorSharp
 		{
 			// Need to include the ObjHeader
 			Pointer<T> ptr = AddressOfHeap(ref t, OffsetType.Header).Address;
-			return ptr.Reinterpret<byte>().CopyOut(HeapSize(ref t));
+			return ptr.Cast<byte>().CopyOut(HeapSize(ref t));
 		}
 
 		/// <summary>
@@ -592,7 +592,7 @@ namespace RazorSharp
 		public static byte[] MemoryOfVal<T>(T t)
 		{
 			Pointer<T> ptr = AddressOf(ref t);
-			return ptr.Reinterpret<byte>().CopyOut(ptr.ElementSize);
+			return ptr.Cast<byte>().CopyOut(ptr.ElementSize);
 		}
 
 		public static byte[] MemoryOfFields<T>(T t) where T : class

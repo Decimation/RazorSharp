@@ -29,11 +29,12 @@ namespace RazorSharp.Utilities
 
 		#endregion
 
+
 		public static MetaType GetMetaType(this Type t)
 		{
 			return new MetaType(t.GetMethodTable());
 		}
-		
+
 		public static object InvokeGenericMethod(Type            t,
 		                                         string          name,
 		                                         Type            typeArgs,
