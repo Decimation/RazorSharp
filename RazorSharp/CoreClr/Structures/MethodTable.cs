@@ -11,8 +11,11 @@ using RazorSharp.CoreClr.Enums;
 using RazorSharp.CoreClr.Enums.MethodTable;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.EE;
+using RazorSharp.Memory.Calling.Symbols;
+using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
+// ReSharper disable MemberCanBeMadeStatic.Global
 
 #endregion
 
@@ -65,7 +68,10 @@ namespace RazorSharp.CoreClr.Structures
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct MethodTable
 	{
-		
+		static MethodTable()
+		{
+			Symcall.BindQuick(typeof(MethodTable));
+		}
 		
 		#region Properties and Accessors
 
@@ -254,6 +260,15 @@ namespace RazorSharp.CoreClr.Structures
 
 		// todo
 		internal MethodDescChunk* MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
+
+		
+		[ClrSymcall]
+		internal uint GetSignatureCorElementType()
+		{
+			throw new SigcallException();
+		}
+
+		
 
 		#endregion
 

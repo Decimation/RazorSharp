@@ -83,7 +83,7 @@ namespace RazorSharp.Memory.Calling.Signatures
 				if (fn != IntPtr.Zero) {
 					Global.Log.Debug("Setting entry point for {Name} to {Addr}",
 					                 methodInfo.Name, fn.ToInt64().ToString("X"));
-					ClrFunctions.SetStableEntryPoint(methodInfo, fn);
+					Functions.SetStableEntryPoint(methodInfo, fn);
 				}
 			}
 		}

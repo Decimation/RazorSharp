@@ -9,6 +9,7 @@ using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.CoreClr.Structures.HeapObjects;
 using RazorSharp.Memory;
 using RazorSharp.Native;
+using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
 namespace RazorSharp.CoreClr
@@ -158,6 +159,21 @@ namespace RazorSharp.CoreClr
 
 			IsSetup = false;
 			
+		}
+
+		internal static Pointer<byte> GetClrFunctionAddress(string name)
+		{
+			return Symbols.GetSymAddress(Clr.ClrPdb.FullName, Clr.CLR_DLL_SHORT, name);
+		}
+
+		internal static TDelegate GetClrFunctionSig<TDelegate>(string hex) where TDelegate : Delegate
+		{
+			return SigScanner.QuickScanDelegate<TDelegate>(Clr.CLR_DLL_SHORT, hex);
+		}
+
+		internal static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate
+		{
+			return Marshal.GetDelegateForFunctionPointer<TDelegate>(Clr.GetClrFunctionAddress(name).Address);
 		}
 	}
 }

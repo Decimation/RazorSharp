@@ -253,6 +253,7 @@
     <Compile Include="Memory\Calling\Symbols\Attributes\ClrSymcallAttribute.cs" />
     <Compile Include="Memory\Calling\Symbols\Attributes\SymcallAttribute.cs" />
     <Compile Include="Memory\Calling\Symbols\Symcall.cs" />
+    <Compile Include="Memory\Functions.cs" />
     <Compile Include="Memory\MemScanner.cs" />
     <Compile Include="Memory\Region.cs" />
     <Compile Include="Memory\SegmentType.cs" />

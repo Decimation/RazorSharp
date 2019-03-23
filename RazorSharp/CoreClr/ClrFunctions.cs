@@ -39,13 +39,10 @@ namespace RazorSharp.CoreClr
 	{
 		static ClrFunctions()
 		{
-			const string FN = "MethodDesc::SetStableEntryPointInterlocked";
-			SetEntryPoint = GetClrFunction<SetEntryPointDelegate>(FN);
 			Symcall.BindQuick(typeof(ClrFunctions));
-			Global.Log.Information("ClrFunctions init complete");
 		}
-
 		
+
 
 		/// <summary>
 		///     Returns the corresponding <see cref="Type" /> for a <see cref="MethodTable" /> pointer.
@@ -65,66 +62,9 @@ namespace RazorSharp.CoreClr
 			throw new SigcallException();
 		}
 
-		#region SetStableEntryPoint
 
-		/// <summary>
-		///     We implement <see cref="SetEntryPointDelegate" /> as a <see cref="Delegate" /> initially because
-		///     <see cref="MethodDesc.SetStableEntryPointInterlocked" /> has not been bound yet, and in order to bind it
-		///     we have to use this function.
-		/// </summary>
-		/// <param name="__this"><c>this</c> pointer of a <see cref="MethodDesc" /></param>
-		/// <param name="pCode">Entry point</param>
-		internal delegate long SetEntryPointDelegate(MethodDesc* value, ulong pCode);
+		
 
-		private static readonly SetEntryPointDelegate SetEntryPoint;
-
-		private static readonly byte[] s_rgStableEntryPointInterlockedSignature =
-		{
-			0x48, 0x89, 0x5C, 0x24, 0x10, 0x48, 0x89, 0x74, 0x24, 0x18, 0x57, 0x48, 0x83, 0xEC, 0x20, 0x48, 0x8B, 0xFA,
-			0x48, 0x8B, 0xF1, 0xE8, 0x1E, 0x57, 0xE7, 0xFF
-		};
-
-		/// <summary>
-		///     <remarks>
-		///         Equal to <see cref="MethodDesc.SetStableEntryPoint" />, but this is implemented via a <see cref="Delegate" />
-		///     </remarks>
-		/// </summary>
-		/// <param name="mi"></param>
-		/// <param name="pCode"></param>
-		internal static void SetStableEntryPoint(MethodInfo mi, IntPtr pCode)
-		{
-			var pMd = (MethodDesc*) mi.MethodHandle.Value;
-			var result = SetEntryPoint(pMd, (ulong) pCode);
-			if (!(result > 0)) {
-				Global.Log.Warning("Could not set entry point for {Method}", mi.Name);	
-			}
-			//Conditions.Assert(result >0);
-		}
-
-		#endregion
-
-		[ClrSymcall(Symbol = "MethodTable::GetSignatureCorElementType", FullyQualified = true)]
-		internal static uint GetSignatureCorElementType(Pointer<MethodTable> pMT)
-		{
-			throw new SigcallException();
-		}
-
-
-		internal static TDelegate GetClrFunctionSig<TDelegate>(string hex) where TDelegate : Delegate
-		{
-			return SigScanner.QuickScanDelegate<TDelegate>(Clr.CLR_DLL_SHORT, hex);
-		}
-
-
-		internal static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate
-		{
-			return Marshal.GetDelegateForFunctionPointer<TDelegate>(GetClrFunctionAddress(name).Address);
-		}
-
-		internal static Pointer<byte> GetClrFunctionAddress(string name)
-		{
-			return Symbols.GetSymAddress(Clr.ClrPdb.FullName, Clr.CLR_DLL_SHORT, name);
-		}
 
 		#region FieldField
 
@@ -137,7 +77,7 @@ namespace RazorSharp.CoreClr
 		{
 			var module = pMT.Reference.Module;
 			var pStr   = Marshal.StringToHGlobalAnsi(name);
-			var cSig   = GetSignatureCorElementType(pMT);
+			var cSig = pMT.Reference.GetSignatureCorElementType();
 			var field  = FindField(pMT, pStr, IntPtr.Zero, cSig, module, 0);
 			Marshal.FreeHGlobal(pStr);
 			return field;

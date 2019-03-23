@@ -46,7 +46,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 			using (var sym = new Native.Symbols(attr.Image)) {
 				var offset = sym.GetSymOffset(fullSym);
 				var address = Modules.GetAddress(attr.Module, offset);
-				ClrFunctions.SetStableEntryPoint(methodInfo, address.Address);
+				Functions.SetStableEntryPoint(methodInfo, address.Address);
 			}
 		}
 
@@ -113,10 +113,10 @@ namespace RazorSharp.Memory.Calling.Symbols
 			Conditions.Requires(addresses.Length == methods.Length);
 
 			for (int i = 0; i < methods.Length; i++) {
-				Global.Log.Debug("Binding {Name} to {Addr} (offset: {Offset}) (sym: {Symbol})", methods[i].Name,
-				                 addresses[i].ToString("P"),offsets[i].ToString("X"), contexts[i]);
+				Global.Log.Debug("Binding {Name} to {Addr} (offset: {Offset})", methods[i].Name,
+				                 addresses[i].ToString("P"),offsets[i].ToString("X"));
 				var addr = addresses[i].Address;
-				ClrFunctions.SetStableEntryPoint(methods[i], addr);
+				Functions.SetStableEntryPoint(methods[i], addr);
 			}
 
 			sym.Dispose();

@@ -138,13 +138,6 @@ namespace Test
 			Other    = 16
 		}
 
-		static bool asBool(int intValue)
-		{
-			bool boolValue = intValue != 0;
-			return boolValue;
-		}
-
-
 		static bool IsPowerOf2(int x)
 		{
 			// return ((x) && (!(x & (x - 1))));
@@ -157,135 +150,7 @@ namespace Test
 			return ((Convert.ToBoolean(x)) && (!Convert.ToBoolean((x & (x - 1)))));
 		}
 
-		[StructLayout(LayoutKind.Explicit)]
-		public struct CharInfo
-		{
-			[FieldOffset(0)]
-			internal char UnicodeChar;
-
-			[FieldOffset(0)]
-			internal char AsciiChar;
-
-			[FieldOffset(2)]
-			internal ushort Attributes;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct Coord
-		{
-			public short X;
-			public short Y;
-
-			public Coord(short x, short y)
-			{
-				X = x;
-				Y = y;
-			}
-		};
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct Rect
-		{
-			public short Left;
-			public short Top;
-			public short Right;
-			public short Bottom;
-		}
-
-		[DllImport("kernel32.dll")]
-		static extern IntPtr GetConsoleWindow();
-
-		[DllImport("kernel32.dll")]
-		static extern uint GetLastError();
-
-		[DllImport("kernel32.dll", SetLastError = true)]
-		static extern bool WriteConsoleOutput(IntPtr   consoleHandle, CharInfo[,] buffer, Coord bufSize, Coord bufZero,
-		                                      ref Rect drawRect);
-
-
-		public enum CharAttributes : ushort
-		{
-			/// <summary>
-			/// None.
-			/// </summary>
-			None = 0x0000,
-
-			/// <summary>
-			/// Text color contains blue.
-			/// </summary>
-			FOREGROUND_BLUE = 0x0001,
-
-			/// <summary>
-			/// Text color contains green.
-			/// </summary>
-			FOREGROUND_GREEN = 0x0002,
-
-			/// <summary>
-			/// Text color contains red.
-			/// </summary>
-			FOREGROUND_RED = 0x0004,
-
-			/// <summary>
-			/// Text color is intensified.
-			/// </summary>
-			FOREGROUND_INTENSITY = 0x0008,
-
-			/// <summary>
-			/// Background color contains blue.
-			/// </summary>
-			BACKGROUND_BLUE = 0x0010,
-
-			/// <summary>
-			/// Background color contains green.
-			/// </summary>
-			BACKGROUND_GREEN = 0x0020,
-
-			/// <summary>
-			/// Background color contains red.
-			/// </summary>
-			BACKGROUND_RED = 0x0040,
-
-			/// <summary>
-			/// Background color is intensified.
-			/// </summary>
-			BACKGROUND_INTENSITY = 0x0080,
-
-			/// <summary>
-			/// Leading byte.
-			/// </summary>
-			COMMON_LVB_LEADING_BYTE = 0x0100,
-
-			/// <summary>
-			/// Trailing byte.
-			/// </summary>
-			COMMON_LVB_TRAILING_BYTE = 0x0200,
-
-			/// <summary>
-			/// Top horizontal
-			/// </summary>
-			COMMON_LVB_GRID_HORIZONTAL = 0x0400,
-
-			/// <summary>
-			/// Left vertical.
-			/// </summary>
-			COMMON_LVB_GRID_LVERTICAL = 0x0800,
-
-			/// <summary>
-			/// Right vertical.
-			/// </summary>
-			COMMON_LVB_GRID_RVERTICAL = 0x1000,
-
-			/// <summary>
-			/// Reverse foreground and background attribute.
-			/// </summary>
-			COMMON_LVB_REVERSE_VIDEO = 0x4000,
-
-			/// <summary>
-			/// Underscore.
-			/// </summary>
-			COMMON_LVB_UNDERSCORE = 0x8000,
-		}
-
+		
 		class Class
 		{
 			public int doSomething2()
@@ -309,6 +174,14 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
+			var a = typeof(Class).GetAnyMethod("doSomething");
+			var b = typeof(Class).GetAnyMethod("doSomething2");
+			
+			Functions.Swap(a,b);
+
+			Debug.Assert(new Class().doSomething()==2);
+
+			Console.WriteLine(ClrFunctions.FindField(typeof(string), "m_firstChar"));
 			
 			
 			// SHUT IT DOWN
