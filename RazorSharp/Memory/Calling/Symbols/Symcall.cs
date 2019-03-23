@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
@@ -49,7 +50,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 			}
 		}
 
-		private static string GetSymbolName(SymcallAttribute attr, MethodInfo method)
+		private static string GetSymbolName(SymcallAttribute attr, [NotNull] MethodInfo method)
 		{
 			// Resolve the symbol
 			string fullSym       = null;
@@ -112,8 +113,8 @@ namespace RazorSharp.Memory.Calling.Symbols
 			Conditions.Requires(addresses.Length == methods.Length);
 
 			for (int i = 0; i < methods.Length; i++) {
-				Global.Log.Debug("Binding {Name} to {Addr} {Offset}", methods[i].Name,
-				                 addresses[i].ToString("P"),offsets[i].ToString("X"));
+				Global.Log.Debug("Binding {Name} to {Addr} (offset: {Offset}) (sym: {Symbol})", methods[i].Name,
+				                 addresses[i].ToString("P"),offsets[i].ToString("X"), contexts[i]);
 				var addr = addresses[i].Address;
 				ClrFunctions.SetStableEntryPoint(methods[i], addr);
 			}

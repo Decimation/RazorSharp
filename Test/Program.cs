@@ -34,10 +34,11 @@ using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;
+using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing;
-using static RazorSharp.CoreClr.ClrFunctions;
+
 using Constants = RazorSharp.CoreClr.Constants;
 using Unsafe = RazorSharp.Unsafe;
 
@@ -287,17 +288,20 @@ namespace Test
 
 		class Class
 		{
-			public void doSomething2()
+			public int doSomething2()
 			{
-				Console.WriteLine("doSomething2");
+				return 2;
+				
 			}
 
-			public void doSomething()
+			public int doSomething()
 			{
-				Console.WriteLine("doSomething");
+				return 1;
 			}
 		}
 
+		
+		
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -305,41 +309,14 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
-
-			var c = new Class();
-			c.doSomething();
-			c.doSomething2();
-			var method  = typeof(Class).GetAnyMethod("doSomething");
-			var method2 = typeof(Class).GetAnyMethod("doSomething2");
-
-			RuntimeHelpers.PrepareMethod(method.MethodHandle);
-			RuntimeHelpers.PrepareMethod(method2.MethodHandle);
-
-			const string sig = "48 89 5C 24 10 48 89 74 24 18 57 48 83";
-
-			var fn = SigScanner.QuickScanDelegate<SetEntryPointDelegate>("clr.dll", sig);
-
-			var result = fn((MethodDesc*) method2.MethodHandle.Value,
-			                (ulong) method.MethodHandle.GetFunctionPointer());
-
-			result = fn((MethodDesc*) method2.MethodHandle.Value,
-			            (ulong) method.MethodHandle.GetFunctionPointer());
-
 			
-			Console.WriteLine("Result: {0}", result);
-
-			c.doSomething();
-			c.doSomething2();
-
-			Console.WriteLine(typeof(string).GetMetaType());
-
+			
 			// SHUT IT DOWN
 			Clr.Close();
 			Global.Close();
 		}
 
-
-		delegate void* get(void* x, void* y);
+		
 
 		[DllImport(@"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\clr.dll")]
 		private static extern void* GetCLRFunction(string str);

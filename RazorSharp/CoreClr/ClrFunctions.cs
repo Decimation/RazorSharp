@@ -4,9 +4,11 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using RazorCommon;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Signatures;
+using RazorSharp.Memory.Calling.Signatures.Attributes;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
@@ -37,40 +39,24 @@ namespace RazorSharp.CoreClr
 	{
 		static ClrFunctions()
 		{
-			
-		}
-
-		/// <summary>
-		///     Used just to invoke the type initializer
-		/// </summary>
-		internal static void Init()
-		{
-			
 			const string FN = "MethodDesc::SetStableEntryPointInterlocked";
-			//SetStableEntryPointInterlocked = GetClrFunction<SetStableEntryPointInterlockedDelegate>(FN);
-
-
-			SetEntryPoint =
-				SigScanner.QuickScanDelegate<SetEntryPointDelegate>(
-					"clr.dll", "48 89 5C 24 10 48 89 74 24 18 57 48 83");
-			
-
+			SetEntryPoint = GetClrFunction<SetEntryPointDelegate>(FN);
 			Symcall.BindQuick(typeof(ClrFunctions));
-
 			Global.Log.Information("ClrFunctions init complete");
-			// Conditions.Requires(SignatureCall.IsBound(typeof(ClrFunctions)));
 		}
+
+		
 
 		/// <summary>
 		///     Returns the corresponding <see cref="Type" /> for a <see cref="MethodTable" /> pointer.
 		/// </summary>
-		/// <param name="__struct"><see cref="MethodTable" /> pointer</param>
+		/// <param name="value"><see cref="MethodTable" /> pointer</param>
 		/// <returns></returns>
 		/// <exception cref="SigcallException">Method has not been bound</exception>
 		[ClrSymcall(UseMethodNameOnly = true)]
-		internal static Type JIT_GetRuntimeType(void* __struct)
+		internal static Type JIT_GetRuntimeType(void* value)
 		{
-			throw new SigcallException();
+			throw new SigcallException(nameof(JIT_GetRuntimeType));
 		}
 
 		[ClrSymcall(UseMethodNameOnly = true)]
@@ -88,9 +74,9 @@ namespace RazorSharp.CoreClr
 		/// </summary>
 		/// <param name="__this"><c>this</c> pointer of a <see cref="MethodDesc" /></param>
 		/// <param name="pCode">Entry point</param>
-		internal delegate int SetEntryPointDelegate(MethodDesc* __this, ulong pCode);
+		internal delegate long SetEntryPointDelegate(MethodDesc* value, ulong pCode);
 
-		private static /*readonly*/ SetEntryPointDelegate SetEntryPoint;
+		private static readonly SetEntryPointDelegate SetEntryPoint;
 
 		private static readonly byte[] s_rgStableEntryPointInterlockedSignature =
 		{
@@ -109,12 +95,15 @@ namespace RazorSharp.CoreClr
 		{
 			var pMd = (MethodDesc*) mi.MethodHandle.Value;
 			var result = SetEntryPoint(pMd, (ulong) pCode);
-			Conditions.Assert(result >0);
+			if (!(result > 0)) {
+				Global.Log.Warning("Could not set entry point for {Method}", mi.Name);	
+			}
+			//Conditions.Assert(result >0);
 		}
 
 		#endregion
 
-		[ClrSymcall(UseMethodNameOnly = true)]
+		[ClrSymcall(Symbol = "MethodTable::GetSignatureCorElementType", FullyQualified = true)]
 		internal static uint GetSignatureCorElementType(Pointer<MethodTable> pMT)
 		{
 			throw new SigcallException();
@@ -164,7 +153,7 @@ namespace RazorSharp.CoreClr
 			Module*         pModule,
 			BOOL            bCaseSensitive = TRUE);
 		*/
-		[ClrSymcall(UseMethodNameOnly = true)]
+		[ClrSymcall(Symbol = "MemberLoader::FindField", FullyQualified = true)]
 		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT,
 		                                             Pointer<byte>        pszName,
 		                                             Pointer<byte>        pSig,

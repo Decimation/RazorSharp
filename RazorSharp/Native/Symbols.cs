@@ -87,16 +87,20 @@ namespace RazorSharp.Native
 
 			if (maxCmpLen == pSymInfo->NameLen) {
 				var s = Marshal.PtrToStringAnsi(new IntPtr(&pSymInfo->Name), (int) pSymInfo->NameLen);
-
+				
 				if (String.CompareOrdinal(s, str) == 0) {
-					var childs = new FindChildrenParams();
+					
+					//var childs = new FindChildrenParams();
 					
 					// Don't ensure this method returns true
-					DbgHelp.SymGetTypeInfo(m_process, pSymInfo->ModBase, pSymInfo->TypeIndex,
-					                       ImageHelpSymbolTypeInfo.TI_GET_CHILDRENCOUNT, &childs.Count);
+					//DbgHelp.SymGetTypeInfo(m_process, pSymInfo->ModBase, pSymInfo->TypeIndex,
+					//                       ImageHelpSymbolTypeInfo.TI_GET_CHILDRENCOUNT, &childs.Count);
 
 					m_addrBuffer = (IntPtr) pSymInfo->Address;
+					return false;
 				}
+
+				
 			}
 
 			return true;
@@ -157,10 +161,13 @@ namespace RazorSharp.Native
 		public static Pointer<byte> GetSymAddress(string image, string module, string name)
 		{
 			using (var sym = new Symbols(image)) {
-				return sym.GetSymAddress(name, module);
+				var addr=sym.GetSymAddress(name, module);
+				return addr;
 			}
 		}
 
+		
+		
 		internal static FileInfo DownloadSymbolFile(DirectoryInfo dest, FileInfo dll)
 		{
 			return DownloadSymbolFile(dest, dll, out _);
