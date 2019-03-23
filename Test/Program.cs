@@ -310,17 +310,36 @@ namespace Test
 			var proc = Process.GetProcessById((int) pid);
 
 
-			var ptr = GetCLRFunction("IsRuntimeStarted");
-			Console.WriteLine(Hex.ToHex(ptr));
 
-			const int offset = 0xF560;
-			var ptr2=Modules.GetAddress("clr.dll", offset);
-			Console.WriteLine("{0:P}",ptr2);
+			var method = typeof(Program).GetAnyMethod("doSomething");
+			var method2 = typeof(Program).GetAnyMethod("doSomething2");
+
+			var ss=SigScanner.QuickScan("clr.dll", "48 89 5C 24 10 48 89 74 24 18 57 48 83");
+			Console.WriteLine("ss: {0:X}",ss.ToInt64());
+			
+			var sym=Symbols.GetSymAddress(Clr.ClrPdb.FullName, "clr.dll", "MethodDesc::SetStableEntryPointInterlocked");
+			Console.WriteLine("sym: {0}", sym);
+			
+			const int offset = 0x1A9418;
+			var seg = Segments.GetSegment(".text", "clr.dll");
+			var ptr2 = (seg.SectionAddress + offset);
+			Console.WriteLine("fn @ {0:P}",ptr2);
+			Console.WriteLine(ptr2.Query());
+			Console.WriteLine(Collections.CreateString(ptr2.CopyOutBytes(5), ToStringOptions.Hex));
 			var fnp=Marshal.GetDelegateForFunctionPointer<ClrFunctions.SetStableEntryPointInterlockedDelegate>(ptr2.Address);
-			Console.WriteLine(Hex.ToHex(fnp()));
+
+
+			var md = (MethodDesc*) method.MethodHandle.Value;
+			var ep = (ulong) method2.MethodHandle.GetFunctionPointer();
+
+			var res = fnp(md, ep);
+			Console.WriteLine("!!>> {0}",res);
+			
+			
 			
 			Console.WriteLine(typeof(string).GetMetaType());
 			var fn=ClrFunctions.GetClrFunctionAddress("GetThreadGeneric");
+			Console.WriteLine("bro");
 			Console.WriteLine("{0:P}",fn);
 			
 			
@@ -333,6 +352,16 @@ namespace Test
 			
 		}
 
+		static void doSomething2()
+		{
+			Console.WriteLine("doSomething2");
+		}
+		
+		static void doSomething()
+		{
+			Console.WriteLine("doSomething");
+		}
+		
 		delegate void* get(void* x, void* y);
 		
 		[DllImport(@"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\clr.dll")]

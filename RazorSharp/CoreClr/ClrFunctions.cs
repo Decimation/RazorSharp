@@ -38,10 +38,19 @@ namespace RazorSharp.CoreClr
 		static ClrFunctions()
 		{
 			const string FN = "MethodDesc::SetStableEntryPointInterlocked";
-			SetStableEntryPointInterlocked = GetClrFunction<SetStableEntryPointInterlockedDelegate>(FN);
+			//SetStableEntryPointInterlocked = GetClrFunction<SetStableEntryPointInterlockedDelegate>(FN);
 
+			
+			const long offset = 1741848;
+			
+			var       ptr2   =Modules.GetAddress("clr.dll", offset);
+			Console.WriteLine("SetStable {0:P}",ptr2);
+			SetStableEntryPointInterlocked=Marshal.GetDelegateForFunctionPointer<ClrFunctions.SetStableEntryPointInterlockedDelegate>(ptr2.Address);
+			
 
 			Symcall.BindQuick(typeof(ClrFunctions));
+
+			Global.Log.Information("ClrFunctions init complete");
 		}
 
 		/// <summary>
