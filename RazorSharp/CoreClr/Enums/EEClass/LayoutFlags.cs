@@ -1,7 +1,8 @@
 using System;
 using RazorSharp.CoreClr.Structures.EE;
 
-namespace RazorSharp.CoreClr.Enums.EEClass {
+namespace RazorSharp.CoreClr.Enums.EEClass
+{
 	/// <summary>
 	///     <para>Sources:</para>
 	///     <list type="bullet">

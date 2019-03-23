@@ -12,6 +12,8 @@ namespace RazorSharp.Pointers
 	/// </summary>
 	public static unsafe class PointerUtils
 	{
+		// todo: move this to Pointer
+		
 		/// <summary>
 		///     Subtracts <paramref name="right" /> bytes from <paramref name="left" />'s <see cref="Pointer{T}.Address" />
 		/// </summary>

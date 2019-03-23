@@ -149,7 +149,8 @@ namespace RazorSharp.CoreClr.Structures
 		internal bool IsAutoProperty {
 			get {
 				string demangled = Identifiers.DemangledAutoPropertyName(Name);
-				if (demangled != null) return Identifiers.NameOfAutoPropertyBackingField(demangled) == Name;
+				if (demangled != null) 
+					return Identifiers.NameOfAutoPropertyBackingField(demangled) == Name;
 
 				return false;
 			}
@@ -247,7 +248,8 @@ namespace RazorSharp.CoreClr.Structures
 
 
 			var data = Unsafe.AddressOf(ref t).Address;
-			if (typeof(TInstance).IsValueType) return data + Offset;
+			if (typeof(TInstance).IsValueType) 
+				return data + Offset;
 
 			data =  Marshal.ReadIntPtr(data);
 			data += IntPtr.Size + Offset;

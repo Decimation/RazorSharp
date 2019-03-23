@@ -51,7 +51,8 @@ namespace RazorSharp.Memory
 			int failedMatches = 0;
 			// ReSharper disable once LoopCanBeConvertedToQuery
 			for (int i = 0; i < arrPattern.Count; i++) {
-				if (arrPattern[i] == 0x0) continue;
+				if (arrPattern[i] == 0x0) 
+					continue;
 
 				if (arrPattern[i] != m_rgModuleBuffer[nOffset + i]) {
 					failedMatches++;
@@ -65,7 +66,8 @@ namespace RazorSharp.Memory
 				Global.Log.Verbose("Failed bytes: {Count} (tolerance: {N})", failedMatches, byteTolerance);
 			}
 
-			if (failedMatches <= byteTolerance) return true;
+			if (failedMatches <= byteTolerance) 
+				return true;
 			return true;
 		}
 
@@ -88,16 +90,10 @@ namespace RazorSharp.Memory
 		public IntPtr FindPattern(byte[] rgPattern, long ofsGuess = 0, int byteTolerance = 0)
 		{
 			ModuleCheck();
-			bool ofsGuessFailed = false;
 
 			if (ofsGuess != 0) {
 				if (PatternCheck(ofsGuess, rgPattern, byteTolerance))
 					return PointerUtils.Add(m_lpModuleBase, ofsGuess).Address;
-
-//					throw new Exception($"Offset guess of {ofsGuess} failed");
-
-//					Logger.Log("Offset guess of {0} failed", Hex.ToHex(ofsGuess));
-				ofsGuessFailed = true;
 			}
 
 			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
@@ -107,9 +103,6 @@ namespace RazorSharp.Memory
 
 				if (PatternCheck(nModuleIndex, rgPattern)) {
 					var p = m_lpModuleBase + nModuleIndex;
-					//Console.WriteLine("Matched opcodes: {0} (actual offset: {1:X}) (theoretical offset: {2:X}) (addr: {3:X})",
-					//                  Collections.CreateString(rgPattern, ToStringOptions.Hex), nModuleIndex, 
-					//                  ofsGuess,p.ToInt64());
 					return p;
 				}
 			}
@@ -117,10 +110,7 @@ namespace RazorSharp.Memory
 			return IntPtr.Zero;
 		}
 
-		internal string Dump()
-		{
-			return String.Format("Module buffer size: {0}", m_rgModuleBuffer.Length);
-		}
+		
 
 		public IntPtr FindPattern(string szPattern, long ofsGuess = 0, int byteTolerance = 0)
 		{
@@ -165,28 +155,7 @@ namespace RazorSharp.Memory
 			return QuickScanDelegate<TDelegate>(module, StringUtil.ParseByteArray(szPattern), ofsGuess);
 		}
 
-		/*public IntPtr FindPattern(string szPattern, out long lTime)
-		{
-			ModuleCheck();
-
-			Stopwatch stopwatch = Stopwatch.StartNew();
-
-			byte[] arrPattern = ParsePatternString(szPattern);
-
-			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
-				if (m_rgModuleBuffer[nModuleIndex] != arrPattern[0]) {
-					continue;
-				}
-
-				if (PatternCheck(nModuleIndex, arrPattern)) {
-					lTime = stopwatch.ElapsedMilliseconds;
-					return m_lpModuleBase + nModuleIndex;
-				}
-			}
-
-			lTime = stopwatch.ElapsedMilliseconds;
-			return IntPtr.Zero;
-		}*/
+		
 
 		public TDelegate GetDelegate<TDelegate>(byte[] rgPattern, long ofsGuess = 0) where TDelegate : Delegate
 		{
@@ -255,7 +224,8 @@ namespace RazorSharp.Memory
 		public void SelectModuleBySegment(string moduleName, string segmentName)
 		{
 			// Module already selected
-			if (moduleName == m_moduleName) return;
+			if (moduleName == m_moduleName) 
+				return;
 
 			var segment = Segments.GetSegment(segmentName, moduleName);
 			Setup(segment.SectionSize, segment.SectionAddress.Address, moduleName);
@@ -278,7 +248,8 @@ namespace RazorSharp.Memory
 		public void SelectModuleAsPage(string moduleName, Pointer<byte> pageBase)
 		{
 			// Module already selected
-			if (moduleName == m_moduleName) return;
+			if (moduleName == m_moduleName) 
+				return;
 
 			var page = Kernel32.VirtualQuery(pageBase.Address);
 
@@ -288,7 +259,8 @@ namespace RazorSharp.Memory
 		public bool SelectModule(ProcessModule targetModule)
 		{
 			// Module already selected
-			if (targetModule.ModuleName == m_moduleName) return true;
+			if (targetModule.ModuleName == m_moduleName) 
+				return true;
 
 			m_lpModuleBase   = targetModule.BaseAddress;
 			m_rgModuleBuffer = new byte[targetModule.ModuleMemorySize];
@@ -305,7 +277,8 @@ namespace RazorSharp.Memory
 		public void SelectModule(string name)
 		{
 			// Module already selected
-			if (name == m_moduleName) return;
+			if (name == m_moduleName) 
+				return;
 
 			SelectModule(Modules.GetModule(name));
 		}

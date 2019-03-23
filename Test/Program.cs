@@ -4,6 +4,7 @@
 #region
 
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -32,6 +33,7 @@ using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
+using RazorSharp.Native.Enums;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing;
@@ -100,7 +102,7 @@ namespace Test
 
 
 		// https://github.com/dotnet/coreclr/blob/1f3f474a13bdde1c5fecdf8cd9ce525dbe5df000/src/vm/reflectioninvocation.cpp#L2970
-		static bool HasFlagFast<TEnum>(this TEnum value, TEnum flag)
+		static bool HasFlagFast<TEnum>(this TEnum value, TEnum flag) where TEnum : Enum
 		{
 			var pThis  = Unsafe.AddressOf(ref value);
 			var pFlags = Unsafe.AddressOf(ref flag);
@@ -123,6 +125,166 @@ namespace Test
 			}
 		}
 
+		[Flags]
+		public enum PhoneService
+		{
+			None     = 0,
+			LandLine = 1,
+			Cell     = 2,
+			Fax      = 4,
+			Internet = 8,
+			Other    = 16
+		}
+
+		static bool asBool(int intValue)
+		{
+			bool boolValue = intValue != 0;
+			return boolValue;
+		}
+
+
+		static bool IsPowerOf2(int x)
+		{
+			// return ((x) && (!(x & (x - 1))));
+			return ((Convert.ToBoolean(x)) && (!Convert.ToBoolean((x & (x - 1)))));
+		}
+
+		[StructLayout(LayoutKind.Explicit)]
+		public struct CharInfo
+		{
+			[FieldOffset(0)]
+			internal char UnicodeChar;
+
+			[FieldOffset(0)]
+			internal char AsciiChar;
+
+			[FieldOffset(2)]
+			internal ushort Attributes;
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct Coord
+		{
+			public short X;
+			public short Y;
+
+			public Coord(short x, short y)
+			{
+				X = x;
+				Y = y;
+			}
+		};
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct Rect
+		{
+			public short Left;
+			public short Top;
+			public short Right;
+			public short Bottom;
+		}
+
+		[DllImport("kernel32.dll")]
+		static extern IntPtr GetConsoleWindow();
+
+		[DllImport("kernel32.dll")]
+		static extern uint GetLastError();
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		static extern bool WriteConsoleOutput(IntPtr   consoleHandle, CharInfo[,] buffer, Coord bufSize, Coord bufZero,
+		                                      ref Rect drawRect);
+
+		// This is for test
+		[DllImport("user32.dll")]
+		static extern bool SetWindowText(IntPtr hWnd, string text);
+
+		public enum CharAttributes : ushort
+		{
+			/// <summary>
+			/// None.
+			/// </summary>
+			None = 0x0000,
+
+			/// <summary>
+			/// Text color contains blue.
+			/// </summary>
+			FOREGROUND_BLUE = 0x0001,
+
+			/// <summary>
+			/// Text color contains green.
+			/// </summary>
+			FOREGROUND_GREEN = 0x0002,
+
+			/// <summary>
+			/// Text color contains red.
+			/// </summary>
+			FOREGROUND_RED = 0x0004,
+
+			/// <summary>
+			/// Text color is intensified.
+			/// </summary>
+			FOREGROUND_INTENSITY = 0x0008,
+
+			/// <summary>
+			/// Background color contains blue.
+			/// </summary>
+			BACKGROUND_BLUE = 0x0010,
+
+			/// <summary>
+			/// Background color contains green.
+			/// </summary>
+			BACKGROUND_GREEN = 0x0020,
+
+			/// <summary>
+			/// Background color contains red.
+			/// </summary>
+			BACKGROUND_RED = 0x0040,
+
+			/// <summary>
+			/// Background color is intensified.
+			/// </summary>
+			BACKGROUND_INTENSITY = 0x0080,
+
+			/// <summary>
+			/// Leading byte.
+			/// </summary>
+			COMMON_LVB_LEADING_BYTE = 0x0100,
+
+			/// <summary>
+			/// Trailing byte.
+			/// </summary>
+			COMMON_LVB_TRAILING_BYTE = 0x0200,
+
+			/// <summary>
+			/// Top horizontal
+			/// </summary>
+			COMMON_LVB_GRID_HORIZONTAL = 0x0400,
+
+			/// <summary>
+			/// Left vertical.
+			/// </summary>
+			COMMON_LVB_GRID_LVERTICAL = 0x0800,
+
+			/// <summary>
+			/// Right vertical.
+			/// </summary>
+			COMMON_LVB_GRID_RVERTICAL = 0x1000,
+
+			/// <summary>
+			/// Reverse foreground and background attribute.
+			/// </summary>
+			COMMON_LVB_REVERSE_VIDEO = 0x4000,
+
+			/// <summary>
+			/// Underscore.
+			/// </summary>
+			COMMON_LVB_UNDERSCORE = 0x8000,
+		}
+
+
+		
+
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -130,32 +292,36 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
+			int n31 = 31;
+			int n64 = 64;
+			Conditions.Assert(!IsPowerOf2(n31));
+			Conditions.Assert(IsPowerOf2(n64));
+			
+			var rect  = new Rect() {Left = 10, Top = 0, Right = 11, Bottom = 1};
+			var bufsz = new Coord(2, 2);
+			var buf   = new CharInfo[2, 2];
+			buf[0, 0] = new CharInfo() {AsciiChar = '+'};
+			var bufpos = new Coord(0, 0);
 
-			var list = new List<int>
-			{
-				1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
-			};
+			
+			var chnd = GetConsoleWindow();
+			Console.WriteLine(Hex.ToHex(chnd));
+			Console.WriteLine(Hex.ToHex(Process.GetCurrentProcess().MainWindowHandle));
+			Console.WriteLine(Hex.ToHex(Process.GetCurrentProcess().Handle));
+			Console.WriteLine(Hex.ToHex(Kernel32.GetStdHandle((StandardHandles.StdOutputHandle))));
+			var std = Console.OpenStandardOutput();
 
+			string frame = "SunAwtFrame";
+			var hnd = new IntPtr(0x00810BA2);
+			var hnd2 = User32.FindWindow(frame, null);
+			Console.WriteLine(">> {0}",Hex.ToHex(hnd2));
+			
 
-			Kernel32.ReadProcessMemory(Process.GetCurrentProcess(), 0L, 10);
-
-
-//			MemoryMarshal
-//			Marshal
-//			BitConverter
-//			Convert
-//			Span
-//			Memory
-//			Buffer
-//			etc
 
 			// SHUT IT DOWN
 			Clr.Close();
 			Global.Close();
 		}
-
-
-		
 
 
 		private static void Dump<T>(T t, int recursivePasses = 0)

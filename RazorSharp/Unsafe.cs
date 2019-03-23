@@ -331,7 +331,8 @@ namespace RazorSharp
 
 			Pointer<MethodTable> mt = typeof(T).GetMethodTable();
 			Pointer<EEClass>     ee = mt.Reference.EEClass;
-			if (ee.Reference.HasLayout) return (int) ee.Reference.LayoutInfo->ManagedSize;
+			if (ee.Reference.HasLayout) 
+				return (int) ee.Reference.LayoutInfo->ManagedSize;
 
 			return INVALID_VALUE;
 		}

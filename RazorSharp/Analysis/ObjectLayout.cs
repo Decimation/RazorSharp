@@ -37,7 +37,8 @@ namespace RazorSharp.Analysis
 
 		private byte[] TryGetObjHeaderAsBytes()
 		{
-			if (m_bIsArray) return ReadBytes(m_pAddr, -IntPtr.Size, sizeof(uint));
+			if (m_bIsArray)
+				return ReadBytes(m_pAddr, -IntPtr.Size, sizeof(uint));
 
 			// Only read the second DWORD; the first DWORD is alignment padding
 			byte[] mem = typeof(T).IsValueType ? null : ReadBytes(m_pAddr, -IntPtr.Size, sizeof(uint));
@@ -48,7 +49,8 @@ namespace RazorSharp.Analysis
 
 		private IntPtr TryGetMethodTablePointer()
 		{
-			if (m_bIsArray) return Marshal.ReadIntPtr(m_pAddr);
+			if (m_bIsArray)
+				return Marshal.ReadIntPtr(m_pAddr);
 
 			return typeof(T).IsValueType ? IntPtr.Zero : Marshal.ReadIntPtr(m_pAddr);
 		}
@@ -110,9 +112,11 @@ namespace RazorSharp.Analysis
 
 		private static UniqueAttributes FindUniqueAttributes(Pointer<FieldDesc> fd)
 		{
-			if (fd.Reference.IsFixedBuffer) return UniqueAttributes.FixedBuffer;
+			if (fd.Reference.IsFixedBuffer)
+				return UniqueAttributes.FixedBuffer;
 
-			if (fd.Reference.IsAutoProperty) return UniqueAttributes.AutoProperty;
+			if (fd.Reference.IsAutoProperty)
+				return UniqueAttributes.AutoProperty;
 
 			return UniqueAttributes.None;
 		}

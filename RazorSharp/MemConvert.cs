@@ -3,6 +3,7 @@
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using System;
+using System.Runtime.InteropServices;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 #endregion
 
@@ -13,6 +14,11 @@ namespace RazorSharp
 	/// <summary>
 	/// <seealso cref="BitConverter"/>
 	/// <seealso cref="System.Convert"/>
+	/// <seealso cref="MemoryMarshal"/>
+	/// <seealso cref="Marshal"/>
+	/// <seealso cref="Span{T}"/>
+	/// <seealso cref="Memory{T}"/>
+	/// <seealso cref="Buffer"/>
 	/// </summary>
 	public static class MemConvert
 	{

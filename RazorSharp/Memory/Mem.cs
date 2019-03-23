@@ -38,7 +38,6 @@ namespace RazorSharp.Memory
 	public static unsafe class Mem
 	{
 		// todo: make all consts match SCREAMING_SNAKE_CASE
-		private const  byte Int32Bits       = 32;
 		internal const int  BytesInKilobyte = 1024;
 
 
@@ -192,16 +191,17 @@ namespace RazorSharp.Memory
 		#region String
 
 		/// <summary>
-		/// Allocates a LPCUTF8 native string from a UTF16 C# string
+		/// Allocates a native string from a UTF16 C# string
 		/// </summary>
 		/// <param name="s">Standard UTF16 C# string</param>
+		/// <param name="type"></param>
 		/// <returns></returns>
-		public static Pointer<byte> AllocString(string s)
+		public static Pointer<byte> AllocString(string s, StringTypes type)
 		{
 			var           size = s.Length + 1;
 			Pointer<byte> ptr  = AllocUnmanaged<byte>(size);
-			ptr.WriteString(s, StringTypes.AnsiStr);
-			Conditions.Assert(ptr.ReadString(StringTypes.AnsiStr) == s);
+			ptr.WriteString(s, type);
+			Conditions.Assert(ptr.ReadString(type) == s);
 
 			return ptr;
 		}

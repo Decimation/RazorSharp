@@ -200,7 +200,8 @@ namespace RazorSharp.CoreClr.Structures
 		/// <exception cref="RuntimeException">If this is not an array <see cref="MethodTable" />.</exception>
 		internal Pointer<MethodTable> ElementTypeHandle {
 			get {
-				if (IsArray) return (MethodTable*) m_ElementTypeHnd;
+				if (IsArray) 
+					return (MethodTable*) m_ElementTypeHnd;
 
 				throw new RuntimeException("Element type handles cannot be accessed when type is not an array");
 			}

@@ -28,10 +28,14 @@ namespace RazorSharp.Native
 	{
 		private const string DBG_HELP_DLL = "DbgHelp.dll";
 
+		/// <summary>
+		/// SYM_ENUMERATESYMBOLS_CALLBACK
+		/// </summary>
+		/// <param name="symInfo">SYMBOL_INFO</param>
+		/// <param name="symbolSize"></param>
+		/// <param name="pUserContext"></param>
 		[return: MarshalAs(UnmanagedType.Bool)]
-		internal delegate bool SYM_ENUMERATESYMBOLS_CALLBACK( /*SYMBOL_INFO*/ IntPtr symInfo,
-		                                                                      uint   symbolSize,
-		                                                                      IntPtr pUserContext);
+		internal delegate bool SymEnumerateSymbols(IntPtr symInfo, uint symbolSize, IntPtr pUserContext);
 
 		//BOOL IMAGEAPI SymGetTypeInfo(
 		//	HANDLE                    hProcess,
@@ -50,30 +54,30 @@ namespace RazorSharp.Native
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SymEnumTypesByNameW")]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool SymEnumTypesByName(IntPtr                        hProcess,
-		                                               ulong                         modBase,
-		                                               string                        mask,
-		                                               SYM_ENUMERATESYMBOLS_CALLBACK callback,
-		                                               IntPtr                        pUserContext);
+		internal static extern bool SymEnumTypesByName(IntPtr              hProcess,
+		                                               ulong               modBase,
+		                                               string              mask,
+		                                               SymEnumerateSymbols callback,
+		                                               IntPtr              pUserContext);
 
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SymEnumSymbolsW")]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool SymEnumSymbols(IntPtr                        hProcess,
-		                                           ulong                         modBase,
-		                                           string                        mask,
-		                                           SYM_ENUMERATESYMBOLS_CALLBACK callback,
-		                                           IntPtr                        pUserContext);
+		internal static extern bool SymEnumSymbols(IntPtr              hProcess,
+		                                           ulong               modBase,
+		                                           string              mask,
+		                                           SymEnumerateSymbols callback,
+		                                           IntPtr              pUserContext);
 
 		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool SymEnumSymbols(IntPtr                        hProcess,
-		                                           ulong                         modBase,
-		                                           IntPtr                        mask,
-		                                           SYM_ENUMERATESYMBOLS_CALLBACK callback,
-		                                           IntPtr                        pUserContext);
+		internal static extern bool SymEnumSymbols(IntPtr              hProcess,
+		                                           ulong               modBase,
+		                                           IntPtr              mask,
+		                                           SymEnumerateSymbols callback,
+		                                           IntPtr              pUserContext);
 
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true)]
@@ -105,7 +109,13 @@ namespace RazorSharp.Native
 		}*/
 
 
-		// BOOL SymInitialize(HANDLE hProcess, PCSTR UserSearchPath, BOOL fInvadeProcess)
+		/// <summary>
+		/// BOOL SymInitialize(HANDLE hProcess, PCSTR UserSearchPath, BOOL fInvadeProcess)
+		/// </summary>
+		/// <param name="hProcess"></param>
+		/// <param name="userSearchPath"></param>
+		/// <param name="fInvadeProcess"></param>
+		/// <returns></returns>
 		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SymInitialize")]
@@ -114,52 +124,99 @@ namespace RazorSharp.Native
 		                                          void*                                userSearchPath,
 		                                          [MarshalAs(UnmanagedType.Bool)] bool fInvadeProcess);
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="hProcess"></param>
+		/// <param name="hFile"></param>
+		/// <param name="imageName"></param>
+		/// <param name="moduleName"></param>
+		/// <param name="baseOfDll"></param>
+		/// <param name="dllSize"></param>
+		/// <param name="data">MODLOAD_DATA</param>
+		/// <param name="flags"></param>
+		/// <returns></returns>
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SymLoadModuleExW")]
-		internal static extern ulong SymLoadModuleEx(IntPtr                  hProcess,
-		                                             IntPtr                  hFile,
-		                                             string                  ImageName,
-		                                             string                  ModuleName,
-		                                             ulong                   BaseOfDll,
-		                                             uint                    DllSize,
-		                                             /*MODLOAD_DATA*/ IntPtr Data,
-		                                             uint                    Flags);
+		internal static extern ulong SymLoadModuleEx(IntPtr hProcess,
+		                                             IntPtr hFile,
+		                                             string imageName,
+		                                             string moduleName,
+		                                             ulong  baseOfDll,
+		                                             uint   dllSize,
+		                                             IntPtr data,
+		                                             uint   flags);
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="hProcess"></param>
+		/// <param name="hFile"></param>
+		/// <param name="imageName"></param>
+		/// <param name="moduleName"></param>
+		/// <param name="baseOfDll"></param>
+		/// <param name="dllSize"></param>
+		/// <param name="data">MODLOAD_DATA</param>
+		/// <param name="flags"></param>
+		/// <returns></returns>
 		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true)]
-		internal static extern ulong SymLoadModuleEx(IntPtr                  hProcess,
-		                                             IntPtr                  hFile,
-		                                             IntPtr                  ImageName,
-		                                             IntPtr                  ModuleName,
-		                                             ulong                   BaseOfDll,
-		                                             uint                    DllSize,
-		                                             /*MODLOAD_DATA*/ IntPtr Data,
-		                                             uint                    Flags);
+		internal static extern ulong SymLoadModuleEx(IntPtr hProcess,
+		                                             IntPtr hFile,
+		                                             IntPtr imageName,
+		                                             IntPtr moduleName,
+		                                             ulong  baseOfDll,
+		                                             uint   dllSize,
+		                                             IntPtr data,
+		                                             uint   flags);
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="hProcess"></param>
+		/// <param name="hFile"></param>
+		/// <param name="imageName"></param>
+		/// <param name="moduleName"></param>
+		/// <param name="baseOfDll"></param>
+		/// <param name="dllSize"></param>
+		/// <param name="data">MODLOAD_DATA</param>
+		/// <param name="flags"></param>
+		/// <returns></returns>
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
-		internal static extern ulong SymLoadModuleEx(IntPtr                  hProcess,
-		                                             IntPtr                  hFile,
-		                                             StringBuilder           ImageName,
-		                                             StringBuilder           ModuleName,
-		                                             ulong                   BaseOfDll,
-		                                             uint                    DllSize,
-		                                             /*MODLOAD_DATA*/ IntPtr Data,
-		                                             uint                    Flags);
+		internal static extern ulong SymLoadModuleEx(IntPtr        hProcess,
+		                                             IntPtr        hFile,
+		                                             StringBuilder imageName,
+		                                             StringBuilder moduleName,
+		                                             ulong         baseOfDll,
+		                                             uint          dllSize,
+		                                             IntPtr        data,
+		                                             uint          flags);
 
 
-		// BOOL SymEnumTypes(HANDLE hProcess, ULONG64 BaseOfDll, PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, PVOID UserContext)
+		/// <summary>
+		/// BOOL SymEnumTypes(HANDLE hProcess, ULONG64 BaseOfDll, PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, PVOID UserContext)
+		/// </summary>
+		/// <param name="hProcess"></param>
+		/// <param name="modBase"></param>
+		/// <param name="callback"></param>
+		/// <param name="pUserContext"></param>
+		/// <returns></returns>
 		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool SymEnumTypes(IntPtr                        hProcess,
-		                                         ulong                         modBase,
-		                                         SYM_ENUMERATESYMBOLS_CALLBACK callback,
-		                                         IntPtr                        pUserContext);
+		internal static extern bool SymEnumTypes(IntPtr              hProcess,
+		                                         ulong               modBase,
+		                                         SymEnumerateSymbols callback,
+		                                         IntPtr              pUserContext);
 
-		// BOOL SymCleanup(HANDLE hProcess)
+		/// <summary>
+		/// BOOL SymCleanup(HANDLE hProcess)
+		/// </summary>
+		/// <param name="hProcess"></param>
+		/// <returns></returns>
 		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]

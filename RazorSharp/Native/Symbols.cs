@@ -40,7 +40,7 @@ namespace RazorSharp.Native
 			m_imgStrNative  = Marshal.StringToHGlobalAnsi(image);
 			m_maskStrNative = Marshal.StringToHGlobalAnsi(mask);
 
-			Conditions.Assert(DbgHelp.SymInitialize(m_process, null, false));
+			Conditions.NativeRequire(DbgHelp.SymInitialize(m_process, null, false));
 
 			m_dllBase = DbgHelp.SymLoadModuleEx(m_process, IntPtr.Zero,m_imgStrNative,
 			                                    IntPtr.Zero,m_base,size,IntPtr.Zero,0);
@@ -89,7 +89,9 @@ namespace RazorSharp.Native
 				var s = Marshal.PtrToStringAnsi(new IntPtr(&pSymInfo->Name), (int) pSymInfo->NameLen);
 
 				if (String.CompareOrdinal(s, str) == 0) {
-					var childs = new TI_FINDCHILDREN_PARAMS();
+					var childs = new FindChildrenParams();
+					
+					// Don't ensure this method returns true
 					DbgHelp.SymGetTypeInfo(m_process, pSymInfo->ModBase, pSymInfo->TypeIndex,
 					                       ImageHelpSymbolTypeInfo.TI_GET_CHILDRENCOUNT, &childs.Count);
 
@@ -102,12 +104,12 @@ namespace RazorSharp.Native
 
 		private void SymEnumSymbols(IntPtr ctxStrNative)
 		{
-			Conditions.Assert(DbgHelp.SymEnumSymbols(m_process, m_dllBase, m_maskStrNative, EnumSymProc, ctxStrNative));
+			Conditions.NativeRequire(DbgHelp.SymEnumSymbols(m_process, m_dllBase, m_maskStrNative, EnumSymProc, ctxStrNative));
 		}
 
 		private void SymEnumTypes(IntPtr ctxStrNative)
 		{
-			Conditions.Assert(DbgHelp.SymEnumTypes(m_process, m_dllBase, EnumSymProc, ctxStrNative));
+			Conditions.NativeRequire(DbgHelp.SymEnumTypes(m_process, m_dllBase, EnumSymProc, ctxStrNative));
 		}
 
 		public long this[string userContext] {
@@ -136,7 +138,7 @@ namespace RazorSharp.Native
 
 		private void ReleaseUnmanagedResources()
 		{
-			Conditions.Assert(DbgHelp.SymCleanup(m_process));
+			Conditions.NativeRequire(DbgHelp.SymCleanup(m_process));
 			Marshal.FreeHGlobal(m_imgStrNative);
 			Marshal.FreeHGlobal(m_maskStrNative);
 			m_process       = IntPtr.Zero;

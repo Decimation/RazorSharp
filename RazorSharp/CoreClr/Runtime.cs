@@ -125,7 +125,8 @@ namespace RazorSharp.CoreClr
 		internal static Pointer<MethodTable> ReadMethodTable<T>(ref T t)
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
-			if (typeof(T).IsValueType) return typeof(T).GetMethodTable();
+			if (typeof(T).IsValueType) 
+				return typeof(T).GetMethodTable();
 
 			// We need to get the heap pointer manually because of type constraints
 			var          ptr = *(IntPtr*) Unsafe.AddressOf(ref t);

@@ -3,7 +3,8 @@ using RazorSharp.CoreClr.Structures.EE;
 
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp.CoreClr.Enums.EEClass {
+namespace RazorSharp.CoreClr.Enums.EEClass
+{
 	/// <summary>
 	///     <remarks>
 	///         Use with <see cref="EEClass.VMFlags" />
@@ -14,10 +15,14 @@ namespace RazorSharp.CoreClr.Enums.EEClass {
 	{
 		LayoutDependsOnOtherModules = 0x00000001,
 		Delegate                    = 0x00000002,
-		FixedAddressVtStatics       = 0x00000020, // Value type Statics in this class will be pinned
-		HasLayout                   = 0x00000040,
-		IsNested                    = 0x00000080,
-		IsEquivalentType            = 0x00000200,
+
+		/// <summary>
+		/// Value type Statics in this class will be pinned
+		/// </summary>
+		FixedAddressVtStatics = 0x00000020,
+		HasLayout        = 0x00000040,
+		IsNested         = 0x00000080,
+		IsEquivalentType = 0x00000200,
 
 		//   OVERLAYED is used to detect whether Equals can safely optimize to a bit-compare across the structure.
 		HasOverlayedFields = 0x00000400,
@@ -33,8 +38,10 @@ namespace RazorSharp.CoreClr.Enums.EEClass {
 
 		UnsafeValueType = 0x00001000,
 
-		BestFitMappingInited =
-			0x00002000,                     // VMFLAG_BESTFITMAPPING and VMFLAG_THROWONUNMAPPABLECHAR are valid only if this is set
+		/// <summary>
+		/// <see cref="BestFitMapping"/> and <see cref="ThrowOnUnmappableChar"/> are valid only if this is set
+		/// </summary>
+		BestFitMappingInited = 0x00002000,
 		BestFitMapping        = 0x00004000, // BestFitMappingAttribute.Value
 		ThrowOnUnmappableChar = 0x00008000, // BestFitMappingAttribute.ThrowOnUnmappableChar
 
@@ -44,7 +51,11 @@ namespace RazorSharp.CoreClr.Enums.EEClass {
 
 		// unused                              = 0x00080000,
 		ContainsStackPtr = 0x00100000,
-		PreferAlign8     = 0x00200000, // Would like to have 8-byte alignment
+
+		/// <summary>
+		/// Would like to have 8-byte alignment
+		/// </summary>
+		PreferAlign8 = 0x00200000,
 		// unused                              = 0x00400000,
 
 		SparseForCominterop = 0x00800000,

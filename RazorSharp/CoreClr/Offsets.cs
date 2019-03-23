@@ -78,43 +78,6 @@ namespace RazorSharp.CoreClr
 
 		#endregion
 
-
-		#region Global variables of clr dll data segment
-
-		// const long g_pStringClassOffset    = 32;
-
-		/// <summary>
-		///     Offset for global variable <c>g_pGCHeap</c> in the <see cref="Segments.SegmentType.DATA" />
-		///     segment of <c>clr.dll</c>
-		///     <remarks>
-		///         Relative to <see cref="RazorSharp.Native.Structures.Images.ImageSectionInfo.SectionAddress" /> of
-		///         <see cref="Segments.SegmentType.DATA" /> segment of <see cref="Clr.CLR_DLL_SHORT" />
-		///     </remarks>
-		/// </summary>
-		internal const long GLOBAL_GCHEAP_OFFSET = 48;
-
-		/// <summary>
-		///     Offset for global variable <c>g_lowest_address</c> in the <see cref="Segments.SegmentType.DATA" />
-		///     segment of <c>clr.dll</c>
-		///     <remarks>
-		///         Relative to <see cref="RazorSharp.Native.Structures.Images.ImageSectionInfo.SectionAddress" /> of
-		///         <see cref="Segments.SegmentType.DATA" /> segment of <see cref="Clr.CLR_DLL_SHORT" />
-		///     </remarks>
-		/// </summary>
-		internal const long GLOBAL_LOWEST_ADDRESS_OFFSET = 40;
-
-		/// <summary>
-		///     Offset for global variable <c>g_highest_address</c> in the <see cref="Segments.SegmentType.DATA" />
-		///     segment of <c>clr.dll</c>
-		///     <remarks>
-		///         Relative to <see cref="RazorSharp.Native.Structures.Images.ImageSectionInfo.SectionAddress" /> of
-		///         <see cref="Segments.SegmentType.DATA" /> segment of <see cref="Clr.CLR_DLL_SHORT" />
-		///     </remarks>
-		/// </summary>
-		internal const long GLOBAL_HIGHEST_ADDRESS_OFFSET = 464;
-
-		#endregion
-
 		internal const int FIELDDESC_DW2_OFFSET_BITS = 27;
 	}
 }

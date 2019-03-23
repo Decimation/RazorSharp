@@ -261,6 +261,10 @@
     <Compile Include="Native\Enums\ImageHelpSymbolTypeInfo.cs" />
     <Compile Include="Native\Enums\SymEnumOptions.cs" />
     <Compile Include="Native\Enums\SymSearchOptions.cs" />
+    <Compile Include="Native\Kernel32Impl.cs" />
+    <Compile Include="Native\NativeInteger.cs" />
+    <Compile Include="Native\OutputAs.cs" />
+    <Compile Include="Native\Structures\FindChildrenParams.cs" />
     <Compile Include="Native\Structures\SymbolInfo.cs" />
     <Compile Include="Native\Symbols.cs" />
     <Compile Include="MemConvert.cs" />
@@ -279,7 +283,6 @@
     <Compile Include="Native\Enums\MemState.cs" />
     <Compile Include="Native\Enums\MemType.cs" />
     <Compile Include="Native\Enums\ProcessAccess.cs" />
-    <Compile Include="Native\Enums\ProcessAccessFlags.cs" />
     <Compile Include="Native\Enums\ProcessorArchitecture.cs" />
     <Compile Include="Native\Enums\StandardHandles.cs" />
     <Compile Include="Native\Enums\ThreadAccess.cs" />
@@ -293,8 +296,8 @@
     <Compile Include="Native\Structures\Images\ImageSectionInfo.cs" />
     <Compile Include="Native\Structures\MemoryBasicInformation.cs" />
     <Compile Include="Native\Structures\SystemInfo.cs" />
+    <Compile Include="Native\User32.cs" />
     <Compile Include="Pointers\AllocPointer.cs" />
-    <Compile Include="Pointers\IPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
     <Compile Include="Pointers\PointerUtils.cs" />
     <Compile Include="CoreClr\ClrFunctions.cs" />

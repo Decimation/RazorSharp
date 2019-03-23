@@ -14,11 +14,8 @@ namespace RazorSharp.Native
 {
 	/// <summary>
 	///     Native P/Invoke for <see cref="KERNEL32_DLL" />
-	///     <remarks>
-	///         Stolen from RazorInvoke for sake of portability and convenience
-	///     </remarks>
 	/// </summary>
-	internal static unsafe class Kernel32
+	internal static unsafe partial class Kernel32
 	{
 		internal const int ERROR_INVALID_PARAMETER = 0x57;
 
@@ -32,8 +29,6 @@ namespace RazorSharp.Native
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool CloseHandle(IntPtr hObject);
 
-		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		internal static extern IntPtr GetCurrentProcess();
 
 		/// <summary>
 		///     WOW64 of GetSystemInfo
@@ -42,8 +37,6 @@ namespace RazorSharp.Native
 		[DllImport(KERNEL32_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 		internal static extern void GetNativeSystemInfo(out SystemInfo lpSystemInfo);
 
-		[DllImport(KERNEL32_DLL)]
-		internal static extern IntPtr GetStdHandle(StandardHandles nStdHandle);
 
 		/// <summary>
 		///     Retrieves the address of an exported function or variable from the specified dynamic-link library (DLL).
@@ -76,18 +69,12 @@ namespace RazorSharp.Native
 		#region Process
 
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		internal static extern IntPtr OpenProcess(ProcessAccessFlags processAccess, bool bInheritHandle,
+		internal static extern IntPtr GetCurrentProcess();
+
+		[DllImport(KERNEL32_DLL, SetLastError = true)]
+		internal static extern IntPtr OpenProcess(ProcessAccess processAccess, bool bInheritHandle,
 		                                          int                processId);
 
-		internal static IntPtr OpenProcess(Process proc, ProcessAccessFlags flags = ProcessAccessFlags.All)
-		{
-			return OpenProcess(flags, false, proc.Id);
-		}
-
-		internal static IntPtr OpenCurrentProcess(ProcessAccessFlags flags = ProcessAccessFlags.All)
-		{
-			return OpenProcess(Process.GetCurrentProcess(), flags);
-		}
 
 		/// <summary>
 		///     Equals <see cref="Process.Id" />
@@ -106,14 +93,6 @@ namespace RazorSharp.Native
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
 		private static extern void GetCurrentThreadStackLimits(IntPtr* low, IntPtr* high);
 
-		internal static (IntPtr Low, IntPtr High) GetCurrentThreadStackLimits()
-		{
-			IntPtr l,
-			       h;
-
-			GetCurrentThreadStackLimits(&l, &h);
-			return (l, h);
-		}
 
 		[DllImport(KERNEL32_DLL)]
 		internal static extern uint GetCurrentThreadId();
@@ -128,26 +107,19 @@ namespace RazorSharp.Native
 		[DllImport(KERNEL32_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 		public static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, uint threadId);
 
-		internal static IntPtr OpenThread(ThreadAccess desiredAccess, int threadId)
-		{
-			return OpenThread(desiredAccess, false, (uint) threadId);
-		}
-
 		#endregion
 
 
 		#region Console
 
 		[DllImport(KERNEL32_DLL)]
+		internal static extern IntPtr GetStdHandle(StandardHandles nStdHandle);
+
+		[DllImport(KERNEL32_DLL)]
 		internal static extern bool GetConsoleMode(IntPtr hConsoleHandle, out ConsoleOutputModes lpMode);
 
 		[DllImport(KERNEL32_DLL)]
 		internal static extern bool SetConsoleMode(IntPtr hConsoleHandle, ConsoleOutputModes dwMode);
-
-		internal static IntPtr GetConsoleHandle()
-		{
-			return GetStdHandle(StandardHandles.StdOutputHandle);
-		}
 
 		#endregion
 
@@ -178,14 +150,6 @@ namespace RazorSharp.Native
 		/// </returns>
 		[DllImport(KERNEL32_DLL)]
 		internal static extern IntPtr VirtualQuery(IntPtr address, ref MemoryBasicInformation buffer, uint length);
-
-		internal static MemoryBasicInformation VirtualQuery(IntPtr lpAddress)
-		{
-			var info    = new MemoryBasicInformation();
-			var lpValue = VirtualQuery(lpAddress, ref info, (uint) sizeof(MemoryBasicInformation));
-			Conditions.Requires(lpValue.ToInt64() == sizeof(MemoryBasicInformation));
-			return info;
-		}
 
 
 		/// <summary>
@@ -229,67 +193,12 @@ namespace RazorSharp.Native
 		                                           MemoryProtection           flNewProtect,
 		                                           [Out] out MemoryProtection lpflOldProtect);
 
-		internal static void VirtualProtect(Pointer<byte>        lpAddress, int dwSize, MemoryProtection flNewProtect,
-		                                    out MemoryProtection lpflOldProtect)
-		{
-			Conditions.NativeRequire(VirtualProtect(lpAddress.Address, (uint) dwSize, flNewProtect, out lpflOldProtect));
-		}
-
 		#endregion
 
 
 		#region Read / write
 
 		#region Read
-
-		internal static T ReadCurrentProcessMemory<T>(Pointer<byte> lpBaseAddress)
-		{
-			return ReadProcessMemory<T>(Process.GetCurrentProcess(), lpBaseAddress);
-		}
-
-
-		internal static byte[] ReadCurrentProcessMemory(Pointer<byte> lpBaseAddress, int cb)
-		{
-			return ReadProcessMemory(Process.GetCurrentProcess(), lpBaseAddress, cb);
-		}
-
-
-		internal static byte[] ReadProcessMemory(Process proc, Pointer<byte> lpBaseAddress, int cb)
-		{
-			var hProc = OpenProcess(proc);
-
-			ulong numberOfBytesRead = 0;
-			uint  size              = (uint) cb;
-			var   mem               = new byte[cb];
-
-			// Read the memory
-			Conditions.NativeRequire(ReadProcessMemory(hProc, lpBaseAddress.Address, mem, size, ref numberOfBytesRead));
-
-			Conditions.Requires(numberOfBytesRead == size);
-
-			// Close the handle
-			Conditions.NativeRequire(CloseHandle(hProc));
-			return mem;
-		}
-
-		internal static T ReadProcessMemory<T>(Process proc, Pointer<byte> lpBaseAddress)
-		{
-			var   hProc             = OpenProcess(proc);
-			T     t                 = default;
-			ulong numberOfBytesRead = 0;
-			uint  size              = (uint) Unsafe.SizeOf<T>();
-
-			// Read the memory
-			Conditions.NativeRequire(ReadProcessMemory(hProc, lpBaseAddress.Address,
-			                                           Unsafe.AddressOf(ref t).Address,
-			                                           size, ref numberOfBytesRead));
-
-			Conditions.NativeRequire(numberOfBytesRead == size);
-
-			// Close the handle
-			Conditions.NativeRequire(CloseHandle(hProc));
-			return t;
-		}
 
 		/// <summary>
 		///     Reads data from an area of memory in a specified process. The entire area to be read must be accessible or the
@@ -302,6 +211,7 @@ namespace RazorSharp.Native
 		/// <param name="lpNumberOfBytesRead"></param>
 		/// <returns></returns>
 		[DllImport(KERNEL32_DLL)]
+		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr    lpBaseAddress, IntPtr lpBuffer,
 		                                              ulong  nSize,    ref ulong lpNumberOfBytesRead);
 
@@ -316,6 +226,7 @@ namespace RazorSharp.Native
 		/// <param name="lpNumberOfBytesRead"></param>
 		/// <returns></returns>
 		[DllImport(KERNEL32_DLL)]
+		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr    lpBaseAddress, byte[] lpBuffer,
 		                                              ulong  nSize,    ref ulong lpNumberOfBytesRead);
 
@@ -323,34 +234,14 @@ namespace RazorSharp.Native
 
 		#region Write
 
-		internal static void WriteCurrentProcessMemory<T>(Pointer<byte> lpBaseAddress, T value)
-		{
-			WriteProcessMemory(Process.GetCurrentProcess(), lpBaseAddress, value);
-		}
-
-		internal static void WriteProcessMemory<T>(Process proc, Pointer<byte> lpBaseAddress, T value)
-		{
-			var hProc                = OpenProcess(proc);
-			int numberOfBytesWritten = 0;
-			int dwSize               = Unsafe.SizeOf<T>();
-
-			// Write the memory
-			Conditions.NativeRequire(WriteProcessMemory(hProc, lpBaseAddress.Address,
-			                                            Unsafe.AddressOf(ref value).Address,
-			                                            dwSize, ref numberOfBytesWritten));
-
-			Conditions.NativeRequire(numberOfBytesWritten == dwSize);
-
-			// Close the handle
-			Conditions.NativeRequire(CloseHandle(hProc));
-		}
-
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr  lpBaseAddress, byte[] lpBuffer,
 		                                               int    dwSize,   ref int lpNumberOfBytesWritten);
 
 
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr  lpBaseAddress, IntPtr lpBuffer,
 		                                               int    dwSize,   ref int lpNumberOfBytesWritten);
 

@@ -79,7 +79,7 @@ namespace RazorSharp.Pointers
 	/// </summary>
 	/// <typeparam name="T">Element type to point to</typeparam>
 	[DebuggerDisplay("{" + nameof(DbgToString) + "()}")]
-	public unsafe struct Pointer<T> : IPointer<T>
+	public unsafe struct Pointer<T>
 	{
 		/// <summary>
 		///     <para>The address we're pointing to.</para>
@@ -89,24 +89,45 @@ namespace RazorSharp.Pointers
 
 		#region Properties
 
+		/// <summary>
+		///     Indexes <see cref="Address" /> as a reference.
+		/// </summary>
 		public ref T this[int index] => ref AsRef(index);
 
+		/// <summary>
+		///     Returns the value as a reference.
+		/// </summary>
 		public ref T Reference => ref AsRef();
-
+		
+		/// <summary>
+		///     Dereferences the pointer as the specified type.
+		/// </summary>
 		public T Value {
 			get => Read();
 			set => Write(value);
 		}
-
+		
+		/// <summary>
+		///     Address being pointed to.
+		/// </summary>
 		public IntPtr Address {
 			get => (IntPtr) m_value;
 			set => m_value = (void*) value;
 		}
 
+		/// <summary>
+		///     Size of type <typeparamref name="T" />.
+		/// </summary>
 		public int ElementSize => Unsafe.SizeOf<T>();
 
+		/// <summary>
+		///     Whether <see cref="Address" /> is <c>null</c> (<see cref="IntPtr.Zero" />).
+		/// </summary>
 		public bool IsNull => m_value == null;
 
+		/// <summary>
+		///     Whether <see cref="Address" /> is aligned on the current <see cref="IntPtr.Size" /> boundary.
+		/// </summary>
 		public bool IsAligned => Mem.IsAligned(Address);
 
 		#endregion
@@ -571,6 +592,11 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+		/// <summary>
+		///     Writes a value of type <typeparamref name="T" /> to <see cref="Address" />
+		/// </summary>
+		/// <param name="t">Value to write</param>
+		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
 		public void Write(T t, int elemOffset = 0)
 		{
 			WriteAny(t, elemOffset);
@@ -652,6 +678,11 @@ namespace RazorSharp.Pointers
 
 		#endregion
 
+		/// <summary>
+		///     Reads a value of type <typeparamref name="T" /> from <see cref="Address" />
+		/// </summary>
+		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
+		/// <returns>The value read from the offset <see cref="Address" /></returns>
 		[Pure]
 		public T Read(int elemOffset = 0)
 		{
@@ -659,6 +690,11 @@ namespace RazorSharp.Pointers
 		}
 
 
+		/// <summary>
+		///     Reinterprets <see cref="Address" /> as a reference to a value of type <typeparamref name="T" />
+		/// </summary>
+		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
+		/// <returns>A reference to a value of type <typeparamref name="T" /></returns>
 		[Pure]
 		public ref T AsRef(int elemOffset = 0)
 		{
@@ -848,6 +884,10 @@ namespace RazorSharp.Pointers
 			return new Pointer<TNew>(Address);
 		}
 
+		/// <summary>
+		///     Returns <see cref="Address" /> as a pointer.
+		/// </summary>
+		/// <returns></returns>
 		[Pure]
 		public void* ToPointer()
 		{
@@ -862,21 +902,37 @@ namespace RazorSharp.Pointers
 
 		#region Integer conversions
 
+		/// <summary>
+		///     Converts <see cref="Address" /> to a 32-bit signed integer.
+		/// </summary>
+		/// <returns></returns>
 		public int ToInt32()
 		{
 			return (int) m_value;
 		}
 
+		/// <summary>
+		///     Converts <see cref="Address" /> to a 64-bit signed integer.
+		/// </summary>
+		/// <returns></returns>
 		public long ToInt64()
 		{
 			return (long) m_value;
 		}
 
+		/// <summary>
+		///     Converts <see cref="Address" /> to a 64-bit unsigned integer.
+		/// </summary>
+		/// <returns></returns>
 		public ulong ToUInt64()
 		{
 			return (ulong) m_value;
 		}
 
+		/// <summary>
+		///     Converts <see cref="Address" /> to a 32-bit unsigned integer.
+		/// </summary>
+		/// <returns></returns>
 		public uint ToUInt32()
 		{
 			return (uint) m_value;
@@ -948,6 +1004,11 @@ namespace RazorSharp.Pointers
 			return ptr.ToUInt64();
 		}
 
+		public static explicit operator Pointer<byte>(Pointer<T> ptr)
+		{
+			return ptr.ToUInt64();
+		}
+		
 		#endregion
 
 
@@ -1132,6 +1193,11 @@ namespace RazorSharp.Pointers
 
 		#region Equality operators
 
+		/// <summary>
+		///     Checks to see if <see cref="other" /> is equal to the current instance.
+		/// </summary>
+		/// <param name="other">Other <see cref="IPointer{T}" /></param>
+		/// <returns></returns>
 		public bool Equals(Pointer<T> other)
 		{
 			return Address == other.Address;
