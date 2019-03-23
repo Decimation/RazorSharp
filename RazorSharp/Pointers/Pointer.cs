@@ -79,7 +79,7 @@ namespace RazorSharp.Pointers
 	/// </summary>
 	/// <typeparam name="T">Element type to point to</typeparam>
 	[DebuggerDisplay("{" + nameof(DbgToString) + "()}")]
-	public unsafe struct Pointer<T>
+	public unsafe struct Pointer<T> : IFormattable
 	{
 		/// <summary>
 		///     <para>The address we're pointing to.</para>

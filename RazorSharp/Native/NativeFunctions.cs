@@ -2,8 +2,10 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorSharp.Memory;
-using RazorSharp.Native.Enums;
+using RazorSharp.Memory.Calling.Signatures;
+using RazorSharp.Memory.Calling.Signatures.Attributes;
+using RazorSharp.Memory.Calling.Symbols;
+using RazorSharp.Memory.Calling.Symbols.Attributes;
 
 #endregion
 
@@ -11,7 +13,7 @@ namespace RazorSharp.Native
 {
 	/// <summary>
 	///     Methods of finding and executing DLL functions:
-	///     <para>1. Sig scanning (<see cref="Memory.SigScanner" />)</para>
+	///     <para>1. Sig scanning (<see cref="SignatureCall"/>) (<see cref="Memory.SigScanner" />) (<see cref="SigcallAttribute"/>)</para>
 	///     <list type="bullet">
 	///         <item>
 	///             <description>Runtime</description>
@@ -48,6 +50,18 @@ namespace RazorSharp.Native
 	///         </item>
 	///         <item>
 	///             <description>Requirements: function is DLL-exported</description>
+	///         </item>
+	///     </list>
+	///     <para>5. <see cref="Symcall" /> (<see cref="SymcallAttribute" />)</para>
+	///     <list type="bullet">
+	///         <item>
+	///             <description>Runtime</description>
+	///         </item>
+	///         <item>
+	///             <description>If the function is not DLL-exported</description>
+	///         </item>
+	///         <item>
+	///             <description>Requirements: symbol/name of the function</description>
 	///         </item>
 	///     </list>
 	/// </summary>

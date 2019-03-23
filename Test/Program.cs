@@ -146,6 +146,12 @@ namespace Test
 		static bool IsPowerOf2(int x)
 		{
 			// return ((x) && (!(x & (x - 1))));
+
+			// Allow 0
+			if (x == 0) {
+				return true;
+			}
+
 			return ((Convert.ToBoolean(x)) && (!Convert.ToBoolean((x & (x - 1)))));
 		}
 
@@ -194,9 +200,6 @@ namespace Test
 		static extern bool WriteConsoleOutput(IntPtr   consoleHandle, CharInfo[,] buffer, Coord bufSize, Coord bufZero,
 		                                      ref Rect drawRect);
 
-		// This is for test
-		[DllImport("user32.dll")]
-		static extern bool SetWindowText(IntPtr hWnd, string text);
 
 		public enum CharAttributes : ushort
 		{
@@ -282,9 +285,6 @@ namespace Test
 		}
 
 
-		
-
-
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -292,36 +292,54 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
-			int n31 = 31;
-			int n64 = 64;
-			Conditions.Assert(!IsPowerOf2(n31));
-			Conditions.Assert(IsPowerOf2(n64));
 			
+
 			var rect  = new Rect() {Left = 10, Top = 0, Right = 11, Bottom = 1};
 			var bufsz = new Coord(2, 2);
 			var buf   = new CharInfo[2, 2];
-			buf[0, 0] = new CharInfo() {AsciiChar = '+'};
+			buf[0, 0] = new CharInfo {AsciiChar = '+'};
 			var bufpos = new Coord(0, 0);
 
-			
-			var chnd = GetConsoleWindow();
-			Console.WriteLine(Hex.ToHex(chnd));
-			Console.WriteLine(Hex.ToHex(Process.GetCurrentProcess().MainWindowHandle));
-			Console.WriteLine(Hex.ToHex(Process.GetCurrentProcess().Handle));
-			Console.WriteLine(Hex.ToHex(Kernel32.GetStdHandle((StandardHandles.StdOutputHandle))));
-			var std = Console.OpenStandardOutput();
 
 			string frame = "SunAwtFrame";
-			var hnd = new IntPtr(0x00810BA2);
-			var hnd2 = User32.FindWindow(frame, null);
-			Console.WriteLine(">> {0}",Hex.ToHex(hnd2));
+			var    hnd   = new IntPtr(0x00810BA2);
+			var    hnd2  = User32.FindWindow(frame, null);
+			Console.WriteLine(">> {0}", Hex.ToHex(hnd2));
+			User32.GetWindowThreadProcessId(hnd2, out var pid);
+			Console.WriteLine(pid);
+			var proc = Process.GetProcessById((int) pid);
+
+
+			var ptr = GetCLRFunction("IsRuntimeStarted");
+			Console.WriteLine(Hex.ToHex(ptr));
+
+			const int offset = 0xF560;
+			var ptr2=Modules.GetAddress("clr.dll", offset);
+			Console.WriteLine("{0:P}",ptr2);
+			var fnp=Marshal.GetDelegateForFunctionPointer<ClrFunctions.SetStableEntryPointInterlockedDelegate>(ptr2.Address);
+			Console.WriteLine(Hex.ToHex(fnp()));
+			
+			Console.WriteLine(typeof(string).GetMetaType());
+			var fn=ClrFunctions.GetClrFunctionAddress("GetThreadGeneric");
+			Console.WriteLine("{0:P}",fn);
+			
 			
 
-
+			var fnOffset = 0x4180;
+			
 			// SHUT IT DOWN
 			Clr.Close();
 			Global.Close();
+			
 		}
+
+		delegate void* get(void* x, void* y);
+		
+		[DllImport(@"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\clr.dll")]
+		private static extern void* GetCLRFunction(string str);
+		
+
+		
 
 
 		private static void Dump<T>(T t, int recursivePasses = 0)

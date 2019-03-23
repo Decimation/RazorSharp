@@ -79,7 +79,7 @@ namespace RazorSharp.CoreClr
 		/// </summary>
 		/// <param name="__this"><c>this</c> pointer of a <see cref="MethodDesc" /></param>
 		/// <param name="pCode">Entry point</param>
-		private delegate long SetStableEntryPointInterlockedDelegate(MethodDesc* __this, ulong pCode);
+		internal delegate long SetStableEntryPointInterlockedDelegate(MethodDesc* __this, ulong pCode);
 
 		private static readonly SetStableEntryPointInterlockedDelegate SetStableEntryPointInterlocked;
 

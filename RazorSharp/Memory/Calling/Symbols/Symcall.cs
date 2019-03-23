@@ -36,6 +36,45 @@ namespace RazorSharp.Memory.Calling.Symbols
 			return BoundTypes.Contains(t);
 		}
 
+		public static void BindQuick(Type t, string method)
+		{
+			var methodInfo=t.GetAnyMethod(method);
+			var attr=methodInfo.GetCustomAttribute<SymcallAttribute>();
+			var fullSym = GetSymbolName(attr, methodInfo);
+			
+			using (var sym = new Native.Symbols(attr.Image)) {
+				var offset = sym.GetSymOffset(fullSym);
+				var address = Modules.GetAddress(attr.Module, offset);
+				ClrFunctions.SetStableEntryPoint(methodInfo, address.Address);
+			}
+		}
+
+		private static string GetSymbolName(SymcallAttribute attr, MethodInfo method)
+		{
+			// Resolve the symbol
+			string fullSym       = null;
+			string declaringName = method.DeclaringType.Name;
+
+			if (attr.FullyQualified && attr.Symbol != null && !attr.UseMethodNameOnly) {
+				fullSym = attr.Symbol;
+			}
+			else if (attr.UseMethodNameOnly && attr.Symbol == null) {
+				fullSym = method.Name;
+			}
+			else if (attr.Symbol != null && !attr.UseMethodNameOnly && !attr.FullyQualified) {
+				fullSym = declaringName + SCOPE_RESOLUTION_OPERATOR + attr.Symbol;
+			}
+			else if (attr.Symbol == null) {
+				// Auto resolve
+				fullSym = declaringName + SCOPE_RESOLUTION_OPERATOR + method.Name;
+			}
+
+
+			Conditions.RequiresNotNull(fullSym, nameof(fullSym));
+
+			return fullSym;
+		}
+		
 		public static void BindQuick(Type t)
 		{
 			if (IsBound(t)) {
@@ -61,39 +100,20 @@ namespace RazorSharp.Memory.Calling.Symbols
 				var method = methods[i];
 
 				// Resolve the symbol
-				string fullSym       = null;
-				string declaringName = method.DeclaringType.Name;
-
-				if (attr.FullyQualified && attr.Symbol != null && !attr.UseMethodNameOnly) {
-					fullSym = attr.Symbol;
-				}
-				else if (attr.UseMethodNameOnly && attr.Symbol == null) {
-					fullSym = method.Name;
-				}
-				else if (attr.Symbol != null && !attr.UseMethodNameOnly && !attr.FullyQualified) {
-					fullSym = declaringName + SCOPE_RESOLUTION_OPERATOR + attr.Symbol;
-				}
-				else if (attr.Symbol == null) {
-					// Auto resolve
-					fullSym = declaringName + SCOPE_RESOLUTION_OPERATOR + method.Name;
-				}
-
-
-				Conditions.RequiresNotNull(fullSym, nameof(fullSym));
-				//Global.Log.Debug("Sym {Name}", fullSym);
+				string fullSym = GetSymbolName(attr, method);
+				
 				contexts.Add(fullSym);
 			}
 
 
 			var offsets = sym.GetSymOffsets(contexts.ToArray());
-
-
 			var addresses = Modules.GetAddresses(baseAttr.Module, offsets).ToArray();
+			
 			Conditions.Requires(addresses.Length == methods.Length);
 
 			for (int i = 0; i < methods.Length; i++) {
-				Global.Log.Debug("Binding {Name} to {Addr}", methods[i].Name,
-				                 addresses[i].ToString("P"));
+				Global.Log.Debug("Binding {Name} to {Addr} {Offset}", methods[i].Name,
+				                 addresses[i].ToString("P"),offsets[i].ToString("X"));
 				var addr = addresses[i].Address;
 				ClrFunctions.SetStableEntryPoint(methods[i], addr);
 			}
