@@ -40,12 +40,10 @@ namespace RazorSharp.CoreClr
 			const string FN = "MethodDesc::SetStableEntryPointInterlocked";
 			//SetStableEntryPointInterlocked = GetClrFunction<SetStableEntryPointInterlockedDelegate>(FN);
 
-			
-			const long offset = 1741848;
-			
-			var       ptr2   =Modules.GetAddress("clr.dll", offset);
-			Console.WriteLine("SetStable {0:P}",ptr2);
-			SetStableEntryPointInterlocked=Marshal.GetDelegateForFunctionPointer<ClrFunctions.SetStableEntryPointInterlockedDelegate>(ptr2.Address);
+
+			SetEntryPoint =
+				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(
+					"clr.dll", "48 89 5C 24 10 48 89 74 24 18 57 48 83");
 			
 
 			Symcall.BindQuick(typeof(ClrFunctions));
@@ -90,7 +88,7 @@ namespace RazorSharp.CoreClr
 		/// <param name="pCode">Entry point</param>
 		internal delegate long SetStableEntryPointInterlockedDelegate(MethodDesc* __this, ulong pCode);
 
-		private static readonly SetStableEntryPointInterlockedDelegate SetStableEntryPointInterlocked;
+		private static readonly SetStableEntryPointInterlockedDelegate SetEntryPoint;
 
 		private static readonly byte[] s_rgStableEntryPointInterlockedSignature =
 		{
@@ -108,7 +106,7 @@ namespace RazorSharp.CoreClr
 		internal static void SetStableEntryPoint(MethodInfo mi, IntPtr pCode)
 		{
 			var pMd = (MethodDesc*) mi.MethodHandle.Value;
-			SetStableEntryPointInterlocked(pMd, (ulong) pCode);
+			SetEntryPoint(pMd, (ulong) pCode);
 		}
 
 		#endregion

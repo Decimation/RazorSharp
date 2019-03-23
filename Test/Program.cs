@@ -292,33 +292,26 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
-			
-
-			var rect  = new Rect() {Left = 10, Top = 0, Right = 11, Bottom = 1};
-			var bufsz = new Coord(2, 2);
-			var buf   = new CharInfo[2, 2];
-			buf[0, 0] = new CharInfo {AsciiChar = '+'};
-			var bufpos = new Coord(0, 0);
-
-
-			string frame = "SunAwtFrame";
-			var    hnd   = new IntPtr(0x00810BA2);
-			var    hnd2  = User32.FindWindow(frame, null);
-			Console.WriteLine(">> {0}", Hex.ToHex(hnd2));
-			User32.GetWindowThreadProcessId(hnd2, out var pid);
-			Console.WriteLine(pid);
-			var proc = Process.GetProcessById((int) pid);
-
 
 
 			var method = typeof(Program).GetAnyMethod("doSomething");
 			var method2 = typeof(Program).GetAnyMethod("doSomething2");
 
+			var md = (MethodDesc*) method.MethodHandle.Value;
+			var ep = (ulong) method2.MethodHandle.GetFunctionPointer();
+			
 			var ss=SigScanner.QuickScan("clr.dll", "48 89 5C 24 10 48 89 74 24 18 57 48 83");
 			Console.WriteLine("ss: {0:X}",ss.ToInt64());
+			Console.WriteLine("ss bytes {0}", Collections.CreateString(new Pointer<byte>(ss).CopyOutBytes(5), ToStringOptions.Hex));
 			
 			var sym=Symbols.GetSymAddress(Clr.ClrPdb.FullName, "clr.dll", "MethodDesc::SetStableEntryPointInterlocked");
 			Console.WriteLine("sym: {0}", sym);
+
+
+
+			var fn2=Marshal.GetDelegateForFunctionPointer<ClrFunctions.SetStableEntryPointInterlockedDelegate>(ss);
+			Console.WriteLine(">> ? {0}",fn2(md,ep));
+			
 			
 			const int offset = 0x1A9418;
 			var seg = Segments.GetSegment(".text", "clr.dll");
@@ -329,11 +322,11 @@ namespace Test
 			var fnp=Marshal.GetDelegateForFunctionPointer<ClrFunctions.SetStableEntryPointInterlockedDelegate>(ptr2.Address);
 
 
-			var md = (MethodDesc*) method.MethodHandle.Value;
-			var ep = (ulong) method2.MethodHandle.GetFunctionPointer();
+			
 
 			var res = fnp(md, ep);
 			Console.WriteLine("!!>> {0}",res);
+			
 			
 			
 			
