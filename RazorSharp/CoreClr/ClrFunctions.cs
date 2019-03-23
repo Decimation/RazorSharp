@@ -37,18 +37,7 @@ namespace RazorSharp.CoreClr
 	{
 		static ClrFunctions()
 		{
-			const string FN = "MethodDesc::SetStableEntryPointInterlocked";
-			//SetStableEntryPointInterlocked = GetClrFunction<SetStableEntryPointInterlockedDelegate>(FN);
-
-
-			SetEntryPoint =
-				SigScanner.QuickScanDelegate<SetStableEntryPointInterlockedDelegate>(
-					"clr.dll", "48 89 5C 24 10 48 89 74 24 18 57 48 83");
 			
-
-			Symcall.BindQuick(typeof(ClrFunctions));
-
-			Global.Log.Information("ClrFunctions init complete");
 		}
 
 		/// <summary>
@@ -56,7 +45,20 @@ namespace RazorSharp.CoreClr
 		/// </summary>
 		internal static void Init()
 		{
-			Conditions.Requires(SignatureCall.IsBound(typeof(ClrFunctions)));
+			
+			const string FN = "MethodDesc::SetStableEntryPointInterlocked";
+			//SetStableEntryPointInterlocked = GetClrFunction<SetStableEntryPointInterlockedDelegate>(FN);
+
+
+			SetEntryPoint =
+				SigScanner.QuickScanDelegate<SetEntryPointDelegate>(
+					"clr.dll", "48 89 5C 24 10 48 89 74 24 18 57 48 83");
+			
+
+			Symcall.BindQuick(typeof(ClrFunctions));
+
+			Global.Log.Information("ClrFunctions init complete");
+			// Conditions.Requires(SignatureCall.IsBound(typeof(ClrFunctions)));
 		}
 
 		/// <summary>
@@ -80,15 +82,15 @@ namespace RazorSharp.CoreClr
 		#region SetStableEntryPoint
 
 		/// <summary>
-		///     We implement <see cref="SetStableEntryPointInterlockedDelegate" /> as a <see cref="Delegate" /> initially because
+		///     We implement <see cref="SetEntryPointDelegate" /> as a <see cref="Delegate" /> initially because
 		///     <see cref="MethodDesc.SetStableEntryPointInterlocked" /> has not been bound yet, and in order to bind it
 		///     we have to use this function.
 		/// </summary>
 		/// <param name="__this"><c>this</c> pointer of a <see cref="MethodDesc" /></param>
 		/// <param name="pCode">Entry point</param>
-		internal delegate long SetStableEntryPointInterlockedDelegate(MethodDesc* __this, ulong pCode);
+		internal delegate int SetEntryPointDelegate(MethodDesc* __this, ulong pCode);
 
-		private static readonly SetStableEntryPointInterlockedDelegate SetEntryPoint;
+		private static /*readonly*/ SetEntryPointDelegate SetEntryPoint;
 
 		private static readonly byte[] s_rgStableEntryPointInterlockedSignature =
 		{
@@ -106,7 +108,8 @@ namespace RazorSharp.CoreClr
 		internal static void SetStableEntryPoint(MethodInfo mi, IntPtr pCode)
 		{
 			var pMd = (MethodDesc*) mi.MethodHandle.Value;
-			SetEntryPoint(pMd, (ulong) pCode);
+			var result = SetEntryPoint(pMd, (ulong) pCode);
+			Conditions.Assert(result >0);
 		}
 
 		#endregion

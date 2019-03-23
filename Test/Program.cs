@@ -37,6 +37,7 @@ using RazorSharp.Native.Enums;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing;
+using static RazorSharp.CoreClr.ClrFunctions;
 using Constants = RazorSharp.CoreClr.Constants;
 using Unsafe = RazorSharp.Unsafe;
 
@@ -284,6 +285,18 @@ namespace Test
 			COMMON_LVB_UNDERSCORE = 0x8000,
 		}
 
+		class Class
+		{
+			public void doSomething2()
+			{
+				Console.WriteLine("doSomething2");
+			}
+
+			public void doSomething()
+			{
+				Console.WriteLine("doSomething");
+			}
+		}
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -293,75 +306,43 @@ namespace Test
 			Clr.Setup();
 
 
+			var c = new Class();
+			c.doSomething();
+			c.doSomething2();
+			var method  = typeof(Class).GetAnyMethod("doSomething");
+			var method2 = typeof(Class).GetAnyMethod("doSomething2");
 
-			var method = typeof(Program).GetAnyMethod("doSomething");
-			var method2 = typeof(Program).GetAnyMethod("doSomething2");
+			RuntimeHelpers.PrepareMethod(method.MethodHandle);
+			RuntimeHelpers.PrepareMethod(method2.MethodHandle);
 
-			var md = (MethodDesc*) method.MethodHandle.Value;
-			var ep = (ulong) method2.MethodHandle.GetFunctionPointer();
-			
-			var ss=SigScanner.QuickScan("clr.dll", "48 89 5C 24 10 48 89 74 24 18 57 48 83");
-			Console.WriteLine("ss: {0:X}",ss.ToInt64());
-			Console.WriteLine("ss bytes {0}", Collections.CreateString(new Pointer<byte>(ss).CopyOutBytes(5), ToStringOptions.Hex));
-			
-			var sym=Symbols.GetSymAddress(Clr.ClrPdb.FullName, "clr.dll", "MethodDesc::SetStableEntryPointInterlocked");
-			Console.WriteLine("sym: {0}", sym);
+			const string sig = "48 89 5C 24 10 48 89 74 24 18 57 48 83";
 
+			var fn = SigScanner.QuickScanDelegate<SetEntryPointDelegate>("clr.dll", sig);
 
+			var result = fn((MethodDesc*) method2.MethodHandle.Value,
+			                (ulong) method.MethodHandle.GetFunctionPointer());
 
-			var fn2=Marshal.GetDelegateForFunctionPointer<ClrFunctions.SetStableEntryPointInterlockedDelegate>(ss);
-			Console.WriteLine(">> ? {0}",fn2(md,ep));
-			
-			
-			const int offset = 0x1A9418;
-			var seg = Segments.GetSegment(".text", "clr.dll");
-			var ptr2 = (seg.SectionAddress + offset);
-			Console.WriteLine("fn @ {0:P}",ptr2);
-			Console.WriteLine(ptr2.Query());
-			Console.WriteLine(Collections.CreateString(ptr2.CopyOutBytes(5), ToStringOptions.Hex));
-			var fnp=Marshal.GetDelegateForFunctionPointer<ClrFunctions.SetStableEntryPointInterlockedDelegate>(ptr2.Address);
-
+			result = fn((MethodDesc*) method2.MethodHandle.Value,
+			            (ulong) method.MethodHandle.GetFunctionPointer());
 
 			
+			Console.WriteLine("Result: {0}", result);
 
-			var res = fnp(md, ep);
-			Console.WriteLine("!!>> {0}",res);
-			
-			
-			
-			
+			c.doSomething();
+			c.doSomething2();
+
 			Console.WriteLine(typeof(string).GetMetaType());
-			var fn=ClrFunctions.GetClrFunctionAddress("GetThreadGeneric");
-			Console.WriteLine("bro");
-			Console.WriteLine("{0:P}",fn);
-			
-			
 
-			var fnOffset = 0x4180;
-			
 			// SHUT IT DOWN
 			Clr.Close();
 			Global.Close();
-			
 		}
 
-		static void doSomething2()
-		{
-			Console.WriteLine("doSomething2");
-		}
-		
-		static void doSomething()
-		{
-			Console.WriteLine("doSomething");
-		}
-		
+
 		delegate void* get(void* x, void* y);
-		
+
 		[DllImport(@"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\clr.dll")]
 		private static extern void* GetCLRFunction(string str);
-		
-
-		
 
 
 		private static void Dump<T>(T t, int recursivePasses = 0)
