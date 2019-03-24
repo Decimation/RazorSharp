@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Dynamic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,6 +23,7 @@ using System.Text;
 using System.Threading;
 using NUnit.Framework;
 using RazorCommon;
+using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp;
@@ -37,6 +39,7 @@ using RazorSharp.Native.Enums;
 using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using Test.Samples;
 using Test.Testing;
 using Constants = RazorSharp.CoreClr.Constants;
 using Unsafe = RazorSharp.Unsafe;
@@ -165,6 +168,11 @@ namespace Test
 
 		delegate Pointer<int> broCop();
 
+		struct MyStruct
+		{
+			public char m_firstChar;
+		}
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -185,24 +193,43 @@ namespace Test
 
 			var xy = new global::System.Single();
 
-			int x = 200;
-			{
-				int y;
-				y = x;
-				Console.WriteLine("Inner Block");
-				Console.WriteLine(x);
-				Console.WriteLine(y);
-			}
 
 			var o = new {str = "foo", i = 1};
-			Console.WriteLine(o);
-			Console.WriteLine(o.GetType());
-			Console.WriteLine(Unsafe.HeapSize(o));
 
-			var m = typeof(float).GetMetaType();
+
+			var   m = typeof(float).GetMetaType();
 			float f = 3.14f;
 			Debug.Assert(m.Fields["m_value"].GetAddress(ref f) == &f);
-			
+
+			const string foo = nameof(foo);
+			const string bar = nameof(bar);
+
+			string bar2 = "bar";
+
+
+			const string asmStr = "RazorSharp";
+			var          asm    = Assembly.Load(asmStr);
+
+
+			var sys     = Type.GetType("System.SZArrayHelper");
+			var methods = sys.GetMetaType().Methods;
+			foreach (var method in methods) {
+				Console.WriteLine(method.MethodInfo);
+			}
+
+			var jit  = Type.GetType("System.Runtime.CompilerServices.JitHelpers");
+			var cast = jit.GetAnyMethod("UnsafeCast");
+			object obj = new[] {1, 2, 3};
+			cast = cast.MakeGenericMethod(typeof(object));
+			var output = cast.Invoke(null, new object[] {obj});
+			Console.WriteLine(">> {0}",output);
+
+
+			Debug.Assert(bar2.IsInterned());
+			Debug.Assert(bar.IsInterned());
+
+			Inspect.Heap(bar);
+			Inspect.Heap(bar2);
 
 
 			// SHUT IT DOWN

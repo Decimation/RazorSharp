@@ -11,15 +11,7 @@ namespace RazorSharp
 {
 	// todo: WIP
 	
-	/// <summary>
-	/// <seealso cref="BitConverter"/>
-	/// <seealso cref="System.Convert"/>
-	/// <seealso cref="MemoryMarshal"/>
-	/// <seealso cref="Marshal"/>
-	/// <seealso cref="Span{T}"/>
-	/// <seealso cref="Memory{T}"/>
-	/// <seealso cref="Buffer"/>
-	/// </summary>
+	
 	public static class MemConvert
 	{
 		public enum ConversionType

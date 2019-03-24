@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
@@ -71,6 +70,15 @@ namespace RazorSharp
 
 	/// <summary>
 	///     Provides utilities for manipulating pointers, memory, and types
+	///     <seealso cref="BitConverter" />
+	///     <seealso cref="System.Convert" />
+	///     <seealso cref="MemoryMarshal" />
+	///     <seealso cref="Marshal" />
+	///     <seealso cref="Span{T}" />
+	///     <seealso cref="Memory{T}" />
+	///     <seealso cref="Buffer" />
+	///     <seealso cref="CSUnsafe" />
+	///     <seealso cref="System.Runtime.CompilerServices.JitHelpers" />
 	/// </summary>
 	public static unsafe class Unsafe
 	{
@@ -83,6 +91,12 @@ namespace RazorSharp
 				return addr.ReadAny<T>();
 			}
 		}
+
+		public static TTo Cast<TFrom, TTo>(TFrom value)
+		{
+			return MemConvert.ProxyCast<TFrom, TTo>(value);
+		}
+		
 
 		/// <summary>
 		///     Interprets a dynamically allocated reference type in the heap as a proper managed type. This is useful when
@@ -286,7 +300,7 @@ namespace RazorSharp
 
 			// Function must be jitted
 
-			if (!md.Reference.IsPointingToNativeCode) 
+			if (!md.Reference.IsPointingToNativeCode)
 				md.Reference.Prepare();
 
 			return md.Reference.Function;
@@ -331,7 +345,7 @@ namespace RazorSharp
 
 			Pointer<MethodTable> mt = typeof(T).GetMethodTable();
 			Pointer<EEClass>     ee = mt.Reference.EEClass;
-			if (ee.Reference.HasLayout) 
+			if (ee.Reference.HasLayout)
 				return (int) ee.Reference.LayoutInfo->ManagedSize;
 
 			return INVALID_VALUE;
