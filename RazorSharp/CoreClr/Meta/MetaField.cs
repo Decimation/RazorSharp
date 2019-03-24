@@ -141,7 +141,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		#region Methods
 
-		public unsafe Pointer<byte> GetStaticAddr()
+		public unsafe Pointer<byte> GetStaticAddress()
 		{
 			return ClrFunctions.JIT_GetStaticFieldAddr_Context(m_value.ToPointer<FieldDesc>());
 		}

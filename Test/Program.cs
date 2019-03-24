@@ -38,7 +38,6 @@ using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using Test.Testing;
-
 using Constants = RazorSharp.CoreClr.Constants;
 using Unsafe = RazorSharp.Unsafe;
 
@@ -150,13 +149,12 @@ namespace Test
 			return ((Convert.ToBoolean(x)) && (!Convert.ToBoolean((x & (x - 1)))));
 		}
 
-		
+
 		class Class
 		{
 			public int doSomething2()
 			{
 				return 2;
-				
 			}
 
 			public int doSomething()
@@ -165,8 +163,8 @@ namespace Test
 			}
 		}
 
-		
-		
+		delegate Pointer<int> broCop();
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -176,20 +174,42 @@ namespace Test
 
 			var a = typeof(Class).GetAnyMethod("doSomething");
 			var b = typeof(Class).GetAnyMethod("doSomething2");
-			
-			Functions.Swap(a,b);
 
-			Debug.Assert(new Class().doSomething()==2);
+			Functions.Swap(a, b);
+
+			Debug.Assert(new Class().doSomething() == 2);
 
 			Console.WriteLine(ClrFunctions.FindField(typeof(string), "m_firstChar"));
+			Console.WriteLine(typeof(int[]).GetMetaType());
+
+
+			var xy = new global::System.Single();
+
+			int x = 200;
+			{
+				int y;
+				y = x;
+				Console.WriteLine("Inner Block");
+				Console.WriteLine(x);
+				Console.WriteLine(y);
+			}
+
+			var o = new {str = "foo", i = 1};
+			Console.WriteLine(o);
+			Console.WriteLine(o.GetType());
+			Console.WriteLine(Unsafe.HeapSize(o));
+
+			var m = typeof(float).GetMetaType();
+			float f = 3.14f;
+			Debug.Assert(m.Fields["m_value"].GetAddress(ref f) == &f);
 			
-			
+
+
 			// SHUT IT DOWN
 			Clr.Close();
 			Global.Close();
 		}
 
-		
 
 		[DllImport(@"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\clr.dll")]
 		private static extern void* GetCLRFunction(string str);
