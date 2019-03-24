@@ -14,6 +14,7 @@ using System.Dynamic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.CompilerServices;
@@ -31,6 +32,7 @@ using RazorSharp.Analysis;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.CoreClr.Structures.HeapObjects;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
@@ -180,32 +182,14 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
-			var a = typeof(Class).GetAnyMethod("doSomething");
-			var b = typeof(Class).GetAnyMethod("doSomething2");
 
-			Functions.Swap(a, b);
+			Console.WriteLine(typeof(string).GetMetaType());
 
-			Debug.Assert(new Class().doSomething() == 2);
-
-			Console.WriteLine(ClrFunctions.FindField(typeof(string), "m_firstChar"));
-			Console.WriteLine(typeof(int[]).GetMetaType());
-
-
-			var xy = new global::System.Single();
-
-
-			var o = new {str = "foo", i = 1};
-
-
-			var   m = typeof(float).GetMetaType();
-			float f = 3.14f;
-			Debug.Assert(m.Fields["m_value"].GetAddress(ref f) == &f);
 
 			const string foo = nameof(foo);
 			const string bar = nameof(bar);
 
 			string bar2 = "bar";
-
 
 			const string asmStr = "RazorSharp";
 			var          asm    = Assembly.Load(asmStr);
@@ -217,12 +201,16 @@ namespace Test
 				Console.WriteLine(method.MethodInfo);
 			}
 
-			var jit  = Type.GetType("System.Runtime.CompilerServices.JitHelpers");
-			var cast = jit.GetAnyMethod("UnsafeCast");
-			object obj = new[] {1, 2, 3};
+			var    jit  = Type.GetType("System.Runtime.CompilerServices.JitHelpers");
+			var    cast = jit.GetAnyMethod("UnsafeCast");
+			object obj  = new[] {1, 2, 3};
 			cast = cast.MakeGenericMethod(typeof(object));
 			var output = cast.Invoke(null, new object[] {obj});
-			Console.WriteLine(">> {0}",output);
+			Console.WriteLine(">> {0}", output);
+
+			//int[] rg = new[] {1, 2, 3};
+			//cast = cast.MakeGenericMethod(typeof(Pointer<ArrayObject>));
+			//var ptr = (Pointer<ArrayObject>) cast.Invoke(null, new object[] {rg});
 
 
 			Debug.Assert(bar2.IsInterned());
@@ -230,6 +218,12 @@ namespace Test
 
 			Inspect.Heap(bar);
 			Inspect.Heap(bar2);
+
+
+			var bigInteger = new BigInteger();
+			Console.WriteLine(Unsafe.SizeOf<BigInteger>());
+			Console.WriteLine(bigInteger);
+			Console.WriteLine(Inspect.LayoutString<BigInteger>());
 
 
 			// SHUT IT DOWN

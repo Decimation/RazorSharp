@@ -42,12 +42,14 @@ namespace RazorSharp.Analysis
 
 		public static string LayoutString<T>(ref T t)
 		{
-			var table     = LayoutTable<T>();
-			var type      = typeof(T).GetMetaType();
-			var fields    = type.Fields.OrderBy(f => f.Offset).ToArray();
+			var table = LayoutTable<T>();
+			var type  = typeof(T).GetMetaType();
+			var fields = type.InstanceFields.ToArray();
 			int lim       = fields.Length;
 			var addresses = new object[lim];
 			var values    = new object[lim];
+
+			Conditions.Assert(lim == type.NumInstanceFields);
 
 			for (int i = 0; i < lim; i++) {
 				var field = fields[i];
@@ -65,7 +67,7 @@ namespace RazorSharp.Analysis
 		private static ConsoleTable LayoutTable<T>()
 		{
 			var type   = typeof(T).GetMetaType();
-			var fields = type.Fields.OrderBy(f => f.Offset).ToArray();
+			var fields = type.InstanceFields.ToArray();
 			var table  = new ConsoleTable("Offset", "Size", "Type", "Name");
 
 			foreach (var field in fields) {

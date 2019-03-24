@@ -3,7 +3,9 @@
 #region
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using RazorCommon;
 using RazorCommon.Utilities;
@@ -64,11 +66,13 @@ namespace RazorSharp.CoreClr.Meta
 			if (!p.Reference.Canon.IsNull && p.Reference.Canon.Address != p.Address)
 				Canon = new MetaType(p.Reference.Canon);
 
-			if (p.Reference.IsArray) 
+			if (p.Reference.IsArray)
 				ElementType = new MetaType(p.Reference.ElementTypeHandle);
 
-			if (!p.Reference.Parent.IsNull)
+			if (!p.Reference.Parent.IsNull) {
 				Parent = new MetaType(p.Reference.Parent);
+			}
+				
 
 			Fields  = new VirtualCollection<MetaField>(GetField, GetFields);
 			Methods = new VirtualCollection<MetaMethod>(GetMethod, GetMethods);
@@ -97,6 +101,14 @@ namespace RazorSharp.CoreClr.Meta
 			}
 		}
 
+		public IEnumerable<MetaField> InstanceFields {
+			get {
+				return Fields
+				      .Where(f => !f.FieldInfo.IsStatic && !f.FieldInfo.IsLiteral)
+				      .OrderBy(f => f.Offset);
+			}
+		}
+		
 		private MetaField GetField(string name)
 		{
 			return new MetaField(RuntimeType.GetFieldDesc(name));

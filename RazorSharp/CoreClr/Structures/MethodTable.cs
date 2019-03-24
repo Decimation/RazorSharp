@@ -118,6 +118,8 @@ namespace RazorSharp.CoreClr.Structures
 
 		internal int NumInterfaces => m_wNumInterfaces;
 
+		internal bool IsParentIndirect => Flags.HasFlag(MethodTableFlags.HasIndirectParent);
+		
 		/// <summary>
 		///     The parent type's <see cref="MethodTable" />.
 		/// </summary>
@@ -129,11 +131,18 @@ namespace RazorSharp.CoreClr.Structures
 			// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
 			// for enum_flag_HasIndirectParentMethodTable.
 			get {
-				if (!Flags.HasFlag(MethodTableFlags.HasIndirectParent)) 
+				if (!IsParentIndirect)
 					return m_pParentMethodTable;
-
-				throw new NotImplementedException("Parent is indirect");
+				else {
+					return GetParentMethodTable();
+				}
 			}
+		}
+
+		[ClrSymcall]
+		private MethodTable* GetParentMethodTable()
+		{
+			return null;
 		}
 
 		// todo

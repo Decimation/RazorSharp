@@ -42,8 +42,8 @@ namespace RazorSharp.Native
 
 			Conditions.NativeRequire(DbgHelp.SymInitialize(m_process, null, false));
 
-			m_dllBase = DbgHelp.SymLoadModuleEx(m_process, IntPtr.Zero,m_imgStrNative,
-			                                    IntPtr.Zero,m_base,size,IntPtr.Zero,0);
+			m_dllBase = DbgHelp.SymLoadModuleEx(m_process, IntPtr.Zero, m_imgStrNative,
+			                                    IntPtr.Zero, m_base, size, IntPtr.Zero, 0);
 		}
 
 		public Symbols(string image) : this(image, MASK_STR_DEFAULT, BASE_DEFAULT, SIZE_DEFAULT) { }
@@ -87,11 +87,10 @@ namespace RazorSharp.Native
 
 			if (maxCmpLen == pSymInfo->NameLen) {
 				var s = Marshal.PtrToStringAnsi(new IntPtr(&pSymInfo->Name), (int) pSymInfo->NameLen);
-				
+
 				if (String.CompareOrdinal(s, str) == 0) {
-					
 					//var childs = new FindChildrenParams();
-					
+
 					// Don't ensure this method returns true
 					//DbgHelp.SymGetTypeInfo(m_process, pSymInfo->ModBase, pSymInfo->TypeIndex,
 					//                       ImageHelpSymbolTypeInfo.TI_GET_CHILDRENCOUNT, &childs.Count);
@@ -99,8 +98,6 @@ namespace RazorSharp.Native
 					m_addrBuffer = (IntPtr) pSymInfo->Address;
 					return false;
 				}
-
-				
 			}
 
 			return true;
@@ -108,12 +105,16 @@ namespace RazorSharp.Native
 
 		private void SymEnumSymbols(IntPtr ctxStrNative)
 		{
-			Conditions.NativeRequire(DbgHelp.SymEnumSymbols(m_process, m_dllBase, m_maskStrNative, EnumSymProc, ctxStrNative));
+			bool value = DbgHelp.SymEnumSymbols(m_process, m_dllBase, 
+			                                    m_maskStrNative, EnumSymProc, ctxStrNative);
+			
+//			Conditions.NativeRequire(value);
 		}
 
 		private void SymEnumTypes(IntPtr ctxStrNative)
 		{
-			Conditions.NativeRequire(DbgHelp.SymEnumTypes(m_process, m_dllBase, EnumSymProc, ctxStrNative));
+			bool value = DbgHelp.SymEnumTypes(m_process, m_dllBase, EnumSymProc, ctxStrNative);
+//			Conditions.NativeRequire(value);
 		}
 
 		public long this[string userContext] {
@@ -161,13 +162,12 @@ namespace RazorSharp.Native
 		public static Pointer<byte> GetSymAddress(string image, string module, string name)
 		{
 			using (var sym = new Symbols(image)) {
-				var addr=sym.GetSymAddress(name, module);
+				var addr = sym.GetSymAddress(name, module);
 				return addr;
 			}
 		}
 
-		
-		
+
 		internal static FileInfo DownloadSymbolFile(DirectoryInfo dest, FileInfo dll)
 		{
 			return DownloadSymbolFile(dest, dll, out _);
@@ -177,23 +177,23 @@ namespace RazorSharp.Native
 		{
 			// symchk
 			string progFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
-			var symChk = new FileInfo(String.Format(@"{0}\Windows Kits\10\Debuggers\x64\symchk.exe", progFiles));
+			var    symChk    = new FileInfo(String.Format(@"{0}\Windows Kits\10\Debuggers\x64\symchk.exe", progFiles));
 			Conditions.RequiresFileExists(symChk);
 
 			string cmd = String.Format("\"{0}\" \"{1}\" /s SRV*{2}*http://msdl.microsoft.com/download/symbols",
 			                           symChk.FullName, dll.FullName, dest.FullName);
 
-			
+
 			using (var cmdProc = Common.Shell("\"" + cmd + "\"")) {
 				var startTime = DateTimeOffset.Now;
-				
+
 				cmdProc.ErrorDataReceived += (sender, args) =>
 				{
 					Global.Log.Error("Process error: {Error}", args.Data);
 				};
 
 				cmdProc.Start();
-				
+
 				var stdOut = cmdProc.StandardOutput;
 				while (!stdOut.EndOfStream) {
 					var ln = stdOut.ReadLine();
@@ -209,10 +209,10 @@ namespace RazorSharp.Native
 			}
 
 			Global.Log.Debug("Done downloading symbols");
-			
+
 			string   pdbStr = dest.FullName + @"\" + Clr.CLR_PDB_SHORT;
 			FileInfo pdb;
-			
+
 			if (Directory.Exists(pdbStr)) {
 				// directory will be named <symbol>.pdb
 				super = new DirectoryInfo(pdbStr);
