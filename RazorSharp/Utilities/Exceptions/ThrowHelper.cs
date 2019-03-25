@@ -48,16 +48,18 @@ namespace RazorSharp.Utilities.Exceptions
 			return exception;
 		}
 
+		
+		
 		[StringFormatMethod(Conditions.STRING_FORMAT_PARAM)]
-		internal static void FailRequire(string msg, params object[] args)
+		internal static void Fail(string msg, params object[] args)
 		{
 			throw CreateException<Exception>(msg, args);
 		}
 
+		
 		[StringFormatMethod(Conditions.STRING_FORMAT_PARAM)]
-		internal static void FailRequire<TException>(string msg, params object[] args) where TException : Exception
+		internal static void Fail<TException>(string msg, params object[] args) where TException : Exception
 		{
-			
 			throw CreateException<TException>(msg, args);
 		}
 	}

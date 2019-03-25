@@ -1,9 +1,11 @@
 #region
 
+using System;
 using RazorCommon;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Structures.ILMethods;
 using RazorSharp.Pointers;
+// ReSharper disable InconsistentNaming
 
 #endregion
 
@@ -38,6 +40,12 @@ namespace RazorSharp.CoreClr.Meta
 			m_value = value;
 		}
 
+		// todo: fix
+		static MetaIL()
+		{
+			throw new NotImplementedException();
+		}
+		
 		/// <summary>
 		///     Whether this type is <see cref="TinyILMethod" />
 		/// </summary>

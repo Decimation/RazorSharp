@@ -214,7 +214,7 @@ namespace RazorSharp.Utilities
 			if (!cond) {
 				string error   = String.Format("P/Invoke or native method \"{0}\" failed", name);
 				var    msgFail = CreateFailString(error, msg, args);
-				ThrowHelper.FailRequire<NativeException>(msgFail);
+				ThrowHelper.Fail<NativeException>(msgFail);
 			}
 		}
 
@@ -228,7 +228,7 @@ namespace RazorSharp.Utilities
 			if (!(value > 0)) {
 				string error   = String.Format("Value \"{0}\" must be > 0", name);
 				var    msgFail = CreateFailString(error, msg, args);
-				ThrowHelper.FailRequire(msgFail);
+				ThrowHelper.Fail(msgFail);
 			}
 		}
 
@@ -285,7 +285,7 @@ namespace RazorSharp.Utilities
 				                             file.Name, file.Directory);
 
 				var msgFail = CreateFailString(error, msg, args);
-				ThrowHelper.FailRequire<FileNotFoundException>(msgFail);
+				ThrowHelper.Fail<FileNotFoundException>(msgFail);
 			}
 		}
 
@@ -297,7 +297,7 @@ namespace RazorSharp.Utilities
 		internal static void Requires(bool cond, string msg = null, params object[] args)
 		{
 			if (!cond) {
-				ThrowHelper.FailRequire(msg, args);
+				ThrowHelper.Fail(msg, args);
 			}
 		}
 
@@ -330,7 +330,7 @@ namespace RazorSharp.Utilities
 		private static void CheckNull(bool b, string name)
 		{
 			if (!b) {
-				ThrowHelper.FailRequire<ArgumentNullException>(name);
+				ThrowHelper.Fail<ArgumentNullException>(name);
 			}
 		}
 

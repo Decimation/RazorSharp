@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
@@ -205,21 +206,61 @@ namespace Test
 
 			const string foo  = nameof(foo);
 			var          cast = Unsafe.Cast<string, Pointer<MyStruct>>(foo);
-			Console.WriteLine(cast);
-			
+
+
 			cast.Add(8)
 			    .Add(4)
 			    .Cast<char>()
 			    .WriteAll("g");
-			
+
 			Debug.Assert(foo.SequenceEqual("goo"));
 
-			
+			var csUnsafe = typeof(CSUnsafe);
+			var il       = csUnsafe.GetMetaType().Methods["AsPointer"].GetILHeader();
+			var ilCode   = csUnsafe.GetMethod("AsPointer").GetMethodBody().GetILAsByteArray();
+
+			var ilHeader = csUnsafe
+			              .GetMethod("AsPointer")
+			              .GetMethodDesc()
+			              .Reference
+			              .GetILHeader();
+
+			var code1 = ilHeader.Reference.Fat.Reference.Code.CopyOutBytes(il.CodeSize);
+			var code2 = ilHeader.Reference.Tiny.Reference.Code.CopyOutBytes(il.CodeSize);
+
+			Console.WriteLine(Collections.CreateString(code1, ToStringOptions.Hex));
+			Console.WriteLine(Collections.CreateString(code2, ToStringOptions.Hex));
+			Console.WriteLine(Collections.CreateString(ilCode, ToStringOptions.Hex));
+
+
+			var opCodes = GetAllOpCodes();
+
+			var opCode  = opCodes.First(op => op.Value == ilCode[0]);
+			var opCode1 = opCodes.First(op => op.Value == ilCode[1]);
+			var opCode2 = opCodes.First(op => op.Value == ilCode[2]);
+
+			Console.WriteLine(opCode);
+			Console.WriteLine(opCode1);
+			Console.WriteLine(opCode2);
 
 
 			// SHUT IT DOWN
 			Clr.Close();
 			Global.Close();
+		}
+
+
+		private static OpCode[] GetAllOpCodes()
+		{
+			var      opCodeType   = typeof(OpCodes);
+			var      opCodeFields = opCodeType.GetFields(BindingFlags.Public | BindingFlags.Static);
+			OpCode[] rgOpCodes    = new OpCode[opCodeFields.Length];
+
+			for (int i = 0; i < rgOpCodes.Length; i++) {
+				rgOpCodes[i] = (OpCode) opCodeFields[i].GetValue(null);
+			}
+
+			return rgOpCodes;
 		}
 
 

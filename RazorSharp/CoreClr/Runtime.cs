@@ -2,8 +2,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Utilities;
@@ -111,8 +113,15 @@ namespace RazorSharp.CoreClr
 		/// <returns>The <see cref="Type" /> of the specified <see cref="MethodTable" /></returns>
 		internal static Type MethodTableToType(Pointer<MethodTable> pMt)
 		{
+			// This seems to raise an ExecutionEngineException when debugging but
+			// it isn't raised when not debugging. ReSharper also tells me the exception is
+			// obsolete and the exception isn't raised anymore? I have no idea.
+			
 			return ClrFunctions.JIT_GetRuntimeType(pMt.ToPointer());
 		}
+
+		
+		
 
 		/// <summary>
 		///     <para>Manually reads a CLR <see cref="MethodTable" /> (TypeHandle).</para>
@@ -125,7 +134,7 @@ namespace RazorSharp.CoreClr
 		internal static Pointer<MethodTable> ReadMethodTable<T>(ref T t)
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
-			if (typeof(T).IsValueType) 
+			if (typeof(T).IsValueType)
 				return typeof(T).GetMethodTable();
 
 			// We need to get the heap pointer manually because of type constraints
@@ -200,7 +209,7 @@ namespace RazorSharp.CoreClr
 			int len  = mt.Reference.FieldDescListLength;
 			var lpFd = new Pointer<FieldDesc>[len];
 
-			for (int i = 0; i < len; i++) 
+			for (int i = 0; i < len; i++)
 				lpFd[i] = &mt.Reference.FieldDescList[i];
 
 			return lpFd;

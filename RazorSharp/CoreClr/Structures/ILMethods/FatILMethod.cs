@@ -86,8 +86,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		/// </code>
 		/// </summary>
 		internal bool IsFat => (CorILMethodFlags) (*(byte*) Unsafe.AddressOf(ref this) &
-		                                           (byte) CorILMethodFlags.FormatMask) ==
-		                       CorILMethodFlags.FatFormat;
+		                                           (byte) CorILMethodFlags.FormatMask) == CorILMethodFlags.FatFormat;
 
 		/// <summary>
 		///     <code>

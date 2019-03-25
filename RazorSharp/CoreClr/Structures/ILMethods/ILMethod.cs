@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Pointers;
+using RazorSharp.Utilities.Exceptions;
 
 #endregion
 
@@ -29,6 +30,8 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 	[StructLayout(LayoutKind.Explicit)]
 	internal struct ILMethod
 	{
+		// todo: fix all this
+		
 		/**
 		 * union
 	     * {
@@ -45,8 +48,8 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		[FieldOffset(0)]
 		private FatILMethod m_fat;
 
-		private Pointer<TinyILMethod> Tiny => Unsafe.AddressOf(ref m_tiny);
-		private Pointer<FatILMethod>  Fat  => Unsafe.AddressOf(ref m_fat);
+		internal Pointer<TinyILMethod> Tiny => Unsafe.AddressOf(ref m_tiny);
+		internal Pointer<FatILMethod>  Fat  => Unsafe.AddressOf(ref m_fat);
 
 		internal bool IsTiny => Tiny.Reference.IsTiny;
 		internal bool IsFat  => Fat.Reference.IsFat;
@@ -98,20 +101,27 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 
 		internal byte[] GetILAsByteArray()
 		{
+			throw new NotImplementedException();
 			return Code.CopyOut(CodeSize);
 		}
 
 		internal CorILMethodFlags Flags {
 			get {
 				// todo: I don't know if the type has to be Fat or not, but just to be safe...
-				if (!IsFat) throw new Exception("IL method type must be Fat");
+				if (!IsFat) 
+					throw new Exception("IL method type must be Fat");
 
 				return Fat.Reference.Flags;
 			}
 		}
 
 
-		internal Pointer<byte> Code => IsTiny ? Tiny.Reference.Code : Fat.Reference.Code;
+		internal Pointer<byte> Code {
+			get {
+				throw new NotImplementedException();
+				var code = IsTiny ? Tiny.Reference.Code : Fat.Reference.Code;
+			}
+		}
 
 
 		internal int CodeSize => (int) (IsTiny ? Tiny.Reference.CodeSize : Fat.Reference.CodeSize);
