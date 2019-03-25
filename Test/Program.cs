@@ -176,9 +176,17 @@ namespace Test
 		}
 
 
+		[StructLayout(LayoutKind.Sequential)]
 		struct MyStruct
 		{
-			public char m_firstChar;
+			public Pointer<MethodTable> m_Pointer;
+			public int                  m_len;
+			public char                 m_firstChar;
+
+			public override string ToString()
+			{
+				return m_firstChar.ToString();
+			}
 		}
 
 		// https://referencesource.microsoft.com/#mscorlib/system/runtime/compilerservices/jithelpers.cs,42f2478cbfe5a17b
@@ -195,18 +203,18 @@ namespace Test
 			var          asm    = Assembly.Load(asmStr);
 
 
-			var meta = typeof(Class).GetMetaType();
-
-
-			// todo: fix
-			var field2 = meta["StaticNigga2"];
-			var ptr2   = field2.GetStaticAddress(null);
-			Console.WriteLine(">> {0:P}", ptr2.Cast<int>());
-
-
 			const string foo  = nameof(foo);
-			var          cast = Unsafe.Cast<string, MyStruct>(foo);
+			var          cast = Unsafe.Cast<string, Pointer<MyStruct>>(foo);
 			Console.WriteLine(cast);
+			
+			cast.Add(8)
+			    .Add(4)
+			    .Cast<char>()
+			    .WriteAll("g");
+			
+			Debug.Assert(foo.SequenceEqual("goo"));
+
+			
 
 
 			// SHUT IT DOWN
