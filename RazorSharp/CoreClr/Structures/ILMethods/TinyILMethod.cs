@@ -1,5 +1,6 @@
 #region
 
+using System;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Pointers;
@@ -59,7 +60,17 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		/// return(((BYTE*) this) + sizeof(struct tagCOR_ILMETHOD_TINY));
 		/// </code>
 		/// </summary>
-		internal Pointer<byte> Code => (byte*) Unsafe.AddressOf(ref this) + sizeof(IMAGE_COR_ILMETHOD_TINY);
+		internal Pointer<byte> Code {
+			get {
+				fixed (TinyILMethod* thisPtr = (&this)) {
+					var value = (byte*) thisPtr;
+					
+					return value 
+					       + sizeof(IMAGE_COR_ILMETHOD_TINY)
+					       +IntPtr.Size;
+				}
+			}
+		}
 
 		internal uint CodeSize => (uint) Flags_CodeSize >> (int) (CorILMethodFlags.FormatShift - 1);
 

@@ -2,6 +2,8 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorCommon;
+using RazorCommon.Utilities;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities.Exceptions;
 
@@ -29,9 +31,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	internal struct ILMethod
-	{
-		// todo: fix all this
-		
+	{		
 		/**
 		 * union
 	     * {
@@ -48,8 +48,8 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		[FieldOffset(0)]
 		private FatILMethod m_fat;
 
-		internal Pointer<TinyILMethod> Tiny => Unsafe.AddressOf(ref m_tiny);
-		internal Pointer<FatILMethod>  Fat  => Unsafe.AddressOf(ref m_fat);
+		private Pointer<TinyILMethod> Tiny => Unsafe.AddressOf(ref m_tiny);
+		private Pointer<FatILMethod>  Fat  => Unsafe.AddressOf(ref m_fat);
 
 		internal bool IsTiny => Tiny.Reference.IsTiny;
 		internal bool IsFat  => Fat.Reference.IsFat;
@@ -101,7 +101,6 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 
 		internal byte[] GetILAsByteArray()
 		{
-			throw new NotImplementedException();
 			return Code.CopyOut(CodeSize);
 		}
 
@@ -118,18 +117,36 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 
 		internal Pointer<byte> Code {
 			get {
-				throw new NotImplementedException();
 				var code = IsTiny ? Tiny.Reference.Code : Fat.Reference.Code;
+				return code;
 			}
 		}
 
 
 		internal int CodeSize => (int) (IsTiny ? Tiny.Reference.CodeSize : Fat.Reference.CodeSize);
 
-
 		internal int MaxStack => (int) (IsTiny ? Tiny.Reference.MaxStack : Fat.Reference.MaxStack);
 
-
 		internal int LocalVarSigTok => (int) (IsTiny ? Tiny.Reference.LocalVarSigTok : Fat.Reference.LocalVarSigTok);
+
+		internal ConsoleTable ToTable()
+		{
+			var table = new ConsoleTable("Info", "Value");
+
+			table.AddRow("Type", IsTiny ? "Tiny" : "Fat");
+			table.AddRow("Code", Code.ToString("P"));
+			table.AddRow("Code mem", Collections.CreateString(GetILAsByteArray(), ToStringOptions.Hex));
+			table.AddRow("Code size", CodeSize);
+			table.AddRow("Max stack", MaxStack);
+			table.AddRow("Local sig token", LocalVarSigTok);
+			table.AddRow("Flags", IsFat ? EnumUtil.CreateString(Flags) : "-");
+
+			return table;
+		}
+		
+		public override string ToString()
+		{
+			return ToTable().ToMarkDownString();
+		}
 	}
 }

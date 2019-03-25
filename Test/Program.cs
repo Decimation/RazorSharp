@@ -42,6 +42,7 @@ using RazorSharp.Native.Enums;
 using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using RazorSharp.Utilities.Exceptions;
 using Test.Samples;
 using Test.Testing;
 using Constants = RazorSharp.CoreClr.Constants;
@@ -225,24 +226,17 @@ namespace Test
 			              .Reference
 			              .GetILHeader();
 
-			var code1 = ilHeader.Reference.Fat.Reference.Code.CopyOutBytes(il.CodeSize);
-			var code2 = ilHeader.Reference.Tiny.Reference.Code.CopyOutBytes(il.CodeSize);
+			
 
-			Console.WriteLine(Collections.CreateString(code1, ToStringOptions.Hex));
-			Console.WriteLine(Collections.CreateString(code2, ToStringOptions.Hex));
-			Console.WriteLine(Collections.CreateString(ilCode, ToStringOptions.Hex));
+			var ss = new SigScanner(Process.GetCurrentProcess());
+			ss.SelectModuleByPage(Clr.ClrModule, ilHeader.Reference.Code.Query().BaseAddress);
+			var ptr = ss.FindPattern(ilCode);
+			Console.WriteLine(Hex.ToHex(ptr));
 
 
-			var opCodes = GetAllOpCodes();
-
-			var opCode  = opCodes.First(op => op.Value == ilCode[0]);
-			var opCode1 = opCodes.First(op => op.Value == ilCode[1]);
-			var opCode2 = opCodes.First(op => op.Value == ilCode[2]);
-
-			Console.WriteLine(opCode);
-			Console.WriteLine(opCode1);
-			Console.WriteLine(opCode2);
-
+			OpCode[] opCodes = {OpCodes.Ldarg_0, OpCodes.Conv_U, OpCodes.Ret};
+			
+			
 
 			// SHUT IT DOWN
 			Clr.Close();

@@ -2,6 +2,7 @@
 
 #region
 
+using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
@@ -107,7 +108,12 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		/// return(((BYTE*) this) + 4*GetSize());
 		/// </code>
 		/// </summary>
-		internal Pointer<byte> Code => (byte*) Unsafe.AddressOf(ref this) + 4 * Size;
+		internal Pointer<byte> Code {
+			get {
+				var ptr =(byte*) Unsafe.AddressOf(ref this) + 4 * Size;
+				return ptr + IntPtr.Size;
+			}
+		}
 
 		public override string ToString()
 		{

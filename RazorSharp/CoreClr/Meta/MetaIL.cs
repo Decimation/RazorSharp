@@ -39,12 +39,6 @@ namespace RazorSharp.CoreClr.Meta
 		{
 			m_value = value;
 		}
-
-		// todo: fix
-		static MetaIL()
-		{
-			throw new NotImplementedException();
-		}
 		
 		/// <summary>
 		///     Whether this type is <see cref="TinyILMethod" />
@@ -103,19 +97,7 @@ namespace RazorSharp.CoreClr.Meta
 			return m_value.Reference.GetILAsByteArray();
 		}
 
-		public ConsoleTable ToTable()
-		{
-			var table = new ConsoleTable("Info", "Value");
-
-			table.AddRow("Type", IsTiny ? "Tiny" : "Fat");
-			table.AddRow("Code", Code.ToString("P"));
-			table.AddRow("Code size", CodeSize);
-			table.AddRow("Max stack", MaxStack);
-			table.AddRow("Local sig token", LocalVarSigTok);
-			table.AddRow("Flags", IsFat ? EnumUtil.CreateString(Flags) : "-");
-
-			return table;
-		}
+		public ConsoleTable ToTable() => m_value.Reference.ToTable();
 
 		public override string ToString()
 		{
