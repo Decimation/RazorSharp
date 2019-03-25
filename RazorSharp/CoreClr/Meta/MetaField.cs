@@ -143,7 +143,22 @@ namespace RazorSharp.CoreClr.Meta
 
 		public unsafe Pointer<byte> GetStaticAddress()
 		{
-			return ClrFunctions.JIT_GetStaticFieldAddr_Context(m_value.ToPointer<FieldDesc>());
+			return m_value.Reference.GetStaticAddress();
+		}
+		
+		public unsafe Pointer<byte> GetStaticAddress(Pointer<byte> value)
+		{
+			return m_value.Reference.GetStaticAddress(value.ToPointer());
+		}
+		
+		public unsafe Pointer<byte> GetStaticAddressHandle()
+		{
+			return m_value.Reference.GetStaticAddressHandle();
+		}
+		
+		public unsafe Pointer<byte> GetStaticAddressContext()
+		{
+			return m_value.Reference.GetStaticAddressContext();
 		}
 
 		public object GetValue<TInstance>(TInstance t)

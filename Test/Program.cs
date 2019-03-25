@@ -157,6 +157,13 @@ namespace Test
 
 		class Class
 		{
+			public static int Static;
+
+			static Class()
+			{
+				Static = Int32.MaxValue;
+			}
+
 			public int doSomething2()
 			{
 				return 2;
@@ -168,12 +175,13 @@ namespace Test
 			}
 		}
 
-		delegate Pointer<int> broCop();
 
 		struct MyStruct
 		{
 			public char m_firstChar;
 		}
+
+		// https://referencesource.microsoft.com/#mscorlib/system/runtime/compilerservices/jithelpers.cs,42f2478cbfe5a17b
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -183,61 +191,22 @@ namespace Test
 			Clr.Setup();
 
 
-			Console.WriteLine(typeof(string).GetMetaType());
-
-
-			const string foo = nameof(foo);
-			const string bar = nameof(bar);
-
-			string bar2 = "bar";
-
 			const string asmStr = "RazorSharp";
 			var          asm    = Assembly.Load(asmStr);
 
 
-			var sys     = Type.GetType("System.SZArrayHelper");
-			var methods = sys.GetMetaType().Methods;
-			foreach (var method in methods) {
-				Console.WriteLine(method.MethodInfo);
-			}
-
-			var    jit  = Type.GetType("System.Runtime.CompilerServices.JitHelpers");
-			var    cast = jit.GetAnyMethod("UnsafeCast");
-			object obj  = new[] {1, 2, 3};
-			cast = cast.MakeGenericMethod(typeof(object));
-			var output = cast.Invoke(null, new object[] {obj});
-			Console.WriteLine(">> {0}", output);
-
-			//int[] rg = new[] {1, 2, 3};
-			//cast = cast.MakeGenericMethod(typeof(Pointer<ArrayObject>));
-			//var ptr = (Pointer<ArrayObject>) cast.Invoke(null, new object[] {rg});
+			var meta = typeof(Class).GetMetaType();
 
 
-			Debug.Assert(bar2.IsInterned());
-			Debug.Assert(bar.IsInterned());
+			// todo: fix
+			var field2 = meta["StaticNigga2"];
+			var ptr2   = field2.GetStaticAddress(null);
+			Console.WriteLine(">> {0:P}", ptr2.Cast<int>());
 
-			Inspect.Heap(bar);
-			Inspect.Heap(bar2);
 
-
-			var bigInteger = new BigInteger();
-			Console.WriteLine(Unsafe.SizeOf<BigInteger>());
-			Console.WriteLine(bigInteger);
-			Console.WriteLine(value: Inspect.LayoutString<BigInteger>());
-			Console.WriteLine(BigInteger.One);
-
-			foreach (var field in typeof(BigInteger).GetMetaType().AllFields) {
-				Console.WriteLine(field);
-			}
-
-			
-			
-			
-			
-			
-			
-			
-			
+			const string foo  = nameof(foo);
+			var          cast = Unsafe.Cast<string, MyStruct>(foo);
+			Console.WriteLine(cast);
 
 
 			// SHUT IT DOWN

@@ -1318,7 +1318,7 @@ namespace RazorSharp.Pointers
 		public string ToStringSafe()
 		{
 			if (IsNull)
-				return NULLPTR;
+				return StringConstants.NULL_STR;
 
 
 			if (typeof(T).IsIntegerType())
@@ -1338,14 +1338,14 @@ namespace RazorSharp.Pointers
 				string valueStr;
 
 				if (heapPtr.IsNull) {
-					valueStr = NULLPTR;
+					valueStr = StringConstants.NULL_STR;
 					goto RETURN;
 				}
 
 				if (typeof(T).IsIListType())
 					valueStr = $"[{Collections.CreateString((IList) Reference)}]";
 				else
-					valueStr = Reference == null ? NULLPTR : Reference.ToString();
+					valueStr = Reference == null ? StringConstants.NULL_STR : Reference.ToString();
 
 				RETURN:
 				return String.Format("{0} ({1})", valueStr, heapPtr.ToString(FMT_P));
@@ -1376,7 +1376,6 @@ namespace RazorSharp.Pointers
 		private const string FMT_I   = "I";
 		private const string FMT_B   = "B";
 		private const string FMT_N   = "N";
-		private const string NULLPTR = "(null)";
 
 		#endregion
 

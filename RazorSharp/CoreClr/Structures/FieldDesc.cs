@@ -214,6 +214,32 @@ namespace RazorSharp.CoreClr.Structures
 			get => throw new SigcallException();
 		}
 
+		[ClrSymcall]
+		internal Pointer<byte> GetStaticAddress()
+		{
+			return null;
+		}
+		
+		[ClrSymcall]
+		internal Pointer<byte> GetStaticAddress(void* value)
+		{
+			return null;
+		}
+		
+		[ClrSymcall]
+		internal Pointer<byte> GetStaticAddressHandle()
+		{
+			return null;
+		}
+		
+		public unsafe Pointer<byte> GetStaticAddressContext()
+		{
+			fixed (FieldDesc* value = &this) {
+				return ClrFunctions.JIT_GetStaticFieldAddr_Context(value);
+			}
+			
+		}
+
 		#endregion
 
 		#region Methods
