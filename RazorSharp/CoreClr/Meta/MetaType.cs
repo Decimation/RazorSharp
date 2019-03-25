@@ -72,10 +72,11 @@ namespace RazorSharp.CoreClr.Meta
 			if (!p.Reference.Parent.IsNull) {
 				Parent = new MetaType(p.Reference.Parent);
 			}
-				
 
-			Fields  = new VirtualCollection<MetaField>(GetField, GetFields);
-			Methods = new VirtualCollection<MetaMethod>(GetMethod, GetMethods);
+
+			Fields    = new VirtualCollection<MetaField>(GetField, GetFields);
+			Methods   = new VirtualCollection<MetaMethod>(GetMethod, GetMethods);
+			AllFields = new VirtualCollection<MetaField>(GetAnyField, GetAllFields);
 		}
 
 		private unsafe Pointer<EEClassLayoutInfo> LayoutInfo => m_value.Reference.EEClass.Reference.LayoutInfo;
@@ -108,7 +109,26 @@ namespace RazorSharp.CoreClr.Meta
 				      .OrderBy(f => f.Offset);
 			}
 		}
-		
+
+		private MetaField GetAnyField(string name)
+		{
+			var field = RuntimeType.GetAnyField(name);
+			Conditions.Requires(!field.IsLiteral, "Field cannot be literal");
+			return new MetaField(field.GetFieldDesc());
+		}
+
+		private MetaField[] GetAllFields()
+		{
+			var fields     = RuntimeType.GetAllFields().Where(x => !x.IsLiteral).ToArray();
+			var metaFields = new MetaField[fields.Length];
+
+			for (int i = 0; i < fields.Length; i++) {
+				metaFields[i] = new MetaField(fields[i].GetFieldDesc());
+			}
+
+			return metaFields;
+		}
+
 		private MetaField GetField(string name)
 		{
 			return new MetaField(RuntimeType.GetFieldDesc(name));
@@ -198,6 +218,8 @@ namespace RazorSharp.CoreClr.Meta
 
 		public VirtualCollection<MetaField> Fields { get; }
 
+		public VirtualCollection<MetaField> AllFields { get; }
+
 		public VirtualCollection<MetaMethod> Methods { get; }
 
 		public MetaType Canon { get; }
@@ -206,7 +228,6 @@ namespace RazorSharp.CoreClr.Meta
 
 		public MetaType Parent { get; }
 
-		
 
 		public CorElementType NormalType => m_value.Reference.EEClass.Reference.NormalType;
 

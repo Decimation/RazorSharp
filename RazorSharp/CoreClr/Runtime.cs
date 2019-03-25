@@ -166,7 +166,7 @@ namespace RazorSharp.CoreClr
 
 		#region FieldDesc
 
-		private static Pointer<byte> GetFieldDescAddress(FieldInfo fi)
+		private static Pointer<byte> GetFieldDescDwordAddress(FieldInfo fi)
 		{
 			Pointer<byte> fieldDesc = fi.FieldHandle.Value;
 			fieldDesc.Add(IntPtr.Size);
@@ -175,14 +175,14 @@ namespace RazorSharp.CoreClr
 
 		internal static int ReadOffset(FieldInfo fi)
 		{
-			Pointer<byte> fieldDesc = GetFieldDescAddress(fi);
+			Pointer<byte> fieldDesc = GetFieldDescDwordAddress(fi);
 			var           dword2    = fieldDesc.ReadAny<uint>(1);
 			return Bits.ReadBits((int) dword2, Offsets.FIELDDESC_DW2_OFFSET_BITS, 0);
 		}
 
 		internal static void WriteOffset(FieldInfo fi, int offset)
 		{
-			Pointer<byte> fieldDesc = GetFieldDescAddress(fi);
+			Pointer<byte> fieldDesc = GetFieldDescDwordAddress(fi);
 			var           dword2    = fieldDesc.ReadAny<uint>(1);
 			fieldDesc.WriteAny(Bits.WriteTo(data: (int) dword2, index: 0,
 			                                Offsets.FIELDDESC_DW2_OFFSET_BITS, offset), 1);
@@ -200,7 +200,8 @@ namespace RazorSharp.CoreClr
 			int len  = mt.Reference.FieldDescListLength;
 			var lpFd = new Pointer<FieldDesc>[len];
 
-			for (int i = 0; i < len; i++) lpFd[i] = &mt.Reference.FieldDescList[i];
+			for (int i = 0; i < len; i++) 
+				lpFd[i] = &mt.Reference.FieldDescList[i];
 
 			return lpFd;
 		}
@@ -228,7 +229,6 @@ namespace RazorSharp.CoreClr
 			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
 			if (Environment.Is64BitProcess) {
 				Conditions.Assert(fieldDesc.Reference.Info == fieldInfo);
-
 				Conditions.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
 			}
 

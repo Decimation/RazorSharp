@@ -88,7 +88,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 				return;
 			}
 
-			Global.Log.Information("Binding type {Name}", t.Name);
+//			Global.Log.Information("Binding type {Name}", t.Name);
 
 			var baseAttr = attributes[0];
 			var sym      = new Native.Symbols(baseAttr.Image);
@@ -113,8 +113,8 @@ namespace RazorSharp.Memory.Calling.Symbols
 			Conditions.Requires(addresses.Length == methods.Length);
 
 			for (int i = 0; i < methods.Length; i++) {
-				Global.Log.Debug("Binding {Name} to {Addr} (offset: {Offset})", methods[i].Name,
-				                 addresses[i].ToString("P"),offsets[i].ToString("X"));
+//				Global.Log.Debug("Binding {Name} to {Addr} (offset: {Offset})", methods[i].Name,
+//				                 addresses[i].ToString("P"),offsets[i].ToString("X"));
 				var addr = addresses[i].Address;
 				Functions.SetStableEntryPoint(methods[i], addr);
 			}

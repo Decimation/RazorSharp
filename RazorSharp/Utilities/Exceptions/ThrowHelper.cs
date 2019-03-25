@@ -1,5 +1,6 @@
 using System;
 using JetBrains.Annotations;
+using RazorCommon;
 
 
 namespace RazorSharp.Utilities.Exceptions
@@ -37,7 +38,7 @@ namespace RazorSharp.Utilities.Exceptions
 		{
 			TException exception;
 			if (!String.IsNullOrWhiteSpace(msg)) {
-				var format = String.Format(msg, args);
+				string format = String.Format(msg, args);
 				exception = Create<TException>(format);
 			}
 			else {
@@ -52,10 +53,11 @@ namespace RazorSharp.Utilities.Exceptions
 		{
 			throw CreateException<Exception>(msg, args);
 		}
-		
+
 		[StringFormatMethod(Conditions.STRING_FORMAT_PARAM)]
 		internal static void FailRequire<TException>(string msg, params object[] args) where TException : Exception
 		{
+			
 			throw CreateException<TException>(msg, args);
 		}
 	}

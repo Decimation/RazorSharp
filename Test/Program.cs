@@ -223,7 +223,21 @@ namespace Test
 			var bigInteger = new BigInteger();
 			Console.WriteLine(Unsafe.SizeOf<BigInteger>());
 			Console.WriteLine(bigInteger);
-			Console.WriteLine(Inspect.LayoutString<BigInteger>());
+			Console.WriteLine(value: Inspect.LayoutString<BigInteger>());
+			Console.WriteLine(BigInteger.One);
+
+			foreach (var field in typeof(BigInteger).GetMetaType().AllFields) {
+				Console.WriteLine(field);
+			}
+
+			
+			
+			
+			
+			
+			
+			
+			
 
 
 			// SHUT IT DOWN
