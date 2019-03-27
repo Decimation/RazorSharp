@@ -149,12 +149,16 @@ namespace RazorSharp.Analysis
 			Console.WriteLine(HeapString(t, options));
 		}
 
+		private const string JOIN_BAR = " | ";
+		
 		private static string CreateInternalRowEntry(byte[] mem, ToStringOptions options)
 		{
 			return InterpretInternal
 				? CreateRowEntry<byte>(mem, options)
-				: Collections.CreateString(" | ", mem, options);
+				: mem.AutoJoin(JOIN_BAR, options);
 		}
+		
+		
 
 		private static string CreateRowEntry<TAs>(byte[] mem, ToStringOptions options)
 		{
@@ -173,10 +177,12 @@ namespace RazorSharp.Analysis
 
 			// Byte is default for TAs
 			if (typeof(TAs) != typeof(byte)) {
-				return Collections.CreateString(" | ", MemConvert.ConvertArray<TAs>(mem), options);
+				
+				return MemConvert.ConvertArray<TAs>(mem).AutoJoin(JOIN_BAR, options);
 			}
 
-			return Collections.CreateString(" | ", mem, options);
+			
+			return mem.AutoJoin(JOIN_BAR, options);
 		}
 
 		public static string HeapString<T, TAs>(T t, ToStringOptions options = DEFAULT) where T : class

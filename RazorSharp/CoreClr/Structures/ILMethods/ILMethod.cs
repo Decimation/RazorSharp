@@ -135,7 +135,8 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 
 			table.AddRow("Type", IsTiny ? "Tiny" : "Fat");
 			table.AddRow("Code", Code.ToString("P"));
-			table.AddRow("Code mem", Collections.CreateString(GetILAsByteArray(), ToStringOptions.Hex));
+			// table.AddRow("Code mem", Collections.CreateString(GetILAsByteArray(), ToStringOptions.Hex));
+			table.AddRow("Code mem", GetILAsByteArray().AutoJoin());
 			table.AddRow("Code size", CodeSize);
 			table.AddRow("Max stack", MaxStack);
 			table.AddRow("Local sig token", LocalVarSigTok);

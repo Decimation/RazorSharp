@@ -80,7 +80,7 @@ namespace RazorSharp.Analysis
 				             OBJHEADER_NAME_STR,
 				             objHeaderMem == null
 					             ? Omitted.ToString()
-					             : String.Format("[{0}]", Collections.CreateString(objHeaderMem)),
+					             : String.Format("[{0}]", objHeaderMem.AutoJoin()),
 				             UniqueAttributes.None);
 
 				// MethodTable*

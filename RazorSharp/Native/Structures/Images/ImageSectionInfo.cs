@@ -41,7 +41,7 @@ namespace RazorSharp.Native.Structures.Images
 		public Pointer<byte> EndAddress {
 			get {
 				// I don't know what's with the SectionSize - 1
-				var ptr = PointerUtils.Add(m_sectionAddress, (byte*) SectionSize - 1);
+				var ptr = PointerUtil.Add(m_sectionAddress, (byte*) SectionSize - 1);
 				return ptr;
 			}
 		}

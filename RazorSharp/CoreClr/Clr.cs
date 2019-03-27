@@ -113,7 +113,7 @@ namespace RazorSharp.CoreClr
 			return clr;
 		}
 
-		internal static void Setup()
+		public static void Setup()
 		{
 			if (ClrPdb == null) {
 				ClrPdb = GetClrSymbolFile();

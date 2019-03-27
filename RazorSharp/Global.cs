@@ -19,6 +19,7 @@ using Serilog.Sinks.SystemConsole.Themes;
 
 namespace RazorSharp
 {
+	
 	public static class Global
 	{
 		internal const string CONTEXT_PROP = "Context";
@@ -51,14 +52,14 @@ namespace RazorSharp
 		}
 
 
-		internal static void Setup()
+		public static void Setup()
 		{
 			Conditions.CheckCompatibility();
 			Console.OutputEncoding = Encoding.Unicode;
 			Conditions.Requires(IsSetup);
 		}
 
-		internal static void Close()
+		public static void Close()
 		{
 			if (!IsSetup) {
 				return;

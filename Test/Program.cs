@@ -1,23 +1,30 @@
 ﻿#region
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Extensions;
 using RazorCommon.Strings;
+using RazorCommon.Utilities;
 using RazorSharp;
 using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Enums;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
-using Unsafe = System.Runtime.CompilerServices.Unsafe;
-
+using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+using Unsafe = RazorSharp.Unsafe;
 #endregion
 
 
@@ -26,7 +33,7 @@ namespace Test
 	#region
 
 	using DWORD = UInt32;
-	using CSUnsafe = Unsafe;
+	
 
 	#endregion
 
@@ -47,6 +54,9 @@ namespace Test
 			return Constants.INVALID_VALUE;
 		}
 
+
+		delegate void* GetRuntimeType(void* p);
+		
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -55,24 +65,30 @@ namespace Test
 			Clr.Setup();
 
 
-			const string asmStr = "RazorSharp";
-			var          asm    = Assembly.Load(asmStr);
+//			const string asmStr = "RazorSharp";
+//			var          asm    = Assembly.Load(asmStr);
 
-			Pointer<MethodTable> strMT    = typeof(string).GetMethodTable();
-			byte[]               ptrBytes = BitConverter.GetBytes(strMT.Address.ToInt64());
+			const string SYM = "JIT_GetRuntimeType";
 
-			var ai = new AddressInfo(strMT.Cast<byte>());
-			Console.WriteLine(ai.Module);
+			GetRuntimeType fn;
+			using (var sym = new Symbols(Clr.ClrPdb.FullName)) {
+				fn = sym.GetFunction<GetRuntimeType>(SYM, "clr.dll");
+			}
 
-			string foo = "foo";
-			var    ai2 = new AddressInfo(RazorSharp.Unsafe.AddressOfHeap(foo));
-			Console.WriteLine(ai2.Segment);
-
-			Pointer<byte> fn  = Clr.GetClrFunctionAddress("MethodDesc::SetStableEntryPointInterlocked");
-			var           ai3 = new AddressInfo(fn);
-			Console.WriteLine(ai3.Segment);
+			var ptr = fn(typeof(string).TypeHandle.Value.ToPointer());
+			
+			
+			Console.WriteLine(Unsafe.RawInterpret<Type>(ptr));
 
 
+			var a = EnumUtil.GetValues<uint>(typeof(CorTokenType));
+			var b = EnumUtil.GetValues<uint>(typeof(TokenType));
+
+			var diff = a.Intersect(b).ToArray();
+			Console.WriteLine(diff.AutoJoin());
+			
+			
+			
 			// SHUT IT DOWN
 			Symbols.Close();
 			Clr.Close();
@@ -154,7 +170,7 @@ namespace Test
 				}
 				else if (val != null) {
 					if (val.GetType().IsArray)
-						valStr  = Collections.CreateString((Array) val, ToStringOptions.Hex);
+						valStr  = ((Array) val).AutoJoin(ToStringOptions.Hex);
 					else valStr = val.ToString();
 				}
 				else {

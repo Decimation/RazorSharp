@@ -93,7 +93,7 @@ namespace RazorSharp.Memory
 
 			if (ofsGuess != 0) {
 				if (PatternCheck(ofsGuess, rgPattern, byteTolerance))
-					return PointerUtils.Add(m_lpModuleBase, ofsGuess).Address;
+					return PointerUtil.Add(m_lpModuleBase, ofsGuess).Address;
 			}
 
 			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {
@@ -162,8 +162,7 @@ namespace RazorSharp.Memory
 		{
 			var addr = FindPattern(rgPattern, ofsGuess);
 			if (addr == IntPtr.Zero)
-				throw new Exception(
-					$"Could not find function with opcodes {Collections.CreateString(rgPattern, ToStringOptions.Hex)}");
+				throw new Exception($"Could not find function with opcodes {rgPattern.AutoJoin()}");
 
 			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
 		}

@@ -298,7 +298,7 @@
     <Compile Include="Native\User32.cs" />
     <Compile Include="Pointers\AllocPointer.cs" />
     <Compile Include="Pointers\Pointer.cs" />
-    <Compile Include="Pointers\PointerUtils.cs" />
+    <Compile Include="Pointers\PointerUtil.cs" />
     <Compile Include="CoreClr\ClrFunctions.cs" />
     <Compile Include="CoreClr\Structures\DWFlags.cs" />
     <Compile Include="CoreClr\Structures\FieldDesc.cs" />

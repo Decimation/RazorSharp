@@ -335,7 +335,7 @@ namespace RazorSharp.Memory
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static ref T AsRef<T>(Pointer<byte> p, int byteOffset = 0)
 		{
-			return ref CSUnsafe.AsRef<T>(PointerUtils.Add(p, byteOffset).ToPointer());
+			return ref CSUnsafe.AsRef<T>(PointerUtil.Add(p, byteOffset).ToPointer());
 		}
 
 		#endregion

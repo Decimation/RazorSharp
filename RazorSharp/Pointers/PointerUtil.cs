@@ -10,7 +10,7 @@ namespace RazorSharp.Pointers
 	/// <summary>
 	///     Provides utilities for pointer arithmetic
 	/// </summary>
-	public static unsafe class PointerUtils
+	public static unsafe class PointerUtil
 	{
 		// todo: move this to Pointer
 		

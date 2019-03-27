@@ -88,7 +88,7 @@ namespace RazorSharp.CoreClr.Structures
 			foreach (byte v in bytes) sb.AppendFormat("{0} ", Convert.ToString(v, 2));
 
 			sb.Remove(sb.Length - 1, 1);
-			return $"Sync block: {m_uSyncBlockValue} ({SyncBlockAsFlags}) [{Collections.CreateString(bytes)}] [{sb}]";
+			return $"Sync block: {m_uSyncBlockValue} ({SyncBlockAsFlags}) [{bytes.AutoJoin()}] [{sb}]";
 		}
 
 		#region Equality

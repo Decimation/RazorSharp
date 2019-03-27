@@ -1023,7 +1023,7 @@ namespace RazorSharp.Pointers
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private IntPtr Offset<TType>(int elemCnt)
 		{
-			return PointerUtils.Offset<TType>(m_value, elemCnt);
+			return PointerUtil.Offset<TType>(m_value, elemCnt);
 		}
 
 
@@ -1036,7 +1036,7 @@ namespace RazorSharp.Pointers
 		/// </returns>
 		public Pointer<T> Add(long bytes = 1)
 		{
-			m_value = PointerUtils.Add(m_value, bytes).ToPointer();
+			m_value = PointerUtil.Add(m_value, bytes).ToPointer();
 			return this;
 		}
 
@@ -1050,7 +1050,7 @@ namespace RazorSharp.Pointers
 		/// </returns>
 		public Pointer<T> Subtract(long bytes = 1)
 		{
-			m_value = PointerUtils.Subtract(m_value, bytes).ToPointer();
+			m_value = PointerUtil.Subtract(m_value, bytes).ToPointer();
 			return this;
 		}
 
@@ -1343,7 +1343,7 @@ namespace RazorSharp.Pointers
 				}
 
 				if (typeof(T).IsIListType())
-					valueStr = $"[{Collections.CreateString((IList) Reference)}]";
+					valueStr = $"[{((IList) Reference).AutoJoin()}]";
 				else
 					valueStr = Reference == null ? StringConstants.NULL_STR : Reference.ToString();
 
