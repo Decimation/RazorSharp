@@ -214,7 +214,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		#region Accessors
 
-		public MetaField this[string name] => Fields[name];
+		public MetaField this[string name] => AllFields[name];
 
 		public VirtualCollection<MetaField> Fields { get; }
 

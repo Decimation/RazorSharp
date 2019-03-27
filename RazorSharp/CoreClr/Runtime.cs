@@ -120,6 +120,19 @@ namespace RazorSharp.CoreClr
 			return ClrFunctions.JIT_GetRuntimeType(pMt.ToPointer());
 		}
 
+		internal static Type GetType(Pointer<MethodTable> pMT)
+		{
+			// FatalExecutionEngineError
+
+			try {
+				return ClrFunctions.JIT_GetRuntimeType(pMT.ToPointer());
+			}
+			catch {
+				Console.WriteLine("FUCK");
+				throw;
+			}
+		}
+
 		
 		
 

@@ -23,6 +23,7 @@ using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using Newtonsoft.Json.Converters;
 using NUnit.Framework;
 using RazorCommon;
 using RazorCommon.Extensions;
@@ -76,6 +77,11 @@ namespace Test
 		private static int Size(this object obj)
 		{
 			return Unsafe.INVALID_VALUE;
+		}
+
+		private static byte[] memoryOf(this object obj)
+		{
+			return Unsafe.MemoryOf(obj);
 		}
 
 
@@ -191,7 +197,14 @@ namespace Test
 			}
 		}
 
+
 		// https://referencesource.microsoft.com/#mscorlib/system/runtime/compilerservices/jithelpers.cs,42f2478cbfe5a17b
+
+		private static void SetFieldOffset<T>(string name, int offset)
+		{
+			var field = typeof(T).GetMetaType()[name];
+			field.Offset = offset;
+		}
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -206,7 +219,7 @@ namespace Test
 
 
 			const string foo  = nameof(foo);
-			var          cast = Unsafe.Cast<string, Pointer<MyStruct>>(foo);
+			var          cast = Unsafe.Cast<string, Pointer<StringObject>>(foo);
 
 
 			cast.Add(8)
@@ -226,31 +239,81 @@ namespace Test
 			              .Reference
 			              .GetILHeader();
 
+
+			const string neko = "nyaa";
+
+			int i    = 0;
+			var reff = __makeref(i);
+			__refvalue(__makeref(i), int) = 0;
+
+
+			Debug.Assert(add(1, 1) == 2);
+
+			Pointer<byte> stack = &i;
+			Console.WriteLine(stack.Query());
+
+			Console.WriteLine("{0:P}", Mem.StackBase);
+			Console.WriteLine("{0:P}", Mem.StackLimit);
+
+			Console.WriteLine(typeof(string).GetMetaType());
 			
-
-			var ss = new SigScanner(Process.GetCurrentProcess());
-			ss.SelectModuleByPage(Clr.ClrModule, ilHeader.Reference.Code.Query().BaseAddress);
-			var ptr = ss.FindPattern(ilCode);
-			Console.WriteLine(Hex.ToHex(ptr));
-
-
-			OpCode[] opCodes = {OpCodes.Ldarg_0, OpCodes.Conv_U, OpCodes.Ret};
-			
-			
-
 			// SHUT IT DOWN
 			Clr.Close();
 			Global.Close();
 		}
 
+		//This bypasses the restriction that you can't have a pointer to T,
+		//letting you write very high-performance generic code.
+		//It's dangerous if you don't know what you're doing, but very worth if you do.
+		static T Read<T>(IntPtr address)
+		{
+			var obj = default(T);
+			var tr  = __makeref(obj);
+
+			//This is equivalent to shooting yourself in the foot
+			//but it's the only high-perf solution in some cases
+			//it sets the first field of the TypedReference (which is a pointer)
+			//to the address you give it, then it dereferences the value.
+			//Better be 10000% sure that your type T is unmanaged/blittable...
+			unsafe {
+				*(IntPtr*) (&tr) = address;
+			}
+
+			return __refvalue(tr, T);
+		}
+
+		static T add<T>(T a, T b)
+		{
+			if (a is int && b is int) {
+				var c = __refvalue(__makeref(a), int);
+				c += __refvalue(__makeref(b), int);
+				return __refvalue(__makeref(c), T);
+			}
+
+			return default;
+		}
+
+		static void foo<T>(ref T value)
+		{
+			//This is the ONLY way to treat value as int, without boxing/unboxing objects
+			if (value is int) {
+				__refvalue(__makeref(value), int) = 1;
+			}
+			else {
+				value = default(T);
+			}
+		}
+
 
 		private static OpCode[] GetAllOpCodes()
 		{
-			var      opCodeType   = typeof(OpCodes);
-			var      opCodeFields = opCodeType.GetFields(BindingFlags.Public | BindingFlags.Static);
-			OpCode[] rgOpCodes    = new OpCode[opCodeFields.Length];
+			var opCodeType   = typeof(OpCodes);
+			var opCodeFields = opCodeType.GetFields(BindingFlags.Public | BindingFlags.Static);
 
-			for (int i = 0; i < rgOpCodes.Length; i++) {
+			OpCode[] rgOpCodes = new OpCode[opCodeFields.Length];
+			for (int i = 0;
+				i < rgOpCodes.Length;
+				i++) {
 				rgOpCodes[i] = (OpCode) opCodeFields[i].GetValue(null);
 			}
 

@@ -161,6 +161,11 @@ namespace RazorSharp.CoreClr.Meta
 			return m_value.Reference.GetStaticAddressContext();
 		}
 
+		public object GetValue(object value)
+		{
+			return m_value.Reference.GetValue(value);
+		}
+		
 		public object GetValue<TInstance>(TInstance t)
 		{
 			return m_value.Reference.GetValue(t);
@@ -173,6 +178,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		public Pointer<byte> GetAddress<TInstance>(ref TInstance t)
 		{
+			
 			return m_value.Reference.GetAddress(ref t);
 		}
 

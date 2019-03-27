@@ -38,7 +38,7 @@ namespace RazorSharp.Memory
 	public static unsafe class Mem
 	{
 		// todo: make all consts match SCREAMING_SNAKE_CASE
-		internal const int  BytesInKilobyte = 1024;
+		internal const int BytesInKilobyte = 1024;
 
 
 		public static bool Is64Bit {
@@ -224,7 +224,10 @@ namespace RazorSharp.Memory
 			// VirtualAlloc(nullptr, page_size, MEM_COMMIT, PAGE_READWRITE);
 
 			// @formatter:off
-			var alloc = Kernel32.VirtualAlloc(IntPtr.Zero, (UIntPtr) si.PageSize, AllocationType.Commit,MemoryProtection.ReadWrite);
+			var alloc = Kernel32.VirtualAlloc(IntPtr.Zero, 
+			                                  (UIntPtr) si.PageSize, 
+			                                  AllocationType.Commit,
+			                                  MemoryProtection.ReadWrite);
 			// @formatter:on
 
 			AllocCount++;
@@ -232,8 +235,9 @@ namespace RazorSharp.Memory
 
 			// VirtualProtect(buffer, code.size(), PAGE_EXECUTE_READ, &dummy);
 
-			Conditions.Requires(
-				Kernel32.VirtualProtect(alloc, (uint) opCodes.Length, MemoryProtection.ExecuteRead, out _));
+			Conditions.NativeRequire(Kernel32.VirtualProtect(alloc, (uint) opCodes.Length,
+			                                                 MemoryProtection.ExecuteRead,
+			                                                 out _));
 
 
 			return alloc;
@@ -241,7 +245,7 @@ namespace RazorSharp.Memory
 
 		public static void FreeCode(Pointer<byte> fn)
 		{
-			Conditions.Requires(Kernel32.VirtualFree(fn.Address, 0, FreeTypes.Release));
+			Conditions.NativeRequire(Kernel32.VirtualFree(fn.Address, 0, FreeTypes.Release));
 			AllocCount--;
 		}
 
@@ -291,8 +295,6 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
-
-		
 
 
 		#region Read / write
@@ -360,12 +362,12 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     Stack Base / Bottom of stack (high address)
 		/// </summary>
-		public static IntPtr StackBase => Kernel32.GetCurrentThreadStackLimits().High;
+		public static Pointer<byte> StackBase => Kernel32.GetCurrentThreadStackLimits().High;
 
 		/// <summary>
 		///     Stack Limit / Ceiling of stack (low address)
 		/// </summary>
-		public static IntPtr StackLimit => Kernel32.GetCurrentThreadStackLimits().Low;
+		public static Pointer<byte> StackLimit => Kernel32.GetCurrentThreadStackLimits().Low;
 
 		/// <summary>
 		///     Should equal <c>4 MB</c> for 64-bit and <c>1 MB</c> for 32-bit
@@ -394,7 +396,7 @@ namespace RazorSharp.Memory
 
 		public static void Copy<T>(Pointer<T> dest, int startOfs, Pointer<T> src, int elemCnt)
 		{
-			for (int i = startOfs; i < elemCnt + startOfs; i++) 
+			for (int i = startOfs; i < elemCnt + startOfs; i++)
 				dest[i - startOfs] = src[i];
 		}
 

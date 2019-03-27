@@ -29,6 +29,8 @@ namespace RazorSharp.Native
 		private readonly ulong m_base,
 		                       m_dllBase;
 
+		private SymbolInfo* m_symbolBuffer;
+
 		private const long INVALID_OFFSET = -4194304;
 
 		public Symbols(string image, string mask, ulong @base, uint size)
@@ -44,6 +46,8 @@ namespace RazorSharp.Native
 
 			m_dllBase = DbgHelp.SymLoadModuleEx(m_process, IntPtr.Zero, m_imgStrNative,
 			                                    IntPtr.Zero, m_base, size, IntPtr.Zero, 0);
+			m_symbolBuffer = null;
+			m_addrBuffer = IntPtr.Zero;
 		}
 
 		public Symbols(string image) : this(image, MASK_STR_DEFAULT, BASE_DEFAULT, SIZE_DEFAULT) { }
@@ -69,6 +73,7 @@ namespace RazorSharp.Native
 				SymEnumSymbols(ctxStrNative);
 				SymEnumTypes(ctxStrNative);
 				var ofs = (m_addrBuffer - (int) m_base).ToInt64();
+				m_symbolBuffer = null;
 				CheckOffset(ofs);
 				offsets.Add(ofs);
 				Marshal.FreeHGlobal(ctxStrNative);
@@ -76,6 +81,8 @@ namespace RazorSharp.Native
 
 			return offsets.ToArray();
 		}
+		
+		
 
 		private bool EnumSymProc(IntPtr pSymInfoX, uint reserved, IntPtr userContext)
 		{
@@ -95,7 +102,8 @@ namespace RazorSharp.Native
 					//DbgHelp.SymGetTypeInfo(m_process, pSymInfo->ModBase, pSymInfo->TypeIndex,
 					//                       ImageHelpSymbolTypeInfo.TI_GET_CHILDRENCOUNT, &childs.Count);
 
-					m_addrBuffer = (IntPtr) pSymInfo->Address;
+					m_addrBuffer   = (IntPtr) pSymInfo->Address;
+					m_symbolBuffer = pSymInfo;
 					return false;
 				}
 			}
@@ -105,11 +113,12 @@ namespace RazorSharp.Native
 
 		private void SymEnumSymbols(IntPtr ctxStrNative)
 		{
-			bool value = DbgHelp.SymEnumSymbols(m_process, m_dllBase, 
+			bool value = DbgHelp.SymEnumSymbols(m_process, m_dllBase,
 			                                    m_maskStrNative, EnumSymProc, ctxStrNative);
-			
+
 //			Conditions.NativeRequire(value);
 		}
+
 
 		private void SymEnumTypes(IntPtr ctxStrNative)
 		{
@@ -117,8 +126,22 @@ namespace RazorSharp.Native
 //			Conditions.NativeRequire(value);
 		}
 
-		public long this[string userContext] {
-			get { return GetSymOffset(userContext); }
+		public SymbolInfo* GetSymbol(string userContext)
+		{
+			var ctxStrNative = Marshal.StringToHGlobalAnsi(userContext);
+
+			SymEnumSymbols(ctxStrNative);
+			SymEnumTypes(ctxStrNative);
+
+			Marshal.FreeHGlobal(ctxStrNative);
+
+			var sym = m_symbolBuffer;
+			m_symbolBuffer = null;
+			return sym;
+		}
+
+		public SymbolInfo* this[string userContext] {
+			get { return GetSymbol(userContext); }
 		}
 
 		public TDelegate GetFunction<TDelegate>(string userContext, string module) where TDelegate : Delegate
@@ -137,6 +160,7 @@ namespace RazorSharp.Native
 			Marshal.FreeHGlobal(ctxStrNative);
 
 			var offset = (m_addrBuffer - (int) m_base).ToInt64();
+			m_symbolBuffer = default;
 			CheckOffset(offset);
 			return offset;
 		}
@@ -150,6 +174,7 @@ namespace RazorSharp.Native
 			m_addrBuffer    = IntPtr.Zero;
 			m_imgStrNative  = IntPtr.Zero;
 			m_maskStrNative = IntPtr.Zero;
+			m_symbolBuffer  = null;
 		}
 
 		public void Dispose()
