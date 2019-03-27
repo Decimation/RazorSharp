@@ -86,7 +86,7 @@ namespace RazorSharp.Memory
 
 		public static int GetOffset<T>(Pointer<T> ptr)
 		{
-			return PointerUtil.OffsetIndex<T>(GetOrigin(ptr).Address, ptr.Address);
+			return GetOrigin(ptr).OffsetIndex<T>(ptr.Address);
 		}
 
 		private static Range GetRange(IntPtr p)

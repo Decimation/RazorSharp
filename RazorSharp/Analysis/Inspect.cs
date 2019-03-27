@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RazorCommon;
+using RazorCommon.Strings;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
@@ -17,8 +18,8 @@ namespace RazorSharp.Analysis
 {
 	public static class Inspect
 	{
-		private const ToStringOptions DEFAULT = ToStringOptions.Hex;
-
+		private const string JOIN_BAR = " | ";
+		
 		/// <summary>
 		///     Whether to interpret the <see cref="MethodTable" />, <see cref="ObjHeader" />, and other internal
 		///     data structures as the TAs parameters.
@@ -80,12 +81,12 @@ namespace RazorSharp.Analysis
 			return table;
 		}
 
-		public static void Stack<T>(ref T t, ToStringOptions options = DEFAULT)
+		public static void Stack<T>(ref T t, ToStringOptions options = Hex.DEFAULT)
 		{
 			Console.WriteLine(StackString(ref t, options));
 		}
 
-		public static string StackString<T>(ref T t, ToStringOptions options = DEFAULT)
+		public static string StackString<T>(ref T t, ToStringOptions options = Hex.DEFAULT)
 		{
 			Pointer<T> addr = Unsafe.AddressOf(ref t);
 			int        size = Unsafe.SizeOf<T>();
@@ -139,17 +140,17 @@ namespace RazorSharp.Analysis
 			return table;
 		}
 
-		public static void Heap<T, TAs>(T t, ToStringOptions options = DEFAULT) where T : class
+		public static void Heap<T, TAs>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
 		{
 			Console.WriteLine(HeapString<T, TAs>(t, options));
 		}
 
-		public static void Heap<T>(T t, ToStringOptions options = DEFAULT) where T : class
+		public static void Heap<T>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
 		{
 			Console.WriteLine(HeapString(t, options));
 		}
 
-		private const string JOIN_BAR = " | ";
+		
 		
 		private static string CreateInternalRowEntry(byte[] mem, ToStringOptions options)
 		{
@@ -171,13 +172,10 @@ namespace RazorSharp.Analysis
 					break;
 				case ToStringOptions.PrefixHex:
 					break;
-				case ToStringOptions.Decimal:
-					break;
 			}
 
 			// Byte is default for TAs
 			if (typeof(TAs) != typeof(byte)) {
-				
 				return MemConvert.ConvertArray<TAs>(mem).AutoJoin(JOIN_BAR, options);
 			}
 
@@ -185,7 +183,7 @@ namespace RazorSharp.Analysis
 			return mem.AutoJoin(JOIN_BAR, options);
 		}
 
-		public static string HeapString<T, TAs>(T t, ToStringOptions options = DEFAULT) where T : class
+		public static string HeapString<T, TAs>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
 		{
 			// Sizes
 			Pointer<byte> addr     = Unsafe.AddressOfHeap(t);
@@ -262,7 +260,7 @@ namespace RazorSharp.Analysis
 			return sb.ToString();
 		}
 
-		public static string HeapString<T>(T t, ToStringOptions options = DEFAULT) where T : class
+		public static string HeapString<T>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
 		{
 			return HeapString<T, byte>(t, options);
 		}

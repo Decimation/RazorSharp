@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Enums.MethodDesc;
@@ -393,7 +394,7 @@ namespace RazorSharp.CoreClr.Structures
 			table.AddRow("MethodDescChunk", MethodDescChunk.ToString("P"));
 
 
-			table.AddRow("Classification", Classification.Join());
+			table.AddRow("Classification", Classification.JoinFlags());
 			table.AddRow("Flags", EnumUtil.CreateFlagsString(m_wFlags, Flags));
 			table.AddRow("Flags 2", EnumUtil.CreateFlagsString(m_bFlags2, Flags2));
 			table.AddRow("Flags 3", EnumUtil.CreateFlagsString(m_wFlags3AndTokenRemainder, Flags3));

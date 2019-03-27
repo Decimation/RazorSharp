@@ -1014,29 +1014,68 @@ namespace RazorSharp.Pointers
 
 		#region Arithmetic
 
+		/// <summary>
+		///     Returns the element index of a pointer relative to <see cref="Address" />
+		/// </summary>
+		/// <param name="current">Current pointer (high address)</param>
+		/// <returns>The index</returns>
+		public int OffsetIndex(Pointer<byte> current)
+		{
+			return OffsetIndex<T>(current);
+		}
+		
+		/// <summary>
+		///     Returns the element index of a pointer relative to <see cref="Address" />
+		/// </summary>
+		/// <param name="current">Current pointer (high address)</param>
+		/// <typeparam name="TElement">Element type</typeparam>
+		/// <returns>The index</returns>
+		public int OffsetIndex<TElement>(Pointer<byte> current)
+		{
+			long delta = current.ToInt64() - ToInt64();
+			return (int) delta / Unsafe.SizeOf<TElement>();
+		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private IntPtr Offset(int elemCnt)
 		{
 			return Offset<T>(elemCnt);
 		}
 
+		/// <summary>
+		///     Offsets a pointer by <paramref name="elemCnt" /> elements.
+		/// </summary>
+		/// <param name="elemCnt">Elements to offset by</param>
+		/// <typeparam name="TType">Element type</typeparam>
+		/// <returns>
+		///     <see cref="Address" /> <c>+</c> <c>(</c><paramref name="elemCnt" /> <c>*</c>
+		/// <see cref="Unsafe.SizeOf{T}" /><c>)</c>
+		/// </returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private IntPtr Offset<TType>(int elemCnt)
 		{
-			return PointerUtil.Offset<TType>(m_value, elemCnt);
+//			return PointerUtil.Offset<TType>(m_value, elemCnt);
+			
+			int size = Unsafe.SizeOf<TType>();
+			size *= elemCnt;
+			return Address + size;
 		}
 
 
 		/// <summary>
 		///     Increment <see cref="Address" /> by the specified number of bytes
 		/// </summary>
-		/// <param name="bytes">Number of bytes to add</param>
+		/// <param name="right">Number of bytes to add</param>
 		/// <returns>
 		///     <c>this</c>
 		/// </returns>
-		public Pointer<T> Add(long bytes = 1)
+		public Pointer<T> Add(long right = 1)
 		{
-			m_value = PointerUtil.Add(m_value, bytes).ToPointer();
+//			m_value = PointerUtil.Add(m_value, bytes).ToPointer();
+//			return this;
+			
+			long val = ToInt64() + right;
+			this = val;
 			return this;
 		}
 
@@ -1044,13 +1083,17 @@ namespace RazorSharp.Pointers
 		/// <summary>
 		///     Decrement <see cref="Address" /> by the specified number of bytes
 		/// </summary>
-		/// <param name="bytes">Number of bytes to subtract</param>
+		/// <param name="right">Number of bytes to subtract</param>
 		/// <returns>
 		///     <c>this</c>
 		/// </returns>
-		public Pointer<T> Subtract(long bytes = 1)
+		public Pointer<T> Subtract(long right = 1)
 		{
-			m_value = PointerUtil.Subtract(m_value, bytes).ToPointer();
+//			m_value = PointerUtil.Subtract(m_value, bytes).ToPointer();
+//			return this;
+
+			long val = ToInt64() - right;
+			this = val;
 			return this;
 		}
 
@@ -1196,7 +1239,7 @@ namespace RazorSharp.Pointers
 		/// <summary>
 		///     Checks to see if <see cref="other" /> is equal to the current instance.
 		/// </summary>
-		/// <param name="other">Other <see cref="IPointer{T}" /></param>
+		/// <param name="other">Other <see cref="Pointer{T}" /></param>
 		/// <returns></returns>
 		public bool Equals(Pointer<T> other)
 		{
@@ -1292,10 +1335,8 @@ namespace RazorSharp.Pointers
 					return ToInt64().ToString();
 				case FMT_O:
 					return ToStringSafe();
-
 				case FMT_I:
 					return ToInfoTable().ToMarkDownString();
-
 				case FMT_P:
 					return Hex.ToHex(ToInt64());
 

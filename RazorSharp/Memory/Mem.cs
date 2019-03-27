@@ -298,6 +298,24 @@ namespace RazorSharp.Memory
 		#endregion
 
 
+		public static IntPtr OffsetAs<TOriginal, TAs>(IntPtr p, int origElemCnt)
+		{
+			return p + OffsetCountAs<TOriginal, TAs>(origElemCnt);
+		}
+
+		/// <summary>
+		///     Calculates the element offset (count) of <paramref name="origElemCnt" /> in terms of <typeparamref name="TAs" />
+		/// </summary>
+		/// <param name="origElemCnt">Original element count in terms of <typeparamref name="TOriginal" /></param>
+		/// <typeparam name="TOriginal">Type of <paramref name="origElemCnt" /></typeparam>
+		/// <typeparam name="TAs">Type to return <paramref name="origElemCnt" /> as</typeparam>
+		/// <returns></returns>
+		public static int OffsetCountAs<TOriginal, TAs>(int origElemCnt)
+		{
+			int origByteCount = origElemCnt * Unsafe.SizeOf<TOriginal>();
+			return origByteCount / Unsafe.SizeOf<TAs>();
+		}
+		
 		#region Read / write
 
 		/// <summary>
@@ -335,7 +353,7 @@ namespace RazorSharp.Memory
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static ref T AsRef<T>(Pointer<byte> p, int byteOffset = 0)
 		{
-			return ref CSUnsafe.AsRef<T>(PointerUtil.Add(p, byteOffset).ToPointer());
+			return ref CSUnsafe.AsRef<T>((p+ byteOffset).ToPointer());
 		}
 
 		#endregion

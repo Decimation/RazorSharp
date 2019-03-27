@@ -4,6 +4,7 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Enums;
@@ -300,7 +301,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 			table.AddRow("Fields are packed", m_fFieldsArePacked == 1);
 			table.AddRow("Fixed EEClass fields", m_cbFixedEEClassFields);
 			table.AddRow("Base size padding", m_cbBaseSizePadding);
-			table.AddRow("VMFlags", VMFlags.Join());
+			table.AddRow("VMFlags", VMFlags.JoinFlags());
 			table.AddRow("Has layout", HasLayout);
 
 

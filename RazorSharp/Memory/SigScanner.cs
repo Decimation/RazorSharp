@@ -93,7 +93,7 @@ namespace RazorSharp.Memory
 
 			if (ofsGuess != 0) {
 				if (PatternCheck(ofsGuess, rgPattern, byteTolerance))
-					return PointerUtil.Add(m_lpModuleBase, ofsGuess).Address;
+					return (((Pointer<byte>)m_lpModuleBase) + ofsGuess).Address;
 			}
 
 			for (int nModuleIndex = 0; nModuleIndex < m_rgModuleBuffer.Length; nModuleIndex++) {

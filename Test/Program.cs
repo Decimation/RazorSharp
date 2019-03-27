@@ -40,8 +40,6 @@ namespace Test
 
 	public static unsafe class Program
 	{
-#if DEBUG
-#endif
 
 		// todo: protect address-sensitive functions
 		// todo: replace native pointers* with Pointer<T> for consistency
@@ -55,7 +53,6 @@ namespace Test
 		}
 
 
-		delegate void* GetRuntimeType(void* p);
 		
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -68,24 +65,16 @@ namespace Test
 //			const string asmStr = "RazorSharp";
 //			var          asm    = Assembly.Load(asmStr);
 
-			const string SYM = "JIT_GetRuntimeType";
 
-			GetRuntimeType fn;
-			using (var sym = new Symbols(Clr.ClrPdb.FullName)) {
-				fn = sym.GetFunction<GetRuntimeType>(SYM, "clr.dll");
-			}
-
-			var ptr = fn(typeof(string).TypeHandle.Value.ToPointer());
+			Pointer<int> ptr = stackalloc int[3];
+			ptr[0] = 1;
+			ptr[1] = 2;
+			ptr[2] = 3;
 			
-			
-			Console.WriteLine(Unsafe.RawInterpret<Type>(ptr));
+			Debug.Assert(ptr.Reference == 1);
+			Debug.Assert(ptr.Add(sizeof(int)).Reference == 2);
+			Debug.Assert(ptr.Increment().Reference == 3);
 
-
-			var a = EnumUtil.GetValues<uint>(typeof(CorTokenType));
-			var b = EnumUtil.GetValues<uint>(typeof(TokenType));
-
-			var diff = a.Intersect(b).ToArray();
-			Console.WriteLine(diff.AutoJoin());
 			
 			
 			
@@ -95,6 +84,16 @@ namespace Test
 			Global.Close();
 		}
 
+		private static TTo ChangeTypeFast<TFrom, TTo>(TFrom value)
+		{
+			
+			return __refvalue(__makeref(value), TTo);
+		}
+		
+		private static TTo ChangeType<TFrom, TTo>(TFrom value)
+		{
+			return (TTo) Convert.ChangeType(value, typeof(TTo));
+		}
 
 		//This bypasses the restriction that you can't have a pointer to T,
 		//letting you write very high-performance generic code.
@@ -114,43 +113,7 @@ namespace Test
 			return __refvalue(tr, T);
 		}
 
-		private static T add<T>(T a, T b)
-		{
-			if (a is int && b is int) {
-				int c = __refvalue(__makeref(a), int);
-				c += __refvalue(__makeref(b), int);
-				return __refvalue(__makeref(c), T);
-			}
-
-			return default;
-		}
-
-		private static void foo<T>(ref T value)
-		{
-			//This is the ONLY way to treat value as int, without boxing/unboxing objects
-			if (value is int) {
-				__refvalue(__makeref(value), int) = 1;
-			}
-			else {
-				value = default;
-			}
-		}
-
-
-		private static OpCode[] GetAllOpCodes()
-		{
-			var         opCodeType   = typeof(OpCodes);
-			FieldInfo[] opCodeFields = opCodeType.GetFields(BindingFlags.Public | BindingFlags.Static);
-
-			var rgOpCodes = new OpCode[opCodeFields.Length];
-			for (int i = 0;
-				i < rgOpCodes.Length;
-				i++) {
-				rgOpCodes[i] = (OpCode) opCodeFields[i].GetValue(null);
-			}
-
-			return rgOpCodes;
-		}
+		
 
 
 		[DllImport(@"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\clr.dll")]
