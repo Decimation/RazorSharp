@@ -13,6 +13,8 @@ using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
+// ReSharper disable ConvertIfStatementToConditionalTernaryExpression
+
 namespace RazorSharp.Native
 {
 	public unsafe class Symbols : IDisposable
@@ -33,6 +35,46 @@ namespace RazorSharp.Native
 
 		private const long INVALID_OFFSET = -4194304;
 
+		/// <summary>
+		/// The file which caches symbols and their offsets
+		/// </summary>
+		private static readonly FileInfo CacheFile;
+
+		private const string OffsetsFileName = "RazorSharpSymbolOffsets.txt";
+
+		/// <summary>
+		/// <para>Key: Symbol name</para>
+		/// <para>Value: Symbol offset</para>
+		/// </summary>
+		private static readonly Dictionary<string, long> Cache;
+
+		static Symbols()
+		{
+			if (FileUtil.GetOrCreateTempFile(OffsetsFileName, out CacheFile)) {
+				Global.Log.Verbose("Symbol cache file detected");
+			}
+			else {
+				Global.Log.Verbose("Symbol cache file created");
+			}
+
+			Cache = FileUtil.ReadDictionary(CacheFile, s => s, Int64.Parse);
+
+			Global.Log.Debug("Read {Count} cached offsets", Cache.Count);
+		}
+
+		/// <summary>
+		/// Caches the offsets in <seealso cref="Cache"/>
+		/// </summary>
+		public static void Close()
+		{
+			File.WriteAllText(CacheFile.FullName, String.Empty);
+			Global.Log.Verbose("Writing {Count} offsets to cache", Cache.Count);
+			FileUtil.WriteDictionary(Cache, CacheFile);
+		}
+
+
+		#region Constructors
+
 		public Symbols(string image, string mask, ulong @base, uint size)
 		{
 			m_process = Kernel32.GetCurrentProcess();
@@ -47,10 +89,12 @@ namespace RazorSharp.Native
 			m_dllBase = DbgHelp.SymLoadModuleEx(m_process, IntPtr.Zero, m_imgStrNative,
 			                                    IntPtr.Zero, m_base, size, IntPtr.Zero, 0);
 			m_symbolBuffer = null;
-			m_addrBuffer = IntPtr.Zero;
+			m_addrBuffer   = IntPtr.Zero;
 		}
 
 		public Symbols(string image) : this(image, MASK_STR_DEFAULT, BASE_DEFAULT, SIZE_DEFAULT) { }
+
+		#endregion
 
 		public Pointer<byte> GetSymAddress(string userContext, string module)
 		{
@@ -63,26 +107,32 @@ namespace RazorSharp.Native
 			Conditions.Requires(offset != INVALID_OFFSET, "Offset is invalid");
 		}
 
+
 		public long[] GetSymOffsets(string[] userContext)
 		{
 			int len     = userContext.Length;
 			var offsets = new List<long>();
 
 			for (int i = 0; i < len; i++) {
-				var ctxStrNative = Marshal.StringToHGlobalAnsi(userContext[i]);
-				SymEnumSymbols(ctxStrNative);
-				SymEnumTypes(ctxStrNative);
-				var ofs = (m_addrBuffer - (int) m_base).ToInt64();
-				m_symbolBuffer = null;
-				CheckOffset(ofs);
-				offsets.Add(ofs);
-				Marshal.FreeHGlobal(ctxStrNative);
+				if (Cache.ContainsKey(userContext[i])) {
+					offsets.Add(Cache[userContext[i]]);
+				}
+				else {
+					var ctxStrNative = Marshal.StringToHGlobalAnsi(userContext[i]);
+					SymEnumSymbols(ctxStrNative);
+					SymEnumTypes(ctxStrNative);
+					var ofs = (m_addrBuffer - (int) m_base).ToInt64();
+					m_symbolBuffer = null;
+					CheckOffset(ofs);
+					offsets.Add(ofs);
+					Marshal.FreeHGlobal(ctxStrNative);
+					Cache.Add(userContext[i], ofs);
+				}
 			}
 
 			return offsets.ToArray();
 		}
-		
-		
+
 
 		private bool EnumSymProc(IntPtr pSymInfoX, uint reserved, IntPtr userContext)
 		{
@@ -140,9 +190,7 @@ namespace RazorSharp.Native
 			return sym;
 		}
 
-		public SymbolInfo* this[string userContext] {
-			get { return GetSymbol(userContext); }
-		}
+		public SymbolInfo* this[string userContext] => GetSymbol(userContext);
 
 		public TDelegate GetFunction<TDelegate>(string userContext, string module) where TDelegate : Delegate
 		{
@@ -152,17 +200,24 @@ namespace RazorSharp.Native
 
 		public long GetSymOffset(string userContext)
 		{
-			var ctxStrNative = Marshal.StringToHGlobalAnsi(userContext);
+			if (Cache.ContainsKey(userContext)) {
+				return Cache[userContext];
+			}
+			else {
+				var ctxStrNative = Marshal.StringToHGlobalAnsi(userContext);
 
-			SymEnumSymbols(ctxStrNative);
-			SymEnumTypes(ctxStrNative);
+				SymEnumSymbols(ctxStrNative);
+				SymEnumTypes(ctxStrNative);
 
-			Marshal.FreeHGlobal(ctxStrNative);
+				Marshal.FreeHGlobal(ctxStrNative);
 
-			var offset = (m_addrBuffer - (int) m_base).ToInt64();
-			m_symbolBuffer = default;
-			CheckOffset(offset);
-			return offset;
+				var offset = (m_addrBuffer - (int) m_base).ToInt64();
+				m_symbolBuffer = default;
+				CheckOffset(offset);
+
+				Cache.Add(userContext, offset);
+				return offset;
+			}
 		}
 
 		private void ReleaseUnmanagedResources()
@@ -191,7 +246,6 @@ namespace RazorSharp.Native
 				return addr;
 			}
 		}
-
 
 		internal static FileInfo DownloadSymbolFile(DirectoryInfo dest, FileInfo dll)
 		{

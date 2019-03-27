@@ -42,10 +42,11 @@ namespace RazorSharp.CoreClr
 			return String.Format(FIXED_BUFFER_NAME, fieldName);
 		}
 
-		internal static string DemangledAutoPropertyName(string fieldName)
+		internal static string NameOfAutoProperty(string fieldName)
 		{
 			if (fieldName.Contains(BACKING_FIELD_NAME_SUFFIX)) {
-				string x = fieldName.JSubstring(fieldName.IndexOf('<') + 1, fieldName.IndexOf('>'));
+				string x = fieldName.JSubstring(fieldName.IndexOf('<') + 1, 
+				                                fieldName.IndexOf('>'));
 
 				return x;
 			}

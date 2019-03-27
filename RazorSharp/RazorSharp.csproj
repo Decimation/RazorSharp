@@ -246,6 +246,7 @@
     <Compile Include="CoreClr\Structures\ILMethods\FatILMethod.cs" />
     <Compile Include="CoreClr\Structures\ILMethods\TinyILMethod.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="Memory\AddressInfo.cs" />
     <Compile Include="Memory\Calling\Signatures\Attributes\ClrSigcallAttribute.cs" />
     <Compile Include="Memory\Calling\Signatures\Attributes\SigcallAttribute.cs" />
     <Compile Include="Memory\Calling\Signatures\SigCache.cs" />
@@ -257,14 +258,11 @@
     <Compile Include="Memory\MemScanner.cs" />
     <Compile Include="Memory\Region.cs" />
     <Compile Include="Memory\SegmentType.cs" />
-    <Compile Include="Memory\Structures.cs" />
     <Compile Include="Native\Enums\ImageDirectoryEntry.cs" />
     <Compile Include="Native\Enums\ImageHelpSymbolTypeInfo.cs" />
     <Compile Include="Native\Enums\SymEnumOptions.cs" />
     <Compile Include="Native\Enums\SymSearchOptions.cs" />
     <Compile Include="Native\Kernel32Impl.cs" />
-    <Compile Include="Native\NativeInteger.cs" />
-    <Compile Include="Native\OutputAs.cs" />
     <Compile Include="Native\Structures\FindChildrenParams.cs" />
     <Compile Include="Native\Structures\SymbolInfo.cs" />
     <Compile Include="Native\Symbols.cs" />

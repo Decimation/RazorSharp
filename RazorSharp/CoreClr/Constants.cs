@@ -100,7 +100,7 @@ namespace RazorSharp.CoreClr
 				case CorElementType.CModOpt:
 				case CorElementType.Internal:
 				case CorElementType.MVar:
-					return Unsafe.INVALID_VALUE;
+					return INVALID_VALUE;
 
 				case CorElementType.TypedByRef:
 					return IntPtr.Size * 2;
@@ -187,5 +187,7 @@ namespace RazorSharp.CoreClr
 		{
 			return rid | (int) tktype;
 		}
+
+		internal const int INVALID_VALUE = -1;
 	}
 }

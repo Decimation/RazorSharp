@@ -104,7 +104,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		///     The enclosing type of this <see cref="MethodDesc" />
 		/// </summary>
-		internal Type EnclosingType => Runtime.MethodTableToType(EnclosingMethodTable);
+		internal Type EnclosingType => EnclosingMethodTable.Reference.RuntimeType;
 
 		internal MethodInfo Info => (MethodInfo) EnclosingType.Module.ResolveMethod(Token);
 

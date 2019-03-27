@@ -14,31 +14,37 @@ using RazorSharp.Utilities;
 
 namespace RazorSharp.CoreClr
 {
+	/// <summary>
+	/// Contains the resources for working with the CLR.
+	/// </summary>
 	public static class Clr
 	{
 		public static bool IsSetup { get; private set; }
 
-		private static readonly Type[] ClrTypes =
-		{
-			typeof(FieldDesc), typeof(MethodDesc), typeof(MethodDescChunk), typeof(MethodTable),
-			typeof(ArrayObject), typeof(HeapObject), typeof(StringObject), typeof(EEClass)
-		};
-
-		private static readonly Type[] ClrTypes2 =
-		{
-			typeof(MethodDesc), typeof(FieldDesc), typeof(ClrFunctions), typeof(GCHeap)
-		};
-
-		public static FileInfo ClrPdb { get; set; }
-		
 		/// <summary>
 		/// Whether or not <see cref="ClrPdb"/> was automatically downloaded.
 		/// If <c>true</c>, <see cref="ClrPdb"/> will be deleted upon calling <see cref="Close"/>.
 		/// </summary>
 		public static bool IsPdbTemporary { get; private set; }
-
+		
+		/// <summary>
+		/// CLR symbol file
+		/// </summary>
+		public static FileInfo ClrPdb { get; set; }
+		
+		/// <summary>
+		/// CLR dll file
+		/// </summary>
 		internal static readonly FileInfo      ClrDll;
+		
+		/// <summary>
+		/// The <see cref="ProcessModule"/> of the CLR
+		/// </summary>
 		internal static readonly ProcessModule ClrModule;
+		
+		/// <summary>
+		/// The <see cref="Version"/> of the CLR
+		/// </summary>
 		internal static readonly Version       ClrVersion;
 
 		/// <summary>
@@ -121,7 +127,6 @@ namespace RazorSharp.CoreClr
 			
 			IsSetup = true;
 		}
-
 		
 
 		/// <summary>
@@ -164,11 +169,6 @@ namespace RazorSharp.CoreClr
 		internal static Pointer<byte> GetClrFunctionAddress(string name)
 		{
 			return Symbols.GetSymAddress(Clr.ClrPdb.FullName, Clr.CLR_DLL_SHORT, name);
-		}
-
-		internal static TDelegate GetClrFunctionSig<TDelegate>(string hex) where TDelegate : Delegate
-		{
-			return SigScanner.QuickScanDelegate<TDelegate>(Clr.CLR_DLL_SHORT, hex);
 		}
 
 		internal static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate

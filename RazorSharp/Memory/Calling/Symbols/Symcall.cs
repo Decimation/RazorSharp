@@ -88,7 +88,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 				return;
 			}
 
-//			Global.Log.Information("Binding type {Name}", t.Name);
+			Global.Log.Information("Binding type {Name}", t.Name);
 
 			var baseAttr = attributes[0];
 			var sym      = new Native.Symbols(baseAttr.Image);

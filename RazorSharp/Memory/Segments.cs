@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
@@ -27,10 +28,10 @@ namespace RazorSharp.Memory
 		{
 			Conditions.Requires64Bit();
 		}
-		
+
 		internal const string TEXT_SEGMENT = ".text";
 
-		public static bool SegmentExists(string module,string segmentType)
+		public static bool SegmentExists(string module, string segmentType)
 		{
 			return GetSegments(module).ContainsBy(x => x.SectionName, segmentType);
 		}
@@ -50,12 +51,22 @@ namespace RazorSharp.Memory
 		/// </exception>
 		public static SegmentType GetSegmentType(Pointer<byte> addr, string moduleName = null)
 		{
-			ImageSectionInfo[] sections = DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
+			ImageSectionInfo[] sections = GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
 			foreach (var s in sections)
 				if (Mem.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address))
 					return Parse(s.SectionName);
 
 			throw new Exception($"Could not find corresponding segment for {Hex.ToHex(addr.Address)}");
+		}
+
+		public static ImageSectionInfo GetSegment(Pointer<byte> addr, string moduleName = null)
+		{
+			ImageSectionInfo[] sections = GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
+			foreach (var s in sections)
+				if (Mem.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address))
+					return s;
+			
+			return default;
 		}
 
 		/// <summary>
@@ -73,14 +84,14 @@ namespace RazorSharp.Memory
 		/// </exception>
 		public static ImageSectionInfo GetSegment(string segment, string moduleName = null)
 		{
-			ImageSectionInfo[] arr = DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
+			ImageSectionInfo[] arr = GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
 
 			foreach (var t in arr)
 				if (t.SectionName == segment)
 					return t;
 
-			throw new Exception(
-				$"Could not find segment: \"{segment}\". Try prefixing \"{segment}\" with a period: (e.g. \".{segment}\")");
+			throw new Exception($"Could not find segment: \"{segment}\". " +
+			                    $"Try prefixing \"{segment}\" with a period: (e.g. \".{segment}\")");
 		}
 
 		/// <summary>
@@ -90,7 +101,7 @@ namespace RazorSharp.Memory
 		/// <returns>All of the segments as an array of <see cref="ImageSectionInfo" /></returns>
 		public static ImageSectionInfo[] GetSegments(string moduleName = null)
 		{
-			return DbgHelp.GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
+			return GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
 		}
 
 		public static void DumpAllSegments()
@@ -103,8 +114,8 @@ namespace RazorSharp.Memory
 		public static void DumpSegments(string moduleName = null)
 		{
 			ImageSectionInfo[] segments = GetSegments(moduleName);
-			var table = new ConsoleTable("Number", "Name", "Size", "Address", "End Address", "Characteristics",
-			                             "Module");
+			var table = new ConsoleTable("Number", "Name",
+			                             "Size", "Address", "End Address", "Characteristics", "Module");
 			string moduleNameTable = moduleName ?? Process.GetCurrentProcess().MainModule.ModuleName; // todo
 			foreach (var v in segments) {
 				object[] rowCpy = v.Row;
@@ -117,28 +128,17 @@ namespace RazorSharp.Memory
 
 		private static SegmentType Parse(string name)
 		{
-			switch (name.ToLower()) {
-				case ".rdata":
-					return SegmentType.RDATA;
-				case ".idata":
-					return SegmentType.IDATA;
-				case ".data":
-					return SegmentType.DATA;
-				case ".pdata":
-					return SegmentType.PDATA;
-				case ".bss":
-					return SegmentType.BSS;
-				case ".rsrc":
-					return SegmentType.RSRC;
-				case ".reloc":
-					return SegmentType.RELOC;
-				case TEXT_SEGMENT:
-					return SegmentType.TEXT;
-				case ".didat":
-					return SegmentType.DIDAT;
-				default:
-					throw new Exception();
+			name = name.ToUpper();
+			if (name[0] == '.') {
+				name = name.Substring(1);
 			}
+
+			// Optimization
+			if (name == TEXT_SEGMENT) {
+				return SegmentType.TEXT;
+			}
+
+			return (SegmentType) Enum.Parse(typeof(SegmentType), name);
 		}
 
 		internal static IntPtr ScanSegment(string segment, string module, byte[] mem)
@@ -150,6 +150,30 @@ namespace RazorSharp.Memory
 					return (s.SectionAddress + i).Address;
 
 			return IntPtr.Zero;
+		}
+
+		public static unsafe ImageSectionInfo[] GetPESectionInfo(IntPtr hModule)
+		{
+			// get the location of the module's IMAGE_NT_HEADERS structure
+			ImageNtHeaders64* pNtHdr = DbgHelp.ImageNtHeader(hModule);
+
+			// section table immediately follows the IMAGE_NT_HEADERS
+			var pSectionHdr = (IntPtr) (pNtHdr + 1);
+			var imageBase   = hModule;
+			var arr         = new ImageSectionInfo[pNtHdr->FileHeader.NumberOfSections];
+			int size        = Marshal.SizeOf<ImageSectionHeader>();
+
+			for (int scn = 0; scn < pNtHdr->FileHeader.NumberOfSections; ++scn) {
+				var struc = Marshal.PtrToStructure<ImageSectionHeader>(pSectionHdr);
+
+				arr[scn] = new ImageSectionInfo(scn, struc.Name,
+				                                (void*) (imageBase.ToInt64() + struc.VirtualAddress),
+				                                (int) struc.VirtualSize, struc);
+
+				pSectionHdr += size;
+			}
+
+			return arr;
 		}
 	}
 }

@@ -148,7 +148,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		internal bool IsAutoProperty {
 			get {
-				string demangled = Identifiers.DemangledAutoPropertyName(Name);
+				string demangled = Identifiers.NameOfAutoProperty(Name);
 				if (demangled != null) 
 					return Identifiers.NameOfAutoPropertyBackingField(demangled) == Name;
 
@@ -194,7 +194,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		///     Enclosing type of this <see cref="FieldDesc" />
 		/// </summary>
-		internal Type EnclosingType => Runtime.MethodTableToType(EnclosingMethodTable);
+		internal Type EnclosingType => EnclosingMethodTable.Reference.RuntimeType;
 
 		/// <summary>
 		///     <see cref="MethodTable" /> of this field's type

@@ -10,8 +10,7 @@ using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 namespace RazorSharp
 {
 	// todo: WIP
-	
-	
+
 	public static class MemConvert
 	{
 		public enum ConversionType
@@ -53,7 +52,6 @@ namespace RazorSharp
 			Mem.Free(alloc);
 			return read;
 		}
-
 
 		public static TProxy ProxyCast<TOld, TProxy>(TOld value)
 		{

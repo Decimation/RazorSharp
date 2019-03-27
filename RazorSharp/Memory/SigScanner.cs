@@ -109,7 +109,8 @@ namespace RazorSharp.Memory
 
 			return IntPtr.Zero;
 		}
-
+		
+		
 		
 
 		public IntPtr FindPattern(string szPattern, long ofsGuess = 0, int byteTolerance = 0)

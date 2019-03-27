@@ -77,12 +77,9 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		public int GCCount {
-//			[ClrSymcall(Symbol = "WKS::GCHeap::GetGcCount", FullyQualified = true)]
+			[ClrSymcall(Symbol = "WKS::GCHeap::GetGcCount", FullyQualified = true)]
 			get => throw new SigcallException();
-//			get => -1;
 		}
-
-		
 		
 		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
 		{
@@ -106,7 +103,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <param name="obj">Pointer to an object in the GC heap</param>
 		/// <param name="smallHeapOnly">Whether to include small GC heaps only</param>
 		/// <returns><c>true</c> if <paramref name="obj" /> is a heap pointer; <c>false</c> otherwise</returns>
-//		[ClrSymcall(Symbol = "GCHeap::IsHeapPointer", FullyQualified = true)]
+		[ClrSymcall(Symbol = "GCHeap::IsHeapPointer", FullyQualified = true)]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
 			throw new SigcallException();
@@ -134,8 +131,8 @@ namespace RazorSharp.CoreClr.Structures
 			return Mem.Read<T>(&objValuePtr);
 		}
 
-		// 85
-//		[ClrSymcall(Symbol = "WKS::GCHeap::IsGCInProgress", FullyQualified = true)]
+		
+		[ClrSymcall(Symbol = "WKS::GCHeap::IsGCInProgress", FullyQualified = true)]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
 		{
 			throw new SigcallException();
@@ -147,7 +144,7 @@ namespace RazorSharp.CoreClr.Structures
 			Conditions.RequiresWorkstationGC();
 #endif
 			
-//			Symcall.BindQuick(typeof(GCHeap));
+			Symcall.BindQuick(typeof(GCHeap));
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 

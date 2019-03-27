@@ -180,14 +180,14 @@ namespace RazorSharp.Pointers
 		/// <param name="value">Value to retrieve the index of</param>
 		/// <param name="startIndex">Index to start searching from</param>
 		/// <param name="searchLength">How many elements to search, starting from the current index</param>
-		/// <returns>The index of the element if it was found; <see cref="Unsafe.INVALID_VALUE" /> if the element was not found</returns>
+		/// <returns>The index of the element if it was found; <see cref="Constants.INVALID_VALUE" /> if the element was not found</returns>
 		public int IndexOf(T value, int startIndex, int searchLength)
 		{
 			for (int i = startIndex; i < searchLength + startIndex; i++)
 				if (Read(i).Equals(value))
 					return i;
 
-			return Unsafe.INVALID_VALUE;
+			return Constants.INVALID_VALUE;
 		}
 
 		/// <summary>
@@ -198,7 +198,7 @@ namespace RazorSharp.Pointers
 		/// </summary>
 		/// <param name="value">Value to retrieve the index of</param>
 		/// <param name="searchLength">How many elements to search, starting from the current index</param>
-		/// <returns>The index of the element if it was found; <see cref="Unsafe.INVALID_VALUE" /> if the element was not found</returns>
+		/// <returns>The index of the element if it was found; <see cref="Constants.INVALID_VALUE" /> if the element was not found</returns>
 		public int IndexOf(T value, int searchLength)
 		{
 			return IndexOf(value, 0, searchLength);
@@ -259,7 +259,7 @@ namespace RazorSharp.Pointers
 		/// <returns><c>true</c> if the value was found within the range specified, <c>false</c> otherwise</returns>
 		public bool Contains(T value, int searchLength)
 		{
-			return IndexOf(value, searchLength) != Unsafe.INVALID_VALUE;
+			return IndexOf(value, searchLength) != Constants.INVALID_VALUE;
 		}
 
 		#endregion

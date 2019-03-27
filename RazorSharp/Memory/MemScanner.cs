@@ -1,11 +1,15 @@
 #region
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
+using Serilog.Context;
 
 #endregion
 
@@ -13,78 +17,45 @@ namespace RazorSharp.Memory
 {
 	public class MemScanner
 	{
-		public delegate byte[] ReadMemoryFunction(int size);
+		private readonly Pointer<byte> m_lo;
+		private readonly byte[]        m_buffer;
 
-		public enum MemoryRegion
+		public MemScanner(Region region)
 		{
-			Stack,
-			Heap
+			m_buffer = region.Memory;
+			m_lo   = region.LowAddress;
 		}
 
-		private readonly Pointer<byte> m_addr;
-		private readonly MemoryRegion  m_region;
-		private          byte[]        m_buf;
-
-		public MemScanner(MemoryRegion region, bool autoFillBuffer = true)
+		private bool PatternCheck(int nOffset, IReadOnlyList<byte> arrPattern)
 		{
-			m_region = region;
+			// ReSharper disable once LoopCanBeConvertedToQuery
+			for (int i = 0; i < arrPattern.Count; i++) {
+				if (arrPattern[i] == 0x0)
+					continue;
 
-			switch (m_region) {
-				case MemoryRegion.Stack:
-					m_addr = Mem.StackBase;
-
-					break;
-				case MemoryRegion.Heap:
-					m_addr = GCHeap.LowestAddress;
-
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
+				if (arrPattern[i] != m_buffer[nOffset + i])
+					return false;
 			}
 
-			if (autoFillBuffer)
-				UpdateBuffer();
+			return true;
 		}
 
-		public byte[] ReadMemory(int size)
+		public Pointer<byte> FindPattern(string szPattern) => FindPattern(StringUtil.ParseByteArray(szPattern));
+		
+		public Pointer<byte> FindPattern(byte[] rgPattern)
 		{
-			return m_addr.CopyOut(size);
-		}
+			for (int nModuleIndex = 0; nModuleIndex < m_buffer.Length; nModuleIndex++) {
+				if (m_buffer[nModuleIndex] != rgPattern[0])
+					continue;
 
-		public byte[] KernelReadMemory(int size)
-		{
-			return Kernel32.ReadCurrentProcessMemory(m_addr, size);
-		}
 
-		public byte[] SafeReadMemory(int size)
-		{
-			return m_addr.SafeCopyOut(size);
-		}
-
-		public void UpdateBuffer()
-		{
-			UpdateBuffer(ReadMemory);
-		}
-
-		public void UpdateBuffer(ReadMemoryFunction fn)
-		{
-			int bufSize = 0;
-			switch (m_region) {
-				case MemoryRegion.Stack:
-					bufSize = (int) Mem.StackSize;
-					break;
-				case MemoryRegion.Heap:
-					bufSize = (int) GCHeap.Size;
-
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
+				if (PatternCheck(nModuleIndex, rgPattern)) {
+					Pointer<byte> p = m_lo + nModuleIndex;
+					return p;
+				}
 			}
 
-
-			m_buf = fn(bufSize);
-			Global.Log.Information("{BufLen} {BufSize}", m_buf.Length, bufSize);
-			Conditions.Assert(m_buf.Length == bufSize);
+			return IntPtr.Zero;
 		}
 	}
 }

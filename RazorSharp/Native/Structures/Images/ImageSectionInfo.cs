@@ -37,15 +37,24 @@ namespace RazorSharp.Native.Structures.Images
 
 		public int SectionSize { get; }
 
-		public Pointer<byte> EndAddress =>
-			PointerUtils.Add(m_sectionAddress, (byte*) SectionSize - 1).Address;
+
+		public Pointer<byte> EndAddress {
+			get {
+				// I don't know what's with the SectionSize - 1
+				var ptr = PointerUtils.Add(m_sectionAddress, (byte*) SectionSize - 1);
+				return ptr;
+			}
+		}
+
 
 		public ImageSectionHeader SectionHeader { get; }
 
 		#endregion
 
 
-		public ImageSectionInfo(int                sectionNumber, string sectionName, void* sectionAddress,
+		public ImageSectionInfo(int                sectionNumber,
+		                        string             sectionName,
+		                        void*              sectionAddress,
 		                        int                sectionSize,
 		                        ImageSectionHeader header)
 		{
@@ -61,7 +70,7 @@ namespace RazorSharp.Native.Structures.Images
 			{
 				SectionNumber,
 				SectionName,
-				String.Format("{0} ({1} K)", SectionSize, SectionSize / Mem.BytesInKilobyte),
+				String.Format("{0} ({1} K)", SectionSize, SectionSize / Mem.BYTES_IN_KB),
 				Hex.ToHex(SectionAddress.ToInt64()),
 				Hex.ToHex(EndAddress.ToInt64()),
 				SectionHeader.Characteristics,

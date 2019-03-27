@@ -51,7 +51,7 @@ namespace RazorSharp.CoreClr
 		/// <returns></returns>
 		/// <exception cref="SigcallException">Method has not been bound</exception>
 		[ClrSymcall(UseMethodNameOnly = true)]
-		internal static Type JIT_GetRuntimeType(void* value)
+		internal static Type JIT_GetRuntimeType(MethodTable* value)
 		{
 			throw new SigcallException(nameof(JIT_GetRuntimeType));
 		}

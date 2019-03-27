@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -106,35 +107,8 @@ namespace RazorSharp.CoreClr
 
 		#region MethodTable
 
-		/// <summary>
-		///     Gets the corresponding <see cref="Type" /> of <see cref="MethodTable" /> <paramref name="pMt" />.
-		/// </summary>
-		/// <param name="pMt"><see cref="MethodTable" /> to get the <see cref="Type" /> of</param>
-		/// <returns>The <see cref="Type" /> of the specified <see cref="MethodTable" /></returns>
-		internal static Type MethodTableToType(Pointer<MethodTable> pMt)
-		{
-			// This seems to raise an ExecutionEngineException when debugging but
-			// it isn't raised when not debugging. ReSharper also tells me the exception is
-			// obsolete and the exception isn't raised anymore? I have no idea.
-			
-			return ClrFunctions.JIT_GetRuntimeType(pMt.ToPointer());
-		}
-
-		internal static Type GetType(Pointer<MethodTable> pMT)
-		{
-			// FatalExecutionEngineError
-
-			try {
-				return ClrFunctions.JIT_GetRuntimeType(pMT.ToPointer());
-			}
-			catch {
-				Console.WriteLine("FUCK");
-				throw;
-			}
-		}
-
 		
-		
+
 
 		/// <summary>
 		///     <para>Manually reads a CLR <see cref="MethodTable" /> (TypeHandle).</para>
@@ -233,7 +207,6 @@ namespace RazorSharp.CoreClr
 			return ReadFieldDescs(ReadMethodTable(ref t));
 		}
 
-
 		internal static Pointer<FieldDesc>[] GetFieldDescs(this Type t)
 		{
 //			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
@@ -249,6 +222,7 @@ namespace RazorSharp.CoreClr
 		{
 			Conditions.RequiresNotNull(fieldInfo, nameof(fieldInfo));
 			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
+			
 			if (Environment.Is64BitProcess) {
 				Conditions.Assert(fieldDesc.Reference.Info == fieldInfo);
 				Conditions.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
@@ -273,12 +247,6 @@ namespace RazorSharp.CoreClr
 			// (they have implicit fields such as length)
 
 			return t.GetField(name, flags).GetFieldDesc();
-		}
-
-		internal static byte[] ReadObjHeaderBytes<T>(T t) where T : class
-		{
-			Pointer<byte> ptr = Unsafe.AddressOfHeap(t, OffsetType.Header);
-			return ptr.CopyOut(IntPtr.Size);
 		}
 
 		#endregion

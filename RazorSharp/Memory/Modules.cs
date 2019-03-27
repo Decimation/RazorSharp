@@ -8,18 +8,21 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.Memory
 {
-	// todo: WIP
+	/// <summary>
+	/// Provides utilities for working with <see cref="ProcessModule"/>s
+	/// </summary>
 	internal static class Modules
 	{
 
+		/// <summary>
+		/// The <see cref="ProcessModuleCollection"/> of the current <see cref="Process"/>
+		/// </summary>
 		private static ProcessModuleCollection ProcessModules {
 			get {
 				return Process.GetCurrentProcess().Modules;
 			}
 		}
 
-		
-		
 		internal static ProcessModule GetModule(string name)
 		{
 			foreach (ProcessModule m in ProcessModules)
@@ -29,14 +32,7 @@ namespace RazorSharp.Memory
 			return null;
 		}
 
-		internal static ProcessModule ScanSector(Pointer<byte> ptr)
-		{
-			foreach (ProcessModule v in ProcessModules)
-				if (Mem.IsAddressInRange(v.BaseAddress + v.ModuleMemorySize, ptr.Address, v.BaseAddress))
-					return v;
-
-			return null;
-		}
+		
 
 		internal static Pointer<byte> GetBaseAddress(string module)
 		{

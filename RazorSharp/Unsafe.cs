@@ -82,8 +82,6 @@ namespace RazorSharp
 	/// </summary>
 	public static unsafe class Unsafe
 	{
-		internal const int INVALID_VALUE = -1;
-
 		public static T Unbox<T>(object o)
 		{
 			lock (o) {
@@ -97,7 +95,6 @@ namespace RazorSharp
 			return MemConvert.ProxyCast<TFrom, TTo>(value);
 		}
 		
-
 		/// <summary>
 		///     Interprets a dynamically allocated reference type in the heap as a proper managed type. This is useful when
 		///     you only have a pointer to a reference type's data in the heap but cannot dereference it because the CLR
@@ -162,7 +159,7 @@ namespace RazorSharp
 			}
 
 
-			return INVALID_VALUE;
+			return Constants.INVALID_VALUE;
 		}
 
 		#endregion
@@ -337,7 +334,7 @@ namespace RazorSharp
 		/// <remarks>
 		///     Returned from <see cref="EEClassLayoutInfo.ManagedSize" />
 		/// </remarks>
-		/// <returns>Managed size if the type has an <see cref="EEClassLayoutInfo" />; <see cref="INVALID_VALUE" /> otherwise</returns>
+		/// <returns>Managed size if the type has an <see cref="EEClassLayoutInfo" />; <see cref="Constants.INVALID_VALUE" /> otherwise</returns>
 		public static int ManagedSizeOf<T>()
 		{
 			// Note: Arrays have no layout
@@ -348,7 +345,7 @@ namespace RazorSharp
 			if (ee.Reference.HasLayout)
 				return (int) ee.Reference.LayoutInfo->ManagedSize;
 
-			return INVALID_VALUE;
+			return Constants.INVALID_VALUE;
 		}
 
 		/// <summary>
@@ -359,14 +356,14 @@ namespace RazorSharp
 		///     <para> Equals <see cref="Marshal.SizeOf(Type)" /></para>
 		///     <para> Equals <see cref="StructLayoutAttribute.Size" /> when type isn't zero-sized.</para>
 		/// </remarks>
-		/// <returns>The native size if the type has a native representation; <see cref="INVALID_VALUE" /> otherwise</returns>
+		/// <returns>The native size if the type has a native representation; <see cref="Constants.INVALID_VALUE" /> otherwise</returns>
 		public static int NativeSizeOf<T>()
 		{
 			// Note: Arrays native size == 0
 
 			Pointer<MethodTable> mt     = typeof(T).GetMethodTable();
 			int                  native = mt.Reference.EEClass.Reference.NativeSize;
-			return native == 0 ? INVALID_VALUE : native;
+			return native == 0 ? Constants.INVALID_VALUE : native;
 		}
 
 

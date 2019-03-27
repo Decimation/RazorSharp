@@ -6,7 +6,7 @@ namespace RazorSharp.Native
 	public static class User32
 	{
 		private const string USER32_DLL = "user32.dll";
-		
+
 		/// <summary>
 		///     Retrieves a handle to the top-level window whose class name and window name match the specified strings. This
 		///     function does not search child windows. This function does not perform a case-sensitive search. To search child
@@ -72,17 +72,16 @@ namespace RazorSharp.Native
 		///     Message.
 		///     </see>
 		/// </remarks>
-		[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-		[return:MarshalAs(UnmanagedType.Bool)]
+		[DllImport(USER32_DLL, SetLastError = true, CharSet = CharSet.Auto)]
+		[return: MarshalAs(UnmanagedType.Bool)]
 		public static extern bool SetWindowText(IntPtr hwnd, String lpString);
-		
-		[DllImport("user32.dll", SetLastError =true)]
+
+		[DllImport(USER32_DLL, SetLastError = true)]
 		public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
 		// When you don't want the ProcessId, use this overload and pass IntPtr.Zero for the second parameter
-		[DllImport("user32.dll")]
-		public static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr ProcessId);
-
+		[DllImport(USER32_DLL)]
+		public static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr processId);
 
 		public static IntPtr FindWindowByCaption(string windowName)
 		{

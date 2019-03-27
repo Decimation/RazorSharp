@@ -3,6 +3,7 @@
 #region
 
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
@@ -238,11 +239,37 @@ namespace RazorSharp.CoreClr.Structures
 
 
 		/// <summary>
+		/// /// <summary>
+		///     Gets the corresponding <see cref="Type" /> of <see cref="MethodTable" /> <paramref name="pMt" />.
+		/// </summary>
+		/// <param name="pMt"><see cref="MethodTable" /> to get the <see cref="Type" /> of</param>
+		/// <returns>The <see cref="Type" /> of the specified <see cref="MethodTable" /></returns>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		internal Type RuntimeType => Runtime.MethodTableToType(Unsafe.AddressOf(ref this));
+		[DebuggerNonUserCode] 
+		[DebuggerHidden]
+		internal Type RuntimeType {
+			get {
+				// This seems to raise an ExecutionEngineException when debugging but
+				// it isn't raised when not debugging. ReSharper also tells me the exception is
+				// obsolete and the exception isn't raised anymore? I have no idea.
+
+			
+			
+				// Managed Debugging Assistant 'FatalExecutionEngineError' : 'The runtime has encountered a fatal error.
+				// The address of the error was at 0xb0e254b9, on thread ----. The error code is 0xc0000005.
+				// This error may be a bug in the CLR or in the unsafe or non-verifiable portions of user code.
+				// Common sources of this bug include user marshaling errors for COM-interop or PInvoke, which
+				// may corrupt the stack.'
+
+				fixed (MethodTable* value = &this) {
+					return ClrFunctions.JIT_GetRuntimeType(value);
+				}
+				
+			}
+		}
 
 
 		internal int NumInstanceFields => EEClass.Reference.NumInstanceFields;
