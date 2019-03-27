@@ -247,6 +247,7 @@
     <Compile Include="CoreClr\Structures\ILMethods\TinyILMethod.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Memory\AddressInfo.cs" />
+    <Compile Include="Memory\Assembler.cs" />
     <Compile Include="Memory\Calling\Signatures\Attributes\ClrSigcallAttribute.cs" />
     <Compile Include="Memory\Calling\Signatures\Attributes\SigcallAttribute.cs" />
     <Compile Include="Memory\Calling\Signatures\SigCache.cs" />

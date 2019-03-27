@@ -75,7 +75,8 @@ namespace Test
 			Debug.Assert(ptr.Add(sizeof(int)).Reference == 2);
 			Debug.Assert(ptr.Increment().Reference == 3);
 
-			
+			var nasm = new NasmAssembler();
+			nasm.Assemble("mov eax, -1", true);
 			
 			
 			// SHUT IT DOWN
