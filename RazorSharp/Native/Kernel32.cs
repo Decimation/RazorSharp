@@ -107,6 +107,14 @@ namespace RazorSharp.Native
 		[DllImport(KERNEL32_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 		public static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, uint threadId);
 
+		
+		[DllImport(KERNEL32_DLL, SetLastError = true)]
+		public static extern bool GetThreadContext(IntPtr hThread, ref CONTEXT lpContext);
+
+		// Get context of thread x64, in x64 application
+		[DllImport(KERNEL32_DLL, SetLastError = true)]
+		public static extern bool GetThreadContext(IntPtr hThread, ref CONTEXT64 lpContext);
+		
 		#endregion
 
 

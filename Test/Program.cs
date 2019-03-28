@@ -21,6 +21,8 @@ using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
+using RazorSharp.Native.Enums;
+using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
@@ -52,6 +54,7 @@ namespace Test
 			return Constants.INVALID_VALUE;
 		}
 
+		
 
 		
 		[HandleProcessCorruptedStateExceptions]
@@ -65,18 +68,12 @@ namespace Test
 //			const string asmStr = "RazorSharp";
 //			var          asm    = Assembly.Load(asmStr);
 
-
-			Pointer<int> ptr = stackalloc int[3];
-			ptr[0] = 1;
-			ptr[1] = 2;
-			ptr[2] = 3;
+			var ctx = new CONTEXT64();
+			var hThread = Kernel32.OpenThread(ThreadAccess.All, (int)Kernel32.GetCurrentThreadId());
+			ctx.ContextFlags = CONTEXT_FLAGS.CONTEXT_ALL;
+			Debug.Assert(Kernel32.GetThreadContext(hThread, ref ctx));
+			Console.WriteLine(Hex.ToHex(ctx.Rbp));
 			
-			Debug.Assert(ptr.Reference == 1);
-			Debug.Assert(ptr.Add(sizeof(int)).Reference == 2);
-			Debug.Assert(ptr.Increment().Reference == 3);
-
-			var nasm = new NasmAssembler();
-			nasm.Assemble("mov eax, -1", true);
 			
 			
 			// SHUT IT DOWN

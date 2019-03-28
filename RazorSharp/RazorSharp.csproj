@@ -264,6 +264,7 @@
     <Compile Include="Native\Enums\SymEnumOptions.cs" />
     <Compile Include="Native\Enums\SymSearchOptions.cs" />
     <Compile Include="Native\Kernel32Impl.cs" />
+    <Compile Include="Native\Structures\Context.cs" />
     <Compile Include="Native\Structures\FindChildrenParams.cs" />
     <Compile Include="Native\Structures\SymbolInfo.cs" />
     <Compile Include="Native\Symbols.cs" />
