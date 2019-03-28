@@ -1,8 +1,12 @@
 using System.Runtime.InteropServices;
 
-namespace RazorSharp.Native.Structures {
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+
+namespace RazorSharp.Native.Structures.ThreadContext
+{
 	[StructLayout(LayoutKind.Sequential)]
-	public struct FLOATING_SAVE_AREA
+	public struct FloatingSaveArea
 	{
 		public uint ControlWord;
 		public uint StatusWord;

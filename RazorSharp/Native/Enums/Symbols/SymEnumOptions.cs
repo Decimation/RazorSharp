@@ -1,6 +1,6 @@
 using System;
 
-namespace RazorSharp.Native.Enums
+namespace RazorSharp.Native.Enums.Symbols
 {
 	[Flags]
 	internal enum SymEnumOptions

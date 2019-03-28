@@ -1,7 +1,11 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace RazorSharp.Native.Structures {
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+
+namespace RazorSharp.Native.Structures.ThreadContext
+{
 	[StructLayout(LayoutKind.Sequential)]
 	public struct M128A
 	{

@@ -10,6 +10,7 @@ using RazorSharp.CoreClr;
 using RazorSharp.Memory;
 using RazorSharp.Native.Enums;
 using RazorSharp.Native.Structures;
+using RazorSharp.Native.Structures.Symbols;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 

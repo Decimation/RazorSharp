@@ -1,12 +1,17 @@
 using System.Runtime.InteropServices;
 using RazorSharp.Native.Enums;
+using RazorSharp.Native.Enums.ThreadContext;
 
-namespace RazorSharp.Native.Structures {
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+
+namespace RazorSharp.Native.Structures.ThreadContext
+{
 	/// <summary>
 	/// x64
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential, Pack = 16)]
-	public struct CONTEXT64
+	public struct Context64
 	{
 		public ulong P1Home;
 		public ulong P2Home;
@@ -15,7 +20,7 @@ namespace RazorSharp.Native.Structures {
 		public ulong P5Home;
 		public ulong P6Home;
 
-		public CONTEXT_FLAGS ContextFlags;
+		public ContextFlags ContextFlags;
 
 		public uint MxCsr;
 
@@ -52,7 +57,7 @@ namespace RazorSharp.Native.Structures {
 		public ulong R15;
 		public ulong Rip;
 
-		public XSAVE_FORMAT64 DUMMYUNIONNAME;
+		public XSaveFormat64 DUMMYUNIONNAME;
 
 		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 26)]
 		public M128A[] VectorRegister;

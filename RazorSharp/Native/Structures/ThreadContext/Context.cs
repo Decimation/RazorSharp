@@ -1,13 +1,13 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace RazorSharp.Native.Structures
-{
-	using DWORD = UInt32;
-	using DWORD64 = UInt64;
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
 
+namespace RazorSharp.Native.Structures.ThreadContext
+{
 	[StructLayout(LayoutKind.Sequential)]
-	public struct CONTEXT
+	public struct Context
 	{
 		public uint ContextFlags; //set this to an appropriate value 
 
@@ -21,7 +21,7 @@ namespace RazorSharp.Native.Structures
 		public uint Dr7;
 
 		// Retrieved by CONTEXT_FLOATING_POINT 
-		public FLOATING_SAVE_AREA FloatSave;
+		public FloatingSaveArea FloatSave;
 
 		// Retrieved by CONTEXT_SEGMENTS 
 		public uint SegGs;

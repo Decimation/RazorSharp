@@ -1,5 +1,6 @@
-namespace RazorSharp.Native.Enums {
-	public enum CONTEXT_FLAGS : uint
+namespace RazorSharp.Native.Enums.ThreadContext
+{
+	public enum ContextFlags : uint
 	{
 		CONTEXT_i386               = 0x10000,
 		CONTEXT_i486               = 0x10000,             //  same as i386

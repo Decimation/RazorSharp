@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using RazorSharp.Native.Enums;
+using RazorSharp.Native.Enums.ThreadContext;
 using RazorSharp.Native.Structures;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -16,7 +17,7 @@ namespace RazorSharp.Native
 
 		internal static IntPtr OpenProcess(Process proc, ProcessAccess flags = ProcessAccess.All)
 		{
-			return OpenProcess(flags, false, proc.Id);
+			return OpenProcess(flags, false, (uint) proc.Id);
 		}
 
 		internal static IntPtr OpenCurrentProcess(ProcessAccess flags = ProcessAccess.All)

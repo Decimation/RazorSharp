@@ -22,11 +22,14 @@ using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;
+using RazorSharp.Native.Enums.ThreadContext;
 using RazorSharp.Native.Structures;
+using RazorSharp.Native.Structures.ThreadContext;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 using Unsafe = RazorSharp.Unsafe;
+
 #endregion
 
 
@@ -35,14 +38,12 @@ namespace Test
 	#region
 
 	using DWORD = UInt32;
-	
 
 	#endregion
 
 
 	public static unsafe class Program
 	{
-
 		// todo: protect address-sensitive functions
 		// todo: replace native pointers* with Pointer<T> for consistency
 		// todo: RazorSharp, ClrMD, Reflection comparison
@@ -54,9 +55,7 @@ namespace Test
 			return Constants.INVALID_VALUE;
 		}
 
-		
 
-		
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -68,14 +67,13 @@ namespace Test
 //			const string asmStr = "RazorSharp";
 //			var          asm    = Assembly.Load(asmStr);
 
-			var ctx = new CONTEXT64();
-			var hThread = Kernel32.OpenThread(ThreadAccess.All, (int)Kernel32.GetCurrentThreadId());
-			ctx.ContextFlags = CONTEXT_FLAGS.CONTEXT_ALL;
+			var ctx     = new Context64();
+			var hThread = Kernel32.OpenThread(ThreadAccess.All, (int) Kernel32.GetCurrentThreadId());
+			ctx.ContextFlags = ContextFlags.CONTEXT_ALL;
 			Debug.Assert(Kernel32.GetThreadContext(hThread, ref ctx));
 			Console.WriteLine(Hex.ToHex(ctx.Rbp));
-			
-			
-			
+
+
 			// SHUT IT DOWN
 			Symbols.Close();
 			Clr.Close();
@@ -84,10 +82,9 @@ namespace Test
 
 		private static TTo ChangeTypeFast<TFrom, TTo>(TFrom value)
 		{
-			
 			return __refvalue(__makeref(value), TTo);
 		}
-		
+
 		private static TTo ChangeType<TFrom, TTo>(TFrom value)
 		{
 			return (TTo) Convert.ChangeType(value, typeof(TTo));
@@ -110,8 +107,6 @@ namespace Test
 
 			return __refvalue(tr, T);
 		}
-
-		
 
 
 		[DllImport(@"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\clr.dll")]

@@ -5,7 +5,7 @@ using RazorSharp.Native.Structures.Images;
 
 #endregion
 
-namespace RazorSharp.Native.Enums
+namespace RazorSharp.Native.Enums.Images
 {
 	/// <summary>
 	///     https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-_image_section_header

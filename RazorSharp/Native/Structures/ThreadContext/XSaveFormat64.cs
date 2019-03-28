@@ -1,11 +1,15 @@
 using System.Runtime.InteropServices;
 
-namespace RazorSharp.Native.Structures {
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+
+namespace RazorSharp.Native.Structures.ThreadContext
+{
 	/// <summary>
 	/// x64
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential, Pack = 16)]
-	public struct XSAVE_FORMAT64
+	public struct XSaveFormat64
 	{
 		public ushort ControlWord;
 		public ushort StatusWord;

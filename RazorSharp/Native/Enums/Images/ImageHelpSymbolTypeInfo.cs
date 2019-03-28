@@ -1,4 +1,4 @@
-namespace RazorSharp.Native.Enums
+namespace RazorSharp.Native.Enums.Images
 {
 	/// <summary>
 	/// IMAGEHLP_SYMBOL_TYPE_INFO

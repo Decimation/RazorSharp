@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Native.Enums;
+// ReSharper disable FieldCanBeMadeReadOnly.Global
 
 #endregion
 
@@ -13,16 +14,16 @@ namespace RazorSharp.Native.Structures
 	[StructLayout(LayoutKind.Sequential)]
 	public struct SystemInfo
 	{
-		public readonly ProcessorArchitecture ProcessorArchitecture;
-		public readonly ushort                Reserved;
-		public readonly uint                  PageSize;
-		public readonly IntPtr                MinimumApplicationAddress;
-		public readonly IntPtr                MaximumApplicationAddress;
-		public readonly IntPtr                ActiveProcessorMask;
-		public readonly uint                  NumberOfProcessors;
-		public readonly uint                  ProcessorType;
-		public readonly uint                  AllocationGranularity;
-		public readonly ushort                ProcessorLevel;
-		public readonly ushort                ProcessorRevision;
+		public ProcessorArchitecture ProcessorArchitecture;
+		public ushort                Reserved;
+		public uint                  PageSize;
+		public IntPtr                MinimumApplicationAddress;
+		public IntPtr                MaximumApplicationAddress;
+		public IntPtr                ActiveProcessorMask;
+		public uint                  NumberOfProcessors;
+		public uint                  ProcessorType;
+		public uint                  AllocationGranularity;
+		public ushort                ProcessorLevel;
+		public ushort                ProcessorRevision;
 	}
 }

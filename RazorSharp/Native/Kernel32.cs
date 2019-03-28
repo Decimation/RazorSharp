@@ -4,7 +4,9 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using RazorSharp.Native.Enums;
+using RazorSharp.Native.Enums.ThreadContext;
 using RazorSharp.Native.Structures;
+using RazorSharp.Native.Structures.ThreadContext;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -20,7 +22,6 @@ namespace RazorSharp.Native
 		internal const int ERROR_INVALID_PARAMETER = 0x57;
 
 		private const string KERNEL32_DLL = "kernel32.dll";
-
 
 		[DllImport(KERNEL32_DLL)]
 		internal static extern uint GetLastError();
@@ -71,11 +72,6 @@ namespace RazorSharp.Native
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
 		internal static extern IntPtr GetCurrentProcess();
 
-		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		internal static extern IntPtr OpenProcess(ProcessAccess processAccess, bool bInheritHandle,
-		                                          int                processId);
-
-
 		/// <summary>
 		///     Equals <see cref="Process.Id" />
 		/// </summary>
@@ -93,28 +89,22 @@ namespace RazorSharp.Native
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
 		private static extern void GetCurrentThreadStackLimits(IntPtr* low, IntPtr* high);
 
-
 		[DllImport(KERNEL32_DLL)]
 		internal static extern uint GetCurrentThreadId();
 
 		[DllImport(KERNEL32_DLL)]
 		internal static extern IntPtr GetCurrentThread();
 
-		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		internal static extern IntPtr OpenThread(uint desiredAccess, bool inheritHandle, uint threadId);
-
-
 		[DllImport(KERNEL32_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
-		public static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, uint threadId);
+		internal static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, uint threadId);
 
-		
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		public static extern bool GetThreadContext(IntPtr hThread, ref CONTEXT lpContext);
+		internal static extern bool GetThreadContext(IntPtr hThread, ref Context lpContext);
 
 		// Get context of thread x64, in x64 application
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		public static extern bool GetThreadContext(IntPtr hThread, ref CONTEXT64 lpContext);
-		
+		internal static extern bool GetThreadContext(IntPtr hThread, ref Context64 lpContext);
+
 		#endregion
 
 

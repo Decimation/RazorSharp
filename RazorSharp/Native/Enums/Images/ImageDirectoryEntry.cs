@@ -1,4 +1,4 @@
-namespace RazorSharp.Native.Enums
+namespace RazorSharp.Native.Enums.Images
 {
 	internal enum ImageDirectoryEntry : ushort
 	{
