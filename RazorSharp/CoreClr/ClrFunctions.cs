@@ -40,30 +40,31 @@ namespace RazorSharp.CoreClr
 		static ClrFunctions()
 		{
 			Symcall.BindQuick(typeof(ClrFunctions));
+			JIT_GetRuntimeType = Clr.GetClrFunction<GetRuntimeType>(nameof(JIT_GetRuntimeType));
 		}
-		
 
+		private delegate void* GetRuntimeType(MethodTable* value);
+
+		private static readonly GetRuntimeType JIT_GetRuntimeType;
 
 		/// <summary>
 		///     Returns the corresponding <see cref="Type" /> for a <see cref="MethodTable" /> pointer.
 		/// </summary>
 		/// <param name="value"><see cref="MethodTable" /> pointer</param>
-		/// <returns></returns>
+		/// <returns>A pointer to a <see cref="Type"/> object</returns>
 		/// <exception cref="SigcallException">Method has not been bound</exception>
-		[ClrSymcall(UseMethodNameOnly = true)]
-		internal static Type JIT_GetRuntimeType(MethodTable* value)
+		internal static Type JIT_GetRuntimeType_Safe(MethodTable* value)
 		{
-			throw new SigcallException(nameof(JIT_GetRuntimeType));
+			void* ptr = JIT_GetRuntimeType(value);
+			return Mem.Read<Type>(&ptr);
 		}
+
 
 		[ClrSymcall(UseMethodNameOnly = true)]
 		internal static Pointer<byte> JIT_GetStaticFieldAddr_Context(FieldDesc* value)
 		{
 			throw new SigcallException();
 		}
-
-
-		
 
 
 		#region FieldField
@@ -77,7 +78,7 @@ namespace RazorSharp.CoreClr
 		{
 			var module = pMT.Reference.Module;
 			var pStr   = Marshal.StringToHGlobalAnsi(name);
-			var cSig = pMT.Reference.GetSignatureCorElementType();
+			var cSig   = pMT.Reference.GetSignatureCorElementType();
 			var field  = FindField(pMT, pStr, IntPtr.Zero, cSig, module, 0);
 			Marshal.FreeHGlobal(pStr);
 			return field;

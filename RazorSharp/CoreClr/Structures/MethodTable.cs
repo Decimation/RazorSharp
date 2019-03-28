@@ -12,6 +12,7 @@ using RazorSharp.CoreClr.Enums;
 using RazorSharp.CoreClr.Enums.MethodTable;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.EE;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;
@@ -242,7 +243,6 @@ namespace RazorSharp.CoreClr.Structures
 		/// /// <summary>
 		///     Gets the corresponding <see cref="Type" /> of <see cref="MethodTable" /> <paramref name="pMt" />.
 		/// </summary>
-		/// <param name="pMt"><see cref="MethodTable" /> to get the <see cref="Type" /> of</param>
 		/// <returns>The <see cref="Type" /> of the specified <see cref="MethodTable" /></returns>
 		///     <remarks>
 		///         Address-sensitive
@@ -265,7 +265,8 @@ namespace RazorSharp.CoreClr.Structures
 				// may corrupt the stack.'
 
 				fixed (MethodTable* value = &this) {
-					return ClrFunctions.JIT_GetRuntimeType(value);
+					return ClrFunctions.JIT_GetRuntimeType_Safe(value);
+					
 				}
 				
 			}

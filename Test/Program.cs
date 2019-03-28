@@ -55,6 +55,7 @@ namespace Test
 			return Constants.INVALID_VALUE;
 		}
 
+		delegate void* fn();
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -67,40 +68,29 @@ namespace Test
 //			const string asmStr = "RazorSharp";
 //			var          asm    = Assembly.Load(asmStr);
 
-			Console.WriteLine("main @ {0:P}", Unsafe.AddressOfFunction(typeof(Program),"Main"));
-			long l   = 0xFF;
-			var  ctx = Kernel32.GetContext(ContextFlags.CONTEXT_ALL);
 
-			var ret = ctx.Rbp + 4;
-			Console.WriteLine("{0:P}",Mem.ReadPointer<byte>(ret,0));
+			string foo = nameof(foo);
+
+			const string s = ", ";
+			Debug.Assert(ReferenceEquals(s, StringConstants.JOIN_COMMA));
+
+			Pointer<char> p = Unsafe.AddressOfHeap(StringConstants.JOIN_COMMA, OffsetType.StringData);
+			p[0] = 'g';
+
+			string[] rg = {"foo", "bar", "baz"};
+
+			Console.WriteLine(StringConstants.JOIN_COMMA);
+			Console.WriteLine(rg.AutoJoin());
 			
-			doSomething();
-			
-			
+			Console.WriteLine(typeof(string).GetMetaType());
+
+
 			// SHUT IT DOWN
 			Symbols.Close();
 			Clr.Close();
 			Global.Close();
 		}
 
-		static void doSomething()
-		{
-			Console.WriteLine("hi");
-			var ctx = Kernel32.GetContext(ContextFlags.CONTEXT_ALL);
-			var ret = ctx.Rbp + 4;
-			Console.WriteLine(Hex.ToHex(ret));
-			
-		}
-
-		private static TTo ChangeTypeFast<TFrom, TTo>(TFrom value)
-		{
-			return __refvalue(__makeref(value), TTo);
-		}
-
-		private static TTo ChangeType<TFrom, TTo>(TFrom value)
-		{
-			return (TTo) Convert.ChangeType(value, typeof(TTo));
-		}
 
 		//This bypasses the restriction that you can't have a pointer to T,
 		//letting you write very high-performance generic code.

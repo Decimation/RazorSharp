@@ -218,6 +218,12 @@ namespace RazorSharp.Memory
 
 		#region Code
 
+		public static Pointer<byte> AllocCode(string asm, bool isProcess32Bit = false)
+		{
+			var code = new Assembler().Assemble(asm,isProcess32Bit);
+			return AllocCode(code);
+		}
+		
 		public static Pointer<byte> AllocCode(byte[] opCodes)
 		{
 			Kernel32.GetNativeSystemInfo(out var si);

@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using RazorCommon;
+using RazorSharp.Pointers;
 
 namespace RazorSharp.Memory
 {
@@ -30,6 +31,8 @@ namespace RazorSharp.Memory
 		private readonly Lazy<string> m_nasmPath = new Lazy<string>(() => @"C:\Lib\nasm.exe",
 		                                                            LazyThreadSafetyMode.ExecutionAndPublication
 		);
+		
+		
 
 		/// <summary>
 		/// Assemble the specified assembly code at a base address.
