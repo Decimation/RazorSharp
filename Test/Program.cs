@@ -67,17 +67,29 @@ namespace Test
 //			const string asmStr = "RazorSharp";
 //			var          asm    = Assembly.Load(asmStr);
 
-			var ctx     = new Context64();
-			var hThread = Kernel32.OpenThread(ThreadAccess.All, (int) Kernel32.GetCurrentThreadId());
-			ctx.ContextFlags = ContextFlags.CONTEXT_ALL;
-			Debug.Assert(Kernel32.GetThreadContext(hThread, ref ctx));
-			Console.WriteLine(Hex.ToHex(ctx.Rbp));
+			Console.WriteLine("main @ {0:P}", Unsafe.AddressOfFunction(typeof(Program),"Main"));
+			long l   = 0xFF;
+			var  ctx = Kernel32.GetContext(ContextFlags.CONTEXT_ALL);
 
-
+			var ret = ctx.Rbp + 4;
+			Console.WriteLine("{0:P}",Mem.ReadPointer<byte>(ret,0));
+			
+			doSomething();
+			
+			
 			// SHUT IT DOWN
 			Symbols.Close();
 			Clr.Close();
 			Global.Close();
+		}
+
+		static void doSomething()
+		{
+			Console.WriteLine("hi");
+			var ctx = Kernel32.GetContext(ContextFlags.CONTEXT_ALL);
+			var ret = ctx.Rbp + 4;
+			Console.WriteLine(Hex.ToHex(ret));
+			
 		}
 
 		private static TTo ChangeTypeFast<TFrom, TTo>(TFrom value)

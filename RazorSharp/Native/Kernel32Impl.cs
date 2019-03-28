@@ -3,6 +3,7 @@ using System.Diagnostics;
 using RazorSharp.Native.Enums;
 using RazorSharp.Native.Enums.ThreadContext;
 using RazorSharp.Native.Structures;
+using RazorSharp.Native.Structures.ThreadContext;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -28,6 +29,16 @@ namespace RazorSharp.Native
 		#endregion
 
 		#region Thread
+
+		internal static Context64 GetContext(ContextFlags flags)
+		{
+			var ctx     = new Context64();
+			var hThread = OpenThread(ThreadAccess.All, (int) GetCurrentThreadId());
+			ctx.ContextFlags = flags;
+			Conditions.NativeRequire(GetThreadContext(hThread, ref ctx));
+			Conditions.NativeRequire(CloseHandle(hThread));
+			return ctx;
+		}
 
 		internal static (IntPtr Low, IntPtr High) GetCurrentThreadStackLimits()
 		{
