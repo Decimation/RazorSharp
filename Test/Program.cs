@@ -4,17 +4,20 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp;
+using RazorSharp.Analysis;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Enums;
 using RazorSharp.CoreClr.Structures;
@@ -55,7 +58,20 @@ namespace Test
 			return Constants.INVALID_VALUE;
 		}
 
-		delegate void* fn();
+		class MString
+		{
+			
+			
+			public MString(string value)
+			{
+				
+			}
+
+			public static implicit operator MString(string value)
+			{
+				return new MString(value);
+			}
+		}
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -69,20 +85,22 @@ namespace Test
 //			var          asm    = Assembly.Load(asmStr);
 
 
-			string foo = nameof(foo);
+			char* str = stackalloc char[256];
 
-			const string s = ", ";
-			Debug.Assert(ReferenceEquals(s, StringConstants.JOIN_COMMA));
+			Mem.StrCpy(str ,0, "fooblet", 1);
 
-			Pointer<char> p = Unsafe.AddressOfHeap(StringConstants.JOIN_COMMA, OffsetType.StringData);
-			p[0] = 'g';
+			Console.WriteLine(new string(str));
 
-			string[] rg = {"foo", "bar", "baz"};
+			string[][] matrix = { new[]{"goo", "sporg"}, new[]{"sperg"} };
+			Console.WriteLine(matrix.GetType());
+			Console.WriteLine(matrix.AutoJoin());
+			Console.WriteLine(Collections.CreateStringAuto(matrix, ", "));
 
-			Console.WriteLine(StringConstants.JOIN_COMMA);
-			Console.WriteLine(rg.AutoJoin());
+
 			
-			Console.WriteLine(typeof(string).GetMetaType());
+
+			
+
 
 
 			// SHUT IT DOWN

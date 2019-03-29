@@ -28,9 +28,27 @@ namespace RazorSharp.Analysis
 
 		// todo
 		public static bool SmartInterpret { get; set; }
+		
+		// todo
+		public static bool ExtensiveLayout { get; set; }
 
 		// layoutString
 
+		public static void Layout<T>(T t) where T : class
+		{
+			Console.WriteLine(LayoutString<T>(t));
+		}
+
+		public static void Layout<T>(ref T t)
+		{
+			Console.WriteLine(LayoutString<T>(ref t));
+		}
+
+		public static void Layout<T>()
+		{
+			Console.WriteLine(LayoutString<T>());
+		}
+		
 		public static string LayoutString<T>(T t) where T : class
 		{
 			throw new NotImplementedException();

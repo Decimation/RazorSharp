@@ -442,6 +442,18 @@ namespace RazorSharp.Memory
 			dest.WriteAll(src);
 		}
 
+		public static void StrCpy(Pointer<char> dest, string src)
+		{
+			dest.WriteAll(src);
+		}
+		
+		public static void StrCpy(Pointer<char> dest, int startOfs, string src, int elemCnt)
+		{
+			fixed (char* ptr = src) {
+				Copy(dest, startOfs, ptr, elemCnt);
+			}
+		}
+		
 		#endregion
 
 		#region Alignment

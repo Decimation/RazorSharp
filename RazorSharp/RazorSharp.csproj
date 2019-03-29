@@ -267,6 +267,7 @@
     <Compile Include="Native\Enums\ThreadContext\ContextFlags.cs" />
     <Compile Include="Native\Enums\ThreadContext\ThreadAccess.cs" />
     <Compile Include="Native\Kernel32Impl.cs" />
+    <Compile Include="Native\NativeStream.cs" />
     <Compile Include="Native\Structures\Symbols\FindChildrenParams.cs" />
     <Compile Include="Native\Structures\Symbols\SymbolInfo.cs" />
     <Compile Include="Native\Structures\ThreadContext\Arm64NtNeon128.cs" />
