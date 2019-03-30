@@ -1,6 +1,8 @@
 ﻿#region
 
 using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +14,7 @@ using System.Reflection.Emit;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
@@ -58,14 +61,9 @@ namespace Test
 			return Constants.INVALID_VALUE;
 		}
 
-		class MString
+		struct MString
 		{
-			
-			
-			public MString(string value)
-			{
-				
-			}
+			public MString(string value) { }
 
 			public static implicit operator MString(string value)
 			{
@@ -81,27 +79,28 @@ namespace Test
 			Clr.Setup();
 
 
+			
+			
 //			const string asmStr = "RazorSharp";
 //			var          asm    = Assembly.Load(asmStr);
 
 
 			char* str = stackalloc char[256];
-
-			Mem.StrCpy(str ,0, "fooblet", 1);
+			Mem.StrCpy(str, 0, "fooblet", 1);
 
 			Console.WriteLine(new string(str));
 
-			string[][] matrix = { new[]{"goo", "sporg"}, new[]{"sperg"} };
-			Console.WriteLine(matrix.GetType());
-			Console.WriteLine(matrix.AutoJoin());
+
+			string[][] matrix = {new[] {"goo", "sporg"}, new[] {"sperg"}};
+			
+			
 			Console.WriteLine(Collections.CreateStringAuto(matrix, ", "));
 
-
 			
 
+			const string cpy = "‍⃠";
+			const int emergence = 177013;
 			
-
-
 
 			// SHUT IT DOWN
 			Symbols.Close();
