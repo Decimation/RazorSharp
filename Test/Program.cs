@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.ExceptionServices;
@@ -71,6 +72,23 @@ namespace Test
 			}
 		}
 
+		struct QString
+		{
+			private Pointer<char> m_str;
+
+			public QString(string value)
+			{
+				m_str = null;
+			}
+
+			public static implicit operator QString(string value)
+			{
+				return new QString(value);
+			}
+		}
+
+		delegate void* AllocDelegate(void* gc, ulong a, uint b);
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -78,34 +96,56 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
-
-			
-			
 //			const string asmStr = "RazorSharp";
 //			var          asm    = Assembly.Load(asmStr);
 
 
-			char* str = stackalloc char[256];
-			Mem.StrCpy(str, 0, "fooblet", 1);
+			string[][] matrix =
+			{
+				new[]
+				{
+					"goo", "sporg"
+				},
+				new[]
+				{
+					"sperg"
+				}
+			};
 
-			Console.WriteLine(new string(str));
+			var intMatrix = new[]
+			{
+				new byte[]
+				{
+					1, 2, 3
+				},
+				new byte[]
+				{
+					4, 5, 6
+				},
+				new byte[]
+				{
+					0xFF, 0xFF, 0xFF
+				}
+			};
 
 
-			string[][] matrix = {new[] {"goo", "sporg"}, new[] {"sperg"}};
-			
-			
-			Console.WriteLine(Collections.CreateStringAuto(matrix, ", "));
+			void* ptr = GCHeap
+			           .GlobalHeap
+			           .Reference
+			           .Alloc(256, 0);
 
-			
+			Console.WriteLine(Hex.ToHex(ptr));
 
-			const string cpy = "‍⃠";
-			const int emergence = 177013;
-			
 
 			// SHUT IT DOWN
 			Symbols.Close();
 			Clr.Close();
 			Global.Close();
+		}
+
+		static unsafe void wstrcpy(char* dmem, char* smem, int charCount)
+		{
+			Mem.Copy<byte>(dmem, smem, charCount * 2);
 		}
 
 

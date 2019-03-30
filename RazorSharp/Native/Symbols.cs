@@ -18,6 +18,7 @@ using RazorSharp.Utilities;
 
 namespace RazorSharp.Native
 {
+	// todo: add support for cases where there are multiple symbols of the same name
 	public unsafe class Symbols : IDisposable
 	{
 		private IntPtr m_process,

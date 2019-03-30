@@ -1384,7 +1384,7 @@ namespace RazorSharp.Pointers
 				}
 
 				if (typeof(T).IsIListType())
-					valueStr = $"[{((IList) Reference).AutoJoin()}]";
+					valueStr = $"[{((IEnumerable) Reference).AutoJoin()}]";
 				else
 					valueStr = Reference == null ? StringConstants.NULL_STR : Reference.ToString();
 

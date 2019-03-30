@@ -131,6 +131,11 @@ namespace RazorSharp.CoreClr.Structures
 			return Mem.Read<T>(&objValuePtr);
 		}
 
+		[ClrSymcall(Symbol = "WKS::GCHeap::Alloc", FullyQualified = true)]
+		public void* Alloc(ulong value, uint value2)
+		{
+			return null;
+		}
 		
 		[ClrSymcall(Symbol = "WKS::GCHeap::IsGCInProgress", FullyQualified = true)]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
