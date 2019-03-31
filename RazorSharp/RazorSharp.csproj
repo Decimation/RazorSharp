@@ -257,9 +257,11 @@
     <Compile Include="Memory\Calling\Symbols\Symcall.cs" />
     <Compile Include="Memory\Functions.cs" />
     <Compile Include="Memory\MemScanner.cs" />
+    <Compile Include="Memory\MemStream.cs" />
     <Compile Include="Memory\ProcessHacker.cs" />
     <Compile Include="Memory\Region.cs" />
     <Compile Include="Memory\SegmentType.cs" />
+    <Compile Include="Miscellaneous.cs" />
     <Compile Include="Native\Enums\Images\ImageDirectoryEntry.cs" />
     <Compile Include="Native\Enums\Images\ImageHelpSymbolTypeInfo.cs" />
     <Compile Include="Native\Enums\Images\ImageSectionCharacteristics.cs" />

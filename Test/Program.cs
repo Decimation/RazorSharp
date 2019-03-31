@@ -51,15 +51,21 @@ namespace Test
 
 	public static unsafe class Program
 	{
+		
 		// todo: protect address-sensitive functions
 		// todo: replace native pointers* with Pointer<T> for consistency
-		// todo: RazorSharp, ClrMD, Reflection comparison
+		// todo: RazorSharp, ClrMD, Reflection, Cecil comparison
 
 
 		[ClrSymcall(Symbol = "Object::GetSize", FullyQualified = true)]
 		private static int Size(this object obj)
 		{
 			return Constants.INVALID_VALUE;
+		}
+
+		class __Error
+		{
+			public __Error Air => this;
 		}
 
 		struct MString
@@ -87,7 +93,6 @@ namespace Test
 			}
 		}
 
-		delegate void* AllocDelegate(void* gc, ulong a, uint b);
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -98,6 +103,31 @@ namespace Test
 
 //			const string asmStr = "RazorSharp";
 //			var          asm    = Assembly.Load(asmStr);
+
+			
+
+			int* mem = stackalloc int[256];
+			mem[0] = 1;
+			mem[1] = 2;
+			mem[2] = 3;
+			mem[3] = 4;
+
+			var memStream = new MemStream(mem);
+			
+			
+			for (int i = 1; i < 3; i++) {
+				
+				var memValue    = memStream.Read<int>();
+				var memValueDef = mem[i];
+				
+				Debug.Assert(memValue == memValueDef,
+				             "memValue==memValueDef",
+				             "{0}!={1}",
+				             memValue,
+				             memValueDef);
+			}
+
+			Console.WriteLine(memStream.Read<int>());
 
 
 			string[][] matrix =
@@ -129,19 +159,27 @@ namespace Test
 			};
 
 
-			void* ptr = GCHeap
-			           .GlobalHeap
-			           .Reference
-			           .Alloc(256, 0);
-
-			Console.WriteLine(Hex.ToHex(ptr));
-
-
 			// SHUT IT DOWN
 			Symbols.Close();
 			Clr.Close();
 			Global.Close();
 		}
+
+
+		class Class<K, V, E> { }
+
+		static void loadClass()
+		{
+			try {
+				var fn = typeof(Miscellaneous).GetAnyMethod("Run");
+			}
+			catch (TypeLoadException e) {
+				Console.WriteLine("shitlet");
+				Console.WriteLine(e);
+				throw;
+			}
+		}
+
 
 		static unsafe void wstrcpy(char* dmem, char* smem, int charCount)
 		{

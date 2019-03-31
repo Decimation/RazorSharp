@@ -710,12 +710,12 @@ namespace RazorSharp.Pointers
 
 		public void WriteAnyEx(Type t, object value, int elemOffset = 0)
 		{
-			InvokeGenericMethod("WriteAny", t, value, elemOffset);
+			InvokeGenericMethod(nameof(WriteAny), t, value, elemOffset);
 		}
 
 		public object ReadAnyEx(Type t, int elemOffset = 0)
 		{
-			return InvokeGenericMethod("ReadAny", t, args: elemOffset);
+			return InvokeGenericMethod(nameof(ReadAny), t, args: elemOffset);
 		}
 
 		public void WriteAny<TType>(TType t, int elemOffset = 0)
