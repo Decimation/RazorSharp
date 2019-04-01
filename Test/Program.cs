@@ -16,6 +16,7 @@ using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
@@ -35,6 +36,7 @@ using RazorSharp.Native.Structures.ThreadContext;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+using ThreadState = System.Threading.ThreadState;
 using Unsafe = RazorSharp.Unsafe;
 
 #endregion
@@ -93,6 +95,9 @@ namespace Test
 			}
 		}
 
+		delegate void Run();
+
+		
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -115,16 +120,12 @@ namespace Test
 			var memStream = new MemStream(mem);
 			
 			
-			for (int i = 1; i < 3; i++) {
+			for (int i = 0; i < 3; i++) {
 				
-				var memValue    = memStream.Read<int>();
-				var memValueDef = mem[i];
+				int memValue    = memStream.Read<int>();
+				int memValueDef = mem[i];
 				
-				Debug.Assert(memValue == memValueDef,
-				             "memValue==memValueDef",
-				             "{0}!={1}",
-				             memValue,
-				             memValueDef);
+				Debug.Assert(memValue == memValueDef);
 			}
 
 			Console.WriteLine(memStream.Read<int>());
@@ -158,6 +159,41 @@ namespace Test
 				}
 			};
 
+			
+
+			var ctx = Kernel32.GetContext(ContextFlags.CONTEXT_ALL);
+			Console.WriteLine(ctx.Rax);
+
+			
+			var hThread = Kernel32.OpenThread(ThreadAccess.All, (int) Kernel32.GetCurrentThreadId());
+			
+			var t = new Thread(() =>
+			{
+				
+				Kernel32.SuspendThread(hThread);
+				
+				
+				
+				
+				ctx.Rax = 255;
+				Kernel32.SetThreadContext(hThread, ref ctx);
+				Console.WriteLine(">> Set thread ctx");
+				
+				Kernel32.ResumeThread(hThread);
+				Console.WriteLine("done");
+			});
+			
+			t.Start();
+
+			
+			
+			Console.WriteLine("ok nigga");
+
+
+			float pi = 3.14f;
+			var val = MemConvert.UnionCast<double, float>(pi);
+			Console.WriteLine(val);
+			
 
 			// SHUT IT DOWN
 			Symbols.Close();

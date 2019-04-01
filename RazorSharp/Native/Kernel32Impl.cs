@@ -39,6 +39,16 @@ namespace RazorSharp.Native
 			Conditions.NativeRequire(CloseHandle(hThread));
 			return ctx;
 		}
+		
+		internal static void SetContext(ref Context64 ctx)
+		{
+			
+			var hThread = OpenThread(ThreadAccess.All, (int) GetCurrentThreadId());
+			
+			Conditions.NativeRequire(SetThreadContext(hThread, ref ctx));
+			Conditions.NativeRequire(CloseHandle(hThread));
+			
+		}
 
 		internal static (IntPtr Low, IntPtr High) GetCurrentThreadStackLimits()
 		{

@@ -4,6 +4,8 @@ using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using System;
 using System.Runtime.InteropServices;
+using RazorCommon.Strings;
+using RazorSharp.Utilities;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 #endregion
 
@@ -11,13 +13,51 @@ namespace RazorSharp
 {
 	// todo: WIP
 
-	public static class MemConvert
+	public static unsafe class MemConvert
 	{
 		public enum ConversionType
 		{
 			LOW_LEVEL,
 			LIGHT,
 			AS
+		}
+
+		private delegate int UnionCastFunction(long value);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="TFrom">T1</typeparam>
+		/// <typeparam name="TTo">T2</typeparam>
+		/// <returns></returns>
+		public static TTo UnionCast<TFrom, TTo>(TFrom value)
+		{
+			Conditions.Assert(Unsafe.SizeOf<TFrom>() == 8);
+			Conditions.Assert(Unsafe.SizeOf<TTo>() == 4);
+			
+			string[] asm = new[]
+			{
+				"push 	 rbp",
+				"mov 	 rbp, rsp",
+				"movss 	 DWORD PTR [rbp-20], xmm0",
+				"mov 	 QWORD PTR [rbp-8], 0",
+				"movss   xmm0, DWORD PTR [rbp-20]",
+				"movss   DWORD PTR [rbp-8], xmm0",
+				"movsd   xmm0, QWORD PTR [rbp-8]",
+				"pop     rbp",
+				"ret"
+			};
+
+			var code = Mem.AllocCode(asm);
+
+			var fn = Marshal.GetDelegateForFunctionPointer<UnionCastFunction>(code.Address);
+
+			var conv = fn(ProxyCast<TFrom, long>(value));
+			Console.WriteLine(Hex.ToHex(conv)); 
+			
+			Mem.FreeCode(code);
+
+			return default;
 		}
 
 		public static unsafe TTo[] ConvertArray<TTo>(byte[] mem)

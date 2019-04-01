@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using RazorCommon;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Native;
@@ -217,7 +218,12 @@ namespace RazorSharp.Memory
 		#endregion
 
 		#region Code
-
+		
+		public static Pointer<byte> AllocCode(string[] asm, bool isProcess32Bit = false)
+		{
+			return AllocCode(asm.QuickJoin(Environment.NewLine), isProcess32Bit);
+		}
+		
 		public static Pointer<byte> AllocCode(string asm, bool isProcess32Bit = false)
 		{
 			var code = new Assembler().Assemble(asm,isProcess32Bit);

@@ -105,6 +105,15 @@ namespace RazorSharp.Native
 		[DllImport(KERNEL32_DLL, SetLastError = true)]
 		internal static extern bool GetThreadContext(IntPtr hThread, ref Context64 lpContext);
 
+		[DllImport(KERNEL32_DLL)]
+		internal static extern bool SetThreadContext(IntPtr hThread, ref Context64 lpContext);
+
+		[DllImport(KERNEL32_DLL)]
+		internal static extern uint SuspendThread(IntPtr hThread);
+
+		[DllImport(KERNEL32_DLL)]
+		internal static extern uint ResumeThread(IntPtr hThread);
+		
 		#endregion
 
 
