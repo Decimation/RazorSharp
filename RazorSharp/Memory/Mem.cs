@@ -326,20 +326,6 @@ namespace RazorSharp.Memory
 		
 		#region Read / write
 
-		/// <summary>
-		///     Reinterprets <paramref name="value" /> of type <typeparamref name="TFrom" /> as a value of type
-		///     <typeparamref name="TTo" />
-		/// </summary>
-		/// <param name="value">Value to reinterpret</param>
-		/// <typeparam name="TFrom">Inherent type</typeparam>
-		/// <typeparam name="TTo">Type to reinterpret <typeparamref name="TFrom" /> as</typeparam>
-		/// <returns></returns>
-		public static TTo ReinterpretCast<TFrom, TTo>(TFrom value)
-		{
-			Pointer<TFrom> addr = Unsafe.AddressOf(ref value);
-			return addr.ReadAny<TTo>();
-		}
-
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<T> ReadPointer<T>(Pointer<byte> ptr, long byteOffset)
 		{

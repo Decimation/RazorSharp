@@ -76,8 +76,7 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
-			int i = 1;
-			Conditions.RequiresUnsigned(i, nameof(i));
+			
 			
 			
 			

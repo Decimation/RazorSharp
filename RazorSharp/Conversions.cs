@@ -16,53 +16,11 @@ namespace RazorSharp
 	{
 		public enum ConversionType
 		{
-			LOW_LEVEL,
+			REINTERPRET,
 			LIGHT,
 			AS,
-			UNION
 		}
 
-		private delegate int UnionCastFunction(long value);
-
-		private delegate void Jmp();
-
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <typeparam name="TFrom">T1</typeparam>
-		/// <typeparam name="TTo">T2</typeparam>
-		/// <returns></returns>
-		public static TTo UnionCast<TFrom, TTo>(TFrom value)
-		{
-			throw new NotImplementedException();
-			
-			Conditions.Assert(Unsafe.SizeOf<TFrom>() == 8);
-			Conditions.Assert(Unsafe.SizeOf<TTo>() == 4);
-
-			string[] asm =
-			{
-				"push 	 rbp",
-				"mov 	 rbp, rsp",
-				"movss 	 DWORD [rbp-20], xmm0",
-				"mov 	 QWORD [rbp-8], 0",
-				"movss   xmm0, DWORD [rbp-20]",
-				"movss   DWORD [rbp-8], xmm0",
-				"movsd   xmm0, QWORD [rbp-8]",
-				"pop     rbp",
-				"ret"
-			};
-
-
-			var fnCode = Mem.AllocCode(asm);
-
-
-			
-
-
-			Mem.FreeCode(fnCode);
-
-			return default;
-		}
 
 		public static unsafe TTo[] ConvertArray<TTo>(byte[] mem)
 		{
@@ -72,11 +30,11 @@ namespace RazorSharp
 			}
 		}
 
-		public static TTo Convert<TFrom, TTo>(TFrom t, ConversionType c = ConversionType.LOW_LEVEL)
+		public static TTo Convert<TFrom, TTo>(TFrom t, ConversionType c = ConversionType.REINTERPRET)
 		{
 			switch (c) {
-				case ConversionType.LOW_LEVEL:
-					return ProxyCast<TFrom, TTo>(t);
+				case ConversionType.REINTERPRET:
+					return ReinterpretCast<TFrom, TTo>(t);
 				case ConversionType.LIGHT:
 					return (TTo) System.Convert.ChangeType(t, typeof(TTo));
 				case ConversionType.AS:
@@ -97,9 +55,19 @@ namespace RazorSharp
 			return read;
 		}
 
-		public static TProxy ProxyCast<TOld, TProxy>(TOld value)
+
+		/// <summary>
+		///     Reinterprets <paramref name="value" /> of type <typeparamref name="TFrom" /> as a value of type
+		///     <typeparamref name="TTo" />
+		/// </summary>
+		/// <param name="value">Value to reinterpret</param>
+		/// <typeparam name="TFrom">Inherent type</typeparam>
+		/// <typeparam name="TTo">Type to reinterpret <typeparamref name="TFrom" /> as</typeparam>
+		/// <returns></returns>
+		public static TTo ReinterpretCast<TFrom, TTo>(TFrom value)
 		{
-			return Unsafe.AddressOf(ref value).ReadAs<TOld, TProxy>();
+			Pointer<TFrom> addr = Unsafe.AddressOf(ref value);
+			return addr.ReadAny<TTo>();
 		}
 	}
 }

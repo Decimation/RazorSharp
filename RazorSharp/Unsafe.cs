@@ -89,11 +89,6 @@ namespace RazorSharp
 				return addr.ReadAny<T>();
 			}
 		}
-
-		public static TTo Cast<TFrom, TTo>(TFrom value)
-		{
-			return Conversions.ProxyCast<TFrom, TTo>(value);
-		}
 		
 		/// <summary>
 		///     Interprets a dynamically allocated reference type in the heap as a proper managed type. This is useful when

@@ -402,7 +402,7 @@ namespace RazorSharp.Pointers
 		/// <summary>
 		///     Reads a value of <typeparamref name="TType" /> as a <typeparamref name="TAs" />
 		///     <remarks>
-		///         This is the same operation as <see cref="Mem.ReinterpretCast{TFrom,TTo}" />
+		///         This is the same operation as <see cref="Conversions.ReinterpretCast{TFrom,TTo}" />
 		///     </remarks>
 		/// </summary>
 		/// <param name="elemOffset">Element offset in terms of <typeparamref name="TType" /></param>
@@ -418,7 +418,7 @@ namespace RazorSharp.Pointers
 		/// <summary>
 		///     Writes a value of <typeparamref name="TType" /> as a <typeparamref name="TAs" />
 		///     <remarks>
-		///         This is the same operation as <see cref="Mem.ReinterpretCast{TFrom,TTo}" />
+		///         This is the same operation as <see cref="Conversions.ReinterpretCast{TFrom,TTo}" />
 		///     </remarks>
 		/// </summary>
 		/// <param name="value">Value to write as a <typeparamref name="TAs" /></param>
