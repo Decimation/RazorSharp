@@ -1,8 +1,6 @@
 #region
 
-using System;
 using RazorCommon;
-using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Structures.ILMethods;
 using RazorSharp.Pointers;
 // ReSharper disable InconsistentNaming

@@ -1,13 +1,11 @@
 using System;
 using System.Diagnostics;
 using RazorCommon.Diagnostics;
-using RazorSharp.Diagnostics;
 using RazorSharp.Native.Enums;
 using RazorSharp.Native.Enums.ThreadContext;
 using RazorSharp.Native.Structures;
 using RazorSharp.Native.Structures.ThreadContext;
 using RazorSharp.Pointers;
-using RazorSharp.Utilities;
 
 namespace RazorSharp.Native
 {

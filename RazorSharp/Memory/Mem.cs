@@ -3,23 +3,16 @@
 #region
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Diagnostics;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;
 using RazorSharp.Pointers;
-using RazorSharp.Utilities;
-using Serilog.Context;
 
 #endregion
 

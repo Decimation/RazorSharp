@@ -11,10 +11,8 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorCommon.Utilities;
-using RazorSharp.Diagnostics;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
-using RazorSharp.Utilities;
 using Serilog.Context;
 
 #endregion

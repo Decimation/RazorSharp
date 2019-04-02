@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
-using RazorSharp.Diagnostics;
 using RazorSharp.Memory.Calling.Signatures.Attributes;
 using RazorSharp.Utilities;
 using Serilog.Context;

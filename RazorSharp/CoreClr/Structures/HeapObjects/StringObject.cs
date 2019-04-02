@@ -6,8 +6,6 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
-using RazorSharp.Diagnostics;
-using RazorSharp.Utilities;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable ConvertToAutoProperty

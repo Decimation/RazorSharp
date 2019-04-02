@@ -3,8 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
-using RazorCommon;
-using RazorSharp.Pointers;
 
 namespace RazorSharp.Memory
 {

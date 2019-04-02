@@ -3,7 +3,6 @@
 #region
 
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Diagnostics;
@@ -13,8 +12,7 @@ using RazorSharp.CoreClr.Enums;
 using RazorSharp.CoreClr.Enums.MethodTable;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.EE;
-using RazorSharp.Diagnostics.Exceptions;
-using RazorSharp.Memory;
+using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;

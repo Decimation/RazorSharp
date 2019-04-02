@@ -4,7 +4,6 @@
 
 using System;
 using System.Text;
-using RazorSharp.Diagnostics;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;
 

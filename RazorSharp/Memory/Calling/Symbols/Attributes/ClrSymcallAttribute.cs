@@ -1,5 +1,4 @@
 using RazorSharp.CoreClr;
-using RazorSharp.Native;
 
 namespace RazorSharp.Memory.Calling.Symbols.Attributes
 {

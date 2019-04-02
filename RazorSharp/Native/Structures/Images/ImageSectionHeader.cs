@@ -2,7 +2,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorSharp.Native.Enums;
 using RazorSharp.Native.Enums.Images;
 
 #endregion

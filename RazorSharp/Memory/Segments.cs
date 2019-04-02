@@ -8,11 +8,9 @@ using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
-using RazorSharp.Diagnostics;
 using RazorSharp.Native;
 using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
-using RazorSharp.Utilities;
 
 #endregion
 

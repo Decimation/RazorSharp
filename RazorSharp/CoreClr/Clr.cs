@@ -5,14 +5,9 @@ using System.Runtime.InteropServices;
 using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Utilities;
-using RazorSharp.CoreClr.Structures;
-using RazorSharp.CoreClr.Structures.EE;
-using RazorSharp.CoreClr.Structures.HeapObjects;
-using RazorSharp.Diagnostics;
 using RazorSharp.Memory;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
-using RazorSharp.Utilities;
 
 namespace RazorSharp.CoreClr
 {

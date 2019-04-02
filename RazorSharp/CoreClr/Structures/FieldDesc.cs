@@ -11,13 +11,11 @@ using RazorSharp.CoreClr.Enums;
 using RazorSharp.CoreClr.Enums.FieldDesc;
 using RazorSharp.CoreClr.Enums.MethodDesc;
 using RazorSharp.CoreClr.Meta;
-using RazorSharp.Diagnostics;
-using RazorSharp.Diagnostics.Exceptions;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;
-using RazorSharp.Utilities;
 
 // ReSharper disable MemberCanBeMadeStatic.Local
 // ReSharper disable InconsistentNaming

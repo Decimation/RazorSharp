@@ -4,7 +4,6 @@ using RazorSharp.Native;
 using RazorSharp.Native.Structures;
 using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
-using RazorSharp.Utilities;
 
 namespace RazorSharp.Memory
 {

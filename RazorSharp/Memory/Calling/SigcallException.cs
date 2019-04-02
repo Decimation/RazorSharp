@@ -1,11 +1,10 @@
 #region
 
 using System;
-using System.Diagnostics;
 
 #endregion
 
-namespace RazorSharp.Diagnostics.Exceptions
+namespace RazorSharp.Memory.Calling
 {
 	public class SigcallException : NotImplementedException
 	{
@@ -13,7 +12,7 @@ namespace RazorSharp.Diagnostics.Exceptions
 
 		public SigcallException() : base("Sigcall method error")
 		{
-			var method = new StackTrace().GetFrame(1).GetMethod();
+			
 		}
 	}
 }

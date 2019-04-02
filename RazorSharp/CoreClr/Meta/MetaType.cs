@@ -15,7 +15,6 @@ using RazorSharp.CoreClr.Enums.EEClass;
 using RazorSharp.CoreClr.Enums.MethodTable;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
-using RazorSharp.Diagnostics;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 

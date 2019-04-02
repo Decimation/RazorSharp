@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using RazorSharp.Native.Enums;
 using RazorSharp.Native.Enums.ThreadContext;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global

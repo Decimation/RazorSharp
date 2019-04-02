@@ -1,7 +1,6 @@
 #region
 
 using System;
-using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 
 #endregion

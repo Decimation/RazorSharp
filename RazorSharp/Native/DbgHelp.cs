@@ -1,20 +1,11 @@
 #region
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
-using RazorCommon;
-using RazorSharp.Memory;
-using RazorSharp.Native.Enums;
 using RazorSharp.Native.Enums.Images;
-using RazorSharp.Native.Structures;
 using RazorSharp.Native.Structures.Images;
-using RazorSharp.Pointers;
-using RazorSharp.Utilities;
 
 #endregion
 

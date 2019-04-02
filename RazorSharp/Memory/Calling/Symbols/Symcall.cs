@@ -3,14 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
-using RazorSharp.Diagnostics;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
-using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
