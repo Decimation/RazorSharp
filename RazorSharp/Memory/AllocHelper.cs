@@ -91,7 +91,7 @@ namespace RazorSharp.Memory
 		private static Range GetRange(IntPtr p)
 		{
 			int index = IndexOf(p);
-			if (index != -1) 
+			if (index != -1)
 				return Pool[index];
 
 			throw new Exception($"Pointer {Hex.ToHex(p)} is either out of bounds, not allocated, or not in pool");
@@ -117,7 +117,6 @@ namespace RazorSharp.Memory
 			return GetRange(ptr.Address).HighAddress;
 		}
 
-		
 
 		public static void Info<T>(Pointer<T> ptr)
 		{
@@ -150,7 +149,7 @@ namespace RazorSharp.Memory
 			internal Range(IntPtr pLoAddress, int cb)
 			{
 				LowAddress = pLoAddress;
-				Size    = cb;
+				Size       = cb;
 			}
 
 			internal bool IsAddrInRange(IntPtr p)

@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
 
+// ReSharper disable FieldCanBeMadeReadOnly.Local
+
 #endregion
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -42,16 +44,16 @@ namespace RazorSharp.CoreClr.Structures.HeapObjects
 	///         Should be used with <see cref="Runtime.GetHeapObject{T}" /> and double indirection.
 	///     </remarks>
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct HeapObject : IHeapObject
 	{
-// 		[FieldOffset(-8) public ObjHeader _header
-		[FieldOffset(0)]
-		private MethodTable* m_methodTablePtr;
-		
-		[FieldOffset(Offsets.PTR_SIZE)]
-		private readonly byte m_fields;
+		#region Fields
 
+		private MethodTable* m_methodTablePtr;
+
+		private byte m_fields;
+
+		#endregion
 
 		/// <summary>
 		///     Equal to GC_MARKED in /src/gc/gc.cpp

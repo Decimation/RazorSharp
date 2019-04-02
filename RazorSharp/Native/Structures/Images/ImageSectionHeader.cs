@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorCommon.Diagnostics;
 using RazorSharp.Native.Enums.Images;
 
 #endregion
@@ -20,6 +21,11 @@ namespace RazorSharp.Native.Structures.Images
 	[StructLayout(LayoutKind.Explicit)]
 	public struct ImageSectionHeader
 	{
+		static ImageSectionHeader()
+		{
+			Guard.UseRequires64Bit(nameof(ImageSectionHeader));
+		}
+
 		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = ImageSectionInfo.IMAGE_SIZEOF_SHORT_NAME)]
 		[FieldOffset(0)]
 		public readonly string Name;

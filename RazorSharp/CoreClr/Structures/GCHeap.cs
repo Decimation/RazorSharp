@@ -1,6 +1,8 @@
 #region
 
 using System;
+using System.Runtime;
+using RazorCommon.Diagnostics;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
@@ -32,6 +34,7 @@ namespace RazorSharp.CoreClr.Structures
 	///         </item>
 	///     </list>
 	/// </summary>
+	[SymNamespace("WKS")]
 	public unsafe struct GCHeap
 	{
 		/// <summary>
@@ -74,10 +77,10 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		public int GCCount {
-			[ClrSymcall(Symbol = "WKS::GCHeap::GetGcCount", FullyQualified = true)]
+			[ClrSymcall(Symbol = "GCHeap::GetGcCount", FullyQualified = true)]
 			get => throw new NativeCallException();
 		}
-		
+
 		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
 		{
 			return IsHeapPointer(Unsafe.AddressOfHeap(ref t).ToPointer(), smallHeapOnly);
@@ -100,7 +103,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <param name="obj">Pointer to an object in the GC heap</param>
 		/// <param name="smallHeapOnly">Whether to include small GC heaps only</param>
 		/// <returns><c>true</c> if <paramref name="obj" /> is a heap pointer; <c>false</c> otherwise</returns>
-		[ClrSymcall(Symbol = "GCHeap::IsHeapPointer", FullyQualified = true)]
+		[ClrSymcall]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
 			throw new NativeCallException();
@@ -111,41 +114,40 @@ namespace RazorSharp.CoreClr.Structures
 		{
 			return null;
 		}
-		
+
 		public static object AllocateObject(Type type, int boolValue)
 		{
-			
-			var objValuePtr = AllocateObject(type.GetMethodTable().ToPointer<MethodTable>(), boolValue);
-			
+			void* objValuePtr = AllocateObject(type.GetMethodTable().ToPointer<MethodTable>(), boolValue);
+
 			//var listNative = CSUnsafe.Read<List<int>>(&objValuePtr);
 			//Console.WriteLine(listNative);
 			return Mem.Read<object>(&objValuePtr);
 		}
-		
+
 		public static T AllocateObject<T>(int boolValue)
 		{
-			var objValuePtr = AllocateObject(typeof(T).GetMethodTable().ToPointer<MethodTable>(), boolValue);
+			void* objValuePtr = AllocateObject(typeof(T).GetMethodTable().ToPointer<MethodTable>(), boolValue);
 			return Mem.Read<T>(&objValuePtr);
 		}
 
-		
-		
-		[ClrSymcall(Symbol = "WKS::GCHeap::IsGCInProgress", FullyQualified = true)]
+		[ClrSymcall]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
 		{
 			throw new NativeCallException();
 		}
-		
+
 		static GCHeap()
 		{
+			Guard.UseRequires(!GCSettings.IsServerGC, nameof(GCHeap), "GC must be WKS");
+			
 			Symcall.BindQuick(typeof(GCHeap));
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 
 			using (var sym = new Symbols(Clr.ClrPdb.FullName)) {
-				g_pGCHeap = sym.GetSymAddress(nameof(g_pGCHeap), Clr.CLR_DLL_SHORT).Address;
-				g_lowest_address = sym.GetSymAddress(nameof(g_lowest_address), Clr.CLR_DLL_SHORT).Address;
-				g_highest_address = sym.GetSymAddress(nameof(g_highest_address), Clr.CLR_DLL_SHORT).Address;
+				g_pGCHeap         = sym.GetClrSymAddress(nameof(g_pGCHeap)).Address;
+				g_lowest_address  = sym.GetClrSymAddress(nameof(g_lowest_address)).Address;
+				g_highest_address = sym.GetClrSymAddress(nameof(g_highest_address)).Address;
 			}
 		}
 	}

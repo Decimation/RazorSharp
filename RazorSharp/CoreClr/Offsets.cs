@@ -11,14 +11,6 @@ namespace RazorSharp.CoreClr
 {
 	public static class Offsets
 	{
-		
-#if WIN32
-		internal const int PTR_SIZE = 4;
-#else
-		internal const int PTR_SIZE = 8;
-#endif
-
-
 		/// <summary>
 		///     The offset, in bytes, of an array's actual <see cref="MethodTable" /> pointer, relative to the
 		///     address pointed to by an array type's <see cref="RuntimeTypeHandle.Value" />.
@@ -76,7 +68,5 @@ namespace RazorSharp.CoreClr
 		internal const int CHUNKS_FIELD_OFFSET = 32;
 
 		#endregion
-
-		internal const int FIELDDESC_DW2_OFFSET_BITS = 27;
 	}
 }

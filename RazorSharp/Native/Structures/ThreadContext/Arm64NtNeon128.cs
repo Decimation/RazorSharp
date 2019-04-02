@@ -1,5 +1,8 @@
-using System;
+#region
+
 using System.Runtime.InteropServices;
+
+#endregion
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 // ReSharper disable MemberCanBePrivate.Global
@@ -11,10 +14,10 @@ namespace RazorSharp.Native.Structures.ThreadContext
 	public unsafe struct Arm64NtNeon128
 	{
 		[FieldOffset(0)]
-		public UInt64 Low;
+		public ulong Low;
 
 		[FieldOffset(8)]
-		public Int64 High;
+		public long High;
 
 		[FieldOffset(0)]
 		public fixed double D[2];
@@ -23,9 +26,9 @@ namespace RazorSharp.Native.Structures.ThreadContext
 		public fixed float S[4];
 
 		[FieldOffset(0)]
-		public fixed UInt16 H[8];
+		public fixed ushort H[8];
 
 		[FieldOffset(0)]
-		public fixed Byte B[16];
+		public fixed byte B[16];
 	}
 }

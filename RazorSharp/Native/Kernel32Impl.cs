@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Diagnostics;
 using RazorCommon.Diagnostics;
@@ -7,13 +9,24 @@ using RazorSharp.Native.Structures;
 using RazorSharp.Native.Structures.ThreadContext;
 using RazorSharp.Pointers;
 
+#endregion
+
 namespace RazorSharp.Native
 {
 	/// <summary>
-	/// Wrapper functions
+	///     Wrapper functions
 	/// </summary>
 	internal static unsafe partial class Kernel32
 	{
+		#region Console
+
+		internal static IntPtr GetConsoleHandle()
+		{
+			return GetStdHandle(StandardHandles.StdOutputHandle);
+		}
+
+		#endregion
+
 		#region Process
 
 		internal static IntPtr OpenProcess(Process proc, ProcessAccess flags = ProcessAccess.All)
@@ -39,15 +52,13 @@ namespace RazorSharp.Native
 			Conditions.NativeRequire(CloseHandle(hThread));
 			return ctx;
 		}
-		
+
 		internal static void SetContext(ref Context64 ctx)
 		{
-			
 			var hThread = OpenThread(ThreadAccess.All, (int) GetCurrentThreadId());
-			
+
 			Conditions.NativeRequire(SetThreadContext(hThread, ref ctx));
 			Conditions.NativeRequire(CloseHandle(hThread));
-			
 		}
 
 		internal static (IntPtr Low, IntPtr High) GetCurrentThreadStackLimits()
@@ -62,15 +73,6 @@ namespace RazorSharp.Native
 		internal static IntPtr OpenThread(ThreadAccess desiredAccess, int threadId)
 		{
 			return OpenThread(desiredAccess, false, (uint) threadId);
-		}
-
-		#endregion
-
-		#region Console
-
-		internal static IntPtr GetConsoleHandle()
-		{
-			return GetStdHandle(StandardHandles.StdOutputHandle);
 		}
 
 		#endregion

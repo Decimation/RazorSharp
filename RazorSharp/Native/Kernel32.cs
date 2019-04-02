@@ -111,7 +111,7 @@ namespace RazorSharp.Native
 
 		[DllImport(KERNEL32_DLL)]
 		internal static extern uint ResumeThread(IntPtr hThread);
-		
+
 		#endregion
 
 

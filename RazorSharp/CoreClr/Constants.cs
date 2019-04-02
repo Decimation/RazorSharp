@@ -15,6 +15,12 @@ namespace RazorSharp.CoreClr
 	internal static unsafe class Constants
 	{
 		/// <summary>
+		///     De facto value representing an invalid value or a failure
+		/// </summary>
+		internal const int INVALID_VALUE = -1;
+
+
+		/// <summary>
 		///     <para>Minimum GC object heap size</para>
 		///     <para>Sources:</para>
 		///     <list type="bullet">
@@ -24,13 +30,6 @@ namespace RazorSharp.CoreClr
 		///     </list>
 		/// </summary>
 		internal static readonly int MinObjectSize = 2 * IntPtr.Size + sizeof(ObjHeader);
-
-		internal const bool IS_64_BIT =
-#if WIN32
-		false;
-#else
-		true;
-#endif
 
 
 		/// <summary>
@@ -187,7 +186,5 @@ namespace RazorSharp.CoreClr
 		{
 			return rid | (int) tktype;
 		}
-
-		internal const int INVALID_VALUE = -1;
 	}
 }

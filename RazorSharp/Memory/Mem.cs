@@ -35,27 +35,11 @@ namespace RazorSharp.Memory
 	public static unsafe class Mem
 	{
 		/// <summary>
-		/// Bytes in kilobytes
+		///     Bytes in kilobytes
 		/// </summary>
 		internal const int BYTES_IN_KB = 1024;
 
-		public static bool Is64Bit {
-			get { return IntPtr.Size == sizeof(long); }
-		}
-
-		#region Zero
-
-		public static void Zero<T>(ref T t)
-		{
-			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
-		}
-
-		public static void Zero(Pointer<byte> ptr, int length)
-		{
-			for (int i = 0; i < length; i++) ptr[i] = 0;
-		}
-
-		#endregion
+		public static bool Is64Bit => IntPtr.Size == sizeof(long);
 
 
 		/// <summary>
@@ -76,10 +60,43 @@ namespace RazorSharp.Memory
 		}
 
 
+		public static IntPtr OffsetAs<TOriginal, TAs>(IntPtr p, int origElemCnt)
+		{
+			return p + OffsetCountAs<TOriginal, TAs>(origElemCnt);
+		}
+
+		/// <summary>
+		///     Calculates the element offset (count) of <paramref name="origElemCnt" /> in terms of <typeparamref name="TAs" />
+		/// </summary>
+		/// <param name="origElemCnt">Original element count in terms of <typeparamref name="TOriginal" /></param>
+		/// <typeparam name="TOriginal">Type of <paramref name="origElemCnt" /></typeparam>
+		/// <typeparam name="TAs">Type to return <paramref name="origElemCnt" /> as</typeparam>
+		/// <returns></returns>
+		public static int OffsetCountAs<TOriginal, TAs>(int origElemCnt)
+		{
+			int origByteCount = origElemCnt * Unsafe.SizeOf<TOriginal>();
+			return origByteCount / Unsafe.SizeOf<TAs>();
+		}
+
+		#region Zero
+
+		public static void Zero<T>(ref T t)
+		{
+			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
+		}
+
+		public static void Zero(Pointer<byte> ptr, int length)
+		{
+			for (int i = 0; i < length; i++) ptr[i] = 0;
+		}
+
+		#endregion
+
+
 		#region Alloc / free
 
 		/// <summary>
-		/// Counts the number of allocations (allocated pointers)
+		///     Counts the number of allocations (allocated pointers)
 		/// </summary>
 		internal static int AllocCount { get; private set; }
 
@@ -89,7 +106,7 @@ namespace RazorSharp.Memory
 		///     Allocates basic reference types in the unmanaged heap.
 		///     <para>
 		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" />,
-		/// 		<see cref="Free{T}(Pointer{T})" />, or <see cref="Free{T}(Pointer{T}, int)" />
+		///         <see cref="Free{T}(Pointer{T})" />, or <see cref="Free{T}(Pointer{T}, int)" />
 		///     </para>
 		/// </summary>
 		/// <typeparam name="T">
@@ -142,7 +159,7 @@ namespace RazorSharp.Memory
 		///     </para>
 		///     <para>
 		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" />,
-		/// 		<see cref="Free{T}(Pointer{T})" />, or <see cref="Free{T}(Pointer{T}, int)" />
+		///         <see cref="Free{T}(Pointer{T})" />, or <see cref="Free{T}(Pointer{T}, int)" />
 		///     </para>
 		/// </summary>
 		/// <typeparam name="T">Element type to allocate</typeparam>
@@ -189,14 +206,14 @@ namespace RazorSharp.Memory
 		#region String
 
 		/// <summary>
-		/// Allocates a native string from a UTF16 C# string
+		///     Allocates a native string from a UTF16 C# string
 		/// </summary>
 		/// <param name="s">Standard UTF16 C# string</param>
 		/// <param name="type"></param>
 		/// <returns></returns>
 		public static Pointer<byte> AllocString(string s, StringTypes type)
 		{
-			var           size = s.Length + 1;
+			int           size = s.Length + 1;
 			Pointer<byte> ptr  = AllocUnmanaged<byte>(size);
 			ptr.WriteString(s, type);
 			Conditions.Assert(ptr.ReadString(type) == s);
@@ -214,18 +231,18 @@ namespace RazorSharp.Memory
 		#endregion
 
 		#region Code
-		
+
 		public static Pointer<byte> AllocCode(string[] asm, bool isProcess32Bit = false)
 		{
 			return AllocCode(asm.AsSingleString(), isProcess32Bit);
 		}
-		
+
 		public static Pointer<byte> AllocCode(string asm, bool isProcess32Bit = false)
 		{
-			var code = Assembler.Assemble(asm,isProcess32Bit);
+			byte[] code = Assembler.Assemble(asm, isProcess32Bit);
 			return AllocCode(code);
 		}
-		
+
 		public static Pointer<byte> AllocCode(byte[] opCodes)
 		{
 			Kernel32.GetNativeSystemInfo(out var si);
@@ -305,25 +322,6 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-
-		public static IntPtr OffsetAs<TOriginal, TAs>(IntPtr p, int origElemCnt)
-		{
-			return p + OffsetCountAs<TOriginal, TAs>(origElemCnt);
-		}
-
-		/// <summary>
-		///     Calculates the element offset (count) of <paramref name="origElemCnt" /> in terms of <typeparamref name="TAs" />
-		/// </summary>
-		/// <param name="origElemCnt">Original element count in terms of <typeparamref name="TOriginal" /></param>
-		/// <typeparam name="TOriginal">Type of <paramref name="origElemCnt" /></typeparam>
-		/// <typeparam name="TAs">Type to return <paramref name="origElemCnt" /> as</typeparam>
-		/// <returns></returns>
-		public static int OffsetCountAs<TOriginal, TAs>(int origElemCnt)
-		{
-			int origByteCount = origElemCnt * Unsafe.SizeOf<TOriginal>();
-			return origByteCount / Unsafe.SizeOf<TAs>();
-		}
-		
 		#region Read / write
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -347,7 +345,29 @@ namespace RazorSharp.Memory
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static ref T AsRef<T>(Pointer<byte> p, int byteOffset = 0)
 		{
-			return ref CSUnsafe.AsRef<T>((p+ byteOffset).ToPointer());
+			return ref CSUnsafe.AsRef<T>((p + byteOffset).ToPointer());
+		}
+
+		/// <summary>
+		///     <para>This bypasses the restriction that you can't have a pointer to <typeparamref name="T" />,</para>
+		///     <para>letting you write very high-performance generic code.</para>
+		///     <para>It's dangerous if you don't know what you're doing, but very worth if you do.</para>
+		/// </summary>
+		private static T ReadUsingTypedRef<T>(Pointer<byte> addr)
+		{
+			var address = addr.Address;
+
+			var obj = default(T);
+			var tr  = __makeref(obj);
+
+			// This is equivalent to shooting yourself in the foot
+			// but it's the only high-perf solution in some cases
+			// it sets the first field of the TypedReference (which is a pointer)
+			// to the address you give it, then it dereferences the value.
+			// Better be 10000% sure that your type T is unmanaged/blittable...
+			*(IntPtr*) (&tr) = address;
+
+			return __refvalue(tr, T);
 		}
 
 		#endregion
@@ -434,28 +454,17 @@ namespace RazorSharp.Memory
 		{
 			dest.WriteAll(src);
 		}
-		
+
 		public static void StrCpy(Pointer<char> dest, int startOfs, string src, int elemCnt)
 		{
 			fixed (char* ptr = src) {
 				Copy(dest, startOfs, ptr, elemCnt);
 			}
 		}
-		
+
 		#endregion
 
 		#region Alignment
-
-		/*public static bool IsAligned<T>(int byteAlignment)
-		{
-			int size = Unsafe.SizeOf<T>();
-			return (size & (byteAlignment - 1)) == 0;
-		}
-
-		public static bool IsAligned<T>()
-		{
-			return IsAligned<T>(IntPtr.Size);
-		}*/
 
 		public static bool IsAligned(IntPtr p)
 		{

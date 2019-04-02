@@ -1,16 +1,18 @@
+#region
+
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Threading;
 using RazorCommon.Diagnostics;
+
+#endregion
 
 namespace RazorSharp.Memory
 {
 	/// <summary>
-	/// <para>The Nasm assembler for x86/64.</para>
-	///
-	/// <para>This code is from Squalr</para>
+	///     <para>The Nasm assembler for x86/64.</para>
+	///     <para>This code is from Squalr</para>
 	/// </summary>
 	public static class Assembler
 	{
@@ -18,7 +20,7 @@ namespace RazorSharp.Memory
 
 
 		/// <summary>
-		/// Assemble the specified assembly code at a base address.
+		///     Assemble the specified assembly code at a base address.
 		/// </summary>
 		/// <param name="assembly">The assembly code.</param>
 		/// <param name="isProcess32Bit">Whether or not the assembly is in the context of a 32 bit program.</param>
@@ -86,7 +88,6 @@ namespace RazorSharp.Memory
 			}
 
 
-			
 			innerMsg = Encoding.ASCII.GetString(Encoding.Unicode.GetBytes(innerMsg));
 			return bytes;
 		}

@@ -82,6 +82,14 @@ namespace RazorSharp.CoreClr.Meta
 
 		private unsafe Pointer<EEClassLayoutInfo> LayoutInfo => m_value.Reference.EEClass.Reference.LayoutInfo;
 
+		public IEnumerable<MetaField> InstanceFields {
+			get {
+				return Fields
+				      .Where(f => !f.FieldInfo.IsStatic && !f.FieldInfo.IsLiteral)
+				      .OrderBy(f => f.Offset);
+			}
+		}
+
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			if (String.IsNullOrEmpty(format))
@@ -103,14 +111,6 @@ namespace RazorSharp.CoreClr.Meta
 			}
 		}
 
-		public IEnumerable<MetaField> InstanceFields {
-			get {
-				return Fields
-				      .Where(f => !f.FieldInfo.IsStatic && !f.FieldInfo.IsLiteral)
-				      .OrderBy(f => f.Offset);
-			}
-		}
-
 		private MetaField GetAnyField(string name)
 		{
 			var field = RuntimeType.GetAnyField(name);
@@ -120,8 +120,8 @@ namespace RazorSharp.CoreClr.Meta
 
 		private MetaField[] GetAllFields()
 		{
-			var fields     = RuntimeType.GetAllFields().Where(x => !x.IsLiteral).ToArray();
-			var metaFields = new MetaField[fields.Length];
+			FieldInfo[] fields     = RuntimeType.GetAllFields().Where(x => !x.IsLiteral).ToArray();
+			var         metaFields = new MetaField[fields.Length];
 
 			for (int i = 0; i < fields.Length; i++) {
 				metaFields[i] = new MetaField(fields[i].GetFieldDesc());

@@ -2,6 +2,9 @@
 
 using System.Runtime.InteropServices;
 
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+
 #endregion
 
 namespace RazorSharp.Native.Structures.Images
@@ -10,24 +13,24 @@ namespace RazorSharp.Native.Structures.Images
 	public struct ImageFileHeader
 	{
 		/// WORD->unsigned short
-		public readonly ushort Machine;
+		public ushort Machine;
 
 		/// WORD->unsigned short
-		public readonly ushort NumberOfSections;
+		public ushort NumberOfSections;
 
 		/// DWORD->unsigned int
-		public readonly uint TimeDateStamp;
+		public uint TimeDateStamp;
 
 		/// DWORD->unsigned int
-		public readonly uint PointerToSymbolTable;
+		public uint PointerToSymbolTable;
 
 		/// DWORD->unsigned int
-		public readonly uint NumberOfSymbols;
+		public uint NumberOfSymbols;
 
 		/// WORD->unsigned short
-		public readonly ushort SizeOfOptionalHeader;
+		public ushort SizeOfOptionalHeader;
 
 		/// WORD->unsigned short
-		public readonly ushort Characteristics;
+		public ushort Characteristics;
 	}
 }

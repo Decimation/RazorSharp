@@ -1,4 +1,8 @@
+#region
+
 using RazorSharp.CoreClr.Structures;
+
+#endregion
 
 namespace RazorSharp.CoreClr.Enums.FieldDesc
 {

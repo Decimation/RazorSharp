@@ -37,13 +37,7 @@ namespace RazorSharp.Native.Structures.Images
 		public int SectionSize { get; }
 
 
-		public Pointer<byte> EndAddress {
-			get {
-				// I don't know what's with the SectionSize - 1
-				
-				return SectionAddress + (byte*) SectionSize - 1;;
-			}
-		}
+		public Pointer<byte> EndAddress => SectionAddress + (byte*) SectionSize - 1;
 
 
 		public ImageSectionHeader SectionHeader { get; }

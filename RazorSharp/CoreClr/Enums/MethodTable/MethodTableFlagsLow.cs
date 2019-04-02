@@ -1,5 +1,9 @@
+#region
+
 using System;
 using RazorSharp.CoreClr.Structures;
+
+#endregion
 
 // ReSharper disable InconsistentNaming
 

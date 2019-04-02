@@ -30,7 +30,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
 	internal struct ILMethod
-	{		
+	{
 		/**
 		 * union
 	     * {
@@ -106,7 +106,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		internal CorILMethodFlags Flags {
 			get {
 				// todo: I don't know if the type has to be Fat or not, but just to be safe...
-				if (!IsFat) 
+				if (!IsFat)
 					throw new Exception("IL method type must be Fat");
 
 				return Fat.Reference.Flags;
@@ -116,7 +116,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 
 		internal Pointer<byte> Code {
 			get {
-				var code = IsTiny ? Tiny.Reference.Code : Fat.Reference.Code;
+				Pointer<byte> code = IsTiny ? Tiny.Reference.Code : Fat.Reference.Code;
 				return code;
 			}
 		}
@@ -124,9 +124,9 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 
 		internal int CodeSize => (int) (IsTiny ? Tiny.Reference.CodeSize : Fat.Reference.CodeSize);
 
-		internal int MaxStack => (int) (IsTiny ? Tiny.Reference.MaxStack : Fat.Reference.MaxStack);
+		internal int MaxStack => (int) (IsTiny ? TinyILMethod.MaxStack : Fat.Reference.MaxStack);
 
-		internal int LocalVarSigTok => (int) (IsTiny ? Tiny.Reference.LocalVarSigTok : Fat.Reference.LocalVarSigTok);
+		internal int LocalVarSigTok => (int) (IsTiny ? TinyILMethod.LocalVarSigTok : Fat.Reference.LocalVarSigTok);
 
 		internal ConsoleTable ToTable()
 		{
@@ -143,7 +143,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 
 			return table;
 		}
-		
+
 		public override string ToString()
 		{
 			return ToTable().ToMarkDownString();

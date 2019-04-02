@@ -1,7 +1,11 @@
+#region
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using RazorSharp.Memory;
+
+#endregion
 
 namespace RazorSharp.Pointers
 {
@@ -11,8 +15,8 @@ namespace RazorSharp.Pointers
 		private Pointer<T> m_ptr;
 
 		public int Length {
-			get { return AllocHelper.GetLength(m_ptr); }
-			set { this = AllocHelper.ReAlloc(m_ptr, value); }
+			get => AllocHelper.GetLength(m_ptr);
+			set => this = AllocHelper.ReAlloc(m_ptr, value);
 		}
 
 		public int  Size        => AllocHelper.GetSize(m_ptr);
@@ -20,8 +24,8 @@ namespace RazorSharp.Pointers
 
 		public ref T this[int index] {
 			get {
-				var cpy = m_ptr + index;
-				
+				Pointer<T> cpy = m_ptr + index;
+
 				if (!Mem.IsAddressInRange(Limit.m_ptr.Address, cpy.Address, Origin.m_ptr.Address)) {
 					throw new IndexOutOfRangeException();
 				}
@@ -30,22 +34,13 @@ namespace RazorSharp.Pointers
 			}
 		}
 
-		public Pointer<T> Pointer {
-			get { return m_ptr; }
-//			set { m_ptr = value; }
-		}
+		public Pointer<T> Pointer => m_ptr;
 
-		public AllocPointer<T> Limit {
-			get { return AllocHelper.GetLimit(m_ptr); }
-		}
+		public AllocPointer<T> Limit => AllocHelper.GetLimit(m_ptr);
 
-		public AllocPointer<T> Origin {
-			get { return AllocHelper.GetOrigin(m_ptr); }
-		}
+		public AllocPointer<T> Origin => AllocHelper.GetOrigin(m_ptr);
 
-		public int Offset {
-			get { return AllocHelper.GetOffset(m_ptr); }
-		}
+		public int Offset => AllocHelper.GetOffset(m_ptr);
 
 		public static AllocPointer<T> operator ++(AllocPointer<T> ptr)
 		{
@@ -56,7 +51,6 @@ namespace RazorSharp.Pointers
 
 			ptr.m_ptr++;
 			return ptr;
-
 		}
 
 

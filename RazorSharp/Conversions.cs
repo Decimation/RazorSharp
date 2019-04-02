@@ -2,8 +2,6 @@
 
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
-using System;
-using RazorCommon.Diagnostics;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 #endregion
@@ -18,11 +16,11 @@ namespace RazorSharp
 		{
 			REINTERPRET,
 			LIGHT,
-			AS,
+			AS
 		}
 
 
-		public static unsafe TTo[] ConvertArray<TTo>(byte[] mem)
+		public static TTo[] ConvertArray<TTo>(byte[] mem)
 		{
 			fixed (byte* ptr = mem) {
 				Pointer<TTo> memPtr = ptr;

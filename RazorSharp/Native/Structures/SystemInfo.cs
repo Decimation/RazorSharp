@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Native.Enums;
+
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 
 #endregion

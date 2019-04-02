@@ -1,8 +1,13 @@
 #region
 
+#region
+
 using RazorCommon;
 using RazorSharp.CoreClr.Structures.ILMethods;
 using RazorSharp.Pointers;
+
+#endregion
+
 // ReSharper disable InconsistentNaming
 
 #endregion
@@ -37,7 +42,7 @@ namespace RazorSharp.CoreClr.Meta
 		{
 			m_value = value;
 		}
-		
+
 		/// <summary>
 		///     Whether this type is <see cref="TinyILMethod" />
 		/// </summary>
@@ -95,7 +100,10 @@ namespace RazorSharp.CoreClr.Meta
 			return m_value.Reference.GetILAsByteArray();
 		}
 
-		public ConsoleTable ToTable() => m_value.Reference.ToTable();
+		public ConsoleTable ToTable()
+		{
+			return m_value.Reference.ToTable();
+		}
 
 		public override string ToString()
 		{

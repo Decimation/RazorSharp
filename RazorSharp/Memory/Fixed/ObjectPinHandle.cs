@@ -4,7 +4,7 @@ using System.Threading;
 
 #endregion
 
-namespace RazorSharp.CoreClr.Fixed
+namespace RazorSharp.Memory.Fixed
 {
 	/// <inheritdoc />
 	/// <summary>

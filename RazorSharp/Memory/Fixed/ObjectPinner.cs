@@ -5,7 +5,7 @@ using System.Reflection.Emit;
 
 #endregion
 
-namespace RazorSharp.CoreClr.Fixed
+namespace RazorSharp.Memory.Fixed
 {
 	/// <summary>
 	///     Pins an object in memory even if the type is unblittable.

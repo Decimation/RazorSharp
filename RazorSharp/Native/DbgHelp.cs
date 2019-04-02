@@ -14,20 +14,11 @@ using RazorSharp.Native.Structures.Images;
 namespace RazorSharp.Native
 {
 	/// <summary>
-	/// https://github.com/Microsoft/DbgShell/blob/master/DbgProvider/internal/Native/DbgHelp.cs
+	///     https://github.com/Microsoft/DbgShell/blob/master/DbgProvider/internal/Native/DbgHelp.cs
 	/// </summary>
 	internal static unsafe class DbgHelp
 	{
 		private const string DBG_HELP_DLL = "DbgHelp.dll";
-
-		/// <summary>
-		/// SYM_ENUMERATESYMBOLS_CALLBACK
-		/// </summary>
-		/// <param name="symInfo">SYMBOL_INFO</param>
-		/// <param name="symbolSize"></param>
-		/// <param name="pUserContext"></param>
-		[return: MarshalAs(UnmanagedType.Bool)]
-		internal delegate bool SymEnumSymbolsCallback(IntPtr symInfo, uint symbolSize, IntPtr pUserContext);
 
 		//BOOL IMAGEAPI SymGetTypeInfo(
 		//	HANDLE                    hProcess,
@@ -46,30 +37,30 @@ namespace RazorSharp.Native
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SymEnumTypesByNameW")]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool SymEnumTypesByName(IntPtr              hProcess,
-		                                               ulong               modBase,
-		                                               string              mask,
+		internal static extern bool SymEnumTypesByName(IntPtr                 hProcess,
+		                                               ulong                  modBase,
+		                                               string                 mask,
 		                                               SymEnumSymbolsCallback callback,
-		                                               IntPtr              pUserContext);
+		                                               IntPtr                 pUserContext);
 
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SymEnumSymbolsW")]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool SymEnumSymbols(IntPtr              hProcess,
-		                                           ulong               modBase,
-		                                           string              mask,
+		internal static extern bool SymEnumSymbols(IntPtr                 hProcess,
+		                                           ulong                  modBase,
+		                                           string                 mask,
 		                                           SymEnumSymbolsCallback callback,
-		                                           IntPtr              pUserContext);
+		                                           IntPtr                 pUserContext);
 
 		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool SymEnumSymbols(IntPtr              hProcess,
-		                                           ulong               modBase,
-		                                           IntPtr              mask,
+		internal static extern bool SymEnumSymbols(IntPtr                 hProcess,
+		                                           ulong                  modBase,
+		                                           IntPtr                 mask,
 		                                           SymEnumSymbolsCallback callback,
-		                                           IntPtr              pUserContext);
+		                                           IntPtr                 pUserContext);
 
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true)]
@@ -104,11 +95,9 @@ namespace RazorSharp.Native
 			return TRUE;
 		}*/
 
-		
-		
 
 		/// <summary>
-		/// BOOL SymInitialize(HANDLE hProcess, PCSTR UserSearchPath, BOOL fInvadeProcess)
+		///     BOOL SymInitialize(HANDLE hProcess, PCSTR UserSearchPath, BOOL fInvadeProcess)
 		/// </summary>
 		/// <param name="hProcess"></param>
 		/// <param name="userSearchPath"></param>
@@ -123,7 +112,6 @@ namespace RazorSharp.Native
 		                                          [MarshalAs(UnmanagedType.Bool)] bool fInvadeProcess);
 
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <param name="hProcess"></param>
 		/// <param name="hFile"></param>
@@ -146,7 +134,6 @@ namespace RazorSharp.Native
 		                                             uint   flags);
 
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <param name="hProcess"></param>
 		/// <param name="hFile"></param>
@@ -170,7 +157,6 @@ namespace RazorSharp.Native
 		                                             uint   flags);
 
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <param name="hProcess"></param>
 		/// <param name="hFile"></param>
@@ -194,7 +180,8 @@ namespace RazorSharp.Native
 
 
 		/// <summary>
-		/// BOOL SymEnumTypes(HANDLE hProcess, ULONG64 BaseOfDll, PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, PVOID UserContext)
+		///     BOOL SymEnumTypes(HANDLE hProcess, ULONG64 BaseOfDll, PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, PVOID
+		///     UserContext)
 		/// </summary>
 		/// <param name="hProcess"></param>
 		/// <param name="modBase"></param>
@@ -205,13 +192,13 @@ namespace RazorSharp.Native
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool SymEnumTypes(IntPtr              hProcess,
-		                                         ulong               modBase,
+		internal static extern bool SymEnumTypes(IntPtr                 hProcess,
+		                                         ulong                  modBase,
 		                                         SymEnumSymbolsCallback callback,
-		                                         IntPtr              pUserContext);
+		                                         IntPtr                 pUserContext);
 
 		/// <summary>
-		/// BOOL SymCleanup(HANDLE hProcess)
+		///     BOOL SymCleanup(HANDLE hProcess)
 		/// </summary>
 		/// <param name="hProcess"></param>
 		/// <returns></returns>
@@ -220,5 +207,14 @@ namespace RazorSharp.Native
 		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool SymCleanup(IntPtr hProcess);
+
+		/// <summary>
+		///     SYM_ENUMERATESYMBOLS_CALLBACK
+		/// </summary>
+		/// <param name="symInfo">SYMBOL_INFO</param>
+		/// <param name="symbolSize"></param>
+		/// <param name="pUserContext"></param>
+		[return: MarshalAs(UnmanagedType.Bool)]
+		internal delegate bool SymEnumSymbolsCallback(IntPtr symInfo, uint symbolSize, IntPtr pUserContext);
 	}
 }

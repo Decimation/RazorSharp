@@ -1,4 +1,8 @@
+#region
+
 using System.Runtime.InteropServices;
+
+#endregion
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -6,7 +10,7 @@ using System.Runtime.InteropServices;
 namespace RazorSharp.Native.Structures.ThreadContext
 {
 	/// <summary>
-	/// x64
+	///     x64
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential, Pack = 16)]
 	public struct XSaveFormat64

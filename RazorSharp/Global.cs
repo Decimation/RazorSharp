@@ -19,7 +19,7 @@ using Serilog.Sinks.SystemConsole.Themes;
 namespace RazorSharp
 {
 	/// <summary>
-	/// The core of RazorSharp. Contains the logger and <see cref="Setup"/>
+	///     The core of RazorSharp. Contains the logger and <see cref="Setup" />
 	/// </summary>
 	public static class Global
 	{
@@ -35,10 +35,8 @@ namespace RazorSharp
 
 		internal static readonly Assembly Assembly;
 
-		public static bool IsSetup { get; private set; }
-
 		/// <summary>
-		/// Sets up the logger and other values
+		///     Sets up the logger and other values
 		/// </summary>
 		static Global()
 		{
@@ -55,9 +53,11 @@ namespace RazorSharp
 			     .CreateLogger();
 
 			const string ASM_STR = "RazorSharp";
-			
+
 			Assembly = Assembly.Load(ASM_STR);
 		}
+
+		public static bool IsSetup { get; private set; }
 
 		private static void CheckCompatibility()
 		{
@@ -109,7 +109,7 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		/// Checks compatibility
+		///     Checks compatibility
 		/// </summary>
 		public static void Setup()
 		{
@@ -119,7 +119,7 @@ namespace RazorSharp
 		}
 
 		/// <summary>
-		/// Disposes the logger and checks for any memory leaks
+		///     Disposes the logger and checks for any memory leaks
 		/// </summary>
 		public static void Close()
 		{

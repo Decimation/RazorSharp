@@ -1,5 +1,9 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
+
+#endregion
 
 namespace RazorSharp.Native
 {
@@ -14,9 +18,9 @@ namespace RazorSharp.Native
 		///     <see cref="!:https://msdn.microsoft.com/en-us/library/windows/desktop/ms633500%28v=vs.85%29.aspx">FindWindowEx</see>
 		///     function.
 		///     <para>
-		///     Go to https://msdn.microsoft.com/en-us/library/windows/desktop/ms633499%28v=vs.85%29.aspx for FindWindow
-		///     information or https://msdn.microsoft.com/en-us/library/windows/desktop/ms633500%28v=vs.85%29.aspx for
-		///     FindWindowEx
+		///         Go to https://msdn.microsoft.com/en-us/library/windows/desktop/ms633499%28v=vs.85%29.aspx for FindWindow
+		///         information or https://msdn.microsoft.com/en-us/library/windows/desktop/ms633500%28v=vs.85%29.aspx for
+		///         FindWindowEx
 		///     </para>
 		/// </summary>
 		/// <param name="lpClassName">
@@ -24,8 +28,8 @@ namespace RazorSharp.Native
 		///     the RegisterClass or RegisterClassEx function. The atom must be in the low-order word of lpClassName; the
 		///     high-order word must be zero.
 		///     <para>
-		///     If lpClassName points to a string, it specifies the window class name. The class name can be any name
-		///     registered with RegisterClass or RegisterClassEx, or any of the predefined control-class names.
+		///         If lpClassName points to a string, it specifies the window class name. The class name can be any name
+		///         registered with RegisterClass or RegisterClassEx, or any of the predefined control-class names.
 		///     </para>
 		///     <para>If lpClassName is NULL, it finds any window whose title matches the lpWindowName parameter.</para>
 		/// </param>
@@ -50,8 +54,8 @@ namespace RazorSharp.Native
 		///     Changes the text of the specified window's title bar (if it has one). If the specified window is a control, the
 		///     text of the control is changed. However, SetWindowText cannot change the text of a control in another application.
 		///     <para>
-		///     Go to https://msdn.microsoft.com/en-us/library/windows/desktop/ms633546%28v=vs.85%29.aspx for more
-		///     information
+		///         Go to https://msdn.microsoft.com/en-us/library/windows/desktop/ms633546%28v=vs.85%29.aspx for more
+		///         information
 		///     </para>
 		/// </summary>
 		/// <param name="hwnd">C++ ( hWnd [in]. Type: HWND )<br />A handle to the window or control whose text is to be changed.</param>
@@ -68,13 +72,13 @@ namespace RazorSharp.Native
 		///     <see cref="SetWindowText" />. The <see cref="SetWindowText" /> function does not expand tab characters (ASCII code
 		///     0x09). Tab characters are displayed as vertical bar(|) characters.<br />For an example go to
 		///     <see cref="!:https://msdn.microsoft.com/en-us/library/windows/desktop/ms644928%28v=vs.85%29.aspx#sending">
-		///     Sending a
-		///     Message.
+		///         Sending a
+		///         Message.
 		///     </see>
 		/// </remarks>
 		[DllImport(USER32_DLL, SetLastError = true, CharSet = CharSet.Auto)]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		public static extern bool SetWindowText(IntPtr hwnd, String lpString);
+		public static extern bool SetWindowText(IntPtr hwnd, string lpString);
 
 		[DllImport(USER32_DLL, SetLastError = true)]
 		public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);

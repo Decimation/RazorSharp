@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,13 +12,14 @@ using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
+#endregion
+
 namespace RazorSharp.Memory.Calling.Symbols
 {
 	public static class Symcall
 	{
+		private const           string     SCOPE_RESOLUTION_OPERATOR = "::";
 		private static readonly ISet<Type> BoundTypes;
-
-		private const string SCOPE_RESOLUTION_OPERATOR = "::";
 
 		static Symcall()
 		{
@@ -37,13 +40,13 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 		public static void BindQuick(Type t, string method)
 		{
-			var methodInfo=t.GetAnyMethod(method);
-			var attr=methodInfo.GetCustomAttribute<SymcallAttribute>();
-			var fullSym = GetSymbolName(attr, methodInfo);
-			
+			var    methodInfo = t.GetAnyMethod(method);
+			var    attr       = methodInfo.GetCustomAttribute<SymcallAttribute>();
+			string fullSym    = GetSymbolName(attr, methodInfo);
+
 			using (var sym = new Native.Symbols(attr.Image)) {
-				var offset = sym.GetSymOffset(fullSym);
-				var address = Modules.GetAddress(attr.Module, offset);
+				long          offset  = sym.GetSymOffset(fullSym);
+				Pointer<byte> address = Modules.GetAddress(attr.Module, offset);
 				Functions.SetStableEntryPoint(methodInfo, address.Address);
 			}
 		}
@@ -73,12 +76,15 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 			return fullSym;
 		}
-		
+
 		public static void BindQuick(Type t)
 		{
 			if (IsBound(t)) {
 				return;
 			}
+
+			var    nameSpaceAttr = t.GetCustomAttribute<SymNamespaceAttribute>();
+			string nameSpace     = nameSpaceAttr == null ? String.Empty : nameSpaceAttr.Namespace;
 
 			(MethodInfo[] methods, SymcallAttribute[] attributes) = t.GetAnnotatedMethods<SymcallAttribute>();
 
@@ -99,15 +105,16 @@ namespace RazorSharp.Memory.Calling.Symbols
 				var method = methods[i];
 
 				// Resolve the symbol
-				string fullSym = GetSymbolName(attr, method);
-				
+				string fullSym = nameSpace + SCOPE_RESOLUTION_OPERATOR + GetSymbolName(attr, method);
+				Global.Log.Debug("Binding {Name} -> {Orig}", fullSym,
+				                 method.Name);
 				contexts.Add(fullSym);
 			}
 
 
-			var offsets = sym.GetSymOffsets(contexts.ToArray());
-			var addresses = Modules.GetAddresses(baseAttr.Module, offsets).ToArray();
-			
+			long[]          offsets   = sym.GetSymOffsets(contexts.ToArray());
+			Pointer<byte>[] addresses = Modules.GetAddresses(baseAttr.Module, offsets).ToArray();
+
 			Conditions.Requires(addresses.Length == methods.Length);
 
 			for (int i = 0; i < methods.Length; i++) {
@@ -119,18 +126,6 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 			sym.Dispose();
 			BoundTypes.Add(t);
-		}
-
-		public static void Bind(Type t)
-		{
-			throw new NotImplementedException();
-			var methods = t.GetAllMethods()
-			               .Where(x => x.GetCustomAttribute<SymcallAttribute>() != null)
-			               .ToArray();
-
-			foreach (var method in methods) {
-				var attr = method.GetCustomAttribute<SymcallAttribute>();
-			}
 		}
 	}
 }

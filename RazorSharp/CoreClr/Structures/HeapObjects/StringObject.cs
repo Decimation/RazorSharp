@@ -7,6 +7,8 @@ using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
 
+// ReSharper disable FieldCanBeMadeReadOnly.Local
+
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable ConvertToAutoProperty
 
@@ -43,19 +45,18 @@ namespace RazorSharp.CoreClr.Structures.HeapObjects
 	///         Should be used with <see cref="Runtime.GetStringObject(ref string)" /> and double indirection.
 	///     </remarks>
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct StringObject : IHeapObject
 	{
-// 		[FieldOffset(-8) public ObjHeader _header
-		[FieldOffset(0)]
-		private readonly MethodTable* m_methodTablePtr;
-		
-		[FieldOffset(Offsets.PTR_SIZE)]
-		private readonly uint m_stringLength;
+		#region Fields
 
-		[FieldOffset(Offsets.PTR_SIZE+sizeof(uint))]
-		private readonly char m_firstChar;
+		private MethodTable* m_methodTablePtr;
 
+		private uint m_stringLength;
+
+		private char m_firstChar;
+
+		#endregion
 
 		public uint Length    => m_stringLength;
 		public char FirstChar => m_firstChar;
@@ -88,10 +89,10 @@ namespace RazorSharp.CoreClr.Structures.HeapObjects
 		private char* GetPointer()
 		{
 			var __this = (char*) Unsafe.AddressOf(ref this);
-			Conditions.RequiresNotNull(__this,nameof(__this));
+			Conditions.RequiresNotNull(__this, nameof(__this));
 			return __this;
 		}
-		
+
 		private static int GetIndex(int index)
 		{
 			return index + RuntimeHelpers.OffsetToStringData / sizeof(char);

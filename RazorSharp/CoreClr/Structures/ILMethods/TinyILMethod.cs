@@ -62,21 +62,21 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		/// </summary>
 		internal Pointer<byte> Code {
 			get {
-				fixed (TinyILMethod* thisPtr = (&this)) {
+				fixed (TinyILMethod* thisPtr = &this) {
 					var value = (byte*) thisPtr;
-					
-					return value 
+
+					return value
 					       + sizeof(IMAGE_COR_ILMETHOD_TINY)
-					       +IntPtr.Size;
+					       + IntPtr.Size;
 				}
 			}
 		}
 
 		internal uint CodeSize => (uint) Flags_CodeSize >> (int) (CorILMethodFlags.FormatShift - 1);
 
-		// todo: I should probably make these 2 fields const
-		internal uint MaxStack       => 8;
-		internal uint LocalVarSigTok => 0;
+
+		internal const uint MaxStack       = 8;
+		internal const uint LocalVarSigTok = 0;
 	}
 
 	/// <summary>

@@ -9,17 +9,17 @@ namespace RazorSharp.Utilities
 {
 	/// <inheritdoc />
 	/// <summary>
-	/// Represents a collection implemented by delegates.
+	///     Represents a collection implemented by delegates.
 	/// </summary>
 	public class VirtualCollection<T> : IEnumerable<T>
 	{
 		/// <summary>
-		/// Retrieves an item with the name <paramref name="name"/>
+		///     Retrieves an item with the name <paramref name="name" />
 		/// </summary>
 		public delegate T GetItem(string name);
 
 		/// <summary>
-		/// Retrieves the items as an array.
+		///     Retrieves the items as an array.
 		/// </summary>
 		public delegate T[] GetItems();
 

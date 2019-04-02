@@ -101,9 +101,6 @@ namespace RazorSharp.CoreClr
 
 		#region MethodTable
 
-		
-
-
 		/// <summary>
 		///     <para>Manually reads a CLR <see cref="MethodTable" /> (TypeHandle).</para>
 		///     <para>
@@ -156,28 +153,6 @@ namespace RazorSharp.CoreClr
 
 		#region FieldDesc
 
-		private static Pointer<byte> GetFieldDescDwordAddress(FieldInfo fi)
-		{
-			Pointer<byte> fieldDesc = fi.FieldHandle.Value;
-			fieldDesc.Add(IntPtr.Size);
-			return fieldDesc;
-		}
-
-		internal static int ReadOffset(FieldInfo fi)
-		{
-			Pointer<byte> fieldDesc = GetFieldDescDwordAddress(fi);
-			var           dword2    = fieldDesc.ReadAny<uint>(1);
-			return Bits.ReadBits((int) dword2, Offsets.FIELDDESC_DW2_OFFSET_BITS, 0);
-		}
-
-		internal static void WriteOffset(FieldInfo fi, int offset)
-		{
-			Pointer<byte> fieldDesc = GetFieldDescDwordAddress(fi);
-			var           dword2    = fieldDesc.ReadAny<uint>(1);
-			fieldDesc.WriteAny(Bits.WriteTo(data: (int) dword2, index: 0,
-			                                Offsets.FIELDDESC_DW2_OFFSET_BITS, offset), 1);
-		}
-
 		/// <summary>
 		///     Reads all <see cref="FieldDesc" />s from <paramref name="mt" />'s <see cref="MethodTable.FieldDescList" />
 		///     <remarks>
@@ -216,7 +191,7 @@ namespace RazorSharp.CoreClr
 		{
 			Conditions.RequiresNotNull(fieldInfo, nameof(fieldInfo));
 			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
-			
+
 			if (Environment.Is64BitProcess) {
 				Conditions.Assert(fieldDesc.Reference.Info == fieldInfo);
 				Conditions.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
@@ -233,7 +208,6 @@ namespace RazorSharp.CoreClr
 		/// <param name="name"></param>
 		/// <param name="flags"></param>
 		/// <returns></returns>
-		/// <exception cref="RuntimeException">If the type is an array</exception>
 		internal static Pointer<FieldDesc> GetFieldDesc(this Type    t, string name,
 		                                                BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 		{

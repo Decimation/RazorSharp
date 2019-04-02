@@ -8,6 +8,8 @@ using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp.Pointers;
 
+// ReSharper disable FieldCanBeMadeReadOnly.Local
+
 #endregion
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -16,7 +18,7 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.CoreClr.Structures
 {
-	//todo: verify
+	//todo: WIP, verify
 	/// <summary>
 	///     <para>Corresponding files:</para>
 	///     <list type="bullet">
@@ -37,7 +39,7 @@ namespace RazorSharp.CoreClr.Structures
 	///         </item>
 	///     </list>
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct MethodDescChunk
 	{
 		#region Fields
@@ -45,26 +47,21 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		///     Relative fixup pointer
 		/// </summary>
-		[FieldOffset(0)]
-		private /*readonly*/ MethodTable* m_methodTable;
+		private MethodTable* m_methodTable;
 
 		/// <summary>
 		///     Relative pointer
 		/// </summary>
-		[FieldOffset(Offsets.PTR_SIZE)]
-		private readonly MethodDescChunk* m_next;
+		private MethodDescChunk* m_next;
 
-		[FieldOffset(Offsets.PTR_SIZE*2)]
-		private readonly byte m_size;
+		private byte m_size;
 
 		/// <summary>
 		///     The number of <see cref="MethodDesc" />s in this chunk minus 1
 		/// </summary>
-		[FieldOffset((Offsets.PTR_SIZE*2)+1)]
-		private readonly byte m_count;
+		private byte m_count;
 
-		[FieldOffset((Offsets.PTR_SIZE*2)+2)]
-		private readonly ushort m_flagsAndTokenRange;
+		private ushort m_flagsAndTokenRange;
 
 		#endregion
 
@@ -107,10 +104,10 @@ namespace RazorSharp.CoreClr.Structures
 		internal Pointer<MethodDesc> FirstMethodDesc {
 			get {
 				// return PTR_MethodDesc(dac_cast<TADDR>(this) + sizeof(MethodDescChunk));
-				var                 __this = Unsafe.AddressOf(ref this).Address;
-				Pointer<MethodDesc> pMD    = __this;
-				pMD.Add(sizeof(MethodDescChunk));
-				return pMD;
+
+				Pointer<MethodDesc> __this = Unsafe.AddressOf(ref this).Address;
+				__this.Add(sizeof(MethodDescChunk));
+				return __this;
 			}
 		}
 

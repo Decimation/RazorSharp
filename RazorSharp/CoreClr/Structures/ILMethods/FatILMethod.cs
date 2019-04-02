@@ -10,6 +10,8 @@ using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Pointers;
 
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+
 #endregion
 
 // ReSharper disable InconsistentNaming
@@ -110,7 +112,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		/// </summary>
 		internal Pointer<byte> Code {
 			get {
-				var ptr =(byte*) Unsafe.AddressOf(ref this) + 4 * Size;
+				byte* ptr = (byte*) Unsafe.AddressOf(ref this) + 4 * Size;
 				return ptr + IntPtr.Size;
 			}
 		}
@@ -146,27 +148,23 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 	///         </item>
 	///     </list>
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	internal struct IMAGE_COR_ILMETHOD_FAT
 	{
-		/**
-		 * 	unsigned Flags    : 12;     // Flags see code:CorILMethodFlags
-			unsigned Size     :  4;     // size in DWords of this structure (currently 3)
-			unsigned MaxStack : 16;     // maximum number of items (I4, I, I8, obj ...), on the operand stack
-			DWORD   CodeSize;           // size of the code
-			mdSignature   LocalVarSigTok;     // token that indicates the signature of the local vars (0 means none)
-		 */
+		/// <summary>
+		///     <para>Flags</para>
+		///     <para>unsigned Flags : 12;</para>
+		///     <para></para>
+		///     <para>Size in dwords of this structure (currently 3)</para>
+		///     <para>unsigned Size : 4;</para>
+		///     <para></para>
+		///     <para>Maximum number of items (I4, I, I8, obj ...), on the operand stack</para>
+		///     <para>unsigned MaxStack : 16;</para>
+		/// </summary>
+		internal uint m_dword1;
 
-		// unsigned Flags    	: 12;     // Flags see code:CorILMethodFlags
-		// unsigned Size     	:  4;     // size in DWords of this structure (currently 3)
-		// unsigned MaxStack 	: 16;     // maximum number of items (I4, I, I8, obj ...), on the operand stack
-		[FieldOffset(0)]
-		internal readonly uint m_dword1;
+		internal uint m_codeSize;
 
-		[FieldOffset(4)]
-		internal readonly uint m_codeSize;
-
-		[FieldOffset(8)]
-		internal readonly uint m_sigTok;
+		internal uint m_sigTok;
 	}
 }

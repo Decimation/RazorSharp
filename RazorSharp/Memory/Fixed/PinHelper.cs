@@ -1,4 +1,4 @@
-namespace RazorSharp.CoreClr.Fixed
+namespace RazorSharp.Memory.Fixed
 {
 	#region
 

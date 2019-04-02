@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Reflection;
 using RazorCommon;
@@ -6,30 +8,15 @@ using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
 
+#endregion
+
 namespace RazorSharp.Utilities
 {
 	/// <summary>
-	/// Provides utilities for working with Reflection
+	///     Provides utilities for working with Reflection
 	/// </summary>
 	public static class ReflectionUtil
 	{
-		#region BindingFlags
-
-		/// <summary>
-		/// <see cref="ALL_INSTANCE_FLAGS"/> and <see cref="BindingFlags.Static"/>
-		/// </summary>
-		public const BindingFlags ALL_FLAGS = ALL_INSTANCE_FLAGS | BindingFlags.Static;
-
-		/// <summary>
-		/// <see cref="BindingFlags.Public"/>, <see cref="BindingFlags.Instance"/>,
-		/// and <see cref="BindingFlags.NonPublic"/>
-		/// </summary>
-		public const BindingFlags ALL_INSTANCE_FLAGS =
-			BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic;
-
-		#endregion
-
-
 		public static MetaType GetMetaType(this Type t)
 		{
 			return new MetaType(t.GetMethodTable());
@@ -48,6 +35,22 @@ namespace RazorSharp.Utilities
 			method = method.MakeGenericMethod(typeArgs);
 			return method.Invoke(method.IsStatic ? null : instance, args);
 		}
+
+		#region BindingFlags
+
+		/// <summary>
+		///     <see cref="ALL_INSTANCE_FLAGS" /> and <see cref="BindingFlags.Static" />
+		/// </summary>
+		public const BindingFlags ALL_FLAGS = ALL_INSTANCE_FLAGS | BindingFlags.Static;
+
+		/// <summary>
+		///     <see cref="BindingFlags.Public" />, <see cref="BindingFlags.Instance" />,
+		///     and <see cref="BindingFlags.NonPublic" />
+		/// </summary>
+		public const BindingFlags ALL_INSTANCE_FLAGS =
+			BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic;
+
+		#endregion
 
 		#region Methods
 

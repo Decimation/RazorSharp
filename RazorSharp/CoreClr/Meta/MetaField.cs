@@ -31,7 +31,7 @@ namespace RazorSharp.CoreClr.Meta
 	{
 		private readonly Pointer<FieldDesc> m_value;
 
-		
+
 		internal MetaField(Pointer<FieldDesc> p)
 		{
 			m_value = p;
@@ -106,14 +106,8 @@ namespace RazorSharp.CoreClr.Meta
 		///     </remarks>
 		/// </summary>
 		public int Offset {
-			get {
-				
-				return m_value.Reference.Offset;
-				
-			}
-			set {
-				m_value.Reference.Offset = value;
-			}
+			get => m_value.Reference.Offset;
+			set => m_value.Reference.Offset = value;
 		}
 
 		/// <summary>
@@ -131,7 +125,6 @@ namespace RazorSharp.CoreClr.Meta
 
 		public MetaType EnclosingMetaType => new MetaType(m_value.Reference.EnclosingMethodTable);
 
-		
 
 //		public Pointer<MethodTable> FieldMethodTable => m_pFieldDesc.Reference.FieldMethodTable;
 
@@ -141,22 +134,22 @@ namespace RazorSharp.CoreClr.Meta
 
 		#region Methods
 
-		public unsafe Pointer<byte> GetStaticAddress()
+		public Pointer<byte> GetStaticAddress()
 		{
 			return m_value.Reference.GetStaticAddress();
 		}
-		
+
 		public unsafe Pointer<byte> GetStaticAddress(Pointer<byte> value)
 		{
 			return m_value.Reference.GetStaticAddress(value.ToPointer());
 		}
-		
-		public unsafe Pointer<byte> GetStaticAddressHandle()
+
+		public Pointer<byte> GetStaticAddressHandle()
 		{
 			return m_value.Reference.GetStaticAddressHandle();
 		}
-		
-		public unsafe Pointer<byte> GetStaticAddressContext()
+
+		public Pointer<byte> GetStaticAddressContext()
 		{
 			return m_value.Reference.GetStaticAddressContext();
 		}
@@ -165,7 +158,7 @@ namespace RazorSharp.CoreClr.Meta
 		{
 			return m_value.Reference.GetValue(value);
 		}
-		
+
 		public object GetValue<TInstance>(TInstance t)
 		{
 			return m_value.Reference.GetValue(t);
@@ -178,7 +171,6 @@ namespace RazorSharp.CoreClr.Meta
 
 		public Pointer<byte> GetAddress<TInstance>(ref TInstance t)
 		{
-			
 			return m_value.Reference.GetAddress(ref t);
 		}
 

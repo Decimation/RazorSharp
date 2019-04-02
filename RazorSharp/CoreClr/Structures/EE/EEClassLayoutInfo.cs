@@ -3,10 +3,11 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
-using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Enums.EEClass;
 using RazorSharp.CoreClr.Meta;
+
+// ReSharper disable FieldCanBeMadeReadOnly.Local
 
 #endregion
 
@@ -31,41 +32,32 @@ namespace RazorSharp.CoreClr.Structures.EE
 	///         <see cref="MetaType" />
 	///     </para>
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct EEClassLayoutInfo
 	{
 		#region Fields
 
 		// why is there an m_cbNativeSize in EEClassLayoutInfo and EEClass?
-		[FieldOffset(0)]
-		private readonly UINT32 m_cbNativeSize;
+		private UINT32 m_cbNativeSize;
 
-		[FieldOffset(4)]
-		private readonly UINT32 m_cbManagedSize;
+
+		private UINT32 m_cbManagedSize;
 
 		// 1,2,4 or 8: this is equal to the largest of the alignment requirements
 		// of each of the EEClass's members. If the NStruct extends another NStruct,
 		// the base NStruct is treated as the first member for the purpose of
 		// this calculation.
-		[FieldOffset(8)]
-		private readonly BYTE m_LargestAlignmentRequirementOfAllMembers;
+		private BYTE m_LargestAlignmentRequirementOfAllMembers;
 
 		// Post V1.0 addition: This is the equivalent of m_LargestAlignmentRequirementOfAllMember
 		// for the managed layout.
-		[FieldOffset(9)]
-		private readonly BYTE m_ManagedLargestAlignmentRequirementOfAllMembers;
+		private BYTE m_ManagedLargestAlignmentRequirementOfAllMembers;
 
-		[FieldOffset(10)]
-		private readonly BYTE m_bFlags;
+		private BYTE m_bFlags;
 
-		[FieldOffset(11)]
-		private readonly BYTE m_cbPackingSize;
+		private BYTE m_cbPackingSize;
 
-		[FieldOffset(12)]
-		private readonly UINT m_numCTMFields;
-
-		[FieldOffset(16)]
-		private readonly void* m_pFieldMarshalers;
+		private void* m_pFieldMarshalers;
 
 		#endregion
 
@@ -77,7 +69,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		/// <summary>
 		///     # of fields that are of the calltime-marshal variety.
 		/// </summary>
-		internal UINT NumCTMFields => m_numCTMFields;
+		internal UINT NumCTMFields { get; }
 
 		/// <summary>
 		///     <para>Size (in bytes) of fixed portion of NStruct.</para>
@@ -107,13 +99,8 @@ namespace RazorSharp.CoreClr.Structures.EE
 
 			table.AddRow("Native size", m_cbNativeSize);
 			table.AddRow("Managed size", m_cbManagedSize);
-			table.AddRow("Largest alignment req of all", m_LargestAlignmentRequirementOfAllMembers);
 			table.AddRow("Flags", EnumUtil.CreateFlagsString(m_bFlags, Flags));
 			table.AddRow("Packing size", m_cbPackingSize);
-			table.AddRow("CTM fields", m_numCTMFields);
-			table.AddRow("Field marshalers", Hex.ToHex(m_pFieldMarshalers));
-			table.AddRow("Blittable", IsBlittable.Prettify());
-			table.AddRow("Zero sized", ZeroSized.Prettify());
 
 			return table.ToMarkDownString();
 		}

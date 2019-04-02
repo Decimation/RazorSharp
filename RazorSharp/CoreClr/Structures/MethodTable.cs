@@ -16,7 +16,9 @@ using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;
+
 // ReSharper disable ConvertToAutoProperty
+// ReSharper disable NonReadonlyMemberInGetHashCode
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 
@@ -78,7 +80,6 @@ namespace RazorSharp.CoreClr.Structures
 			Symcall.BindQuick(typeof(MethodTable));
 		}
 
-		
 
 		#region Properties and Accessors
 
@@ -139,9 +140,7 @@ namespace RazorSharp.CoreClr.Structures
 			get {
 				if (!IsParentIndirect)
 					return m_pParentMethodTable;
-				else {
-					return GetParentMethodTable();
-				}
+				return GetParentMethodTable();
 			}
 		}
 
@@ -194,29 +193,7 @@ namespace RazorSharp.CoreClr.Structures
 		///         <see cref="LowBits.EEClass" />
 		///     </exception>
 		/// </summary>
-		internal Pointer<MethodTable> Canon {
-			get {
-
-				return GetCanonicalMethodTable();
-				
-				/*switch (UnionType) {
-					case LowBits.MethodTable:
-						Pointer<MethodTable> pCanon = m_pCanonMT;
-						pCanon.Subtract(Offsets.CANON_MT_UNION_MT_OFFSET);
-						return pCanon;
-					case LowBits.EEClass:
-					{
-						fixed (MethodTable* mt = &this) {
-							return mt;
-						}
-					}
-					case LowBits.Invalid:
-					case LowBits.Indirection:
-					default:
-						return GetCanonicalMethodTable();
-				}*/
-			}
-		}
+		internal Pointer<MethodTable> Canon => GetCanonicalMethodTable();
 
 		[ClrSymcall]
 		private MethodTable* GetCanonicalMethodTable()
@@ -248,10 +225,11 @@ namespace RazorSharp.CoreClr.Structures
 
 
 		/// <summary>
-		/// /// <summary>
-		///     Gets the corresponding <see cref="Type" /> of this <see cref="MethodTable" />
-		/// </summary>
-		/// <returns>The <see cref="Type" /> of the specified <see cref="MethodTable" /></returns>
+		///     ///
+		///     <summary>
+		///         Gets the corresponding <see cref="Type" /> of this <see cref="MethodTable" />
+		///     </summary>
+		///     <returns>The <see cref="Type" /> of the specified <see cref="MethodTable" /></returns>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
@@ -320,9 +298,9 @@ namespace RazorSharp.CoreClr.Structures
 		#region Union
 
 		/// <summary>
-		/// <para>Union</para>
-		/// <para>EEClass* 		<see cref="m_pEEClass"/></para>
-		/// <para>MethodTable* 	<see cref="m_pCanonMT"/></para>
+		///     <para>Union</para>
+		///     <para>EEClass* 		<see cref="m_pEEClass" /></para>
+		///     <para>MethodTable* 	<see cref="m_pCanonMT" /></para>
 		/// </summary>
 		private EEClass* m_pEEClass;
 
@@ -334,11 +312,10 @@ namespace RazorSharp.CoreClr.Structures
 		#region Union
 
 		/// <summary>
-		/// <para>Union</para>
-		/// 
-		/// <para>void* 		<see cref="m_pPerInstInfo"/></para>
-		/// <para>void* 		<see cref="m_ElementTypeHnd"/></para>
-		/// <para>void*		<see cref="m_pMultipurposeSlot1"/></para>
+		///     <para>Union</para>
+		///     <para>void* 		<see cref="m_pPerInstInfo" /></para>
+		///     <para>void* 		<see cref="m_ElementTypeHnd" /></para>
+		///     <para>void*		<see cref="m_pMultipurposeSlot1" /></para>
 		/// </summary>
 		private void* m_pPerInstInfo;
 
@@ -351,10 +328,9 @@ namespace RazorSharp.CoreClr.Structures
 		#region Union
 
 		/// <summary>
-		/// <para>Union</para>
-		/// 
-		/// <para>void* 		m_pInterfaceMap</para>
-		/// <para>void* 		m_pMultipurposeSlot2</para>
+		///     <para>Union</para>
+		///     <para>void* 		m_pInterfaceMap</para>
+		///     <para>void* 		m_pMultipurposeSlot2</para>
 		/// </summary>
 		private void* m_pInterfaceMap;
 
@@ -387,34 +363,36 @@ namespace RazorSharp.CoreClr.Structures
 			table.AddRow("Name", RuntimeType.Name);
 			table.AddRow("Base size", m_BaseSize);
 
-			if (HasComponentSize) table.AddRow("Component size", m_dwFlags.ComponentSize);
+			if (HasComponentSize)
+				table.AddRow("Component size", m_dwFlags.ComponentSize);
 
 			table.AddRow("Flags", EnumUtil.CreateFlagsString(FlagsValue, Flags));
 			table.AddRow("Flags 2", EnumUtil.CreateFlagsString(Flags2Value, Flags2));
 			table.AddRow("Low flags", EnumUtil.CreateFlagsString(FlagsLowValue, FlagsLow));
 			table.AddRow("Token", Token);
 
-			if (m_pParentMethodTable != null) table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));
+			if (m_pParentMethodTable != null)
+				table.AddRow("Parent MT", Hex.ToHex(m_pParentMethodTable));
 
 			table.AddRow("Module", Hex.ToHex(m_pLoaderModule));
 			table.AddRow("Union type", UnionType);
 			table.AddRow("EEClass", Hex.ToHex(EEClass.Address));
 			table.AddRow("Canon MT", Hex.ToHex(Canon.Address));
 
-			if (IsArray) table.AddRow("Element type handle", Hex.ToHex(m_ElementTypeHnd));
+			if (IsArray)
+				table.AddRow("Element type handle", Hex.ToHex(m_ElementTypeHnd));
 
 
 			// EEClass fields
 			table.AddRow("FieldDesc List", Hex.ToHex(FieldDescList));
 			table.AddRow("FieldDesc List length", FieldDescListLength);
 			table.AddRow("MethodDescChunk List", Hex.ToHex(MethodDescChunkList));
+
 			table.AddRow("Number instance fields", NumInstanceFields);
 			table.AddRow("Number static fields", NumStaticFields);
 			table.AddRow("Number non virtual slots", NumNonVirtualSlots);
 			table.AddRow("Number methods", NumMethods);
 			table.AddRow("Number instance field bytes", NumInstanceFieldBytes);
-
-
 			table.AddRow("Number virtuals", m_wNumVirtuals);
 			table.AddRow("Number interfaces", m_wNumInterfaces);
 
@@ -422,7 +400,6 @@ namespace RazorSharp.CoreClr.Structures
 			table.AddRow("Blittable", EEClass.Reference.IsBlittable.Prettify());
 
 
-//			table.RemoveFromRows(0, "0x0", (ushort) 0, (uint) 0);
 			return table.ToMarkDownString();
 		}
 
@@ -441,8 +418,6 @@ namespace RazorSharp.CoreClr.Structures
 		public override int GetHashCode()
 		{
 			unchecked {
-				// ReSharper disable once NonReadonlyMemberInGetHashCode
-				// m_dwFlags will never change despite not being readonly
 				int hashCode = m_dwFlags.GetHashCode();
 				hashCode = (hashCode * 397) ^ (int) m_BaseSize;
 				hashCode = (hashCode * 397) ^ m_wFlags2.GetHashCode();

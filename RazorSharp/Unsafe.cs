@@ -89,7 +89,7 @@ namespace RazorSharp
 				return addr.ReadAny<T>();
 			}
 		}
-		
+
 		/// <summary>
 		///     Interprets a dynamically allocated reference type in the heap as a proper managed type. This is useful when
 		///     you only have a pointer to a reference type's data in the heap but cannot dereference it because the CLR
@@ -329,7 +329,10 @@ namespace RazorSharp
 		/// <remarks>
 		///     Returned from <see cref="EEClassLayoutInfo.ManagedSize" />
 		/// </remarks>
-		/// <returns>Managed size if the type has an <see cref="EEClassLayoutInfo" />; <see cref="Constants.INVALID_VALUE" /> otherwise</returns>
+		/// <returns>
+		///     Managed size if the type has an <see cref="EEClassLayoutInfo" />; <see cref="Constants.INVALID_VALUE" />
+		///     otherwise
+		/// </returns>
 		public static int ManagedSizeOf<T>()
 		{
 			// Note: Arrays have no layout

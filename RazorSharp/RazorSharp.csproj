@@ -206,9 +206,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\Inspect.cs" />
-    <Compile Include="Analysis\ObjectLayout.cs" />
     <Compile Include="CoreClr\Clr.cs" />
     <Compile Include="CoreClr\Enums\CorElementType.cs" />
+    <Compile Include="CoreClr\Enums\CorILMethodFlags.cs" />
     <Compile Include="CoreClr\Enums\CorTokenType.cs" />
     <Compile Include="CoreClr\Enums\EEClass\EEClassFieldId.cs" />
     <Compile Include="CoreClr\Enums\EEClass\LayoutFlags.cs" />
@@ -225,10 +225,6 @@
     <Compile Include="CoreClr\Enums\MethodTable\MethodTableFlagsLow.cs" />
     <Compile Include="CoreClr\Enums\ObjHeader\SyncBlockFlags.cs" />
     <Compile Include="CoreClr\Enums\TokenType.cs" />
-    <Compile Include="CoreClr\Fixed\ObjectPinHandle.cs" />
-    <Compile Include="CoreClr\Fixed\ObjectPinner.cs" />
-    <Compile Include="CoreClr\Fixed\PinHandle.cs" />
-    <Compile Include="CoreClr\Fixed\PinHelper.cs" />
     <Compile Include="CoreClr\Meta\IMeta.cs" />
     <Compile Include="CoreClr\Meta\IMetaMember.cs" />
     <Compile Include="CoreClr\Meta\MetaField.cs" />
@@ -236,12 +232,10 @@
     <Compile Include="CoreClr\Meta\MetaMethod.cs" />
     <Compile Include="CoreClr\Meta\MetaType.cs" />
     <Compile Include="CoreClr\Offsets.cs" />
-    <Compile Include="CoreClr\Identifiers.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClass.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClassLayoutInfo.cs" />
     <Compile Include="CoreClr\Structures\EE\LayoutEEClass.cs" />
     <Compile Include="CoreClr\Structures\GCHeap.cs" />
-    <Compile Include="CoreClr\Structures\ILMethods\CorILMethodFlags.cs" />
     <Compile Include="CoreClr\Structures\ILMethods\ILMethod.cs" />
     <Compile Include="CoreClr\Structures\ILMethods\FatILMethod.cs" />
     <Compile Include="CoreClr\Structures\ILMethods\TinyILMethod.cs" />
@@ -251,11 +245,15 @@
     <Compile Include="Memory\Calling\NativeCallException.cs" />
     <Compile Include="Memory\Calling\Signatures\Attributes\ClrSigcallAttribute.cs" />
     <Compile Include="Memory\Calling\Signatures\Attributes\SigcallAttribute.cs" />
-    <Compile Include="Memory\Calling\Signatures\SigCache.cs" />
     <Compile Include="Memory\Calling\Signatures\SignatureCall.cs" />
     <Compile Include="Memory\Calling\Symbols\Attributes\ClrSymcallAttribute.cs" />
     <Compile Include="Memory\Calling\Symbols\Attributes\SymcallAttribute.cs" />
+    <Compile Include="Memory\Calling\Symbols\Attributes\SymNamespaceAttribute.cs" />
     <Compile Include="Memory\Calling\Symbols\Symcall.cs" />
+    <Compile Include="Memory\Fixed\ObjectPinHandle.cs" />
+    <Compile Include="Memory\Fixed\ObjectPinner.cs" />
+    <Compile Include="Memory\Fixed\PinHandle.cs" />
+    <Compile Include="Memory\Fixed\PinHelper.cs" />
     <Compile Include="Memory\Functions.cs" />
     <Compile Include="Memory\MemScanner.cs" />
     <Compile Include="Memory\MemStream.cs" />
@@ -270,7 +268,6 @@
     <Compile Include="Native\Enums\ThreadContext\ContextFlags.cs" />
     <Compile Include="Native\Enums\ThreadContext\ThreadAccess.cs" />
     <Compile Include="Native\Kernel32Impl.cs" />
-    <Compile Include="Native\NativeStream.cs" />
     <Compile Include="Native\Structures\Symbols\FindChildrenParams.cs" />
     <Compile Include="Native\Structures\Symbols\SymbolInfo.cs" />
     <Compile Include="Native\Structures\ThreadContext\Arm64NtNeon128.cs" />
@@ -286,7 +283,6 @@
     <Compile Include="Memory\Mem.cs" />
     <Compile Include="Memory\Modules.cs" />
     <Compile Include="Memory\Segments.cs" />
-    <Compile Include="Memory\SigScanner.cs" />
     <Compile Include="Native\DbgHelp.cs" />
     <Compile Include="Native\Enums\AllocationType.cs" />
     <Compile Include="Native\Enums\ConsoleOutputModes.cs" />
@@ -297,7 +293,6 @@
     <Compile Include="Native\Enums\ProcessAccess.cs" />
     <Compile Include="Native\Enums\ProcessorArchitecture.cs" />
     <Compile Include="Native\Enums\StandardHandles.cs" />
-    <Compile Include="Native\NativeFunctions.cs" />
     <Compile Include="Native\Kernel32.cs" />
     <Compile Include="Native\Structures\Images\ImageDataDirectory.cs" />
     <Compile Include="Native\Structures\Images\ImageFileHeader.cs" />

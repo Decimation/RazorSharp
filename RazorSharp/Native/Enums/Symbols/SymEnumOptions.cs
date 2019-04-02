@@ -1,4 +1,8 @@
+#region
+
 using System;
+
+#endregion
 
 namespace RazorSharp.Native.Enums.Symbols
 {
@@ -8,6 +12,6 @@ namespace RazorSharp.Native.Enums.Symbols
 		Default = 0x01,
 		Inline  = 0x02, // includes inline symbols
 
-		All = (Default | Inline)
+		All = Default | Inline
 	}
 }

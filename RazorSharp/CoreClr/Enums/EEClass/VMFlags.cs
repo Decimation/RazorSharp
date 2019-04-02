@@ -1,5 +1,9 @@
+#region
+
 using System;
 using RazorSharp.CoreClr.Structures.EE;
+
+#endregion
 
 // ReSharper disable InconsistentNaming
 
@@ -17,7 +21,7 @@ namespace RazorSharp.CoreClr.Enums.EEClass
 		Delegate                    = 0x00000002,
 
 		/// <summary>
-		/// Value type Statics in this class will be pinned
+		///     Value type Statics in this class will be pinned
 		/// </summary>
 		FixedAddressVtStatics = 0x00000020,
 		HasLayout        = 0x00000040,
@@ -39,7 +43,7 @@ namespace RazorSharp.CoreClr.Enums.EEClass
 		UnsafeValueType = 0x00001000,
 
 		/// <summary>
-		/// <see cref="BestFitMapping"/> and <see cref="ThrowOnUnmappableChar"/> are valid only if this is set
+		///     <see cref="BestFitMapping" /> and <see cref="ThrowOnUnmappableChar" /> are valid only if this is set
 		/// </summary>
 		BestFitMappingInited = 0x00002000,
 		BestFitMapping        = 0x00004000, // BestFitMappingAttribute.Value
@@ -53,7 +57,7 @@ namespace RazorSharp.CoreClr.Enums.EEClass
 		ContainsStackPtr = 0x00100000,
 
 		/// <summary>
-		/// Would like to have 8-byte alignment
+		///     Would like to have 8-byte alignment
 		/// </summary>
 		PreferAlign8 = 0x00200000,
 		// unused                              = 0x00400000,

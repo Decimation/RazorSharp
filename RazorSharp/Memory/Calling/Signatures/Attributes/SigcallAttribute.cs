@@ -16,28 +16,13 @@ namespace RazorSharp.Memory.Calling.Signatures.Attributes
 	///     <para>
 	///         The annotated method's entry point (<see cref="MethodDesc.Function" />)
 	///         will be set (<see cref="Functions.SetStableEntryPoint" />) to the address of the matched signature found by
-	///         <see cref="SigScanner" />.
+	///         <see cref="MemScanner" />.
 	///     </para>
 	///     <para>This allows the calling of non-exported DLL functions, so long as the function signature matches.</para>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method)]
 	public class SigcallAttribute : Attribute
 	{
-		/// <summary>
-		///     Module (DLL) containing <see cref="Signature" />
-		/// </summary>
-		public string Module { get; set; }
-
-		/// <summary>
-		///     Relative to the module's <see cref="SigScanner.BaseAddress" />
-		/// </summary>
-		public long OffsetGuess { get; set; }
-
-		/// <summary>
-		///     Unique byte-sequence-string signature of the function
-		/// </summary>
-		public string Signature { get; set; }
-
 		public SigcallAttribute() { }
 
 		public SigcallAttribute(string module, string signature)
@@ -45,5 +30,20 @@ namespace RazorSharp.Memory.Calling.Signatures.Attributes
 			Module    = module;
 			Signature = signature;
 		}
+
+		/// <summary>
+		///     Module (DLL) containing <see cref="Signature" />
+		/// </summary>
+		public string Module { get; set; }
+
+		/// <summary>
+		///     Relative to the module's <see cref="MemScanner.m_lo" />
+		/// </summary>
+		public long OffsetGuess { get; set; }
+
+		/// <summary>
+		///     Unique byte-sequence-string signature of the function
+		/// </summary>
+		public string Signature { get; set; }
 	}
 }

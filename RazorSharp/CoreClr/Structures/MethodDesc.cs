@@ -17,6 +17,9 @@ using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;
+// ReSharper disable NonReadonlyMemberInGetHashCode
+
+// ReSharper disable FieldCanBeMadeReadOnly.Local
 
 // ReSharper disable MemberCanBeMadeStatic.Local
 // ReSharper disable InconsistentNaming
@@ -62,10 +65,9 @@ namespace RazorSharp.CoreClr.Structures
 	///         This should only be accessed via <see cref="Pointer{T}" />
 	///     </remarks>
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct MethodDesc
 	{
-		// method.hpp: 213
 		private const int ALIGNMENT_SHIFT = 3;
 		private const int ALIGNMENT       = 1 << ALIGNMENT_SHIFT;
 		private const int ALIGNMENT_MASK  = ALIGNMENT - 1;
@@ -77,25 +79,20 @@ namespace RazorSharp.CoreClr.Structures
 
 		#region Fields
 
-		[FieldOffset(0)]
-		private readonly ushort m_wFlags3AndTokenRemainder;
+		private ushort m_wFlags3AndTokenRemainder;
 
-		[FieldOffset(2)]
-		private readonly byte m_chunkIndex;
+		private byte m_chunkIndex;
 
-		[FieldOffset(3)]
-		private readonly byte m_bFlags2;
+		private byte m_bFlags2;
 
-		[FieldOffset(4)]
-		private readonly ushort m_wSlotNumber;
+		private ushort m_wSlotNumber;
 
-		[FieldOffset(6)]
-		private readonly ushort m_wFlags;
+		private ushort m_wFlags;
 
 		/// <summary>
-		///     Valid only if the function is non-virtual and non-abstract (<see cref="SizeOf" /> <c>== 16</c>)
+		///     Valid only if the function is non-virtual and
+		///     non-abstract (<see cref="SizeOf" /> <c>== 16</c>)
 		/// </summary>
-		[FieldOffset(8)]
 		private void* m_pFunction;
 
 		#endregion
@@ -255,13 +252,6 @@ namespace RazorSharp.CoreClr.Structures
 
 		#region Methods
 
-		internal void Compare(MethodInfo info)
-		{
-			Conditions.Assert(Token == info.MetadataToken);
-			Conditions.Assert(Name == info.Name);
-			Conditions.Assert(Info == info);
-		}
-
 		#region Equality
 
 		public bool Equals(MethodDesc md)
@@ -339,8 +329,6 @@ namespace RazorSharp.CoreClr.Structures
 			throw new NativeCallException();
 		}
 
-		
-
 
 		internal TDelegate GetDelegate<TDelegate>() where TDelegate : Delegate
 		{
@@ -358,40 +346,30 @@ namespace RazorSharp.CoreClr.Structures
 		public override string ToString()
 		{
 			var table = new ConsoleTable("Field", "Value");
+
 			table.AddRow("Name", Name);
-			table.AddRow("Enclosing type", EnclosingType.Name);
 			table.AddRow("MethodTable", Hex.ToHex(EnclosingMethodTable.Address));
 			table.AddRow("Token", Token);
-			table.AddRow("Signature", Info);
-
 			table.AddRow("Function", Hex.ToHex(Function));
-			table.AddRow("Non-MI Function", Hex.ToHex(m_pFunction));
 			table.AddRow("Native code", Hex.ToHex(NativeCode));
-			if (HasILHeader) table.AddRow("IL code", Hex.ToHex(GetILHeader().Reference.Code.Address));
 
-//			table.AddRow("Chunk index", m_chunkIndex);
-//			table.AddRow("Slot number", m_wSlotNumber);
+			if (HasILHeader)
+				table.AddRow("IL code", Hex.ToHex(GetILHeader().Reference.Code.Address));
+
 			table.AddRow("Attributes", Attributes);
-
-			table.AddRow("Is pointing to native code", IsPointingToNativeCode.Prettify());
-			table.AddRow("Is constructor", IsConstructor.Prettify());
-			table.AddRow("Has this", HasThis.Prettify());
-			table.AddRow("Is IL", IsIL.Prettify());
-			table.AddRow("MethodDescChunk", MethodDescChunk.ToString("P"));
-
-
 			table.AddRow("Classification", Classification.JoinFlags());
+
 			table.AddRow("Flags", EnumUtil.CreateFlagsString(m_wFlags, Flags));
 			table.AddRow("Flags 2", EnumUtil.CreateFlagsString(m_bFlags2, Flags2));
 			table.AddRow("Flags 3", EnumUtil.CreateFlagsString(m_wFlags3AndTokenRemainder, Flags3));
-			table.AddRow("SizeOf", SizeOf);
 
+			table.AddRow("SizeOf", SizeOf);
 
 			return table.ToMarkDownString();
 		}
 
 		#endregion
-		
+
 		/*public static void InjectJmp(Pointer<byte> addr, MethodInfo methodInfo)
 		{
 			var mm = new MetaMethod(methodInfo.GetMethodDesc());

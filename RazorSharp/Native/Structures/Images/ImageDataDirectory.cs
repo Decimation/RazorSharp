@@ -2,6 +2,9 @@
 
 using System.Runtime.InteropServices;
 
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+
 #endregion
 
 namespace RazorSharp.Native.Structures.Images
@@ -10,9 +13,9 @@ namespace RazorSharp.Native.Structures.Images
 	public struct ImageDataDirectory
 	{
 		/// DWORD->unsigned int
-		public readonly uint VirtualAddress;
+		public uint VirtualAddress;
 
 		/// DWORD->unsigned int
-		public readonly uint Size;
+		public uint Size;
 	}
 }

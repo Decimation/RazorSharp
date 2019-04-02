@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Diagnostics;
 using RazorSharp.Native;
@@ -5,27 +7,50 @@ using RazorSharp.Native.Structures;
 using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
 
+#endregion
+
 namespace RazorSharp.Memory
 {
 	/// <summary>
-	/// Represents a region in memory.
+	///     Represents a region in memory.
 	/// </summary>
 	public class Region
 	{
-		public long Size {
-			get { return Math.Abs((long) (HighAddress - LowAddress)); }
-		}
+		public long Size => Math.Abs((long) (HighAddress - LowAddress));
 
-		public byte[] Memory {
-			get { return Kernel32.ReadCurrentProcessMemory(LowAddress, (int) Size); }
-		}
+		public byte[] Memory => Kernel32.ReadCurrentProcessMemory(LowAddress, (int) Size);
 
 		/// <summary>
-		/// Base address
+		///     Base address
 		/// </summary>
 		public Pointer<byte> LowAddress { get; }
 
 		public Pointer<byte> HighAddress { get; }
+
+		public static Region FromModule(ProcessModule module)
+		{
+			var lo   = module.BaseAddress;
+			int size = module.ModuleMemorySize;
+
+			return new Region(lo, size);
+		}
+
+		public static Region FromSegment(ImageSectionInfo img)
+		{
+			Pointer<byte> lo = img.SectionAddress;
+			Pointer<byte> hi = img.EndAddress;
+
+			// region.Size seems to be 1 less than img.SectionSize
+			return new Region(lo, hi);
+		}
+
+		public static Region FromPage(MemoryBasicInformation memInfo)
+		{
+			var  lo   = memInfo.BaseAddress;
+			long size = (long) memInfo.RegionSize;
+
+			return new Region(lo, size);
+		}
 
 		#region Constructors
 
@@ -38,34 +63,9 @@ namespace RazorSharp.Memory
 		public Region(Pointer<byte> lo, long size)
 		{
 			LowAddress  = lo;
-			HighAddress = (lo + size);
+			HighAddress = lo + size;
 		}
 
 		#endregion
-
-		public static Region FromModule(ProcessModule module)
-		{
-			var lo   = module.BaseAddress;
-			var size = module.ModuleMemorySize;
-
-			return new Region(lo, size);
-		}
-
-		public static Region FromSegment(ImageSectionInfo img)
-		{
-			var lo = img.SectionAddress;
-			var hi = img.EndAddress;
-
-			// region.Size seems to be 1 less than img.SectionSize
-			return new Region(lo, hi);
-		}
-
-		public static Region FromPage(MemoryBasicInformation memInfo)
-		{
-			var lo   = memInfo.BaseAddress;
-			var size = (long) memInfo.RegionSize;
-
-			return new Region(lo, size);
-		}
 	}
 }

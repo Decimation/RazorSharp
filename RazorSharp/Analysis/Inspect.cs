@@ -20,36 +20,30 @@ namespace RazorSharp.Analysis
 	public static class Inspect
 	{
 		private const string JOIN_BAR = " | ";
-		
+
 		/// <summary>
 		///     Whether to interpret the <see cref="MethodTable" />, <see cref="ObjHeader" />, and other internal
 		///     data structures as the TAs parameters.
 		/// </summary>
 		public static bool InterpretInternal { get; set; } = false;
 
-		// todo
-		public static bool SmartInterpret { get; set; }
-		
-		// todo
-		public static bool ExtensiveLayout { get; set; }
-
-		// layoutString
+		#region Layout
 
 		public static void Layout<T>(T t) where T : class
 		{
-			Console.WriteLine(LayoutString<T>(t));
+			Console.WriteLine(LayoutString(t));
 		}
 
 		public static void Layout<T>(ref T t)
 		{
-			Console.WriteLine(LayoutString<T>(ref t));
+			Console.WriteLine(LayoutString(ref t));
 		}
 
 		public static void Layout<T>()
 		{
 			Console.WriteLine(LayoutString<T>());
 		}
-		
+
 		public static string LayoutString<T>(T t) where T : class
 		{
 			throw new NotImplementedException();
@@ -62,12 +56,12 @@ namespace RazorSharp.Analysis
 
 		public static string LayoutString<T>(ref T t)
 		{
-			var table = LayoutTable<T>();
-			var type  = typeof(T).GetMetaType();
-			var fields = type.InstanceFields.ToArray();
-			int lim       = fields.Length;
-			var addresses = new object[lim];
-			var values    = new object[lim];
+			var         table     = LayoutTable<T>();
+			var         type      = typeof(T).GetMetaType();
+			MetaField[] fields    = type.InstanceFields.ToArray();
+			int         lim       = fields.Length;
+			var         addresses = new object[lim];
+			var         values    = new object[lim];
 
 			Conditions.Assert(lim == type.NumInstanceFields);
 
@@ -86,9 +80,9 @@ namespace RazorSharp.Analysis
 
 		private static ConsoleTable LayoutTable<T>()
 		{
-			var type   = typeof(T).GetMetaType();
-			var fields = type.InstanceFields.ToArray();
-			var table  = new ConsoleTable("Offset", "Size", "Type", "Name");
+			var         type   = typeof(T).GetMetaType();
+			MetaField[] fields = type.InstanceFields.ToArray();
+			var         table  = new ConsoleTable("Offset", "Size", "Type", "Name");
 
 			foreach (var field in fields) {
 				table.AddRow(field.Offset,
@@ -99,6 +93,10 @@ namespace RazorSharp.Analysis
 
 			return table;
 		}
+
+		#endregion
+
+		#region Stack
 
 		public static void Stack<T>(ref T t, ToStringOptions options = Hex.DEFAULT)
 		{
@@ -123,84 +121,9 @@ namespace RazorSharp.Analysis
 			return sb.ToString();
 		}
 
-		private static ConsoleTable StackHeapTypeTable<T>(ref T t, ToStringOptions options)
-		{
-			var type = typeof(T).GetMetaType();
-			Conditions.RequiresClassType<T>();
-			Pointer<T> addr = Unsafe.AddressOf(ref t);
-			var row = new List<object>
-			{
-				CreateRowEntry<byte>(addr.CopyOutBytes(IntPtr.Size), options)
-			};
-			var table = new ConsoleTable(String.Format("Pointer to {0}", type.Name));
-			table.AddRow(row.ToArray());
-			return table;
-		}
+		#endregion
 
-		private static ConsoleTable StackValueTypeTable<T>(ref T t, ToStringOptions options)
-		{
-			var type = typeof(T).GetMetaType();
-			Conditions.RequiresValueType<T>();
-			List<MetaField> fields     = type.Fields.Where(x => !x.IsStatic).ToList();
-			List<string>    fieldNames = fields.Select(x => x.Name).ToList();
-			var             table      = new ConsoleTable(fieldNames.ToArray());
-			Pointer<T>      addr       = Unsafe.AddressOf(ref t);
-			var             row        = new List<object>();
-
-
-			foreach (var f in fields) {
-				Pointer<byte> rowPtr = f.GetAddress(ref t);
-				int           size   = f.Size;
-				addr += size;
-				row.Add(CreateRowEntry<byte>(rowPtr.CopyOut(size), options));
-			}
-
-			table.AddRow(row.ToArray());
-			return table;
-		}
-
-		public static void Heap<T, TAs>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
-		{
-			Console.WriteLine(HeapString<T, TAs>(t, options));
-		}
-
-		public static void Heap<T>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
-		{
-			Console.WriteLine(HeapString(t, options));
-		}
-
-		
-		
-		private static string CreateInternalRowEntry(byte[] mem, ToStringOptions options)
-		{
-			return InterpretInternal
-				? CreateRowEntry<byte>(mem, options)
-				: mem.AutoJoin(JOIN_BAR, options);
-		}
-		
-		
-
-		private static string CreateRowEntry<TAs>(byte[] mem, ToStringOptions options)
-		{
-			switch (options) {
-				case ToStringOptions.None:
-					break;
-				case ToStringOptions.Hex:
-					break;
-				case ToStringOptions.ZeroPadHex:
-					break;
-				case ToStringOptions.PrefixHex:
-					break;
-			}
-
-			// Byte is default for TAs
-			if (typeof(TAs) != typeof(byte)) {
-				return Conversions.ConvertArray<TAs>(mem).AutoJoin(JOIN_BAR, options);
-			}
-
-			
-			return mem.AutoJoin(JOIN_BAR, options);
-		}
+		#region Heap
 
 		public static string HeapString<T, TAs>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
 		{
@@ -282,6 +205,83 @@ namespace RazorSharp.Analysis
 		public static string HeapString<T>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
 		{
 			return HeapString<T, byte>(t, options);
+		}
+
+		public static void Heap<T, TAs>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
+		{
+			Console.WriteLine(HeapString<T, TAs>(t, options));
+		}
+
+		public static void Heap<T>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
+		{
+			Console.WriteLine(HeapString(t, options));
+		}
+
+		#endregion
+
+		private static ConsoleTable StackHeapTypeTable<T>(ref T t, ToStringOptions options)
+		{
+			var type = typeof(T).GetMetaType();
+			Conditions.RequiresClassType<T>();
+			Pointer<T> addr = Unsafe.AddressOf(ref t);
+			var row = new List<object>
+			{
+				CreateRowEntry<byte>(addr.CopyOutBytes(IntPtr.Size), options)
+			};
+			var table = new ConsoleTable(String.Format("Pointer to {0}", type.Name));
+			table.AddRow(row.ToArray());
+			return table;
+		}
+
+		private static ConsoleTable StackValueTypeTable<T>(ref T t, ToStringOptions options)
+		{
+			var type = typeof(T).GetMetaType();
+			Conditions.RequiresValueType<T>();
+			List<MetaField> fields     = type.Fields.Where(x => !x.IsStatic).ToList();
+			List<string>    fieldNames = fields.Select(x => x.Name).ToList();
+			var             table      = new ConsoleTable(fieldNames.ToArray());
+			Pointer<T>      addr       = Unsafe.AddressOf(ref t);
+			var             row        = new List<object>();
+
+
+			foreach (var f in fields) {
+				Pointer<byte> rowPtr = f.GetAddress(ref t);
+				int           size   = f.Size;
+				addr += size;
+				row.Add(CreateRowEntry<byte>(rowPtr.CopyOut(size), options));
+			}
+
+			table.AddRow(row.ToArray());
+			return table;
+		}
+
+		private static string CreateInternalRowEntry(byte[] mem, ToStringOptions options)
+		{
+			return InterpretInternal
+				? CreateRowEntry<byte>(mem, options)
+				: mem.AutoJoin(JOIN_BAR, options);
+		}
+
+		private static string CreateRowEntry<TAs>(byte[] mem, ToStringOptions options)
+		{
+			switch (options) {
+				case ToStringOptions.None:
+					break;
+				case ToStringOptions.Hex:
+					break;
+				case ToStringOptions.ZeroPadHex:
+					break;
+				case ToStringOptions.PrefixHex:
+					break;
+			}
+
+			// Byte is default for TAs
+			if (typeof(TAs) != typeof(byte)) {
+				return Conversions.ConvertArray<TAs>(mem).AutoJoin(JOIN_BAR, options);
+			}
+
+
+			return mem.AutoJoin(JOIN_BAR, options);
 		}
 	}
 }

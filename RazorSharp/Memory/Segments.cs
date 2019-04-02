@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
-using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp.Native;
@@ -60,7 +59,7 @@ namespace RazorSharp.Memory
 			foreach (var s in sections)
 				if (Mem.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address))
 					return s;
-			
+
 			return default;
 		}
 

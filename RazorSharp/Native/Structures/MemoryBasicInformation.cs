@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
 using RazorSharp.Native.Enums;
+
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
 

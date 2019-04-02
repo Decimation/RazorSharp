@@ -1,5 +1,9 @@
+#region
+
 using System.Runtime.InteropServices;
 using RazorSharp.Native.Enums.ThreadContext;
+
+#endregion
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -7,7 +11,7 @@ using RazorSharp.Native.Enums.ThreadContext;
 namespace RazorSharp.Native.Structures.ThreadContext
 {
 	/// <summary>
-	/// x64
+	///     x64
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential, Pack = 16)]
 	public struct Context64

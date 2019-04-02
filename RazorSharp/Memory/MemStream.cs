@@ -1,4 +1,8 @@
+#region
+
 using RazorSharp.Pointers;
+
+#endregion
 
 namespace RazorSharp.Memory
 {

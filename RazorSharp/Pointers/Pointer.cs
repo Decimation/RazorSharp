@@ -18,8 +18,8 @@ using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr;
-using RazorSharp.CoreClr.Fixed;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Fixed;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;
 using RazorSharp.Native.Structures;
@@ -99,7 +99,7 @@ namespace RazorSharp.Pointers
 		///     Returns the value as a reference.
 		/// </summary>
 		public ref T Reference => ref AsRef();
-		
+
 		/// <summary>
 		///     Dereferences the pointer as the specified type.
 		/// </summary>
@@ -107,7 +107,7 @@ namespace RazorSharp.Pointers
 			get => Read();
 			set => Write(value);
 		}
-		
+
 		/// <summary>
 		///     Address being pointed to.
 		/// </summary>
@@ -435,7 +435,7 @@ namespace RazorSharp.Pointers
 		#region String
 
 		/// <summary>
-		/// Writes a native string type
+		///     Writes a native string type
 		/// </summary>
 		public void WriteString(string s, StringTypes type)
 		{
@@ -455,7 +455,7 @@ namespace RazorSharp.Pointers
 			WriteAny<byte>(0, bytes.Length + 1);
 		}
 
-		
+
 		// todo: WIP
 		public bool IsReadable()
 		{
@@ -463,23 +463,18 @@ namespace RazorSharp.Pointers
 				return false;
 			}
 
-			var mem = Query();
+			var mem  = Query();
 			var prot = mem.Protect;
 
-			if (prot.HasFlag(MemoryProtection.ReadOnly)) {
-				
-			}
+			if (prot.HasFlag(MemoryProtection.ReadOnly)) { }
 
-			if ((prot & MemoryProtection.ReadWrite) != 0) {
-				
-			}
-			
-			
+			if ((prot & MemoryProtection.ReadWrite) != 0) { }
+
 
 			throw new Exception();
 		}
 
-		
+
 		// todo: WIP
 		public object ReadNative(UnmanagedType type, params object[] args)
 		{
@@ -565,12 +560,12 @@ namespace RazorSharp.Pointers
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type), type, null);
 			}
-			
+
 			throw new Exception();
 		}
-		
+
 		/// <summary>
-		/// Reads a native string type
+		///     Reads a native string type
 		/// </summary>
 		[Pure]
 		public string ReadString(StringTypes s)
@@ -587,7 +582,7 @@ namespace RazorSharp.Pointers
 
 		public string ReadString(int len)
 		{
-			var chars = CopyOutAny<char>(len);
+			char[] chars = CopyOutAny<char>(len);
 			return new string(chars);
 		}
 
@@ -716,7 +711,7 @@ namespace RazorSharp.Pointers
 
 		public object ReadAnyEx(Type t, int elemOffset = 0)
 		{
-			return InvokeGenericMethod(nameof(ReadAny), t, args: elemOffset);
+			return InvokeGenericMethod(nameof(ReadAny), t, elemOffset);
 		}
 
 		public void WriteAny<TType>(TType t, int elemOffset = 0)
@@ -876,7 +871,7 @@ namespace RazorSharp.Pointers
 
 		/// <summary>
 		///     Creates a new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" />, pointing to
-		/// <see cref="Address" />
+		///     <see cref="Address" />
 		/// </summary>
 		/// <typeparam name="TNew">Type to point to</typeparam>
 		/// <returns>A new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" /></returns>
@@ -963,8 +958,6 @@ namespace RazorSharp.Pointers
 
 		#region Implicit and explicit conversions
 
-		
-		
 		public static implicit operator Pointer<T>(Pointer<byte> v)
 		{
 			return v.Address;
@@ -1009,7 +1002,7 @@ namespace RazorSharp.Pointers
 		{
 			return ptr.ToUInt64();
 		}
-		
+
 		#endregion
 
 
@@ -1024,7 +1017,7 @@ namespace RazorSharp.Pointers
 		{
 			return OffsetIndex<T>(current);
 		}
-		
+
 		/// <summary>
 		///     Returns the element index of a pointer relative to <see cref="Address" />
 		/// </summary>
@@ -1050,13 +1043,13 @@ namespace RazorSharp.Pointers
 		/// <typeparam name="TType">Element type</typeparam>
 		/// <returns>
 		///     <see cref="Address" /> <c>+</c> <c>(</c><paramref name="elemCnt" /> <c>*</c>
-		/// <see cref="Unsafe.SizeOf{T}" /><c>)</c>
+		///     <see cref="Unsafe.SizeOf{T}" /><c>)</c>
 		/// </returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private IntPtr Offset<TType>(int elemCnt)
 		{
 //			return PointerUtil.Offset<TType>(m_value, elemCnt);
-			
+
 			int size = Unsafe.SizeOf<TType>();
 			size *= elemCnt;
 			return Address + size;
@@ -1074,7 +1067,7 @@ namespace RazorSharp.Pointers
 		{
 //			m_value = PointerUtil.Add(m_value, bytes).ToPointer();
 //			return this;
-			
+
 			long val = ToInt64() + right;
 			this = val;
 			return this;
@@ -1376,8 +1369,8 @@ namespace RazorSharp.Pointers
 
 
 			if (!typeof(T).IsValueType) {
-				var    heapPtr = ReadPointer<byte>();
-				string valueStr;
+				Pointer<byte> heapPtr = ReadPointer<byte>();
+				string        valueStr;
 
 				if (heapPtr.IsNull) {
 					valueStr = StringConstants.NULL_STR;
@@ -1413,11 +1406,11 @@ namespace RazorSharp.Pointers
 
 		#region Constants
 
-		private const string FMT_O   = "O";
-		private const string FMT_P   = "P";
-		private const string FMT_I   = "I";
-		private const string FMT_B   = "B";
-		private const string FMT_N   = "N";
+		private const string FMT_O = "O";
+		private const string FMT_P = "P";
+		private const string FMT_I = "I";
+		private const string FMT_B = "B";
+		private const string FMT_N = "N";
 
 		#endregion
 

@@ -9,15 +9,36 @@ using RazorSharp.Pointers;
 
 namespace RazorSharp.Memory
 {
+	/// <summary>
+	///     A basic sig scanner.
+	/// </summary>
 	public class MemScanner
 	{
-		private readonly Pointer<byte> m_lo;
-		private readonly byte[]        m_buffer;
+		private byte[]        m_buffer;
+		private Pointer<byte> m_lo;
 
 		public MemScanner(Region region)
 		{
+			SelectRegion(region);
+		}
+
+		public MemScanner()
+		{
+			m_lo     = null;
+			m_buffer = null;
+		}
+
+		private void EnsureSetup()
+		{
+			if (m_lo.IsNull || m_buffer == null) {
+				throw new Exception("A memory region must be specified.");
+			}
+		}
+
+		public void SelectRegion(Region region)
+		{
 			m_buffer = region.Memory;
-			m_lo   = region.LowAddress;
+			m_lo     = region.LowAddress;
 		}
 
 		private bool PatternCheck(int nOffset, IReadOnlyList<byte> arrPattern)
@@ -34,10 +55,15 @@ namespace RazorSharp.Memory
 			return true;
 		}
 
-		public Pointer<byte> FindPattern(string szPattern) => FindPattern(StringUtil.ParseByteArray(szPattern));
-		
+		public Pointer<byte> FindPattern(string szPattern)
+		{
+			return FindPattern(StringUtil.ParseByteArray(szPattern));
+		}
+
 		public Pointer<byte> FindPattern(byte[] rgPattern)
 		{
+			EnsureSetup();
+
 			for (int nModuleIndex = 0; nModuleIndex < m_buffer.Length; nModuleIndex++) {
 				if (m_buffer[nModuleIndex] != rgPattern[0])
 					continue;

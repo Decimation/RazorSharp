@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using RazorSharp.CoreClr;
 using RazorSharp.Pointers;
 
 #endregion
@@ -9,22 +10,22 @@ using RazorSharp.Pointers;
 namespace RazorSharp.Memory
 {
 	/// <summary>
-	/// Provides utilities for working with <see cref="ProcessModule"/>s
+	///     Provides utilities for working with <see cref="ProcessModule" />s
 	/// </summary>
 	internal static class Modules
 	{
-
 		/// <summary>
-		/// The <see cref="ProcessModuleCollection"/> of the current <see cref="Process"/>
+		///     The <see cref="ProcessModuleCollection" /> of the current <see cref="Process" />
 		/// </summary>
-		private static ProcessModuleCollection ProcessModules {
-			get {
-				return Process.GetCurrentProcess().Modules;
-			}
-		}
+		private static ProcessModuleCollection ProcessModules => Process.GetCurrentProcess().Modules;
 
 		internal static ProcessModule GetModule(string name)
 		{
+			// todo: I shouldn't have to do this
+			if (name == Clr.CLR_DLL_SHORT) {
+				return Clr.ClrModule;
+			}
+
 			foreach (ProcessModule m in ProcessModules)
 				if (m.ModuleName == name)
 					return m;
@@ -32,7 +33,6 @@ namespace RazorSharp.Memory
 			return null;
 		}
 
-		
 
 		internal static Pointer<byte> GetBaseAddress(string module)
 		{
@@ -40,18 +40,24 @@ namespace RazorSharp.Memory
 			Pointer<byte> ptr = pm.BaseAddress;
 			return ptr;
 		}
-		
+
 		internal static IEnumerable<Pointer<byte>> GetAddresses(string module, long[] offset)
 		{
-			var ptr = GetBaseAddress(module);
+			Pointer<byte> ptr = GetBaseAddress(module);
 			foreach (long ofs in offset) {
 				yield return ptr + ofs;
 			}
 		}
-		
+
 		internal static Pointer<byte> GetAddress(string module, long offset)
 		{
-			var ptr = GetBaseAddress(module);
+			Pointer<byte> ptr = GetBaseAddress(module);
+			return ptr + offset;
+		}
+
+		internal static Pointer<byte> GetAddress(ProcessModule module, long offset)
+		{
+			Pointer<byte> ptr = module.BaseAddress;
 			return ptr + offset;
 		}
 

@@ -74,12 +74,12 @@ namespace RazorSharp.CoreClr.Structures.EE
 		#region Union
 
 		/// <summary>
-		/// <para>Union</para>
-		/// <para>void* <see cref="m_ohDelegate"/></para>
-		/// <para>uint <see cref="m_cbNativeSize"/></para>
-		/// <para>int <see cref="m_ComInterfaceType"/></para>
+		///     <para>Union</para>
+		///     <para>void* <see cref="m_ohDelegate" /></para>
+		///     <para>uint <see cref="m_cbNativeSize" /></para>
+		///     <para>int <see cref="m_ComInterfaceType" /></para>
 		/// </summary>
-		private readonly void* m_ohDelegate;
+		private void* m_ohDelegate;
 
 		private uint m_cbNativeSize {
 			get {
@@ -101,7 +101,6 @@ namespace RazorSharp.CoreClr.Structures.EE
 
 		#endregion
 
-		
 
 		private void* m_pccwTemplate;
 
@@ -122,7 +121,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		#region Accessors
 
 		public int ComInterfaceType => m_ComInterfaceType;
-		
+
 		/// <summary>
 		///     Count of bytes of normal fields of this instance (<see cref="EEClass" />,
 		///     <see cref="LayoutEEClass" /> etc.). Doesn't count bytes of "packed" fields

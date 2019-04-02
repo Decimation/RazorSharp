@@ -1,5 +1,9 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
+
+#endregion
 
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable MemberCanBePrivate.Global
@@ -7,9 +11,13 @@ using System.Runtime.InteropServices;
 
 namespace RazorSharp.Native.Structures.Symbols
 {
+	#region
+
 	using ULONG = UInt32;
 	using ULONG64 = UInt64;
 	using CHAR = SByte;
+
+	#endregion
 
 
 	[StructLayout(LayoutKind.Sequential)]

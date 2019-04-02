@@ -1,4 +1,8 @@
+#region
+
 using System.Runtime.CompilerServices;
+
+#endregion
 
 namespace RazorSharp.Memory
 {
@@ -23,17 +27,17 @@ namespace RazorSharp.Memory
 
 		private static int GetMask(int index, int size)
 		{
-			return (((1 << (size)) - 1) << (index));
+			return ((1 << size) - 1) << index;
 		}
 
 		public static int ReadFrom(int data, int index, int size)
 		{
-			return (((data) & GetMask((index), (size))) >> (index));
+			return (data & GetMask(index, size)) >> index;
 		}
 
 		public static int WriteTo(int data, int index, int size, int value)
 		{
-			return (((data) & (~GetMask((index), (size)))) | ((value) << (index)));
+			return (data & ~GetMask(index, size)) | (value << index);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
-using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Enums;
 using RazorSharp.CoreClr.Enums.FieldDesc;
 using RazorSharp.CoreClr.Enums.MethodDesc;
@@ -16,6 +15,8 @@ using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;
+
+// ReSharper disable FieldCanBeMadeReadOnly.Local
 
 // ReSharper disable MemberCanBeMadeStatic.Local
 // ReSharper disable InconsistentNaming
@@ -50,7 +51,7 @@ namespace RazorSharp.CoreClr.Structures
 	///         This should only be accessed via <see cref="Pointer{T}" />
 	///     </remarks>
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct FieldDesc
 	{
 		static FieldDesc()
@@ -58,29 +59,32 @@ namespace RazorSharp.CoreClr.Structures
 			Symcall.BindQuick(typeof(FieldDesc));
 		}
 
-		private const int FieldOffsetMax    = (1 << 27) - 1;
-		private const int FieldOffsetNewEnC = FieldOffsetMax - 4;
+		private const int FIELD_OFFSET_MAX = (1 << 27) - 1;
 
+		private const int FIELD_OFFSET_NEW_ENC = FIELD_OFFSET_MAX - 4;
+
+		private const int DW2_OFFSET_BITS = 27;
 
 		#region Fields
 
-		[FieldOffset(0)]
-		private readonly MethodTable* m_pMTOfEnclosingClass;
+		private MethodTable* m_pMTOfEnclosingClass;
 
 
-		// unsigned m_mb                  	: 24;
-		// unsigned m_isStatic            	: 1;
-		// unsigned m_isThreadLocal       	: 1;
-		// unsigned m_isRVA               	: 1;
-		// unsigned m_prot                	: 3;
-		// unsigned m_requiresFullMbValue 	: 1;
-		[FieldOffset(Offsets.PTR_SIZE)]
-		private readonly uint m_dword1;
+		/// <summary>
+		///     <para>unsigned m_mb : 24;</para>
+		///     <para>unsigned m_isStatic : 1;</para>
+		///     <para>unsigned m_isThreadLocal : 1;</para>
+		///     <para>unsigned m_isRVA : 1;</para>
+		///     <para>unsigned m_prot : 3;</para>
+		///     <para>unsigned m_requiresFullMbValue : 1;</para>
+		/// </summary>
+		private uint m_dword1;
 
-		// unsigned m_dwOffset         		: 27;
-		// unsigned m_type             		: 5;
-		[FieldOffset(Offsets.PTR_SIZE + sizeof(uint))]
-		private /*readonly*/ uint m_dword2;
+		/// <summary>
+		///     <para>unsigned m_dwOffset : 27;</para>
+		///     <para>unsigned m_type : 5;</para>
+		/// </summary>
+		private uint m_dword2;
 
 		#endregion
 
@@ -92,23 +96,23 @@ namespace RazorSharp.CoreClr.Structures
 		///         Original name: MB
 		///     </remarks>
 		/// </summary>
-		private int OrigToken => (int) (m_dword1 & 0xFFFFFF);
+		private int RawToken => (int) (m_dword1 & 0xFFFFFF);
 
 		internal int Token {
 			get {
 				// Check if this FieldDesc is using the packed mb layout
 				if (!RequiresFullMBValue)
-					return Constants.TokenFromRid(OrigToken & (int) MbMask.PackedMbLayoutMbMask,
+					return Constants.TokenFromRid(RawToken & (int) MbMask.PackedMbLayoutMbMask,
 					                              CorTokenType.FieldDef);
 
-				return Constants.TokenFromRid(OrigToken, CorTokenType.FieldDef);
+				return Constants.TokenFromRid(RawToken, CorTokenType.FieldDef);
 			}
 		}
 
 
 		internal int Offset {
-			get { return (int) (m_dword2 & 0x7FFFFFF); }
-			set { m_dword2 = (uint)Bits.WriteTo((int)m_dword2, 0, Offsets.FIELDDESC_DW2_OFFSET_BITS, value); }
+			get => (int) (m_dword2 & 0x7FFFFFF);
+			set => m_dword2 = (uint) Bits.WriteTo((int) m_dword2, 0, DW2_OFFSET_BITS, value);
 		}
 
 		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
@@ -144,13 +148,13 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal bool IsRVA => Bits.ReadBit(m_dword1, 26);
 
-		internal bool IsFixedBuffer => Identifiers.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
+		internal bool IsFixedBuffer => Formatting.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
 
 		internal bool IsAutoProperty {
 			get {
-				string demangled = Identifiers.NameOfAutoProperty(Name);
-				if (demangled != null) 
-					return Identifiers.NameOfAutoPropertyBackingField(demangled) == Name;
+				string demangled = Formatting.NameOfAutoProperty(Name);
+				if (demangled != null)
+					return Formatting.NameOfAutoPropertyBackingField(demangled) == Name;
 
 				return false;
 			}
@@ -217,27 +221,26 @@ namespace RazorSharp.CoreClr.Structures
 		[ClrSymcall]
 		internal Pointer<byte> GetStaticAddress()
 		{
-			return null;
+			throw new NativeCallException(nameof(GetStaticAddress));
 		}
-		
+
 		[ClrSymcall]
 		internal Pointer<byte> GetStaticAddress(void* value)
 		{
-			return null;
+			throw new NativeCallException(nameof(GetStaticAddress));
 		}
-		
+
 		[ClrSymcall]
 		internal Pointer<byte> GetStaticAddressHandle()
 		{
-			return null;
+			throw new NativeCallException(nameof(GetStaticAddressHandle));
 		}
-		
-		public unsafe Pointer<byte> GetStaticAddressContext()
+
+		internal Pointer<byte> GetStaticAddressContext()
 		{
 			fixed (FieldDesc* value = &this) {
 				return ClrFunctions.JIT_GetStaticFieldAddr_Context(value);
 			}
-			
 		}
 
 		#endregion
@@ -270,11 +273,10 @@ namespace RazorSharp.CoreClr.Structures
 		{
 			Conditions.Assert(!IsStatic, "You cannot get the address of a static field (yet)");
 			Conditions.Assert(Runtime.ReadMethodTable(ref t) == EnclosingMethodTable);
-			Conditions.Assert(Offset != FieldOffsetNewEnC);
-
+			Conditions.Assert(Offset != FIELD_OFFSET_NEW_ENC);
 
 			var data = Unsafe.AddressOf(ref t).Address;
-			if (typeof(TInstance).IsValueType) 
+			if (typeof(TInstance).IsValueType)
 				return data + Offset;
 
 			data =  Marshal.ReadIntPtr(data);
@@ -289,30 +291,10 @@ namespace RazorSharp.CoreClr.Structures
 		{
 			var table = new ConsoleTable("Field", "Value");
 
-			// !NOTE NOTE NOTE!
-			// this->ToString() must be used to view this
-
 			table.AddRow("Name", Name);
-			table.AddRow("Enclosing MethodTable", Hex.ToHex(EnclosingMethodTable.ToPointer()));
-			table.AddRow("Enclosing type", EnclosingType.Name);
-
-
-			// Unsigned 1
-//			table.AddRow("MB", MB);
 			table.AddRow("Token", Token);
-
-
 			table.AddRow("Offset", Offset);
-			table.AddRow("CorType", CorType);
 			table.AddRow("Size", Size);
-
-			table.AddRow("Static", IsStatic.Prettify());
-			table.AddRow("ThreadLocal", IsThreadLocal.Prettify());
-			table.AddRow("RVA", IsRVA.Prettify());
-
-			table.AddRow("Protection", Protection);
-			table.AddRow("Requires full MB value", RequiresFullMBValue);
-
 			table.AddRow("Attributes", Info.Attributes);
 
 			return table.ToMarkDownString();

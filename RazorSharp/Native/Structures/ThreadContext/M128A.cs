@@ -1,5 +1,9 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
+
+#endregion
 
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable FieldCanBeMadeReadOnly.Global
@@ -14,7 +18,7 @@ namespace RazorSharp.Native.Structures.ThreadContext
 
 		public override string ToString()
 		{
-			return String.Format("High: {0}, Low: {1}", this.High, this.Low);
+			return String.Format("High: {0}, Low: {1}", High, Low);
 		}
 	}
 }

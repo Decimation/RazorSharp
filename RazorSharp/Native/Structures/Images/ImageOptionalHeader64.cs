@@ -2,6 +2,9 @@
 
 using System.Runtime.InteropServices;
 
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+
 #endregion
 
 namespace RazorSharp.Native.Structures.Images
@@ -97,6 +100,7 @@ namespace RazorSharp.Native.Structures.Images
 		public uint NumberOfRvaAndSizes;
 
 		/// IMAGE_DATA_DIRECTORY[16]
+		/// todo: use MarshalAs
 		public ImageDataDirectory DataDirectory_0;
 
 		public ImageDataDirectory DataDirectory_1;
