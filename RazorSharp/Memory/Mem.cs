@@ -149,7 +149,7 @@ namespace RazorSharp.Memory
 		/// <returns>A pointer to the allocated memory</returns>
 		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
 		{
-			Conditions.RequiresUnsigned(elemCnt, nameof(elemCnt));
+			Conditions.RequiresArg(elemCnt > 0, nameof(elemCnt));
 			int size  = Unsafe.SizeOf<T>() * elemCnt;
 			var alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
@@ -222,7 +222,7 @@ namespace RazorSharp.Memory
 		
 		public static Pointer<byte> AllocCode(string asm, bool isProcess32Bit = false)
 		{
-			var code = new Assembler().Assemble(asm,isProcess32Bit);
+			var code = Assembler.Assemble(asm,isProcess32Bit);
 			return AllocCode(code);
 		}
 		

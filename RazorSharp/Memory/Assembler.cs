@@ -3,32 +3,18 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
+using RazorCommon.Diagnostics;
 
 namespace RazorSharp.Memory
 {
 	/// <summary>
-	/// The Nasm assembler for x86/64.
+	/// <para>The Nasm assembler for x86/64.</para>
+	///
+	/// <para>This code is from Squalr</para>
 	/// </summary>
-	internal class Assembler
+	public static class Assembler
 	{
-		/// <summary>
-		/// Assemble the specified assembly code.
-		/// </summary>
-		/// <param name="assembly">The assembly code.</param>
-		/// <param name="isProcess32Bit">Whether or not the assembly is in the context of a 32 bit program.</param>
-		/// <returns>An array of bytes containing the assembly code.</returns>
-		public byte[] Assemble(string assembly, bool isProcess32Bit)
-		{
-			// Assemble and return the code
-			return Assemble(assembly, isProcess32Bit, 0);
-		}
-
-		/// <summary>
-		/// The path to the nasm binary. This is searched for recursively and cached. This is done since NuGet can move the relative location of the file.
-		/// </summary>
-		private readonly Lazy<string> m_nasmPath = new Lazy<string>(() => @"C:\Lib\nasm.exe",
-		                                                            LazyThreadSafetyMode.ExecutionAndPublication
-		);
+		private const string NASM_EXEC = @"C:\Lib\nasm.exe";
 
 
 		/// <summary>
@@ -38,10 +24,12 @@ namespace RazorSharp.Memory
 		/// <param name="isProcess32Bit">Whether or not the assembly is in the context of a 32 bit program.</param>
 		/// <param name="baseAddress">The address where the code is rebased.</param>
 		/// <returns>An array of bytes containing the assembly code.</returns>
-		public byte[] Assemble(string assembly, bool isProcess32Bit, ulong baseAddress)
+		public static byte[] Assemble(string assembly, bool isProcess32Bit, ulong baseAddress = 0)
 		{
-			// Can't have PTR keyword
-			
+			Conditions.Requires(File.Exists(NASM_EXEC), "Could not find nasm.exe");
+
+			// Note: Can't have PTR keyword
+
 			string msg, innerMsg;
 			byte[] bytes = null;
 
@@ -57,15 +45,14 @@ namespace RazorSharp.Memory
 			assembly = preamble + assembly;
 
 			try {
-				string assemblyFilePath = Path.Combine(Path.GetTempPath(), "SqualrAssembly" + Guid.NewGuid() + ".asm");
-				string outputFilePath   = Path.Combine(Path.GetTempPath(), "SqualrAssembly" + Guid.NewGuid() + ".bin");
+				string assemblyFilePath = Path.Combine(Path.GetTempPath(), "Assembly" + Guid.NewGuid() + ".asm");
+				string outputFilePath   = Path.Combine(Path.GetTempPath(), "Assembly" + Guid.NewGuid() + ".bin");
 
 
 				File.WriteAllText(assemblyFilePath, assembly);
 
-				string exePath = m_nasmPath.Value;
 
-				var startInfo = new ProcessStartInfo(exePath)
+				var startInfo = new ProcessStartInfo(NASM_EXEC)
 				{
 					Arguments              = "-f bin -o " + Escape(outputFilePath) + " " + Escape(assemblyFilePath),
 					RedirectStandardError  = true,
@@ -99,8 +86,8 @@ namespace RazorSharp.Memory
 			}
 
 
-			Console.WriteLine(msg);
-			Console.WriteLine(Encoding.ASCII.GetString(Encoding.Unicode.GetBytes(innerMsg)));
+			
+			innerMsg = Encoding.ASCII.GetString(Encoding.Unicode.GetBytes(innerMsg));
 			return bytes;
 		}
 

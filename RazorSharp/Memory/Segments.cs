@@ -24,11 +24,6 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public static class Segments
 	{
-		static Segments()
-		{
-			Conditions.Requires64Bit();
-		}
-
 		internal const string TEXT_SEGMENT = ".text";
 
 		public static bool SegmentExists(string module, string segmentType)

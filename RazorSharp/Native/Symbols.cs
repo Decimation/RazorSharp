@@ -102,7 +102,7 @@ namespace RazorSharp.Native
 
 		private static void CheckOffset(long offset)
 		{
-			Conditions.Requires(offset != INVALID_OFFSET, "Offset is invalid");
+			Conditions.RequiresArg(offset != INVALID_OFFSET, nameof(offset));
 		}
 
 
@@ -255,7 +255,7 @@ namespace RazorSharp.Native
 			// symchk
 			string progFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
 			var    symChk    = new FileInfo(String.Format(@"{0}\Windows Kits\10\Debuggers\x64\symchk.exe", progFiles));
-			Conditions.RequiresFileExists(symChk);
+			Conditions.Requires(symChk.Exists);
 
 			string cmd = String.Format("\"{0}\" \"{1}\" /s SRV*{2}*http://msdl.microsoft.com/download/symbols",
 			                           symChk.FullName, dll.FullName, dest.FullName);
@@ -311,7 +311,7 @@ namespace RazorSharp.Native
 				throw new Exception(String.Format("Error downloading symbols. File: {0}", pdbStr));
 			}
 
-			Conditions.RequiresFileExists(pdb);
+			Conditions.Ensures(pdb.Exists);
 			return pdb;
 		}
 	}

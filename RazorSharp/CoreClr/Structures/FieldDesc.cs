@@ -170,7 +170,7 @@ namespace RazorSharp.CoreClr.Structures
 		internal int Size {
 			get {
 				int s = Constants.SizeOfCorElementType(CorType);
-				return s == -1 ? LoadSize : s;
+				return s == Constants.INVALID_VALUE ? LoadSize : s;
 			}
 		}
 
@@ -181,7 +181,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		private int LoadSize {
 			[ClrSymcall(Symbol = "FieldDesc::LoadSize", FullyQualified = true)]
-			get => throw new SigcallException(nameof(LoadSize));
+			get => throw new NativeCallException(nameof(LoadSize));
 		}
 
 		internal FieldInfo Info => EnclosingType.Module.ResolveField(Token);
@@ -211,7 +211,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
 			[ClrSymcall(Symbol = "FieldDesc::GetApproxEnclosingMethodTable", FullyQualified = true)]
-			get => throw new SigcallException();
+			get => throw new NativeCallException();
 		}
 
 		[ClrSymcall]

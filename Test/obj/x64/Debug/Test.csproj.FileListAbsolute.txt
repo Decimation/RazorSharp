@@ -74,7 +74,6 @@ C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\Test.pdb
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Runtime.CompilerServices.Unsafe.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\JetBrains.Annotations.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\Newtonsoft.Json.dll
-C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\nunit.framework.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\RazorSharp.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\Serilog.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\Serilog.Sinks.ColoredConsole.dll
@@ -89,8 +88,6 @@ C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\RazorSharp.dll.config
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\JetBrains.Annotations.xml
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\Newtonsoft.Json.pdb
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\Newtonsoft.Json.xml
-C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\nunit.framework.pdb
-C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\nunit.framework.xml
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\Serilog.pdb
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\Serilog.xml
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\Serilog.Sinks.Console.xml

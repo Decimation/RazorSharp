@@ -49,7 +49,6 @@ namespace RazorSharp.CoreClr.Structures
 			}
 		}
 
-
 		internal DWORD GetPackedField(DWORD dwFieldIndex)
 		{
 			DWORD dwOffset = 0;

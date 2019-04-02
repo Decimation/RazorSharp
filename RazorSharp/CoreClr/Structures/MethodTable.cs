@@ -74,6 +74,16 @@ namespace RazorSharp.CoreClr.Structures
 		{
 			Symcall.BindQuick(typeof(MethodTable));
 		}
+		
+		public bool Equals(MethodTable32 other)
+		{
+			return m_dwFlags.Equals(other.m_dwFlags) && m_BaseSize == other.m_BaseSize &&
+			       m_wFlags2 == other.m_wFlags2 && m_wToken == other.m_wToken &&
+			       m_wNumVirtuals == other.m_wNumVirtuals && m_wNumInterfaces == other.m_wNumInterfaces &&
+			       m_pParentMethodTable == other.m_pParentMethodTable && m_pLoaderModule == other.m_pLoaderModule &&
+			       m_pWriteableData == other.m_pWriteableData && m_pEEClass == other.m_pEEClass &&
+			       m_pPerInstInfo == other.m_pPerInstInfo && m_pInterfaceMap == other.m_pInterfaceMap;
+		}
 
 		#region Properties and Accessors
 
@@ -281,7 +291,7 @@ namespace RazorSharp.CoreClr.Structures
 		[ClrSymcall]
 		internal uint GetSignatureCorElementType()
 		{
-			throw new SigcallException();
+			throw new NativeCallException();
 		}
 
 		#endregion
@@ -317,7 +327,6 @@ namespace RazorSharp.CoreClr.Structures
 
 		private const int MISC2_UNION_OFFSET_32 = 36;
 		private const int MISC2_UNION_OFFSET_64 = 56;
-
 
 		[FieldOffset(16 + Offsets.PTR_SIZE)]
 		private readonly void* m_pLoaderModule;

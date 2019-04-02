@@ -38,7 +38,7 @@ namespace RazorSharp
 				case ConversionType.LIGHT:
 					return (TTo) System.Convert.ChangeType(t, typeof(TTo));
 				case ConversionType.AS:
-				//return CSUnsafe.As<TFrom, TTo>(ref t);
+					return CSUnsafe.As<TFrom, TTo>(ref t);
 				default:
 					return default;
 			}

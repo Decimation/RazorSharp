@@ -55,6 +55,9 @@ namespace RazorSharp.CoreClr
 		internal const string CLR_DLL_SHORT = "clr.dll";
 
 
+		/// <summary>
+		/// Retrieves resources
+		/// </summary>
 		static Clr()
 		{
 			ClrDll     = GetClrDll();
@@ -106,10 +109,11 @@ namespace RazorSharp.CoreClr
 		{
 			string clrPath = RuntimeEnvironment.GetRuntimeDirectory() + CLR_DLL_SHORT;
 			var    clr     = new FileInfo(clrPath);
-			Conditions.RequiresFileExists(clr);
+			Conditions.Requires(clr.Exists);
 			return clr;
 		}
 
+		
 		public static void Setup()
 		{
 			if (ClrPdb == null) {
@@ -117,7 +121,7 @@ namespace RazorSharp.CoreClr
 				IsPdbTemporary = true;
 			}
 			else {
-				Conditions.RequiresFileExists(ClrPdb);
+				Conditions.Requires(ClrPdb.Exists);
 				IsPdbTemporary = false;
 			}
 
@@ -150,9 +154,7 @@ namespace RazorSharp.CoreClr
 		
 		public static void Close()
 		{
-			if (!IsSetup) {
-				return;
-			}
+			Conditions.Requires(IsSetup);
 
 			// This won't delete the symbol file if it wasn't manually downloaded
 			// but we'll make sure anyway
@@ -160,7 +162,6 @@ namespace RazorSharp.CoreClr
 				DeleteSymbolFile(ClrPdb);
 
 			IsSetup = false;
-			
 		}
 
 		internal static Pointer<byte> GetClrFunctionAddress(string name)

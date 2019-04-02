@@ -75,7 +75,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		public int GCCount {
 			[ClrSymcall(Symbol = "WKS::GCHeap::GetGcCount", FullyQualified = true)]
-			get => throw new SigcallException();
+			get => throw new NativeCallException();
 		}
 		
 		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
@@ -103,7 +103,7 @@ namespace RazorSharp.CoreClr.Structures
 		[ClrSymcall(Symbol = "GCHeap::IsHeapPointer", FullyQualified = true)]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
-			throw new SigcallException();
+			throw new NativeCallException();
 		}
 
 		[ClrSymcall(UseMethodNameOnly = true)]
@@ -133,7 +133,7 @@ namespace RazorSharp.CoreClr.Structures
 		[ClrSymcall(Symbol = "WKS::GCHeap::IsGCInProgress", FullyQualified = true)]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
 		{
-			throw new SigcallException();
+			throw new NativeCallException();
 		}
 		
 		static GCHeap()

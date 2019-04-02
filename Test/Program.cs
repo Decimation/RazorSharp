@@ -1,8 +1,10 @@
 ﻿#region
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Resources;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
@@ -10,6 +12,8 @@ using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Structures;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
@@ -42,32 +46,8 @@ namespace Test
 		}
 
 
-		struct MString
-		{
-			public MString(string value) { }
-
-			public static implicit operator MString(string value)
-			{
-				return new MString(value);
-			}
-		}
-
-		struct QString
-		{
-			private Pointer<char> m_str;
-
-			public QString(string value)
-			{
-				m_str = null;
-			}
-
-			public static implicit operator QString(string value)
-			{
-				return new QString(value);
-			}
-		}
-
 		
+
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -75,17 +55,23 @@ namespace Test
 			Global.Setup();
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
+			
 
+			string s = "foo";
 			
+			var str = typeof(string);
+			Pointer<MethodTable32> pMT32 = str.TypeHandle.Value;
+			Pointer<MethodTable> pMT = str.TypeHandle.Value;
 			
-			
-			
-			
-//			const string asmStr = "RazorSharp";
-//			var          asm    = Assembly.Load(asmStr);
+			Debug.Assert(pMT.Address == pMT32.Address);
 
-
+			var tk1 = pMT.Reference.Token;
+			var tk2 = pMT32.Reference.Token;
+			Console.WriteLine(tk1);
+			Console.WriteLine(tk2);
+			Debug.Assert(pMT.Reference.Equals(pMT32.Reference));
 			
+
 
 
 			// SHUT IT DOWN

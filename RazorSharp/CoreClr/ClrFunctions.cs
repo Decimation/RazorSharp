@@ -45,7 +45,7 @@ namespace RazorSharp.CoreClr
 		/// </summary>
 		/// <param name="value"><see cref="MethodTable" /> pointer</param>
 		/// <returns>A pointer to a <see cref="Type"/> object</returns>
-		/// <exception cref="SigcallException">Method has not been bound</exception>
+		/// <exception cref="NativeCallException">Method has not been bound</exception>
 		internal static Type JIT_GetRuntimeType_Safe(MethodTable* value)
 		{
 			void* ptr = JIT_GetRuntimeType(value);
@@ -56,7 +56,7 @@ namespace RazorSharp.CoreClr
 		[ClrSymcall(UseMethodNameOnly = true)]
 		internal static Pointer<byte> JIT_GetStaticFieldAddr_Context(FieldDesc* value)
 		{
-			throw new SigcallException();
+			throw new NativeCallException();
 		}
 
 
@@ -96,7 +96,7 @@ namespace RazorSharp.CoreClr
 		                                             int                  bCaseSens)
 		{
 			// pSignature can be NULL to find any field with the given name
-			throw new SigcallException();
+			throw new NativeCallException();
 		}
 
 		#endregion

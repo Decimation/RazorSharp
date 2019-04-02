@@ -55,7 +55,7 @@ namespace RazorSharp.Pointers
 	// todo: decorate the remaining Pure methods with PureAttribute
 
 	/// <summary>
-	///     <para>Represents a native pointer. Equals the size of <see cref="IntPtr.Size" />.</para>
+	///     <para>Represents a native pointer. Equals the size of <see cref="P:System.IntPtr.Size" />.</para>
 	///     <para>Can be represented as a native pointer in memory. </para>
 	///     <para>Has identical or better performance than native pointers.</para>
 	///     <para>Type safety is not enforced in methods suffixed with "Any" for accessibility</para>

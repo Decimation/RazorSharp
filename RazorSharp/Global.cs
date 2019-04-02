@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -17,7 +18,9 @@ using Serilog.Sinks.SystemConsole.Themes;
 
 namespace RazorSharp
 {
-	
+	/// <summary>
+	/// The core of RazorSharp. Contains the logger and <see cref="Setup"/>
+	/// </summary>
 	public static class Global
 	{
 		internal const string CONTEXT_PROP = "Context";
@@ -29,9 +32,14 @@ namespace RazorSharp
 			"[{Timestamp:HH:mm:ss.fff} <{ThreadId}> ({Context}) {Level:u3}] {Message}{NewLine}";
 
 		internal static readonly Logger Log;
-		
+
+		internal static readonly Assembly Assembly;
+
 		public static bool IsSetup { get; private set; }
-		
+
+		/// <summary>
+		/// Sets up the logger and other values
+		/// </summary>
 		static Global()
 		{
 			var levelSwitch = new LoggingLevelSwitch
@@ -46,7 +54,9 @@ namespace RazorSharp
 			     .WriteTo.Console(outputTemplate: OUTPUT_TEMPLATE_ALT, theme: SystemConsoleTheme.Colored)
 			     .CreateLogger();
 
-			IsSetup = true;
+			const string ASM_STR = "RazorSharp";
+			
+			Assembly = Assembly.Load(ASM_STR);
 		}
 
 		private static void CheckCompatibility()
@@ -90,7 +100,7 @@ namespace RazorSharp
 			Conditions.Requires(Environment.Version == Clr.ClrVersion);
 
 			Conditions.Requires(!GCSettings.IsServerGC);
-			
+
 			Conditions.Requires(Type.GetType("Mono.Runtime") == null);
 
 			if (Debugger.IsAttached) {
@@ -98,19 +108,23 @@ namespace RazorSharp
 			}
 		}
 
+		/// <summary>
+		/// Checks compatibility
+		/// </summary>
 		public static void Setup()
 		{
 			CheckCompatibility();
 			Console.OutputEncoding = Encoding.Unicode;
-			Conditions.Requires(IsSetup);
+			IsSetup                = true;
 		}
 
+		/// <summary>
+		/// Disposes the logger and checks for any memory leaks
+		/// </summary>
 		public static void Close()
 		{
-			if (!IsSetup) {
-				return;
-			}
-			
+			Conditions.Requires(IsSetup);
+
 			if (Mem.IsMemoryInUse) {
 				Log.Warning("Memory leak: {Count} dangling pointer(s)", Mem.AllocCount);
 			}

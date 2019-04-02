@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Utilities;
@@ -15,11 +16,15 @@ namespace RazorSharp.Memory
 			SetEntryPoint = Clr.GetClrFunction<SetEntryPointDelegate>(SET_ENTRY_POINT);
 
 
-			const string GET_DELEGATE = "GetDelegateForFunctionPointerInternal";
+			/*const string GET_DELEGATE = "GetDelegateForFunctionPointerInternal";
 			GetDelegate = (GetDelegateDelegate) typeof(Marshal)
 			                                   .GetAnyMethod(GET_DELEGATE)
-			                                   .CreateDelegate(typeof(GetDelegateDelegate));
+			                                   .CreateDelegate(typeof(GetDelegateDelegate));*/
+
+			
 		}
+
+		
 
 		#region Set entry point
 
@@ -55,9 +60,7 @@ namespace RazorSharp.Memory
 
 		#region Get delegate
 
-		private delegate Delegate GetDelegateDelegate(IntPtr ptr, Type t);
-
-		private static readonly GetDelegateDelegate GetDelegate;
+		
 
 		public static TDelegate GetDelegateForFunctionPointer<TDelegate>(IntPtr ptr) where TDelegate : Delegate
 		{
@@ -66,7 +69,11 @@ namespace RazorSharp.Memory
 
 		public static Delegate GetDelegateForFunctionPointer(IntPtr ptr, Type t)
 		{
-			return GetDelegate(ptr, t);
+			
+//			Conditions.RequiresNotNull(GetDelegate, nameof(GetDelegate));
+//			return GetDelegate(ptr, t);
+
+			return Marshal.GetDelegateForFunctionPointer(ptr, t);
 		}
 
 		public static void Swap(MethodInfo dest, MethodInfo src)
