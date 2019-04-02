@@ -12,6 +12,8 @@ using RazorSharp.CoreClr.Enums.EEClass;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Pointers;
 
+// ReSharper disable FieldCanBeMadeReadOnly.Local
+
 #endregion
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -53,68 +55,74 @@ namespace RazorSharp.CoreClr.Structures.EE
 	///         This should only be accessed via <see cref="Pointer{T}" />
 	///     </remarks>
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct EEClass
 	{
 		#region Fields
 
-		[FieldOffset(0)]
-		private readonly void* m_pGuidInfo;
+		private void* m_pGuidInfo;
 
-		[FieldOffset(Offsets.PTR_SIZE)]
-		private readonly void* m_rpOptionalFields;
+		private void* m_rpOptionalFields;
 
-		[FieldOffset(Offsets.PTR_SIZE * 2)]
-		private readonly MethodTable* m_pMethodTable;
+		private MethodTable* m_pMethodTable;
 
-		[FieldOffset(Offsets.PTR_SIZE * 3)]
-		private readonly FieldDesc* m_pFieldDescList;
+		private FieldDesc* m_pFieldDescList;
 
-		[FieldOffset(Offsets.PTR_SIZE * 4)]
-		private readonly void* m_pChunks;
+		private void* m_pChunks;
 
 
 		#region Union
 
-		private const int UNION_OFFSET = Offsets.PTR_SIZE * 5;
-
-		[FieldOffset(UNION_OFFSET)]
-		private readonly uint m_cbNativeSize;
-
-		[FieldOffset(UNION_OFFSET)]
+		/// <summary>
+		/// <para>Union</para>
+		/// <para>void* <see cref="m_ohDelegate"/></para>
+		/// <para>uint <see cref="m_cbNativeSize"/></para>
+		/// <para>int <see cref="m_ComInterfaceType"/></para>
+		/// </summary>
 		private readonly void* m_ohDelegate;
 
-		[FieldOffset(UNION_OFFSET)]
-		private readonly int m_ComInterfaceType;
+		private uint m_cbNativeSize {
+			get {
+				fixed (EEClass* value = &this) {
+					Pointer<uint> ptr = &value->m_ohDelegate;
+					return ptr.Reference;
+				}
+			}
+		}
+
+		private int m_ComInterfaceType {
+			get {
+				fixed (EEClass* value = &this) {
+					Pointer<int> ptr = &value->m_ohDelegate;
+					return ptr.Reference;
+				}
+			}
+		}
 
 		#endregion
 
+		
 
-		[FieldOffset(UNION_OFFSET + Offsets.PTR_SIZE)]
-		private readonly void* m_pccwTemplate;
+		private void* m_pccwTemplate;
 
-		[FieldOffset(UNION_OFFSET + (Offsets.PTR_SIZE * 2))]
-		private readonly DWORD m_dwAttrClass;
+		private DWORD m_dwAttrClass;
 
-		[FieldOffset(UNION_OFFSET + (Offsets.PTR_SIZE * 2) + sizeof(DWORD))]
-		private readonly DWORD m_VMFlags;
+		private DWORD m_VMFlags;
 
-		[FieldOffset(UNION_OFFSET + (Offsets.PTR_SIZE * 2) + (sizeof(DWORD) * 2))]
-		private readonly byte m_NormType;
+		private byte m_NormType;
 
-		[FieldOffset(UNION_OFFSET + (Offsets.PTR_SIZE * 2) + (sizeof(DWORD) * 2) + 1)]
-		private readonly byte m_fFieldsArePacked;
+		private byte m_fFieldsArePacked;
 
-		[FieldOffset(UNION_OFFSET + (Offsets.PTR_SIZE * 2) + (sizeof(DWORD) * 2) + 2)]
-		private readonly byte m_cbFixedEEClassFields;
+		private byte m_cbFixedEEClassFields;
 
-		[FieldOffset(UNION_OFFSET + (Offsets.PTR_SIZE * 2) + (sizeof(DWORD) * 2) + 3)]
-		private readonly byte m_cbBaseSizePadding;
+		private byte m_cbBaseSizePadding;
 
 		#endregion
 
 		#region Accessors
 
+		public int ComInterfaceType => m_ComInterfaceType;
+		
 		/// <summary>
 		///     Count of bytes of normal fields of this instance (<see cref="EEClass" />,
 		///     <see cref="LayoutEEClass" /> etc.). Doesn't count bytes of "packed" fields

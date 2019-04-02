@@ -16,6 +16,9 @@ using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;
+// ReSharper disable ConvertToAutoProperty
+
+// ReSharper disable FieldCanBeMadeReadOnly.Local
 
 // ReSharper disable MemberCanBeMadeStatic.Global
 
@@ -67,23 +70,15 @@ namespace RazorSharp.CoreClr.Structures
 	///         This should only be accessed via <see cref="Pointer{T}" />
 	///     </remarks>
 	/// </summary>
-	[StructLayout(LayoutKind.Explicit)]
+	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct MethodTable
 	{
 		static MethodTable()
 		{
 			Symcall.BindQuick(typeof(MethodTable));
 		}
+
 		
-		public bool Equals(MethodTable32 other)
-		{
-			return m_dwFlags.Equals(other.m_dwFlags) && m_BaseSize == other.m_BaseSize &&
-			       m_wFlags2 == other.m_wFlags2 && m_wToken == other.m_wToken &&
-			       m_wNumVirtuals == other.m_wNumVirtuals && m_wNumInterfaces == other.m_wNumInterfaces &&
-			       m_pParentMethodTable == other.m_pParentMethodTable && m_pLoaderModule == other.m_pLoaderModule &&
-			       m_pWriteableData == other.m_pWriteableData && m_pEEClass == other.m_pEEClass &&
-			       m_pPerInstInfo == other.m_pPerInstInfo && m_pInterfaceMap == other.m_pInterfaceMap;
-		}
 
 		#region Properties and Accessors
 
@@ -135,7 +130,6 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		///     The parent type's <see cref="MethodTable" />.
 		/// </summary>
-		/// <exception cref="NotImplementedException">If the type is an indirect parent</exception>
 		internal Pointer<MethodTable> Parent {
 			// On Linux ARM is a RelativeFixupPointer. Otherwise,
 			// Parent PTR_MethodTable if enum_flag_HasIndirectParent is not set. Pointer to indirection cell
@@ -202,7 +196,10 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal Pointer<MethodTable> Canon {
 			get {
-				switch (UnionType) {
+
+				return GetCanonicalMethodTable();
+				
+				/*switch (UnionType) {
 					case LowBits.MethodTable:
 						Pointer<MethodTable> pCanon = m_pCanonMT;
 						pCanon.Subtract(Offsets.CANON_MT_UNION_MT_OFFSET);
@@ -216,9 +213,15 @@ namespace RazorSharp.CoreClr.Structures
 					case LowBits.Invalid:
 					case LowBits.Indirection:
 					default:
-						throw new NotImplementedException("Canon MT could not be accessed");
-				}
+						return GetCanonicalMethodTable();
+				}*/
 			}
+		}
+
+		[ClrSymcall]
+		private MethodTable* GetCanonicalMethodTable()
+		{
+			return null;
 		}
 
 
@@ -242,8 +245,6 @@ namespace RazorSharp.CoreClr.Structures
 
 		// internal name: GetTypeDefRid
 		internal int Token => Constants.TokenFromRid(OrigToken, CorTokenType.TypeDef);
-
-		
 
 
 		/// <summary>
@@ -298,72 +299,66 @@ namespace RazorSharp.CoreClr.Structures
 
 		#region Fields
 
-		[FieldOffset(0)]
 		private DWFlags m_dwFlags;
 
-		[FieldOffset(4)]
-		private readonly DWORD m_BaseSize;
+		private DWORD m_BaseSize;
 
-		[FieldOffset(8)]
-		private readonly WORD m_wFlags2;
+		private WORD m_wFlags2;
 
-		[FieldOffset(10)]
-		private readonly WORD m_wToken;
+		private WORD m_wToken;
 
-		[FieldOffset(12)]
-		private readonly WORD m_wNumVirtuals;
+		private WORD m_wNumVirtuals;
 
-		[FieldOffset(14)]
-		private readonly WORD m_wNumInterfaces;
+		private WORD m_wNumInterfaces;
 
-		[FieldOffset(16)]
-		private readonly MethodTable* m_pParentMethodTable;
+		private MethodTable* m_pParentMethodTable;
 
-		private const int EECLASS_MT_UNION_OFFSET_32 = 28;
-		private const int EECLASS_MT_UNION_OFFSET_64 = 40;
+		private void* m_pLoaderModule;
 
-		private const int MISC_UNION_OFFSET_32 = 32;
-		private const int MISC_UNION_OFFSET_64 = 48;
-
-		private const int MISC2_UNION_OFFSET_32 = 36;
-		private const int MISC2_UNION_OFFSET_64 = 56;
-
-		[FieldOffset(16 + Offsets.PTR_SIZE)]
-		private readonly void* m_pLoaderModule;
-
-		[FieldOffset(16 + (Offsets.PTR_SIZE * 2))]
-		private readonly void* m_pWriteableData;
+		private void* m_pWriteableData;
 
 		#region Union
 
-		[FieldOffset(EECLASS_MT_UNION_OFFSET_64)]
-		private readonly EEClass* m_pEEClass;
+		/// <summary>
+		/// <para>Union</para>
+		/// <para>EEClass* 		<see cref="m_pEEClass"/></para>
+		/// <para>MethodTable* 	<see cref="m_pCanonMT"/></para>
+		/// </summary>
+		private EEClass* m_pEEClass;
 
-		[FieldOffset(EECLASS_MT_UNION_OFFSET_64)]
-		private readonly MethodTable* m_pCanonMT;
+
+		private MethodTable* m_pCanonMT => (MethodTable*) m_pEEClass;
 
 		#endregion
 
 		#region Union
 
-		[FieldOffset(MISC_UNION_OFFSET_64)]
-		private readonly void* m_pPerInstInfo;
+		/// <summary>
+		/// <para>Union</para>
+		/// 
+		/// <para>void* 		<see cref="m_pPerInstInfo"/></para>
+		/// <para>void* 		<see cref="m_ElementTypeHnd"/></para>
+		/// <para>void*		<see cref="m_pMultipurposeSlot1"/></para>
+		/// </summary>
+		private void* m_pPerInstInfo;
 
-		[FieldOffset(MISC_UNION_OFFSET_64)]
-		private readonly void* m_ElementTypeHnd;
 
-		[FieldOffset(MISC_UNION_OFFSET_64)]
-		private readonly void* m_pMultipurposeSlot1;
+		private void* m_ElementTypeHnd     => m_pPerInstInfo;
+		private void* m_pMultipurposeSlot1 => m_pPerInstInfo;
 
 		#endregion
 
 		#region Union
 
-		[FieldOffset(MISC2_UNION_OFFSET_64)]
-		private readonly void* m_pInterfaceMap;
+		/// <summary>
+		/// <para>Union</para>
+		/// 
+		/// <para>void* 		m_pInterfaceMap</para>
+		/// <para>void* 		m_pMultipurposeSlot2</para>
+		/// </summary>
+		private void* m_pInterfaceMap;
 
-		[FieldOffset(MISC2_UNION_OFFSET_64)]
-		private readonly void* m_pMultipurposeSlot2;
+		public void* m_pMultipurposeSlot2 => m_pInterfaceMap;
 
 		#endregion
 

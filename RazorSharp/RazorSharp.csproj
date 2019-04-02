@@ -245,7 +245,6 @@
     <Compile Include="CoreClr\Structures\ILMethods\ILMethod.cs" />
     <Compile Include="CoreClr\Structures\ILMethods\FatILMethod.cs" />
     <Compile Include="CoreClr\Structures\ILMethods\TinyILMethod.cs" />
-    <Compile Include="CoreClr\Structures\MethodTable32.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Memory\AddressInfo.cs" />
     <Compile Include="Memory\Assembler.cs" />

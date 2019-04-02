@@ -1,10 +1,12 @@
+#region
+
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Utilities;
+
+#endregion
 
 namespace RazorSharp.Memory
 {
@@ -15,23 +17,21 @@ namespace RazorSharp.Memory
 			const string SET_ENTRY_POINT = "MethodDesc::SetStableEntryPointInterlocked";
 			SetEntryPoint = Clr.GetClrFunction<SetEntryPointDelegate>(SET_ENTRY_POINT);
 
+			Global.Log.Debug("Functions init done");
 
 			/*const string GET_DELEGATE = "GetDelegateForFunctionPointerInternal";
 			GetDelegate = (GetDelegateDelegate) typeof(Marshal)
 			                                   .GetAnyMethod(GET_DELEGATE)
 			                                   .CreateDelegate(typeof(GetDelegateDelegate));*/
-
-			
 		}
 
-		
 
 		#region Set entry point
 
 		/// <summary>
 		///     We implement <see cref="SetEntryPointDelegate" /> as a <see cref="Delegate" /> initially because
-		///     <see cref="MethodDesc.SetStableEntryPointInterlocked" /> has not been bound yet, and in order to bind it
-		///     we have to use this function.
+		///     <see cref="MethodDesc.SetStableEntryPointInterlocked" /> has not been bound yet, and in order to bind
+		///     it we have to use this function.
 		/// </summary>
 		/// <param name="value"><c>this</c> pointer of a <see cref="MethodDesc" /></param>
 		/// <param name="pCode">Entry point</param>
@@ -47,8 +47,8 @@ namespace RazorSharp.Memory
 		/// </summary>
 		public static void SetStableEntryPoint(MethodInfo mi, IntPtr pCode)
 		{
-			var pMd    = (MethodDesc*) mi.MethodHandle.Value;
-			var result = SetEntryPoint(pMd, (ulong) pCode);
+			var  pMd    = (MethodDesc*) mi.MethodHandle.Value;
+			long result = SetEntryPoint(pMd, (ulong) pCode);
 			if (!(result > 0)) {
 				Global.Log.Warning("Could not set entry point for {Method}", mi.Name);
 			}
@@ -60,8 +60,6 @@ namespace RazorSharp.Memory
 
 		#region Get delegate
 
-		
-
 		public static TDelegate GetDelegateForFunctionPointer<TDelegate>(IntPtr ptr) where TDelegate : Delegate
 		{
 			return (TDelegate) GetDelegateForFunctionPointer(ptr, typeof(TDelegate));
@@ -69,7 +67,6 @@ namespace RazorSharp.Memory
 
 		public static Delegate GetDelegateForFunctionPointer(IntPtr ptr, Type t)
 		{
-			
 //			Conditions.RequiresNotNull(GetDelegate, nameof(GetDelegate));
 //			return GetDelegate(ptr, t);
 

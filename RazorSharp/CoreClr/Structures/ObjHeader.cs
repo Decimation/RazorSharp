@@ -31,6 +31,7 @@ namespace RazorSharp.CoreClr.Structures
 		[FieldOffset(4)]
 		private UInt32 m_uSyncBlockValue;
 #endif
+		
 
 		#endregion
 
@@ -43,7 +44,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		static ObjHeader()
 		{
-			Conditions.Assert(sizeof(ObjHeader) == IntPtr.Size);
+			Conditions.Requires(sizeof(ObjHeader) == IntPtr.Size);
 		}
 
 		public void SetBit(uint uBit)
@@ -111,7 +112,8 @@ namespace RazorSharp.CoreClr.Structures
 		public override int GetHashCode()
 		{
 			unchecked {
-				return ((int) m_uAlignpad * 397) ^ (int) m_uSyncBlockValue;
+				//return ((int) m_uAlignpad * 397) ^ (int) m_uSyncBlockValue;
+				return m_uSyncBlockValue.GetHashCode();
 			}
 		}
 

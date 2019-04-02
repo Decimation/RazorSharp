@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.ExceptionServices;
@@ -11,8 +12,10 @@ using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
 using RazorSharp;
+using RazorSharp.Analysis;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
@@ -46,8 +49,15 @@ namespace Test
 		}
 
 
-		
+		private static void SaveObjToFile(object o, FileInfo info)
+		{
+			var mem = Unsafe.MemoryOf(o);
 
+			info.Create();
+			using (var stream = info.OpenWrite()) {
+				stream.Write(mem, 0, mem.Length);
+			}
+		}
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -55,24 +65,13 @@ namespace Test
 			Global.Setup();
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
-			
-
-			string s = "foo";
-			
-			var str = typeof(string);
-			Pointer<MethodTable32> pMT32 = str.TypeHandle.Value;
-			Pointer<MethodTable> pMT = str.TypeHandle.Value;
-			
-			Debug.Assert(pMT.Address == pMT32.Address);
-
-			var tk1 = pMT.Reference.Token;
-			var tk2 = pMT32.Reference.Token;
-			Console.WriteLine(tk1);
-			Console.WriteLine(tk2);
-			Debug.Assert(pMT.Reference.Equals(pMT32.Reference));
-			
 
 
+			var mt = typeof(EEClass).GetMethodTable();
+			var ee = mt.Reference.EEClass;
+
+			Console.WriteLine(ee.Reference.NativeSize);
+			Console.WriteLine(ee.Reference.ComInterfaceType);
 
 			// SHUT IT DOWN
 			Symbols.Close();
