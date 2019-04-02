@@ -4,6 +4,7 @@
 
 using System;
 using System.Text;
+using RazorSharp.Diagnostics;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;
 
@@ -22,8 +23,7 @@ namespace RazorSharp.Utilities
 		/// </summary>
 		public static void ModConsole()
 		{
-			throw new NotSupportedException("This feature is disabled");
-
+			throw new NotImplementedException();
 
 			Console.OutputEncoding = Encoding.Unicode; // todo: Encoding.Unicode / UTF8? Any difference?
 			var handle = Kernel32.GetConsoleHandle();

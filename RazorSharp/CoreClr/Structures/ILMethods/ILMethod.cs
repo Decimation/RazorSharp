@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Utilities;
 using RazorSharp.Pointers;
-using RazorSharp.Utilities.Exceptions;
 
 #endregion
 

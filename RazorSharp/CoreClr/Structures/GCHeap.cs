@@ -2,14 +2,16 @@
 
 using System;
 using System.Collections.Generic;
+using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
+using RazorSharp.Diagnostics;
+using RazorSharp.Diagnostics.Exceptions;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
-using RazorSharp.Utilities.Exceptions;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable MemberCanBeMadeStatic.Global
@@ -141,10 +143,6 @@ namespace RazorSharp.CoreClr.Structures
 		
 		static GCHeap()
 		{
-#if !UNIT_TEST
-			Conditions.RequiresWorkstationGC();
-#endif
-			
 			Symcall.BindQuick(typeof(GCHeap));
 
 			// Retrieve the global variables from the data segment of the CLR DLL

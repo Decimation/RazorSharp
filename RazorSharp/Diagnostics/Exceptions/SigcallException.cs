@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 #endregion
 
-namespace RazorSharp.Utilities.Exceptions
+namespace RazorSharp.Diagnostics.Exceptions
 {
 	public class SigcallException : NotImplementedException
 	{

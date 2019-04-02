@@ -4,25 +4,34 @@ using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
+using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
+using RazorCommon.Utilities;
+using RazorSharp.Diagnostics;
 using RazorSharp.Utilities;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
 #endregion
 
 namespace RazorSharp
 {
 	// todo: WIP
 
-	public static unsafe class MemConvert
+	public static unsafe class Conversions
 	{
 		public enum ConversionType
 		{
 			LOW_LEVEL,
 			LIGHT,
-			AS
+			AS,
+			UNION
 		}
 
 		private delegate int UnionCastFunction(long value);
+
+		private delegate void Jmp();
 
 		/// <summary>
 		/// 
@@ -32,30 +41,32 @@ namespace RazorSharp
 		/// <returns></returns>
 		public static TTo UnionCast<TFrom, TTo>(TFrom value)
 		{
+			throw new NotImplementedException();
+			
 			Conditions.Assert(Unsafe.SizeOf<TFrom>() == 8);
 			Conditions.Assert(Unsafe.SizeOf<TTo>() == 4);
-			
-			string[] asm = new[]
+
+			string[] asm =
 			{
 				"push 	 rbp",
 				"mov 	 rbp, rsp",
-				"movss 	 DWORD PTR [rbp-20], xmm0",
-				"mov 	 QWORD PTR [rbp-8], 0",
-				"movss   xmm0, DWORD PTR [rbp-20]",
-				"movss   DWORD PTR [rbp-8], xmm0",
-				"movsd   xmm0, QWORD PTR [rbp-8]",
+				"movss 	 DWORD [rbp-20], xmm0",
+				"mov 	 QWORD [rbp-8], 0",
+				"movss   xmm0, DWORD [rbp-20]",
+				"movss   DWORD [rbp-8], xmm0",
+				"movsd   xmm0, QWORD [rbp-8]",
 				"pop     rbp",
 				"ret"
 			};
 
-			var code = Mem.AllocCode(asm);
 
-			var fn = Marshal.GetDelegateForFunctionPointer<UnionCastFunction>(code.Address);
+			var fnCode = Mem.AllocCode(asm);
 
-			var conv = fn(ProxyCast<TFrom, long>(value));
-			Console.WriteLine(Hex.ToHex(conv)); 
+
 			
-			Mem.FreeCode(code);
+
+
+			Mem.FreeCode(fnCode);
 
 			return default;
 		}
@@ -67,7 +78,7 @@ namespace RazorSharp
 				return memPtr.CopyOut(mem.Length / memPtr.ElementSize);
 			}
 		}
-		
+
 		public static TTo Convert<TFrom, TTo>(TFrom t, ConversionType c = ConversionType.LOW_LEVEL)
 		{
 			switch (c) {
@@ -76,7 +87,7 @@ namespace RazorSharp
 				case ConversionType.LIGHT:
 					return (TTo) System.Convert.ChangeType(t, typeof(TTo));
 				case ConversionType.AS:
-					//return CSUnsafe.As<TFrom, TTo>(ref t);
+				//return CSUnsafe.As<TFrom, TTo>(ref t);
 				default:
 					return default;
 			}

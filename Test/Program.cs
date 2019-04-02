@@ -6,6 +6,7 @@ using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
@@ -18,6 +19,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
@@ -53,7 +55,6 @@ namespace Test
 
 	public static unsafe class Program
 	{
-		
 		// todo: protect address-sensitive functions
 		// todo: replace native pointers* with Pointer<T> for consistency
 		// todo: RazorSharp, ClrMD, Reflection, Cecil comparison
@@ -65,10 +66,6 @@ namespace Test
 			return Constants.INVALID_VALUE;
 		}
 
-		class __Error
-		{
-			public __Error Air => this;
-		}
 
 		struct MString
 		{
@@ -95,8 +92,6 @@ namespace Test
 			}
 		}
 
-		delegate void Run();
-
 		
 
 		[HandleProcessCorruptedStateExceptions]
@@ -106,120 +101,22 @@ namespace Test
 			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
 			Clr.Setup();
 
+			int i = 1;
+			Conditions.RequiresUnsigned(i, nameof(i));
+			
+			
+			
 //			const string asmStr = "RazorSharp";
 //			var          asm    = Assembly.Load(asmStr);
 
-			
-
-			int* mem = stackalloc int[256];
-			mem[0] = 1;
-			mem[1] = 2;
-			mem[2] = 3;
-			mem[3] = 4;
-
-			var memStream = new MemStream(mem);
-			
-			
-			for (int i = 0; i < 3; i++) {
-				
-				int memValue    = memStream.Read<int>();
-				int memValueDef = mem[i];
-				
-				Debug.Assert(memValue == memValueDef);
-			}
-
-			Console.WriteLine(memStream.Read<int>());
-
-
-			string[][] matrix =
-			{
-				new[]
-				{
-					"goo", "sporg"
-				},
-				new[]
-				{
-					"sperg"
-				}
-			};
-
-			var intMatrix = new[]
-			{
-				new byte[]
-				{
-					1, 2, 3
-				},
-				new byte[]
-				{
-					4, 5, 6
-				},
-				new byte[]
-				{
-					0xFF, 0xFF, 0xFF
-				}
-			};
 
 			
 
-			var ctx = Kernel32.GetContext(ContextFlags.CONTEXT_ALL);
-			Console.WriteLine(ctx.Rax);
-
-			
-			var hThread = Kernel32.OpenThread(ThreadAccess.All, (int) Kernel32.GetCurrentThreadId());
-			
-			var t = new Thread(() =>
-			{
-				
-				Kernel32.SuspendThread(hThread);
-				
-				
-				
-				
-				ctx.Rax = 255;
-				Kernel32.SetThreadContext(hThread, ref ctx);
-				Console.WriteLine(">> Set thread ctx");
-				
-				Kernel32.ResumeThread(hThread);
-				Console.WriteLine("done");
-			});
-			
-			t.Start();
-
-			
-			
-			Console.WriteLine("ok nigga");
-
-
-			float pi = 3.14f;
-			var val = MemConvert.UnionCast<double, float>(pi);
-			Console.WriteLine(val);
-			
 
 			// SHUT IT DOWN
 			Symbols.Close();
 			Clr.Close();
 			Global.Close();
-		}
-
-
-		class Class<K, V, E> { }
-
-		static void loadClass()
-		{
-			try {
-				var fn = typeof(Miscellaneous).GetAnyMethod("Run");
-			}
-			catch (TypeLoadException e) {
-				Console.WriteLine("shitlet");
-				Console.WriteLine(e);
-				throw;
-			}
-		}
-
-
-		static unsafe void wstrcpy(char* dmem, char* smem, int charCount)
-		{
-			Mem.Copy<byte>(dmem, smem, charCount * 2);
 		}
 
 

@@ -6,17 +6,20 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Enums.MethodDesc;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.ILMethods;
+using RazorSharp.Diagnostics;
+using RazorSharp.Diagnostics.Exceptions;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
-using RazorSharp.Utilities.Exceptions;
 
 // ReSharper disable MemberCanBeMadeStatic.Local
 // ReSharper disable InconsistentNaming
@@ -339,26 +342,12 @@ namespace RazorSharp.CoreClr.Structures
 			throw new SigcallException();
 		}
 
-		/// <summary>
-		///     Use at your own risk!
-		/// </summary>
-		/// <param name="p">New function pointer</param>
-		/// <exception cref="Exception">If this function is <c>virtual</c> or <c>abstract</c></exception>
-		[Obsolete("Use SetStableEntryPoint", true)]
-		internal void SetFunctionPointer(IntPtr p)
-		{
-			Conditions.Assert(
-				!Attributes.HasFlag(MethodAttributes.Virtual) && !Attributes.HasFlag(MethodAttributes.Abstract),
-				"Function is virtual/abstract");
-
-
-			m_pFunction = p.ToPointer();
-		}
+		
 
 
 		internal TDelegate GetDelegate<TDelegate>() where TDelegate : Delegate
 		{
-			return Marshal.GetDelegateForFunctionPointer<TDelegate>(Function);
+			return Functions.GetDelegateForFunctionPointer<TDelegate>(Function);
 		}
 
 

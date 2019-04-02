@@ -8,12 +8,14 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Enums;
 using RazorSharp.CoreClr.Enums.EEClass;
 using RazorSharp.CoreClr.Enums.MethodTable;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
+using RazorSharp.Diagnostics;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 

@@ -5,10 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Diagnostics;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -194,7 +196,7 @@ namespace RazorSharp.Analysis
 
 			// Byte is default for TAs
 			if (typeof(TAs) != typeof(byte)) {
-				return MemConvert.ConvertArray<TAs>(mem).AutoJoin(JOIN_BAR, options);
+				return Conversions.ConvertArray<TAs>(mem).AutoJoin(JOIN_BAR, options);
 			}
 
 			

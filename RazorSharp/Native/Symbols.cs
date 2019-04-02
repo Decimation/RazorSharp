@@ -5,8 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr;
+using RazorSharp.Diagnostics;
 using RazorSharp.Memory;
 using RazorSharp.Native.Enums;
 using RazorSharp.Native.Structures;
@@ -197,7 +199,7 @@ namespace RazorSharp.Native
 		public TDelegate GetFunction<TDelegate>(string userContext, string module) where TDelegate : Delegate
 		{
 			var addr = GetSymAddress(userContext, module);
-			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr.Address);
+			return Functions.GetDelegateForFunctionPointer<TDelegate>(addr.Address);
 		}
 
 		public long GetSymOffset(string userContext)

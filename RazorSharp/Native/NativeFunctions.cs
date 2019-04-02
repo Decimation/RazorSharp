@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Signatures;
 using RazorSharp.Memory.Calling.Signatures.Attributes;
 using RazorSharp.Memory.Calling.Symbols;
@@ -71,7 +72,7 @@ namespace RazorSharp.Native
 		{
 			var hModule = Kernel32.GetModuleHandle(dllName);
 			var hFn     = Kernel32.GetProcAddress(hModule, fn);
-			return Marshal.GetDelegateForFunctionPointer<TDelegate>(hFn);
+			return Functions.GetDelegateForFunctionPointer<TDelegate>(hFn);
 		}
 	}
 }

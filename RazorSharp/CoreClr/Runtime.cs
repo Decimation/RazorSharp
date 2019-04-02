@@ -9,14 +9,16 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.HeapObjects;
+using RazorSharp.Diagnostics;
+using RazorSharp.Diagnostics.Exceptions;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
-using RazorSharp.Utilities.Exceptions;
 
 #endregion
 

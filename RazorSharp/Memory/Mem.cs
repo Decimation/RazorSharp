@@ -10,8 +10,11 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using RazorCommon;
+using RazorCommon.Diagnostics;
+using RazorCommon.Extensions;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Diagnostics;
 using RazorSharp.Native;
 using RazorSharp.Native.Enums;
 using RazorSharp.Pointers;
@@ -221,7 +224,7 @@ namespace RazorSharp.Memory
 		
 		public static Pointer<byte> AllocCode(string[] asm, bool isProcess32Bit = false)
 		{
-			return AllocCode(asm.QuickJoin(Environment.NewLine), isProcess32Bit);
+			return AllocCode(asm.AsSingleString(), isProcess32Bit);
 		}
 		
 		public static Pointer<byte> AllocCode(string asm, bool isProcess32Bit = false)

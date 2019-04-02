@@ -2,11 +2,13 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.CoreClr.Structures.HeapObjects;
+using RazorSharp.Diagnostics;
 using RazorSharp.Memory;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
@@ -173,7 +175,7 @@ namespace RazorSharp.CoreClr
 
 		internal static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate
 		{
-			return Marshal.GetDelegateForFunctionPointer<TDelegate>(Clr.GetClrFunctionAddress(name).Address);
+			return Functions.GetDelegateForFunctionPointer<TDelegate>(Clr.GetClrFunctionAddress(name).Address);
 		}
 	}
 }

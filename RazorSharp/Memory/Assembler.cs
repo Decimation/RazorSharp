@@ -31,8 +31,7 @@ namespace RazorSharp.Memory
 		private readonly Lazy<string> m_nasmPath = new Lazy<string>(() => @"C:\Lib\nasm.exe",
 		                                                            LazyThreadSafetyMode.ExecutionAndPublication
 		);
-		
-		
+
 
 		/// <summary>
 		/// Assemble the specified assembly code at a base address.
@@ -43,6 +42,8 @@ namespace RazorSharp.Memory
 		/// <returns>An array of bytes containing the assembly code.</returns>
 		public byte[] Assemble(string assembly, bool isProcess32Bit, ulong baseAddress)
 		{
+			// Can't have PTR keyword
+			
 			string msg, innerMsg;
 			byte[] bytes = null;
 
@@ -63,8 +64,9 @@ namespace RazorSharp.Memory
 
 
 				File.WriteAllText(assemblyFilePath, assembly);
-				string        exePath     = m_nasmPath.Value;
-				StringBuilder buildOutput = new StringBuilder();
+
+				string exePath = m_nasmPath.Value;
+
 				var startInfo = new ProcessStartInfo(exePath)
 				{
 					Arguments              = "-f bin -o " + Escape(outputFilePath) + " " + Escape(assemblyFilePath),
@@ -99,8 +101,11 @@ namespace RazorSharp.Memory
 			}
 
 
+			Console.WriteLine(msg);
+			Console.WriteLine(Encoding.ASCII.GetString(Encoding.Unicode.GetBytes(innerMsg)));
 			return bytes;
 		}
+
 
 		private static string Escape(string str)
 		{

@@ -9,11 +9,12 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorCommon.Utilities;
+using RazorSharp.Diagnostics;
 using RazorSharp.Native;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
-using RazorSharp.Utilities.Exceptions;
 using Serilog.Context;
 
 #endregion
@@ -164,7 +165,7 @@ namespace RazorSharp.Memory
 			if (addr == IntPtr.Zero)
 				throw new Exception($"Could not find function with opcodes {rgPattern.AutoJoin()}");
 
-			return Marshal.GetDelegateForFunctionPointer<TDelegate>(addr);
+			return Functions.GetDelegateForFunctionPointer<TDelegate>(addr);
 		}
 
 		public TDelegate GetDelegate<TDelegate>(string szPattern, long ofsGuess = 0) where TDelegate : Delegate

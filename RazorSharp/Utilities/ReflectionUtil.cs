@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Diagnostics;
 
 namespace RazorSharp.Utilities
 {

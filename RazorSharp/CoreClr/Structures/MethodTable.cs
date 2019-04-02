@@ -6,17 +6,19 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Enums;
 using RazorSharp.CoreClr.Enums.MethodTable;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.EE;
+using RazorSharp.Diagnostics.Exceptions;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Pointers;
-using RazorSharp.Utilities.Exceptions;
+
 // ReSharper disable MemberCanBeMadeStatic.Global
 
 #endregion
@@ -74,7 +76,7 @@ namespace RazorSharp.CoreClr.Structures
 		{
 			Symcall.BindQuick(typeof(MethodTable));
 		}
-		
+
 		#region Properties and Accessors
 
 		#region Flags
@@ -121,7 +123,7 @@ namespace RazorSharp.CoreClr.Structures
 		internal int NumInterfaces => m_wNumInterfaces;
 
 		internal bool IsParentIndirect => Flags.HasFlag(MethodTableFlags.HasIndirectParent);
-		
+
 		/// <summary>
 		///     The parent type's <see cref="MethodTable" />.
 		/// </summary>
@@ -215,13 +217,10 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		///     Element type handle of an individual element if this is the <see cref="MethodTable" /> of an array.
 		/// </summary>
-		/// <exception cref="RuntimeException">If this is not an array <see cref="MethodTable" />.</exception>
 		internal Pointer<MethodTable> ElementTypeHandle {
 			get {
-				if (IsArray) 
-					return (MethodTable*) m_ElementTypeHnd;
-
-				throw new RuntimeException("Element type handles cannot be accessed when type is not an array");
+				Conditions.Requires(IsArray);
+				return (MethodTable*) m_ElementTypeHnd;
 			}
 		}
 
@@ -233,56 +232,37 @@ namespace RazorSharp.CoreClr.Structures
 		internal bool   ContainsPointers => Flags.HasFlag(MethodTableFlags.ContainsPointers);
 		internal string Name             => RuntimeType.Name;
 
-
+		// internal name: GetTypeDefRid
 		internal int Token => Constants.TokenFromRid(OrigToken, CorTokenType.TypeDef);
 
-		// internal name: GetTypeDefRid
+		
 
 
 		/// <summary>
 		/// /// <summary>
-		///     Gets the corresponding <see cref="Type" /> of <see cref="MethodTable" /> <paramref name="pMt" />.
+		///     Gets the corresponding <see cref="Type" /> of this <see cref="MethodTable" />
 		/// </summary>
 		/// <returns>The <see cref="Type" /> of the specified <see cref="MethodTable" /></returns>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		[DebuggerNonUserCode] 
-		[DebuggerHidden]
 		internal Type RuntimeType {
 			get {
-				// This seems to raise an ExecutionEngineException when debugging but
-				// it isn't raised when not debugging. ReSharper also tells me the exception is
-				// obsolete and the exception isn't raised anymore? I have no idea.
-
-			
-			
-				// Managed Debugging Assistant 'FatalExecutionEngineError' : 'The runtime has encountered a fatal error.
-				// The address of the error was at 0xb0e254b9, on thread ----. The error code is 0xc0000005.
-				// This error may be a bug in the CLR or in the unsafe or non-verifiable portions of user code.
-				// Common sources of this bug include user marshaling errors for COM-interop or PInvoke, which
-				// may corrupt the stack.'
-
 				fixed (MethodTable* value = &this) {
 					return ClrFunctions.JIT_GetRuntimeType_Safe(value);
-					
 				}
-				
 			}
 		}
 
 
 		internal int NumInstanceFields => EEClass.Reference.NumInstanceFields;
 
-
 		internal int NumStaticFields => EEClass.Reference.NumStaticFields;
 
 		internal int NumNonVirtualSlots => EEClass.Reference.NumNonVirtualSlots;
 
-
 		internal int NumMethods => EEClass.Reference.NumMethods;
-
 
 		internal int NumInstanceFieldBytes => BaseSize - EEClass.Reference.BaseSizePadding;
 
@@ -299,14 +279,12 @@ namespace RazorSharp.CoreClr.Structures
 		// todo
 		internal MethodDescChunk* MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
 
-		
+
 		[ClrSymcall]
 		internal uint GetSignatureCorElementType()
 		{
 			throw new SigcallException();
 		}
-
-		
 
 		#endregion
 

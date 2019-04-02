@@ -3,10 +3,12 @@
 using System;
 using System.Reflection;
 using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Enums.MethodDesc;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Diagnostics;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 

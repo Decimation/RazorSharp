@@ -245,6 +245,7 @@
     <Compile Include="CoreClr\Structures\ILMethods\ILMethod.cs" />
     <Compile Include="CoreClr\Structures\ILMethods\FatILMethod.cs" />
     <Compile Include="CoreClr\Structures\ILMethods\TinyILMethod.cs" />
+    <Compile Include="Diagnostics\Exceptions\SigcallException.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Memory\AddressInfo.cs" />
     <Compile Include="Memory\Assembler.cs" />
@@ -280,7 +281,7 @@
     <Compile Include="Native\Structures\ThreadContext\M128A.cs" />
     <Compile Include="Native\Structures\ThreadContext\XSaveFormat64.cs" />
     <Compile Include="Native\Symbols.cs" />
-    <Compile Include="MemConvert.cs" />
+    <Compile Include="Conversions.cs" />
     <Compile Include="Memory\AllocHelper.cs" />
     <Compile Include="Memory\Bits.cs" />
     <Compile Include="Memory\Mem.cs" />
@@ -327,14 +328,8 @@
     <Compile Include="Unsafe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\AnnotationUtil.cs" />
-    <Compile Include="Utilities\Exceptions\NativeException.cs" />
-    <Compile Include="Utilities\Exceptions\PreconditionException.cs" />
-    <Compile Include="Utilities\Exceptions\SigcallException.cs" />
-    <Compile Include="Utilities\Exceptions\RuntimeException.cs" />
-    <Compile Include="Utilities\Exceptions\ThrowHelper.cs" />
-    <Compile Include="Utilities\Exceptions\TypeException.cs" />
-    <Compile Include="Utilities\Conditions.cs" />
     <Compile Include="Utilities\ReflectionUtil.cs" />
+    <Compile Include="Utilities\Shell.cs" />
     <Compile Include="Utilities\StandardOut.cs" />
     <Compile Include="Utilities\VirtualCollection.cs" />
   </ItemGroup>

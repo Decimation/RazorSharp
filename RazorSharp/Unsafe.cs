@@ -4,9 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
+using RazorSharp.Diagnostics;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
@@ -92,7 +94,7 @@ namespace RazorSharp
 
 		public static TTo Cast<TFrom, TTo>(TFrom value)
 		{
-			return MemConvert.ProxyCast<TFrom, TTo>(value);
+			return Conversions.ProxyCast<TFrom, TTo>(value);
 		}
 		
 		/// <summary>

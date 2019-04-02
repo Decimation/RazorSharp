@@ -1,7 +1,9 @@
 using System;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Utilities;
 
 namespace RazorSharp.Memory
 {
@@ -9,10 +11,18 @@ namespace RazorSharp.Memory
 	{
 		static Functions()
 		{
-			const string FN = "MethodDesc::SetStableEntryPointInterlocked";
-			SetEntryPoint = Clr.GetClrFunction<SetEntryPointDelegate>(FN);
+			const string SET_ENTRY_POINT = "MethodDesc::SetStableEntryPointInterlocked";
+			SetEntryPoint = Clr.GetClrFunction<SetEntryPointDelegate>(SET_ENTRY_POINT);
+
+
+			const string GET_DELEGATE = "GetDelegateForFunctionPointerInternal";
+			GetDelegate = (GetDelegateDelegate) typeof(Marshal)
+			                                   .GetAnyMethod(GET_DELEGATE)
+			                                   .CreateDelegate(typeof(GetDelegateDelegate));
 		}
-		
+
+		#region Set entry point
+
 		/// <summary>
 		///     We implement <see cref="SetEntryPointDelegate" /> as a <see cref="Delegate" /> initially because
 		///     <see cref="MethodDesc.SetStableEntryPointInterlocked" /> has not been bound yet, and in order to bind it
@@ -23,12 +33,7 @@ namespace RazorSharp.Memory
 		private delegate long SetEntryPointDelegate(MethodDesc* value, ulong pCode);
 
 		private static readonly SetEntryPointDelegate SetEntryPoint;
-		
-		public static void Swap(MethodInfo dest, MethodInfo src)
-		{
-			var srcCode = src.MethodHandle.GetFunctionPointer();
-			SetStableEntryPoint(dest,srcCode);
-		}
+
 
 		/// <summary>
 		///     <remarks>
@@ -40,9 +45,36 @@ namespace RazorSharp.Memory
 			var pMd    = (MethodDesc*) mi.MethodHandle.Value;
 			var result = SetEntryPoint(pMd, (ulong) pCode);
 			if (!(result > 0)) {
-				Global.Log.Warning("Could not set entry point for {Method}", mi.Name);	
+				Global.Log.Warning("Could not set entry point for {Method}", mi.Name);
 			}
+
 			//Conditions.Assert(result >0);
 		}
+
+		#endregion
+
+		#region Get delegate
+
+		private delegate Delegate GetDelegateDelegate(IntPtr ptr, Type t);
+
+		private static readonly GetDelegateDelegate GetDelegate;
+
+		public static TDelegate GetDelegateForFunctionPointer<TDelegate>(IntPtr ptr) where TDelegate : Delegate
+		{
+			return (TDelegate) GetDelegateForFunctionPointer(ptr, typeof(TDelegate));
+		}
+
+		public static Delegate GetDelegateForFunctionPointer(IntPtr ptr, Type t)
+		{
+			return GetDelegate(ptr, t);
+		}
+
+		public static void Swap(MethodInfo dest, MethodInfo src)
+		{
+			var srcCode = src.MethodHandle.GetFunctionPointer();
+			SetStableEntryPoint(dest, srcCode);
+		}
+
+		#endregion
 	}
 }
