@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props" Condition="Exists('..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props')" />
   <Import Project="..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props')" />
   <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -92,6 +93,10 @@
     </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=2.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+    </Reference>
+    <Reference Include="ModuleInit, Version=1.9.0.0, Culture=neutral, PublicKeyToken=409b3227471b0f0d">
+      <HintPath>..\packages\ModuleInit.Fody.1.9.0\lib\net452\ModuleInit.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
@@ -260,6 +265,7 @@
     <Compile Include="Memory\ProcessHacker.cs" />
     <Compile Include="Memory\Region.cs" />
     <Compile Include="Memory\SegmentType.cs" />
+    <Compile Include="ModuleInitializer.cs" />
     <Compile Include="Native\Enums\Images\ImageDirectoryEntry.cs" />
     <Compile Include="Native\Enums\Images\ImageHelpSymbolTypeInfo.cs" />
     <Compile Include="Native\Enums\Images\ImageSectionCharacteristics.cs" />
@@ -277,7 +283,6 @@
     <Compile Include="Native\Structures\ThreadContext\M128A.cs" />
     <Compile Include="Native\Structures\ThreadContext\XSaveFormat64.cs" />
     <Compile Include="Native\Symbols.cs" />
-    <Compile Include="Conversions.cs" />
     <Compile Include="Memory\AllocHelper.cs" />
     <Compile Include="Memory\Bits.cs" />
     <Compile Include="Memory\Mem.cs" />
@@ -322,6 +327,7 @@
     <Compile Include="Unsafe.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\AnnotationUtil.cs" />
+    <Compile Include="Utilities\Conversions.cs" />
     <Compile Include="Utilities\ReflectionUtil.cs" />
     <Compile Include="Utilities\StandardOut.cs" />
     <Compile Include="Utilities\VirtualCollection.cs" />
@@ -343,7 +349,10 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\packages\Fody.3.3.5\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.3.3.5\build\Fody.targets'))" />
+    <Error Condition="!Exists('..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props'))" />
   </Target>
+  <Import Project="..\packages\Fody.3.3.5\build\Fody.targets" Condition="Exists('..\packages\Fody.3.3.5\build\Fody.targets')" />
   <!--<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>

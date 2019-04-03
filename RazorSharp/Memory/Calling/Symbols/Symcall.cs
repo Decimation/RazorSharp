@@ -84,7 +84,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 			}
 
 			var    nameSpaceAttr = t.GetCustomAttribute<SymNamespaceAttribute>();
-			string nameSpace     = nameSpaceAttr == null ? String.Empty : nameSpaceAttr.Namespace;
+			string nameSpace     = nameSpaceAttr?.Namespace;
 
 			(MethodInfo[] methods, SymcallAttribute[] attributes) = t.GetAnnotatedMethods<SymcallAttribute>();
 
@@ -105,9 +105,15 @@ namespace RazorSharp.Memory.Calling.Symbols
 				var method = methods[i];
 
 				// Resolve the symbol
-				string fullSym = nameSpace + SCOPE_RESOLUTION_OPERATOR + GetSymbolName(attr, method);
-				Global.Log.Debug("Binding {Name} -> {Orig}", fullSym,
-				                 method.Name);
+				
+				string fullSym = GetSymbolName(attr, method);
+
+				if (nameSpace != null) {
+					fullSym = nameSpace + SCOPE_RESOLUTION_OPERATOR + fullSym;
+				}
+				
+//				Global.Log.Debug("Binding {Name} -> {Orig}", fullSym,
+//				                 method.Name);
 				contexts.Add(fullSym);
 			}
 

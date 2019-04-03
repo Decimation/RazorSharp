@@ -49,20 +49,13 @@ namespace Test
 			return Constants.INVALID_VALUE;
 		}
 
+		
+		
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			Global.Setup();
-			Clr.ClrPdb = new FileInfo(@"C:\Symbols\clr.pdb");
-			Clr.Setup();
+			
 
-			Console.WriteLine(GCHeap.GlobalHeap.Reference.GCCount);
-
-
-			// SHUT IT DOWN
-			Symbols.Close();
-			Clr.Close();
-			Global.Close();
 		}
 	}
 }

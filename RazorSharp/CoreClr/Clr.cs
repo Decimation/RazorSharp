@@ -18,7 +18,7 @@ namespace RazorSharp.CoreClr
 	/// <summary>
 	///     Contains the resources for working with the CLR.
 	/// </summary>
-	public static class Clr
+	internal static class Clr
 	{
 		#region Constants and accessors
 
@@ -47,18 +47,22 @@ namespace RazorSharp.CoreClr
 		/// </summary>
 		internal static readonly Version ClrVersion;
 
-		public static bool IsSetup { get; private set; }
+		internal static bool IsSetup { get; private set; }
 
 		/// <summary>
 		///     Whether or not <see cref="ClrPdb" /> was automatically downloaded.
 		///     If <c>true</c>, <see cref="ClrPdb" /> will be deleted upon calling <see cref="Close" />.
 		/// </summary>
-		public static bool IsPdbTemporary { get; private set; }
+		private static bool IsPdbTemporary { get; set; }
 
 		/// <summary>
-		///     CLR symbol file
+		///     <para>CLR symbol file</para>
+		/// <para>A PDB file will be searched for in <see cref="CLR_PDB_FILE_SEARCH"/>;</para>
+		/// <para>or the symbol file will be automatically downloaded</para>
 		/// </summary>
-		public static FileInfo ClrPdb { get; set; }
+		internal static FileInfo ClrPdb { get; private set; }
+
+		private const string CLR_PDB_FILE_SEARCH = @"C:\Symbols\clr.pdb";
 
 		#endregion
 
@@ -76,7 +80,7 @@ namespace RazorSharp.CoreClr
 		/// <summary>
 		///     Matches <see cref="ClrPdb" /> with the symbol file returned by Microsoft's servers
 		/// </summary>
-		public static void CheckSymbolIntegrity()
+		internal static void CheckSymbolIntegrity()
 		{
 			// Good lord this problem took 3 hours to solve
 			// Turns out the pdb file was just out of date lmao
@@ -93,8 +97,8 @@ namespace RazorSharp.CoreClr
 		{
 			FileInfo clrSym = null;
 			string   cd     = Environment.CurrentDirectory;
-
 			string[] dirs = {cd, Environment.SystemDirectory};
+			
 			foreach (string dir in dirs) {
 				var fi = FileUtil.FindFile(dir, CLR_PDB_SHORT);
 				if (fi != null) {
@@ -104,7 +108,13 @@ namespace RazorSharp.CoreClr
 			}
 
 			if (clrSym == null) {
-				clrSym = Symbols.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
+				if (File.Exists(CLR_PDB_FILE_SEARCH)) {
+					clrSym = new FileInfo(CLR_PDB_FILE_SEARCH);
+				}
+				else {
+					clrSym = Symbols.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
+				}
+				
 			}
 
 			Global.Log.Debug("Clr symbol file: {File}", clrSym.FullName);
@@ -121,7 +131,7 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		public static void Setup()
+		internal static void Setup()
 		{
 			if (ClrPdb == null) {
 				ClrPdb         = GetClrSymbolFile();
@@ -159,7 +169,7 @@ namespace RazorSharp.CoreClr
 			}
 		}
 
-		public static void Close()
+		internal static void Close()
 		{
 			Conditions.Requires(IsSetup);
 

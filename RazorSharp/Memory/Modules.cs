@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Pointers;
 
@@ -22,7 +23,7 @@ namespace RazorSharp.Memory
 		internal static ProcessModule GetModule(string name)
 		{
 			// todo: I shouldn't have to do this
-			if (name == Clr.CLR_DLL_SHORT) {
+			if (name == Clr.CLR_DLL_SHORT && Clr.IsSetup) {
 				return Clr.ClrModule;
 			}
 

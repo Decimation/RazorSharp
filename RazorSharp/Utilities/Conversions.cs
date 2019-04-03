@@ -6,7 +6,7 @@ using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 #endregion
 
-namespace RazorSharp
+namespace RazorSharp.Utilities
 {
 	// todo: WIP
 

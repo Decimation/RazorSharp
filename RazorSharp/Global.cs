@@ -21,7 +21,7 @@ namespace RazorSharp
 	/// <summary>
 	///     The core of RazorSharp. Contains the logger and <see cref="Setup" />
 	/// </summary>
-	public static class Global
+	internal static class Global
 	{
 		internal const string CONTEXT_PROP = "Context";
 
@@ -57,7 +57,7 @@ namespace RazorSharp
 			Assembly = Assembly.Load(ASM_STR);
 		}
 
-		public static bool IsSetup { get; private set; }
+		internal static bool IsSetup { get; private set; }
 
 		private static void CheckCompatibility()
 		{
@@ -111,7 +111,7 @@ namespace RazorSharp
 		/// <summary>
 		///     Checks compatibility
 		/// </summary>
-		public static void Setup()
+		internal static void Setup()
 		{
 			CheckCompatibility();
 			Console.OutputEncoding = Encoding.Unicode;
@@ -121,7 +121,7 @@ namespace RazorSharp
 		/// <summary>
 		///     Disposes the logger and checks for any memory leaks
 		/// </summary>
-		public static void Close()
+		internal static void Close()
 		{
 			Conditions.Requires(IsSetup);
 
