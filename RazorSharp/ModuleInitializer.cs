@@ -10,6 +10,7 @@ namespace RazorSharp
 	{
 		public static void Initialize()
 		{
+			/*
 			// Init code
 			Global.Setup();
 			Clr.Setup();
@@ -21,7 +22,7 @@ namespace RazorSharp
 				Symbols.Close();
 				Clr.Close();
 				Global.Close();
-			};
+			};*/
 		}
 	}
 }

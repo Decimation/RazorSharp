@@ -29,7 +29,7 @@ namespace RazorSharp.Utilities
 		                                         params object[] args)
 		{
 			var method = t.GetAnyMethod(name);
-			Conditions.RequiresNotNull(method, nameof(method));
+			Conditions.NotNull(method, nameof(method));
 
 
 			method = method.MakeGenericMethod(typeArgs);

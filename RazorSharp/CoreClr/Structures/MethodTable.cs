@@ -207,7 +207,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal Pointer<MethodTable> ElementTypeHandle {
 			get {
-				Conditions.Requires(IsArray);
+				Conditions.Require(IsArray);
 				return (MethodTable*) m_ElementTypeHnd;
 			}
 		}

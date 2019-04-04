@@ -104,61 +104,6 @@ namespace RazorSharp
 			return Mem.Read<T>(&cpy);
 		}
 
-		#region OffsetOf
-
-		/// <summary>
-		///     Returns the field offset of the specified field, by name.
-		/// </summary>
-		/// <remarks>
-		///     Returned from <see cref="FieldDesc.Offset" />
-		/// </remarks>
-		/// <param name="fieldName">Name of the field</param>
-		/// <typeparam name="TType">Enclosing type</typeparam>
-		/// <returns>Field offset</returns>
-		public static int OffsetOf<TType>(string fieldName)
-		{
-			return typeof(TType).GetFieldDesc(fieldName).Reference.Offset;
-		}
-
-		/// <summary>
-		///     Returns the field offset of the specified field, by value.
-		/// </summary>
-		/// <param name="type">Instance of enclosing type</param>
-		/// <param name="val">Value to calculate the offset of</param>
-		/// <typeparam name="TType">Enclosing type</typeparam>
-		/// <typeparam name="TMember">Member type</typeparam>
-		/// <returns>Field offset</returns>
-		public static int OffsetOf<TType, TMember>(ref TType type, TMember val)
-		{
-			int memberSize = SizeOf<TMember>();
-
-			// Find possible matching FieldDesc types
-			//var fieldDescs = RRuntime.GetFieldDescs<TType>().Select(x => x.Value)
-			//	.Where(x => x.CorType == Constants.TypeToCorType<TMember>()).ToArray();
-
-			// Not using LINQ is faster
-			Pointer<FieldDesc>[] fieldDescsPtrs = typeof(TType).GetFieldDescs();
-			var                  fieldDescs     = new List<FieldDesc>();
-			foreach (Pointer<FieldDesc> p in fieldDescsPtrs)
-				if (p.Reference.CorType == Constants.TypeToCorType<TMember>())
-					fieldDescs.Add(p.Reference);
-
-
-			Pointer<TMember> rawMemory = AddressOf(ref type).Address;
-
-			if (!typeof(TType).IsValueType) rawMemory = Marshal.ReadIntPtr(rawMemory.Address) + IntPtr.Size;
-
-			foreach (var t in fieldDescs) {
-				int adjustedOfs = t.Offset / memberSize;
-				if (rawMemory[adjustedOfs].Equals(val)) return t.Offset;
-			}
-
-
-			return Constants.INVALID_VALUE;
-		}
-
-		#endregion
-
 		#region Address
 
 		/// <summary>
@@ -177,8 +122,7 @@ namespace RazorSharp
 			return AddressOfField(ref instance, name);
 		}
 
-		// todo: maybe use CSUnsafe.AsPointer instead of a TypedReference...
-		// todo: it's much faster (by ~1.8 ns)
+		
 
 		/// <summary>
 		///     <para>Returns the address of <paramref name="t" />.</para>
@@ -191,9 +135,13 @@ namespace RazorSharp
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Pointer<T> AddressOf<T>(ref T t)
 		{
-			var tr = __makeref(t);
-			return *(IntPtr*) (&tr);
+			/*var tr = __makeref(t);
+			return *(IntPtr*) (&tr);*/
+			return CSUnsafe.AsPointer(ref t);
 		}
+
+		
+
 
 		/// <summary>
 		///     Returns the address of reference type <paramref name="t" />'s heap memory (raw data).
@@ -238,13 +186,13 @@ namespace RazorSharp
 			switch (offset) {
 				case OffsetType.StringData:
 
-					Conditions.RequiresType<string, T>();
+					Conditions.Require(typeof(T) == typeof(string));
 					string s = t as string;
 					return AddressOfHeap(ref s) + RuntimeHelpers.OffsetToStringData;
 
 				case OffsetType.ArrayData:
 
-					Conditions.RequiresType<Array, T>();
+					Conditions.Require(typeof(T).IsArray || typeof(T) == typeof(Array));
 					return AddressOfHeap(ref t) + Offsets.OffsetToArrayData;
 
 				case OffsetType.Fields:
@@ -409,20 +357,17 @@ namespace RazorSharp
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int HeapSize<T>(ref T t) where T : class
-		{
-			return HeapSizeInternal(t);
-		}
+		public static int HeapSize<T>(ref T t) where T : class => HeapSizeInternal(t);
+		
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int HeapSize<T>(T t) where T : class
-		{
-			return HeapSize(ref t);
-		}
+		public static int HeapSize<T>(T t) where T : class => HeapSize(ref t);
+		
 
 		private static int HeapSizeInternal<T>(T t)
 		{
-			Conditions.RequiresClassType<T>();
+			// Sanity check
+			Conditions.Require(!typeof(T).IsValueType);
 
 			// By manually reading the MethodTable*, we can calculate the size correctly if the reference
 			// is boxed or cloaked
@@ -461,7 +406,7 @@ namespace RazorSharp
 			 */
 
 			if (typeof(T).IsArray) {
-				Conditions.RequiresType<Array, T>();
+				Conditions.Require(typeof(T).IsArray || typeof(T) == typeof(Array));
 				var arr = t as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
@@ -525,15 +470,24 @@ namespace RazorSharp
 		///         <para>This includes field padding.</para>
 		///     </remarks>
 		/// </summary>
-		public static int BaseFieldsSize<T>(T t) where T : class
-		{
-			return BaseFieldsSizeInternal(t);
-		}
+		public static int BaseFieldsSize<T>(T t) where T : class => BaseFieldsSizeInternal(t);
+		
 
 		private static int BaseFieldsSizeInternal<T>(T t)
 		{
-			Conditions.RequiresClassType<T>();
+			// Sanity check
+			Conditions.Require(!typeof(T).IsValueType);
 			return Runtime.ReadMethodTable(ref t).Reference.NumInstanceFieldBytes;
+		}
+
+		/// <summary>
+		/// Returns the size of the data not occupied by the <see cref="MethodTable"/> pointer
+		/// and the <see cref="ObjHeader"/>.
+		/// </summary>
+		public static int SizeOfData<T>(T t) where T : class
+		{
+			// Subtract the size of the ObjHeader and MethodTable*
+			return HeapSize(ref t) - (IntPtr.Size + sizeof(MethodTable*));
 		}
 
 		#endregion
@@ -551,14 +505,13 @@ namespace RazorSharp
 		/// <returns>
 		///     <see cref="MethodTable.BaseSize" />
 		/// </returns>
-		public static int BaseInstanceSize<T>() where T : class
-		{
-			return BaseInstanceSizeInternal<T>();
-		}
+		public static int BaseInstanceSize<T>() where T : class => BaseInstanceSizeInternal<T>();
+		
 
 		private static int BaseInstanceSizeInternal<T>()
 		{
-			Conditions.RequiresClassType<T>();
+			// Sanity check
+			Conditions.Require(!typeof(T).IsValueType);
 			return typeof(T).GetMethodTable().Reference.BaseSize;
 		}
 
@@ -570,9 +523,9 @@ namespace RazorSharp
 
 		public static bool IsBoxed<T>(in T value)
 		{
-			return
-				(typeof(T).IsInterface || typeof(T) == typeof(object)) &&
-				value != null && value.GetType().IsValueType;
+			return (typeof(T).IsInterface || typeof(T) == typeof(object)) 
+			       && value != null
+			       && value.GetType().IsValueType;
 		}
 
 
@@ -589,7 +542,7 @@ namespace RazorSharp
 		{
 			// Need to include the ObjHeader
 			Pointer<T> ptr = AddressOfHeap(ref t, OffsetType.Header).Address;
-			return ptr.Cast<byte>().CopyOut(HeapSize(ref t));
+			return ptr.Cast<byte>().CopyOut(HeapSize(t));
 		}
 
 		/// <summary>
@@ -607,19 +560,12 @@ namespace RazorSharp
 
 		public static byte[] MemoryOfFields<T>(T t) where T : class
 		{
-			// Subtract the size of the ObjHeader and MethodTable*
-			int fieldSize = HeapSize(ref t) - IntPtr.Size * 2;
-
+			int fieldSize = SizeOfData(t);
 			var fields = new byte[fieldSize];
 
 			// Skip over the MethodTable*
 			Marshal.Copy((AddressOfHeap(ref t) + IntPtr.Size).Address, fields, 0, fieldSize);
 			return fields;
-		}
-
-		internal static void WriteReference<T>(ref T t, Pointer<byte> newHeapAddr)
-		{
-			Marshal.WriteIntPtr(AddressOf(ref t).Address, newHeapAddr.Address);
 		}
 
 		#endregion

@@ -86,10 +86,10 @@ namespace RazorSharp.CoreClr
 			// Turns out the pdb file was just out of date lmao
 
 			const string ERR = "The PDB specified by \"ClrPdb\" does not match the one returned by Microsoft's servers";
-			Conditions.RequiresNotNull(ClrPdb, nameof(ClrPdb));
+			Conditions.NotNull(ClrPdb, nameof(ClrPdb));
 			string cd     = Environment.CurrentDirectory;
 			var    tmpSym = Symbols.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
-			Conditions.Requires(ClrPdb.ContentEquals(tmpSym), ERR);
+			Conditions.Require(ClrPdb.ContentEquals(tmpSym), ERR, nameof(ClrPdb));
 			DeleteSymbolFile(tmpSym);
 		}
 
@@ -126,7 +126,7 @@ namespace RazorSharp.CoreClr
 		{
 			string clrPath = RuntimeEnvironment.GetRuntimeDirectory() + CLR_DLL_SHORT;
 			var    clr     = new FileInfo(clrPath);
-			Conditions.Requires(clr.Exists);
+			Conditions.Require(clr.Exists);
 			return clr;
 		}
 
@@ -138,7 +138,7 @@ namespace RazorSharp.CoreClr
 				IsPdbTemporary = true;
 			}
 			else {
-				Conditions.Requires(ClrPdb.Exists);
+				Conditions.Require(ClrPdb.Exists);
 				IsPdbTemporary = false;
 			}
 
@@ -153,7 +153,7 @@ namespace RazorSharp.CoreClr
 		private static void DeleteSymbolFile(FileInfo pdb)
 		{
 			// Delete temporarily downloaded symbol files
-			Conditions.RequiresNotNull(pdb.Directory, nameof(pdb.Directory));
+			Conditions.NotNull(pdb.Directory, nameof(pdb.Directory));
 
 			// This (should) equal IsPdbTemporary
 			if (pdb.Directory.FullName.Contains(Environment.CurrentDirectory)) {
@@ -171,7 +171,7 @@ namespace RazorSharp.CoreClr
 
 		internal static void Close()
 		{
-			Conditions.Requires(IsSetup);
+			Conditions.Require(IsSetup);
 
 			// This won't delete the symbol file if it wasn't manually downloaded
 			// but we'll make sure anyway

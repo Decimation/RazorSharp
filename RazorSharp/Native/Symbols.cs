@@ -100,7 +100,7 @@ namespace RazorSharp.Native
 
 		private static void CheckOffset(long offset)
 		{
-			Conditions.RequiresArg(offset != INVALID_OFFSET, nameof(offset));
+			Conditions.Ensure(offset != INVALID_OFFSET, nameof(offset));
 		}
 
 
@@ -132,10 +132,10 @@ namespace RazorSharp.Native
 
 		private bool EnumSymProc(IntPtr lpSymInfo, uint reserved, IntPtr userContext)
 		{
-			Conditions.RequiresNotNull(lpSymInfo, nameof(lpSymInfo));
+			Conditions.NotNull(lpSymInfo, nameof(lpSymInfo));
 			var    pSymInfo = (SymbolInfo*) lpSymInfo;
 			string str      = Marshal.PtrToStringAnsi(userContext);
-			Conditions.RequiresNotNull(str, nameof(str));
+			Conditions.NotNull(str, nameof(str));
 			int maxCmpLen = str.Length;
 
 			if (maxCmpLen == pSymInfo->NameLen) {
@@ -215,7 +215,7 @@ namespace RazorSharp.Native
 
 		private void ReleaseUnmanagedResources()
 		{
-			Conditions.NativeRequire(DbgHelp.SymCleanup(m_process));
+			Conditions.Require(DbgHelp.SymCleanup(m_process));
 			Marshal.FreeHGlobal(m_imgStrNative);
 			Marshal.FreeHGlobal(m_maskStrNative);
 			m_process       = IntPtr.Zero;
@@ -249,7 +249,7 @@ namespace RazorSharp.Native
 			// symchk
 			string progFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
 			var    symChk    = new FileInfo(String.Format(@"{0}\Windows Kits\10\Debuggers\x64\symchk.exe", progFiles));
-			Conditions.Requires(symChk.Exists);
+			Conditions.Require(symChk.Exists);
 
 			string cmd = String.Format("\"{0}\" \"{1}\" /s SRV*{2}*http://msdl.microsoft.com/download/symbols",
 			                           symChk.FullName, dll.FullName, dest.FullName);
@@ -268,7 +268,7 @@ namespace RazorSharp.Native
 				var stdOut = cmdProc.StandardOutput;
 				while (!stdOut.EndOfStream) {
 					string ln = stdOut.ReadLine();
-					Conditions.RequiresNotNull(ln, nameof(ln));
+					Conditions.NotNull(ln, nameof(ln));
 					if (ln.Contains("SYMCHK: PASSED + IGNORED files = 1")) {
 						break;
 					}
@@ -305,7 +305,7 @@ namespace RazorSharp.Native
 				throw new Exception(String.Format("Error downloading symbols. File: {0}", pdbStr));
 			}
 
-			Conditions.Ensures(pdb.Exists);
+			Conditions.Ensure(pdb.Exists);
 			return pdb;
 		}
 
@@ -321,7 +321,7 @@ namespace RazorSharp.Native
 			m_imgStrNative  = Marshal.StringToHGlobalAnsi(image);
 			m_maskStrNative = Marshal.StringToHGlobalAnsi(mask);
 
-			Conditions.NativeRequire(DbgHelp.SymInitialize(m_process, null, false));
+			Conditions.Require(DbgHelp.SymInitialize(m_process, null, false));
 
 			m_dllBase = DbgHelp.SymLoadModuleEx(m_process, IntPtr.Zero, m_imgStrNative,
 			                                    IntPtr.Zero, m_base, size, IntPtr.Zero, 0);

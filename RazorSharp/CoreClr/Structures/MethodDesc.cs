@@ -314,7 +314,7 @@ namespace RazorSharp.CoreClr.Structures
 		internal void SetStableEntryPoint(Pointer<byte> pCode)
 		{
 			Reset();
-			Conditions.NativeRequire(SetStableEntryPointInterlocked((ulong) pCode) > 0);
+			Conditions.Ensure(SetStableEntryPointInterlocked((ulong) pCode) > 0);
 		}
 
 		/// <summary>

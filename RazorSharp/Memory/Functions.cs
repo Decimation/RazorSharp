@@ -133,7 +133,7 @@ namespace RazorSharp.Memory
 
 		public static Delegate GetDelegateForFunctionPointer(IntPtr ptr, Type t)
 		{
-//			Conditions.RequiresNotNull(GetDelegate, nameof(GetDelegate));
+//			Conditions.NotNull(GetDelegate, nameof(GetDelegate));
 //			return GetDelegate(ptr, t);
 
 			return Marshal.GetDelegateForFunctionPointer(ptr, t);

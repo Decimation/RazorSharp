@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorCommon.Diagnostics;
+using RazorSharp.Memory;
 using RazorSharp.Native.Enums.Images;
 
 #endregion
@@ -23,7 +24,7 @@ namespace RazorSharp.Native.Structures.Images
 	{
 		static ImageSectionHeader()
 		{
-			Guard.UseRequires64Bit(nameof(ImageSectionHeader));
+			Conditions.Require(Mem.Is64Bit);
 		}
 
 		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = ImageSectionInfo.IMAGE_SIZEOF_SHORT_NAME)]

@@ -138,7 +138,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		static GCHeap()
 		{
-			Guard.UseRequires(!GCSettings.IsServerGC, nameof(GCHeap), "GC must be WKS");
+			Conditions.Require(!GCSettings.IsServerGC,  "GC must be WKS", nameof(GCHeap));
 			
 			Symcall.BindQuick(typeof(GCHeap));
 

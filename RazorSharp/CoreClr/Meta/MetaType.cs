@@ -114,7 +114,7 @@ namespace RazorSharp.CoreClr.Meta
 		private MetaField GetAnyField(string name)
 		{
 			var field = RuntimeType.GetAnyField(name);
-			Conditions.Requires(!field.IsLiteral, "Field cannot be literal");
+			Conditions.Require(!field.IsLiteral, "Field cannot be literal", nameof(field));
 			return new MetaField(field.GetFieldDesc());
 		}
 

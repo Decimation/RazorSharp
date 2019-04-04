@@ -171,7 +171,7 @@ namespace RazorSharp.Analysis
 				}
 			}
 			else {
-				Conditions.RequiresNotNull(fields, nameof(fields));
+				Conditions.NotNull(fields, nameof(fields));
 
 				foreach (var f in fields) {
 					Pointer<byte> rowPtr = f.GetAddress(ref t);
@@ -222,7 +222,7 @@ namespace RazorSharp.Analysis
 		private static ConsoleTable StackHeapTypeTable<T>(ref T t, ToStringOptions options)
 		{
 			var type = typeof(T).GetMetaType();
-			Conditions.RequiresClassType<T>();
+			Conditions.Require(!typeof(T).IsValueType);
 			Pointer<T> addr = Unsafe.AddressOf(ref t);
 			var row = new List<object>
 			{
@@ -236,7 +236,7 @@ namespace RazorSharp.Analysis
 		private static ConsoleTable StackValueTypeTable<T>(ref T t, ToStringOptions options)
 		{
 			var type = typeof(T).GetMetaType();
-			Conditions.RequiresValueType<T>();
+			Conditions.Require(typeof(T).IsValueType);
 			List<MetaField> fields     = type.Fields.Where(x => !x.IsStatic).ToList();
 			List<string>    fieldNames = fields.Select(x => x.Name).ToList();
 			var             table      = new ConsoleTable(fieldNames.ToArray());

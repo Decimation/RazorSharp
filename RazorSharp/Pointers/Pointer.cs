@@ -278,7 +278,7 @@ namespace RazorSharp.Pointers
 			int            i          = 0;
 			while (enumerator.MoveNext()) {
 				var current = enumerator.Current;
-				Conditions.RequiresNotNull(current, nameof(current));
+				Conditions.NotNull(current, nameof(current));
 
 				if (!current.Equals(this[i++])) {
 					enumerator.Dispose();
@@ -1297,14 +1297,14 @@ namespace RazorSharp.Pointers
 		///             <item>
 		///                 <description>
 		///                     If <typeparamref name="T" /> is a number type, its value will be returned as well its
-		///                     value in <see cref="Hex.ToHex(long)" /> format.
+		///                     value in <see cref="Hex.ToHex(long, ToStringOptions)"/> format.
 		///                 </description>
 		///             </item>
 		///         </list>
 		///     </para>
 		///     <para>
-		///         <c>"P"</c>: Pointer (<see cref="P:RazorSharp.Pointers.Pointer`1.Address" />) in <see cref="Hex.ToHex{T}" />
-		///         format
+		///         <c>"P"</c>: Pointer (<see cref="P:RazorSharp.Pointers.Pointer`1.Address" />) in
+		/// <see cref="Hex.ToHex(IntPtr, ToStringOptions)" /> format
 		///     </para>
 		///     <para><c>"I"</c>: Table of information </para>
 		///     <para>

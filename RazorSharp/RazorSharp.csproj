@@ -211,6 +211,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\Inspect.cs" />
+    <Compile Include="Core.cs" />
     <Compile Include="CoreClr\Clr.cs" />
     <Compile Include="CoreClr\Enums\CorElementType.cs" />
     <Compile Include="CoreClr\Enums\CorILMethodFlags.cs" />

@@ -42,7 +42,7 @@ namespace RazorSharp.Memory.Calling.Signatures
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void ApplySigcall(MethodInfo methodInfo)
 		{
-			Conditions.RequiresNotNull(methodInfo, nameof(methodInfo));
+			Conditions.NotNull(methodInfo, nameof(methodInfo));
 
 			var attr = methodInfo.GetCustomAttribute<SigcallAttribute>();
 

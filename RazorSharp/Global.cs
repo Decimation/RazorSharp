@@ -88,8 +88,8 @@ namespace RazorSharp
 			 * - Workstation Concurrent GC
 			 *
 			 */
-			Conditions.Requires64Bit();
-			Conditions.Requires(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+			Conditions.Require(Mem.Is64Bit);
+			Conditions.Require(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
 			/**
 			 * 4.0.30319.42000
@@ -97,11 +97,11 @@ namespace RazorSharp
 			 * Other versions will probably work but we're just making sure
 			 * todo - determine compatibility
 			 */
-			Conditions.Requires(Environment.Version == Clr.ClrVersion);
+			Conditions.Require(Environment.Version == Clr.ClrVersion);
 
-			Conditions.Requires(!GCSettings.IsServerGC);
+			Conditions.Require(!GCSettings.IsServerGC);
 
-			Conditions.Requires(Type.GetType("Mono.Runtime") == null);
+			Conditions.Require(Type.GetType("Mono.Runtime") == null);
 
 			if (Debugger.IsAttached) {
 				Log.Warning("Debugging is enabled: some features may not work correctly");
@@ -123,7 +123,7 @@ namespace RazorSharp
 		/// </summary>
 		internal static void Close()
 		{
-			Conditions.Requires(IsSetup);
+			Conditions.Require(IsSetup);
 
 			if (Mem.IsMemoryInUse) {
 				Log.Warning("Memory leak: {Count} dangling pointer(s)", Mem.AllocCount);

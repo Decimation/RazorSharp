@@ -81,7 +81,7 @@ namespace RazorSharp.CoreClr
 
 		internal static ArrayObject** GetArrayObject<T>(ref T t) where T : class
 		{
-			Conditions.RequiresType<Array, T>();
+			Conditions.Require(typeof(T).IsArray);
 
 			return (ArrayObject**) Unsafe.AddressOf(ref t);
 		}
@@ -189,7 +189,7 @@ namespace RazorSharp.CoreClr
 
 		internal static Pointer<FieldDesc> GetFieldDesc(this FieldInfo fieldInfo)
 		{
-			Conditions.RequiresNotNull(fieldInfo, nameof(fieldInfo));
+			Conditions.NotNull(fieldInfo, nameof(fieldInfo));
 			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
 
 			if (Environment.Is64BitProcess) {
@@ -223,7 +223,7 @@ namespace RazorSharp.CoreClr
 
 		internal static Pointer<MethodDesc> GetMethodDesc(this MethodInfo methodInfo)
 		{
-			Conditions.RequiresNotNull(methodInfo, nameof(methodInfo));
+			Conditions.NotNull(methodInfo, nameof(methodInfo));
 
 			var methodHandle = methodInfo.MethodHandle;
 			var md           = (MethodDesc*) methodHandle.Value;
@@ -244,7 +244,7 @@ namespace RazorSharp.CoreClr
 		internal static Pointer<MethodDesc>[] GetMethodDescs(this Type t, BindingFlags flags = ReflectionUtil.ALL_FLAGS)
 		{
 			MethodInfo[] methods = t.GetMethods(flags);
-			Conditions.RequiresNotNull(methods, nameof(methods));
+			Conditions.NotNull(methods, nameof(methods));
 			var arr = new Pointer<MethodDesc>[methods.Length];
 
 			for (int i = 0; i < arr.Length; i++) {
@@ -258,5 +258,19 @@ namespace RazorSharp.CoreClr
 		}
 
 		#endregion
+
+		/// <summary>
+		///     Returns the field offset of the specified field, by name.
+		/// </summary>
+		/// <remarks>
+		///     Returned from <see cref="FieldDesc.Offset" />
+		/// </remarks>
+		/// <param name="fieldName">Name of the field</param>
+		/// <typeparam name="TType">Enclosing type</typeparam>
+		/// <returns>Field offset</returns>
+		public static int OffsetOf<TType>(string fieldName)
+		{
+			return typeof(TType).GetFieldDesc(fieldName).Reference.Offset;
+		}
 	}
 }

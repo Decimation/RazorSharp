@@ -89,7 +89,7 @@ namespace RazorSharp.CoreClr.Structures.HeapObjects
 		private char* GetPointer()
 		{
 			var __this = (char*) Unsafe.AddressOf(ref this);
-			Conditions.RequiresNotNull(__this, nameof(__this));
+			Conditions.NotNull(__this, nameof(__this));
 			return __this;
 		}
 

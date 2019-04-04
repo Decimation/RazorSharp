@@ -72,7 +72,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 			}
 
 
-			Conditions.RequiresNotNull(fullSym, nameof(fullSym));
+			Conditions.NotNull(fullSym, nameof(fullSym));
 
 			return fullSym;
 		}
@@ -121,7 +121,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 			long[]          offsets   = sym.GetSymOffsets(contexts.ToArray());
 			Pointer<byte>[] addresses = Modules.GetAddresses(baseAttr.Module, offsets).ToArray();
 
-			Conditions.Requires(addresses.Length == methods.Length);
+			Conditions.Require(addresses.Length == methods.Length);
 
 			for (int i = 0; i < methods.Length; i++) {
 //				Global.Log.Debug("Binding {Name} to {Addr} (offset: {Offset})", methods[i].Name,

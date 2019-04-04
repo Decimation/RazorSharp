@@ -116,8 +116,8 @@ namespace RazorSharp.Memory
 		/// <returns>A double indirection pointer to the unmanaged instance.</returns>
 		public static Pointer<T> AllocUnmanagedInstance<T>() where T : class
 		{
-			Conditions.RequiresTypeNot<Array, T>("Use AllocUnmanaged for arrays");
-			Conditions.RequiresTypeNot<string, T>();
+			Conditions.Require(!typeof(T).IsArray);
+			Conditions.Require(typeof(T) == typeof(string));
 
 
 			// Minimum size required for an instance
@@ -166,7 +166,7 @@ namespace RazorSharp.Memory
 		/// <returns>A pointer to the allocated memory</returns>
 		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
 		{
-			Conditions.RequiresArg(elemCnt > 0, nameof(elemCnt));
+			Conditions.Require(elemCnt > 0, nameof(elemCnt));
 			int size  = Unsafe.SizeOf<T>() * elemCnt;
 			var alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
@@ -261,7 +261,7 @@ namespace RazorSharp.Memory
 
 			// VirtualProtect(buffer, code.size(), PAGE_EXECUTE_READ, &dummy);
 
-			Conditions.NativeRequire(Kernel32.VirtualProtect(alloc, (uint) opCodes.Length,
+			Conditions.Ensure(Kernel32.VirtualProtect(alloc, (uint) opCodes.Length,
 			                                                 MemoryProtection.ExecuteRead,
 			                                                 out _));
 
@@ -271,7 +271,7 @@ namespace RazorSharp.Memory
 
 		public static void FreeCode(Pointer<byte> fn)
 		{
-			Conditions.NativeRequire(Kernel32.VirtualFree(fn.Address, 0, FreeTypes.Release));
+			Conditions.Ensure(Kernel32.VirtualFree(fn.Address, 0, FreeTypes.Release));
 			AllocCount--;
 		}
 
@@ -409,7 +409,7 @@ namespace RazorSharp.Memory
 
 		internal static void StackInit<T>(ref byte* b)
 		{
-			Conditions.Requires(IsOnStack(b));
+			Conditions.Require(IsOnStack(b));
 
 			// ObjHeader
 			Zero(b, sizeof(ObjHeader));

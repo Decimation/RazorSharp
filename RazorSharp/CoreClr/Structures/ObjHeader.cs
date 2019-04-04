@@ -6,6 +6,7 @@ using System.Text;
 using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr.Enums.ObjHeader;
+using RazorSharp.Memory;
 
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -43,8 +44,8 @@ namespace RazorSharp.CoreClr.Structures
 
 		static ObjHeader()
 		{
-			Conditions.Requires(sizeof(ObjHeader) == IntPtr.Size);
-			Guard.UseRequires64Bit(nameof(ObjHeader));
+			Conditions.Require(sizeof(ObjHeader) == IntPtr.Size);
+			Conditions.Require(Mem.Is64Bit);
 		}
 
 		public void SetBit(uint uBit)

@@ -59,7 +59,7 @@ namespace RazorSharp.Memory
 
 		public static void Free<T>(Pointer<T> ptr)
 		{
-			Conditions.Requires(IsAllocated(ptr));
+			Conditions.Require(IsAllocated(ptr));
 
 			var rg     = GetRange(ptr.Address);
 			var origin = rg.LowAddress;

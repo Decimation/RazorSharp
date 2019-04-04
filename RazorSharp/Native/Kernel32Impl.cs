@@ -48,8 +48,8 @@ namespace RazorSharp.Native
 			var ctx     = new Context64();
 			var hThread = OpenThread(ThreadAccess.All, (int) GetCurrentThreadId());
 			ctx.ContextFlags = flags;
-			Conditions.NativeRequire(GetThreadContext(hThread, ref ctx));
-			Conditions.NativeRequire(CloseHandle(hThread));
+			Conditions.Ensure(GetThreadContext(hThread, ref ctx));
+			Conditions.Ensure(CloseHandle(hThread));
 			return ctx;
 		}
 
@@ -57,8 +57,8 @@ namespace RazorSharp.Native
 		{
 			var hThread = OpenThread(ThreadAccess.All, (int) GetCurrentThreadId());
 
-			Conditions.NativeRequire(SetThreadContext(hThread, ref ctx));
-			Conditions.NativeRequire(CloseHandle(hThread));
+			Conditions.Ensure(SetThreadContext(hThread, ref ctx));
+			Conditions.Ensure(CloseHandle(hThread));
 		}
 
 		internal static (IntPtr Low, IntPtr High) GetCurrentThreadStackLimits()
@@ -82,7 +82,7 @@ namespace RazorSharp.Native
 		internal static void VirtualProtect(Pointer<byte>        lpAddress, int dwSize, MemoryProtection flNewProtect,
 		                                    out MemoryProtection lpflOldProtect)
 		{
-			Conditions.NativeRequire(VirtualProtect(lpAddress.Address, (uint) dwSize, flNewProtect,
+			Conditions.Ensure(VirtualProtect(lpAddress.Address, (uint) dwSize, flNewProtect,
 			                                        out lpflOldProtect));
 		}
 
@@ -90,7 +90,7 @@ namespace RazorSharp.Native
 		{
 			var info    = new MemoryBasicInformation();
 			var lpValue = VirtualQuery(lpAddress, ref info, (uint) sizeof(MemoryBasicInformation));
-			Conditions.Requires(lpValue.ToInt64() == sizeof(MemoryBasicInformation));
+			Conditions.Require(lpValue.ToInt64() == sizeof(MemoryBasicInformation));
 			return info;
 		}
 
@@ -119,12 +119,12 @@ namespace RazorSharp.Native
 			var   mem               = new byte[cb];
 
 			// Read the memory
-			Conditions.NativeRequire(ReadProcessMemory(hProc, lpBaseAddress.Address, mem, size, ref numberOfBytesRead));
+			Conditions.Ensure(ReadProcessMemory(hProc, lpBaseAddress.Address, mem, size, ref numberOfBytesRead));
 
-			Conditions.Requires(numberOfBytesRead == size);
+			Conditions.Ensure(numberOfBytesRead == size);
 
 			// Close the handle
-			Conditions.NativeRequire(CloseHandle(hProc));
+			Conditions.Ensure(CloseHandle(hProc));
 			return mem;
 		}
 
@@ -136,14 +136,14 @@ namespace RazorSharp.Native
 			uint  size              = (uint) Unsafe.SizeOf<T>();
 
 			// Read the memory
-			Conditions.NativeRequire(ReadProcessMemory(hProc, lpBaseAddress.Address,
+			Conditions.Ensure(ReadProcessMemory(hProc, lpBaseAddress.Address,
 			                                           Unsafe.AddressOf(ref t).Address,
 			                                           size, ref numberOfBytesRead));
 
-			Conditions.NativeRequire(numberOfBytesRead == size);
+			Conditions.Ensure(numberOfBytesRead == size);
 
 			// Close the handle
-			Conditions.NativeRequire(CloseHandle(hProc));
+			Conditions.Ensure(CloseHandle(hProc));
 			return t;
 		}
 
@@ -159,14 +159,14 @@ namespace RazorSharp.Native
 			int dwSize               = Unsafe.SizeOf<T>();
 
 			// Write the memory
-			Conditions.NativeRequire(WriteProcessMemory(hProc, lpBaseAddress.Address,
+			Conditions.Ensure(WriteProcessMemory(hProc, lpBaseAddress.Address,
 			                                            Unsafe.AddressOf(ref value).Address,
 			                                            dwSize, ref numberOfBytesWritten));
 
-			Conditions.NativeRequire(numberOfBytesWritten == dwSize);
+			Conditions.Ensure(numberOfBytesWritten == dwSize);
 
 			// Close the handle
-			Conditions.NativeRequire(CloseHandle(hProc));
+			Conditions.Ensure(CloseHandle(hProc));
 		}
 
 		#endregion
