@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using RazorSharp.Native.Enums.Images;
+using RazorSharp.Native.Structures;
 using RazorSharp.Native.Structures.Images;
 
 #endregion
@@ -70,7 +71,24 @@ namespace RazorSharp.Native
 		                                           IntPtr mask,
 		                                           IntPtr callback,
 		                                           IntPtr pUserContext);
+		
+		
 
+		[DllImport(DBG_HELP_DLL)]
+		internal static extern uint SymGetOptions();
+
+		[DllImport(DBG_HELP_DLL)]
+		internal static extern uint SymSetOptions(uint options);
+
+		[DllImport(DBG_HELP_DLL)]
+		internal static extern uint SymLoadModule64(IntPtr hProc, IntPtr h, string p, string s, ulong baseAddr,
+		                                            uint   fileSize);
+		
+		// BOOL SymGetModuleInfo64(HANDLE hProcess, DWORD64 qwAddr, PIMAGEHLP_MODULE64 ModuleInfo)
+		
+		[DllImport(DBG_HELP_DLL, SetLastError = true)]
+		internal static extern unsafe bool SymGetModuleInfo64(IntPtr hProc, ulong qwAddr, IntPtr pModInfo);
+		
 		[DllImport(DBG_HELP_DLL)]
 		internal static extern ImageNtHeaders64* ImageNtHeader(IntPtr hModule);
 
@@ -78,6 +96,10 @@ namespace RazorSharp.Native
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool SymFromName(IntPtr hProcess, IntPtr name, IntPtr pSymbol);
 
+		// BOOL SymUnloadModule64(HANDLE hProcess, DWORD64 BaseOfDll)
+		[DllImport(DBG_HELP_DLL)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		internal static extern bool SymUnloadModule64(IntPtr hProc, ulong baseAddr);
 
 		/*BOOL CALLBACK EnumSymProc(PSYMBOL_INFO pSymInfo, ULONG, PVOID UserContext)
 		{

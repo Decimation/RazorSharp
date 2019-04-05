@@ -78,11 +78,15 @@ namespace Test
 		{
 			Core.Setup();
 
-			using (var sym = new SymEnvironment(Clr.ClrPdb.FullName)) {
-				foreach (var s in sym.Search("JIT_GetRuntimeType")) {
-					Console.WriteLine(s);
-				}
-			}
+			
+			string img = Clr.ClrPdb.FullName;
+			Console.WriteLine(img);
+			var e = new EnumSymbols();
+			e.LoadAll(img);
+
+			
+			
+			
 
 
 			Core.Close();

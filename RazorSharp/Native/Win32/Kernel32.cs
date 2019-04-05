@@ -2,6 +2,8 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.Native.Enums;
 using RazorSharp.Native.Enums.ThreadContext;
@@ -21,10 +23,34 @@ namespace RazorSharp.Native
 
 		private const string KERNEL32_DLL = "kernel32.dll";
 
+		internal static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
+
+		#region File
+
+		internal const uint INVALID_FILE_SIZE = (uint) 0xFFFFFFFF;
+
+		[DllImport(KERNEL32_DLL, SetLastError = true, CharSet = CharSet.Auto)]
+		public static extern IntPtr CreateFile(
+			string                                       fileName,
+			[MarshalAs(UnmanagedType.U4)] FileAccess     fileAccess,
+			[MarshalAs(UnmanagedType.U4)] FileShare      fileShare,
+			IntPtr                                       securityAttributes, // optional SECURITY_ATTRIBUTES structure can be passed
+			[MarshalAs(UnmanagedType.U4)] FileMode       creationDisposition,
+			[MarshalAs(UnmanagedType.U4)] FileAttributes flagsAndAttributes,
+			IntPtr                                       template);
+
+		// DWORD GetFileSize(
+		// 	HANDLE  hFile,
+		// 	LPDWORD lpFileSizeHigh
+		// );
+		[DllImport(KERNEL32_DLL)]
+		public static extern uint GetFileSize(IntPtr hFile, ushort* lpFileSizeHigh);
+		
+		#endregion
 
 		[DllImport(KERNEL32_DLL)]
 		public static extern uint GetLastError();
-		
+
 		[DllImport(KERNEL32_DLL, SetLastError = true, PreserveSig = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool CloseHandle(IntPtr hObject);

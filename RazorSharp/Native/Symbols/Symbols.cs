@@ -139,7 +139,7 @@ namespace RazorSharp.Native
 			int maxCmpLen = str.Length;
 
 			if (maxCmpLen == pSymInfo->NameLen) {
-				string s = Marshal.PtrToStringAnsi(new IntPtr(&pSymInfo->Name), (int) pSymInfo->NameLen);
+				string s = NativeHelp.GetString(&pSymInfo->Name, pSymInfo->NameLen);
 
 				if (String.CompareOrdinal(s, str) == 0) {
 					//var childs = new FindChildrenParams();

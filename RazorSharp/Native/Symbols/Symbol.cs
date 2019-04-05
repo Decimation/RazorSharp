@@ -42,7 +42,7 @@ namespace RazorSharp.Native.Structures.Symbols
 
 		internal Symbol(SymbolInfo* pSymInfo)
 		{
-			Name = Marshal.PtrToStringAuto(new IntPtr(&pSymInfo->Name), (int) pSymInfo->NameLen);
+			Name = NativeHelp.GetString(&pSymInfo->Name, pSymInfo->NameLen);
 
 			SizeOfStruct = pSymInfo->SizeOfStruct;
 			TypeIndex    = pSymInfo->TypeIndex;
