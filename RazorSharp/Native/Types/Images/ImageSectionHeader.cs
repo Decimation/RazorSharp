@@ -6,6 +6,9 @@ using RazorCommon.Diagnostics;
 using RazorSharp.Memory;
 using RazorSharp.Native.Enums.Images;
 
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+
 #endregion
 
 // ReSharper disable BuiltInTypeReferenceStyle
@@ -29,36 +32,36 @@ namespace RazorSharp.Native.Structures.Images
 
 		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = ImageSectionInfo.IMAGE_SIZEOF_SHORT_NAME)]
 		[FieldOffset(0)]
-		public readonly string Name;
+		public string Name;
 
 		[FieldOffset(8)]
-		public readonly DWORD PhysicalAddress;
+		public DWORD PhysicalAddress;
 
 		[FieldOffset(8)]
-		public readonly DWORD VirtualSize;
+		public DWORD VirtualSize;
 
 		[FieldOffset(12)]
-		public readonly DWORD VirtualAddress;
+		public DWORD VirtualAddress;
 
 		[FieldOffset(14)]
-		public readonly DWORD SizeOfRawData;
+		public DWORD SizeOfRawData;
 
 		[FieldOffset(18)]
-		public readonly DWORD PointerToRawData;
+		public DWORD PointerToRawData;
 
 		[FieldOffset(22)]
-		public readonly DWORD PointerToRelocations;
+		public DWORD PointerToRelocations;
 
 		[FieldOffset(26)]
-		public readonly DWORD PointerToLinenumbers;
+		public DWORD PointerToLinenumbers;
 
 		[FieldOffset(30)]
-		public readonly WORD NumberOfRelocations;
+		public WORD NumberOfRelocations;
 
 		[FieldOffset(32)]
-		public readonly WORD NumberOfLinenumbers;
+		public WORD NumberOfLinenumbers;
 
 		[FieldOffset(36)]
-		public readonly ImageSectionCharacteristics Characteristics;
+		public ImageSectionCharacteristics Characteristics;
 	}
 }

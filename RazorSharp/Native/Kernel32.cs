@@ -21,8 +21,6 @@ namespace RazorSharp.Native
 
 		private const string KERNEL32_DLL = "kernel32.dll";
 
-		[DllImport(KERNEL32_DLL)]
-		internal static extern uint GetLastError();
 
 		[DllImport(KERNEL32_DLL, SetLastError = true, PreserveSig = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
@@ -150,8 +148,8 @@ namespace RazorSharp.Native
 		/// <param name="length">The size of the buffer pointed to by the <paramref name="buffer" /> parameter, in bytes.</param>
 		/// <returns>
 		///     The return value is the actual number of bytes returned in the information buffer. If the function fails, the
-		///     return value is zero. To get extended error information, call <see cref="GetLastError" />. Possible error values
-		///     include <see cref="ERROR_INVALID_PARAMETER" />.
+		///     return value is zero. To get extended error information, call <see cref="Marshal.GetLastWin32Error" />.
+		/// Possible error values include <see cref="ERROR_INVALID_PARAMETER" />.
 		/// </returns>
 		[DllImport(KERNEL32_DLL)]
 		internal static extern IntPtr VirtualQuery(IntPtr address, ref MemoryBasicInformation buffer, uint length);

@@ -41,7 +41,17 @@ namespace RazorSharp.CoreClr
 
 		#endregion
 
+		internal static int FindComponentSize<T>(T value)
+		{
+			var mt = ReadMethodTable(ref value);
+			return mt.Reference.ComponentSize;
+		}
 
+		internal static bool IsArray<T>()
+		{
+			return typeof(T).IsArray || typeof(T) == typeof(Array);
+		}
+		
 		/// <summary>
 		///     Reads a reference type's <see cref="ObjHeader" />
 		/// </summary>

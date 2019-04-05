@@ -1,9 +1,12 @@
 #region
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using JetBrains.Annotations;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
+using RazorSharp.Native;
 using RazorSharp.Pointers;
 
 #endregion
@@ -18,7 +21,7 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     The <see cref="ProcessModuleCollection" /> of the current <see cref="Process" />
 		/// </summary>
-		private static ProcessModuleCollection ProcessModules => Process.GetCurrentProcess().Modules;
+		internal static ProcessModuleCollection CurrentModules => Process.GetCurrentProcess().Modules;
 
 		internal static ProcessModule GetModule(string name)
 		{
@@ -27,19 +30,21 @@ namespace RazorSharp.Memory
 				return Clr.ClrModule;
 			}
 
-			foreach (ProcessModule m in ProcessModules)
+			foreach (ProcessModule m in CurrentModules)
 				if (m.ModuleName == name)
 					return m;
 
 			return null;
 		}
 
+		internal static IntPtr GetModuleHandle(string name) => Kernel32.GetModuleHandle(name);
+
+		internal static IntPtr GetModuleHandle(ProcessModule module) => GetModuleHandle(module.ModuleName);
 
 		internal static Pointer<byte> GetBaseAddress(string module)
 		{
-			var           pm  = GetModule(module);
-			Pointer<byte> ptr = pm.BaseAddress;
-			return ptr;
+			var pm = GetModule(module);
+			return pm.BaseAddress;
 		}
 
 		internal static IEnumerable<Pointer<byte>> GetAddresses(string module, long[] offset)
@@ -64,7 +69,7 @@ namespace RazorSharp.Memory
 
 		public static ProcessModule FromAddress(Pointer<byte> ptr)
 		{
-			foreach (ProcessModule module in ProcessModules) {
+			foreach (ProcessModule module in CurrentModules) {
 				var lo = module.BaseAddress;
 				var hi = lo + module.ModuleMemorySize;
 

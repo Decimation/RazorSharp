@@ -330,10 +330,7 @@ namespace RazorSharp.Pointers
 		#endregion
 
 
-		public MemoryBasicInformation Query()
-		{
-			return Kernel32.VirtualQuery(Address);
-		}
+		public MemoryBasicInformation Query() => Kernel32.VirtualQuery(Address);
 
 		public bool IsWritable => !IsReadOnly;
 		public bool IsReadOnly => Query().Protect.HasFlag(MemoryProtection.ReadOnly);
@@ -341,7 +338,7 @@ namespace RazorSharp.Pointers
 
 		private string DbgToString()
 		{
-			return String.Format("Address = {0} | Value = {1}", ToString(FMT_P), Reference.ToString());
+			return String.Format("Address = {0} | Value = {1}", ToString(PointerFormat.FMT_P), Reference.ToString());
 		}
 
 
@@ -828,12 +825,6 @@ namespace RazorSharp.Pointers
 			Mem.Zero(m_value, byteCnt);
 		}
 
-		public PinHandle TryPin()
-		{
-			Conditions.Assert(!typeof(T).IsValueType, "Value types do not need to be pinned");
-			return new ObjectPinHandle(Value);
-		}
-
 
 		public ConsoleTable ToInfoTable()
 		{
@@ -842,10 +833,10 @@ namespace RazorSharp.Pointers
 				: new ConsoleTable("Address", "Pointer", "Value", "Aligned", "Null", "Element size", "Type");
 
 			if (typeof(T).IsValueType)
-				table.AddRow(Hex.ToHex(m_value), ToString(FMT_O), IsAligned.Prettify(),
+				table.AddRow(Hex.ToHex(m_value), ToString(PointerFormat.FMT_O), IsAligned.Prettify(),
 				             IsNull.Prettify(), ElementSize, String.Format("<{0}>", typeof(T).Name));
 			else
-				table.AddRow(Hex.ToHex(m_value), Hex.ToHex(ReadAny<long>()), ToString(FMT_O),
+				table.AddRow(Hex.ToHex(m_value), Hex.ToHex(ReadAny<long>()), ToString(PointerFormat.FMT_O),
 				             IsAligned.Prettify(), IsNull.Prettify(), ElementSize,
 				             String.Format("<{0}>", typeof(T).Name));
 
@@ -861,9 +852,9 @@ namespace RazorSharp.Pointers
 			for (int i = 0; i < elemCnt; i++) {
 				Pointer<T> ptr = AddressOfIndex(i);
 				if (!typeof(T).IsValueType)
-					table.AddRow(ptr.ToString(FMT_P), i, Hex.ToHex(ReadAny<long>(i)), ptr.ToStringSafe());
+					table.AddRow(ptr.ToString(PointerFormat.FMT_P), i, Hex.ToHex(ReadAny<long>(i)), ptr.ToStringSafe());
 				else
-					table.AddRow(ptr.ToString(FMT_P), i, ptr.ToStringSafe());
+					table.AddRow(ptr.ToString(PointerFormat.FMT_P), i, ptr.ToStringSafe());
 			}
 
 			return table;
@@ -902,37 +893,25 @@ namespace RazorSharp.Pointers
 		///     Converts <see cref="Address" /> to a 32-bit signed integer.
 		/// </summary>
 		/// <returns></returns>
-		public int ToInt32()
-		{
-			return (int) m_value;
-		}
+		public int ToInt32() => (int) m_value;
 
 		/// <summary>
 		///     Converts <see cref="Address" /> to a 64-bit signed integer.
 		/// </summary>
 		/// <returns></returns>
-		public long ToInt64()
-		{
-			return (long) m_value;
-		}
+		public long ToInt64() => (long) m_value;
 
 		/// <summary>
 		///     Converts <see cref="Address" /> to a 64-bit unsigned integer.
 		/// </summary>
 		/// <returns></returns>
-		public ulong ToUInt64()
-		{
-			return (ulong) m_value;
-		}
+		public ulong ToUInt64() => (ulong) m_value;
 
 		/// <summary>
 		///     Converts <see cref="Address" /> to a 32-bit unsigned integer.
 		/// </summary>
 		/// <returns></returns>
-		public uint ToUInt32()
-		{
-			return (uint) m_value;
-		}
+		public uint ToUInt32() => (uint) m_value;
 
 		#endregion
 
@@ -958,50 +937,23 @@ namespace RazorSharp.Pointers
 
 		#region Implicit and explicit conversions
 
-		public static implicit operator Pointer<T>(Pointer<byte> v)
-		{
-			return v.Address;
-		}
+		public static implicit operator Pointer<T>(Pointer<byte> v) => v.Address;
 
-		public static implicit operator Pointer<T>(void* v)
-		{
-			return new Pointer<T>(v);
-		}
+		public static implicit operator Pointer<T>(void* v) => new Pointer<T>(v);
 
-		public static implicit operator Pointer<T>(IntPtr p)
-		{
-			return new Pointer<T>(p.ToPointer());
-		}
+		public static implicit operator Pointer<T>(IntPtr p) => new Pointer<T>(p.ToPointer());
 
-		public static implicit operator Pointer<T>(long l)
-		{
-			return new Pointer<T>(l);
-		}
+		public static implicit operator Pointer<T>(long l) => new Pointer<T>(l);
 
-		public static implicit operator Pointer<T>(ulong ul)
-		{
-			return new Pointer<T>(ul);
-		}
+		public static implicit operator Pointer<T>(ulong ul) => new Pointer<T>(ul);
 
-		public static explicit operator void*(Pointer<T> ptr)
-		{
-			return ptr.ToPointer();
-		}
+		public static explicit operator void*(Pointer<T> ptr) => ptr.ToPointer();
 
-		public static explicit operator long(Pointer<T> ptr)
-		{
-			return ptr.ToInt64();
-		}
+		public static explicit operator long(Pointer<T> ptr) => ptr.ToInt64();
 
-		public static explicit operator ulong(Pointer<T> ptr)
-		{
-			return ptr.ToUInt64();
-		}
+		public static explicit operator ulong(Pointer<T> ptr) => ptr.ToUInt64();
 
-		public static explicit operator Pointer<byte>(Pointer<T> ptr)
-		{
-			return ptr.ToUInt64();
-		}
+		public static explicit operator Pointer<byte>(Pointer<T> ptr) => ptr.ToUInt64();
 
 		#endregion
 
@@ -1013,10 +965,7 @@ namespace RazorSharp.Pointers
 		/// </summary>
 		/// <param name="current">Current pointer (high address)</param>
 		/// <returns>The index</returns>
-		public int OffsetIndex(Pointer<byte> current)
-		{
-			return OffsetIndex<T>(current);
-		}
+		public int OffsetIndex(Pointer<byte> current) => OffsetIndex<T>(current);
 
 		/// <summary>
 		///     Returns the element index of a pointer relative to <see cref="Address" />
@@ -1031,10 +980,7 @@ namespace RazorSharp.Pointers
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private IntPtr Offset(int elemCnt)
-		{
-			return Offset<T>(elemCnt);
-		}
+		private IntPtr Offset(int elemCnt) => Offset<T>(elemCnt);
 
 		/// <summary>
 		///     Offsets a pointer by <paramref name="elemCnt" /> elements.
@@ -1055,6 +1001,18 @@ namespace RazorSharp.Pointers
 			return Address + size;
 		}
 
+
+		public Pointer<T> Add<TType>(int elemCnt = 1)
+		{
+			var elemSize = Unsafe.SizeOf<TType>() * elemCnt;
+			return Add(elemSize);
+		}
+
+		public Pointer<T> Subtract<TType>(int elemCnt = 1)
+		{
+			var elemSize = Unsafe.SizeOf<TType>() * elemCnt;
+			return Subtract(elemSize);
+		}
 
 		/// <summary>
 		///     Increment <see cref="Address" /> by the specified number of bytes
@@ -1273,44 +1231,7 @@ namespace RazorSharp.Pointers
 		/// <summary>
 		/// </summary>
 		/// <param name="format">
-		///     <para>
-		///         <c>"O"</c>: Object (<see cref="P:RazorSharp.Pointers.Pointer`1.Reference" />).
-		///         <list type="bullet">
-		///             <item>
-		///                 <description>
-		///                     If <typeparamref name="T" /> is <see cref="Char" />, it will be
-		///                     returned as a C-string represented as a <see cref="String" />.
-		///                 </description>
-		///             </item>
-		///             <item>
-		///                 <description>
-		///                     If <typeparamref name="T" /> is a reference type, its string representation will be
-		///                     returned along with its heap pointer in <c>"P"</c> format.
-		///                 </description>
-		///             </item>
-		///             <item>
-		///                 <description>
-		///                     If <typeparamref name="T" /> is an <see cref="IList" /> type, its contents will be returned
-		///                     along with its heap pointer in <c>"P"</c> format.
-		///                 </description>
-		///             </item>
-		///             <item>
-		///                 <description>
-		///                     If <typeparamref name="T" /> is a number type, its value will be returned as well its
-		///                     value in <see cref="Hex.ToHex(long, ToStringOptions)"/> format.
-		///                 </description>
-		///             </item>
-		///         </list>
-		///     </para>
-		///     <para>
-		///         <c>"P"</c>: Pointer (<see cref="P:RazorSharp.Pointers.Pointer`1.Address" />) in
-		/// <see cref="Hex.ToHex(IntPtr, ToStringOptions)" /> format
-		///     </para>
-		///     <para><c>"I"</c>: Table of information </para>
-		///     <para>
-		///         <c>"B"</c>: Both <c>"P"</c> and <c>"O"</c>
-		///     </para>
-		///     <para><c>"N"</c>: 64-bit integer (<see cref="ToInt64" />) </para>
+		///     See <see cref="PointerFormat"/> for format options
 		/// </param>
 		/// <param name="formatProvider"></param>
 		/// <returns></returns>
@@ -1318,23 +1239,23 @@ namespace RazorSharp.Pointers
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			if (String.IsNullOrEmpty(format))
-				format = DefaultFormat;
+				format = PointerFormat.DefaultFormat;
 
 			if (formatProvider == null)
 				formatProvider = CultureInfo.CurrentCulture;
 
 
 			switch (format.ToUpperInvariant()) {
-				case FMT_N:
+				case PointerFormat.FMT_N:
 					return ToInt64().ToString();
-				case FMT_O:
+				case PointerFormat.FMT_O:
 					return ToStringSafe();
-				case FMT_I:
+				case PointerFormat.FMT_I:
 					return ToInfoTable().ToMarkDownString();
-				case FMT_P:
+				case PointerFormat.FMT_P:
 					return Hex.ToHex(ToInt64());
 
-				case FMT_B:
+				case PointerFormat.FMT_B:
 					string thisStr = ToStringSafe();
 
 					string typeName = typeof(T).ContainsAnyGenericParameters()
@@ -1346,7 +1267,7 @@ namespace RazorSharp.Pointers
 					return String.Format("{0} @ {1}: {2}", typeNameDisplay, Hex.ToHex(Address),
 					                     thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
 				default:
-					goto case FMT_O;
+					goto case PointerFormat.FMT_O;
 			}
 		}
 
@@ -1383,7 +1304,7 @@ namespace RazorSharp.Pointers
 					valueStr = Reference == null ? StringConstants.NULL_STR : Reference.ToString();
 
 				RETURN:
-				return String.Format("{0} ({1})", valueStr, heapPtr.ToString(FMT_P));
+				return String.Format("{0} ({1})", valueStr, heapPtr.ToString(PointerFormat.FMT_P));
 			}
 
 
@@ -1399,21 +1320,9 @@ namespace RazorSharp.Pointers
 		[Pure]
 		public override string ToString()
 		{
-			return ToString(DefaultFormat);
+			return ToString(PointerFormat.DefaultFormat);
 		}
 
 		#endregion
-
-		#region Constants
-
-		private const string FMT_O = "O";
-		private const string FMT_P = "P";
-		private const string FMT_I = "I";
-		private const string FMT_B = "B";
-		private const string FMT_N = "N";
-
-		#endregion
-
-		public static string DefaultFormat { get; set; } = FMT_B;
 	}
 }

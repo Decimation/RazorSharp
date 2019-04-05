@@ -10,6 +10,7 @@ using RazorCommon.Strings;
 using RazorSharp.Native;
 using RazorSharp.Native.Structures.Images;
 using RazorSharp.Pointers;
+// ReSharper disable InconsistentNaming
 
 #endregion
 
@@ -100,7 +101,7 @@ namespace RazorSharp.Memory
 
 		public static void DumpAllSegments()
 		{
-			foreach (ProcessModule v in Process.GetCurrentProcess().Modules) {
+			foreach (ProcessModule v in Modules.CurrentModules) {
 				DumpSegments(v.ModuleName);
 			}
 		}
@@ -139,13 +140,21 @@ namespace RazorSharp.Memory
 		{
 			var    s      = GetSegment(segment, module);
 			byte[] segMem = Mem.ReadBytes(s.SectionAddress, 0, s.SectionSize);
-			for (int i = 0; i < s.SectionSize; i += IntPtr.Size)
-				if (new ArraySegment<byte>(segMem, i, IntPtr.Size).SequenceEqual(mem))
+			for (int i = 0; i < s.SectionSize; i += IntPtr.Size) {
+				var rgSeg = new ArraySegment<byte>(segMem, i, IntPtr.Size);
+				if (rgSeg.SequenceEqual(mem))
 					return (s.SectionAddress + i).Address;
+			}
+				
 
 			return IntPtr.Zero;
 		}
 
+		public static unsafe Pointer<ImageNtHeaders64> GetHeader64(ProcessModule module)
+		{
+			return DbgHelp.ImageNtHeader(Modules.GetModuleHandle(module));
+		}
+		
 		public static unsafe ImageSectionInfo[] GetPESectionInfo(IntPtr hModule)
 		{
 			// get the location of the module's IMAGE_NT_HEADERS structure

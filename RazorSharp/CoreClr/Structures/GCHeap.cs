@@ -56,12 +56,12 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		///     The lowest address of the global GC heap.
 		/// </summary>
-		public static IntPtr LowestAddress => g_lowest_address;
+		public static Pointer<byte> LowestAddress => g_lowest_address;
 
 		/// <summary>
 		///     The highest address of the global GC heap.
 		/// </summary>
-		public static IntPtr HighestAddress => g_highest_address;
+		public static Pointer<byte> HighestAddress => g_highest_address;
 
 		/// <summary>
 		///     Total size of the managed GC heap

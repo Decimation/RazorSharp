@@ -9,6 +9,7 @@ using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Fixed;
 using RazorSharp.Pointers;
 
 #endregion
@@ -20,52 +21,6 @@ namespace RazorSharp
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
-
-
-	/// <summary>
-	///     Offset options for <see cref="Unsafe.AddressOfHeap{T}(ref T, OffsetType)" />
-	/// </summary>
-	public enum OffsetType
-	{
-		/// <summary>
-		///     Return the pointer offset by <c>-</c><see cref="IntPtr.Size" />,
-		///     so it points to the object's <see cref="ObjHeader" />.
-		/// </summary>
-		Header,
-
-		/// <summary>
-		///     If the type is a <see cref="string" />, return the
-		///     pointer offset by <see cref="RuntimeHelpers.OffsetToStringData" /> so it
-		///     points to the string's characters.
-		///     <remarks>
-		///         Note: Equal to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>.
-		///     </remarks>
-		/// </summary>
-		StringData,
-
-		/// <summary>
-		///     If the type is an array, return
-		///     the pointer offset by <see cref="Offsets.OffsetToArrayData" /> so it points
-		///     to the array's elements.
-		///     <remarks>
-		///         Note: Equal to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>
-		///     </remarks>
-		/// </summary>
-		ArrayData,
-
-		/// <summary>
-		///     If the type is a reference type, return
-		///     the pointer offset by <see cref="IntPtr.Size" /> so it points
-		///     to the object's fields.
-		/// </summary>
-		Fields,
-
-		/// <summary>
-		///     Don't offset the heap pointer at all, so it
-		///     points to the <see cref="MethodTable" /> pointer.
-		/// </summary>
-		None
-	}
 
 
 	/// <summary>
@@ -122,7 +77,6 @@ namespace RazorSharp
 			return AddressOfField(ref instance, name);
 		}
 
-		
 
 		/// <summary>
 		///     <para>Returns the address of <paramref name="t" />.</para>
@@ -139,8 +93,6 @@ namespace RazorSharp
 			return *(IntPtr*) (&tr);*/
 			return CSUnsafe.AsPointer(ref t);
 		}
-
-		
 
 
 		/// <summary>
@@ -192,7 +144,7 @@ namespace RazorSharp
 
 				case OffsetType.ArrayData:
 
-					Conditions.Require(typeof(T).IsArray || typeof(T) == typeof(Array));
+					Conditions.Require(Runtime.IsArray<T>());
 					return AddressOfHeap(ref t) + Offsets.OffsetToArrayData;
 
 				case OffsetType.Fields:
@@ -319,10 +271,8 @@ namespace RazorSharp
 		/// </summary>
 		/// <returns><see cref="IntPtr.Size" /> for reference types, size for value types</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int SizeOf<T>()
-		{
-			return CSUnsafe.SizeOf<T>();
-		}
+		public static int SizeOf<T>() => CSUnsafe.SizeOf<T>();
+
 
 		#region HeapSize
 
@@ -358,11 +308,11 @@ namespace RazorSharp
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int HeapSize<T>(ref T t) where T : class => HeapSizeInternal(t);
-		
+
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int HeapSize<T>(T t) where T : class => HeapSize(ref t);
-		
+
 
 		private static int HeapSizeInternal<T>(T t)
 		{
@@ -406,7 +356,7 @@ namespace RazorSharp
 			 */
 
 			if (typeof(T).IsArray) {
-				Conditions.Require(typeof(T).IsArray || typeof(T) == typeof(Array));
+				Conditions.Require(Runtime.IsArray<T>());
 				var arr = t as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
@@ -471,7 +421,7 @@ namespace RazorSharp
 		///     </remarks>
 		/// </summary>
 		public static int BaseFieldsSize<T>(T t) where T : class => BaseFieldsSizeInternal(t);
-		
+
 
 		private static int BaseFieldsSizeInternal<T>(T t)
 		{
@@ -490,6 +440,19 @@ namespace RazorSharp
 			return HeapSize(ref t) - (IntPtr.Size + sizeof(MethodTable*));
 		}
 
+		/*public static int SizeOfFields<T>(T t) where T : class
+		{
+			if (t is string str) {
+				return (str.Length * sizeof(char)) + sizeof(uint);
+			}
+
+			if (t is Array rg) {
+				return (rg.Length * Runtime.FindComponentSize(t)) + IntPtr.Size;
+			}
+
+			return SizeOfData(t);
+		}*/
+
 		#endregion
 
 		#region BaseInstanceSize
@@ -506,7 +469,7 @@ namespace RazorSharp
 		///     <see cref="MethodTable.BaseSize" />
 		/// </returns>
 		public static int BaseInstanceSize<T>() where T : class => BaseInstanceSizeInternal<T>();
-		
+
 
 		private static int BaseInstanceSizeInternal<T>()
 		{
@@ -523,7 +486,7 @@ namespace RazorSharp
 
 		public static bool IsBoxed<T>(in T value)
 		{
-			return (typeof(T).IsInterface || typeof(T) == typeof(object)) 
+			return (typeof(T).IsInterface || typeof(T) == typeof(object))
 			       && value != null
 			       && value.GetType().IsValueType;
 		}
@@ -561,7 +524,7 @@ namespace RazorSharp
 		public static byte[] MemoryOfFields<T>(T t) where T : class
 		{
 			int fieldSize = SizeOfData(t);
-			var fields = new byte[fieldSize];
+			var fields    = new byte[fieldSize];
 
 			// Skip over the MethodTable*
 			Marshal.Copy((AddressOfHeap(ref t) + IntPtr.Size).Address, fields, 0, fieldSize);
