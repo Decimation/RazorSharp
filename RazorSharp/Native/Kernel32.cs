@@ -22,6 +22,9 @@ namespace RazorSharp.Native
 		private const string KERNEL32_DLL = "kernel32.dll";
 
 
+		[DllImport(KERNEL32_DLL)]
+		public static extern uint GetLastError();
+		
 		[DllImport(KERNEL32_DLL, SetLastError = true, PreserveSig = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool CloseHandle(IntPtr hObject);

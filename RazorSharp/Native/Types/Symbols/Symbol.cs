@@ -67,5 +67,14 @@ namespace RazorSharp.Native.Structures.Symbols
 			// SizeOfStruct + (MaxNameLen - 1) * sizeof(TCHAR)
 			return (int) (pSym->SizeOfStruct + (pSym->MaxNameLen - 1) * sizeof(byte));
 		}
+
+		public override string ToString()
+		{
+			return String.Format("Name: {0} | Size: {1} | Type index: {2} | Address: {3:X}", 
+			                     Name, 
+			                     Size, 
+			                     TypeIndex, 
+			                     Address);
+		}
 	}
 }

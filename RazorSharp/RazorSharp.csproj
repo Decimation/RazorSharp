@@ -280,10 +280,9 @@
     <Compile Include="Native\Types\Images\SubSystemType.cs" />
     <Compile Include="Native\Types\Symbols\FindChildrenParams.cs" />
     <Compile Include="Native\Types\Symbols\Symbol.cs" />
-    <Compile Include="Native\Types\Symbols\SymbolEnvironment.cs" />
+    <Compile Include="Native\Types\Symbols\SymEnvironment.cs" />
     <Compile Include="Native\Types\Symbols\SymbolInfo.cs" />
     <Compile Include="Native\Types\Symbols\Symbols.cs" />
-    <Compile Include="Native\Types\Symbols\SymCollection.cs" />
     <Compile Include="Native\Types\Symbols\SymEnumOptions.cs" />
     <Compile Include="Native\Types\Symbols\SymSearchOptions.cs" />
     <Compile Include="Native\Types\ThreadContext\Arm64NtNeon128.cs" />

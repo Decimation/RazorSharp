@@ -23,6 +23,7 @@ using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Memory.Fixed;
 using RazorSharp.Native;
 using RazorSharp.Native.Structures.Symbols;
+using RazorSharp.Native.Types.Symbols;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
@@ -69,31 +70,19 @@ namespace Test
 			return p;
 		}
 
-		
-		
-	
+
 		// todo: reorganize namespaces and fix access levels
-		
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
 			Core.Setup();
 
-			var sym = new SymCollection(Clr.ClrPdb.FullName,"*");
-			sym.LoadAll();
-
-			foreach (var s in sym.Search("MethodTable")) {
-				Console.WriteLine("{0}: {1} {2}",s.Name,s.TypeIndex,s.SizeOfStruct);
+			using (var sym = new SymEnvironment(Clr.ClrPdb.FullName)) {
+				foreach (var s in sym.Search("JIT_GetRuntimeType")) {
+					Console.WriteLine(s);
+				}
 			}
-
-			var g = sym.Search("g_pCanonMethodTableClass").First();
-			
-			Console.WriteLine(g.TypeIndex);
-			
-			
-
-			
-			
 
 
 			Core.Close();
