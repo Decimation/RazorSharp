@@ -144,19 +144,18 @@ namespace RazorSharp.CoreClr.Structures
 			Symcall.BindQuick(typeof(GCHeap));
 
 			// Retrieve the global variables from the data segment of the CLR DLL
-			using (var sym = new Symbols(Clr.ClrPdb.FullName)) {
-				g_pGCHeap = sym.GetClrSymAddress(nameof(g_pGCHeap))
-				               .ReadPointer<byte>()
-				               .Address;
 
-				g_lowest_address = sym.GetClrSymAddress(nameof(g_lowest_address))
-				                      .ReadPointer<byte>()
-				                      .Address;
+			g_pGCHeap = Clr.GetClrSymAddress(nameof(g_pGCHeap))
+			               .ReadPointer<byte>()
+			               .Address;
 
-				g_highest_address = sym.GetClrSymAddress(nameof(g_highest_address))
-				                       .ReadPointer<byte>()
-				                       .Address;
-			}
+			g_lowest_address = Clr.GetClrSymAddress(nameof(g_lowest_address))
+			                      .ReadPointer<byte>()
+			                      .Address;
+
+			g_highest_address = Clr.GetClrSymAddress(nameof(g_highest_address))
+			                       .ReadPointer<byte>()
+			                       .Address;
 		}
 	}
 }

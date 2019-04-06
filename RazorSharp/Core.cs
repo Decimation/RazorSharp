@@ -19,7 +19,7 @@ namespace RazorSharp
 		public static void Close()
 		{
 			// SHUT IT DOWN
-			Symbols.Close();
+			SymReader.Close();
 			Clr.Close();
 			Global.Close();
 		}

@@ -63,6 +63,8 @@ namespace RazorSharp.CoreClr
 		/// </summary>
 		internal static FileInfo ClrPdb { get; private set; }
 
+		internal static readonly SymReader ClrSymbols;
+		
 		private const string CLR_PDB_FILE_SEARCH = @"C:\Symbols\clr.pdb";
 
 		#endregion
@@ -75,6 +77,7 @@ namespace RazorSharp.CoreClr
 			ClrDll     = GetClrDll();
 			ClrModule  = Modules.GetModule(CLR_DLL_SHORT);
 			ClrVersion = new Version(4, 0, 30319, 42000);
+			ClrSymbols = new SymReader();
 		}
 
 
@@ -89,7 +92,7 @@ namespace RazorSharp.CoreClr
 			const string ERR = "The PDB specified by \"ClrPdb\" does not match the one returned by Microsoft's servers";
 			Conditions.NotNull(ClrPdb, nameof(ClrPdb));
 			string cd     = Environment.CurrentDirectory;
-			var    tmpSym = Symbols.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
+			var    tmpSym = SymReader.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
 			Conditions.Require(ClrPdb.ContentEquals(tmpSym), ERR, nameof(ClrPdb));
 			DeleteSymbolFile(tmpSym);
 		}
@@ -113,7 +116,7 @@ namespace RazorSharp.CoreClr
 					clrSym = new FileInfo(CLR_PDB_FILE_SEARCH);
 				}
 				else {
-					clrSym = Symbols.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
+					clrSym = SymReader.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
 				}
 				
 			}
@@ -142,6 +145,9 @@ namespace RazorSharp.CoreClr
 				Conditions.Require(ClrPdb.Exists);
 				IsPdbTemporary = false;
 			}
+			
+			ClrSymbols.LoadAll(ClrPdb.FullName, null);
+			Global.Log.Debug("Loaded {Count} Clr symbols", ClrSymbols.Symbols.Count);
 
 
 			IsSetup = true;
@@ -182,16 +188,14 @@ namespace RazorSharp.CoreClr
 			IsSetup = false;
 		}
 
-		internal static Pointer<byte> GetClrFunctionAddress(string name)
+		internal static Pointer<byte> GetClrSymAddress(string name)
 		{
-			using (var clrSym = new Symbols(ClrPdb.FullName)) {
-				return clrSym.GetClrSymAddress(name);
-			}
+			return ClrSymbols.GetClrSymAddress(name);
 		}
 
 		internal static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate
 		{
-			return Functions.GetDelegateForFunctionPointer<TDelegate>(GetClrFunctionAddress(name).Address);
+			return Functions.GetDelegateForFunctionPointer<TDelegate>(GetClrSymAddress(name).Address);
 		}
 	}
 }

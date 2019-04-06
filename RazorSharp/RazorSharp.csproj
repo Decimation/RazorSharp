@@ -245,7 +245,7 @@
     <Compile Include="CoreClr\Structures\ProtectionLevel.cs" />
     <Compile Include="CoreClr\Structures\SyncBlockFlags.cs" />
     <Compile Include="CoreClr\Structures\TokenType.cs" />
-    <Compile Include="EnumSymbols.cs" />
+    <Compile Include="SymReader.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Memory\AddressInfo.cs" />
     <Compile Include="Memory\Assembler.cs" />
@@ -300,9 +300,7 @@
     <Compile Include="Native\Symbols\FindChildrenParams.cs" />
     <Compile Include="Native\Symbols\Symbol.cs" />
     <Compile Include="Native\Symbols\SymbolInfo.cs" />
-    <Compile Include="Native\Symbols\Symbols.cs" />
     <Compile Include="Native\Symbols\SymEnumOptions.cs" />
-    <Compile Include="Native\Symbols\SymEnvironment.cs" />
     <Compile Include="Native\Symbols\SymSearchOptions.cs" />
     <Compile Include="Native\Symbols\SymTagEnum.cs" />
     <Compile Include="Native\Symbols\SymType.cs" />

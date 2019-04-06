@@ -64,36 +64,13 @@ namespace Test
 			Core.Setup();
 
 
-			string img = Clr.ClrPdb.FullName;
-			Console.WriteLine(img);
-			var e = new EnumSymbols();
-			var sw = Stopwatch.StartNew();
-			e.LoadAll(img);
-			sw.Stop();
-			Console.WriteLine(sw.Elapsed);
-			var syms = e.Symbols;
-			var x    = syms.First(s => s.Name.Contains("g_lowest_address"));
-			Console.WriteLine(x);
-			Console.WriteLine("base {0:X}", x.ModBase);
-			Console.WriteLine("diff {0:X}", x.Address - x.ModBase);
-
-			using (var sym = new Symbols(img)) {
-				var s = sym.GetSymOffset("g_lowest_address");
-				Console.WriteLine("{0:X}", s);
+			foreach (var symbol in Clr.ClrSymbols.Symbols) {
+				if (symbol.Name.StartsWith("g_") && symbol.Name.Contains("thread")) {
+					Console.WriteLine(symbol);
+				}
 			}
 
-			long o = e.Symbols.First(y => y.Name.Contains("g_lowest_address")).Offset;
-			Console.WriteLine(o);
-			Console.WriteLine(e.Symbols.First(n => n.Name.Contains("g_pStringClass")));
-
-			var sm = new Symbols(img);
 			
-			var sw2 = Stopwatch.StartNew();
-			long i = sm.GetSymOffset("?g_pStringClass@@3PEAVMethodTable@@EA");
-			sw2.Stop();
-			Console.WriteLine(sw2.Elapsed);
-			sm.Dispose();
-
 			Core.Close();
 		}
 	}
