@@ -21,8 +21,7 @@ using RazorSharp.CoreClr;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Fixed;
 using RazorSharp.Native;
-using RazorSharp.Native.Enums;
-using RazorSharp.Native.Structures;
+using RazorSharp.Native.Win32;
 using RazorSharp.Utilities;
 
 #endregion

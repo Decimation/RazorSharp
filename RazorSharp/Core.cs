@@ -1,6 +1,7 @@
 using System;
 using RazorSharp.CoreClr;
 using RazorSharp.Native;
+using RazorSharp.Native.Symbols;
 
 namespace RazorSharp
 {

@@ -3,15 +3,12 @@
 using System;
 using System.Diagnostics;
 using RazorCommon.Diagnostics;
-using RazorSharp.Native.Enums;
-using RazorSharp.Native.Enums.ThreadContext;
-using RazorSharp.Native.Structures;
-using RazorSharp.Native.Structures.ThreadContext;
+using RazorSharp.Native.ThreadContext;
 using RazorSharp.Pointers;
 
 #endregion
 
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Win32
 {
 	/// <summary>
 	///     Wrapper functions

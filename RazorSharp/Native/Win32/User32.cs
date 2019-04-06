@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 
 #endregion
 
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Win32
 {
-	public static class User32
+	internal static class User32
 	{
 		private const string USER32_DLL = "user32.dll";
 

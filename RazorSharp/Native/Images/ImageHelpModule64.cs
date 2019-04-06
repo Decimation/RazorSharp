@@ -1,9 +1,13 @@
 using System.Runtime.InteropServices;
+using RazorSharp.Native.Symbols;
 
-namespace RazorSharp.Native.Structures
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+
+namespace RazorSharp.Native.Images
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct IMAGEHELP_MODULE64
+	internal struct ImageHelpModule64
 	{
 		//************************************************
 		public int     SizeOfStruct;

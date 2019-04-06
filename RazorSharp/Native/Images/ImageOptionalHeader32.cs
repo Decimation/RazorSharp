@@ -1,12 +1,12 @@
 using System.Runtime.InteropServices;
-using RazorSharp.Native.Enums.Images;
+
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace RazorSharp.Native.Structures.Images
+namespace RazorSharp.Native.Images
 {
 	[StructLayout(LayoutKind.Explicit)]
-    public struct ImageOptionalHeader32
+	internal struct ImageOptionalHeader32
     {
         [FieldOffset(0)]
         public MagicType Magic;

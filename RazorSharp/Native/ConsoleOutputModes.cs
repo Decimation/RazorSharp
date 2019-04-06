@@ -4,10 +4,10 @@ using System;
 
 #endregion
 
-namespace RazorSharp.Native.Enums
+namespace RazorSharp.Native
 {
 	[Flags]
-	public enum ConsoleOutputModes : uint
+	internal enum ConsoleOutputModes : uint
 	{
 		EnableProcessedOutput           = 0x0001,
 		EnableWrapAtEolOutput           = 0x0002,

@@ -5,7 +5,7 @@
 using System;
 using System.Text;
 using RazorSharp.Native;
-using RazorSharp.Native.Enums;
+using RazorSharp.Native.Win32;
 
 #endregion
 
@@ -15,7 +15,7 @@ using RazorSharp.Native.Enums;
 
 namespace RazorSharp.Utilities
 {
-	public static class StandardOut
+	internal static class StandardOut
 	{
 		/// <summary>
 		///     Patch the console to allow for ANSI escape sequences and special formatting.

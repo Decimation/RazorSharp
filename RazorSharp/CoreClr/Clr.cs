@@ -9,6 +9,7 @@ using RazorCommon.Extensions;
 using RazorCommon.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Native;
+using RazorSharp.Native.Symbols;
 using RazorSharp.Pointers;
 
 #endregion

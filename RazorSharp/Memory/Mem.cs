@@ -11,7 +11,7 @@ using RazorCommon.Extensions;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Native;
-using RazorSharp.Native.Enums;
+using RazorSharp.Native.Win32;
 using RazorSharp.Pointers;
 
 #endregion

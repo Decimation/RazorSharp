@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace RazorSharp.Native.Enums.Symbols
+namespace RazorSharp.Native.Symbols
 {
 	[Flags]
 	internal enum SymEnumOptions

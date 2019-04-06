@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace RazorSharp.Native.Enums
+namespace RazorSharp.Native
 {
 	// todo: compare to ProcessAccessFlags
 

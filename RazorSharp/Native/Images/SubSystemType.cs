@@ -1,6 +1,6 @@
-namespace RazorSharp.Native.Enums.Images
+namespace RazorSharp.Native.Images
 {
-	public enum SubSystemType : ushort
+	internal enum SubSystemType : ushort
 	{
 		IMAGE_SUBSYSTEM_UNKNOWN                 = 0,
 		IMAGE_SUBSYSTEM_NATIVE                  = 1,

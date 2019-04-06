@@ -4,7 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
-using RazorSharp.Native.Enums;
+using RazorSharp.Native.Win32;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -13,11 +13,11 @@ using RazorSharp.Native.Enums;
 
 // ReSharper disable UnassignedReadonlyField
 
-namespace RazorSharp.Native.Structures
+namespace RazorSharp.Native
 {
 	/// <summary>
 	///     Contains information about a range of pages in the virtual address space of a process.
-	///     The <see cref="Kernel32.VirtualQuery(IntPtr)" />,
+	///     The <see cref="Kernel32.VirtualQuery(System.IntPtr)" />,
 	///     <see cref="Kernel32.VirtualQuery(IntPtr, ref MemoryBasicInformation, uint)" /> and VirtualQueryEx functions use
 	///     this structure.
 	///     <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-_memory_basic_information">

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using RazorSharp.Memory;
 using RazorSharp.Pointers;
 
-namespace RazorSharp.Native.Structures.Symbols
+namespace RazorSharp.Native.Symbols
 {
 	/// <summary>
 	/// Wraps a <see cref="SymbolInfo"/>
@@ -23,9 +23,13 @@ namespace RazorSharp.Native.Structures.Symbols
 		public uint   Scope        { get; }
 		public uint   Tag          { get; }
 
+		public SymTagEnum TagEnum => (SymTagEnum) Tag;
+
+		public long Offset => (long) (Address - ModBase);
+
 		private readonly byte[] m_symbolStructMemory;
 
-		
+
 		/// <summary>
 		/// Copies the values of <see cref="m_symbolStructMemory"/> into unmanaged memory.
 		/// <seealso cref="m_symbolStructMemory"/> contains the wrapped <see cref="SymbolInfo"/> value.
@@ -33,7 +37,7 @@ namespace RazorSharp.Native.Structures.Symbols
 		/// This memory must be freed with <see cref="Mem.Free{T}(Pointer{T})"/>
 		/// </remarks>
 		/// </summary>
-		public Pointer<SymbolInfo> GetSymbolInfo()
+		internal Pointer<SymbolInfo> GetSymbolInfo()
 		{
 			var alloc = Mem.AllocUnmanaged<byte>(m_symbolStructMemory.Length);
 			alloc.WriteAll(m_symbolStructMemory);
@@ -56,13 +60,13 @@ namespace RazorSharp.Native.Structures.Symbols
 			Scope        = pSymInfo->Scope;
 			Tag          = pSymInfo->Tag;
 
-			int realSize = CalculateRealStructSize(pSymInfo);
+			int realSize = GetSymbolInfoSize(pSymInfo);
 			m_symbolStructMemory = new byte[realSize];
 
 			Marshal.Copy((IntPtr) pSymInfo, m_symbolStructMemory, 0, realSize);
 		}
 
-		private static int CalculateRealStructSize(SymbolInfo* pSym)
+		private static int GetSymbolInfoSize(SymbolInfo* pSym)
 		{
 			// SizeOfStruct + (MaxNameLen - 1) * sizeof(TCHAR)
 			return (int) (pSym->SizeOfStruct + (pSym->MaxNameLen - 1) * sizeof(byte));
@@ -70,11 +74,11 @@ namespace RazorSharp.Native.Structures.Symbols
 
 		public override string ToString()
 		{
-			return String.Format("Name: {0} | Size: {1} | Type index: {2} | Address: {3:X}", 
-			                     Name, 
-			                     Size, 
-			                     TypeIndex, 
-			                     Address);
+			return String.Format("Name: {0} | Offset: {1:X} | Address: {2:X} | Tag: {3}",
+			                     Name,
+			                     Offset,
+			                     Address,
+			                     TagEnum);
 		}
 	}
 }

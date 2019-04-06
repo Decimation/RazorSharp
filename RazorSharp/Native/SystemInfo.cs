@@ -2,7 +2,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorSharp.Native.Enums;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 
@@ -10,10 +9,10 @@ using RazorSharp.Native.Enums;
 
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace RazorSharp.Native.Structures
+namespace RazorSharp.Native
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct SystemInfo
+	internal struct SystemInfo
 	{
 		public ProcessorArchitecture ProcessorArchitecture;
 		public ushort                Reserved;

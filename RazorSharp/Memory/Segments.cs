@@ -8,8 +8,10 @@ using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp.Native;
-using RazorSharp.Native.Structures.Images;
+using RazorSharp.Native.Images;
+using RazorSharp.Native.Win32;
 using RazorSharp.Pointers;
+
 // ReSharper disable InconsistentNaming
 
 #endregion
@@ -145,16 +147,12 @@ namespace RazorSharp.Memory
 				if (rgSeg.SequenceEqual(mem))
 					return (s.SectionAddress + i).Address;
 			}
-				
+
 
 			return IntPtr.Zero;
 		}
 
-		public static unsafe Pointer<ImageNtHeaders64> GetHeader64(ProcessModule module)
-		{
-			return DbgHelp.ImageNtHeader(Modules.GetModuleHandle(module));
-		}
-		
+
 		public static unsafe ImageSectionInfo[] GetPESectionInfo(IntPtr hModule)
 		{
 			// get the location of the module's IMAGE_NT_HEADERS structure

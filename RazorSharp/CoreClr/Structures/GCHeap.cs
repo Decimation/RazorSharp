@@ -8,6 +8,7 @@ using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
+using RazorSharp.Native.Symbols;
 using RazorSharp.Pointers;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -138,15 +139,23 @@ namespace RazorSharp.CoreClr.Structures
 
 		static GCHeap()
 		{
-			Conditions.Require(!GCSettings.IsServerGC,  "GC must be WKS", nameof(GCHeap));
-			
+			Conditions.Require(!GCSettings.IsServerGC, "GC must be WKS", nameof(GCHeap));
+
 			Symcall.BindQuick(typeof(GCHeap));
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 			using (var sym = new Symbols(Clr.ClrPdb.FullName)) {
-				g_pGCHeap         = sym.GetClrSymAddress(nameof(g_pGCHeap)).Address;
-				g_lowest_address  = sym.GetClrSymAddress(nameof(g_lowest_address)).Address;
-				g_highest_address = sym.GetClrSymAddress(nameof(g_highest_address)).Address;
+				g_pGCHeap = sym.GetClrSymAddress(nameof(g_pGCHeap))
+				               .ReadPointer<byte>()
+				               .Address;
+
+				g_lowest_address = sym.GetClrSymAddress(nameof(g_lowest_address))
+				                      .ReadPointer<byte>()
+				                      .Address;
+
+				g_highest_address = sym.GetClrSymAddress(nameof(g_highest_address))
+				                       .ReadPointer<byte>()
+				                       .Address;
 			}
 		}
 	}

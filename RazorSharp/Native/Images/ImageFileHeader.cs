@@ -7,10 +7,10 @@ using System.Runtime.InteropServices;
 
 #endregion
 
-namespace RazorSharp.Native.Structures.Images
+namespace RazorSharp.Native.Images
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct ImageFileHeader
+	internal struct ImageFileHeader
 	{
 		/// WORD->unsigned short
 		public ushort Machine;

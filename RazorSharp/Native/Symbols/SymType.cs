@@ -1,4 +1,4 @@
-namespace RazorSharp.Native.Structures
+namespace RazorSharp.Native.Symbols
 {
 	public enum SymType
 	{

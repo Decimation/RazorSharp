@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 
-namespace RazorSharp.Native.Structures.Symbols
+namespace RazorSharp.Native.Symbols
 {
 	#region
 
@@ -21,7 +21,7 @@ namespace RazorSharp.Native.Structures.Symbols
 
 
 	[StructLayout(LayoutKind.Sequential)]
-	public struct SymbolInfo
+	internal struct SymbolInfo
 	{
 		public ULONG   SizeOfStruct;
 		public ULONG   TypeIndex;
@@ -39,5 +39,5 @@ namespace RazorSharp.Native.Structures.Symbols
 		public ULONG   NameLen;
 		public ULONG   MaxNameLen;
 		public CHAR    Name;
-	} //SYMBOL_INFO, *PSYMBOL_INFO;
+	}
 }

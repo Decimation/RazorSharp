@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace RazorSharp.Native
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct GUID
+	internal unsafe struct GUID
 	{
 		//	typedef struct _GUID {
 		//		unsigned long  Data1;

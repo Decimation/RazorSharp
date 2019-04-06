@@ -13,7 +13,7 @@ namespace RazorSharp.CoreClr.Enums.MethodTable
 	///     </remarks>
 	/// </summary>
 	[Flags]
-	public enum LowBits
+	internal enum LowBits
 	{
 		/// <summary>
 		///     0 - pointer to <see cref="EEClass" />

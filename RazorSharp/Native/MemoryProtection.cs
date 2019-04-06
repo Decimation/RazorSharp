@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace RazorSharp.Native.Enums
+namespace RazorSharp.Native
 {
 	/// <summary>
 	///     <a href="https://docs.microsoft.com/en-us/windows/desktop/memory/memory-protection-constants">Doc</a>

@@ -1,26 +1,30 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using RazorCommon.Diagnostics;
 using RazorSharp.Memory;
 using RazorSharp.Native;
-using RazorSharp.Native.Structures;
-using RazorSharp.Native.Structures.Symbols;
+using RazorSharp.Native.Images;
+using RazorSharp.Native.Symbols;
+using RazorSharp.Native.Win32;
 using static RazorSharp.Native.SymTagEnum;
 using SymTagEnum = RazorSharp.Native.SymTagEnum;
+using static RazorSharp.Native.Symbols.SymType;
 
 namespace RazorSharp
 {
-	public unsafe class EnumSymbols : IDisposable
+	public unsafe class EnumSymbols
 	{
-		private IntPtr m_proc;
+		public           List<Symbol> Symbols { get; private set; }
+		private readonly IntPtr       m_proc;
 
 		private void ShowSymbolInfo(ulong modBase)
 		{
-			IMAGEHELP_MODULE64 module64 = default;
+			ImageHelpModule64 module64 = default;
 
-			int size = Marshal.SizeOf<IMAGEHELP_MODULE64>();
+			int size = Marshal.SizeOf<ImageHelpModule64>();
 
 			Console.WriteLine("Size: {0}", size);
 			module64.SizeOfStruct = size;
@@ -31,16 +35,61 @@ namespace RazorSharp
 
 			bool bRet = DbgHelp.SymGetModuleInfo64(m_proc, modBase, pAlloc);
 
-			NativeFunctions.Call(bRet, nameof(DbgHelp.SymGetModuleInfo64), false);
+			NativeFunctions.Call(bRet, nameof(DbgHelp.SymGetModuleInfo64));
 
 
 			// Display information about symbols 
+			
+			
 
 			// Kind of symbols
 
-			module64 = Marshal.PtrToStructure<IMAGEHELP_MODULE64>(pAlloc);
-			Marshal.FreeHGlobal(pAlloc);
+			module64 = Marshal.PtrToStructure<ImageHelpModule64>(pAlloc);
 			
+			switch (module64.SymType) {
+				case SymNone:
+					Console.WriteLine("No symbols available for the module.\n");
+					break;
+
+				case SymExport:
+					Console.WriteLine("Loaded symbols: Exports\n");
+					break;
+
+				case SymCoff:
+					Console.WriteLine("Loaded symbols: COFF\n");
+					break;
+
+				case SymCv:
+					Console.WriteLine("Loaded symbols: CodeView\n");
+					break;
+
+				case SymSym:
+					Console.WriteLine("Loaded symbols: SYM\n");
+					break;
+
+				case SymVirtual:
+					Console.WriteLine("Loaded symbols: Virtual\n");
+					break;
+
+				case SymPdb:
+					Console.WriteLine("Loaded symbols: PDB\n");
+					break;
+
+				case SymDia:
+					Console.WriteLine("Loaded symbols: DIA\n");
+					break;
+
+				case SymDeferred:
+					Console.WriteLine("Loaded symbols: Deferred\n"); // not actually loaded
+					break;
+
+				default:
+					Console.WriteLine("Loaded symbols: Unknown format.\n");
+					break;
+			}
+			
+			Marshal.FreeHGlobal(pAlloc);
+
 			Console.WriteLine("Sym type: {0}", module64.SymType);
 
 			// Image name
@@ -55,6 +104,8 @@ namespace RazorSharp
 
 			Console.WriteLine("PDB name {0}", module64.LoadedPdbName);
 
+			Console.WriteLine("Mod name {0}", module64.ModuleName);
+
 			// Is debug information unmatched ?
 			// (It can only happen if the debug information is contained
 			// in a separate file (.DBG or .PDB)
@@ -66,24 +117,19 @@ namespace RazorSharp
 			// Contents
 
 			// Line numbers available ?
-
-			Console.WriteLine("Line numbers: {0} \n", module64.LineNumbers ? "Available" : "Not available");
+			Console.WriteLine("Line numbers: {0}", module64.LineNumbers ? "Available" : "Not available");
 
 			// Global symbols available ?
-
-			Console.WriteLine("Global symbols: {0} \n", module64.GlobalSymbols ? "Available" : "Not available");
+			Console.WriteLine("Global symbols: {0}", module64.GlobalSymbols ? "Available" : "Not available");
 
 			// Type information available ?
-
-			Console.WriteLine("Type information: {0} \n", module64.TypeInfo ? "Available" : "Not available");
+			Console.WriteLine("Type information: {0}", module64.TypeInfo ? "Available" : "Not available");
 
 			// Source indexing available ?
-
-			Console.WriteLine("Source indexing: {0} \n", module64.SourceIndexed ? "Yes" : "No");
+			Console.WriteLine("Source indexing: {0}", module64.SourceIndexed ? "Yes" : "No");
 
 			// Public symbols available ?
-
-			Console.WriteLine("Public symbols: {0} \n", module64.Publics ? "Available" : "Not available");
+			Console.WriteLine("Public symbols: {0}", module64.Publics ? "Available" : "Not available");
 		}
 
 		private static string TagStr(uint tag)
@@ -160,11 +206,13 @@ namespace RazorSharp
 
 		public EnumSymbols()
 		{
-			m_proc = Kernel32.GetCurrentProcess();
+			m_proc  = Kernel32.GetCurrentProcess();
+			Symbols = new List<Symbol>();
 		}
 
-		private static void ShowSymbolDetails(SymbolInfo* symInfo)
+		private void ShowSymbolDetails(SymbolInfo* symInfo)
 		{
+			/*
 			// Kind of symbol (tag) 
 			Console.WriteLine("Symbol: {0}  ", TagStr(symInfo->Tag));
 
@@ -176,9 +224,18 @@ namespace RazorSharp
 
 			// Name 
 			Console.WriteLine("Name: {0}", NativeHelp.GetString(&symInfo->Name, symInfo->Name));
+
+			Console.WriteLine(symInfo->Value);*/
+
+			var sym = new Symbol(symInfo);
+			Symbols.Add(sym);
+
+			if ((SymTagEnum) sym.Tag == SymTagBaseClass) {
+				Console.WriteLine(sym);
+			}
 		}
 
-		bool MyEnumSymbolsCallback(IntPtr pSymInfo, uint symSize, IntPtr userCtx)
+		private bool MyEnumSymbolsCallback(IntPtr pSymInfo, uint symSize, IntPtr userCtx)
 		{
 			if (pSymInfo != IntPtr.Zero) {
 				ShowSymbolDetails((SymbolInfo*) pSymInfo);
@@ -207,9 +264,10 @@ namespace RazorSharp
 			// Initialize DbgHelp and load symbols for all modules of the current process 
 
 
-			bRet = DbgHelp.SymInitialize(m_proc, 				// Process handle of the current process
-			                             null,   	// No user-defined search path -> use default
-			                             false); 	// Do not load symbols for modules in the current process
+			bRet = DbgHelp.SymInitialize(m_proc, // Process handle of the current process
+			                             null,   // No user-defined search path -> use default
+			                             true);  // Do not load symbols for modules in the
+			// current process
 
 
 			do {
@@ -232,8 +290,8 @@ namespace RazorSharp
 					(uint) fileSize // Size of the file (cannot be NULL if .PDB file is used, otherwise it can be NULL)
 				);
 
-				NativeFunctions.Call(modBase !=0, nameof(DbgHelp.SymLoadModule64));
-				
+				NativeFunctions.Call(modBase != 0, nameof(DbgHelp.SymLoadModule64));
+
 				if (modBase == 0) {
 					break;
 				}
@@ -249,23 +307,21 @@ namespace RazorSharp
 
 				var symEnumSuccess = DbgHelp.SymEnumSymbols(
 					m_proc,                // Process handle of the current process
-					modBase,               			// Base address of the module
-					pSearchMask,           			// Mask (NULL -> all symbols)
-					MyEnumSymbolsCallback, 			// The callback function
-					IntPtr.Zero           // A used-defined context can be passed here, if necessary
+					modBase,               // Base address of the module
+					pSearchMask,           // Mask (NULL -> all symbols)
+					MyEnumSymbolsCallback, // The callback function
+					IntPtr.Zero            // A used-defined context can be passed here, if necessary
 				);
 
 
 				NativeFunctions.Call(symEnumSuccess, nameof(DbgHelp.SymEnumSymbols));
 
 				NativeFunctions.Call(DbgHelp.SymUnloadModule64(m_proc, modBase), nameof(DbgHelp.SymUnloadModule64));
-				
 			} while (false);
 
-			
+
 			NativeFunctions.Call(DbgHelp.SymCleanup(m_proc), nameof(DbgHelp.SymCleanup));
-			
-			
+
 
 			// Complete
 		}
@@ -273,13 +329,13 @@ namespace RazorSharp
 		private static bool GetFileSize(string pFileName, ref ulong fileSize)
 		{
 			var hFile = Kernel32.CreateFile(pFileName,
-			                                   FileAccess.Read,
-			                                   FileShare.Read,
-			                                   IntPtr.Zero,
-			                                   FileMode.Open,
-			                                   0,
-			                                   IntPtr.Zero);
-			
+			                                FileAccess.Read,
+			                                FileShare.Read,
+			                                IntPtr.Zero,
+			                                FileMode.Open,
+			                                0,
+			                                IntPtr.Zero);
+
 			if (hFile == Kernel32.INVALID_HANDLE_VALUE) {
 				Console.WriteLine("CreateFile failed");
 				return false;
@@ -324,11 +380,6 @@ namespace RazorSharp
 			}
 
 			return true;
-		}
-
-		public void Dispose()
-		{
-			Kernel32.CloseHandle(m_proc);
 		}
 	}
 }

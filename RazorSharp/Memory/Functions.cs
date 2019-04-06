@@ -10,6 +10,7 @@ using RazorSharp.Memory.Calling.Signatures.Attributes;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Native;
+using RazorSharp.Native.Win32;
 
 #endregion
 

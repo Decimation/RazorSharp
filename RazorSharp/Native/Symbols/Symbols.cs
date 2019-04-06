@@ -9,14 +9,14 @@ using RazorCommon.Diagnostics;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory;
-using RazorSharp.Native.Structures.Symbols;
+using RazorSharp.Native.Win32;
 using RazorSharp.Pointers;
 
 #endregion
 
 // ReSharper disable ConvertIfStatementToConditionalTernaryExpression
 
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Symbols
 {
 	// todo: add support for cases where there are multiple symbols of the same name
 	
@@ -35,7 +35,7 @@ namespace RazorSharp.Native
 
 		private const long INVALID_OFFSET = -4194304;
 
-		private const string OffsetsFileName = "RazorSharpSymbolOffsets.txt";
+		private const string OFFSETS_FILE_NAME = "RazorSharpSymbolOffsets.txt";
 
 		/// <summary>
 		///     The file which caches symbols and their offsets
@@ -60,7 +60,7 @@ namespace RazorSharp.Native
 
 		static Symbols()
 		{
-			if (FileUtil.GetOrCreateTempFile(OffsetsFileName, out CacheFile)) {
+			if (FileUtil.GetOrCreateTempFile(OFFSETS_FILE_NAME, out CacheFile)) {
 				Global.Log.Verbose("Symbol cache file detected");
 			}
 			else {
@@ -72,7 +72,7 @@ namespace RazorSharp.Native
 			Global.Log.Debug("Read {Count} cached offsets", Cache.Count);
 		}
 
-		public SymbolInfo* this[string name] => GetSymbol(name);
+		public Symbol this[string name] => GetSymbol(name);
 
 		public void Dispose()
 		{
@@ -172,7 +172,7 @@ namespace RazorSharp.Native
 //			Conditions.NativeRequire(value);
 		}
 
-		public SymbolInfo* GetSymbol(string name)
+		public Symbol GetSymbol(string name)
 		{
 			var ctxStrNative = Marshal.StringToHGlobalAnsi(name);
 
@@ -183,7 +183,7 @@ namespace RazorSharp.Native
 
 			SymbolInfo* sym = m_symbolBuffer;
 			m_symbolBuffer = null;
-			return sym;
+			return new Symbol(sym);
 		}
 
 		public TDelegate GetFunction<TDelegate>(string name, string module) where TDelegate : Delegate

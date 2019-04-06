@@ -9,7 +9,7 @@ using RazorSharp.Pointers;
 
 #endregion
 
-namespace RazorSharp.Native.Structures.Images
+namespace RazorSharp.Native.Images
 {
 	/// <summary>
 	///     Wraps an <see cref="ImageSectionHeader" />

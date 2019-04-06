@@ -4,10 +4,10 @@ using System;
 
 #endregion
 
-namespace RazorSharp.Native.Enums
+namespace RazorSharp.Native
 {
 	[Flags]
-	public enum StandardHandles
+	internal enum StandardHandles
 	{
 		StdInputHandle  = -10,
 		StdOutputHandle = -11,

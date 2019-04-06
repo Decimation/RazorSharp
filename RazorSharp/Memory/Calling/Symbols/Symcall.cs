@@ -29,7 +29,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 		private static Pointer<byte> GetClrFunctionAddress(string name)
 		{
-			return Native.Symbols.GetSymAddress(Clr.ClrPdb.FullName, Clr.CLR_DLL_SHORT, name);
+			return Native.Symbols.Symbols.GetSymAddress(Clr.ClrPdb.FullName, Clr.CLR_DLL_SHORT, name);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -44,7 +44,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 			var    attr       = methodInfo.GetCustomAttribute<SymcallAttribute>();
 			string fullSym    = GetSymbolName(attr, methodInfo);
 
-			using (var sym = new Native.Symbols(attr.Image)) {
+			using (var sym = new Native.Symbols.Symbols(attr.Image)) {
 				long          offset  = sym.GetSymOffset(fullSym);
 				Pointer<byte> address = Modules.GetAddress(attr.Module, offset);
 				Functions.SetStableEntryPoint(methodInfo, address.Address);
@@ -95,7 +95,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 			Global.Log.Information("Binding type {Name}", t.Name);
 
 			var baseAttr = attributes[0];
-			var sym      = new Native.Symbols(baseAttr.Image);
+			var sym      = new Native.Symbols.Symbols(baseAttr.Image);
 			var contexts = new List<string>();
 
 			int lim = methods.Length;
@@ -124,8 +124,8 @@ namespace RazorSharp.Memory.Calling.Symbols
 			Conditions.Require(addresses.Length == methods.Length);
 
 			for (int i = 0; i < methods.Length; i++) {
-//				Global.Log.Debug("Binding {Name} to {Addr} (offset: {Offset})", methods[i].Name,
-//				                 addresses[i].ToString("P"),offsets[i].ToString("X"));
+				Global.Log.Debug("Binding {Name} to {Addr} (offset: {Offset})", methods[i].Name,
+				                 addresses[i].ToString("P"),offsets[i].ToString("X"));
 				var addr = addresses[i].Address;
 				Functions.SetStableEntryPoint(methods[i], addr);
 			}

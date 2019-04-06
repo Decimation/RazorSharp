@@ -4,15 +4,14 @@ using System;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
-using RazorSharp.Native.Enums.Images;
-using RazorSharp.Native.Structures;
-using RazorSharp.Native.Structures.Images;
+using RazorSharp.Native.Images;
+using RazorSharp.Native.Symbols;
 
 #endregion
 
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Win32
 {
 	/// <summary>
 	///     https://github.com/Microsoft/DbgShell/blob/master/DbgProvider/internal/Native/DbgHelp.cs
@@ -100,6 +99,16 @@ namespace RazorSharp.Native
 		[DllImport(DBG_HELP_DLL)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool SymUnloadModule64(IntPtr hProc, ulong baseAddr);
+
+		//BOOL IMAGEAPI SymFromAddr(
+		//	HANDLE       hProcess,
+		//	DWORD64      Address,
+		//	PDWORD64     Displacement,
+		//	PSYMBOL_INFO Symbol
+		//);
+		[DllImport(DBG_HELP_DLL, SetLastError = true)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		internal static extern bool SymFromAddr(IntPtr hProc, ulong addr, ulong* displacement, SymbolInfo* pSym);
 
 		/*BOOL CALLBACK EnumSymProc(PSYMBOL_INFO pSymInfo, ULONG, PVOID UserContext)
 		{

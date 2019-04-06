@@ -7,13 +7,13 @@ using System.Runtime.InteropServices;
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 
-namespace RazorSharp.Native.Structures.Symbols
+namespace RazorSharp.Native.Symbols
 {
 	/// <summary>
 	///     Native name: TI_FINDCHILDREN_PARAMS
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential)]
-	public struct FindChildrenParams
+	internal struct FindChildrenParams
 	{
 		public uint Count;
 		public uint Start;

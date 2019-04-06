@@ -2,8 +2,8 @@
 
 using System.Diagnostics;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Native.Structures;
-using RazorSharp.Native.Structures.Images;
+using RazorSharp.Native;
+using RazorSharp.Native.Images;
 using RazorSharp.Pointers;
 
 #endregion

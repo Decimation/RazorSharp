@@ -4,10 +4,10 @@ using System;
 
 #endregion
 
-namespace RazorSharp.Native.Enums
+namespace RazorSharp.Native
 {
 	[Flags]
-	public enum FreeTypes : uint
+	internal enum FreeTypes : uint
 	{
 		Decommit = 0x4000,
 		Release  = 0x8000

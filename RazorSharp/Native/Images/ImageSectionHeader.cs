@@ -4,7 +4,6 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon.Diagnostics;
 using RazorSharp.Memory;
-using RazorSharp.Native.Enums.Images;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -13,7 +12,7 @@ using RazorSharp.Native.Enums.Images;
 
 // ReSharper disable BuiltInTypeReferenceStyle
 
-namespace RazorSharp.Native.Structures.Images
+namespace RazorSharp.Native.Images
 {
 	#region
 

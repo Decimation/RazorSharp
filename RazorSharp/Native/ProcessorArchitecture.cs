@@ -1,6 +1,6 @@
-namespace RazorSharp.Native.Enums
+namespace RazorSharp.Native
 {
-	public enum ProcessorArchitecture : ushort
+	internal enum ProcessorArchitecture : ushort
 	{
 		/// <summary>
 		///     x64 (AMD or Intel)

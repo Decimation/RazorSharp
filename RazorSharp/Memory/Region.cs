@@ -3,8 +3,8 @@
 using System;
 using System.Diagnostics;
 using RazorSharp.Native;
-using RazorSharp.Native.Structures;
-using RazorSharp.Native.Structures.Images;
+using RazorSharp.Native.Images;
+using RazorSharp.Native.Win32;
 using RazorSharp.Pointers;
 
 #endregion

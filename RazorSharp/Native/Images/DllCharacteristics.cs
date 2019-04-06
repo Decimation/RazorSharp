@@ -1,6 +1,6 @@
-namespace RazorSharp.Native.Enums.Images
+namespace RazorSharp.Native.Images
 {
-	public enum DllCharacteristics : ushort
+	internal enum DllCharacteristics : ushort
 	{
 		RES_0                                          = 0x0001,
 		RES_1                                          = 0x0002,

@@ -1,6 +1,6 @@
-namespace RazorSharp.Native.Enums.Images
+namespace RazorSharp.Native.Images
 {
-	public enum MachineType : ushort
+	internal enum MachineType : ushort
 	{
 		Native  = 0,
 		I386    = 0x014c,

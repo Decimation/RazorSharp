@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory;
-using RazorSharp.Native.Enums.Images;
-using RazorSharp.Native.Structures.Symbols;
+using RazorSharp.Native.Images;
+using RazorSharp.Native.Win32;
 using RazorSharp.Pointers;
 
-namespace RazorSharp.Native.Types.Symbols
+namespace RazorSharp.Native.Symbols
 {
 	// todo: WIP
 	public unsafe class SymEnvironment : IDisposable
@@ -18,6 +18,8 @@ namespace RazorSharp.Native.Types.Symbols
 		private readonly List<Symbol> m_symbols;
 		private const    string       MASK_WILDCARD = "*";
 		private          ulong        m_dllbase;
+
+		public List<Symbol> Symbols => m_symbols;
 
 		public SymEnvironment(string imgName, string mask = MASK_WILDCARD)
 		{
@@ -42,7 +44,7 @@ namespace RazorSharp.Native.Types.Symbols
 
 
 			Global.Log.Debug("Code {Code}", Marshal.GetLastWin32Error());
-			
+
 			Conditions.Require(m_dllbase != 0, nameof(m_dllbase));
 
 			Global.Log.Debug("dll base {Base}", m_dllbase.ToString("X"));
@@ -107,6 +109,7 @@ namespace RazorSharp.Native.Types.Symbols
 		public void Dispose()
 		{
 			DbgHelp.SymCleanup(m_proc);
+			DbgHelp.SymUnloadModule64(m_proc, m_dllbase);
 			Kernel32.CloseHandle(m_proc);
 
 			m_proc = IntPtr.Zero;
