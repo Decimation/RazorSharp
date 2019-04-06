@@ -7,7 +7,7 @@ namespace RazorSharp
 {
 	public static class Core
 	{
-		public static readonly Version Version = new Version(0,1,1,2);
+		public static readonly Version Version = new Version(0,1,1,3);
 		
 		public static void Setup()
 		{
@@ -19,7 +19,7 @@ namespace RazorSharp
 		public static void Close()
 		{
 			// SHUT IT DOWN
-			SymReader.Close();
+			SymbolReader.Close();
 			Clr.Close();
 			Global.Close();
 		}

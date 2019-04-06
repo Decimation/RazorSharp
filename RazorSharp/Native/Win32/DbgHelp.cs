@@ -19,6 +19,10 @@ namespace RazorSharp.Native.Win32
 	internal static unsafe class DbgHelp
 	{
 		private const string DBG_HELP_DLL = "DbgHelp.dll";
+		
+		internal const uint SYMOPT_DEBUG = 0x80000000;
+
+		internal const uint SYMOPT_UNDNAME = 0x2;
 
 		//BOOL IMAGEAPI SymGetTypeInfo(
 		//	HANDLE                    hProcess,
@@ -52,6 +56,8 @@ namespace RazorSharp.Native.Win32
 		                                           SymEnumSymbolsCallback callback,
 		                                           IntPtr                 pUserContext);
 
+		
+		
 		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true)]
@@ -243,9 +249,9 @@ namespace RazorSharp.Native.Win32
 		///     SYM_ENUMERATESYMBOLS_CALLBACK
 		/// </summary>
 		/// <param name="symInfo">SYMBOL_INFO</param>
-		/// <param name="symbolSize"></param>
-		/// <param name="pUserContext"></param>
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal delegate bool SymEnumSymbolsCallback(IntPtr symInfo, uint symbolSize, IntPtr pUserContext);
+		
+		
 	}
 }

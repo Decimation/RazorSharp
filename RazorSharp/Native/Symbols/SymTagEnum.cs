@@ -1,4 +1,4 @@
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Symbols
 {
 	public enum SymTagEnum
 	{

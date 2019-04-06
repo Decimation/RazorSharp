@@ -9,6 +9,7 @@ using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using RazorCommon;
 using RazorCommon.Diagnostics;
@@ -23,6 +24,7 @@ using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Memory.Fixed;
 using RazorSharp.Native;
 using RazorSharp.Native.Symbols;
+using RazorSharp.Native.Win32;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
@@ -63,14 +65,18 @@ namespace Test
 		{
 			Core.Setup();
 
-
-			foreach (var symbol in Clr.ClrSymbols.Symbols) {
-				if (symbol.Name.StartsWith("g_") && symbol.Name.Contains("thread")) {
-					Console.WriteLine(symbol);
-				}
-			}
-
+			var sym = Clr.ClrSymbols.GetSymbol("g_pGCHeap");
+			Console.WriteLine(sym);
 			
+			using (var s = new SymbolEnvironment(Clr.ClrPdb.FullName)) {
+				
+				var x = s.First("g_pGCHeap", "*!*");
+
+				
+				Console.WriteLine("Sym {0}",x);
+			}
+			
+
 			Core.Close();
 		}
 	}

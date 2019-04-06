@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -8,26 +7,18 @@ using RazorCommon.Diagnostics;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory;
-using RazorSharp.Native;
 using RazorSharp.Native.Images;
-using RazorSharp.Native.Symbols;
 using RazorSharp.Native.Win32;
 using RazorSharp.Pointers;
-using static RazorSharp.Native.SymTagEnum;
-using SymTagEnum = RazorSharp.Native.SymTagEnum;
-using static RazorSharp.Native.Symbols.SymType;
 
-namespace RazorSharp
+namespace RazorSharp.Native.Symbols
 {
 	/// <summary>
 	/// Provides access to symbols in PDB files and matching them with the corresponding memory
 	/// location in an image
 	/// </summary>
-	internal unsafe class SymReader
+	internal unsafe class SymbolReader
 	{
-		// todo: add support for loading just one specified symbol like in Symbols
-		
-		
 		internal List<Symbol> Symbols { get; private set; }
 
 		private readonly IntPtr m_proc;
@@ -36,7 +27,7 @@ namespace RazorSharp
 
 		private const string MASK_STR_DEFAULT = "*!*";
 
-		private const string OffsetsFileName = "RazorSharpSymbolOffsets.txt";
+		private const string OFFSETS_FILE_NAME = "RazorSharpSymbolOffsets.txt";
 
 		/// <summary>
 		///     The file which caches symbols and their offsets
@@ -50,9 +41,9 @@ namespace RazorSharp
 		private static readonly Dictionary<string, long> Cache;
 		
 		
-		static SymReader()
+		static SymbolReader()
 		{
-			if (FileUtil.GetOrCreateTempFile(OffsetsFileName, out CacheFile)) {
+			if (FileUtil.GetOrCreateTempFile(OFFSETS_FILE_NAME, out CacheFile)) {
 				Global.Log.Verbose("Symbol cache file detected");
 			}
 			else {
@@ -74,7 +65,7 @@ namespace RazorSharp
 			FileUtil.WriteDictionary(Cache, CacheFile);
 		}
 
-		internal SymReader()
+		internal SymbolReader()
 		{
 			m_proc  = Kernel32.GetCurrentProcess();
 			Symbols = new List<Symbol>();
@@ -116,11 +107,10 @@ namespace RazorSharp
 //				Global.Log.Debug("Sym {Name} is cached", name);
 				return Cache[name];
 			}
-			else {
-				var ofs = GetSymbol(name).Offset;
-				Cache.Add(name, ofs);
-				return ofs;
-			}
+
+			var ofs = GetSymbol(name).Offset;
+			Cache.Add(name, ofs);
+			return ofs;
 		}
 
 		public long[] GetSymOffsets(string[] names)
@@ -162,7 +152,7 @@ namespace RazorSharp
 
 			bool bRet = DbgHelp.SymGetModuleInfo64(m_proc, modBase, pAlloc);
 
-			NativeFunctions.Call(bRet, nameof(DbgHelp.SymGetModuleInfo64));
+			NativeHelp.Call(bRet, nameof(DbgHelp.SymGetModuleInfo64));
 
 
 			module64 = Marshal.PtrToStructure<ImageHelpModule64>(pAlloc);
@@ -198,8 +188,8 @@ namespace RazorSharp
 			// messages to debug output - use the debugger's Debug Output window
 			// to view the messages
 
-			const uint SYMOPT_DEBUG = 0x80000000;
-			options |= SYMOPT_DEBUG;
+			
+			options |= DbgHelp.SYMOPT_DEBUG;
 
 			DbgHelp.SymSetOptions(options);
 
@@ -207,7 +197,7 @@ namespace RazorSharp
 			// Initialize DbgHelp and load symbols for all modules of the current process 
 			var symInit = DbgHelp.SymInitialize(m_proc, null, true);
 
-			NativeFunctions.Call(symInit, nameof(DbgHelp.SymInitialize));
+			NativeHelp.Call(symInit, nameof(DbgHelp.SymInitialize));
 
 			ulong baseAddr = 0;
 			ulong fileSize = 0;
@@ -225,7 +215,7 @@ namespace RazorSharp
 				(uint) fileSize // Size of the file (cannot be NULL if .PDB file is used, otherwise it can be NULL)
 			);
 
-			NativeFunctions.Call(m_modBase != 0, nameof(DbgHelp.SymLoadModule64));
+			NativeHelp.Call(m_modBase != 0, nameof(DbgHelp.SymLoadModule64));
 
 
 			// Obtain and display information about loaded symbols 
@@ -242,11 +232,11 @@ namespace RazorSharp
 				IntPtr.Zero          // A used-defined context can be passed here, if necessary
 			);
 
-			NativeFunctions.Call(symEnumSuccess, nameof(DbgHelp.SymEnumSymbols));
+			NativeHelp.Call(symEnumSuccess, nameof(DbgHelp.SymEnumSymbols));
 
-			NativeFunctions.Call(DbgHelp.SymUnloadModule64(m_proc, m_modBase), nameof(DbgHelp.SymUnloadModule64));
+			NativeHelp.Call(DbgHelp.SymUnloadModule64(m_proc, m_modBase), nameof(DbgHelp.SymUnloadModule64));
 
-			NativeFunctions.Call(DbgHelp.SymCleanup(m_proc), nameof(DbgHelp.SymCleanup));
+			NativeHelp.Call(DbgHelp.SymCleanup(m_proc), nameof(DbgHelp.SymCleanup));
 
 			// Complete
 		}
@@ -279,7 +269,8 @@ namespace RazorSharp
 			return fileSize != Kernel32.INVALID_FILE_SIZE;
 		}
 
-		private static bool GetFileParams(string pFileName, ref ulong baseAddr, ref ulong fileSize)
+		// ReSharper disable once RedundantAssignment
+		internal static bool GetFileParams(string pFileName, ref ulong baseAddr, ref ulong fileSize)
 		{
 			// Is it .PDB file ?
 
@@ -320,7 +311,7 @@ namespace RazorSharp
         			return DownloadSymbolFile(dest, dll, out _);
         		}
         
-        		internal static FileInfo DownloadSymbolFile(DirectoryInfo dest, FileInfo dll, out DirectoryInfo super)
+        internal static FileInfo DownloadSymbolFile(DirectoryInfo dest, FileInfo dll, out DirectoryInfo super)
         		{
         			// symchk
         			string progFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);

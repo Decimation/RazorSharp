@@ -9,6 +9,7 @@ using JetBrains.Annotations;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
+using RazorSharp.Native.Symbols;
 using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
@@ -73,13 +74,13 @@ namespace RazorSharp.Memory.Calling.Symbols
 			return fullSym;
 		}
 
-		private static SymReader GetReader(SymcallAttribute attr)
+		private static SymbolReader GetReader(SymcallAttribute attr)
 		{
 			if (attr.Image == Clr.CLR_DLL_SHORT) {
 				return Clr.ClrSymbols;
 			}
 			
-			var sym = new SymReader();
+			var sym = new SymbolReader();
 			sym.LoadAll(attr.Image, null);
 			return sym;
 		}

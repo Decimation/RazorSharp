@@ -63,7 +63,7 @@ namespace RazorSharp.CoreClr
 		/// </summary>
 		internal static FileInfo ClrPdb { get; private set; }
 
-		internal static readonly SymReader ClrSymbols;
+		internal static readonly SymbolReader ClrSymbols;
 		
 		private const string CLR_PDB_FILE_SEARCH = @"C:\Symbols\clr.pdb";
 
@@ -77,7 +77,7 @@ namespace RazorSharp.CoreClr
 			ClrDll     = GetClrDll();
 			ClrModule  = Modules.GetModule(CLR_DLL_SHORT);
 			ClrVersion = new Version(4, 0, 30319, 42000);
-			ClrSymbols = new SymReader();
+			ClrSymbols = new SymbolReader();
 		}
 
 
@@ -92,7 +92,7 @@ namespace RazorSharp.CoreClr
 			const string ERR = "The PDB specified by \"ClrPdb\" does not match the one returned by Microsoft's servers";
 			Conditions.NotNull(ClrPdb, nameof(ClrPdb));
 			string cd     = Environment.CurrentDirectory;
-			var    tmpSym = SymReader.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
+			var    tmpSym = SymbolReader.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
 			Conditions.Require(ClrPdb.ContentEquals(tmpSym), ERR, nameof(ClrPdb));
 			DeleteSymbolFile(tmpSym);
 		}
@@ -116,7 +116,7 @@ namespace RazorSharp.CoreClr
 					clrSym = new FileInfo(CLR_PDB_FILE_SEARCH);
 				}
 				else {
-					clrSym = SymReader.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
+					clrSym = SymbolReader.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
 				}
 				
 			}
