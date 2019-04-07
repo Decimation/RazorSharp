@@ -1,11 +1,10 @@
 #region
 
 using System;
-using RazorSharp.CoreClr.Structures;
 
 #endregion
 
-namespace RazorSharp.CoreClr.Enums.ObjHeader
+namespace RazorSharp.CoreClr.Structures
 {
 	/// <summary>
 	///     <remarks>

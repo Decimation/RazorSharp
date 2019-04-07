@@ -7,12 +7,12 @@ using RazorCommon.Strings;
 
 #endregion
 
-namespace RazorSharp.Pointers
+namespace RazorSharp.Memory.Pointers
 {
 	public static class PointerFormat
 	{
 		/// <summary>
-		///     Object (<see cref="P:RazorSharp.Pointers.Pointer`1.Reference" />).
+		///     Object (<see cref="P:RazorSharp.Memory.Pointers.Pointer`1.Reference" />).
 		///     <list type="bullet">
 		///         <item>
 		///             <description>
@@ -44,7 +44,7 @@ namespace RazorSharp.Pointers
 
 		/// <summary>
 		///     <para>
-		///         Pointer (<see cref="P:RazorSharp.Pointers.Pointer`1.Address" />) in
+		///         Pointer (<see cref="P:RazorSharp.Memory.Pointers.Pointer`1.Address" />) in
 		///         <see cref="Hex.ToHex(IntPtr, ToStringOptions)" /> format
 		///     </para>
 		/// </summary>

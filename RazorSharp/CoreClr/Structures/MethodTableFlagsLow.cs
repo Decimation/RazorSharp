@@ -1,13 +1,12 @@
 #region
 
 using System;
-using RazorSharp.CoreClr.Structures;
 
 #endregion
 
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp.CoreClr.Enums.MethodTable
+namespace RazorSharp.CoreClr.Structures
 {
 	/// <summary>
 	///     <remarks>

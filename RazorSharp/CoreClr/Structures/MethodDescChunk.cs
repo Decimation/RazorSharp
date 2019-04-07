@@ -6,7 +6,8 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;
-using RazorSharp.Pointers;
+using RazorSharp.Memory;
+using RazorSharp.Memory.Pointers;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 

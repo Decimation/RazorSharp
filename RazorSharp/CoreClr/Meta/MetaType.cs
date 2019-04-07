@@ -10,12 +10,9 @@ using System.Reflection;
 using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorCommon.Utilities;
-using RazorSharp.CoreClr.Enums;
-using RazorSharp.CoreClr.Enums.EEClass;
-using RazorSharp.CoreClr.Enums.MethodTable;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 
 #endregion

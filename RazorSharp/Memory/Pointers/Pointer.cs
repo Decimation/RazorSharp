@@ -18,8 +18,6 @@ using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr;
-using RazorSharp.Memory;
-using RazorSharp.Memory.Fixed;
 using RazorSharp.Native;
 using RazorSharp.Native.Win32;
 using RazorSharp.Utilities;
@@ -30,7 +28,7 @@ using RazorSharp.Utilities;
 
 #endregion
 
-namespace RazorSharp.Pointers
+namespace RazorSharp.Memory.Pointers
 {
 	#region
 
@@ -135,7 +133,7 @@ namespace RazorSharp.Pointers
 		#region Constructors
 
 		/// <summary>
-		///     Creates a new <see cref="T:RazorSharp.Pointers.Pointer`1" /> pointing to the address <paramref name="p" />
+		///     Creates a new <see cref="T:RazorSharp.Memory.Pointers.Pointer`1" /> pointing to the address <paramref name="p" />
 		/// </summary>
 		/// <param name="p">Address to point to</param>
 		public Pointer(IntPtr p) : this(p.ToPointer()) { }
@@ -151,7 +149,7 @@ namespace RazorSharp.Pointers
 		}
 
 		/// <summary>
-		///     Creates a new <see cref="T:RazorSharp.Pointers.Pointer`1" /> pointing to the address <paramref name="v" />
+		///     Creates a new <see cref="T:RazorSharp.Memory.Pointers.Pointer`1" /> pointing to the address <paramref name="v" />
 		///     represented as an <see cref="T:System.Int64" />
 		/// </summary>
 		/// <param name="v">Address to point to</param>
@@ -160,7 +158,7 @@ namespace RazorSharp.Pointers
 		public Pointer(ulong ul) : this((void*) ul) { }
 
 		/// <summary>
-		///     Creates a new <see cref="T:RazorSharp.Pointers.Pointer`1" /> pointing to the address of <paramref name="t" />
+		///     Creates a new <see cref="T:RazorSharp.Memory.Pointers.Pointer`1" /> pointing to the address of <paramref name="t" />
 		/// </summary>
 		/// <param name="t">Variable whose address will be pointed to</param>
 		public Pointer(ref T t) : this(Unsafe.AddressOf(ref t).Address) { }

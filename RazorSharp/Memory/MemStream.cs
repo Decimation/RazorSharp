@@ -1,6 +1,6 @@
 #region
 
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 
 #endregion
 

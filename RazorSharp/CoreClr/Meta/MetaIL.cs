@@ -3,8 +3,9 @@
 #region
 
 using RazorCommon;
+using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.ILMethods;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 
 #endregion
 

@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Memory;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 
 namespace RazorSharp.Native.Symbols
 {

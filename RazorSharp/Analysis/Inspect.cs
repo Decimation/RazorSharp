@@ -10,7 +10,8 @@ using RazorCommon.Strings;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Pointers;
+using RazorSharp.Memory;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 
 #endregion

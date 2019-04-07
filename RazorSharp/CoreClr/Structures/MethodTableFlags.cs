@@ -1,11 +1,10 @@
 #region
 
 using System;
-using RazorSharp.CoreClr.Structures;
 
 #endregion
 
-namespace RazorSharp.CoreClr.Enums.MethodTable
+namespace RazorSharp.CoreClr.Structures
 {
 	/// <summary>
 	///     <para>Sources:</para>

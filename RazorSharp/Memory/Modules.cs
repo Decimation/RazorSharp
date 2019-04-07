@@ -6,9 +6,9 @@ using System.Diagnostics;
 using JetBrains.Annotations;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;
 using RazorSharp.Native.Win32;
-using RazorSharp.Pointers;
 
 #endregion
 

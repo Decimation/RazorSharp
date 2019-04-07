@@ -1,7 +1,6 @@
 #region
 
 using System;
-using RazorSharp.CoreClr.Enums.MethodTable;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 

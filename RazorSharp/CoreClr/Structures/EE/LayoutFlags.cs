@@ -1,11 +1,10 @@
 #region
 
 using System;
-using RazorSharp.CoreClr.Structures.EE;
 
 #endregion
 
-namespace RazorSharp.CoreClr.Enums.EEClass
+namespace RazorSharp.CoreClr.Structures.EE
 {
 	/// <summary>
 	///     <para>Sources:</para>

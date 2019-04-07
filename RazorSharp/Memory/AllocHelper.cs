@@ -6,8 +6,8 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
-using RazorSharp.Pointers;
-using static RazorSharp.Unsafe;
+using RazorSharp.Memory.Pointers;
+using static RazorSharp.Memory.Unsafe;
 
 #endregion
 

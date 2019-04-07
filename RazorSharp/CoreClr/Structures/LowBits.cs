@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace RazorSharp.CoreClr.Enums.MethodTable
+namespace RazorSharp.CoreClr.Structures
 {
 	/// <summary>
 	///     The value of lowest two bits describe what the union contains

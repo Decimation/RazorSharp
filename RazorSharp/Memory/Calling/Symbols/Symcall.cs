@@ -9,8 +9,8 @@ using JetBrains.Annotations;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Symbols;
-using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 
 #endregion

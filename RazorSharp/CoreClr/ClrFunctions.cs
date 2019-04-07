@@ -7,7 +7,7 @@ using RazorSharp.Memory;
 using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 
 // ReSharper disable IdentifierTypo
 

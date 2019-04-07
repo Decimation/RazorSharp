@@ -8,7 +8,8 @@ using RazorCommon;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Meta;
-using RazorSharp.Pointers;
+using RazorSharp.Memory;
+using RazorSharp.Memory.Pointers;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 

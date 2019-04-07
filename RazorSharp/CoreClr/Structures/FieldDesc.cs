@@ -6,15 +6,12 @@ using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
-using RazorSharp.CoreClr.Enums;
-using RazorSharp.CoreClr.Enums.FieldDesc;
-using RazorSharp.CoreClr.Enums.MethodDesc;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 

@@ -3,8 +3,9 @@
 using System;
 using System.Diagnostics;
 using RazorCommon.Diagnostics;
+using RazorSharp.Memory;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.ThreadContext;
-using RazorSharp.Pointers;
 
 #endregion
 

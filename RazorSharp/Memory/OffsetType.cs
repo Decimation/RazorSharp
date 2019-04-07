@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 
-namespace RazorSharp
+namespace RazorSharp.Memory
 {
 	/// <summary>
 	///     Offset options for <see cref="Unsafe.AddressOfHeap{T}(ref T, OffsetType)" />

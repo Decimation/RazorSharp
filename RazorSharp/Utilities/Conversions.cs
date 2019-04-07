@@ -1,7 +1,7 @@
 #region
 
 using RazorSharp.Memory;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 #endregion

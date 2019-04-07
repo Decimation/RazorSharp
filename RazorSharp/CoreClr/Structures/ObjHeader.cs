@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using RazorCommon;
 using RazorCommon.Diagnostics;
-using RazorSharp.CoreClr.Enums.ObjHeader;
 using RazorSharp.Memory;
 
 // ReSharper disable BuiltInTypeReferenceStyle

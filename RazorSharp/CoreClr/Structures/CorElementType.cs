@@ -1,10 +1,8 @@
 #region
 
-using RazorSharp.CoreClr.Structures;
-
 #endregion
 
-namespace RazorSharp.CoreClr.Enums
+namespace RazorSharp.CoreClr.Structures
 {
 	/// <summary>
 	///     <para>Sources:</para>

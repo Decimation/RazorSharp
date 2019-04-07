@@ -4,7 +4,8 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Utilities;
-using RazorSharp.Pointers;
+using RazorSharp.Memory;
+using RazorSharp.Memory.Pointers;
 
 #endregion
 

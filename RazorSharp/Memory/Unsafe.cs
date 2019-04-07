@@ -1,20 +1,17 @@
 ﻿#region
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
-using RazorSharp.Memory;
-using RazorSharp.Memory.Fixed;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 
 #endregion
 
-namespace RazorSharp
+namespace RazorSharp.Memory
 {
 	#region
 

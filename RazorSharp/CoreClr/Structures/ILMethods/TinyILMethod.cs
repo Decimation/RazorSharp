@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Meta;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 
 #endregion
 

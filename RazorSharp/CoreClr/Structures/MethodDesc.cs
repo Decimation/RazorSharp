@@ -9,14 +9,15 @@ using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
-using RazorSharp.CoreClr.Enums.MethodDesc;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.ILMethods;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
+using Unsafe = RazorSharp.Memory.Unsafe;
+
 // ReSharper disable NonReadonlyMemberInGetHashCode
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local

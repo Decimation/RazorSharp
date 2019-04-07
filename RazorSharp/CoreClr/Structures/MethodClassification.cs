@@ -1,10 +1,8 @@
 #region
 
-using RazorSharp.CoreClr.Structures;
-
 #endregion
 
-namespace RazorSharp.CoreClr.Enums.MethodDesc
+namespace RazorSharp.CoreClr.Structures
 {
 	/// <summary>
 	///     <remarks>

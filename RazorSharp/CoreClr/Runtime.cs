@@ -9,8 +9,9 @@ using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.HeapObjects;
 using RazorSharp.Memory;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
+using Unsafe = RazorSharp.Memory.Unsafe;
 
 #endregion
 

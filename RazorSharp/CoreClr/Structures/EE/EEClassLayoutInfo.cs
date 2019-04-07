@@ -4,8 +4,8 @@ using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Utilities;
-using RazorSharp.CoreClr.Enums.EEClass;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.Memory;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 

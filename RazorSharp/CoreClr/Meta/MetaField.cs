@@ -4,10 +4,8 @@
 
 using System;
 using System.Reflection;
-using RazorSharp.CoreClr.Enums;
-using RazorSharp.CoreClr.Enums.FieldDesc;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 
 #endregion
 

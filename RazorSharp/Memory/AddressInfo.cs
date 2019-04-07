@@ -2,9 +2,9 @@
 
 using System.Diagnostics;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;
 using RazorSharp.Native.Images;
-using RazorSharp.Pointers;
 
 #endregion
 

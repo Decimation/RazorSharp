@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using RazorCommon.Strings;
 using RazorSharp.Memory;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 
 #endregion
 

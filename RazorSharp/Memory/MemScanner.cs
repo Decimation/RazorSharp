@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 using RazorCommon.Utilities;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 
 #endregion
 

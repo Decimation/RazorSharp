@@ -1,4 +1,4 @@
-namespace RazorSharp.CoreClr.Enums.MethodDesc
+namespace RazorSharp.CoreClr.Structures
 {
 	internal enum MbMask
 	{

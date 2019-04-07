@@ -3,11 +3,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using RazorSharp.Memory;
 
 #endregion
 
-namespace RazorSharp.Pointers
+namespace RazorSharp.Memory.Pointers
 {
 	// todo: WIP
 	public struct AllocPointer<T> : IEnumerable<T>

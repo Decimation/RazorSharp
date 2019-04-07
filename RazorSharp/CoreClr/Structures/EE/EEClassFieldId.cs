@@ -1,5 +1,5 @@
 // ReSharper disable InconsistentNaming
-namespace RazorSharp.CoreClr.Enums.EEClass
+namespace RazorSharp.CoreClr.Structures.EE
 {
 	public enum EEClassFieldId : uint
 	{

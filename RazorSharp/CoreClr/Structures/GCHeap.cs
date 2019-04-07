@@ -7,9 +7,9 @@ using RazorSharp.Memory;
 using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;
 using RazorSharp.Native.Symbols;
-using RazorSharp.Pointers;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable MemberCanBeMadeStatic.Global

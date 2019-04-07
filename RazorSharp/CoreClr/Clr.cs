@@ -8,9 +8,9 @@ using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Utilities;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;
 using RazorSharp.Native.Symbols;
-using RazorSharp.Pointers;
 
 #endregion
 

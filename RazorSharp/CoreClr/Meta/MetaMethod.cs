@@ -6,9 +6,8 @@ using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
 using RazorCommon.Utilities;
-using RazorSharp.CoreClr.Enums.MethodDesc;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Pointers;
+using RazorSharp.Memory.Pointers;
 
 #endregion
 

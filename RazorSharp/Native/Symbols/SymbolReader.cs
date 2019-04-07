@@ -7,9 +7,9 @@ using RazorCommon.Diagnostics;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Images;
 using RazorSharp.Native.Win32;
-using RazorSharp.Pointers;
 
 namespace RazorSharp.Native.Symbols
 {

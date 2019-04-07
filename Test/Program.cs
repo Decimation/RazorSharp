@@ -22,13 +22,13 @@ using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Memory.Fixed;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;
 using RazorSharp.Native.Symbols;
 using RazorSharp.Native.Win32;
-using RazorSharp.Pointers;
 using RazorSharp.Utilities;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-using Unsafe = RazorSharp.Unsafe;
+using Unsafe = RazorSharp.Memory.Unsafe;
 
 #endregion
 
@@ -57,24 +57,34 @@ namespace Test
 			return Constants.INVALID_VALUE;
 		}
 
-
-		// todo: reorganize namespaces and fix access levels
+		[DllImport("kernel32")]
+		private static extern IntPtr GetCurrentProcess();
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
 			Core.Setup();
 
-			var sym = Clr.ClrSymbols.GetSymbol("g_pGCHeap");
-			Console.WriteLine(sym);
-			
-			using (var s = new SymbolEnvironment(Clr.ClrPdb.FullName)) {
-				
-				var x = s.First("g_pGCHeap", "*!*");
+			var meta = typeof(Program).GetMetaType();
 
-				
-				Console.WriteLine("Sym {0}",x);
-			}
+			var m = meta.Methods["GetCurrentProcess"];
+
+			Console.WriteLine(m);
+			Console.WriteLine(m.Flags);
+
+			var m2 = meta.Methods["Size"];
+
+			Console.WriteLine(m2);
+
+			object str = "foo";
+			var gc = GCHandle.Alloc(str, GCHandleType.Pinned);
+
+
+			var s = Clr.ClrSymbols.Symbols.Where(sym => sym.Name.Contains("GetClassification")).ToList();
+			Console.WriteLine(s.Count);
+			
+			gc.Free();
+			
 			
 
 			Core.Close();

@@ -2,7 +2,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorSharp.CoreClr.Enums.EEClass;
 using RazorSharp.CoreClr.Structures.EE;
 
 #endregion
