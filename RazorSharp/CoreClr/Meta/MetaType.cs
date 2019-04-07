@@ -351,6 +351,8 @@ namespace RazorSharp.CoreClr.Meta
 
 		#endregion
 
+		internal Pointer<MethodTable> Value => m_value;
+
 		#endregion
 	}
 }

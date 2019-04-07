@@ -246,6 +246,10 @@ namespace RazorSharp.CoreClr.Structures
 		internal MethodDescFlags2         Flags2     => (MethodDescFlags2) m_bFlags2;
 		internal MethodDescFlags3         Flags3     => (MethodDescFlags3) m_wFlags3AndTokenRemainder;
 
+		
+		
+		
+
 		#endregion
 
 		#endregion
@@ -354,6 +358,7 @@ namespace RazorSharp.CoreClr.Structures
 			table.AddRow("Function", Hex.ToHex(Function));
 			table.AddRow("Native code", Hex.ToHex(NativeCode));
 
+			
 			if (HasILHeader)
 				table.AddRow("IL code", Hex.ToHex(GetILHeader().Reference.Code.Address));
 

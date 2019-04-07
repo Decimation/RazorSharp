@@ -114,6 +114,8 @@ namespace RazorSharp.CoreClr.Meta
 
 		#endregion
 
+		internal Pointer<MethodDesc> Value => m_value;
+
 		#region Flags
 
 		public MethodClassification     Classification => m_value.Reference.Classification;

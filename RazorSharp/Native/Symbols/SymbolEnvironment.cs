@@ -76,8 +76,9 @@ namespace RazorSharp.Native.Symbols
 			return true;
 		}
 
+		public long GetSymOffset(string name) => First(name).Offset;
 
-		public Symbol First(string name, string mask)
+		public Symbol First(string name, string mask = null)
 		{
 			IntPtr nameNative = Marshal.StringToHGlobalAuto(name);
 

@@ -36,16 +36,19 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 		public static void BindQuick(Type t, string method)
 		{
-			throw new NotImplementedException();
-			/*var    methodInfo = t.GetAnyMethod(method);
+			
+			var    methodInfo = t.GetAnyMethod(method);
 			var    attr       = methodInfo.GetCustomAttribute<SymcallAttribute>();
 			string fullSym    = GetSymbolName(attr, methodInfo);
 
-			var sym = new SymReader();
-			sym.LoadAll(attr.Image, null);
-			long          offset  = sym.GetSymOffset(fullSym);
-			Pointer<byte> address = Modules.GetAddress(attr.Module, offset);
-			Functions.SetStableEntryPoint(methodInfo, address.Address);*/
+			using (var sym = new SymbolEnvironment(attr.Image)) {
+				long          offset  = sym.GetSymOffset(fullSym);
+				Pointer<byte> address = Modules.GetAddress(attr.Module, offset);
+				Functions.SetStableEntryPoint(methodInfo, address.Address);
+			}
+			
+			
+			
 		}
 
 		private static string GetSymbolName(SymcallAttribute attr, [NotNull] MethodInfo method)

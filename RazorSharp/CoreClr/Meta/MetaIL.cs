@@ -44,6 +44,8 @@ namespace RazorSharp.CoreClr.Meta
 			m_value = value;
 		}
 
+		internal Pointer<ILMethod> Value => m_value;
+		
 		/// <summary>
 		///     Whether this type is <see cref="TinyILMethod" />
 		/// </summary>

@@ -123,6 +123,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		public MetaType EnclosingMetaType => new MetaType(m_value.Reference.EnclosingMethodTable);
 
+		internal Pointer<FieldDesc> Value => m_value;
 
 //		public Pointer<MethodTable> FieldMethodTable => m_pFieldDesc.Reference.FieldMethodTable;
 

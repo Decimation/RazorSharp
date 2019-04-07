@@ -20,6 +20,7 @@ using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Memory.Fixed;
 using RazorSharp.Memory.Pointers;
@@ -60,32 +61,93 @@ namespace Test
 		[DllImport("kernel32")]
 		private static extern IntPtr GetCurrentProcess();
 
+		[AttributeUsage(AttributeTargets.Method)]
+		class Attr : Attribute
+		{
+			internal string Image  { get; }
+			internal string Name   { get; }
+			internal string Module { get; }
+
+			public Attr(string img, string module, string name)
+			{
+				Image  = img;
+				Name   = name;
+				Module = module;
+			}
+		}
+
+
+		class MyStruct
+		{
+			// #define IDS_CLASSLOAD_MISSINGMETHODRVA          0x1797
+
+			// MethodTableBuilder::ValidateMethods()
+			// https://github.com/dotnet/coreclr/blob/master/src/vm/methodtablebuilder.cpp
+			// 4880: BuildMethodTableThrowException(IDS_CLASSLOAD_MISSINGMETHODRVA, it.Token());
+//			[MethodImpl(MethodImplOptions.InternalCall)]
+
+			[ClrSymcall(Symbol = "Object::GetSize", FullyQualified = true)]
+			public extern int Run();
+		}
+
+		class MyStruct2
+		{
+			public void Run()
+			{
+				Console.WriteLine("giblet");
+			}
+		}
+
+		static void nil()
+		{
+			const int OPCODES_OFS = 0xAB78E;
+
+			var txtSeg = Segments.GetSegment(".text", "clr.dll");
+			var ptr    = txtSeg.SectionAddress + OPCODES_OFS;
+
+			Console.WriteLine(ptr.CopyOutBytes(5).AutoJoin());
+
+			ptr.SafeWrite(new byte[5]);
+
+			Console.WriteLine(ptr.CopyOutBytes(5).AutoJoin());
+		}
+
+		static void alt()
+		{
+			Console.WriteLine(new MyStruct().Run());
+		}
+
+		static void bind()
+		{
+			var c  = typeof(MyStruct);
+			var m  = c.GetAnyMethod("Run");
+			var md = m.GetMethodDesc();
+
+			Symcall.BindQuick(c, "Run");
+		}
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
 			Core.Setup();
 
-			var meta = typeof(Program).GetMetaType();
-
-			var m = meta.Methods["GetCurrentProcess"];
-
-			Console.WriteLine(m);
-			Console.WriteLine(m.Flags);
-
-			var m2 = meta.Methods["Size"];
-
-			Console.WriteLine(m2);
-
-			object str = "foo";
-			var gc = GCHandle.Alloc(str, GCHandleType.Pinned);
+			// .text:00000001800AC78E E8 D5 09 4B 00 call    ?BuildMethodTableThrowException@MethodTableBuilder@@AEAAXJII@Z
+			// .text 0000000180001000	000000018070E000
 
 
-			var s = Clr.ClrSymbols.Symbols.Where(sym => sym.Name.Contains("GetClassification")).ToList();
-			Console.WriteLine(s.Count);
-			
-			gc.Free();
-			
-			
+			var myStruct2 = new MyStruct2();
+			var fn        = typeof(MyStruct2).GetAnyMethod("Run");
+			Console.WriteLine(fn.GetMethodDesc().Reference.RVA);
+
+			var fn2 = typeof(Program).GetAnyMethod("GetCurrentProcess");
+			Console.WriteLine(fn2.GetMethodDesc().Reference.RVA);
+
+			nil();
+
+			bind();
+
+			alt();
+
 
 			Core.Close();
 		}
