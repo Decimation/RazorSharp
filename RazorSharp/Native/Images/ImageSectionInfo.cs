@@ -29,7 +29,7 @@ namespace RazorSharp.Native.Images
 
 		public int SectionNumber { get; }
 
-		public Pointer<byte> SectionAddress => (IntPtr) m_sectionAddress;
+		public Pointer<byte> SectionAddress => m_sectionAddress;
 
 		[field: MarshalAs(UnmanagedType.ByValTStr, SizeConst = IMAGE_SIZEOF_SHORT_NAME)]
 		public string SectionName { get; }

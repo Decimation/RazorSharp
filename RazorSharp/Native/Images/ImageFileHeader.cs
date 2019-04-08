@@ -13,7 +13,7 @@ namespace RazorSharp.Native.Images
 	internal struct ImageFileHeader
 	{
 		/// WORD->unsigned short
-		public ushort Machine;
+		public MachineType Machine;
 
 		/// WORD->unsigned short
 		public ushort NumberOfSections;
