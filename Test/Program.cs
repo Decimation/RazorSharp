@@ -28,6 +28,7 @@ using RazorSharp.Native;
 using RazorSharp.Native.Symbols;
 using RazorSharp.Native.Win32;
 using RazorSharp.Utilities;
+using Test.PEFile;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 using Unsafe = RazorSharp.Memory.Unsafe;
 
@@ -94,15 +95,37 @@ namespace Test
 			string str = "foo";
 			Inspect.Layout(ref str);
 
+
 			
 
-			Console.WriteLine(Hex.TryCreateHex(Math.PI));
+			foreach (ProcessModule module in Modules.CurrentModules) {
+				Console.WriteLine(module.ModuleName);
+			}
+
+
+			Arglist(__arglist(1, 2, 3, "fooblet"));
+
 			
-			
-			Arglist(__arglist(1,2,3,"fooblet"));
+			string img = @"C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorSharp.dll";
+			using (var stream = File.OpenRead(img)) {
+				var imageReader = new ImageReader(stream);
+				if (imageReader.ReadImage()) {
+					Console.WriteLine(imageReader.ReadDataDirectory());
+					Image i = imageReader.image;
+					Console.WriteLine("rva: {0:X}",imageReader.metadata.VirtualAddress);
+					Console.WriteLine(i.Sections[0].Name);
+
+					foreach (var s in i.Sections) {
+						Console.WriteLine(s.Name);
+					}
+
+					Console.WriteLine("{0:X} {0}",imageReader.StringHeap.Length);
+				}
+			}
 
 			Core.Close();
 		}
+
 
 		private static void Arglist(__arglist)
 		{
