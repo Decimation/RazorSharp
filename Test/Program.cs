@@ -80,35 +80,14 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			Core.Setup();
-
-			// .text:00000001800AC78E E8 D5 09 4B 00 call    ?BuildMethodTableThrowException@MethodTableBuilder@@AEAAXJII@Z
-			// .text 0000000180001000	000000018070E000
-
-
-			decimal d = Decimal.MaxValue;
-			Inspect.Layout(ref d);
-
-			decimal x = Decimal.MinValue;
-			Inspect.Layout(ref x);
-
-			string str = "foo";
-			Inspect.Layout(ref str);
-
+			//Core.Setup();
 
 			
-
-			foreach (ProcessModule module in Modules.CurrentModules) {
-				Console.WriteLine(module.ModuleName);
-			}
-
-
-			Arglist(__arglist(1, 2, 3, "fooblet"));
 
 			
 			string img = @"C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorSharp.dll";
 			using (var stream = File.OpenRead(img)) {
-				var imageReader = new ImageReader(stream);
+				var imageReader = new JbImageReader(stream);
 				if (imageReader.ReadImage()) {
 					Console.WriteLine(imageReader.ReadDataDirectory());
 					Image i = imageReader.image;
@@ -119,11 +98,27 @@ namespace Test
 						Console.WriteLine(s.Name);
 					}
 
-					Console.WriteLine("{0:X} {0}",imageReader.StringHeap.Length);
+					
+
+					Console.WriteLine("raw data {0:X}",i.MetadataSection.PointerToRawData);
+
+
+					
+
 				}
 			}
 
-			Core.Close();
+			//Core.Close();
+		}
+
+		static void ReadToken(uint u)
+		{
+			
+		}
+
+		static string ReadCString(byte[] buf)
+		{
+			return Encoding.ASCII.GetString(buf);
 		}
 
 
