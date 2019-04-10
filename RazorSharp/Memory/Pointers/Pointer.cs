@@ -128,6 +128,20 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		public bool IsAligned => Mem.IsAligned(Address);
 
+		public bool IsNil {
+			get {
+				int elemSize = ElementSize;
+
+				for (int i = 0; i < elemSize; i++) {
+					if (ReadAny<byte>(i) != 0U) {
+						return false;
+					}
+				}
+
+				return true;
+			}
+		}
+
 		#endregion
 
 		#region Constructors
@@ -327,6 +341,8 @@ namespace RazorSharp.Memory.Pointers
 		#endregion
 
 
+		
+		
 		public MemoryBasicInformation Query() => Kernel32.VirtualQuery(Address);
 
 		public bool IsWritable => !IsReadOnly;
@@ -934,6 +950,8 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Implicit and explicit conversions
 
+		public static implicit operator bool(Pointer<T> ptr) => !ptr.IsNil;
+		
 		public static implicit operator Pointer<T>(Pointer<byte> v) => v.Address;
 
 		public static implicit operator Pointer<T>(void* v) => new Pointer<T>(v);
@@ -993,22 +1011,19 @@ namespace RazorSharp.Memory.Pointers
 		{
 //			return PointerUtil.Offset<TType>(m_value, elemCnt);
 
-			int size = Unsafe.SizeOf<TType>();
-			size *= elemCnt;
+			int size = Mem.Size<TType>(elemCnt);
 			return Address + size;
 		}
 
 
 		public Pointer<T> Add<TType>(int elemCnt = 1)
 		{
-			var elemSize = Unsafe.SizeOf<TType>() * elemCnt;
-			return Add(elemSize);
+			return Add(Mem.Size<TType>(elemCnt));
 		}
 
 		public Pointer<T> Subtract<TType>(int elemCnt = 1)
 		{
-			var elemSize = Unsafe.SizeOf<TType>() * elemCnt;
-			return Subtract(elemSize);
+			return Subtract(Mem.Size<TType>(elemCnt));
 		}
 
 		/// <summary>

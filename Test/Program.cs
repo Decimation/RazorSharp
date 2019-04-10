@@ -1,10 +1,12 @@
 ﻿#region
 
 using System;
+using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
@@ -45,7 +47,7 @@ namespace Test
 
 	using Ptr = Pointer<byte>;
 
-	public static unsafe class Program
+	public static unsafe partial class Program
 	{
 		// todo: replace native pointers* with Pointer<T> for consistency
 		// todo: RazorSharp, ClrMD, Reflection, Cecil comparison
@@ -59,6 +61,7 @@ namespace Test
 			return Constants.INVALID_VALUE;
 		}
 
+		interface IIndexable<T> { }
 
 		private class MyStruct
 		{
@@ -68,6 +71,7 @@ namespace Test
 			// https://github.com/dotnet/coreclr/blob/master/src/vm/methodtablebuilder.cpp
 			// 4880: BuildMethodTableThrowException(IDS_CLASSLOAD_MISSINGMETHODRVA, it.Token());
 //			[MethodImpl(MethodImplOptions.InternalCall)]
+
 
 			[ClrSymcall(Symbol = "Object::GetSize", FullyQualified = true)]
 			public int Run()
@@ -80,43 +84,42 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			//Core.Setup();
-
-			
-
-			
-			string img = @"C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorSharp.dll";
-			using (var stream = File.OpenRead(img)) {
-				var imageReader = new JbImageReader(stream);
-				if (imageReader.ReadImage()) {
-					Console.WriteLine(imageReader.ReadDataDirectory());
-					Image i = imageReader.image;
-					Console.WriteLine("rva: {0:X}",imageReader.metadata.VirtualAddress);
-					Console.WriteLine(i.Sections[0].Name);
-
-					foreach (var s in i.Sections) {
-						Console.WriteLine(s.Name);
-					}
-
-					
-
-					Console.WriteLine("raw data {0:X}",i.MetadataSection.PointerToRawData);
+			Core.Setup();
 
 
-					
+			var m = new MyClass();
 
-				}
+			Inspect.Layout(m);
+			Inspect.Heap(m);
+
+			var f = m.GetType().GetAnyField("s");
+			Console.WriteLine("{0:X}", f.MetadataToken);
+			Console.WriteLine("{0}", BitConverter.GetBytes(f.MetadataToken).AutoJoin());
+
+			var md = typeof(string).GetAnyMethod("get_Chars");
+			Console.WriteLine(">> {0:X}", md.MetadataToken);
+
+			var ptr = Mem.AllocUnmanaged<char>(256);
+			ptr.WriteAll("foo");
+			Console.WriteLine(">: {0}", ptr.Reference);
+
+
+			while (ptr) {
+				Console.Write("{0}", ptr[0]);
+				ptr++;
 			}
 
-			//Core.Close();
+			CString cs = default;
+
+
+			Core.Close();
 		}
 
-		static void ReadToken(uint u)
-		{
-			
-		}
+		private struct CString { }
 
-		static string ReadCString(byte[] buf)
+		private static void ReadToken(uint u) { }
+
+		private static string ReadCString(byte[] buf)
 		{
 			return Encoding.ASCII.GetString(buf);
 		}

@@ -78,6 +78,9 @@ namespace RazorSharp.Memory
 			return origByteCount / Unsafe.SizeOf<TAs>();
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int Size<T>(int elemCnt) => Unsafe.SizeOf<T>() * elemCnt;
+
 		#region Zero
 
 		public static void Zero<T>(ref T t)
@@ -87,8 +90,10 @@ namespace RazorSharp.Memory
 
 		public static void Zero(Pointer<byte> ptr, int length)
 		{
-			for (int i = 0; i < length; i++) ptr[i] = 0;
+			for (int i = 0; i < length; i++) 
+				ptr[i] = 0;
 		}
+
 
 		#endregion
 
@@ -117,7 +122,7 @@ namespace RazorSharp.Memory
 		public static Pointer<T> AllocUnmanagedInstance<T>() where T : class
 		{
 			Conditions.Require(!typeof(T).IsArray);
-			Conditions.Require(typeof(T) == typeof(string));
+			Conditions.Require(typeof(T) != typeof(string));
 
 
 			// Minimum size required for an instance
@@ -167,7 +172,7 @@ namespace RazorSharp.Memory
 		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
 		{
 			Conditions.Require(elemCnt > 0, nameof(elemCnt));
-			int size  = Unsafe.SizeOf<T>() * elemCnt;
+			int size = Size<T>(elemCnt);
 			var alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
 
@@ -178,7 +183,7 @@ namespace RazorSharp.Memory
 
 		public static Pointer<T> ReAllocUnmanaged<T>(Pointer<T> ptr, int elemCnt = 1)
 		{
-			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) (elemCnt * Unsafe.SizeOf<T>()));
+			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) (Size<T>(elemCnt)));
 		}
 
 		/// <summary>

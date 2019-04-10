@@ -273,6 +273,7 @@
     <Compile Include="Memory\Region.cs" />
     <Compile Include="Memory\SegmentType.cs" />
     <Compile Include="ModuleInitializer.cs" />
+    <Compile Include="MyClass.cs" />
     <Compile Include="Native\AllocationType.cs" />
     <Compile Include="Native\ConsoleOutputModes.cs" />
     <Compile Include="Native\FreeTypes.cs" />

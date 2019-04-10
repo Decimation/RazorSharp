@@ -47,7 +47,7 @@ namespace RazorSharp.Analysis
 
 		public static string LayoutString<T>(T t) where T : class
 		{
-			throw new NotImplementedException();
+			return LayoutString<T>(ref t);
 		}
 
 		public static string LayoutString<T>()
@@ -69,8 +69,8 @@ namespace RazorSharp.Analysis
 			for (int i = 0; i < lim; i++) {
 				var field = fields[i];
 
-				addresses[i] = field.GetAddress(ref t).ToString("P");
-				values[i]    = field.GetValue(t); // todo
+				addresses[i] = field.GetAddress(ref t).ToString(PointerFormat.FMT_P);
+				values[i] = field.GetValue(t) ?? StringConstants.NULL_STR;
 			}
 
 			table.Attach(1, "Address", addresses)
@@ -129,7 +129,7 @@ namespace RazorSharp.Analysis
 		public static string HeapString<T, TAs>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
 		{
 			// Sizes
-			Pointer<byte> addr     = Unsafe.AddressOfHeap(t);
+			Pointer<byte> addr     = Unsafe.AddressOfHeap(t, OffsetType.Header);
 			int           heapSize = Unsafe.HeapSize(t);
 
 			// Type info

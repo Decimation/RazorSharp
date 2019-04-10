@@ -56,6 +56,12 @@ namespace RazorSharp.Memory
 			return Mem.Read<T>(&cpy);
 		}
 
+		public static bool IsNil<T>(T value)
+		{
+			var ptr = Unsafe.AddressOf(ref value);
+			return ptr.IsNil;
+		}
+		
 		#region Address
 
 		/// <summary>
