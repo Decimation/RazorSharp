@@ -64,13 +64,13 @@ namespace RazorSharp.Memory
 		{
 			EnsureSetup();
 
-			for (int nModuleIndex = 0; nModuleIndex < m_buffer.Length; nModuleIndex++) {
-				if (m_buffer[nModuleIndex] != rgPattern[0])
+			for (int i = 0; i < m_buffer.Length; i++) {
+				if (m_buffer[i] != rgPattern[0])
 					continue;
 
 
-				if (PatternCheck(nModuleIndex, rgPattern)) {
-					Pointer<byte> p = m_lo + nModuleIndex;
+				if (PatternCheck(i, rgPattern)) {
+					Pointer<byte> p = m_lo + i;
 					return p;
 				}
 			}

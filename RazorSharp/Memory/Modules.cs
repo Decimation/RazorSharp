@@ -48,12 +48,22 @@ namespace RazorSharp.Memory
 			return pm.BaseAddress;
 		}
 
-		public static IEnumerable<Pointer<byte>> GetAddresses(string module, long[] offset)
+		public static Pointer<byte>[] GetAddresses(string module, long[] offset)
 		{
+			int lim = offset.Length;
+			var rg = new Pointer<byte>[lim];
+			
 			Pointer<byte> ptr = GetBaseAddress(module);
-			foreach (long ofs in offset) {
-				yield return ptr + ofs;
+
+			for (int i = 0; i < lim; i++) {
+				rg[i] = ptr + offset[i];
 			}
+
+			return rg;
+			
+			
+			
+			
 		}
 
 		public static Pointer<byte> GetAddress(string module, long offset)

@@ -215,11 +215,8 @@ namespace RazorSharp.CoreClr.Structures
 			get => throw new NativeCallException();
 		}
 
-		[ClrSymcall]
-		internal Pointer<byte> GetStaticAddress()
-		{
-			throw new NativeCallException(nameof(GetStaticAddress));
-		}
+
+		internal Pointer<byte> GetStaticAddress() => GetStaticAddress(null);
 
 		[ClrSymcall]
 		internal Pointer<byte> GetStaticAddress(void* value)

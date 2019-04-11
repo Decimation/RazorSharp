@@ -5,6 +5,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Resources;
@@ -61,7 +62,10 @@ namespace Test
 			return Constants.INVALID_VALUE;
 		}
 
-		interface IIndexable<T> { }
+		private interface IIndexable<T>
+		{
+			T this[int i] { get; set; }
+		}
 
 		private class MyStruct
 		{
@@ -80,36 +84,56 @@ namespace Test
 			}
 		}
 
+		class MyClass2
+		{
+			public readonly string Sz = "foo";
+
+			public void change()
+			{
+				Unsafe.Set(this, "Sz", "bar");
+			}
+		}
+
+		struct MyStruct2
+		{
+			public string Sz;
+
+
+			public void change()
+			{
+				Unsafe.Set(ref this, "Sz", "bar");
+			}
+		}
+
+		
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
 			Core.Setup();
 
-
-			var m = new MyClass();
-
-			Inspect.Layout(m);
-			Inspect.Heap(m);
-
-			var f = m.GetType().GetAnyField("s");
-			Console.WriteLine("{0:X}", f.MetadataToken);
-			Console.WriteLine("{0}", BitConverter.GetBytes(f.MetadataToken).AutoJoin());
-
-			var md = typeof(string).GetAnyMethod("get_Chars");
-			Console.WriteLine(">> {0:X}", md.MetadataToken);
-
-			var ptr = Mem.AllocUnmanaged<char>(256);
-			ptr.WriteAll("foo");
-			Console.WriteLine(">: {0}", ptr.Reference);
+			var ms = typeof(string).GetMetaType();
+			Console.WriteLine(ms);
+			Console.WriteLine(ms["m_firstChar"]);
 
 
-			while (ptr) {
-				Console.Write("{0}", ptr[0]);
-				ptr++;
-			}
+			Console.WriteLine("done");
+			var m = new MyClass2();
+			Console.WriteLine(m.Sz);
+			Console.WriteLine();
 
-			CString cs = default;
+			m.change();
+
+			Console.WriteLine(m.Sz);
+			
+			
+
+			var ms2 = new MyStruct2 {Sz = "fooby"};
+			Console.WriteLine(ms2.Sz);
+			ms2.change();
+			Console.WriteLine(ms2.Sz);
+			Console.WriteLine(ms2.Sz = "barlet");
+			
 
 
 			Core.Close();

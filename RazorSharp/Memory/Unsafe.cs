@@ -8,6 +8,7 @@ using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Utilities;
 
 #endregion
 
@@ -61,7 +62,25 @@ namespace RazorSharp.Memory
 			var ptr = Unsafe.AddressOf(ref value);
 			return ptr.IsNil;
 		}
-		
+
+		public static void Set<T, TField>(T value, string name, TField f)
+		{
+			var m = value.GetType().GetMetaType();
+			m[name].SetValue(value, f);
+		}
+
+		public static void Set<T, TField>(ref T value, string name, TField f)
+		{
+			var m = value.GetType().GetMetaType();
+			m[name].SetValueByAddr(ref value, f);
+		}
+
+		public static void Set<T, TField>(Pointer<T> value, string name, TField f)
+		{
+			var m = typeof(T).GetMetaType();
+			value.Add(m[name].Offset).WriteAny(f);
+		}
+
 		#region Address
 
 		/// <summary>

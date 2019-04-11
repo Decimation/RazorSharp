@@ -173,6 +173,12 @@ namespace RazorSharp.CoreClr.Meta
 			return m_value.Reference.GetAddress(ref t);
 		}
 
+		public void SetValueByAddr<TInstance, TField>(ref TInstance inst, TField value)
+		{
+			var addr = GetAddress(ref inst);
+			addr.WriteAny(value);
+		}
+
 		#endregion
 	}
 }

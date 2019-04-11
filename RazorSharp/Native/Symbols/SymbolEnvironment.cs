@@ -8,7 +8,7 @@ using RazorSharp.Native.Win32;
 
 namespace RazorSharp.Native.Symbols
 {
-	public unsafe class SymbolEnvironment : IDisposable
+	public unsafe class SymbolEnvironment : ISymbolProvider
 	{
 		private string m_img;
 
@@ -17,6 +17,8 @@ namespace RazorSharp.Native.Symbols
 
 		private readonly ulong m_modBase;
 
+		private List<Symbol> m_symBuffer;
+		private string[]     m_nameBuffer;
 
 		public SymbolEnvironment(string img)
 		{
@@ -58,7 +60,6 @@ namespace RazorSharp.Native.Symbols
 			NativeHelp.Call(m_modBase != 0, nameof(DbgHelp.SymLoadModule64));
 		}
 
-
 		private bool FirstSymCallback(IntPtr sym, uint symSize, IntPtr userCtx)
 		{
 			var pSym = (SymbolInfo*) sym;
@@ -76,11 +77,66 @@ namespace RazorSharp.Native.Symbols
 			return true;
 		}
 
-		public long GetSymOffset(string name) => First(name).Offset;
+		public long GetSymOffset(string name) => GetSymbol(name).Offset;
 
-		public Symbol First(string name, string mask = null)
+		public long[] GetSymOffsets(string[] names)
 		{
-			IntPtr nameNative = Marshal.StringToHGlobalAuto(name);
+			
+			var sym = GetSymbols(names);
+			var lim = sym.Length;
+			long[] ofs = new long[lim];
+
+			for (int i = 0; i < lim; i++) {
+				ofs[i] = sym[i].Offset;
+			}
+
+			return ofs;
+			
+			//return GetSymbols(names).Select(x => x.Offset).Reverse().ToArray();
+		}
+
+		public Symbol[] GetSymbols(string[] names)
+		{
+			m_symBuffer  = new List<Symbol>(names.Length);
+			m_nameBuffer = names;
+
+			var symEnumSuccess = DbgHelp.SymEnumSymbols(
+				m_proc,             // Process handle of the current process
+				m_modBase,          // Base address of the module
+				null,               // Mask (NULL -> all symbols)
+				CollectSymCallback, // The callback function
+				IntPtr.Zero         // A used-defined context can be passed here, if necessary
+			);
+
+			NativeHelp.Call(symEnumSuccess, nameof(DbgHelp.SymEnumSymbols));
+
+
+			var cpy = m_symBuffer.OrderBy(s => names.IndexOf(s.Name)).ToArray();
+
+			m_nameBuffer = null;
+			m_symBuffer  = null;
+
+			return cpy;
+		}
+
+
+		private bool CollectSymCallback(IntPtr sym, uint symSize, IntPtr userCtx)
+		{
+			var pSym = (SymbolInfo*) sym;
+			var symName = NativeHelp.GetString(&pSym->Name, pSym->NameLen);
+
+			if (m_nameBuffer.Contains(symName)) {
+				m_symBuffer.Add(new Symbol(pSym));
+			}
+
+			return m_symBuffer.Count != m_nameBuffer.Length;
+		}
+
+		public Symbol GetSymbol(string name) => GetSymbol(name, null);
+		
+		public Symbol GetSymbol(string name, string mask)
+		{
+			var nameNative = Marshal.StringToHGlobalAuto(name);
 
 			var symEnumSuccess = DbgHelp.SymEnumSymbols(
 				m_proc,           // Process handle of the current process

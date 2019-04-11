@@ -17,7 +17,7 @@ namespace RazorSharp.Native.Symbols
 	/// Provides access to symbols in PDB files and matching them with the corresponding memory
 	/// location in an image
 	/// </summary>
-	internal unsafe class SymbolReader
+	public unsafe class SymbolReader : ISymbolProvider
 	{
 		internal List<Symbol> Symbols { get; private set; }
 
@@ -65,13 +65,18 @@ namespace RazorSharp.Native.Symbols
 			FileUtil.WriteDictionary(Cache, CacheFile);
 		}
 
-		internal SymbolReader()
+		public SymbolReader()
 		{
 			m_proc  = Kernel32.GetCurrentProcess();
 			Symbols = new List<Symbol>();
 		}
-		
-		public Symbol[] GetSymbols(string name)
+
+		public Symbol[] GetSymbols(string[] names)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Symbol[] GetSymbolsContainingName(string name)
 		{
 			var list = new List<Symbol>();
 			
@@ -86,7 +91,7 @@ namespace RazorSharp.Native.Symbols
 		
 		public Symbol GetSymbol(string name)
 		{
-			var symbols = GetSymbols(name);
+			var symbols = GetSymbolsContainingName(name);
 			foreach (var symbol in symbols) {
 				if (symbol.Name == name) {
 					return symbol;
@@ -135,6 +140,11 @@ namespace RazorSharp.Native.Symbols
 			return GetSymAddress(name, Clr.CLR_DLL_SHORT);
 		}
 
+		public void Dispose()
+		{
+			
+		}
+		
 		#region Retrieval
 
 		private void SymGetModuleInfo(ulong modBase)
@@ -180,7 +190,7 @@ namespace RazorSharp.Native.Symbols
 		/// <summary>
 		/// This has significant overhead
 		/// </summary>
-		internal void LoadAll(string pFileName, string pSearchMask)
+		public void LoadAll(string pFileName, string pSearchMask)
 		{
 			uint options = DbgHelp.SymGetOptions();
 

@@ -1,4 +1,5 @@
 using System;
+using System.Media;
 using RazorSharp.CoreClr;
 using RazorSharp.Native;
 using RazorSharp.Native.Symbols;

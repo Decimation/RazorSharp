@@ -135,6 +135,12 @@ namespace RazorSharp.CoreClr
 		}
 
 
+		internal static void LoadAllClrSymbols()
+		{
+			ClrSymbols.LoadAll(ClrPdb.FullName, null);
+			Global.Log.Debug("Loaded {Count} Clr symbols", ClrSymbols.Symbols.Count);
+		}
+		
 		internal static void Setup()
 		{
 			if (ClrPdb == null) {
@@ -146,9 +152,7 @@ namespace RazorSharp.CoreClr
 				IsPdbTemporary = false;
 			}
 			
-			ClrSymbols.LoadAll(ClrPdb.FullName, null);
-			Global.Log.Debug("Loaded {Count} Clr symbols", ClrSymbols.Symbols.Count);
-
+			
 
 			IsSetup = true;
 		}
