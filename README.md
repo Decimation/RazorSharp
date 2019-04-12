@@ -12,7 +12,6 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [x] Taking the address of managed objects
 - [x] Pointer to managed types
 - [x] Pinning unblittable objects
-- And more
 
 # CLR structures mapping
 - [x] `ObjectHeader`
@@ -25,7 +24,6 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [ ] `MethodDescChunk`
 - [ ] `Module`
 - [x] `PackedDWORDFields`
-- And many more
 
 # Compatibility
 RazorSharp is tested on:
