@@ -2,6 +2,7 @@
 
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,7 @@ using System.Text;
 using System.Threading;
 using RazorCommon;
 using RazorCommon.Diagnostics;
+using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.Analysis;
@@ -84,69 +86,38 @@ namespace Test
 			}
 		}
 
-		class MyClass2
-		{
-			public readonly string Sz = "foo";
 
-			public void change()
-			{
-				Unsafe.Set(this, "Sz", "bar");
-			}
+		private enum MyEnum : ulong
+		{
+			VAL
 		}
 
-		struct MyStruct2
+		private static ulong Ul<T>(T v) where T : struct
 		{
-			public string Sz;
-
-
-			public void change()
-			{
-				Unsafe.Set(ref this, "Sz", "bar");
-			}
+			return default;
 		}
-
 		
-
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
 			Core.Setup();
 
-			var ms = typeof(string).GetMetaType();
-			Console.WriteLine(ms);
-			Console.WriteLine(ms["m_firstChar"]);
+			var mc = new MyClass {s = "foo"};
 
+			Console.WriteLine(mc);
 
-			Console.WriteLine("done");
-			var m = new MyClass2();
-			Console.WriteLine(m.Sz);
-			Console.WriteLine();
+			var n = Unsafe.DeepCopy(mc);
+			Console.WriteLine(n);
 
-			m.change();
+			CString* cs;
+			Ul(MyEnum.VAL);
 
-			Console.WriteLine(m.Sz);
-			
-			
-
-			var ms2 = new MyStruct2 {Sz = "fooby"};
-			Console.WriteLine(ms2.Sz);
-			ms2.change();
-			Console.WriteLine(ms2.Sz);
-			Console.WriteLine(ms2.Sz = "barlet");
-			
-
+			Conditions.Assert(Unsafe.Unbox<int>(1) == 1);
 
 			Core.Close();
 		}
 
 		private struct CString { }
-
-		private static void ReadToken(uint u) { }
-
-		private static string ReadCString(byte[] buf)
-		{
-			return Encoding.ASCII.GetString(buf);
-		}
 
 
 		private static void Arglist(__arglist)

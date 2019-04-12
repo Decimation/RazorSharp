@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorSharp.Native.Win32;
 
@@ -81,10 +82,11 @@ namespace RazorSharp.Native.Symbols
 
 		public long[] GetSymOffsets(string[] names)
 		{
-			
 			var sym = GetSymbols(names);
 			var lim = sym.Length;
-			long[] ofs = new long[lim];
+			var ofs = new long[lim];
+
+//			Conditions.Ensure(sym.Length == lim, nameof(sym.Length));
 
 			for (int i = 0; i < lim; i++) {
 				ofs[i] = sym[i].Offset;

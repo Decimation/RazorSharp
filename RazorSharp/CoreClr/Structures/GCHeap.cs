@@ -110,28 +110,28 @@ namespace RazorSharp.CoreClr.Structures
 			throw new NativeCallException();
 		}
 
-		[ClrSymcall(UseMethodNameOnly = true)]
-		internal static void* AllocateObject(MethodTable* mt, int boolValue)
+		[ClrSymcall(UseMethodNameOnly = true, IgnoreNamespace = true)]
+		internal static void* AllocateObject(MethodTable* mt, int fHandleCom)
 		{
 			return null;
 		}
 
-		public static object AllocateObject(Type type, int boolValue)
+		public static object AllocateObject(Type type, int fHandleCom)
 		{
-			void* objValuePtr = AllocateObject(type.GetMethodTable().ToPointer<MethodTable>(), boolValue);
+			void* objValuePtr = AllocateObject(type.GetMethodTable().ToPointer<MethodTable>(), fHandleCom);
 
 			//var listNative = CSUnsafe.Read<List<int>>(&objValuePtr);
 			//Console.WriteLine(listNative);
 			return Mem.Read<object>(&objValuePtr);
 		}
 
-		public static T AllocateObject<T>(int boolValue)
+		public static T AllocateObject<T>(int fHandleCom)
 		{
-			void* objValuePtr = AllocateObject(typeof(T).GetMethodTable().ToPointer<MethodTable>(), boolValue);
+			void* objValuePtr = AllocateObject(typeof(T).GetMethodTable().ToPointer<MethodTable>(), fHandleCom);
 			return Mem.Read<T>(&objValuePtr);
 		}
 
-		[ClrSymcall]
+		[ClrSymcall(IgnoreNamespace = true)]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
 		{
 			throw new NativeCallException();

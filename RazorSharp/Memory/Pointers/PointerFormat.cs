@@ -51,11 +51,6 @@ namespace RazorSharp.Memory.Pointers
 		public const string FMT_P = "P";
 
 		/// <summary>
-		///     <para>Table of information </para>
-		/// </summary>
-		public const string FMT_I = "I";
-
-		/// <summary>
 		///     Both <see cref="FMT_P" /> and <see cref="FMT_O" />
 		/// </summary>
 		public const string FMT_B = "B";
@@ -64,6 +59,8 @@ namespace RazorSharp.Memory.Pointers
 		///     64-bit integer (<see cref="Pointer{T}.ToInt64" />)
 		/// </summary>
 		public const string FMT_N = "N";
+
+		internal const string VAL_FMT = "{0} ({1})";
 
 		public static string DefaultFormat { get; set; } = FMT_P;
 	}

@@ -7,6 +7,7 @@ using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
+using RazorSharp.Memory.Fixed;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 
@@ -35,10 +36,10 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public static unsafe class Unsafe
 	{
-		public static T Unbox<T>(object o)
+		public static T Unbox<T>(object value) where T : struct
 		{
-			lock (o) {
-				Pointer<byte> addr = AddressOfHeap(o, OffsetType.Fields);
+			lock (value) {
+				Pointer<byte> addr = AddressOfHeap(value, OffsetType.Fields);
 				return addr.ReadAny<T>();
 			}
 		}
@@ -59,7 +60,7 @@ namespace RazorSharp.Memory
 
 		public static bool IsNil<T>(T value)
 		{
-			var ptr = Unsafe.AddressOf(ref value);
+			var ptr = AddressOf(ref value);
 			return ptr.IsNil;
 		}
 
@@ -261,7 +262,7 @@ namespace RazorSharp.Memory
 
 
 			Pointer<MethodTable> mt = typeof(T).GetMethodTable();
-			Pointer<EEClass>     ee = mt.Reference.EEClass;
+			Pointer<EEClass> ee = mt.Reference.EEClass;
 			if (ee.Reference.HasLayout)
 				return (int) ee.Reference.LayoutInfo->ManagedSize;
 
@@ -553,6 +554,25 @@ namespace RazorSharp.Memory
 			return fields;
 		}
 
+		
 		#endregion
+
+		public static T DeepCopy<T>(T value) where T : class
+		{
+			Conditions.Require(value.GetType() != typeof(string), nameof(value));
+			Conditions.Require(!value.GetType().IsArray, nameof(value));
+
+			lock (value) {
+				var valueCpy = GCHeap.AllocateObject<T>(0);
+
+				fixed (byte* data = &PinHelper.GetPinningHelper(valueCpy).Data) {
+					Pointer<byte> ptr = data;
+					byte[]        mem = Unsafe.MemoryOfFields(value);
+					ptr.WriteAll(mem);
+				}
+
+				return valueCpy;
+			}
+		}
 	}
 }

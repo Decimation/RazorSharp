@@ -128,12 +128,16 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		public bool IsAligned => Mem.IsAligned(Address);
 
+		/// <summary>
+		/// Whether the value being pointed to is <c>default</c> or <c>null</c> bytes
+		/// </summary>
 		public bool IsNil {
 			get {
 				int elemSize = ElementSize;
+				var mem      = CopyOutBytes(elemSize);
 
 				for (int i = 0; i < elemSize; i++) {
-					if (ReadAny<byte>(i) != 0U) {
+					if (mem[i] != 0U) {
 						return false;
 					}
 				}
@@ -255,10 +259,7 @@ namespace RazorSharp.Memory.Pointers
 		///     Initializes <paramref name="elemCount" /> elements with the default value of <typeparamref name="T" />.
 		/// </summary>
 		/// <param name="elemCount">Number of elements</param>
-		public void Init(int elemCount)
-		{
-			Set(default, elemCount);
-		}
+		public void Init(int elemCount) => Set(default, elemCount);
 
 
 		#region Contains
@@ -287,6 +288,7 @@ namespace RazorSharp.Memory.Pointers
 		{
 			IEnumerator<T> enumerator = enumerable.GetEnumerator();
 			int            i          = 0;
+
 			while (enumerator.MoveNext()) {
 				var current = enumerator.Current;
 				Conditions.NotNull(current, nameof(current));
@@ -341,8 +343,6 @@ namespace RazorSharp.Memory.Pointers
 		#endregion
 
 
-		
-		
 		public MemoryBasicInformation Query() => Kernel32.VirtualQuery(Address);
 
 		public bool IsWritable => !IsReadOnly;
@@ -355,10 +355,10 @@ namespace RazorSharp.Memory.Pointers
 		}
 
 
-		public Span<T> AsSpan(int length)
-		{
-			return new Span<T>(ToPointer(), length);
-		}
+		public Span<T> AsSpan(int length) => new Span<T>(ToPointer(), length);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private int Size(int elemCnt) => elemCnt * ElementSize;
 
 		#region Read / write
 
@@ -387,9 +387,12 @@ namespace RazorSharp.Memory.Pointers
 		/// <param name="enumerable">Values to write</param>
 		public void WriteAll(IEnumerable<T> enumerable)
 		{
-			int            i                        = 0;
-			IEnumerator<T> enumerator               = enumerable.GetEnumerator();
-			while (enumerator.MoveNext()) this[i++] = enumerator.Current;
+			int i = 0;
+
+			IEnumerator<T> enumerator = enumerable.GetEnumerator();
+
+			while (enumerator.MoveNext())
+				this[i++] = enumerator.Current;
 
 			enumerator.Dispose();
 		}
@@ -603,10 +606,7 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		/// <param name="t">Value to write</param>
 		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
-		public void Write(T t, int elemOffset = 0)
-		{
-			WriteAny(t, elemOffset);
-		}
+		public void Write(T t, int elemOffset = 0) => WriteAny(t, elemOffset);
 
 		private MemoryProtection VirtualProtectAccessible(int cb)
 		{
@@ -690,10 +690,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
 		/// <returns>The value read from the offset <see cref="Address" /></returns>
 		[Pure]
-		public T Read(int elemOffset = 0)
-		{
-			return ReadAny<T>(elemOffset);
-		}
+		public T Read(int elemOffset = 0) => ReadAny<T>(elemOffset);
 
 
 		/// <summary>
@@ -702,10 +699,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
 		/// <returns>A reference to a value of type <typeparamref name="T" /></returns>
 		[Pure]
-		public ref T AsRef(int elemOffset = 0)
-		{
-			return ref AsRefAny<T>(elemOffset);
-		}
+		public ref T AsRef(int elemOffset = 0) => ref AsRefAny<T>(elemOffset);
 
 		#region Any
 
@@ -731,16 +725,10 @@ namespace RazorSharp.Memory.Pointers
 
 
 		[Pure]
-		public TType ReadAny<TType>(int elemOffset = 0)
-		{
-			return Mem.Read<TType>(Offset<TType>(elemOffset));
-		}
+		public TType ReadAny<TType>(int elemOffset = 0) => Mem.Read<TType>(Offset<TType>(elemOffset));
 
 		[Pure]
-		public ref TType AsRefAny<TType>(int elemOffset = 0)
-		{
-			return ref Mem.AsRef<TType>(Offset(elemOffset));
-		}
+		public ref TType AsRefAny<TType>(int elemOffset = 0) => ref Mem.AsRef<TType>(Offset(elemOffset));
 
 		#endregion
 
@@ -795,12 +783,12 @@ namespace RazorSharp.Memory.Pointers
 		[Pure]
 		public T[] SafeCopyOut(int elemCnt)
 		{
-			Kernel32.VirtualProtect(Address, elemCnt * ElementSize, MemoryProtection.ExecuteReadWrite,
+			Kernel32.VirtualProtect(Address, Size(elemCnt), MemoryProtection.ExecuteReadWrite,
 			                        out var oldProtect);
 
 			T[] buf = CopyOut(elemCnt);
 
-			Kernel32.VirtualProtect(Address, elemCnt * ElementSize, oldProtect, out oldProtect);
+			Kernel32.VirtualProtect(Address, Size(elemCnt), oldProtect, out oldProtect);
 			return buf;
 		}
 
@@ -828,32 +816,11 @@ namespace RazorSharp.Memory.Pointers
 			return Offset(index);
 		}
 
-		public void Zero(int elemCnt)
-		{
-			Mem.Zero(m_value, elemCnt * ElementSize);
-		}
+		public void Zero(int elemCnt) => Mem.Zero(m_value, Size(elemCnt));
 
 		public void ZeroBytes(int byteCnt)
 		{
 			Mem.Zero(m_value, byteCnt);
-		}
-
-
-		public ConsoleTable ToInfoTable()
-		{
-			var table = typeof(T).IsValueType
-				? new ConsoleTable("Address", "Value", "Aligned", "Null", "Element size", "Type")
-				: new ConsoleTable("Address", "Pointer", "Value", "Aligned", "Null", "Element size", "Type");
-
-			if (typeof(T).IsValueType)
-				table.AddRow(Hex.ToHex(m_value), ToString(PointerFormat.FMT_O), IsAligned.Prettify(),
-				             IsNull.Prettify(), ElementSize, String.Format("<{0}>", typeof(T).Name));
-			else
-				table.AddRow(Hex.ToHex(m_value), Hex.ToHex(ReadAny<long>()), ToString(PointerFormat.FMT_O),
-				             IsAligned.Prettify(), IsNull.Prettify(), ElementSize,
-				             String.Format("<{0}>", typeof(T).Name));
-
-			return table;
 		}
 
 		public ConsoleTable ToTable(int elemCnt)
@@ -879,20 +846,14 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		/// <typeparam name="TNew">Type to point to</typeparam>
 		/// <returns>A new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" /></returns>
-		public Pointer<TNew> Cast<TNew>()
-		{
-			return new Pointer<TNew>(Address);
-		}
+		public Pointer<TNew> Cast<TNew>() => new Pointer<TNew>(Address);
 
 		/// <summary>
 		///     Returns <see cref="Address" /> as a pointer.
 		/// </summary>
 		/// <returns></returns>
 		[Pure]
-		public void* ToPointer()
-		{
-			return m_value;
-		}
+		public void* ToPointer() => m_value;
 
 		[Pure]
 		public TUnmanaged* ToPointer<TUnmanaged>() where TUnmanaged : unmanaged
@@ -951,7 +912,7 @@ namespace RazorSharp.Memory.Pointers
 		#region Implicit and explicit conversions
 
 		public static implicit operator bool(Pointer<T> ptr) => !ptr.IsNil;
-		
+
 		public static implicit operator Pointer<T>(Pointer<byte> v) => v.Address;
 
 		public static implicit operator Pointer<T>(void* v) => new Pointer<T>(v);
@@ -1016,15 +977,9 @@ namespace RazorSharp.Memory.Pointers
 		}
 
 
-		public Pointer<T> Add<TType>(int elemCnt = 1)
-		{
-			return Add(Mem.Size<TType>(elemCnt));
-		}
+		public Pointer<T> Add<TType>(int elemCnt = 1) => Add(Mem.Size<TType>(elemCnt));
 
-		public Pointer<T> Subtract<TType>(int elemCnt = 1)
-		{
-			return Subtract(Mem.Size<TType>(elemCnt));
-		}
+		public Pointer<T> Subtract<TType>(int elemCnt = 1) => Subtract(Mem.Size<TType>(elemCnt));
 
 		/// <summary>
 		///     Increment <see cref="Address" /> by the specified number of bytes
@@ -1205,14 +1160,12 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		/// <param name="other">Other <see cref="Pointer{T}" /></param>
 		/// <returns></returns>
-		public bool Equals(Pointer<T> other)
-		{
-			return Address == other.Address;
-		}
+		public bool Equals(Pointer<T> other) => Address == other.Address;
 
 		public override bool Equals(object obj)
 		{
-			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(null, obj))
+				return false;
 
 			return obj is Pointer<T> pointer && Equals(pointer);
 		}
@@ -1223,15 +1176,9 @@ namespace RazorSharp.Memory.Pointers
 			return unchecked((int) (long) m_value);
 		}
 
-		public static bool operator ==(Pointer<T> left, Pointer<T> right)
-		{
-			return left.Equals(right);
-		}
+		public static bool operator ==(Pointer<T> left, Pointer<T> right) => left.Equals(right);
 
-		public static bool operator !=(Pointer<T> left, Pointer<T> right)
-		{
-			return !left.Equals(right);
-		}
+		public static bool operator !=(Pointer<T> left, Pointer<T> right) => !left.Equals(right);
 
 		#endregion
 
@@ -1262,8 +1209,6 @@ namespace RazorSharp.Memory.Pointers
 					return ToInt64().ToString();
 				case PointerFormat.FMT_O:
 					return ToStringSafe();
-				case PointerFormat.FMT_I:
-					return ToInfoTable().ToMarkDownString();
 				case PointerFormat.FMT_P:
 					return Hex.ToHex(ToInt64());
 
@@ -1290,7 +1235,7 @@ namespace RazorSharp.Memory.Pointers
 
 
 			if (typeof(T).IsIntegerType())
-				return String.Format("{0} ({1})", Reference, Hex.TryCreateHex(Reference));
+				return String.Format(PointerFormat.VAL_FMT, Reference, Hex.TryCreateHex(Reference));
 
 			/* Special support for C-string */
 			if (typeof(T) == typeof(char))
@@ -1316,7 +1261,7 @@ namespace RazorSharp.Memory.Pointers
 					valueStr = Reference == null ? StringConstants.NULL_STR : Reference.ToString();
 
 				RETURN:
-				return String.Format("{0} ({1})", valueStr, heapPtr.ToString(PointerFormat.FMT_P));
+				return String.Format(PointerFormat.VAL_FMT, valueStr, heapPtr.ToString(PointerFormat.FMT_P));
 			}
 
 
@@ -1324,16 +1269,10 @@ namespace RazorSharp.Memory.Pointers
 		}
 
 		[Pure]
-		public string ToString(string format)
-		{
-			return ToString(format, CultureInfo.CurrentCulture);
-		}
+		public string ToString(string format) => ToString(format, CultureInfo.CurrentCulture);
 
 		[Pure]
-		public override string ToString()
-		{
-			return ToString(PointerFormat.DefaultFormat);
-		}
+		public override string ToString() => ToString(PointerFormat.DefaultFormat);
 
 		#endregion
 	}

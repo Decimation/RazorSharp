@@ -49,6 +49,8 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 		private static string GetSymbolName(SymcallAttribute attr, [NotNull] MethodInfo method)
 		{
+			Conditions.NotNull(method.DeclaringType, nameof(method.DeclaringType));
+
 			// Resolve the symbol
 			string fullSym       = null;
 			string declaringName = method.DeclaringType.Name;
@@ -73,7 +75,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 			return fullSym;
 		}
 
-		private static ISymbolProvider GetReader(SymcallAttribute attr)
+		private static ISymbolProvider GetProvider(SymcallAttribute attr)
 		{
 			/*if (attr.Image == Clr.CLR_DLL_SHORT) {
 				return Clr.ClrSymbols;
@@ -108,7 +110,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 
 			var baseAttr = attributes[0];
-			var sym      = GetReader(baseAttr);
+			var sym      = GetProvider(baseAttr);
 			var contexts = new string[lim];
 
 
@@ -120,7 +122,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 				string fullSym = GetSymbolName(attr, method);
 
-				if (nameSpace != null) {
+				if (nameSpace != null && !attr.IgnoreNamespace) {
 					fullSym = nameSpace + SCOPE_RESOLUTION_OPERATOR + fullSym;
 				}
 
@@ -136,15 +138,18 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 			Pointer<byte>[] addresses = Modules.GetAddresses(baseAttr.Module, offsets).ToArray();
 
-			Conditions.Require(addresses.Length == lim);
+			Conditions.Require(addresses.Length == lim,
+			                   String.Format("addresses: {0} | offsets: {2} | lim: {1}",
+			                                 addresses.Length,
+			                                 lim,
+			                                 offsets.Length));
 
 			for (int i = 0; i < lim; i++) {
-				
 				// .text	0000000180001000	000000018070E000	R	.	X	.	L	para	0001	public	CODE	64	0000	0000	0003	FFFFFFFFFFFFFFFF	FFFFFFFFFFFFFFFF
 
 //				Global.Log.Debug("Binding {Name} to {Addr} (offset: {Offset})", methods[i].Name,
 //				                 addresses[i].ToString("P"), offsets[i].ToString("X"));
-				
+
 				var addr = addresses[i].Address;
 				Functions.SetStableEntryPoint(methods[i], addr);
 			}

@@ -4,8 +4,8 @@ namespace RazorSharp
 {
 	public class MyClass
 	{
-		private string s;
-		private int    i;
+		public string s;
+		public int    i;
 
 		public byte this[int id] => 0;
 

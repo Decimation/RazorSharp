@@ -36,5 +36,11 @@ namespace RazorSharp.Memory.Calling.Symbols.Attributes
 		///     Whether to use the decorated method's name as the symbol.
 		/// </summary>
 		public bool UseMethodNameOnly { get; set; }
+		
+		/// <summary>
+		/// Whether to ignore <see cref="SymNamespaceAttribute.Namespace"/> if the enclosing type
+		/// specifies a namespace.
+		/// </summary>
+		public bool IgnoreNamespace { get; set; }
 	}
 }
