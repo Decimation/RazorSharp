@@ -12,6 +12,7 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [x] Taking the address of managed objects
 - [x] Pointer to managed types
 - [x] Pinning unblittable objects
+- And more
 
 # CLR structures mapping
 - [x] `ObjectHeader`
@@ -24,6 +25,7 @@ RazorSharp also allows for manipulation of the CLR and low-level operations with
 - [ ] `MethodDescChunk`
 - [ ] `Module`
 - [x] `PackedDWORDFields`
+- And many more
 
 # Compatibility
 RazorSharp is tested on:
@@ -33,11 +35,8 @@ RazorSharp is tested on:
 - Workstation GC
 
 # todo
-- [ ] `ObjectLayout` for arrays
 - [ ] `MethodDescChunk`
 - [ ] Read `MethodDescs` without Reflection
 - [x] Fix Canon MT for pointer arrays
 - [x] Get field names via `FieldDesc`
-- [x] `ObjectLayout` without `ObjectLayoutInspector` `TypeLayout` (very slow)
 - [x] Fix "Function" field in `MethodDesc` for virtual functions
-- [ ] Fix `InvalidProgramException` when using `MethodDescs` in `RefInspector<string>`
