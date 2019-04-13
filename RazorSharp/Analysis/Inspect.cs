@@ -28,6 +28,71 @@ namespace RazorSharp.Analysis
 		/// </summary>
 		public static bool InterpretInternal { get; set; } = false;
 
+		private static ConsoleTable StackHeapTypeTable<T>(ref T t, ToStringOptions options)
+		{
+			var type = typeof(T).GetMetaType();
+			Conditions.Require(!typeof(T).IsValueType);
+			Pointer<T> addr = Unsafe.AddressOf(ref t);
+			var row = new List<object>
+			{
+				CreateRowEntry<byte>(addr.CopyOutBytes(IntPtr.Size), options)
+			};
+			var table = new ConsoleTable(String.Format("Pointer to {0}", type.Name));
+			table.AddRow(row.ToArray());
+			return table;
+		}
+
+		private static ConsoleTable StackValueTypeTable<T>(ref T t, ToStringOptions options)
+		{
+			var type = typeof(T).GetMetaType();
+			Conditions.Require(typeof(T).IsValueType);
+			List<MetaField> fields     = type.Fields.Where(x => !x.IsStatic).ToList();
+			List<string>    fieldNames = fields.Select(x => x.Name).ToList();
+			var             table      = new ConsoleTable(fieldNames.ToArray());
+			Pointer<T>      addr       = Unsafe.AddressOf(ref t);
+			var             row        = new List<object>();
+
+
+			foreach (var f in fields) {
+				Pointer<byte> rowPtr = f.GetAddress(ref t);
+				int           size   = f.Size;
+				addr += size;
+				row.Add(CreateRowEntry<byte>(rowPtr.CopyOut(size), options));
+			}
+
+			table.AddRow(row.ToArray());
+			return table;
+		}
+
+		private static string CreateInternalRowEntry(byte[] mem, ToStringOptions options)
+		{
+			return InterpretInternal
+				? CreateRowEntry<byte>(mem, options)
+				: mem.AutoJoin(JOIN_BAR, options);
+		}
+
+		private static string CreateRowEntry<TAs>(byte[] mem, ToStringOptions options)
+		{
+			switch (options) {
+				case ToStringOptions.None:
+					break;
+				case ToStringOptions.Hex:
+					break;
+				case ToStringOptions.ZeroPadHex:
+					break;
+				case ToStringOptions.PrefixHex:
+					break;
+			}
+
+			// Byte is default for TAs
+			if (typeof(TAs) != typeof(byte)) {
+				return Conversions.ConvertArray<TAs>(mem).AutoJoin(JOIN_BAR, options);
+			}
+
+
+			return mem.AutoJoin(JOIN_BAR, options);
+		}
+
 		#region Layout
 
 		public static void Layout<T>(T t) where T : class
@@ -47,7 +112,7 @@ namespace RazorSharp.Analysis
 
 		public static string LayoutString<T>(T t) where T : class
 		{
-			return LayoutString<T>(ref t);
+			return LayoutString(ref t);
 		}
 
 		public static string LayoutString<T>()
@@ -70,7 +135,7 @@ namespace RazorSharp.Analysis
 				var field = fields[i];
 
 				addresses[i] = field.GetAddress(ref t).ToString(PointerFormat.FMT_P);
-				values[i] = field.GetValue(t) ?? StringConstants.NULL_STR;
+				values[i]    = field.GetValue(t) ?? StringConstants.NULL_STR;
 			}
 
 			table.Attach(1, "Address", addresses)
@@ -219,70 +284,5 @@ namespace RazorSharp.Analysis
 		}
 
 		#endregion
-
-		private static ConsoleTable StackHeapTypeTable<T>(ref T t, ToStringOptions options)
-		{
-			var type = typeof(T).GetMetaType();
-			Conditions.Require(!typeof(T).IsValueType);
-			Pointer<T> addr = Unsafe.AddressOf(ref t);
-			var row = new List<object>
-			{
-				CreateRowEntry<byte>(addr.CopyOutBytes(IntPtr.Size), options)
-			};
-			var table = new ConsoleTable(String.Format("Pointer to {0}", type.Name));
-			table.AddRow(row.ToArray());
-			return table;
-		}
-
-		private static ConsoleTable StackValueTypeTable<T>(ref T t, ToStringOptions options)
-		{
-			var type = typeof(T).GetMetaType();
-			Conditions.Require(typeof(T).IsValueType);
-			List<MetaField> fields     = type.Fields.Where(x => !x.IsStatic).ToList();
-			List<string>    fieldNames = fields.Select(x => x.Name).ToList();
-			var             table      = new ConsoleTable(fieldNames.ToArray());
-			Pointer<T>      addr       = Unsafe.AddressOf(ref t);
-			var             row        = new List<object>();
-
-
-			foreach (var f in fields) {
-				Pointer<byte> rowPtr = f.GetAddress(ref t);
-				int           size   = f.Size;
-				addr += size;
-				row.Add(CreateRowEntry<byte>(rowPtr.CopyOut(size), options));
-			}
-
-			table.AddRow(row.ToArray());
-			return table;
-		}
-
-		private static string CreateInternalRowEntry(byte[] mem, ToStringOptions options)
-		{
-			return InterpretInternal
-				? CreateRowEntry<byte>(mem, options)
-				: mem.AutoJoin(JOIN_BAR, options);
-		}
-
-		private static string CreateRowEntry<TAs>(byte[] mem, ToStringOptions options)
-		{
-			switch (options) {
-				case ToStringOptions.None:
-					break;
-				case ToStringOptions.Hex:
-					break;
-				case ToStringOptions.ZeroPadHex:
-					break;
-				case ToStringOptions.PrefixHex:
-					break;
-			}
-
-			// Byte is default for TAs
-			if (typeof(TAs) != typeof(byte)) {
-				return Conversions.ConvertArray<TAs>(mem).AutoJoin(JOIN_BAR, options);
-			}
-
-
-			return mem.AutoJoin(JOIN_BAR, options);
-		}
 	}
 }

@@ -44,7 +44,7 @@ namespace RazorSharp.CoreClr
 
 		internal static int FindComponentSize<T>(T value)
 		{
-			var mt = ReadMethodTable(ref value);
+			Pointer<MethodTable> mt = ReadMethodTable(ref value);
 			return mt.Reference.ComponentSize;
 		}
 
@@ -52,16 +52,14 @@ namespace RazorSharp.CoreClr
 		{
 			return typeof(T).IsArray || typeof(T) == typeof(Array);
 		}
-		
+
 		/// <summary>
 		///     Reads a reference type's <see cref="ObjHeader" />
 		/// </summary>
 		/// <returns>A pointer to the reference type's header</returns>
 		internal static Pointer<ObjHeader> ReadObjHeader<T>(T t) where T : class
 		{
-			var data = Unsafe.AddressOfHeap(ref t).Address;
-
-			return (ObjHeader*) (data - IntPtr.Size);
+			return Unsafe.AddressOfHeap(ref t, OffsetType.Header).Cast<ObjHeader>();
 		}
 
 
@@ -87,6 +85,25 @@ namespace RazorSharp.CoreClr
 			return typeof(T).GetMethodTable().Reference.IsBlittable;
 		}
 
+
+		internal static TypeHandle GetHandle<T>(T value) where T : class
+		{
+			return Unsafe.AddressOfHeap(value).ReadAny<TypeHandle>();
+		}
+
+		/// <summary>
+		///     Returns the field offset of the specified field, by name.
+		/// </summary>
+		/// <remarks>
+		///     Returned from <see cref="FieldDesc.Offset" />
+		/// </remarks>
+		/// <param name="fieldName">Name of the field</param>
+		/// <typeparam name="TType">Enclosing type</typeparam>
+		/// <returns>Field offset</returns>
+		public static int OffsetOf<TType>(string fieldName)
+		{
+			return typeof(TType).GetFieldDesc(fieldName).Reference.Offset;
+		}
 
 		#region HeapObjects
 
@@ -144,10 +161,13 @@ namespace RazorSharp.CoreClr
 		{
 			var typeHandle = t.TypeHandle.Value;
 
+			// TypeHandle::GetMethodTable also returns the correct MethodTable,
+			// but we don't have its TypeHandle here
 
 			// Special case:
 			// If an object is an array, its actual MethodTable* is stored at the address pointed to by its
-			// given MethodTable* returned from TypeHandle.Value (which is invalid), offset by ARRAY_MT_PTR_OFFSET bytes.
+			// given MethodTable* returned from TypeHandle.Value (which is invalid),
+			// offset by ARRAY_MT_PTR_OFFSET bytes.
 
 			// See ARRAY_MT_PTR_OFFSET documentation
 
@@ -239,7 +259,7 @@ namespace RazorSharp.CoreClr
 			var methodHandle = methodInfo.MethodHandle;
 			var md           = (MethodDesc*) methodHandle.Value;
 
-			Conditions.Assert(md->Info.MetadataToken == methodInfo.MetadataToken);
+			Conditions.Ensure(md->Info.MetadataToken == methodInfo.MetadataToken);
 
 			// todo
 //			RazorContract.Assert(md->Info == methodInfo);
@@ -269,19 +289,5 @@ namespace RazorSharp.CoreClr
 		}
 
 		#endregion
-
-		/// <summary>
-		///     Returns the field offset of the specified field, by name.
-		/// </summary>
-		/// <remarks>
-		///     Returned from <see cref="FieldDesc.Offset" />
-		/// </remarks>
-		/// <param name="fieldName">Name of the field</param>
-		/// <typeparam name="TType">Enclosing type</typeparam>
-		/// <returns>Field offset</returns>
-		public static int OffsetOf<TType>(string fieldName)
-		{
-			return typeof(TType).GetFieldDesc(fieldName).Reference.Offset;
-		}
 	}
 }

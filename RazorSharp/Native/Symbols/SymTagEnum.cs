@@ -45,5 +45,5 @@ namespace RazorSharp.Native.Symbols
 		SymTagHeapAllocationSite,
 		SymTagCoffGroup,
 		SymTagMax
-	};
+	}
 }

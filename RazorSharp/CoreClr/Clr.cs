@@ -9,7 +9,6 @@ using RazorCommon.Extensions;
 using RazorCommon.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Native;
 using RazorSharp.Native.Symbols;
 
 #endregion
@@ -21,54 +20,6 @@ namespace RazorSharp.CoreClr
 	/// </summary>
 	internal static class Clr
 	{
-		#region Constants and accessors
-
-		/// <summary>
-		///     <c>clr.pdb</c>
-		/// </summary>
-		internal const string CLR_PDB_SHORT = "clr.pdb";
-
-		/// <summary>
-		///     <c>clr.dll</c>
-		/// </summary>
-		internal const string CLR_DLL_SHORT = "clr.dll";
-
-		/// <summary>
-		///     CLR dll file
-		/// </summary>
-		internal static readonly FileInfo ClrDll;
-
-		/// <summary>
-		///     The <see cref="ProcessModule" /> of the CLR
-		/// </summary>
-		internal static readonly ProcessModule ClrModule;
-
-		/// <summary>
-		///     The <see cref="Version" /> of the CLR
-		/// </summary>
-		internal static readonly Version ClrVersion;
-
-		internal static bool IsSetup { get; private set; }
-
-		/// <summary>
-		///     Whether or not <see cref="ClrPdb" /> was automatically downloaded.
-		///     If <c>true</c>, <see cref="ClrPdb" /> will be deleted upon calling <see cref="Close" />.
-		/// </summary>
-		private static bool IsPdbTemporary { get; set; }
-
-		/// <summary>
-		///     <para>CLR symbol file</para>
-		/// <para>A PDB file will be searched for in <see cref="CLR_PDB_FILE_SEARCH"/>;</para>
-		/// <para>or the symbol file will be automatically downloaded</para>
-		/// </summary>
-		internal static FileInfo ClrPdb { get; private set; }
-
-		internal static readonly SymbolReader ClrSymbols;
-		
-		private const string CLR_PDB_FILE_SEARCH = @"C:\Symbols\clr.pdb";
-
-		#endregion
-
 		/// <summary>
 		///     Retrieves resources
 		/// </summary>
@@ -101,8 +52,8 @@ namespace RazorSharp.CoreClr
 		{
 			FileInfo clrSym = null;
 			string   cd     = Environment.CurrentDirectory;
-			string[] dirs = {cd, Environment.SystemDirectory};
-			
+			string[] dirs   = {cd, Environment.SystemDirectory};
+
 			foreach (string dir in dirs) {
 				var fi = FileUtil.FindFile(dir, CLR_PDB_SHORT);
 				if (fi != null) {
@@ -118,7 +69,6 @@ namespace RazorSharp.CoreClr
 				else {
 					clrSym = SymbolReader.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
 				}
-				
 			}
 
 			Global.Log.Debug("Clr symbol file: {File}", clrSym.FullName);
@@ -140,7 +90,7 @@ namespace RazorSharp.CoreClr
 			ClrSymbols.LoadAll(ClrPdb.FullName, null);
 			Global.Log.Debug("Loaded {Count} Clr symbols", ClrSymbols.Symbols.Count);
 		}
-		
+
 		internal static void Setup()
 		{
 			if (ClrPdb == null) {
@@ -151,8 +101,7 @@ namespace RazorSharp.CoreClr
 				Conditions.Require(ClrPdb.Exists);
 				IsPdbTemporary = false;
 			}
-			
-			
+
 
 			IsSetup = true;
 		}
@@ -201,5 +150,53 @@ namespace RazorSharp.CoreClr
 		{
 			return Functions.GetDelegateForFunctionPointer<TDelegate>(GetClrSymAddress(name).Address);
 		}
+
+		#region Constants and accessors
+
+		/// <summary>
+		///     <c>clr.pdb</c>
+		/// </summary>
+		internal const string CLR_PDB_SHORT = "clr.pdb";
+
+		/// <summary>
+		///     <c>clr.dll</c>
+		/// </summary>
+		internal const string CLR_DLL_SHORT = "clr.dll";
+
+		/// <summary>
+		///     CLR dll file
+		/// </summary>
+		internal static readonly FileInfo ClrDll;
+
+		/// <summary>
+		///     The <see cref="ProcessModule" /> of the CLR
+		/// </summary>
+		internal static readonly ProcessModule ClrModule;
+
+		/// <summary>
+		///     The <see cref="Version" /> of the CLR
+		/// </summary>
+		internal static readonly Version ClrVersion;
+
+		internal static bool IsSetup { get; private set; }
+
+		/// <summary>
+		///     Whether or not <see cref="ClrPdb" /> was automatically downloaded.
+		///     If <c>true</c>, <see cref="ClrPdb" /> will be deleted upon calling <see cref="Close" />.
+		/// </summary>
+		private static bool IsPdbTemporary { get; set; }
+
+		/// <summary>
+		///     <para>CLR symbol file</para>
+		///     <para>A PDB file will be searched for in <see cref="CLR_PDB_FILE_SEARCH" />;</para>
+		///     <para>or the symbol file will be automatically downloaded</para>
+		/// </summary>
+		internal static FileInfo ClrPdb { get; private set; }
+
+		internal static readonly SymbolReader ClrSymbols;
+
+		private const string CLR_PDB_FILE_SEARCH = @"C:\Symbols\clr.pdb";
+
+		#endregion
 	}
 }

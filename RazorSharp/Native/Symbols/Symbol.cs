@@ -1,48 +1,20 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 
+#endregion
+
 namespace RazorSharp.Native.Symbols
 {
 	/// <summary>
-	/// Wraps a <see cref="SymbolInfo"/>
+	///     Wraps a <see cref="SymbolInfo" />
 	/// </summary>
 	public unsafe class Symbol
 	{
-		public string Name         { get; }
-		public uint   SizeOfStruct { get; }
-		public uint   TypeIndex    { get; }
-		public uint   Index        { get; }
-		public uint   Size         { get; }
-		public ulong  ModBase      { get; }
-		public uint   Flags        { get; }
-		public ulong  Value        { get; }
-		public ulong  Address      { get; }
-		public uint   Register     { get; }
-		public uint   Scope        { get; }
-		public uint   Tag          { get; }
-
-		public SymTagEnum TagEnum => (SymTagEnum) Tag;
-
-		public long Offset => (long) (Address - ModBase);
-
 		private readonly byte[] m_symbolStructMemory;
-
-
-		/// <summary>
-		/// Copies the values of <see cref="m_symbolStructMemory"/> into unmanaged memory.
-		/// <seealso cref="m_symbolStructMemory"/> contains the wrapped <see cref="SymbolInfo"/> value.
-		/// <remarks>
-		/// This memory must be freed with <see cref="Mem.Free{T}(Pointer{T})"/>
-		/// </remarks>
-		/// </summary>
-		internal Pointer<SymbolInfo> GetSymbolInfo()
-		{
-			var alloc = Mem.AllocUnmanaged<byte>(m_symbolStructMemory.Length);
-			alloc.WriteAll(m_symbolStructMemory);
-			return alloc.Cast<SymbolInfo>();
-		}
 
 		internal Symbol(SymbolInfo* pSymInfo)
 		{
@@ -64,6 +36,38 @@ namespace RazorSharp.Native.Symbols
 			m_symbolStructMemory = new byte[realSize];
 
 			Marshal.Copy((IntPtr) pSymInfo, m_symbolStructMemory, 0, realSize);
+		}
+
+		public string Name         { get; }
+		public uint   SizeOfStruct { get; }
+		public uint   TypeIndex    { get; }
+		public uint   Index        { get; }
+		public uint   Size         { get; }
+		public ulong  ModBase      { get; }
+		public uint   Flags        { get; }
+		public ulong  Value        { get; }
+		public ulong  Address      { get; }
+		public uint   Register     { get; }
+		public uint   Scope        { get; }
+		public uint   Tag          { get; }
+
+		public SymTagEnum TagEnum => (SymTagEnum) Tag;
+
+		public long Offset => (long) (Address - ModBase);
+
+
+		/// <summary>
+		///     Copies the values of <see cref="m_symbolStructMemory" /> into unmanaged memory.
+		///     <seealso cref="m_symbolStructMemory" /> contains the wrapped <see cref="SymbolInfo" /> value.
+		///     <remarks>
+		///         This memory must be freed with <see cref="Mem.Free{T}(Pointer{T})" />
+		///     </remarks>
+		/// </summary>
+		internal Pointer<SymbolInfo> GetSymbolInfo()
+		{
+			Pointer<byte> alloc = Mem.AllocUnmanaged<byte>(m_symbolStructMemory.Length);
+			alloc.WriteAll(m_symbolStructMemory);
+			return alloc.Cast<SymbolInfo>();
 		}
 
 		private static int GetSymbolInfoSize(SymbolInfo* pSym)

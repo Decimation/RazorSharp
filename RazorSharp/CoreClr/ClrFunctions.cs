@@ -1,9 +1,9 @@
 #region
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Memory;
 using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
@@ -18,6 +18,8 @@ using RazorSharp.Memory.Pointers;
 namespace RazorSharp.CoreClr
 {
 	#region
+
+	using CSUnsafe = Unsafe;
 
 	#endregion
 
@@ -47,7 +49,7 @@ namespace RazorSharp.CoreClr
 		internal static Type JIT_GetRuntimeType_Safe(MethodTable* value)
 		{
 			void* ptr = JIT_GetRuntimeType(value);
-			return Mem.Read<Type>(&ptr);
+			return CSUnsafe.Read<Type>(&ptr);
 		}
 
 

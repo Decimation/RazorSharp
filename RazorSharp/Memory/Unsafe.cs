@@ -33,6 +33,7 @@ namespace RazorSharp.Memory
 	///     <seealso cref="Buffer" />
 	///     <seealso cref="CSUnsafe" />
 	///     <seealso cref="System.Runtime.CompilerServices.JitHelpers" />
+	///     <seealso cref="Mem" />
 	/// </summary>
 	public static unsafe class Unsafe
 	{
@@ -55,14 +56,40 @@ namespace RazorSharp.Memory
 		public static T RawInterpret<T>(Pointer<byte> rawMem) where T : class
 		{
 			var cpy = rawMem.Address;
-			return Mem.Read<T>(&cpy);
+			return CSUnsafe.Read<T>(&cpy);
 		}
 
 		public static bool IsNil<T>(T value)
 		{
-			var ptr = AddressOf(ref value);
+			Pointer<T> ptr = AddressOf(ref value);
 			return ptr.IsNil;
 		}
+
+		public static TInt Value<T, TInt>(T value) where T : Enum
+		{
+			Pointer<T> ptr = AddressOf(ref value);
+			return ptr.ReadAny<TInt>();
+		}
+
+		public static T DeepCopy<T>(T value) where T : class
+		{
+			Conditions.Require(value.GetType() != typeof(string), nameof(value));
+			Conditions.Require(!value.GetType().IsArray, nameof(value));
+
+			lock (value) {
+				var valueCpy = GCHeap.AllocateObject<T>(0);
+
+				fixed (byte* data = &PinHelper.GetPinningHelper(valueCpy).Data) {
+					Pointer<byte> ptr = data;
+					byte[]        mem = MemoryOfFields(value);
+					ptr.WriteAll(mem);
+				}
+
+				return valueCpy;
+			}
+		}
+
+		#region Set
 
 		public static void Set<T, TField>(T value, string name, TField f)
 		{
@@ -81,6 +108,8 @@ namespace RazorSharp.Memory
 			var m = typeof(T).GetMetaType();
 			value.Add(m[name].Offset).WriteAny(f);
 		}
+
+		#endregion
 
 		#region Address
 
@@ -102,24 +131,24 @@ namespace RazorSharp.Memory
 
 
 		/// <summary>
-		///     <para>Returns the address of <paramref name="t" />.</para>
+		///     <para>Returns the address of <paramref name="value" />.</para>
 		///     <remarks>
 		///         <para>Equals <see cref="CSUnsafe.AsPointer{T}" /></para>
 		///     </remarks>
 		/// </summary>
-		/// <param name="t">Type to return the address of</param>
+		/// <param name="value">Type to return the address of</param>
 		/// <returns>The address of the type in memory.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Pointer<T> AddressOf<T>(ref T t)
+		public static Pointer<T> AddressOf<T>(ref T value)
 		{
 			/*var tr = __makeref(t);
 			return *(IntPtr*) (&tr);*/
-			return CSUnsafe.AsPointer(ref t);
+			return CSUnsafe.AsPointer(ref value);
 		}
 
 
 		/// <summary>
-		///     Returns the address of reference type <paramref name="t" />'s heap memory (raw data).
+		///     Returns the address of reference type <paramref name="value" />'s heap memory (raw data).
 		///     <remarks>
 		///         <para>
 		///             Note: This does not pin the reference in memory if it is a reference type.
@@ -128,12 +157,12 @@ namespace RazorSharp.Memory
 		///         </para>
 		///     </remarks>
 		/// </summary>
-		/// <param name="t">Reference type to return the heap address of</param>
+		/// <param name="value">Reference type to return the heap address of</param>
 		/// <returns>The address of the heap object.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Pointer<byte> AddressOfHeap<T>(ref T t) where T : class
+		public static Pointer<byte> AddressOfHeap<T>(ref T value) where T : class
 		{
-			var tr = __makeref(t);
+			var tr = __makeref(value);
 
 			// NOTE:
 			// Strings have their data offset by RuntimeHelpers.OffsetToStringData
@@ -142,7 +171,7 @@ namespace RazorSharp.Memory
 		}
 
 		/// <summary>
-		///     Returns the address of reference type <paramref name="t" />'s heap memory, offset by the specified
+		///     Returns the address of reference type <paramref name="value" />'s heap memory, offset by the specified
 		///     <see cref="OffsetType" />.
 		///     <remarks>
 		///         <para>
@@ -152,23 +181,23 @@ namespace RazorSharp.Memory
 		///         </para>
 		///     </remarks>
 		/// </summary>
-		/// <param name="t">Reference type to return the heap address of</param>
+		/// <param name="value">Reference type to return the heap address of</param>
 		/// <param name="offset">Offset type</param>
-		/// <returns>The address of <paramref name="t" /></returns>
+		/// <returns>The address of <paramref name="value" /></returns>
 		/// <exception cref="ArgumentOutOfRangeException">If <paramref name="offset"></paramref> is out of range.</exception>
-		public static Pointer<byte> AddressOfHeap<T>(ref T t, OffsetType offset) where T : class
+		public static Pointer<byte> AddressOfHeap<T>(ref T value, OffsetType offset) where T : class
 		{
 			switch (offset) {
 				case OffsetType.StringData:
 
 					Conditions.Require(typeof(T) == typeof(string));
-					string s = t as string;
+					string s = value as string;
 					return AddressOfHeap(ref s) + RuntimeHelpers.OffsetToStringData;
 
 				case OffsetType.ArrayData:
 
 					Conditions.Require(Runtime.IsArray<T>());
-					return AddressOfHeap(ref t) + Offsets.OffsetToArrayData;
+					return AddressOfHeap(ref value) + Offsets.OffsetToArrayData;
 
 				case OffsetType.Fields:
 
@@ -176,26 +205,26 @@ namespace RazorSharp.Memory
 					// todo: ...and if it's a string, should this return StringData?
 
 					// Skip over the MethodTable*
-					return AddressOfHeap(ref t) + sizeof(MethodTable*);
+					return AddressOfHeap(ref value) + sizeof(MethodTable*);
 
 				case OffsetType.None:
-					return AddressOfHeap(ref t);
+					return AddressOfHeap(ref value);
 
 				case OffsetType.Header:
-					return AddressOfHeap(ref t) - sizeof(ObjHeader);
+					return AddressOfHeap(ref value) - sizeof(ObjHeader);
 				default:
 					throw new ArgumentOutOfRangeException(nameof(offset), offset, null);
 			}
 		}
 
-		public static Pointer<byte> AddressOfHeap<T>(T t) where T : class
+		public static Pointer<byte> AddressOfHeap<T>(T value) where T : class
 		{
-			return AddressOfHeap(ref t);
+			return AddressOfHeap(ref value);
 		}
 
-		public static Pointer<byte> AddressOfHeap<T>(T t, OffsetType offset) where T : class
+		public static Pointer<byte> AddressOfHeap<T>(T value, OffsetType offset) where T : class
 		{
-			return AddressOfHeap(ref t, offset);
+			return AddressOfHeap(ref value, offset);
 		}
 
 		public static Pointer<byte> AddressOfFunction<T>(string name)
@@ -262,7 +291,7 @@ namespace RazorSharp.Memory
 
 
 			Pointer<MethodTable> mt = typeof(T).GetMethodTable();
-			Pointer<EEClass> ee = mt.Reference.EEClass;
+			Pointer<EEClass>     ee = mt.Reference.EEClass;
 			if (ee.Reference.HasLayout)
 				return (int) ee.Reference.LayoutInfo->ManagedSize;
 
@@ -294,7 +323,10 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <returns><see cref="IntPtr.Size" /> for reference types, size for value types</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int SizeOf<T>() => CSUnsafe.SizeOf<T>();
+		public static int SizeOf<T>()
+		{
+			return CSUnsafe.SizeOf<T>();
+		}
 
 
 		#region HeapSize
@@ -330,11 +362,17 @@ namespace RazorSharp.Memory
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int HeapSize<T>(ref T t) where T : class => HeapSizeInternal(t);
+		public static int HeapSize<T>(ref T t) where T : class
+		{
+			return HeapSizeInternal(t);
+		}
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int HeapSize<T>(T t) where T : class => HeapSize(ref t);
+		public static int HeapSize<T>(T t) where T : class
+		{
+			return HeapSize(ref t);
+		}
 
 
 		private static int HeapSizeInternal<T>(T t)
@@ -443,7 +481,10 @@ namespace RazorSharp.Memory
 		///         <para>This includes field padding.</para>
 		///     </remarks>
 		/// </summary>
-		public static int BaseFieldsSize<T>(T t) where T : class => BaseFieldsSizeInternal(t);
+		public static int BaseFieldsSize<T>(T t) where T : class
+		{
+			return BaseFieldsSizeInternal(t);
+		}
 
 
 		private static int BaseFieldsSizeInternal<T>(T t)
@@ -454,8 +495,8 @@ namespace RazorSharp.Memory
 		}
 
 		/// <summary>
-		/// Returns the size of the data not occupied by the <see cref="MethodTable"/> pointer
-		/// and the <see cref="ObjHeader"/>.
+		///     Returns the size of the data not occupied by the <see cref="MethodTable" /> pointer
+		///     and the <see cref="ObjHeader" />.
 		/// </summary>
 		public static int SizeOfData<T>(T t) where T : class
 		{
@@ -491,7 +532,10 @@ namespace RazorSharp.Memory
 		/// <returns>
 		///     <see cref="MethodTable.BaseSize" />
 		/// </returns>
-		public static int BaseInstanceSize<T>() where T : class => BaseInstanceSizeInternal<T>();
+		public static int BaseInstanceSize<T>() where T : class
+		{
+			return BaseInstanceSizeInternal<T>();
+		}
 
 
 		private static int BaseInstanceSizeInternal<T>()
@@ -554,25 +598,6 @@ namespace RazorSharp.Memory
 			return fields;
 		}
 
-		
 		#endregion
-
-		public static T DeepCopy<T>(T value) where T : class
-		{
-			Conditions.Require(value.GetType() != typeof(string), nameof(value));
-			Conditions.Require(!value.GetType().IsArray, nameof(value));
-
-			lock (value) {
-				var valueCpy = GCHeap.AllocateObject<T>(0);
-
-				fixed (byte* data = &PinHelper.GetPinningHelper(valueCpy).Data) {
-					Pointer<byte> ptr = data;
-					byte[]        mem = Unsafe.MemoryOfFields(value);
-					ptr.WriteAll(mem);
-				}
-
-				return valueCpy;
-			}
-		}
 	}
 }

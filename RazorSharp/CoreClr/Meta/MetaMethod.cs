@@ -27,11 +27,9 @@ namespace RazorSharp.CoreClr.Meta
 	/// </summary>
 	public class MetaMethod : IMetaMember
 	{
-		private readonly Pointer<MethodDesc> m_value;
-
 		internal MetaMethod(Pointer<MethodDesc> methodDesc)
 		{
-			m_value = methodDesc;
+			Value = methodDesc;
 		}
 
 
@@ -49,16 +47,16 @@ namespace RazorSharp.CoreClr.Meta
 		///         <para>Address-sensitive</para>
 		///     </remarks>
 		/// </summary>
-		public int Token => m_value.Reference.Token;
+		public int Token => Value.Reference.Token;
 
-		public string Name => m_value.Reference.Name;
+		public string Name => Value.Reference.Name;
 
-		public Type EnclosingType => m_value.Reference.EnclosingType;
+		public Type EnclosingType => Value.Reference.EnclosingType;
 
 		/// <summary>
 		///     The corresponding <see cref="MethodInfo" /> of this <see cref="MethodDesc" />
 		/// </summary>
-		public MethodInfo MethodInfo => m_value.Reference.Info;
+		public MethodInfo MethodInfo => Value.Reference.Info;
 
 		public MemberInfo Info => MethodInfo;
 
@@ -74,8 +72,8 @@ namespace RazorSharp.CoreClr.Meta
 		///     </para>
 		/// </summary>
 		public Pointer<byte> Function {
-			get => m_value.Reference.Function;
-			set => m_value.Reference.Function = value.Address;
+			get => Value.Reference.Function;
+			set => Value.Reference.Function = value.Address;
 		}
 
 		/// <summary>
@@ -84,45 +82,45 @@ namespace RazorSharp.CoreClr.Meta
 		///     ngened code if <see cref="IsPreImplemented" /> is <c>true</c>.
 		///     <returns><see cref="IntPtr.Zero" /> if the method has no native code.</returns>
 		/// </summary>
-		public Pointer<byte> NativeCode => m_value.Reference.NativeCode;
+		public Pointer<byte> NativeCode => Value.Reference.NativeCode;
 
-		public Pointer<byte> PreImplementedCode => m_value.Reference.PreImplementedCode;
+		public Pointer<byte> PreImplementedCode => Value.Reference.PreImplementedCode;
 
 		// ChunkIndex
 		// MethodDescChunk
 		// SizeOf
 		// EnclosingMethodTable
 
-		public MetaType EnclosingMetaType => new MetaType(m_value.Reference.EnclosingMethodTable);
+		public MetaType EnclosingMetaType => new MetaType(Value.Reference.EnclosingMethodTable);
 
-		public int SizeOf => m_value.Reference.SizeOf;
+		public int SizeOf => Value.Reference.SizeOf;
 
 		// RVA
 
 
 		#region bool
 
-		public bool IsConstructor    => m_value.Reference.IsConstructor;
-		public bool IsPreImplemented => m_value.Reference.IsPreImplemented;
-		public bool HasThis          => m_value.Reference.HasThis;
-		public bool HasILHeader      => m_value.Reference.HasILHeader;
-		public bool IsUnboxingStub   => m_value.Reference.IsUnboxingStub;
-		public bool IsIL             => m_value.Reference.IsIL;
-		public bool IsStatic         => m_value.Reference.IsStatic;
+		public bool IsConstructor    => Value.Reference.IsConstructor;
+		public bool IsPreImplemented => Value.Reference.IsPreImplemented;
+		public bool HasThis          => Value.Reference.HasThis;
+		public bool HasILHeader      => Value.Reference.HasILHeader;
+		public bool IsUnboxingStub   => Value.Reference.IsUnboxingStub;
+		public bool IsIL             => Value.Reference.IsIL;
+		public bool IsStatic         => Value.Reference.IsStatic;
 
-		public bool IsPointingToNativeCode => m_value.Reference.IsPointingToNativeCode;
+		public bool IsPointingToNativeCode => Value.Reference.IsPointingToNativeCode;
 
 		#endregion
 
-		internal Pointer<MethodDesc> Value => m_value;
+		internal Pointer<MethodDesc> Value { get; }
 
 		#region Flags
 
-		public MethodClassification     Classification => m_value.Reference.Classification;
-		public MethodAttributes         Attributes     => m_value.Reference.Attributes;
-		public MethodDescClassification Flags          => m_value.Reference.Flags;
-		public MethodDescFlags2         Flags2         => m_value.Reference.Flags2;
-		public MethodDescFlags3         Flags3         => m_value.Reference.Flags3;
+		public MethodClassification     Classification => Value.Reference.Classification;
+		public MethodAttributes         Attributes     => Value.Reference.Attributes;
+		public MethodDescClassification Flags          => Value.Reference.Flags;
+		public MethodDescFlags2         Flags2         => Value.Reference.Flags2;
+		public MethodDescFlags3         Flags3         => Value.Reference.Flags3;
 
 		#endregion
 
@@ -142,17 +140,17 @@ namespace RazorSharp.CoreClr.Meta
 		public MetaIL GetILHeader(int fAllowOverrides = 0)
 		{
 			Conditions.Assert(IsIL);
-			return new MetaIL(m_value.Reference.GetILHeader(fAllowOverrides));
+			return new MetaIL(Value.Reference.GetILHeader(fAllowOverrides));
 		}
 
 		public void Reset()
 		{
-			m_value.Reference.Reset();
+			Value.Reference.Reset();
 		}
 
 		public TDelegate GetDelegate<TDelegate>() where TDelegate : Delegate
 		{
-			return m_value.Reference.GetDelegate<TDelegate>();
+			return Value.Reference.GetDelegate<TDelegate>();
 		}
 
 		/// <summary>
@@ -160,7 +158,7 @@ namespace RazorSharp.CoreClr.Meta
 		/// </summary>
 		public void Prepare()
 		{
-			m_value.Reference.Prepare();
+			Value.Reference.Prepare();
 		}
 
 

@@ -37,59 +37,57 @@ namespace RazorSharp.CoreClr.Meta
 	/// </summary>
 	public class MetaIL
 	{
-		private readonly Pointer<ILMethod> m_value;
-
 		internal MetaIL(Pointer<ILMethod> value)
 		{
-			m_value = value;
+			Value = value;
 		}
 
-		internal Pointer<ILMethod> Value => m_value;
-		
+		internal Pointer<ILMethod> Value { get; }
+
 		/// <summary>
 		///     Whether this type is <see cref="TinyILMethod" />
 		/// </summary>
-		public bool IsTiny => m_value.Reference.IsTiny;
+		public bool IsTiny => Value.Reference.IsTiny;
 
 		/// <summary>
 		///     Whether this type is <see cref="FatILMethod" />
 		/// </summary>
-		public bool IsFat => m_value.Reference.IsFat;
+		public bool IsFat => Value.Reference.IsFat;
 
 		/// <summary>
 		///     Points to the JIT IL code
 		/// </summary>
-		public Pointer<byte> Code => m_value.Reference.Code;
+		public Pointer<byte> Code => Value.Reference.Code;
 
 		/// <summary>
 		///     Length/size of the IL code (<see cref="Code" />)
 		/// </summary>
-		public int CodeSize => m_value.Reference.CodeSize;
+		public int CodeSize => Value.Reference.CodeSize;
 
 		/// <summary>
 		///     <remarks>
 		///         Equals <see cref="System.Reflection.MethodBody.MaxStackSize" />
 		///     </remarks>
 		/// </summary>
-		public int MaxStack => m_value.Reference.MaxStack;
+		public int MaxStack => Value.Reference.MaxStack;
 
 		/// <summary>
 		///     <remarks>
 		///         Equals <see cref="System.Reflection.MethodBody.LocalSignatureMetadataToken" />
 		///     </remarks>
 		/// </summary>
-		public int LocalVarSigTok => m_value.Reference.LocalVarSigTok;
+		public int LocalVarSigTok => Value.Reference.LocalVarSigTok;
 
 		/// <summary>
 		///     <remarks>
 		///         <see cref="IsFat" /> must be <c>true</c>
 		///     </remarks>
 		/// </summary>
-		public CorILMethodFlags Flags => m_value.Reference.Flags;
+		public CorILMethodFlags Flags => Value.Reference.Flags;
 
 		public void WriteIL(byte[] opCodes)
 		{
-			m_value.Reference.WriteIL(opCodes);
+			Value.Reference.WriteIL(opCodes);
 		}
 
 		/// <summary>
@@ -100,12 +98,12 @@ namespace RazorSharp.CoreClr.Meta
 		/// <returns></returns>
 		public byte[] GetILAsByteArray()
 		{
-			return m_value.Reference.GetILAsByteArray();
+			return Value.Reference.GetILAsByteArray();
 		}
 
 		public ConsoleTable ToTable()
 		{
-			return m_value.Reference.ToTable();
+			return Value.Reference.ToTable();
 		}
 
 		public override string ToString()

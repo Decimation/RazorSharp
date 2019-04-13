@@ -19,7 +19,7 @@ namespace RazorSharp.Native.Win32
 	internal static unsafe class DbgHelp
 	{
 		private const string DBG_HELP_DLL = "DbgHelp.dll";
-		
+
 		internal const uint SYMOPT_DEBUG = 0x80000000;
 
 		internal const uint SYMOPT_UNDNAME = 0x2;
@@ -56,8 +56,7 @@ namespace RazorSharp.Native.Win32
 		                                           SymEnumSymbolsCallback callback,
 		                                           IntPtr                 pUserContext);
 
-		
-		
+
 		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 		[DllImport(DBG_HELP_DLL, SetLastError = true)]
@@ -76,8 +75,7 @@ namespace RazorSharp.Native.Win32
 		                                           IntPtr mask,
 		                                           IntPtr callback,
 		                                           IntPtr pUserContext);
-		
-		
+
 
 		[DllImport(DBG_HELP_DLL)]
 		internal static extern uint SymGetOptions();
@@ -88,12 +86,12 @@ namespace RazorSharp.Native.Win32
 		[DllImport(DBG_HELP_DLL)]
 		internal static extern uint SymLoadModule64(IntPtr hProc, IntPtr h, string p, string s, ulong baseAddr,
 		                                            uint   fileSize);
-		
+
 		// BOOL SymGetModuleInfo64(HANDLE hProcess, DWORD64 qwAddr, PIMAGEHLP_MODULE64 ModuleInfo)
-		
+
 		[DllImport(DBG_HELP_DLL, SetLastError = true)]
-		internal static extern unsafe bool SymGetModuleInfo64(IntPtr hProc, ulong qwAddr, IntPtr pModInfo);
-		
+		internal static extern bool SymGetModuleInfo64(IntPtr hProc, ulong qwAddr, IntPtr pModInfo);
+
 		[DllImport(DBG_HELP_DLL)]
 		internal static extern ImageNtHeaders64* ImageNtHeader(IntPtr hModule);
 
@@ -251,7 +249,5 @@ namespace RazorSharp.Native.Win32
 		/// <param name="symInfo">SYMBOL_INFO</param>
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal delegate bool SymEnumSymbolsCallback(IntPtr symInfo, uint symbolSize, IntPtr pUserContext);
-		
-		
 	}
 }

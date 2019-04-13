@@ -1,4 +1,9 @@
+#region
+
 using System.Runtime.InteropServices;
+
+#endregion
+
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global

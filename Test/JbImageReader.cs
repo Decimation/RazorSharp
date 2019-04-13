@@ -1,3 +1,10 @@
+#region
+
+using System;
+using System.IO;
+
+#endregion
+
 namespace Test
 {
 	//
@@ -10,24 +17,25 @@ namespace Test
 // Licensed under the MIT/X11 license.
 //
 
-	using System;
-	using System.IO;
-	using System.Linq;
-	using RVA = System.UInt32;
-	using TargetArchitecture = System.UInt16;
+	#region
+
+	using RVA = UInt32;
+	using TargetArchitecture = UInt16;
+
+	#endregion
 
 	namespace PEFile
 	{
 		public sealed class JbImageReader : BinaryStreamReader
 		{
 			internal readonly Image image;
-			public            Guid  Mvid;
-			public            uint  Timestamp;
 
-			DataDirectory cli;
+			private  DataDirectory cli;
 			internal DataDirectory metadata;
+			public   Guid          Mvid;
 
-			uint table_heap_offset;
+			private uint table_heap_offset;
+			public  uint Timestamp;
 
 
 			public JbImageReader(Stream stream)
@@ -39,7 +47,7 @@ namespace Test
 
 			public static Guid ReadAssemblyMvid(string filePath)
 			{
-				Guid mvid = Guid.Empty;
+				var mvid = Guid.Empty;
 				try {
 					using (var stream = File.OpenRead(filePath)) {
 						var imageReader = new JbImageReader(stream);
@@ -53,7 +61,7 @@ namespace Test
 				return mvid;
 			}
 
-			void MoveTo(DataDirectory directory)
+			private void MoveTo(DataDirectory directory)
 			{
 				BaseStream.Position = image.ResolveVirtualAddress(directory.VirtualAddress);
 			}
@@ -109,12 +117,12 @@ namespace Test
 				return true;
 			}
 
-			TargetArchitecture ReadArchitecture()
+			private ushort ReadArchitecture()
 			{
 				return ReadUInt16();
 			}
 
-			void ReadOptionalHeaders(out ushort subsystem, out ushort dll_characteristics)
+			private void ReadOptionalHeaders(out ushort subsystem, out ushort dll_characteristics)
 			{
 				// - PEOptionalHeader
 				//   - StandardFieldsHeader
@@ -195,12 +203,12 @@ namespace Test
 				Advance(8);
 			}
 
-			string ReadAlignedString(int length)
+			private string ReadAlignedString(int length)
 			{
 				int read   = 0;
 				var buffer = new char[length];
 				while (read < length) {
-					var current = ReadByte();
+					byte current = ReadByte();
 					if (current == 0)
 						break;
 
@@ -212,13 +220,13 @@ namespace Test
 				return new string(buffer, 0, read);
 			}
 
-			string ReadZeroTerminatedString(int length)
+			private string ReadZeroTerminatedString(int length)
 			{
-				int read   = 0;
-				var buffer = new char[length];
-				var bytes  = ReadBytes(length);
+				int    read   = 0;
+				var    buffer = new char[length];
+				byte[] bytes  = ReadBytes(length);
 				while (read < length) {
-					var current = bytes[read];
+					byte current = bytes[read];
 					if (current == 0)
 						break;
 
@@ -228,7 +236,7 @@ namespace Test
 				return new string(buffer, 0, read);
 			}
 
-			void ReadSections(ushort count)
+			private void ReadSections(ushort count)
 			{
 				var sections = new Section[count];
 
@@ -261,7 +269,7 @@ namespace Test
 				image.Sections = sections;
 			}
 
-			void ReadCLIHeader()
+			private void ReadCLIHeader()
 			{
 				MoveTo(cli);
 
@@ -289,7 +297,7 @@ namespace Test
 				// ManagedNativeHeader		8
 			}
 
-			void ReadMetadata()
+			private void ReadMetadata()
 			{
 				MoveTo(metadata);
 
@@ -306,7 +314,7 @@ namespace Test
 				// Flags		2
 				Advance(2);
 
-				var streams = ReadUInt16();
+				ushort streams = ReadUInt16();
 
 				var section = image.GetSectionAtVirtualAddress(metadata.VirtualAddress);
 				image.MetadataSection = section ?? throw new BadImageFormatException();
@@ -315,11 +323,8 @@ namespace Test
 					ReadMetadataStream(section);
 			}
 
-			
 
-			
-			
-			void ReadMetadataStream(Section section)
+			private void ReadMetadataStream(Section section)
 			{
 				// Offset		4
 				uint offset =
@@ -328,31 +333,31 @@ namespace Test
 				// Size			4
 				uint size = ReadUInt32();
 
-				var name = ReadAlignedString(16);
+				string name = ReadAlignedString(16);
 				switch (name) {
 					case "#~":
-						
+
 					case "#-":
 						//var tableHeapData = ReadHeapData(offset, size);
-						
+
 						table_heap_offset = offset;
 						break;
 					case "#Strings":
 						//image.StringHeap = new StringHeap(data);
-						
-						
+
+
 						break;
 					case "#Blob":
 						//image.BlobHeap = new BlobHeap(data);
-						
+
 						break;
 					case "#GUID":
 						//image.GuidHeap = new GuidHeap(data);
-						var data = ReadHeapData(offset, size);
+						byte[] data = ReadHeapData(offset, size);
 						if (data.Length >= 16) {
 							uint mvidIndex = GetMvidIndexInGuidStream();
 
-							byte[] guidBytes = new byte[16];
+							var guidBytes = new byte[16];
 							Buffer.BlockCopy(data, (int) (mvidIndex - 1) * 16, guidBytes, 0, 16);
 
 							Mvid = new Guid(guidBytes);
@@ -370,21 +375,21 @@ namespace Test
 
 			private uint GetMvidIndexInGuidStream()
 			{
-				var oldPosition = BaseStream.Position;
+				long oldPosition = BaseStream.Position;
 
 				MoveTo(table_heap_offset + image.MetadataSection.PointerToRawData);
 				Advance(6);
-				var sizes = ReadByte();
+				byte sizes = ReadByte();
 				Advance(1);
-				var valid  = ReadInt64();
-				var sorted = ReadInt64();
+				long valid  = ReadInt64();
+				long sorted = ReadInt64();
 
 				for (int i = 0; i < 58; i++) {
 					if ((valid & (1L << i)) == 0) {
 						continue;
 					}
 
-					var tableLength = ReadUInt32();
+					uint tableLength = ReadUInt32();
 				}
 
 				Advance(2);
@@ -407,11 +412,11 @@ namespace Test
 				return mvidIndex;
 			}
 
-			byte[] ReadHeapData(uint offset, uint size)
+			private byte[] ReadHeapData(uint offset, uint size)
 			{
-				var position = BaseStream.Position;
+				long position = BaseStream.Position;
 				MoveTo(offset + image.MetadataSection.PointerToRawData);
-				var data = ReadBytes((int) size);
+				byte[] data = ReadBytes((int) size);
 				BaseStream.Position = position;
 
 				return data;
@@ -420,17 +425,15 @@ namespace Test
 
 		public class BinaryStreamReader : BinaryReader
 		{
-			public int Position {
-				get { return (int) BaseStream.Position; }
-				set { BaseStream.Position = value; }
-			}
-
-			public int Length {
-				get { return (int) BaseStream.Length; }
-			}
-
 			public BinaryStreamReader(Stream stream)
 				: base(stream) { }
+
+			public int Position {
+				get => (int) BaseStream.Position;
+				set => BaseStream.Position = value;
+			}
+
+			public int Length => (int) BaseStream.Length;
 
 			public void Advance(int bytes)
 			{
@@ -445,7 +448,7 @@ namespace Test
 			public void Align(int align)
 			{
 				align--;
-				var position = Position;
+				int position = Position;
 				Advance(((position + align) & ~align) - position);
 			}
 
@@ -455,49 +458,47 @@ namespace Test
 			}
 		}
 
-		struct DataDirectory
+		internal struct DataDirectory
 		{
-			public readonly RVA  VirtualAddress;
+			public readonly uint VirtualAddress;
 			public readonly uint Size;
 
-			public bool IsZero {
-				get { return VirtualAddress == 0 && Size == 0; }
-			}
+			public bool IsZero => VirtualAddress == 0 && Size == 0;
 
-			public DataDirectory(RVA rva, uint size)
+			public DataDirectory(uint rva, uint size)
 			{
-				this.VirtualAddress = rva;
-				this.Size           = size;
+				VirtualAddress = rva;
+				Size           = size;
 			}
 		}
 
-		sealed class Section
+		internal sealed class Section
 		{
 			public string Name;
-			public RVA    VirtualAddress;
-			public uint   SizeOfRawData;
 			public uint   PointerToRawData;
+			public uint   SizeOfRawData;
+			public uint   VirtualAddress;
 		}
 
-		sealed class Image
+		internal sealed class Image
 		{
-			public Stream Stream;
-
-			public string             RuntimeVersion;
-			public TargetArchitecture Architecture;
-
-			public Section[] Sections;
-
-			public Section MetadataSection;
-
-			public uint EntryPointToken;
-			public uint Timestamp;
+			public ushort Architecture;
 
 			public DataDirectory Debug;
-			public DataDirectory Resources;
-			public DataDirectory StrongName;
 
-			public uint ResolveVirtualAddress(RVA rva)
+			public uint EntryPointToken;
+
+			public Section       MetadataSection;
+			public DataDirectory Resources;
+
+			public string RuntimeVersion;
+
+			public Section[]     Sections;
+			public Stream        Stream;
+			public DataDirectory StrongName;
+			public uint          Timestamp;
+
+			public uint ResolveVirtualAddress(uint rva)
 			{
 				var section = GetSectionAtVirtualAddress(rva);
 				if (section == null)
@@ -506,14 +507,14 @@ namespace Test
 				return ResolveVirtualAddressInSection(rva, section);
 			}
 
-			public uint ResolveVirtualAddressInSection(RVA rva, Section section)
+			public uint ResolveVirtualAddressInSection(uint rva, Section section)
 			{
 				return rva + section.PointerToRawData - section.VirtualAddress;
 			}
 
-			public Section GetSectionAtVirtualAddress(RVA rva)
+			public Section GetSectionAtVirtualAddress(uint rva)
 			{
-				var sections = this.Sections;
+				Section[] sections = Sections;
 				for (int i = 0; i < sections.Length; i++) {
 					var section = sections[i];
 					if (rva >= section.VirtualAddress && rva < section.VirtualAddress + section.SizeOfRawData)

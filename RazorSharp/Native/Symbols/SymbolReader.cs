@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,20 +13,16 @@ using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Images;
 using RazorSharp.Native.Win32;
 
+#endregion
+
 namespace RazorSharp.Native.Symbols
 {
 	/// <summary>
-	/// Provides access to symbols in PDB files and matching them with the corresponding memory
-	/// location in an image
+	///     Provides access to symbols in PDB files and matching them with the corresponding memory
+	///     location in an image
 	/// </summary>
 	public unsafe class SymbolReader : ISymbolProvider
 	{
-		internal List<Symbol> Symbols { get; private set; }
-
-		private readonly IntPtr m_proc;
-
-		private ulong m_modBase;
-
 		private const string MASK_STR_DEFAULT = "*!*";
 
 		private const string OFFSETS_FILE_NAME = "RazorSharpSymbolOffsets.txt";
@@ -39,8 +37,12 @@ namespace RazorSharp.Native.Symbols
 		///     <para>Value: Symbol offset</para>
 		/// </summary>
 		private static readonly Dictionary<string, long> Cache;
-		
-		
+
+		private readonly IntPtr m_proc;
+
+		private ulong m_modBase;
+
+
 		static SymbolReader()
 		{
 			if (FileUtil.GetOrCreateTempFile(OFFSETS_FILE_NAME, out CacheFile)) {
@@ -54,16 +56,6 @@ namespace RazorSharp.Native.Symbols
 
 			Global.Log.Debug("Read {Count} cached offsets", Cache.Count);
 		}
-		
-		/// <summary>
-		///     Caches the offsets in <seealso cref="Cache" />
-		/// </summary>
-		public static void Close()
-		{
-			File.WriteAllText(CacheFile.FullName, String.Empty);
-			Global.Log.Verbose("Writing {Count} offsets to cache", Cache.Count);
-			FileUtil.WriteDictionary(Cache, CacheFile);
-		}
 
 		public SymbolReader()
 		{
@@ -71,27 +63,16 @@ namespace RazorSharp.Native.Symbols
 			Symbols = new List<Symbol>();
 		}
 
+		internal List<Symbol> Symbols { get; }
+
 		public Symbol[] GetSymbols(string[] names)
 		{
 			throw new NotImplementedException();
 		}
 
-		public Symbol[] GetSymbolsContainingName(string name)
-		{
-			var list = new List<Symbol>();
-			
-			foreach (var sym in Symbols) {
-				if (sym.Name.Contains(name)) {
-					list.Add(sym);
-				}
-			}
-
-			return list.ToArray();
-		}
-		
 		public Symbol GetSymbol(string name)
 		{
-			var symbols = GetSymbolsContainingName(name);
+			Symbol[] symbols = GetSymbolsContainingName(name);
 			foreach (var symbol in symbols) {
 				if (symbol.Name == name) {
 					return symbol;
@@ -99,13 +80,13 @@ namespace RazorSharp.Native.Symbols
 			}
 
 
-			var names       = symbols.Select(x => x.Name).ToList();
-			var closestName = StringUtil.FindClosest(name, names);
-			var closestSym  = symbols.First(sym => sym.Name == closestName);
+			List<string> names       = symbols.Select(x => x.Name).ToList();
+			string       closestName = StringUtil.FindClosest(name, names);
+			var          closestSym  = symbols.First(sym => sym.Name == closestName);
 
 			return closestSym;
 		}
-		
+
 		public long GetSymOffset(string name)
 		{
 			if (Cache.ContainsKey(name)) {
@@ -113,7 +94,7 @@ namespace RazorSharp.Native.Symbols
 				return Cache[name];
 			}
 
-			var ofs = GetSymbol(name).Offset;
+			long ofs = GetSymbol(name).Offset;
 			Cache.Add(name, ofs);
 			return ofs;
 		}
@@ -129,6 +110,31 @@ namespace RazorSharp.Native.Symbols
 			return rg;
 		}
 
+		public void Dispose() { }
+
+		/// <summary>
+		///     Caches the offsets in <seealso cref="Cache" />
+		/// </summary>
+		public static void Close()
+		{
+			File.WriteAllText(CacheFile.FullName, String.Empty);
+			Global.Log.Verbose("Writing {Count} offsets to cache", Cache.Count);
+			FileUtil.WriteDictionary(Cache, CacheFile);
+		}
+
+		public Symbol[] GetSymbolsContainingName(string name)
+		{
+			var list = new List<Symbol>();
+
+			foreach (var sym in Symbols) {
+				if (sym.Name.Contains(name)) {
+					list.Add(sym);
+				}
+			}
+
+			return list.ToArray();
+		}
+
 		public Pointer<byte> GetSymAddress(string name, string module)
 		{
 			long offset = GetSymOffset(name);
@@ -140,11 +146,6 @@ namespace RazorSharp.Native.Symbols
 			return GetSymAddress(name, Clr.CLR_DLL_SHORT);
 		}
 
-		public void Dispose()
-		{
-			
-		}
-		
 		#region Retrieval
 
 		private void SymGetModuleInfo(ulong modBase)
@@ -188,7 +189,7 @@ namespace RazorSharp.Native.Symbols
 		}
 
 		/// <summary>
-		/// This has significant overhead
+		///     This has significant overhead
 		/// </summary>
 		public void LoadAll(string pFileName, string pSearchMask)
 		{
@@ -198,14 +199,14 @@ namespace RazorSharp.Native.Symbols
 			// messages to debug output - use the debugger's Debug Output window
 			// to view the messages
 
-			
+
 			options |= DbgHelp.SYMOPT_DEBUG;
 
 			DbgHelp.SymSetOptions(options);
 
 
 			// Initialize DbgHelp and load symbols for all modules of the current process 
-			var symInit = DbgHelp.SymInitialize(m_proc, null, true);
+			bool symInit = DbgHelp.SymInitialize(m_proc, null, true);
 
 			NativeHelp.Call(symInit, nameof(DbgHelp.SymInitialize));
 
@@ -234,7 +235,7 @@ namespace RazorSharp.Native.Symbols
 			// Enumerate symbols and display information about them
 
 
-			var symEnumSuccess = DbgHelp.SymEnumSymbols(
+			bool symEnumSuccess = DbgHelp.SymEnumSymbols(
 				m_proc,              // Process handle of the current process
 				m_modBase,           // Base address of the module
 				pSearchMask,         // Mask (NULL -> all symbols)
@@ -251,7 +252,7 @@ namespace RazorSharp.Native.Symbols
 			// Complete
 		}
 
-		
+
 		private static bool GetFileSize(string pFileName, ref ulong fileSize)
 		{
 			var hFile = Kernel32.CreateFile(pFileName,
@@ -317,74 +318,74 @@ namespace RazorSharp.Native.Symbols
 		#region Download
 
 		internal static FileInfo DownloadSymbolFile(DirectoryInfo dest, FileInfo dll)
-        		{
-        			return DownloadSymbolFile(dest, dll, out _);
-        		}
-        
-        internal static FileInfo DownloadSymbolFile(DirectoryInfo dest, FileInfo dll, out DirectoryInfo super)
-        		{
-        			// symchk
-        			string progFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
-        			var    symChk    = new FileInfo(String.Format(@"{0}\Windows Kits\10\Debuggers\x64\symchk.exe", progFiles));
-        			Conditions.Require(symChk.Exists);
-        
-        			string cmd = String.Format("\"{0}\" \"{1}\" /s SRV*{2}*http://msdl.microsoft.com/download/symbols",
-        			                           symChk.FullName, dll.FullName, dest.FullName);
-        
-        
-        			using (var cmdProc = Common.Shell("\"" + cmd + "\"")) {
-        				var startTime = DateTimeOffset.Now;
-        
-        				cmdProc.ErrorDataReceived += (sender, args) =>
-        				{
-        					Global.Log.Error("Process error: {Error}", args.Data);
-        				};
-        
-        				cmdProc.Start();
-        
-        				var stdOut = cmdProc.StandardOutput;
-        				while (!stdOut.EndOfStream) {
-        					string ln = stdOut.ReadLine();
-        					Conditions.NotNull(ln, nameof(ln));
-        					if (ln.Contains("SYMCHK: PASSED + IGNORED files = 1")) {
-        						break;
-        					}
-        
-        					if (DateTimeOffset.Now.Subtract(startTime).TotalMinutes > 1.5) {
-        						throw new TimeoutException("Could not download CLR symbols");
-        					}
-        				}
-        			}
-        
-        			Global.Log.Debug("Done downloading symbols");
-        
-        			string   pdbStr = dest.FullName + @"\" + Clr.CLR_PDB_SHORT;
-        			FileInfo pdb;
-        
-        			if (Directory.Exists(pdbStr)) {
-        				// directory will be named <symbol>.pdb
-        				super = new DirectoryInfo(pdbStr);
-        
-        				// sole child directory will be something like 9FF14BF5D36043909E88FF823F35EE3B2
-        				DirectoryInfo[] children = super.GetDirectories();
-        				Conditions.Assert(children.Length == 1);
-        				var child = children[0];
-        
-        				// (possibly sole) file will be the symbol file
-        				FileInfo[] files = child.GetFiles();
-        				pdb = files.First(f => f.Name.Contains(Clr.CLR_PDB_SHORT));
-        			}
-        			else if (File.Exists(pdbStr)) {
-        				super = null;
-        				pdb   = new FileInfo(pdbStr);
-        			}
-        			else {
-        				throw new Exception(String.Format("Error downloading symbols. File: {0}", pdbStr));
-        			}
-        
-        			Conditions.Ensure(pdb.Exists);
-        			return pdb;
-        		}
+		{
+			return DownloadSymbolFile(dest, dll, out _);
+		}
+
+		internal static FileInfo DownloadSymbolFile(DirectoryInfo dest, FileInfo dll, out DirectoryInfo super)
+		{
+			// symchk
+			string progFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+			var    symChk    = new FileInfo(String.Format(@"{0}\Windows Kits\10\Debuggers\x64\symchk.exe", progFiles));
+			Conditions.Require(symChk.Exists);
+
+			string cmd = String.Format("\"{0}\" \"{1}\" /s SRV*{2}*http://msdl.microsoft.com/download/symbols",
+			                           symChk.FullName, dll.FullName, dest.FullName);
+
+
+			using (var cmdProc = Common.Shell("\"" + cmd + "\"")) {
+				var startTime = DateTimeOffset.Now;
+
+				cmdProc.ErrorDataReceived += (sender, args) =>
+				{
+					Global.Log.Error("Process error: {Error}", args.Data);
+				};
+
+				cmdProc.Start();
+
+				var stdOut = cmdProc.StandardOutput;
+				while (!stdOut.EndOfStream) {
+					string ln = stdOut.ReadLine();
+					Conditions.NotNull(ln, nameof(ln));
+					if (ln.Contains("SYMCHK: PASSED + IGNORED files = 1")) {
+						break;
+					}
+
+					if (DateTimeOffset.Now.Subtract(startTime).TotalMinutes > 1.5) {
+						throw new TimeoutException("Could not download CLR symbols");
+					}
+				}
+			}
+
+			Global.Log.Debug("Done downloading symbols");
+
+			string   pdbStr = dest.FullName + @"\" + Clr.CLR_PDB_SHORT;
+			FileInfo pdb;
+
+			if (Directory.Exists(pdbStr)) {
+				// directory will be named <symbol>.pdb
+				super = new DirectoryInfo(pdbStr);
+
+				// sole child directory will be something like 9FF14BF5D36043909E88FF823F35EE3B2
+				DirectoryInfo[] children = super.GetDirectories();
+				Conditions.Assert(children.Length == 1);
+				var child = children[0];
+
+				// (possibly sole) file will be the symbol file
+				FileInfo[] files = child.GetFiles();
+				pdb = files.First(f => f.Name.Contains(Clr.CLR_PDB_SHORT));
+			}
+			else if (File.Exists(pdbStr)) {
+				super = null;
+				pdb   = new FileInfo(pdbStr);
+			}
+			else {
+				throw new Exception(String.Format("Error downloading symbols. File: {0}", pdbStr));
+			}
+
+			Conditions.Ensure(pdb.Exists);
+			return pdb;
+		}
 
 		#endregion
 	}

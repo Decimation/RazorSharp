@@ -1,7 +1,4 @@
 namespace Test
 {
-	public class ImageReader
-	{
-		
-	}
+	public class ImageReader { }
 }

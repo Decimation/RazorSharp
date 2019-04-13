@@ -21,29 +21,6 @@ namespace RazorSharp.Native.Win32
 
 		internal static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
-		#region File
-
-		internal const uint INVALID_FILE_SIZE = (uint) 0xFFFFFFFF;
-
-		[DllImport(KERNEL32_DLL, SetLastError = true, CharSet = CharSet.Auto)]
-		public static extern IntPtr CreateFile(
-			string                                       fileName,
-			[MarshalAs(UnmanagedType.U4)] FileAccess     fileAccess,
-			[MarshalAs(UnmanagedType.U4)] FileShare      fileShare,
-			IntPtr                                       securityAttributes, // optional SECURITY_ATTRIBUTES structure can be passed
-			[MarshalAs(UnmanagedType.U4)] FileMode       creationDisposition,
-			[MarshalAs(UnmanagedType.U4)] FileAttributes flagsAndAttributes,
-			IntPtr                                       template);
-
-		// DWORD GetFileSize(
-		// 	HANDLE  hFile,
-		// 	LPDWORD lpFileSizeHigh
-		// );
-		[DllImport(KERNEL32_DLL)]
-		public static extern uint GetFileSize(IntPtr hFile, ushort* lpFileSizeHigh);
-		
-		#endregion
-
 		[DllImport(KERNEL32_DLL)]
 		public static extern uint GetLastError();
 
@@ -76,6 +53,29 @@ namespace RazorSharp.Native.Win32
 		/// <returns></returns>
 		[DllImport(KERNEL32_DLL, CharSet = CharSet.Auto)]
 		internal static extern IntPtr GetModuleHandle(string lpModuleName);
+
+		#region File
+
+		internal const uint INVALID_FILE_SIZE = 0xFFFFFFFF;
+
+		[DllImport(KERNEL32_DLL, SetLastError = true, CharSet = CharSet.Auto)]
+		public static extern IntPtr CreateFile(
+			string                                       fileName,
+			[MarshalAs(UnmanagedType.U4)] FileAccess     fileAccess,
+			[MarshalAs(UnmanagedType.U4)] FileShare      fileShare,
+			IntPtr                                       securityAttributes, // optional SECURITY_ATTRIBUTES structure can be passed
+			[MarshalAs(UnmanagedType.U4)] FileMode       creationDisposition,
+			[MarshalAs(UnmanagedType.U4)] FileAttributes flagsAndAttributes,
+			IntPtr                                       template);
+
+		// DWORD GetFileSize(
+		// 	HANDLE  hFile,
+		// 	LPDWORD lpFileSizeHigh
+		// );
+		[DllImport(KERNEL32_DLL)]
+		public static extern uint GetFileSize(IntPtr hFile, ushort* lpFileSizeHigh);
+
+		#endregion
 
 		#region Library
 
@@ -174,7 +174,7 @@ namespace RazorSharp.Native.Win32
 		/// <returns>
 		///     The return value is the actual number of bytes returned in the information buffer. If the function fails, the
 		///     return value is zero. To get extended error information, call <see cref="Marshal.GetLastWin32Error" />.
-		/// Possible error values include <see cref="ERROR_INVALID_PARAMETER" />.
+		///     Possible error values include <see cref="ERROR_INVALID_PARAMETER" />.
 		/// </returns>
 		[DllImport(KERNEL32_DLL)]
 		internal static extern IntPtr VirtualQuery(IntPtr address, ref MemoryBasicInformation buffer, uint length);

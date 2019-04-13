@@ -216,7 +216,10 @@ namespace RazorSharp.CoreClr.Structures
 		}
 
 
-		internal Pointer<byte> GetStaticAddress() => GetStaticAddress(null);
+		internal Pointer<byte> GetStaticAddress()
+		{
+			return GetStaticAddress(null);
+		}
 
 		[ClrSymcall]
 		internal Pointer<byte> GetStaticAddress(void* value)

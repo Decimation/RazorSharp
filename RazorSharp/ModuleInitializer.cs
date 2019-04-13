@@ -1,6 +1,10 @@
+#region
+
 using System;
 using RazorSharp.CoreClr;
-using RazorSharp.Native;
+using RazorSharp.Native.Symbols;
+
+#endregion
 
 // ReSharper disable UnusedMember.Global
 
@@ -10,19 +14,18 @@ namespace RazorSharp
 	{
 		public static void Initialize()
 		{
-			/*
 			// Init code
 			Global.Setup();
 			Clr.Setup();
-			
+
 			var appDomain = AppDomain.CurrentDomain;
 			appDomain.ProcessExit += (sender, eventArgs) =>
 			{
 				// SHUT IT DOWN
-				Symbols.Close();
+				SymbolReader.Close();
 				Clr.Close();
 				Global.Close();
-			};*/
+			};
 		}
 	}
 }

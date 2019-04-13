@@ -1,7 +1,9 @@
-// ReSharper disable InconsistentNaming
+#region
 
 using System;
 using System.Runtime.InteropServices;
+
+#endregion
 
 namespace RazorSharp.Memory.Fixed
 {
@@ -14,15 +16,15 @@ namespace RazorSharp.Memory.Fixed
 			m_handle = GCHandle.Alloc(o, GCHandleType.Pinned);
 		}
 
-		public static GCHelper Pin(object o)
-		{
-			return new GCHelper(o);
-		}
-
 
 		public void Dispose()
 		{
 			m_handle.Free();
+		}
+
+		public static GCHelper Pin(object o)
+		{
+			return new GCHelper(o);
 		}
 	}
 }

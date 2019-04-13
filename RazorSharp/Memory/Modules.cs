@@ -1,13 +1,9 @@
 #region
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using JetBrains.Annotations;
-using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Native;
 using RazorSharp.Native.Win32;
 
 #endregion
@@ -38,9 +34,15 @@ namespace RazorSharp.Memory
 			return null;
 		}
 
-		public static IntPtr GetModuleHandle(string name) => Kernel32.GetModuleHandle(name);
+		public static IntPtr GetModuleHandle(string name)
+		{
+			return Kernel32.GetModuleHandle(name);
+		}
 
-		public static IntPtr GetModuleHandle(ProcessModule module) => GetModuleHandle(module.ModuleName);
+		public static IntPtr GetModuleHandle(ProcessModule module)
+		{
+			return GetModuleHandle(module.ModuleName);
+		}
 
 		public static Pointer<byte> GetBaseAddress(string module)
 		{
@@ -51,8 +53,8 @@ namespace RazorSharp.Memory
 		public static Pointer<byte>[] GetAddresses(string module, long[] offset)
 		{
 			int lim = offset.Length;
-			var rg = new Pointer<byte>[lim];
-			
+			var rg  = new Pointer<byte>[lim];
+
 			Pointer<byte> ptr = GetBaseAddress(module);
 
 			for (int i = 0; i < lim; i++) {
@@ -60,10 +62,6 @@ namespace RazorSharp.Memory
 			}
 
 			return rg;
-			
-			
-			
-			
 		}
 
 		public static Pointer<byte> GetAddress(string module, long offset)

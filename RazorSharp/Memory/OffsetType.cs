@@ -1,8 +1,12 @@
+#region
+
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
+
+#endregion
 
 namespace RazorSharp.Memory
 {

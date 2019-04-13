@@ -1,7 +1,3 @@
-#region
-
-#endregion
-
 namespace RazorSharp.CoreClr.Structures
 {
 	/// <summary>

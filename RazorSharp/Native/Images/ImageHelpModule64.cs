@@ -1,5 +1,9 @@
+#region
+
 using System.Runtime.InteropServices;
 using RazorSharp.Native.Symbols;
+
+#endregion
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global

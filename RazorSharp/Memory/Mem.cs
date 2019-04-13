@@ -31,6 +31,8 @@ namespace RazorSharp.Memory
 
 	/// <summary>
 	///     Provides functions for interacting with memory.
+	///     <seealso cref="Unsafe" />
+	///     <seealso cref="CSUnsafe" />
 	/// </summary>
 	public static unsafe class Mem
 	{
@@ -79,7 +81,10 @@ namespace RazorSharp.Memory
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int Size<T>(int elemCnt) => Unsafe.SizeOf<T>() * elemCnt;
+		public static int Size<T>(int elemCnt)
+		{
+			return CSUnsafe.SizeOf<T>() * elemCnt;
+		}
 
 		#region Zero
 
@@ -90,10 +95,9 @@ namespace RazorSharp.Memory
 
 		public static void Zero(Pointer<byte> ptr, int length)
 		{
-			for (int i = 0; i < length; i++) 
+			for (int i = 0; i < length; i++)
 				ptr[i] = 0;
 		}
-
 
 		#endregion
 
@@ -131,7 +135,7 @@ namespace RazorSharp.Memory
 			// We'll allocate extra bytes (+ IntPtr.Size) for a pointer and write the address of
 			// the unmanaged "instance" there, as the CLR can only interpret
 			// reference types as a pointer.
-			Pointer<byte> alloc       = AllocUnmanaged<byte>(baseSize + IntPtr.Size);
+			Pointer<byte>        alloc       = AllocUnmanaged<byte>(baseSize + IntPtr.Size);
 			Pointer<MethodTable> methodTable = typeof(T).GetMethodTable();
 
 			// Write the pointer in the extra allocated bytes,
@@ -172,7 +176,7 @@ namespace RazorSharp.Memory
 		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
 		{
 			Conditions.Require(elemCnt > 0, nameof(elemCnt));
-			int size = Size<T>(elemCnt);
+			int size  = Size<T>(elemCnt);
 			var alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
 
@@ -183,7 +187,7 @@ namespace RazorSharp.Memory
 
 		public static Pointer<T> ReAllocUnmanaged<T>(Pointer<T> ptr, int elemCnt = 1)
 		{
-			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) (Size<T>(elemCnt)));
+			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) Size<T>(elemCnt));
 		}
 
 		/// <summary>
@@ -267,8 +271,8 @@ namespace RazorSharp.Memory
 			// VirtualProtect(buffer, code.size(), PAGE_EXECUTE_READ, &dummy);
 
 			Conditions.Ensure(Kernel32.VirtualProtect(alloc, (uint) opCodes.Length,
-			                                                 MemoryProtection.ExecuteRead,
-			                                                 out _));
+			                                          MemoryProtection.ExecuteRead,
+			                                          out _));
 
 
 			return alloc;
@@ -322,7 +326,8 @@ namespace RazorSharp.Memory
 
 		public static void WriteBytes(Pointer<byte> dest, byte[] src)
 		{
-			for (int i = 0; i < src.Length; i++) dest[i] = src[i];
+			for (int i = 0; i < src.Length; i++)
+				dest[i] = src[i];
 		}
 
 		#endregion
@@ -335,7 +340,7 @@ namespace RazorSharp.Memory
 			return *(IntPtr*) ptr.Add(byteOffset);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		/*[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Write<T>(Pointer<byte> p, int byteOffset, T t)
 		{
 			CSUnsafe.Write((p + byteOffset).ToPointer(), t);
@@ -351,7 +356,7 @@ namespace RazorSharp.Memory
 		public static ref T AsRef<T>(Pointer<byte> p, int byteOffset = 0)
 		{
 			return ref CSUnsafe.AsRef<T>((p + byteOffset).ToPointer());
-		}
+		}*/
 
 		/// <summary>
 		///     <para>This bypasses the restriction that you can't have a pointer to <typeparamref name="T" />,</para>
@@ -411,20 +416,6 @@ namespace RazorSharp.Memory
 		///     Should equal <c>4 MB</c> for 64-bit and <c>1 MB</c> for 32-bit
 		/// </summary>
 		public static long StackSize => StackBase.ToInt64() - StackLimit.ToInt64();
-
-		internal static void StackInit<T>(ref byte* b)
-		{
-			Conditions.Require(IsOnStack(b));
-
-			// ObjHeader
-			Zero(b, sizeof(ObjHeader));
-
-			// MethodTable*
-			b += sizeof(MethodTable*);
-			Pointer<MethodTable> mt  = typeof(T).GetMethodTable();
-			Pointer<MethodTable> pMt = b;
-			pMt.WriteAny(mt);
-		}
 
 		#endregion
 

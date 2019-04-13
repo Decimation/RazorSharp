@@ -81,7 +81,7 @@ namespace RazorSharp.Native.Win32
 		                                    out MemoryProtection lpflOldProtect)
 		{
 			Conditions.Ensure(VirtualProtect(lpAddress.Address, (uint) dwSize, flNewProtect,
-			                                        out lpflOldProtect));
+			                                 out lpflOldProtect));
 		}
 
 		internal static MemoryBasicInformation VirtualQuery(IntPtr lpAddress)
@@ -135,8 +135,8 @@ namespace RazorSharp.Native.Win32
 
 			// Read the memory
 			Conditions.Ensure(ReadProcessMemory(hProc, lpBaseAddress.Address,
-			                                           Unsafe.AddressOf(ref t).Address,
-			                                           size, ref numberOfBytesRead));
+			                                    Unsafe.AddressOf(ref t).Address,
+			                                    size, ref numberOfBytesRead));
 
 			Conditions.Ensure(numberOfBytesRead == size);
 
@@ -158,8 +158,8 @@ namespace RazorSharp.Native.Win32
 
 			// Write the memory
 			Conditions.Ensure(WriteProcessMemory(hProc, lpBaseAddress.Address,
-			                                            Unsafe.AddressOf(ref value).Address,
-			                                            dwSize, ref numberOfBytesWritten));
+			                                     Unsafe.AddressOf(ref value).Address,
+			                                     dwSize, ref numberOfBytesWritten));
 
 			Conditions.Ensure(numberOfBytesWritten == dwSize);
 

@@ -27,18 +27,15 @@ namespace RazorSharp.CoreClr.Meta
 	/// </summary>
 	public class MetaField : IMetaMember
 	{
-		private readonly Pointer<FieldDesc> m_value;
-
-
 		internal MetaField(Pointer<FieldDesc> p)
 		{
-			m_value = p;
+			Value = p;
 		}
 
 
 		public override string ToString()
 		{
-			var info = m_value.Reference.Info;
+			var info = Value.Reference.Info;
 			return String.Format("{0} {1} (offset: {2}) (size: {3})", info.FieldType.Name, info.Name, Offset, Size);
 		}
 
@@ -46,47 +43,47 @@ namespace RazorSharp.CoreClr.Meta
 
 		#region bool
 
-		public bool IsPublic => m_value.Reference.IsPublic;
+		public bool IsPublic => Value.Reference.IsPublic;
 
-		public bool IsPrivate => m_value.Reference.IsPrivate;
+		public bool IsPrivate => Value.Reference.IsPrivate;
 
-		public bool IsInternal => m_value.Reference.IsInternal;
+		public bool IsInternal => Value.Reference.IsInternal;
 
-		public bool IsPrivateProtected => m_value.Reference.IsPrivateProtected;
+		public bool IsPrivateProtected => Value.Reference.IsPrivateProtected;
 
-		public bool IsProtectedInternal => m_value.Reference.IsProtectedInternal;
+		public bool IsProtectedInternal => Value.Reference.IsProtectedInternal;
 
-		public bool IsPointer => m_value.Reference.IsPointer;
+		public bool IsPointer => Value.Reference.IsPointer;
 
 		/// <summary>
 		///     Whether the field is <c>static</c>
 		/// </summary>
-		public bool IsStatic => m_value.Reference.IsStatic;
+		public bool IsStatic => Value.Reference.IsStatic;
 
 		/// <summary>
 		///     Whether the field is decorated with a <see cref="ThreadStaticAttribute" /> attribute
 		/// </summary>
-		public bool IsThreadLocal => m_value.Reference.IsThreadLocal;
+		public bool IsThreadLocal => Value.Reference.IsThreadLocal;
 
-		public bool IsRVA => m_value.Reference.IsRVA;
+		public bool IsRVA => Value.Reference.IsRVA;
 
-		public bool IsFixedBuffer => m_value.Reference.IsFixedBuffer;
+		public bool IsFixedBuffer => Value.Reference.IsFixedBuffer;
 
-		public bool IsAutoProperty => m_value.Reference.IsAutoProperty;
+		public bool IsAutoProperty => Value.Reference.IsAutoProperty;
 
 		#endregion
 
 		/// <summary>
 		///     Access level of the field
 		/// </summary>
-		public ProtectionLevel Protection => m_value.Reference.Protection;
+		public ProtectionLevel Protection => Value.Reference.Protection;
 
-		public CorElementType CorType => m_value.Reference.CorType;
+		public CorElementType CorType => Value.Reference.CorType;
 
 		/// <summary>
 		///     <para>Size of the field</para>
 		/// </summary>
-		public int Size => m_value.Reference.Size;
+		public int Size => Value.Reference.Size;
 
 		/// <summary>
 		///     Field metadata token
@@ -95,7 +92,7 @@ namespace RazorSharp.CoreClr.Meta
 		///         <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Field"</c> column in hexadecimal format.</para>
 		///     </remarks>
 		/// </summary>
-		public int Token => m_value.Reference.Token;
+		public int Token => Value.Reference.Token;
 
 		/// <summary>
 		///     Offset in memory
@@ -104,26 +101,26 @@ namespace RazorSharp.CoreClr.Meta
 		///     </remarks>
 		/// </summary>
 		public int Offset {
-			get => m_value.Reference.Offset;
-			set => m_value.Reference.Offset = value;
+			get => Value.Reference.Offset;
+			set => Value.Reference.Offset = value;
 		}
 
 		/// <summary>
 		///     The corresponding <see cref="FieldInfo" /> of this <see cref="FieldDesc" />
 		/// </summary>
-		public FieldInfo FieldInfo => m_value.Reference.Info;
+		public FieldInfo FieldInfo => Value.Reference.Info;
 
 		public MemberInfo Info => FieldInfo;
 
-		public string Name => m_value.Reference.Name;
+		public string Name => Value.Reference.Name;
 
-		public Type EnclosingType => m_value.Reference.EnclosingType;
+		public Type EnclosingType => Value.Reference.EnclosingType;
 
-		public Type FieldType => m_value.Reference.FieldType;
+		public Type FieldType => Value.Reference.FieldType;
 
-		public MetaType EnclosingMetaType => new MetaType(m_value.Reference.EnclosingMethodTable);
+		public MetaType EnclosingMetaType => new MetaType(Value.Reference.EnclosingMethodTable);
 
-		internal Pointer<FieldDesc> Value => m_value;
+		internal Pointer<FieldDesc> Value { get; }
 
 //		public Pointer<MethodTable> FieldMethodTable => m_pFieldDesc.Reference.FieldMethodTable;
 
@@ -135,47 +132,47 @@ namespace RazorSharp.CoreClr.Meta
 
 		public Pointer<byte> GetStaticAddress()
 		{
-			return m_value.Reference.GetStaticAddress();
+			return Value.Reference.GetStaticAddress();
 		}
 
 		public unsafe Pointer<byte> GetStaticAddress(Pointer<byte> value)
 		{
-			return m_value.Reference.GetStaticAddress(value.ToPointer());
+			return Value.Reference.GetStaticAddress(value.ToPointer());
 		}
 
 		public Pointer<byte> GetStaticAddressHandle()
 		{
-			return m_value.Reference.GetStaticAddressHandle();
+			return Value.Reference.GetStaticAddressHandle();
 		}
 
 		public Pointer<byte> GetStaticAddressContext()
 		{
-			return m_value.Reference.GetStaticAddressContext();
+			return Value.Reference.GetStaticAddressContext();
 		}
 
 		public object GetValue(object value)
 		{
-			return m_value.Reference.GetValue(value);
+			return Value.Reference.GetValue(value);
 		}
 
 		public object GetValue<TInstance>(TInstance t)
 		{
-			return m_value.Reference.GetValue(t);
+			return Value.Reference.GetValue(t);
 		}
 
 		public void SetValue<TInstance>(TInstance t, object value)
 		{
-			m_value.Reference.SetValue(t, value);
+			Value.Reference.SetValue(t, value);
 		}
 
 		public Pointer<byte> GetAddress<TInstance>(ref TInstance t)
 		{
-			return m_value.Reference.GetAddress(ref t);
+			return Value.Reference.GetAddress(ref t);
 		}
 
 		public void SetValueByAddr<TInstance, TField>(ref TInstance inst, TField value)
 		{
-			var addr = GetAddress(ref inst);
+			Pointer<byte> addr = GetAddress(ref inst);
 			addr.WriteAny(value);
 		}
 

@@ -8,7 +8,6 @@ using RazorCommon;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Native;
 using RazorSharp.Native.Images;
 using RazorSharp.Native.Win32;
 

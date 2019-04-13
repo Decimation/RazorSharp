@@ -40,8 +40,6 @@ namespace RazorSharp.Utilities
 				default:
 					return default;
 			}
-
-			return default;
 		}
 
 		public static TTo Convert<TTo>(byte[] mem) where TTo : struct

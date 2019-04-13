@@ -13,6 +13,5 @@ namespace RazorSharp.Native.Images
 		IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER      = 12,
 		IMAGE_SUBSYSTEM_EFI_ROM                 = 13,
 		IMAGE_SUBSYSTEM_XBOX                    = 14
-
 	}
 }

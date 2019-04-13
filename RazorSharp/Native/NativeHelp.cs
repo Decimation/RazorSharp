@@ -1,10 +1,13 @@
+#region
+
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
+
+#endregion
 
 namespace RazorSharp.Native
 {
@@ -13,8 +16,8 @@ namespace RazorSharp.Native
 		public static void Call(bool value, string name, bool throwOnFalse = false)
 		{
 			if (!value) {
-				var win32Error = Marshal.GetLastWin32Error();
-				var hResult    = Marshal.GetHRForLastWin32Error();
+				int win32Error = Marshal.GetLastWin32Error();
+				int hResult    = Marshal.GetHRForLastWin32Error();
 
 				string err = GetMessageForWin32Error(win32Error);
 
@@ -26,7 +29,7 @@ namespace RazorSharp.Native
 				                           err);
 
 				Global.Log.Error("Function {Name} failed. Error: {Err} Code: {Code}",
-				                 name,err, win32Error);
+				                 name, err, win32Error);
 
 				if (throwOnFalse) {
 					throw new Win32Exception(win32Error, msg);
@@ -37,8 +40,8 @@ namespace RazorSharp.Native
 		public static void Call(bool value, bool throwOnFalse = false)
 		{
 			if (!value) {
-				var stackTrace = new StackFrame(1);
-				var name       = stackTrace.GetMethod().Name;
+				var    stackTrace = new StackFrame(1);
+				string name       = stackTrace.GetMethod().Name;
 
 				Call(false, name, throwOnFalse);
 			}
@@ -49,12 +52,12 @@ namespace RazorSharp.Native
 			if (first == null || len <= 0) {
 				return null;
 			}
-			
+
 			return Marshal.PtrToStringAuto(new IntPtr(first), len).Erase(StringConstants.NULL_TERMINATOR);
-			
+
 			// return new string(first, 0,len);
-			
-			
+
+
 			/*byte[] rg = new byte[len];
 			Marshal.Copy(new IntPtr(first), rg, 0, rg.Length);
 			return Encoding.ASCII.GetString(rg);*/
@@ -65,6 +68,9 @@ namespace RazorSharp.Native
 			return new Win32Exception(code).Message;
 		}
 
-		public static unsafe string GetString(sbyte* first, uint len) => GetString(first, (int) len);
+		public static unsafe string GetString(sbyte* first, uint len)
+		{
+			return GetString(first, (int) len);
+		}
 	}
 }

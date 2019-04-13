@@ -2,14 +2,12 @@
 
 using System;
 using System.Runtime;
+using System.Runtime.CompilerServices;
 using RazorCommon.Diagnostics;
-using RazorSharp.Memory;
 using RazorSharp.Memory.Calling;
 using RazorSharp.Memory.Calling.Symbols;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Native;
-using RazorSharp.Native.Symbols;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable MemberCanBeMadeStatic.Global
@@ -20,6 +18,12 @@ using RazorSharp.Native.Symbols;
 
 namespace RazorSharp.CoreClr.Structures
 {
+	#region
+
+	using CSUnsafe = Unsafe;
+
+	#endregion
+
 	/// <summary>
 	///     <para>Represents the entire GC heap. This includes Gen 0, 1, 2, LOH, and other segments.</para>
 	///     <para>Corresponding files:</para>
@@ -84,7 +88,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
 		{
-			return IsHeapPointer(Unsafe.AddressOfHeap(ref t).ToPointer(), smallHeapOnly);
+			return IsHeapPointer(Memory.Unsafe.AddressOfHeap(ref t).ToPointer(), smallHeapOnly);
 		}
 
 		/// <summary>
@@ -122,13 +126,13 @@ namespace RazorSharp.CoreClr.Structures
 
 			//var listNative = CSUnsafe.Read<List<int>>(&objValuePtr);
 			//Console.WriteLine(listNative);
-			return Mem.Read<object>(&objValuePtr);
+			return CSUnsafe.Read<object>(&objValuePtr);
 		}
 
 		public static T AllocateObject<T>(int fHandleCom)
 		{
 			void* objValuePtr = AllocateObject(typeof(T).GetMethodTable().ToPointer<MethodTable>(), fHandleCom);
-			return Mem.Read<T>(&objValuePtr);
+			return CSUnsafe.Read<T>(&objValuePtr);
 		}
 
 		[ClrSymcall(IgnoreNamespace = true)]

@@ -1,5 +1,3 @@
-// ReSharper disable ClassCannotBeInstantiated
-// ReSharper disable ClassNeverInstantiated.Global
 namespace RazorSharp.Memory.Fixed
 {
 	#region
