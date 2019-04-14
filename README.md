@@ -41,3 +41,7 @@ RazorSharp is tested on:
 - [x] Fix Canon MT for pointer arrays
 - [x] Get field names via `FieldDesc`
 - [x] Fix "Function" field in `MethodDesc` for virtual functions
+
+# License
+
+Icons made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a>
