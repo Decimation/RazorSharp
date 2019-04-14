@@ -1,4 +1,10 @@
 # RazorSharp
+
+[![nuget](https://img.shields.io/nuget/v/RazorSharp.svg?logo=NuGet)](https://www.nuget.org/packages/RazorSharp/)
+[![nuget dl](https://img.shields.io/nuget/dt/RazorSharp.svg?logo=NuGet)](https://www.nuget.org/packages/RazorSharp/)
+
+![Icon](https://github.com/Decimation/RazorSharp/raw/master/icon64.png)
+
 Low-level utilities and tools for working with the CLR, CLR internal structures, and memory.
 
 # Goals
@@ -33,11 +39,12 @@ RazorSharp is tested on:
 - Workstation GC
 
 # todo
-- [ ] `ObjectLayout` for arrays
 - [ ] `MethodDescChunk`
 - [ ] Read `MethodDescs` without Reflection
 - [x] Fix Canon MT for pointer arrays
 - [x] Get field names via `FieldDesc`
-- [x] `ObjectLayout` without `ObjectLayoutInspector` `TypeLayout` (very slow)
 - [x] Fix "Function" field in `MethodDesc` for virtual functions
-- [ ] Fix `InvalidProgramException` when using `MethodDescs` in `RefInspector<string>`
+
+# License
+
+Icons made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a>
