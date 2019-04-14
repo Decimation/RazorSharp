@@ -1,7 +1,10 @@
-[![nuget](https://img.shields.io/nuget/v/RazorSharp.svg?logo=NuGet)](https://www.nuget.org/packages/RazorSharp/)
-![nuget dl](https://img.shields.io/nuget/dt/RazorSharp.svg?logo=NuGet)
-
 # RazorSharp
+
+[![nuget](https://img.shields.io/nuget/v/RazorSharp.svg?logo=NuGet)](https://www.nuget.org/packages/RazorSharp/)
+[![nuget dl](https://img.shields.io/nuget/dt/RazorSharp.svg?logo=NuGet)](https://www.nuget.org/packages/RazorSharp/)
+
+![Icon](https://github.com/Decimation/RazorSharp/raw/master/icon64.png)
+
 Low-level utilities and tools for working with the CLR, CLR internal structures, and memory.
 
 # Goals
