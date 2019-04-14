@@ -88,7 +88,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
 		{
-			return IsHeapPointer(Memory.Unsafe.AddressOfHeap(ref t).ToPointer(), smallHeapOnly);
+			return IsHeapPointer(Memory.Unsafe.AddressOfHeap(t).ToPointer(), smallHeapOnly);
 		}
 
 		/// <summary>

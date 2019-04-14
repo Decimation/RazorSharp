@@ -40,7 +40,7 @@ namespace RazorSharp.Memory
 		public static T Unbox<T>(object value) where T : struct
 		{
 			lock (value) {
-				Pointer<byte> addr = AddressOfHeap(value, OffsetType.Fields);
+				Pointer<byte> addr = AddressOfHeap(value, OffsetOptions.Fields);
 				return addr.ReadAny<T>();
 			}
 		}
@@ -59,17 +59,7 @@ namespace RazorSharp.Memory
 			return CSUnsafe.Read<T>(&cpy);
 		}
 
-		public static bool IsNil<T>(T value)
-		{
-			Pointer<T> ptr = AddressOf(ref value);
-			return ptr.IsNil;
-		}
-
-		public static TInt Value<T, TInt>(T value) where T : Enum
-		{
-			Pointer<T> ptr = AddressOf(ref value);
-			return ptr.ReadAny<TInt>();
-		}
+		public static bool IsNil<T>(T value) => AddressOf(ref value).IsNil;
 
 		public static T DeepCopy<T>(T value) where T : class
 		{
@@ -160,7 +150,7 @@ namespace RazorSharp.Memory
 		/// <param name="value">Reference type to return the heap address of</param>
 		/// <returns>The address of the heap object.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Pointer<byte> AddressOfHeap<T>(ref T value) where T : class
+		public static Pointer<byte> AddressOfHeap<T>(T value) where T : class
 		{
 			var tr = __makeref(value);
 
@@ -172,7 +162,7 @@ namespace RazorSharp.Memory
 
 		/// <summary>
 		///     Returns the address of reference type <paramref name="value" />'s heap memory, offset by the specified
-		///     <see cref="OffsetType" />.
+		///     <see cref="OffsetOptions" />.
 		///     <remarks>
 		///         <para>
 		///             Note: This does not pin the reference in memory if it is a reference type.
@@ -185,46 +175,36 @@ namespace RazorSharp.Memory
 		/// <param name="offset">Offset type</param>
 		/// <returns>The address of <paramref name="value" /></returns>
 		/// <exception cref="ArgumentOutOfRangeException">If <paramref name="offset"></paramref> is out of range.</exception>
-		public static Pointer<byte> AddressOfHeap<T>(ref T value, OffsetType offset) where T : class
+		public static Pointer<byte> AddressOfHeap<T>(T value, OffsetOptions offset) where T : class
 		{
 			switch (offset) {
-				case OffsetType.StringData:
+				case OffsetOptions.StringData:
 
 					Conditions.Require(typeof(T) == typeof(string));
 					string s = value as string;
-					return AddressOfHeap(ref s) + RuntimeHelpers.OffsetToStringData;
+					return AddressOfHeap(s) + RuntimeHelpers.OffsetToStringData;
 
-				case OffsetType.ArrayData:
+				case OffsetOptions.ArrayData:
 
 					Conditions.Require(Runtime.IsArray<T>());
-					return AddressOfHeap(ref value) + Offsets.OffsetToArrayData;
+					return AddressOfHeap(value) + Offsets.OffsetToArrayData;
 
-				case OffsetType.Fields:
+				case OffsetOptions.Fields:
 
 					// todo: if the type is an array, should this return ArrayData,
 					// todo: ...and if it's a string, should this return StringData?
 
 					// Skip over the MethodTable*
-					return AddressOfHeap(ref value) + sizeof(MethodTable*);
+					return AddressOfHeap(value) + sizeof(MethodTable*);
 
-				case OffsetType.None:
-					return AddressOfHeap(ref value);
+				case OffsetOptions.None:
+					return AddressOfHeap(value);
 
-				case OffsetType.Header:
-					return AddressOfHeap(ref value) - sizeof(ObjHeader);
+				case OffsetOptions.Header:
+					return AddressOfHeap(value) - sizeof(ObjHeader);
 				default:
 					throw new ArgumentOutOfRangeException(nameof(offset), offset, null);
 			}
-		}
-
-		public static Pointer<byte> AddressOfHeap<T>(T value) where T : class
-		{
-			return AddressOfHeap(ref value);
-		}
-
-		public static Pointer<byte> AddressOfHeap<T>(T value, OffsetType offset) where T : class
-		{
-			return AddressOfHeap(ref value, offset);
 		}
 
 		public static Pointer<byte> AddressOfFunction<T>(string name)
@@ -265,7 +245,7 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     Calculates the complete size of <paramref name="t" />'s data. If <typeparamref name="T" /> is
 		///     a value type, this is equal to <see cref="SizeOf{T}" />. If <typeparamref name="T" /> is a
-		///     reference type, this is equal to <see cref="HeapSize{T}(ref T)" />.
+		///     reference type, this is equal to <see cref="HeapSize{T}(T)" />.
 		/// </summary>
 		/// <param name="t">Value to calculate the size of</param>
 		/// <typeparam name="T">Type of <paramref name="t" /></typeparam>
@@ -323,13 +303,13 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <returns><see cref="IntPtr.Size" /> for reference types, size for value types</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int SizeOf<T>()
-		{
-			return CSUnsafe.SizeOf<T>();
-		}
+		public static int SizeOf<T>() => CSUnsafe.SizeOf<T>();
 
 
 		#region HeapSize
+
+		
+		
 
 		/// <summary>
 		///     <para>Calculates the complete size of a reference type in heap memory.</para>
@@ -362,27 +342,17 @@ namespace RazorSharp.Memory
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int HeapSize<T>(ref T t) where T : class
-		{
-			return HeapSizeInternal(t);
-		}
+		public static int HeapSize<T>(T value) where T : class => HeapSizeInternal(value);
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int HeapSize<T>(T t) where T : class
-		{
-			return HeapSize(ref t);
-		}
-
-
-		private static int HeapSizeInternal<T>(T t)
+		private static int HeapSizeInternal<T>(T value)
 		{
 			// Sanity check
 			Conditions.Require(!typeof(T).IsValueType);
 
 			// By manually reading the MethodTable*, we can calculate the size correctly if the reference
 			// is boxed or cloaked
-			Pointer<MethodTable> methodTable = Runtime.ReadMethodTable(ref t);
+			Pointer<MethodTable> methodTable = Runtime.ReadMethodTable(ref value);
 
 			// Value of GetSizeField()
 			int length = 0;
@@ -418,18 +388,18 @@ namespace RazorSharp.Memory
 
 			if (typeof(T).IsArray) {
 				Conditions.Require(Runtime.IsArray<T>());
-				var arr = t as Array;
+				var arr = value as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
 				// We already know it's not null because the type is an array.
 				length = arr.Length;
 
 				// Sanity check
-				Conditions.Assert(!(t is string));
+				Conditions.Assert(!(value is string));
 			}
-			else if (t is string str) {
+			else if (value is string str) {
 				// Sanity check
-				Conditions.Assert(!typeof(T).IsArray);
+				Conditions.Assert(!Runtime.IsArray<T>());
 				length = str.Length;
 			}
 
@@ -501,7 +471,7 @@ namespace RazorSharp.Memory
 		public static int SizeOfData<T>(T t) where T : class
 		{
 			// Subtract the size of the ObjHeader and MethodTable*
-			return HeapSize(ref t) - (IntPtr.Size + sizeof(MethodTable*));
+			return HeapSize(t) - (IntPtr.Size + sizeof(MethodTable*));
 		}
 
 		/*public static int SizeOfFields<T>(T t) where T : class
@@ -571,7 +541,7 @@ namespace RazorSharp.Memory
 		public static byte[] MemoryOf<T>(T t) where T : class
 		{
 			// Need to include the ObjHeader
-			Pointer<T> ptr = AddressOfHeap(ref t, OffsetType.Header).Address;
+			Pointer<T> ptr = AddressOfHeap(t, OffsetOptions.Header).Address;
 			return ptr.Cast<byte>().CopyOut(HeapSize(t));
 		}
 
@@ -594,7 +564,7 @@ namespace RazorSharp.Memory
 			var fields    = new byte[fieldSize];
 
 			// Skip over the MethodTable*
-			Marshal.Copy((AddressOfHeap(ref t) + IntPtr.Size).Address, fields, 0, fieldSize);
+			Marshal.Copy((AddressOfHeap(t) + IntPtr.Size).Address, fields, 0, fieldSize);
 			return fields;
 		}
 

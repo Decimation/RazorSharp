@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\InlineIL.Fody.1.1.2\build\InlineIL.Fody.props" Condition="Exists('..\packages\InlineIL.Fody.1.1.2\build\InlineIL.Fody.props')" />
   <Import Project="..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props')" />
   <Import Project="..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props" Condition="Exists('..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -85,6 +86,10 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="InlineIL, Version=1.1.2.0, Culture=neutral, PublicKeyToken=1058fa0ac76b4b05">
+      <HintPath>..\packages\InlineIL.Fody.1.1.2\lib\net452\InlineIL.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="JetBrains.Annotations, Version=2019.1.1.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
       <HintPath>..\packages\JetBrains.Annotations.2019.1.1\lib\net20\JetBrains.Annotations.dll</HintPath>
       <Private>True</Private>
@@ -96,7 +101,8 @@
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="RazorCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\RazorCommon\RazorCommon\bin\Release\RazorCommon.dll</HintPath>
+      <HintPath>..\packages\RazorCommon.1.0.0\lib\net472\RazorCommon.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
       <HintPath>..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
@@ -112,13 +118,15 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Memory, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+      <HintPath>..\..\..\.nuget\packages\system.memory\4.5.2\lib\netstandard2.0\System.Memory.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Threading.Thread" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\Inspect.cs" />
-    <Compile Include="Core.cs" />
     <Compile Include="CoreClr\Clr.cs" />
     <Compile Include="CoreClr\Meta\IMeta.cs" />
     <Compile Include="CoreClr\Meta\IMetaMember.cs" />
@@ -153,7 +161,9 @@
     <Compile Include="CoreClr\Structures\SyncBlockFlags.cs" />
     <Compile Include="CoreClr\Structures\TokenType.cs" />
     <Compile Include="CoreClr\Structures\TypeHandle.cs" />
-    <Compile Include="Memory\OffsetType.cs" />
+    <Compile Include="Hook.cs" />
+    <Compile Include="Jit.cs" />
+    <Compile Include="Memory\OffsetOptions.cs" />
     <Compile Include="Memory\Pointers\AllocPointer.cs" />
     <Compile Include="Memory\Pointers\Pointer.cs" />
     <Compile Include="Memory\Pointers\PointerFormat.cs" />
@@ -181,7 +191,6 @@
     <Compile Include="Memory\Region.cs" />
     <Compile Include="Memory\SegmentType.cs" />
     <Compile Include="ModuleInitializer.cs" />
-    <Compile Include="MyClass.cs" />
     <Compile Include="Native\AllocationType.cs" />
     <Compile Include="Native\ConsoleOutputModes.cs" />
     <Compile Include="Native\FreeTypes.cs" />
@@ -252,6 +261,8 @@
     <Compile Include="CoreClr\Constants.cs" />
     <Compile Include="CoreClr\Runtime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Strucs.cs" />
+    <Compile Include="Strucs2.cs" />
     <Compile Include="Utilities\AnnotationUtil.cs" />
     <Compile Include="Utilities\Conversions.cs" />
     <Compile Include="Utilities\ReflectionUtil.cs" />
@@ -270,6 +281,7 @@
     <Error Condition="!Exists('..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props'))" />
     <Error Condition="!Exists('..\packages\Fody.4.2.1\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.4.2.1\build\Fody.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\packages\InlineIL.Fody.1.1.2\build\InlineIL.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\InlineIL.Fody.1.1.2\build\InlineIL.Fody.props'))" />
   </Target>
   <Import Project="..\packages\Fody.4.2.1\build\Fody.targets" Condition="Exists('..\packages\Fody.4.2.1\build\Fody.targets')" />
   <!--<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

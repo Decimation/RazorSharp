@@ -10,6 +10,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using InlineIL;
 using JetBrains.Annotations;
 using RazorCommon;
 using RazorCommon.Diagnostics;
@@ -325,8 +326,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <param name="l">Operand</param>
 		public Pointer<T> And(long l)
 		{
-			long newAddr = ToInt64() & l;
-			Address = new IntPtr(newAddr);
+			this = ToInt64() & l;
 			return this;
 		}
 
@@ -340,8 +340,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <param name="l">Operand</param>
 		public Pointer<T> Or(long l)
 		{
-			long newAddr = ToInt64() | l;
-			Address = new IntPtr(newAddr);
+			this = ToInt64() | l;
 			return this;
 		}
 
@@ -554,10 +553,7 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		/// <param name="t">Value to write</param>
 		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
-		public void Write(T t, int elemOffset = 0)
-		{
-			WriteAny(t, elemOffset);
-		}
+		public void Write(T t, int elemOffset = 0) => WriteAny(t, elemOffset);
 
 
 		#region Safe write
@@ -612,10 +608,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
 		/// <returns>The value read from the offset <see cref="Address" /></returns>
 		[Pure]
-		public T Read(int elemOffset = 0)
-		{
-			return ReadAny<T>(elemOffset);
-		}
+		public T Read(int elemOffset = 0) => ReadAny<T>(elemOffset);
 
 
 		/// <summary>
@@ -624,10 +617,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
 		/// <returns>A reference to a value of type <typeparamref name="T" /></returns>
 		[Pure]
-		public ref T AsRef(int elemOffset = 0)
-		{
-			return ref AsRefAny<T>(elemOffset);
-		}
+		public ref T AsRef(int elemOffset = 0) => ref AsRefAny<T>(elemOffset);
 
 		#region Any
 
@@ -635,7 +625,7 @@ namespace RazorSharp.Memory.Pointers
 
 		private object InvokeGenericMethod(string name, Type typeArgs, params object[] args)
 		{
-			return ReflectionUtil.InvokeGenericMethod(GetType(), name, typeArgs, this, args);
+			return ReflectionUtil.InvokeGenericMethod(GetType(), name, this, new[] {typeArgs}, args);
 		}
 
 		public void WriteAnyEx(Type t, object value, int elemOffset = 0)
@@ -703,20 +693,14 @@ namespace RazorSharp.Memory.Pointers
 		///     the current pointer
 		/// </returns>
 		[Pure]
-		public T[] CopyOut(int elemCnt)
-		{
-			return CopyOut(0, elemCnt);
-		}
+		public T[] CopyOut(int elemCnt) => CopyOut(0, elemCnt);
 
 		public TType[] CopyOutAny<TType>(int startIndex, int elemCnt)
 		{
 			return Cast<TType>().CopyOut(startIndex, elemCnt);
 		}
 
-		public TType[] CopyOutAny<TType>(int elemCnt)
-		{
-			return Cast<TType>().CopyOut(elemCnt);
-		}
+		public TType[] CopyOutAny<TType>(int elemCnt) => Cast<TType>().CopyOut(elemCnt);
 
 		// todo: verify this works
 		[Pure]
@@ -732,16 +716,10 @@ namespace RazorSharp.Memory.Pointers
 		}
 
 		[Pure]
-		public byte[] CopyOutBytes(int elemCnt)
-		{
-			return CopyOutAny<byte>(elemCnt);
-		}
+		public byte[] CopyOutBytes(int elemCnt) => CopyOutAny<byte>(elemCnt);
 
 		[Pure]
-		public byte[] CopyOutBytes(int startIndex, int elemCnt)
-		{
-			return CopyOutAny<byte>(startIndex, elemCnt);
-		}
+		public byte[] CopyOutBytes(int startIndex, int elemCnt) => CopyOutAny<byte>(startIndex, elemCnt);
 
 		#endregion
 
@@ -750,20 +728,11 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Other methods
 
-		public Pointer<T> AddressOfIndex(int index)
-		{
-			return OffsetFast(index);
-		}
+		public Pointer<T> AddressOfIndex(int index) => OffsetFast(index);
 
-		public void Zero(int elemCnt)
-		{
-			Mem.Zero(m_value, Size(elemCnt));
-		}
+		public void Zero(int elemCnt) => Mem.Zero(m_value, Size(elemCnt));
 
-		public void ZeroBytes(int byteCnt)
-		{
-			Mem.Zero(m_value, byteCnt);
-		}
+		public void ZeroBytes(int byteCnt) => Mem.Zero(m_value, byteCnt);
 
 		public ConsoleTable ToTable(int elemCnt)
 		{
@@ -788,20 +757,14 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		/// <typeparam name="TNew">Type to point to</typeparam>
 		/// <returns>A new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" /></returns>
-		public Pointer<TNew> Cast<TNew>()
-		{
-			return new Pointer<TNew>(Address);
-		}
+		public Pointer<TNew> Cast<TNew>() => new Pointer<TNew>(Address);
 
 		/// <summary>
 		///     Returns <see cref="Address" /> as a pointer.
 		/// </summary>
 		/// <returns></returns>
 		[Pure]
-		public void* ToPointer()
-		{
-			return m_value;
-		}
+		public void* ToPointer() => m_value;
 
 		[Pure]
 		public TUnmanaged* ToPointer<TUnmanaged>() where TUnmanaged : unmanaged
@@ -815,37 +778,25 @@ namespace RazorSharp.Memory.Pointers
 		///     Converts <see cref="Address" /> to a 32-bit signed integer.
 		/// </summary>
 		/// <returns></returns>
-		public int ToInt32()
-		{
-			return (int) m_value;
-		}
+		public int ToInt32() => (int) m_value;
 
 		/// <summary>
 		///     Converts <see cref="Address" /> to a 64-bit signed integer.
 		/// </summary>
 		/// <returns></returns>
-		public long ToInt64()
-		{
-			return (long) m_value;
-		}
+		public long ToInt64() => (long) m_value;
 
 		/// <summary>
 		///     Converts <see cref="Address" /> to a 64-bit unsigned integer.
 		/// </summary>
 		/// <returns></returns>
-		public ulong ToUInt64()
-		{
-			return (ulong) m_value;
-		}
+		public ulong ToUInt64() => (ulong) m_value;
 
 		/// <summary>
 		///     Converts <see cref="Address" /> to a 32-bit unsigned integer.
 		/// </summary>
 		/// <returns></returns>
-		public uint ToUInt32()
-		{
-			return (uint) m_value;
-		}
+		public uint ToUInt32() => (uint) m_value;
 
 		#endregion
 
@@ -931,10 +882,7 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		/// <param name="current">Current pointer (high address)</param>
 		/// <returns>The index</returns>
-		public int OffsetIndex(Pointer<byte> current)
-		{
-			return OffsetIndex<T>(current);
-		}
+		public int OffsetIndex(Pointer<byte> current) => OffsetIndex<T>(current);
 
 		/// <summary>
 		///     Returns the element index of a pointer relative to <see cref="Address" />
@@ -950,10 +898,7 @@ namespace RazorSharp.Memory.Pointers
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void* OffsetFast(int elemCnt)
-		{
-			return OffsetFast<T>(elemCnt);
-		}
+		private void* OffsetFast(int elemCnt) => OffsetFast<T>(elemCnt);
 
 		/// <summary>
 		///     Offsets a pointer by <paramref name="elemCnt" /> elements.
@@ -971,15 +916,9 @@ namespace RazorSharp.Memory.Pointers
 		}
 
 
-		public Pointer<T> Add<TType>(int elemCnt = 1)
-		{
-			return Add(Mem.Size<TType>(elemCnt));
-		}
+		public Pointer<T> Add<TType>(int elemCnt = 1) => Add(Mem.Size<TType>(elemCnt));
 
-		public Pointer<T> Subtract<TType>(int elemCnt = 1)
-		{
-			return Add<TType>(-elemCnt);
-		}
+		public Pointer<T> Subtract<TType>(int elemCnt = 1) => Add<TType>(-elemCnt);
 
 		/// <summary>
 		///     Increment <see cref="Address" /> by the specified number of bytes
@@ -1006,10 +945,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <returns>
 		///     <c>this</c>
 		/// </returns>
-		public Pointer<T> Subtract(long right = 1)
-		{
-			return Add(-right);
-		}
+		public Pointer<T> Subtract(long right = 1) => Add(-right);
 
 
 		/// <summary>
@@ -1033,10 +969,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <returns>
 		///     <c>this</c>
 		/// </returns>
-		public Pointer<T> Decrement(int elemCnt = 1)
-		{
-			return Increment(-elemCnt);
-		}
+		public Pointer<T> Decrement(int elemCnt = 1) => Increment(-elemCnt);
 
 		/// <summary>
 		///     Increments the <see cref="Address" /> by the specified number of elements.

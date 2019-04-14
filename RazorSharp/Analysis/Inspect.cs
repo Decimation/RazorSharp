@@ -194,7 +194,7 @@ namespace RazorSharp.Analysis
 		public static string HeapString<T, TAs>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
 		{
 			// Sizes
-			Pointer<byte> addr     = Unsafe.AddressOfHeap(t, OffsetType.Header);
+			Pointer<byte> addr     = Unsafe.AddressOfHeap(t, OffsetOptions.Header);
 			int           heapSize = Unsafe.HeapSize(t);
 
 			// Type info
@@ -210,7 +210,7 @@ namespace RazorSharp.Analysis
 			string objHeaderStr = CreateInternalRowEntry(objHeaderMem, options);
 
 			// MethodTable*
-			byte[] methodTablePtrMem = Unsafe.AddressOfHeap(t, OffsetType.None).CopyOut(IntPtr.Size);
+			byte[] methodTablePtrMem = Unsafe.AddressOfHeap(t, OffsetOptions.None).CopyOut(IntPtr.Size);
 			string methodTablePtrStr = CreateInternalRowEntry(methodTablePtrMem, options);
 
 			var row = new List<object>
@@ -218,7 +218,7 @@ namespace RazorSharp.Analysis
 				objHeaderStr, methodTablePtrStr
 			};
 
-			var           offsetType = type.IsArray ? OffsetType.ArrayData : OffsetType.Fields;
+			var           offsetType = type.IsArray ? OffsetOptions.ArrayData : OffsetOptions.Fields;
 			Pointer<byte> dataAddr   = Unsafe.AddressOfHeap(t, offsetType);
 
 			if (type.IsArray) {

@@ -3,7 +3,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using InlineIL;
 using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Utilities;
@@ -198,5 +200,7 @@ namespace RazorSharp.CoreClr
 		private const string CLR_PDB_FILE_SEARCH = @"C:\Symbols\clr.pdb";
 
 		#endregion
+		
+		
 	}
 }

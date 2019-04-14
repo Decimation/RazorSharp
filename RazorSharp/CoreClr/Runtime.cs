@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -42,10 +43,11 @@ namespace RazorSharp.CoreClr
 
 		#endregion
 
-		internal static int FindComponentSize<T>(T value)
+		public static T Alloc<T>(params object[] args)
 		{
-			Pointer<MethodTable> mt = ReadMethodTable(ref value);
-			return mt.Reference.ComponentSize;
+			var value = GCHeap.AllocateObject<T>(0);
+			RunConstructor(value, args);
+			return value;
 		}
 
 		internal static bool IsArray<T>()
@@ -59,7 +61,7 @@ namespace RazorSharp.CoreClr
 		/// <returns>A pointer to the reference type's header</returns>
 		internal static Pointer<ObjHeader> ReadObjHeader<T>(T t) where T : class
 		{
-			return Unsafe.AddressOfHeap(ref t, OffsetType.Header).Cast<ObjHeader>();
+			return Unsafe.AddressOfHeap(t, OffsetOptions.Header).Cast<ObjHeader>();
 		}
 
 
@@ -103,6 +105,34 @@ namespace RazorSharp.CoreClr
 		public static int OffsetOf<TType>(string fieldName)
 		{
 			return typeof(TType).GetFieldDesc(fieldName).Reference.Offset;
+		}
+
+		/// <summary>
+		///     Runs a constructor whose parameters match <paramref name="args" />
+		/// </summary>
+		/// <param name="value">Instance</param>
+		/// <param name="args">Constructor arguments</param>
+		/// <returns>
+		///     <c>true</c> if a matching constructor was found and executed;
+		///     <c>false</c> if a constructor couldn't be found
+		/// </returns>
+		public static bool RunConstructor<T>(T value, params object[] args)
+		{
+			ConstructorInfo[] ctors    = value.GetType().GetConstructors();
+			Type[]            argTypes = args.Select(x => x.GetType()).ToArray();
+
+			foreach (var ctor in ctors) {
+				ParameterInfo[] paramz = ctor.GetParameters();
+
+				if (paramz.Length == args.Length) {
+					if (paramz.Select(x => x.ParameterType).SequenceEqual(argTypes)) {
+						ctor.Invoke(value, args);
+						return true;
+					}
+				}
+			}
+
+			return false;
 		}
 
 		#region HeapObjects

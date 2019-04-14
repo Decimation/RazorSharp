@@ -90,4 +90,4 @@ C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\RazorCommon.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Buffers.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Memory.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Numerics.Vectors.dll
-C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\RazorCommon.pdb
+C:\Users\Deci\RiderProjects\RazorSharp\Test\obj\x64\Debug\Test.csproj.Fody.CopyLocal.cache

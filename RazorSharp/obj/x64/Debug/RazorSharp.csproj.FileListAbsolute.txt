@@ -45,6 +45,9 @@ C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.cspro
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.dll
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.pdb
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorCommon.dll
-C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\RazorCommon.pdb
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.csprojAssemblyReference.cache
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.csproj.Fody.CopyLocal.cache
+C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\InlineIL.dll
+C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\InlineIL.xml
+C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Memory.dll
+C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Memory.xml

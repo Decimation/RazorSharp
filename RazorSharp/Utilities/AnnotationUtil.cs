@@ -34,15 +34,11 @@ namespace RazorSharp.Utilities
 
 		internal static (MethodInfo[], TAttribute[]) GetAnnotatedMethods<TAttribute>(this Type t)
 			where TAttribute : Attribute
-		{
-			return t.GetAnnotatedMethods<TAttribute>(ReflectionUtil.ALL_FLAGS);
-		}
+			=> t.GetAnnotatedMethods<TAttribute>(ReflectionUtil.ALL_FLAGS);
 
 		internal static (MethodInfo[], TAttribute[]) GetAnnotatedMethods<TAttribute>(this Type t, BindingFlags flags)
 			where TAttribute : Attribute
-		{
-			return GetAnnotated(t.GetMethods, flags, info => info.GetCustomAttribute<TAttribute>());
-		}
+			=> GetAnnotated(t.GetMethods, flags, info => info.GetCustomAttribute<TAttribute>());
 
 		#endregion
 
@@ -50,15 +46,11 @@ namespace RazorSharp.Utilities
 
 		internal static (FieldInfo[], TAttribute[]) GetAnnotatedFields<TAttribute>(this Type t)
 			where TAttribute : Attribute
-		{
-			return t.GetAnnotatedFields<TAttribute>(ReflectionUtil.ALL_FLAGS);
-		}
+			=> t.GetAnnotatedFields<TAttribute>(ReflectionUtil.ALL_FLAGS);
 
 		internal static (FieldInfo[], TAttribute[]) GetAnnotatedFields<TAttribute>(this Type t, BindingFlags flags)
 			where TAttribute : Attribute
-		{
-			return GetAnnotated(t.GetFields, flags, info => info.GetCustomAttribute<TAttribute>());
-		}
+			=> GetAnnotated(t.GetFields, flags, info => info.GetCustomAttribute<TAttribute>());
 
 		#endregion
 	}

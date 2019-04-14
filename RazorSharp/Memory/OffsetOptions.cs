@@ -11,9 +11,9 @@ using RazorSharp.CoreClr.Structures;
 namespace RazorSharp.Memory
 {
 	/// <summary>
-	///     Offset options for <see cref="Unsafe.AddressOfHeap{T}(ref T, OffsetType)" />
+	///     Offset options for <see cref="Unsafe.AddressOfHeap{T}(T,OffsetOptions)" />
 	/// </summary>
-	public enum OffsetType
+	public enum OffsetOptions
 	{
 		/// <summary>
 		///     Return the pointer offset by <c>-</c><see cref="IntPtr.Size" />,

@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Linq;
 using System.Reflection;
 using RazorCommon;
 using RazorCommon.Diagnostics;
@@ -17,15 +18,21 @@ namespace RazorSharp.Utilities
 	/// </summary>
 	public static class ReflectionUtil
 	{
-		public static MetaType GetMetaType(this Type t)
-		{
-			return new MetaType(t.GetMethodTable());
-		}
+		public static MetaType GetMetaType(this Type t) => new MetaType(t.GetMethodTable());
 
+		/// <summary>
+		/// Executes a generic method
+		/// </summary>
+		/// <param name="t">Enclosing type</param>
+		/// <param name="name">Method name</param>
+		/// <param name="instance">Instance of type <paramref name="t"/>; <c>null</c> if the method is static</param>
+		/// <param name="typeArgs">Generic type parameters</param>
+		/// <param name="args">Method arguments</param>
+		/// <returns>Return value of the method specified by <seealso cref="name"/></returns>
 		public static object InvokeGenericMethod(Type            t,
 		                                         string          name,
-		                                         Type            typeArgs,
 		                                         object          instance,
+		                                         Type[]          typeArgs,
 		                                         params object[] args)
 		{
 			var method = t.GetAnyMethod(name);
@@ -33,6 +40,7 @@ namespace RazorSharp.Utilities
 
 
 			method = method.MakeGenericMethod(typeArgs);
+
 			return method.Invoke(method.IsStatic ? null : instance, args);
 		}
 
@@ -54,29 +62,17 @@ namespace RazorSharp.Utilities
 
 		#region Methods
 
-		internal static MethodInfo[] GetAllMethods(this Type t)
-		{
-			return t.GetMethods(ALL_FLAGS);
-		}
+		internal static MethodInfo[] GetAllMethods(this Type t) => t.GetMethods(ALL_FLAGS);
 
-		internal static MethodInfo GetAnyMethod(this Type t, string name)
-		{
-			return t.GetMethod(name, ALL_FLAGS);
-		}
+		internal static MethodInfo GetAnyMethod(this Type t, string name) => t.GetMethod(name, ALL_FLAGS);
 
 		#endregion
 
 		#region Fields
 
-		internal static FieldInfo[] GetAllFields(this Type t)
-		{
-			return t.GetFields(ALL_FLAGS);
-		}
+		internal static FieldInfo[] GetAllFields(this Type t) => t.GetFields(ALL_FLAGS);
 
-		internal static FieldInfo GetAnyField(this Type t, string name)
-		{
-			return t.GetField(name, ALL_FLAGS);
-		}
+		internal static FieldInfo GetAnyField(this Type t, string name) => t.GetField(name, ALL_FLAGS);
 
 		/// <summary>
 		///     Gets the corresponding <see cref="FieldInfo" />s equivalent to the fields
@@ -87,11 +83,6 @@ namespace RazorSharp.Utilities
 			FieldInfo[] fields = t.GetFields(ALL_FLAGS);
 			Arrays.RemoveAll(ref fields, f => f.IsLiteral);
 			return fields;
-		}
-
-		internal static FieldInfo[] GetMethodTableFields<T>()
-		{
-			return typeof(T).GetMethodTableFields();
 		}
 
 		#endregion

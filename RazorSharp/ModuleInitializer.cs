@@ -12,8 +12,13 @@ namespace RazorSharp
 {
 	public static class ModuleInitializer
 	{
+		/// <summary>
+		/// Runs when this module is loaded.
+		/// </summary>
 		public static void Initialize()
 		{
+			Global.Log.Information("Loading module");
+
 			// Init code
 			Global.Setup();
 			Clr.Setup();
@@ -22,6 +27,9 @@ namespace RazorSharp
 			appDomain.ProcessExit += (sender, eventArgs) =>
 			{
 				// SHUT IT DOWN
+				Global.Log.Information("Unloading module");
+
+
 				SymbolReader.Close();
 				Clr.Close();
 				Global.Close();
