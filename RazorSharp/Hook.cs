@@ -12,11 +12,11 @@ namespace RazorSharp
 	{
 		public Jit.CorJitCompiler.CompileMethodDel Compile = null;
 
-		private IntPtr pJit;
-		private IntPtr pVTable;
-		private bool isHooked = false;
+		private          IntPtr                                  pJit;
+		private          IntPtr                                  pVTable;
+		private          bool                                    isHooked = false;
 		private readonly Jit.CorJitCompiler.CorJitCompilerNative compiler;
-		private MemoryProtection lpflOldProtect;
+		private          MemoryProtection                        lpflOldProtect;
 
 		public CompilerHook()
 		{
@@ -25,24 +25,27 @@ namespace RazorSharp
 			compiler = Marshal.PtrToStructure<Jit.CorJitCompiler.CorJitCompilerNative>(Marshal.ReadIntPtr(pJit));
 			Debug.Assert(compiler.CompileMethod != null);
 			pVTable = Marshal.ReadIntPtr(pJit);
-			
+
 			RuntimeHelpers.PrepareMethod(GetType().GetMethod("RemoveHook").MethodHandle);
-			RuntimeHelpers.PrepareMethod(GetType().GetMethod("LockpVTable", System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).MethodHandle);            
+			RuntimeHelpers.PrepareMethod(GetType().GetMethod("LockpVTable",
+			                                                 System.Reflection.BindingFlags.Instance |
+			                                                 System.Reflection.BindingFlags.NonPublic).MethodHandle);
 		}
-		
+
 		private bool UnlockpVTable()
 		{
-			if (!Kernel32.VirtualProtect(pVTable, (uint)IntPtr.Size, MemoryProtection.ExecuteReadWrite, out lpflOldProtect))
-			{
+			if (!Kernel32.VirtualProtect(pVTable, (uint) IntPtr.Size, MemoryProtection.ExecuteReadWrite,
+			                             out lpflOldProtect)) {
 				Console.WriteLine(new Win32Exception(Marshal.GetLastWin32Error()).Message);
 				return false;
 			}
+
 			return true;
 		}
 
 		private bool LockpVTable()
 		{
-			return Kernel32.VirtualProtect(pVTable, (uint)IntPtr.Size, lpflOldProtect, out lpflOldProtect);
+			return Kernel32.VirtualProtect(pVTable, (uint) IntPtr.Size, lpflOldProtect, out lpflOldProtect);
 		}
 
 		public bool Hook(Jit.CorJitCompiler.CompileMethodDel hook)

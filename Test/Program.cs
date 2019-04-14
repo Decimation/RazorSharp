@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using InlineIL;
@@ -76,36 +77,104 @@ namespace Test
 		// [Out] IntPtr                         nativeSizeOfCode
 
 		private static IntPtr corJitInfo__;
-		
-		private static Jit.CorJitCompiler.CorJitResult Compile(IntPtr                 thisPtr, IntPtr corJitInfo,
-		                                              CorInfo*               methInfo,
-		                                              CorJitFlags.CorJitFlag flags, IntPtr nativeEntry,
-		                                              IntPtr                 nativeSizeOfCode)
+
+		private static RuntimeMethodHandle cv(IntPtr p)
 		{
+			return Conversions.Convert<IntPtr, RuntimeMethodHandle>(p);
+		}
+
+		private static CompilerHook hook;
+
+		private static Jit.CorJitCompiler.CorJitResult Compile(IntPtr                 thisPtr,
+		                                                       IntPtr                 corJitInfo,
+		                                                       CorInfo*               methInfo,
+		                                                       CorJitFlags.CorJitFlag flags,
+		                                                       IntPtr                 nativeEntry,
+		                                                       IntPtr                 nativeSizeOfCode)
+		{
+			var res = hook.Compile(thisPtr, corJitInfo, methInfo, flags, nativeEntry, nativeSizeOfCode);
+
 			Console.WriteLine("JIT: {0:X}", thisPtr.ToInt64());
 			Console.WriteLine("CorJITInfo: {0:X}", corJitInfo.ToInt64());
+			Console.WriteLine("Method: {0:X}", methInfo->methodHandle.ToInt64());
+			Console.WriteLine("Native entry: {0:X}", nativeEntry.ToInt64());
+			Console.WriteLine("Native size: {0}", Marshal.ReadInt32(nativeSizeOfCode));
+			Console.WriteLine("Result: {0}\n", res);
+
+
 			corJitInfo__ = corJitInfo;
-			return default;
+
+			return res;
 		}
-		
+
 		static int Calc(int x, int y)
 		{
-			var r = Math.Asin((double)x);
-			return (int)r * y;
+			var r = Math.Asin((double) x);
+			return (int) r * y;
 		}
-		
+
+		static long Calc2(int x, int y)
+		{
+			var r = Math.Asin((double) x);
+			return (int) r * y;
+		}
+
+		static string doS()
+		{
+			return "foo";
+		}
+
+		private static void CompileV(Type t, string name)
+		{
+			var fn = t.GetAnyMethod(name);
+			RuntimeHelpers.PrepareMethod(fn.MethodHandle);
+		}
+
+		private static void CompileV<T>(string name)
+		{
+			var fn = typeof(T).GetAnyMethod(name);
+			RuntimeHelpers.PrepareMethod(fn.MethodHandle);
+		}
+
+		public static TTo As<TFrom, TTo>(TFrom source)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			return IL.Return<TTo>();
+		}
+
 		public static void Main(string[] args)
 		{
-			
-			var hook = new CompilerHook();
+			// ICorJitCompiler
+			var pJit = Jit.CorJitCompiler.GetJit();
+
+			hook = new CompilerHook();
+
+			Debug.Assert(pJit != null);
+			var compiler = Marshal.PtrToStructure<Jit.CorJitCompiler.CorJitCompilerNative>(Marshal.ReadIntPtr(pJit));
+			Debug.Assert(compiler.CompileMethod != null);
+
+			var m = typeof(MethodBase).GetMethods()
+			                          .Where(x => x.Name == "GetMethodFromHandle")
+			                          .First(x => x.GetParameters().Length == 1 &&
+			                                      x.GetParameters()[0].Name == "handle");
+
+			RuntimeHelpers.PrepareMethod(m.MethodHandle);
+
+			var tgt  = typeof(Program).GetAnyMethod("Calc");
+			var tgt2 = typeof(Program).GetAnyMethod("doS");
+
 			hook.Hook(Compile);
 
-			SpinWait.SpinUntil(() => corJitInfo__ != IntPtr.Zero);
+			RuntimeHelpers.PrepareMethod(tgt.MethodHandle);
+
+			while (corJitInfo__ == IntPtr.Zero) { }
+
+			RuntimeHelpers.PrepareMethod(tgt2.MethodHandle);
+
 			hook.RemoveHook();
-			RuntimeHelpers.PrepareMethod(typeof(Program).GetAnyMethod("Calc").MethodHandle);
+
 
 			
-
 		}
 	}
 }
