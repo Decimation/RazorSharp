@@ -17,6 +17,7 @@ using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.CorJit;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
@@ -78,17 +79,12 @@ namespace Test
 
 		private static IntPtr corJitInfo__;
 
-		private static RuntimeMethodHandle cv(IntPtr p)
-		{
-			return Conversions.Convert<IntPtr, RuntimeMethodHandle>(p);
-		}
-
 		private static CompilerHook hook;
 
-		private static Jit.CorJitCompiler.CorJitResult Compile(IntPtr                 thisPtr,
+		private static CorJitCompiler.CorJitResult Compile(IntPtr                 thisPtr,
 		                                                       IntPtr                 corJitInfo,
 		                                                       CorInfo*               methInfo,
-		                                                       CorJitFlags.CorJitFlag flags,
+		                                                       CorJitFlag flags,
 		                                                       IntPtr                 nativeEntry,
 		                                                       IntPtr                 nativeSizeOfCode)
 		{
@@ -108,12 +104,6 @@ namespace Test
 		}
 
 		static int Calc(int x, int y)
-		{
-			var r = Math.Asin((double) x);
-			return (int) r * y;
-		}
-
-		static long Calc2(int x, int y)
 		{
 			var r = Math.Asin((double) x);
 			return (int) r * y;
@@ -145,13 +135,11 @@ namespace Test
 		public static void Main(string[] args)
 		{
 			// ICorJitCompiler
-			var pJit = Jit.CorJitCompiler.GetJit();
+			var pJit = CorJitCompiler.GetJit();
 
 			hook = new CompilerHook();
 
-			Debug.Assert(pJit != null);
-			var compiler = Marshal.PtrToStructure<Jit.CorJitCompiler.CorJitCompilerNative>(Marshal.ReadIntPtr(pJit));
-			Debug.Assert(compiler.CompileMethod != null);
+			
 
 			var m = typeof(MethodBase).GetMethods()
 			                          .Where(x => x.Name == "GetMethodFromHandle")

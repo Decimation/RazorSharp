@@ -1,8 +1,10 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using RazorSharp.CorJit;
 using RazorSharp.Native;
 using RazorSharp.Native.Win32;
 
@@ -10,26 +12,25 @@ namespace RazorSharp
 {
 	public unsafe class CompilerHook
 	{
-		public Jit.CorJitCompiler.CompileMethodDel Compile = null;
+		public CorJitCompiler.CompileMethodDel Compile = null;
 
-		private          IntPtr                                  pJit;
-		private          IntPtr                                  pVTable;
-		private          bool                                    isHooked = false;
-		private readonly Jit.CorJitCompiler.CorJitCompilerNative compiler;
-		private          MemoryProtection                        lpflOldProtect;
+		private readonly IntPtr               pJit;
+		private readonly IntPtr               pVTable;
+		private          bool                 isHooked = false;
+		private readonly CorJitCompilerNative compiler;
+		private          MemoryProtection     lpflOldProtect;
 
 		public CompilerHook()
 		{
-			if (pJit == IntPtr.Zero) pJit = Jit.CorJitCompiler.GetJit();
+			if (pJit == IntPtr.Zero) pJit = CorJitCompiler.GetJit();
 			Debug.Assert(pJit != null);
-			compiler = Marshal.PtrToStructure<Jit.CorJitCompiler.CorJitCompilerNative>(Marshal.ReadIntPtr(pJit));
+			compiler = Marshal.PtrToStructure<CorJitCompilerNative>(Marshal.ReadIntPtr(pJit));
 			Debug.Assert(compiler.CompileMethod != null);
 			pVTable = Marshal.ReadIntPtr(pJit);
 
-			RuntimeHelpers.PrepareMethod(GetType().GetMethod("RemoveHook").MethodHandle);
-			RuntimeHelpers.PrepareMethod(GetType().GetMethod("LockpVTable",
-			                                                 System.Reflection.BindingFlags.Instance |
-			                                                 System.Reflection.BindingFlags.NonPublic).MethodHandle);
+			RuntimeHelpers.PrepareMethod(GetType().GetMethod(nameof(RemoveHook)).MethodHandle);
+			RuntimeHelpers.PrepareMethod(
+				GetType().GetMethod(nameof(LockpVTable), BindingFlags.Instance | BindingFlags.NonPublic).MethodHandle);
 		}
 
 		private bool UnlockpVTable()
@@ -48,7 +49,7 @@ namespace RazorSharp
 			return Kernel32.VirtualProtect(pVTable, (uint) IntPtr.Size, lpflOldProtect, out lpflOldProtect);
 		}
 
-		public bool Hook(Jit.CorJitCompiler.CompileMethodDel hook)
+		public bool Hook(CorJitCompiler.CompileMethodDel hook)
 		{
 			if (!UnlockpVTable()) return false;
 

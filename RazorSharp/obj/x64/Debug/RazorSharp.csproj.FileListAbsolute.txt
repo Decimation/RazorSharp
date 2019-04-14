@@ -51,3 +51,4 @@ C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\InlineIL.dll
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\InlineIL.xml
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Memory.dll
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Memory.xml
+C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Buffers.dll
