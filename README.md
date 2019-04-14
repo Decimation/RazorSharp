@@ -1,4 +1,5 @@
 [![nuget](https://img.shields.io/nuget/v/RazorSharp.svg)](https://www.nuget.org/packages/RazorSharp/)
+![nuget dl](https://img.shields.io/nuget/dt/RazorSharp.svg)
 
 # RazorSharp
 Low-level utilities and tools for working with the CLR, CLR internal structures, and memory.
