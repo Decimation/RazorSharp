@@ -3,15 +3,18 @@
 using System;
 using System.Runtime.InteropServices;
 
+// ReSharper disable ClassNeverInstantiated.Global
+
 #endregion
 
 namespace RazorSharp.CoreJit
 {
 	internal unsafe class CorJitCompiler
 	{
-		internal static ICorJitCompiler GetCorJitCompilerInterface()
+		internal static ICorJitCompiler GetCorJitCompilerInterface() => GetCorJitCompilerInterface(GetJit());
+
+		internal static ICorJitCompiler GetCorJitCompilerInterface(IntPtr pJit)
 		{
-			var pJit           = GetJit();
 			var nativeCompiler = Marshal.PtrToStructure<CorJitCompilerNative>(pJit);
 			return new CorJitCompilerNativeWrapper(pJit, nativeCompiler.CompileMethod,
 			                                       nativeCompiler.ProcessShutdownWork,
@@ -20,7 +23,11 @@ namespace RazorSharp.CoreJit
 
 		// _TARGET_X64_ "Clrjit.dll"
 		// else			"Mscorjit.dll"
-		[DllImport("Clrjit.dll", CallingConvention = CallingConvention.StdCall,
+
+		/// <summary>
+		/// ICorJitCompiler
+		/// </summary>
+		[DllImport("clrjit.dll", CallingConvention = CallingConvention.StdCall,
 			SetLastError                           = true,
 			EntryPoint                             = "getJit",
 			BestFitMapping                         = true)]
@@ -28,18 +35,18 @@ namespace RazorSharp.CoreJit
 
 		private sealed class CorJitCompilerNativeWrapper : ICorJitCompiler
 		{
-			private readonly CompileMethodDel       _compileMethod;
-			private readonly GetMethodAttribs       _getMethodAttribs;
-			private readonly ProcessShutdownWorkDel _processShutdownWork;
-			private          IntPtr                 _pThis;
+			private readonly CompileMethod       _compileMethod;
+			private readonly GetMethodAttribs    _getMethodAttribs;
+			private readonly ProcessShutdownWork _processShutdownWork;
+			private          IntPtr              _pThis;
 
-			internal CorJitCompilerNativeWrapper(IntPtr                 pThis,
-			                                     CompileMethodDel       compileMethodDel,
-			                                     ProcessShutdownWorkDel processShutdownWork,
-			                                     GetMethodAttribs       getMethodAttribs)
+			internal CorJitCompilerNativeWrapper(IntPtr              pThis,
+			                                     CompileMethod       compileMethod,
+			                                     ProcessShutdownWork processShutdownWork,
+			                                     GetMethodAttribs    getMethodAttribs)
 			{
 				_pThis               = pThis;
-				_compileMethod       = compileMethodDel;
+				_compileMethod       = compileMethod;
 				_processShutdownWork = processShutdownWork;
 				_getMethodAttribs    = getMethodAttribs;
 			}
@@ -59,7 +66,7 @@ namespace RazorSharp.CoreJit
 				_processShutdownWork(thisPtr, corStaticInfo);
 			}
 
-			internal uint GetMethodAttribs(IntPtr methodHandle)
+			public uint GetMethodAttribs(IntPtr methodHandle)
 			{
 				return _getMethodAttribs(methodHandle);
 			}
@@ -67,15 +74,15 @@ namespace RazorSharp.CoreJit
 
 
 		[UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
-		internal delegate CorJitResult CompileMethodDel(IntPtr        thisPtr,
-		                                                [In] IntPtr   corJitInfo,
-		                                                [In] CorInfo* methodInfo,
-		                                                CorJitFlag    flags,
-		                                                [Out] IntPtr  nativeEntry,
-		                                                [Out] IntPtr  nativeSizeOfCode);
+		internal delegate CorJitResult CompileMethod(IntPtr        thisPtr,
+		                                             [In] IntPtr   corJitInfo,
+		                                             [In] CorInfo* methodInfo,
+		                                             CorJitFlag    flags,
+		                                             [Out] IntPtr  nativeEntry,
+		                                             [Out] IntPtr  nativeSizeOfCode);
 
 		[UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
-		internal delegate void ProcessShutdownWorkDel(IntPtr thisPtr, [Out] IntPtr corStaticInfo);
+		internal delegate void ProcessShutdownWork(IntPtr thisPtr, [Out] IntPtr corStaticInfo);
 
 		[UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
 		internal delegate byte IsCacheCleanupRequiredDel();

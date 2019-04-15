@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
+using RazorSharp.Memory.Pointers;
 
 #endregion
 
@@ -47,6 +48,11 @@ namespace RazorSharp.Native
 			}
 		}
 
+		public static unsafe string GetString(sbyte* first)
+		{
+			return new string(first);
+		}
+		
 		public static unsafe string GetString(sbyte* first, int len)
 		{
 			if (first == null || len <= 0) {

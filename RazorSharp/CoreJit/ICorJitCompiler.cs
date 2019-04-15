@@ -20,5 +20,7 @@ namespace RazorSharp.CoreJit
 		                           [Out] IntPtr  nativeSizeOfCode);
 
 		void ProcessShutdownWork(IntPtr thisPtr, [In] IntPtr corStaticInfo);
+
+		uint GetMethodAttribs(IntPtr methodHandle);
 	}
 }

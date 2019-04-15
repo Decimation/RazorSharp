@@ -186,11 +186,11 @@
     <Compile Include="CoreJit\CorJitResult.cs" />
     <Compile Include="CoreJit\CorJitCompiler.cs" />
     <Compile Include="CoreJit\CorJitFlag.cs" />
+    <Compile Include="CoreJit\Hook.cs" />
     <Compile Include="CoreJit\ICorJitCompiler.cs" />
     <Compile Include="CoreJit\ILDump.cs" />
     <Compile Include="CoreJit\InfoAccessType.cs" />
     <Compile Include="CoreJit\JitConstants.cs" />
-    <Compile Include="Hook.cs" />
     <Compile Include="Memory\OffsetOptions.cs" />
     <Compile Include="Memory\Pointers\AllocPointer.cs" />
     <Compile Include="Memory\Pointers\Pointer.cs" />

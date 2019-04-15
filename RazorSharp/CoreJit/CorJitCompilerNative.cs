@@ -4,8 +4,8 @@ namespace RazorSharp.CoreJit
 {
 	internal struct CorJitCompilerNative
 	{
-		internal CorJitCompiler.CompileMethodDel          CompileMethod;
-		internal CorJitCompiler.ProcessShutdownWorkDel    ProcessShutdownWork;
+		internal CorJitCompiler.CompileMethod             CompileMethod;
+		internal CorJitCompiler.ProcessShutdownWork       ProcessShutdownWork;
 		internal CorJitCompiler.IsCacheCleanupRequiredDel IsCacheCleanupRequired;
 		internal CorJitCompiler.GetMethodAttribs          GetMethodAttribs;
 	}

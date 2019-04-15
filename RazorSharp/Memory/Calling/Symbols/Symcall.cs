@@ -139,9 +139,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 			Conditions.Require(addresses.Length == lim,
 			                   String.Format("addresses: {0} | offsets: {2} | lim: {1}",
-			                                 addresses.Length,
-			                                 lim,
-			                                 offsets.Length));
+			                                 addresses.Length,lim,offsets.Length));
 
 			for (int i = 0; i < lim; i++) {
 				// .text	0000000180001000	000000018070E000	R	.	X	.	L	para	0001	public	CODE	64	0000	0000	0003	FFFFFFFFFFFFFFFF	FFFFFFFFFFFFFFFF
