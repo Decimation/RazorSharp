@@ -3,6 +3,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
@@ -44,6 +45,18 @@ namespace RazorSharp.Utilities
 			return method.Invoke(method.IsStatic ? null : instance, args);
 		}
 
+		public static OpCode[] GetAllOpCodes()
+		{
+			var opCodesFields = typeof(OpCodes).GetFields(BindingFlags.Public | BindingFlags.Static);
+			var opCodes = new OpCode[opCodesFields.Length];
+			
+			for (int i = 0; i < opCodes.Length; i++) {
+				opCodes[i] = (OpCode) opCodesFields[i].GetValue(null);
+			}
+
+			return opCodes;
+		}
+		
 		#region BindingFlags
 
 		/// <summary>

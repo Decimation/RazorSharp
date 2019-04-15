@@ -4,6 +4,8 @@ using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
+// ReSharper disable ReturnTypeCanBeEnumerable.Global
+
 #endregion
 
 namespace RazorSharp.Utilities
@@ -12,14 +14,6 @@ namespace RazorSharp.Utilities
 
 	public static unsafe class Conversions
 	{
-		public enum ConversionType
-		{
-			REINTERPRET,
-			LIGHT,
-			AS
-		}
-
-
 		public static TTo[] ConvertArray<TTo>(byte[] mem)
 		{
 			fixed (byte* ptr = mem) {

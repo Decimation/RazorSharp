@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -17,7 +18,8 @@ using RazorCommon.Strings;
 using RazorSharp;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.CorJit;
+using RazorSharp.CoreClr.Structures.ILMethods;
+using RazorSharp.CoreJit;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
@@ -70,23 +72,25 @@ namespace Test
 			return IL.Return<Type>();
 		}
 
-		// IntPtr      thisPtr,
-		// [In] IntPtr corJitInfo,
-		// [In] CorInfo* methodInfo,
-		//               CorJitFlags.CorJitFlag flags,
-		// [Out] IntPtr                         nativeEntry,
-		// [Out] IntPtr                         nativeSizeOfCode
+		
 
-		private static IntPtr corJitInfo__;
+		private static IntPtr _corJitInfo;
 
 		private static CompilerHook hook;
 
-		private static CorJitCompiler.CorJitResult Compile(IntPtr                 thisPtr,
-		                                                       IntPtr                 corJitInfo,
-		                                                       CorInfo*               methInfo,
-		                                                       CorJitFlag flags,
-		                                                       IntPtr                 nativeEntry,
-		                                                       IntPtr                 nativeSizeOfCode)
+		private static byte[] _ilcode = new[]
+		{
+			(byte) OpCodes.Ldarg_0.Value,
+			(byte) OpCodes.Conv_U.Value,
+			(byte) OpCodes.Ret.Value
+		};
+
+		private static CorJitResult Compile(IntPtr     thisPtr,
+		                                    IntPtr     corJitInfo,
+		                                    CorInfo*   methInfo,
+		                                    CorJitFlag flags,
+		                                    IntPtr     nativeEntry,
+		                                    IntPtr     nativeSizeOfCode)
 		{
 			var res = hook.Compile(thisPtr, corJitInfo, methInfo, flags, nativeEntry, nativeSizeOfCode);
 
@@ -95,35 +99,33 @@ namespace Test
 			Console.WriteLine("Method: {0:X}", methInfo->methodHandle.ToInt64());
 			Console.WriteLine("Native entry: {0:X}", nativeEntry.ToInt64());
 			Console.WriteLine("Native size: {0}", Marshal.ReadInt32(nativeSizeOfCode));
+			Console.WriteLine("Tk {0:X}", (int) methInfo->args.token);
 			Console.WriteLine("Result: {0}\n", res);
 
+			// // Return the argument that was passed in.
+			// static const BYTE ilcode[] = { CEE_LDARG_0, CEE_CONV_U, CEE_RET };
+			// methInfo->ILCode = const_cast<BYTE*>(ilcode);
+			// methInfo->ILCodeSize = sizeof(ilcode);
+			// methInfo->maxStack = 1;
+			// methInfo->EHcount = 0;
+			// methInfo->options = (CorInfoOptions)0;
 
-			corJitInfo__ = corJitInfo;
+
+			_corJitInfo = corJitInfo;
 
 			return res;
 		}
 
-		static int Calc(int x, int y)
+		private static int Calc(int x, int y)
 		{
-			var r = Math.Asin((double) x);
+			var r = Math.Asin(x);
 			return (int) r * y;
 		}
 
-		static string doS()
-		{
-			return "foo";
-		}
 
-		private static void CompileV(Type t, string name)
+		private static void* AsPointer<T>(ref T t)
 		{
-			var fn = t.GetAnyMethod(name);
-			RuntimeHelpers.PrepareMethod(fn.MethodHandle);
-		}
-
-		private static void CompileV<T>(string name)
-		{
-			var fn = typeof(T).GetAnyMethod(name);
-			RuntimeHelpers.PrepareMethod(fn.MethodHandle);
+			return null;
 		}
 
 		public static TTo As<TFrom, TTo>(TFrom source)
@@ -132,37 +134,19 @@ namespace Test
 			return IL.Return<TTo>();
 		}
 
+		static int add(int a, int b) => a + b;
+
+		
 		public static void Main(string[] args)
 		{
 			// ICorJitCompiler
 			var pJit = CorJitCompiler.GetJit();
-
-			hook = new CompilerHook();
-
-			
-
-			var m = typeof(MethodBase).GetMethods()
-			                          .Where(x => x.Name == "GetMethodFromHandle")
-			                          .First(x => x.GetParameters().Length == 1 &&
-			                                      x.GetParameters()[0].Name == "handle");
-
-			RuntimeHelpers.PrepareMethod(m.MethodHandle);
-
-			var tgt  = typeof(Program).GetAnyMethod("Calc");
-			var tgt2 = typeof(Program).GetAnyMethod("doS");
-
-			hook.Hook(Compile);
-
-			RuntimeHelpers.PrepareMethod(tgt.MethodHandle);
-
-			while (corJitInfo__ == IntPtr.Zero) { }
-
-			RuntimeHelpers.PrepareMethod(tgt2.MethodHandle);
-
-			hook.RemoveHook();
-
-
-			
+			var m   = typeof(Program).GetAnyMethod(nameof(add));
+			var il = m.GetMethodBody().GetILAsByteArray();
+			Console.WriteLine(il.AutoJoin());
+			Pointer<ILMethod> ilh = m.GetMethodDesc().Reference.GetILHeader();
+			Console.WriteLine(ilh.Reference.GetILAsByteArray().AutoJoin());
+			ILDump.DumpILToConsole(m);
 		}
 	}
 }

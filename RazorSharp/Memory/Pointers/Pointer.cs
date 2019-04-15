@@ -822,7 +822,7 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Implicit and explicit conversions
 
-		public static implicit operator bool(Pointer<T> ptr)
+		public static explicit /*implicit*/ operator bool(Pointer<T> ptr)
 		{
 			return !ptr.IsNil;
 		}

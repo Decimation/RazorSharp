@@ -65,9 +65,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 				fixed (TinyILMethod* thisPtr = &this) {
 					var value = (byte*) thisPtr;
 
-					return value
-					       + sizeof(IMAGE_COR_ILMETHOD_TINY)
-					       + IntPtr.Size;
+					return value + sizeof(IMAGE_COR_ILMETHOD_TINY);
 				}
 			}
 		}

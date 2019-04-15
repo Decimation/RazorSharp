@@ -1,9 +1,9 @@
 using System;
 
-namespace RazorSharp.CorJit
+namespace RazorSharp.CoreJit
 {
 	[Flags]
-	public enum CorJitFlag : UInt32
+	internal enum CorJitFlag : UInt32
 	{
 		CORJIT_FLAG_CALL_GETJITFLAGS = 0xffffffff, // Indicates that the JIT should retrieve flags in the form of a
 

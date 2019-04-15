@@ -1,11 +1,11 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace RazorSharp.CorJit
+namespace RazorSharp.CoreJit
 {
-	public unsafe class CorJitCompiler
+	internal unsafe class CorJitCompiler
 	{
-		public static ICorJitCompiler GetCorJitCompilerInterface()
+		internal static ICorJitCompiler GetCorJitCompilerInterface()
 		{
 			var pJit           = GetJit();
 			var nativeCompiler = Marshal.PtrToStructure<CorJitCompilerNative>(pJit);
@@ -16,12 +16,12 @@ namespace RazorSharp.CorJit
 
 		private sealed class CorJitCompilerNativeWrapper : ICorJitCompiler
 		{
-			private IntPtr                 _pThis;
-			private CompileMethodDel       _compileMethod;
-			private ProcessShutdownWorkDel _processShutdownWork;
-			private GetMethodAttribs       _getMethodAttribs;
+			private          IntPtr                 _pThis;
+			private readonly CompileMethodDel       _compileMethod;
+			private readonly ProcessShutdownWorkDel _processShutdownWork;
+			private readonly GetMethodAttribs       _getMethodAttribs;
 
-			public CorJitCompilerNativeWrapper(IntPtr                 pThis,
+			internal CorJitCompilerNativeWrapper(IntPtr                 pThis,
 			                                   CompileMethodDel       compileMethodDel,
 			                                   ProcessShutdownWorkDel processShutdownWork,
 			                                   GetMethodAttribs       getMethodAttribs)
@@ -47,7 +47,7 @@ namespace RazorSharp.CorJit
 				_processShutdownWork(thisPtr, corStaticInfo);
 			}
 
-			public UInt32 GetMethodAttribs(IntPtr methodHandle)
+			internal uint GetMethodAttribs(IntPtr methodHandle)
 			{
 				return _getMethodAttribs(methodHandle);
 			}
@@ -59,11 +59,11 @@ namespace RazorSharp.CorJit
 			SetLastError                           = true,
 			EntryPoint                             = "getJit",
 			BestFitMapping                         = true)]
-		public static extern IntPtr GetJit();
+		internal static extern IntPtr GetJit();
 
 
 		[UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
-		public delegate CorJitResult CompileMethodDel(IntPtr        thisPtr,
+		internal delegate CorJitResult CompileMethodDel(IntPtr        thisPtr,
 		                                              [In] IntPtr   corJitInfo,
 		                                              [In] CorInfo* methodInfo,
 		                                              CorJitFlag    flags,
@@ -71,16 +71,16 @@ namespace RazorSharp.CorJit
 		                                              [Out] IntPtr  nativeSizeOfCode);
 
 		[UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
-		public delegate void ProcessShutdownWorkDel(IntPtr thisPtr, [Out] IntPtr corStaticInfo);
+		internal delegate void ProcessShutdownWorkDel(IntPtr thisPtr, [Out] IntPtr corStaticInfo);
 
 		[UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
-		public delegate Byte IsCacheCleanupRequiredDel();
+		internal delegate byte IsCacheCleanupRequiredDel();
 
 		[UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
-		public delegate UInt32 GetMethodAttribs(IntPtr methodHandle);
+		internal delegate uint GetMethodAttribs(IntPtr methodHandle);
 
 
-		public enum CodeOptimize
+		internal enum CodeOptimize
 		{
 			BLENDED_CODE,
 			SMALL_CODE,

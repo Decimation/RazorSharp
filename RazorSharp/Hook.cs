@@ -4,15 +4,15 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorSharp.CorJit;
+using RazorSharp.CoreJit;
 using RazorSharp.Native;
 using RazorSharp.Native.Win32;
 
 namespace RazorSharp
 {
-	public unsafe class CompilerHook
+	internal unsafe class CompilerHook
 	{
-		public CorJitCompiler.CompileMethodDel Compile = null;
+		internal CorJitCompiler.CompileMethodDel Compile = null;
 
 		private readonly IntPtr               pJit;
 		private readonly IntPtr               pVTable;
@@ -20,7 +20,7 @@ namespace RazorSharp
 		private readonly CorJitCompilerNative compiler;
 		private          MemoryProtection     lpflOldProtect;
 
-		public CompilerHook()
+		internal CompilerHook()
 		{
 			if (pJit == IntPtr.Zero) pJit = CorJitCompiler.GetJit();
 			Debug.Assert(pJit != null);
@@ -49,7 +49,7 @@ namespace RazorSharp
 			return Kernel32.VirtualProtect(pVTable, (uint) IntPtr.Size, lpflOldProtect, out lpflOldProtect);
 		}
 
-		public bool Hook(CorJitCompiler.CompileMethodDel hook)
+		internal bool Hook(CorJitCompiler.CompileMethodDel hook)
 		{
 			if (!UnlockpVTable()) return false;
 
@@ -64,7 +64,7 @@ namespace RazorSharp
 			return isHooked = LockpVTable();
 		}
 
-		public bool RemoveHook()
+		internal bool RemoveHook()
 		{
 			if (!isHooked) throw new InvalidOperationException("Impossible unhook not hooked compiler");
 			if (!UnlockpVTable()) return false;

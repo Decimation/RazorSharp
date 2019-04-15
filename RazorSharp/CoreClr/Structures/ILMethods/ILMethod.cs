@@ -54,10 +54,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		internal bool IsTiny => Tiny.Reference.IsTiny;
 		internal bool IsFat  => Fat.Reference.IsFat;
 
-		internal void WriteIL(byte[] rgOpCodes)
-		{
-			Code.SafeWrite(rgOpCodes);
-		}
+		internal void WriteIL(byte[] rgOpCodes) => Code.SafeWrite(rgOpCodes);
 
 		/*public OpCode[] OpCodes {
 			get { return ReflectionUtil.GetOpCodes(Code, CodeSize); }
@@ -99,10 +96,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		}*/
 
 
-		internal byte[] GetILAsByteArray()
-		{
-			return Code.CopyOut(CodeSize);
-		}
+		internal byte[] GetILAsByteArray() => Code.CopyOut(CodeSize);
 
 		internal CorILMethodFlags Flags {
 			get {
@@ -145,9 +139,6 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 			return table;
 		}
 
-		public override string ToString()
-		{
-			return ToTable().ToMarkDownString();
-		}
+		public override string ToString() => ToTable().ToMarkDownString();
 	}
 }
