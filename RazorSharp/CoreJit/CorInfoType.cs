@@ -33,6 +33,6 @@ namespace RazorSharp.CoreJit
 		// the JIT in "import only" mode.
 
 		CORINFO_TYPE_VAR = 0x16,
-		CORINFO_TYPE_COUNT, // number of jit types
-	};
+		CORINFO_TYPE_COUNT // number of jit types
+	}
 }

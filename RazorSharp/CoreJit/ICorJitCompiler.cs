@@ -1,10 +1,14 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
+
+#endregion
 
 namespace RazorSharp.CoreJit
 {
 	/// <summary>
-	/// corjit.h
+	///     corjit.h
 	/// </summary>
 	internal unsafe interface ICorJitCompiler
 	{

@@ -1,11 +1,15 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
+
+#endregion
 
 namespace RazorSharp.CoreJit
 {
 	//CORINFO_SIG_INFO
 	[StructLayout(LayoutKind.Sequential)]
-	internal unsafe struct CorInfoSigInfo
+	internal struct CorInfoSigInfo
 	{
 		//CorInfoCallConv
 		internal CorInfoCallConv callConv;
@@ -18,15 +22,15 @@ namespace RazorSharp.CoreJit
 
 		internal CorInfoType    retType;
 		internal byte           flags; // used by IL stubs code
-		internal UInt16         numArgs;
+		internal ushort         numArgs;
 		internal CorInfoSigInst sigInst; // information about how type variables are being instantiated in generic code
 		internal IntPtr         args;
 		internal IntPtr         pSig;
 
-		internal UInt64 cbSig;
+		internal ulong cbSig;
 
 		//scope CORINFO_MODULE_HANDLE
 		internal IntPtr moduleHandle; // passed to getArgClass
-		internal UInt32 token;
+		internal uint   token;
 	}
 }

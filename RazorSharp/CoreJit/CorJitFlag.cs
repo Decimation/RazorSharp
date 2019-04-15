@@ -1,9 +1,13 @@
+#region
+
 using System;
+
+#endregion
 
 namespace RazorSharp.CoreJit
 {
 	[Flags]
-	internal enum CorJitFlag : UInt32
+	internal enum CorJitFlag : uint
 	{
 		CORJIT_FLAG_CALL_GETJITFLAGS = 0xffffffff, // Indicates that the JIT should retrieve flags in the form of a
 
@@ -171,5 +175,5 @@ namespace RazorSharp.CoreJit
 		CORJIT_FLAG_UNUSED32 = 63
 
 #endif // !defined(_TARGET_ARM64_) &&!defined(_TARGET_X86_) && !defined(_TARGET_AMD64_)
-	};
+	}
 }

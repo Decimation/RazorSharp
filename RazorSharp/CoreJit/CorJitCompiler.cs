@@ -1,5 +1,9 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
+
+#endregion
 
 namespace RazorSharp.CoreJit
 {
@@ -14,17 +18,25 @@ namespace RazorSharp.CoreJit
 			                                       nativeCompiler.GetMethodAttribs);
 		}
 
+		// _TARGET_X64_ "Clrjit.dll"
+		// else			"Mscorjit.dll"
+		[DllImport("Clrjit.dll", CallingConvention = CallingConvention.StdCall,
+			SetLastError                           = true,
+			EntryPoint                             = "getJit",
+			BestFitMapping                         = true)]
+		internal static extern IntPtr GetJit();
+
 		private sealed class CorJitCompilerNativeWrapper : ICorJitCompiler
 		{
-			private          IntPtr                 _pThis;
 			private readonly CompileMethodDel       _compileMethod;
-			private readonly ProcessShutdownWorkDel _processShutdownWork;
 			private readonly GetMethodAttribs       _getMethodAttribs;
+			private readonly ProcessShutdownWorkDel _processShutdownWork;
+			private          IntPtr                 _pThis;
 
 			internal CorJitCompilerNativeWrapper(IntPtr                 pThis,
-			                                   CompileMethodDel       compileMethodDel,
-			                                   ProcessShutdownWorkDel processShutdownWork,
-			                                   GetMethodAttribs       getMethodAttribs)
+			                                     CompileMethodDel       compileMethodDel,
+			                                     ProcessShutdownWorkDel processShutdownWork,
+			                                     GetMethodAttribs       getMethodAttribs)
 			{
 				_pThis               = pThis;
 				_compileMethod       = compileMethodDel;
@@ -53,22 +65,14 @@ namespace RazorSharp.CoreJit
 			}
 		}
 
-		// _TARGET_X64_ "Clrjit.dll"
-		// else			"Mscorjit.dll"
-		[DllImport("Clrjit.dll", CallingConvention = CallingConvention.StdCall,
-			SetLastError                           = true,
-			EntryPoint                             = "getJit",
-			BestFitMapping                         = true)]
-		internal static extern IntPtr GetJit();
-
 
 		[UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
 		internal delegate CorJitResult CompileMethodDel(IntPtr        thisPtr,
-		                                              [In] IntPtr   corJitInfo,
-		                                              [In] CorInfo* methodInfo,
-		                                              CorJitFlag    flags,
-		                                              [Out] IntPtr  nativeEntry,
-		                                              [Out] IntPtr  nativeSizeOfCode);
+		                                                [In] IntPtr   corJitInfo,
+		                                                [In] CorInfo* methodInfo,
+		                                                CorJitFlag    flags,
+		                                                [Out] IntPtr  nativeEntry,
+		                                                [Out] IntPtr  nativeSizeOfCode);
 
 		[UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
 		internal delegate void ProcessShutdownWorkDel(IntPtr thisPtr, [Out] IntPtr corStaticInfo);

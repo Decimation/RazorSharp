@@ -1,5 +1,3 @@
-// ReSharper disable UnassignedField.Global
-
 #pragma warning disable 649
 
 namespace RazorSharp.CoreJit

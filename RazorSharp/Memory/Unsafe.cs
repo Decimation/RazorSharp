@@ -59,7 +59,10 @@ namespace RazorSharp.Memory
 			return CSUnsafe.Read<T>(&cpy);
 		}
 
-		public static bool IsNil<T>(T value) => AddressOf(ref value).IsNil;
+		public static bool IsNil<T>(T value)
+		{
+			return AddressOf(ref value).IsNil;
+		}
 
 		public static T DeepCopy<T>(T value) where T : class
 		{
@@ -303,13 +306,13 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <returns><see cref="IntPtr.Size" /> for reference types, size for value types</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int SizeOf<T>() => CSUnsafe.SizeOf<T>();
+		public static int SizeOf<T>()
+		{
+			return CSUnsafe.SizeOf<T>();
+		}
 
 
 		#region HeapSize
-
-		
-		
 
 		/// <summary>
 		///     <para>Calculates the complete size of a reference type in heap memory.</para>
@@ -342,7 +345,10 @@ namespace RazorSharp.Memory
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int HeapSize<T>(T value) where T : class => HeapSizeInternal(value);
+		public static int HeapSize<T>(T value) where T : class
+		{
+			return HeapSizeInternal(value);
+		}
 
 
 		private static int HeapSizeInternal<T>(T value)

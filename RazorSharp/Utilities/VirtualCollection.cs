@@ -1,7 +1,12 @@
 #region
 
+#region
+
 using System.Collections;
 using System.Collections.Generic;
+
+#endregion
+
 // ReSharper disable ReturnTypeCanBeEnumerable.Global
 
 #endregion

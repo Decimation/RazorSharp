@@ -1,6 +1,12 @@
+#region
+
 using System;
 using System.Reflection;
 using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Structures.ILMethods;
+using RazorSharp.Memory.Pointers;
+
+#endregion
 
 // ReSharper disable StringLiteralTypo
 // ReSharper disable CommentTypo
@@ -12,12 +18,12 @@ namespace RazorSharp.CoreJit
 	{
 		internal static void DumpILToConsole(MethodInfo mi)
 		{
-			var il = mi.GetMethodDesc().Reference.GetILHeader();
+			Pointer<ILMethod> il = mi.GetMethodDesc().Reference.GetILHeader();
 			DumpILToConsole(il.Reference.Code.ToPointer<byte>(), il.Reference.CodeSize);
 		}
 
 		/// <summary>
-		/// https://github.com/GeorgePlotnikov/ClrAnalyzer/blob/master/Win32Native/ildump.h
+		///     https://github.com/GeorgePlotnikov/ClrAnalyzer/blob/master/Win32Native/ildump.h
 		/// </summary>
 		internal static void DumpILToConsole(byte* ilCode, int len)
 		{
@@ -243,79 +249,79 @@ namespace RazorSharp.CoreJit
 						break;
 					case 0x38: // br XXXX
 						Console.Write("br IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;
 					case 0x39: // brfalse XXXX
 						Console.Write("brfalse IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;
 					case 0x3a: // brtrue XXXX
 						Console.Write("brtrue IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;
 					case 0x3b: // beq XXXX
 						Console.Write("beq IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;
 					case 0x3c: // bgt XXXX
 						Console.Write("bgt IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;
 					case 0x3d: // bgt XXXX
 						Console.Write("bgt IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;
 					case 0x3e: // ble XXXX
 						Console.Write("ble IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;
 					case 0x3f: // blt XXXX
 						Console.Write("blt IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;
 					case 0x40: // bne.un XXXX
 						Console.Write("bne.un IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;
 					case 0x41: // bge.un XXXX
 						Console.Write("bge.un IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;
 					case 0x42: // bgt.un XXXX
 						Console.Write("bgt.un IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;
 					case 0x43: // ble.un XXXX
 						Console.Write("ble.un IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;
 					case 0x44: // blt.un XXXX
 						Console.Write("blt.un IL_{0:X}",
-						              i + 5 + (ilCode[i + 4] << 24 | ilCode[i + 3] << 16 | ilCode[i + 2] << 8 |
+						              i + 5 + ((ilCode[i + 4] << 24) | (ilCode[i + 3] << 16) | (ilCode[i + 2] << 8) |
 						                       ilCode[i + 1]));
 						i += 4;
 						break;

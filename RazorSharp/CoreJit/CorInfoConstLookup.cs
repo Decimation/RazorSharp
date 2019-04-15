@@ -1,5 +1,9 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
+
+#endregion
 
 namespace RazorSharp.CoreJit
 {
@@ -16,10 +20,10 @@ namespace RazorSharp.CoreJit
 		[FieldOffset(0)]
 		internal InfoAccessType accessType;
 
-		[FieldOffset(sizeof(Int32))]
+		[FieldOffset(sizeof(int))]
 		internal IntPtr handle;
 
-		[FieldOffset(sizeof(Int32))]
+		[FieldOffset(sizeof(int))]
 		internal void* addr;
 	}
 }

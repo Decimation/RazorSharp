@@ -1,6 +1,5 @@
 #region
 
-using System;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Memory.Pointers;

@@ -1,5 +1,8 @@
-using System;
+#region
+
 using System.Runtime.InteropServices;
+
+#endregion
 
 namespace RazorSharp.CoreJit
 {
@@ -12,7 +15,7 @@ namespace RazorSharp.CoreJit
 
 		// The 'runtimeLookupFlags' and 'runtimeLookupArgs' fields
 		// are just for internal VM / ZAP communication, not to be used by the JIT.
-		internal UInt16 runtimeLookupFlags;
+		internal ushort runtimeLookupFlags;
 		internal void*  runtimeLookupArgs;
 	}
 }

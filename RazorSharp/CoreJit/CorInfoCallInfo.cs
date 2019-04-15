@@ -1,20 +1,25 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
 
-namespace RazorSharp.CoreJit {
+#endregion
+
+namespace RazorSharp.CoreJit
+{
 	//CORINFO_CALL_INFO
 	[StructLayout(LayoutKind.Sequential)]
-	internal unsafe struct CorInfoCallInfo
+	internal struct CorInfoCallInfo
 	{
 		internal IntPtr hMethod;     //target method handle
-		internal UInt32 methodFlags; //flags for the target method
+		internal uint   methodFlags; //flags for the target method
 
-		internal UInt32 classFlags; //flags for CORINFO_RESOLVED_TOKEN::hClass
+		internal uint classFlags; //flags for CORINFO_RESOLVED_TOKEN::hClass
 
 		internal CorInfoSigInfo sig;
 
 		//Verification information
-		internal UInt32 verMethodFlags; // flags for CORINFO_RESOLVED_TOKEN::hMethod
+		internal uint verMethodFlags; // flags for CORINFO_RESOLVED_TOKEN::hMethod
 
 		internal CorInfoSigInfo verSig;
 		//All of the regular method data is the same... hMethod might not be the same as CORINFO_RESOLVED_TOKEN::hMethod
@@ -46,13 +51,13 @@ namespace RazorSharp.CoreJit {
 		// If kind.CORINFO_VIRTUALCALL_STUB then stubLookup will be set.
 		// If kind.CORINFO_CALL_CODE_POINTER then entryPointLookup will be set.
 		[StructLayout(LayoutKind.Explicit)]
-		internal struct lookup
+		internal struct Lookup
 		{
 			[FieldOffset(0)]
-			CorInfoLookup stubLookup;
+			private readonly CorInfoLookup stubLookup;
 
 			[FieldOffset(0)]
-			CorInfoLookup codePointerLookup;
+			private readonly CorInfoLookup codePointerLookup;
 		}
 
 		internal CorInfoConstLookup instParamLookup; // Used by Ready-to-Run

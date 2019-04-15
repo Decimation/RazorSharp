@@ -2,7 +2,6 @@
 
 #region
 
-using System;
 using System.Runtime.InteropServices;
 using RazorCommon;
 using RazorCommon.Strings;

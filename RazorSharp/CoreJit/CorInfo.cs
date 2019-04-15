@@ -1,5 +1,9 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
+
+#endregion
 
 namespace RazorSharp.CoreJit
 {
@@ -14,10 +18,10 @@ namespace RazorSharp.CoreJit
 
 		//BYTE*
 		internal IntPtr ILCode;
-		internal UInt32 ILCodeSize;
-		internal UInt16 maxStack;
+		internal uint   ILCodeSize;
+		internal ushort maxStack;
 
-		internal UInt16 EHcount;
+		internal ushort EHcount;
 
 		//options CorInfoOptions
 		internal CorInfoOptions options;

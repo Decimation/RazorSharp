@@ -13,7 +13,7 @@ namespace RazorSharp
 	public static class ModuleInitializer
 	{
 		/// <summary>
-		/// Runs when this module is loaded.
+		///     Runs when this module is loaded.
 		/// </summary>
 		public static void Initialize()
 		{

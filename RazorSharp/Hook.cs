@@ -1,3 +1,5 @@
+#region
+
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -8,17 +10,19 @@ using RazorSharp.CoreJit;
 using RazorSharp.Native;
 using RazorSharp.Native.Win32;
 
+#endregion
+
 namespace RazorSharp
 {
-	internal unsafe class CompilerHook
+	internal class CompilerHook
 	{
-		internal CorJitCompiler.CompileMethodDel Compile = null;
-
-		private readonly IntPtr               pJit;
-		private readonly IntPtr               pVTable;
-		private          bool                 isHooked = false;
 		private readonly CorJitCompilerNative compiler;
-		private          MemoryProtection     lpflOldProtect;
+
+		private readonly IntPtr                          pJit;
+		private readonly IntPtr                          pVTable;
+		internal         CorJitCompiler.CompileMethodDel Compile;
+		private          bool                            isHooked;
+		private          MemoryProtection                lpflOldProtect;
 
 		internal CompilerHook()
 		{

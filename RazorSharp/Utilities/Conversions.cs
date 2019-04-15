@@ -1,8 +1,12 @@
 #region
 
+#region
+
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
+#endregion
 
 // ReSharper disable ReturnTypeCanBeEnumerable.Global
 

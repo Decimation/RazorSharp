@@ -1,31 +1,35 @@
-using System;
+#region
+
 using System.Runtime.InteropServices;
 
-namespace RazorSharp.CoreJit {
+#endregion
+
+namespace RazorSharp.CoreJit
+{
 	//CORINFO_HELPER_DESC
 	[StructLayout(LayoutKind.Sequential)]
-	internal unsafe struct CorInfoHelperDesc
+	internal struct CorInfoHelperDesc
 	{
 		internal CorInfoHelpFunc helperNum;
-		internal UInt16          numArgs;
+		internal ushort          numArgs;
 
 		[StructLayout(LayoutKind.Explicit)]
-		internal struct args
+		internal struct Args
 		{
 			[FieldOffset(0)]
-			UInt32 fieldHandle;
+			private readonly uint fieldHandle;
 
 			[FieldOffset(0)]
-			UInt32 methodHandle;
+			private readonly uint methodHandle;
 
 			[FieldOffset(0)]
-			UInt32 classHandle;
+			private readonly uint classHandle;
 
 			[FieldOffset(0)]
-			UInt32 moduleHandle;
+			private readonly uint moduleHandle;
 
 			[FieldOffset(0)]
-			UInt32 constant;
-		};
+			private readonly uint constant;
+		}
 	}
 }

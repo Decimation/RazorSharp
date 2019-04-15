@@ -1,7 +1,6 @@
 #region
 
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using RazorCommon;
@@ -19,17 +18,20 @@ namespace RazorSharp.Utilities
 	/// </summary>
 	public static class ReflectionUtil
 	{
-		public static MetaType GetMetaType(this Type t) => new MetaType(t.GetMethodTable());
+		public static MetaType GetMetaType(this Type t)
+		{
+			return new MetaType(t.GetMethodTable());
+		}
 
 		/// <summary>
-		/// Executes a generic method
+		///     Executes a generic method
 		/// </summary>
 		/// <param name="t">Enclosing type</param>
 		/// <param name="name">Method name</param>
-		/// <param name="instance">Instance of type <paramref name="t"/>; <c>null</c> if the method is static</param>
+		/// <param name="instance">Instance of type <paramref name="t" />; <c>null</c> if the method is static</param>
 		/// <param name="typeArgs">Generic type parameters</param>
 		/// <param name="args">Method arguments</param>
-		/// <returns>Return value of the method specified by <seealso cref="name"/></returns>
+		/// <returns>Return value of the method specified by <seealso cref="name" /></returns>
 		public static object InvokeGenericMethod(Type            t,
 		                                         string          name,
 		                                         object          instance,
@@ -47,16 +49,16 @@ namespace RazorSharp.Utilities
 
 		public static OpCode[] GetAllOpCodes()
 		{
-			var opCodesFields = typeof(OpCodes).GetFields(BindingFlags.Public | BindingFlags.Static);
-			var opCodes = new OpCode[opCodesFields.Length];
-			
+			FieldInfo[] opCodesFields = typeof(OpCodes).GetFields(BindingFlags.Public | BindingFlags.Static);
+			var         opCodes       = new OpCode[opCodesFields.Length];
+
 			for (int i = 0; i < opCodes.Length; i++) {
 				opCodes[i] = (OpCode) opCodesFields[i].GetValue(null);
 			}
 
 			return opCodes;
 		}
-		
+
 		#region BindingFlags
 
 		/// <summary>
@@ -75,17 +77,29 @@ namespace RazorSharp.Utilities
 
 		#region Methods
 
-		internal static MethodInfo[] GetAllMethods(this Type t) => t.GetMethods(ALL_FLAGS);
+		internal static MethodInfo[] GetAllMethods(this Type t)
+		{
+			return t.GetMethods(ALL_FLAGS);
+		}
 
-		internal static MethodInfo GetAnyMethod(this Type t, string name) => t.GetMethod(name, ALL_FLAGS);
+		internal static MethodInfo GetAnyMethod(this Type t, string name)
+		{
+			return t.GetMethod(name, ALL_FLAGS);
+		}
 
 		#endregion
 
 		#region Fields
 
-		internal static FieldInfo[] GetAllFields(this Type t) => t.GetFields(ALL_FLAGS);
+		internal static FieldInfo[] GetAllFields(this Type t)
+		{
+			return t.GetFields(ALL_FLAGS);
+		}
 
-		internal static FieldInfo GetAnyField(this Type t, string name) => t.GetField(name, ALL_FLAGS);
+		internal static FieldInfo GetAnyField(this Type t, string name)
+		{
+			return t.GetField(name, ALL_FLAGS);
+		}
 
 		/// <summary>
 		///     Gets the corresponding <see cref="FieldInfo" />s equivalent to the fields

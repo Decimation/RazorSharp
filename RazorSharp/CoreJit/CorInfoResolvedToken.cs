@@ -1,17 +1,22 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
 
-namespace RazorSharp.CoreJit {
+#endregion
+
+namespace RazorSharp.CoreJit
+{
 	//CORINFO_RESOLVED_TOKEN
 	[StructLayout(LayoutKind.Sequential)]
-	internal unsafe struct CorInfoResolvedToken
+	internal struct CorInfoResolvedToken
 	{
 		//
 		// [In] arguments of resolveToken
 		//
 		internal IntPtr           tokenContext; //Context for resolution of generic arguments
 		internal IntPtr           tokenScope;
-		internal UInt32           token; //The source token
+		internal uint             token; //The source token
 		internal CorInfoTokenKind tokenType;
 
 		//
@@ -28,9 +33,9 @@ namespace RazorSharp.CoreJit {
 		//
 		// [Out] TypeSpec and MethodSpec signatures for generics. NULL otherwise.
 		//
-		internal Byte   pTypeSpec;
-		internal UInt32 cbTypeSpec;
-		internal Byte   pMethodSpec;
-		internal UInt32 cbMethodSpec;
+		internal byte pTypeSpec;
+		internal uint cbTypeSpec;
+		internal byte pMethodSpec;
+		internal uint cbMethodSpec;
 	}
 }

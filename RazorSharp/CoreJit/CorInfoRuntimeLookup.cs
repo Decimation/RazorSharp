@@ -1,5 +1,9 @@
+#region
+
 using System;
 using System.Runtime.InteropServices;
+
+#endregion
 
 namespace RazorSharp.CoreJit
 {
@@ -21,7 +25,7 @@ namespace RazorSharp.CoreJit
 		// 0 = use the this pointer itself (e.g. token is C<!0> inside code in sealed class C)
 		//     or method desc itself (e.g. token is method void M::mymeth<!!0>() inside code in M::mymeth)
 		// Otherwise, follow each byte-offset stored in the "offsets[]" array (may be negative)
-		internal UInt16 indirections;
+		internal ushort indirections;
 
 		// If set, test for null and branch to helper if null
 		internal bool testForNull;

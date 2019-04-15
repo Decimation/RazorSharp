@@ -1,5 +1,3 @@
-using System;
-
 namespace RazorSharp.CoreJit
 {
 	internal class CorJitFlags
@@ -16,12 +14,39 @@ namespace RazorSharp.CoreJit
 			Set(corJitFlags);
 		}
 
-		internal void Reset()                 => _corJitFlags = 0;
-		internal void Set(CorJitFlag    flag) => _corJitFlags |= (CorJitFlag) ((UInt32) 1 << (Int32) flag);
-		internal void Clear(CorJitFlag  flag) => _corJitFlags &= ~(CorJitFlag) ((UInt32) 1 << (Int32) flag);
-		internal void Add(CorJitFlag    flag) => _corJitFlags |= flag;
-		internal void Remove(CorJitFlag flag) => _corJitFlags &= ~flag;
-		internal bool IsSet(CorJitFlag  flag) => _corJitFlags.HasFlag(flag);
-		internal bool IsEmpty()               => _corJitFlags == 0;
+		internal void Reset()
+		{
+			_corJitFlags = 0;
+		}
+
+		internal void Set(CorJitFlag flag)
+		{
+			_corJitFlags |= (CorJitFlag) ((uint) 1 << (int) flag);
+		}
+
+		internal void Clear(CorJitFlag flag)
+		{
+			_corJitFlags &= ~(CorJitFlag) ((uint) 1 << (int) flag);
+		}
+
+		internal void Add(CorJitFlag flag)
+		{
+			_corJitFlags |= flag;
+		}
+
+		internal void Remove(CorJitFlag flag)
+		{
+			_corJitFlags &= ~flag;
+		}
+
+		internal bool IsSet(CorJitFlag flag)
+		{
+			return _corJitFlags.HasFlag(flag);
+		}
+
+		internal bool IsEmpty()
+		{
+			return _corJitFlags == 0;
+		}
 	}
 }
