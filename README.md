@@ -41,9 +41,8 @@ RazorSharp is tested on:
 # todo
 - [ ] `MethodDescChunk`
 - [ ] Read `MethodDescs` without Reflection
-- [x] Fix Canon MT for pointer arrays
-- [x] Get field names via `FieldDesc`
-- [x] Fix "Function" field in `MethodDesc` for virtual functions
+- [ ] RazorSharp, ClrMD, Reflection, Cecil, dnlib, MetadataTools comparison
+- [x] Replace native pointers* with Pointer<T> for consistency
 
 # License
 
