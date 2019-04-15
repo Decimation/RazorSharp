@@ -28,10 +28,7 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool IsBound(Type t)
-		{
-			return BoundTypes.Contains(t);
-		}
+		public static bool IsBound(Type t) => BoundTypes.Contains(t);
 
 		public static void BindQuick(Type t, string method)
 		{

@@ -73,10 +73,7 @@ namespace Test
 		[SymNamespace("CEEInfo")]
 		struct ICorJitInfo
 		{
-			static ICorJitInfo()
-			{
-				
-			}
+			static ICorJitInfo() { }
 
 			[ClrSymcall(UseMethodNameOnly = true)]
 			public Pointer<byte> getMethodName(Pointer<byte> ftn, Pointer<Pointer<byte>> moduleName)
@@ -90,10 +87,9 @@ namespace Test
 			byte* szMethodName = stackalloc byte[256];
 			byte* szClassName  = stackalloc byte[256];
 
-			var m  = info->getMethodName(corInfo->methodHandle, &szClassName);
-			Console.WriteLine((char)m[0]);
+			var m = info->getMethodName(corInfo->methodHandle, &szClassName);
+			Console.WriteLine((char) m[0]);
 			Console.ReadLine();
-
 		}
 
 		private static CompilerHook _compilerHook;
@@ -118,14 +114,16 @@ namespace Test
 		public static void Main(string[] args)
 		{
 			Symcall.BindQuick(typeof(ICorJitInfo));
-			
+
 			// ICorJitCompiler
 			var pJit = CorJitCompiler.GetJit();
 
-			__Compile(typeof(Program),"Dump");
+			__Compile(typeof(Program), "Dump");
+
+			var fn = typeof(Marshal).GetAnyMethod("GetDelegateForFunctionPointerInternal");
 			
-			
-			
+
+
 			_compilerHook = new CompilerHook();
 			_compilerHook.Hook(CompileHook);
 		}

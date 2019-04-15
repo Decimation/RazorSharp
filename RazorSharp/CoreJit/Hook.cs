@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.Native;
 using RazorSharp.Native.Win32;
+// ReSharper disable PossibleNullReferenceException
 
 #endregion
 
@@ -17,11 +18,11 @@ namespace RazorSharp.CoreJit
 	{
 		private readonly CorJitCompilerNative m_compiler;
 
-		private readonly IntPtr                          m_pJit;
-		private readonly IntPtr                          m_pVTable;
+		private readonly IntPtr                       m_pJit;
+		private readonly IntPtr                       m_pVTable;
 		internal         CorJitCompiler.CompileMethod Compile;
-		private          bool                            m_isHooked;
-		private          MemoryProtection                m_lpflOldProtect;
+		private          bool                         m_isHooked;
+		private          MemoryProtection             m_lpflOldProtect;
 
 		internal CompilerHook()
 		{
@@ -31,9 +32,9 @@ namespace RazorSharp.CoreJit
 			Debug.Assert(m_compiler.CompileMethod != null);
 			m_pVTable = Marshal.ReadIntPtr(m_pJit);
 
-			RuntimeHelpers.PrepareMethod(GetType().GetMethod(nameof(RemoveHook), BindingFlags.NonPublic | BindingFlags.Instance).MethodHandle);
-			RuntimeHelpers.PrepareMethod(
-				GetType().GetMethod(nameof(LockVTable), BindingFlags.Instance | BindingFlags.NonPublic).MethodHandle);
+			const BindingFlags FLAGS = BindingFlags.NonPublic | BindingFlags.Instance;
+			RuntimeHelpers.PrepareMethod(GetType().GetMethod(nameof(RemoveHook), FLAGS).MethodHandle);
+			RuntimeHelpers.PrepareMethod(GetType().GetMethod(nameof(LockVTable), FLAGS).MethodHandle);
 		}
 
 		private bool UnlockVTable()

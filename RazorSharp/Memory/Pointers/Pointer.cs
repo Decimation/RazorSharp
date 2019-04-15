@@ -525,6 +525,8 @@ namespace RazorSharp.Memory.Pointers
 
 		/// <summary>
 		///     Reads a native string type
+		/// <seealso cref="NativeHelp.GetString(SByte*,Int32)"/>
+		/// <seealso cref="NativeHelp.GetString(SByte*)"/>
 		/// </summary>
 		[Pure]
 		public string ReadString(StringTypes s)
@@ -539,6 +541,10 @@ namespace RazorSharp.Memory.Pointers
 			}
 		}
 
+		/// <summary>
+		/// <seealso cref="NativeHelp.GetString(SByte*,Int32)"/>
+		/// <seealso cref="NativeHelp.GetString(SByte*)"/>
+		/// </summary>
 		public string ReadString(int len)
 		{
 			char[] chars = CopyOutAny<char>(len);
