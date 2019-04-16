@@ -12,10 +12,9 @@ namespace RazorSharp
 {
 	public static class ModuleInitializer
 	{
-		/// <summary>
-		///     Runs when this module is loaded.
-		/// </summary>
-		public static void Initialize()
+		public static bool IsSetup { get; private set; }
+
+		public static void GlobalSetup()
 		{
 			Global.Log.Information("Loading module");
 
@@ -23,16 +22,33 @@ namespace RazorSharp
 			Global.Setup();
 			Clr.Setup();
 
+			IsSetup = true;
+		}
+
+		public static void GlobalClose()
+		{
+			// SHUT IT DOWN
+			Global.Log.Information("Unloading module");
+
+
+			SymbolReader.Close();
+			Clr.Close();
+			Global.Close();
+
+			IsSetup = false;
+		}
+
+		/// <summary>
+		///     Runs when this module is loaded.
+		/// </summary>
+		public static void Initialize()
+		{
+//			GlobalSetup();
+
 			var appDomain = AppDomain.CurrentDomain;
 			appDomain.ProcessExit += (sender, eventArgs) =>
 			{
-				// SHUT IT DOWN
-				Global.Log.Information("Unloading module");
-
-
-				SymbolReader.Close();
-				Clr.Close();
-				Global.Close();
+//				GlobalCleanup();
 			};
 		}
 	}

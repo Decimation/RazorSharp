@@ -35,6 +35,8 @@ namespace RazorSharp
 
 		internal static readonly Assembly Assembly;
 
+		internal static bool IsSetup { get; private set; }
+
 		/// <summary>
 		///     Sets up the logger and other values
 		/// </summary>
@@ -55,8 +57,6 @@ namespace RazorSharp
 
 			Assembly = Assembly.Load(ASM_STR);
 		}
-
-		internal static bool IsSetup { get; private set; }
 
 
 		private static void CheckCompatibility()

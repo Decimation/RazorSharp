@@ -195,6 +195,7 @@
     <Compile Include="Memory\Pointers\AllocPointer.cs" />
     <Compile Include="Memory\Pointers\Pointer.cs" />
     <Compile Include="Memory\Pointers\PointerFormat.cs" />
+    <Compile Include="Memory\Pointers\StringTypes.cs" />
     <Compile Include="Memory\Unsafe.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Memory\AddressInfo.cs" />

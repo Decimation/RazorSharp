@@ -45,28 +45,25 @@ namespace Test
 	public static unsafe class Program
 	{
 		// Common library: RazorCommon
-		// Testing library: RazorSandbox
+		// Testing library: Sandbox
 
-		[ClrSymcall(Symbol = "Object::GetSize", FullyQualified = true)]
-		private static int Size(this object obj)
-		{
-			return Constants.INVALID_VALUE;
-		}
 
-		
-		static void __Compile(Type t, string n)
+		private static void __Compile(Type t, string n)
 		{
 			RuntimeHelpers.PrepareMethod(t.GetAnyMethod(n).MethodHandle);
 		}
 
+
 		public static void Main(string[] args)
 		{
-			
-
 			// ICorJitCompiler
 			var pJit = CorJitCompiler.GetJit();
-
 			
+			
+
+
+			// hwnd 000B0B74
+			// SunAwtFrame
 		}
 	}
 }

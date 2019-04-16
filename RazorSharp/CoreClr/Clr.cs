@@ -141,10 +141,7 @@ namespace RazorSharp.CoreClr
 			IsSetup = false;
 		}
 
-		internal static Pointer<byte> GetClrSymAddress(string name)
-		{
-			return ClrSymbols.GetClrSymAddress(name);
-		}
+		internal static Pointer<byte> GetClrSymAddress(string name) => ClrSymbols.GetClrSymAddress(name);
 
 		internal static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate
 		{

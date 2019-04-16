@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
@@ -59,15 +60,18 @@ namespace RazorSharp.Memory
 			return CSUnsafe.Read<T>(&cpy);
 		}
 
-		public static bool IsNil<T>(T value)
+		/// <summary>
+		/// Whether the value of <paramref name="value"/> is <c>default</c> or <c>null</c> bytes
+		/// </summary>
+		public static bool IsNil<T>([CanBeNull] T value)
 		{
 			return AddressOf(ref value).IsNil;
 		}
 
 		public static T DeepCopy<T>(T value) where T : class
 		{
-			Conditions.Require(value.GetType() != typeof(string), nameof(value));
-			Conditions.Require(!value.GetType().IsArray, nameof(value));
+			Conditions.Require(typeof(T) != typeof(string), nameof(value));
+			Conditions.Require(!Runtime.IsArray<T>(), nameof(value));
 
 			lock (value) {
 				var valueCpy = GCHeap.AllocateObject<T>(0);
@@ -204,7 +208,7 @@ namespace RazorSharp.Memory
 					return AddressOfHeap(value);
 
 				case OffsetOptions.Header:
-					return AddressOfHeap(value) - sizeof(ObjHeader);
+					return AddressOfHeap(value) - sizeof(MethodTable*);
 				default:
 					throw new ArgumentOutOfRangeException(nameof(offset), offset, null);
 			}
@@ -232,11 +236,6 @@ namespace RazorSharp.Memory
 
 			return md.Reference.Function;
 		}
-
-		/*public static Pointer<T> AddressOfHeap<T>(T[] rg)
-		{
-			return AddressOfHeap(rg, OffsetType.ArrayData).Reinterpret<T>();
-		}*/
 
 		#endregion
 

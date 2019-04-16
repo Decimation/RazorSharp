@@ -24,8 +24,8 @@ namespace RazorSharp.CoreClr
 		internal const int ARRAY_MT_PTR_OFFSET = 6;
 
 		/// <summary>
-		///     How many bytes to subtract from <see cref="MethodTable.m_pCanonMT" /> if <see cref="MethodTable.UnionType" /> is
-		///     <see cref="LowBits.MethodTable" />
+		///     How many bytes to subtract from <see cref="MethodTable.m_pCanonMT" /> if
+		///     <see cref="MethodTable.UnionType" /> is <see cref="LowBits.MethodTable" />
 		///     <remarks>
 		///         <para>Source: /src/vm/methodtable.inl: 1180</para>
 		///     </remarks>

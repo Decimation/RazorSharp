@@ -64,10 +64,7 @@ namespace RazorSharp.CoreClr
 
 		#region FieldField
 
-		internal static Pointer<FieldDesc> FindField(Type t, string name)
-		{
-			return FindField(t.GetMethodTable(), name);
-		}
+		internal static Pointer<FieldDesc> FindField(Type t, string name) => FindField(t.GetMethodTable(), name);
 
 		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT, string name)
 		{
@@ -80,15 +77,6 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		/*
-		static FieldDesc * FindField(
-			MethodTable *   pMT,
-			LPCUTF8         pszName,
-			PCCOR_SIGNATURE pSignature,
-			DWORD           cSignature,
-			Module*         pModule,
-			BOOL            bCaseSensitive = TRUE);
-		*/
 		[ClrSymcall(Symbol = "MemberLoader::FindField", FullyQualified = true)]
 		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT,
 		                                             Pointer<byte>        pszName,

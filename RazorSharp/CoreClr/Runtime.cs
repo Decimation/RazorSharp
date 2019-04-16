@@ -30,7 +30,7 @@ namespace RazorSharp.CoreClr
 	///         </item>
 	///     </list>
 	/// </summary>
-	internal static unsafe class Runtime
+	public static unsafe class Runtime
 	{
 		#region Compare
 
@@ -42,6 +42,16 @@ namespace RazorSharp.CoreClr
 		}
 
 		#endregion
+
+		public static Pointer<byte> GetClrSymAddress(string name)
+		{
+			return Clr.GetClrSymAddress(name);
+		}
+
+		public static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate
+		{
+			return Clr.GetClrFunction<TDelegate>(name);
+		}
 
 		public static T Alloc<T>(params object[] args)
 		{
@@ -102,7 +112,7 @@ namespace RazorSharp.CoreClr
 		/// <param name="fieldName">Name of the field</param>
 		/// <typeparam name="TType">Enclosing type</typeparam>
 		/// <returns>Field offset</returns>
-		public static int OffsetOf<TType>(string fieldName)
+		internal static int OffsetOf<TType>(string fieldName)
 		{
 			return typeof(TType).GetFieldDesc(fieldName).Reference.Offset;
 		}
@@ -139,7 +149,7 @@ namespace RazorSharp.CoreClr
 
 		internal static ArrayObject** GetArrayObject<T>(ref T t) where T : class
 		{
-			Conditions.Require(typeof(T).IsArray);
+			Conditions.Require(IsArray<T>());
 
 			return (ArrayObject**) Unsafe.AddressOf(ref t);
 		}
@@ -151,8 +161,7 @@ namespace RazorSharp.CoreClr
 
 		internal static HeapObject** GetHeapObject<T>(ref T t) where T : class
 		{
-			var h = (HeapObject**) Unsafe.AddressOf(ref t);
-			return h;
+			return (HeapObject**) Unsafe.AddressOf(ref t);
 		}
 
 		#endregion
@@ -257,7 +266,6 @@ namespace RazorSharp.CoreClr
 				Conditions.Assert(fieldDesc.Reference.Info == fieldInfo);
 				Conditions.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
 			}
-
 
 			return fieldDesc;
 		}

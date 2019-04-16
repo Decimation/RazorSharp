@@ -37,19 +37,6 @@ namespace RazorSharp.Memory.Pointers
 
 	#endregion
 
-	public enum StringTypes
-	{
-		/// <summary>
-		///     LPCUTF8 native string (<see cref="sbyte" /> (1-byte) string)
-		/// </summary>
-		AnsiStr,
-
-		/// <summary>
-		///     <see cref="char" /> (2-byte) string
-		/// </summary>
-		UniStr
-	}
-
 	// todo: decorate the remaining Pure methods with PureAttribute
 
 	/// <summary>
@@ -420,10 +407,10 @@ namespace RazorSharp.Memory.Pointers
 		{
 			byte[] bytes;
 			switch (type) {
-				case StringTypes.AnsiStr:
+				case StringTypes.ANSI:
 					bytes = Encoding.UTF8.GetBytes(s);
 					break;
-				case StringTypes.UniStr:
+				case StringTypes.UNI:
 					bytes = Encoding.Unicode.GetBytes(s);
 					break;
 				default:
@@ -527,14 +514,19 @@ namespace RazorSharp.Memory.Pointers
 		///     Reads a native string type
 		/// <seealso cref="NativeHelp.GetString(SByte*,Int32)"/>
 		/// <seealso cref="NativeHelp.GetString(SByte*)"/>
+		/// <seealso cref="Encoding.GetString(byte[])"/>
+		/// <seealso cref="string"/>
+		/// <seealso cref="Marshal.PtrToStringAuto(IntPtr)"/>
+		/// <seealso cref="Marshal.PtrToStringAnsi(IntPtr)"/>
+		/// <seealso cref="Marshal.PtrToStringUni(IntPtr)"/>
 		/// </summary>
 		[Pure]
 		public string ReadString(StringTypes s)
 		{
 			switch (s) {
-				case StringTypes.AnsiStr:
+				case StringTypes.ANSI:
 					return new string((sbyte*) m_value);
-				case StringTypes.UniStr:
+				case StringTypes.UNI:
 					return new string((char*) m_value);
 				default:
 					throw new ArgumentOutOfRangeException(nameof(s), s, null);
@@ -544,6 +536,11 @@ namespace RazorSharp.Memory.Pointers
 		/// <summary>
 		/// <seealso cref="NativeHelp.GetString(SByte*,Int32)"/>
 		/// <seealso cref="NativeHelp.GetString(SByte*)"/>
+		/// <seealso cref="Encoding.GetString(byte[])"/>
+		/// <seealso cref="string"/>
+		/// <seealso cref="Marshal.PtrToStringAuto(IntPtr)"/>
+		/// <seealso cref="Marshal.PtrToStringAnsi(IntPtr)"/>
+		/// <seealso cref="Marshal.PtrToStringUni(IntPtr)"/>
 		/// </summary>
 		public string ReadString(int len)
 		{
@@ -558,10 +555,7 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		/// <param name="t">Value to write</param>
 		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
-		public void Write(T t, int elemOffset = 0)
-		{
-			WriteAny(t, elemOffset);
-		}
+		public void Write(T t, int elemOffset = 0) => WriteAny(t, elemOffset);
 
 
 		#region Safe write
@@ -616,10 +610,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
 		/// <returns>The value read from the offset <see cref="Address" /></returns>
 		[Pure]
-		public T Read(int elemOffset = 0)
-		{
-			return ReadAny<T>(elemOffset);
-		}
+		public T Read(int elemOffset = 0) => ReadAny<T>(elemOffset);
 
 
 		/// <summary>
@@ -628,10 +619,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
 		/// <returns>A reference to a value of type <typeparamref name="T" /></returns>
 		[Pure]
-		public ref T AsRef(int elemOffset = 0)
-		{
-			return ref AsRefAny<T>(elemOffset);
-		}
+		public ref T AsRef(int elemOffset = 0) => ref AsRefAny<T>(elemOffset);
 
 		#region Any
 
@@ -1246,7 +1234,7 @@ namespace RazorSharp.Memory.Pointers
 
 			/* Special support for C-string */
 			if (typeof(T) == typeof(char))
-				return ReadString(StringTypes.UniStr);
+				return ReadString(StringTypes.UNI);
 
 			/*if (typeof(T) == typeof(sbyte)) {
 				return inst.ReadString(StringTypes.AnsiStr);

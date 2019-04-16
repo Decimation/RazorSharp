@@ -159,15 +159,11 @@ namespace RazorSharp.CoreClr
 				case TypeCode.String:
 					return CorElementType.Class;
 				default:
-					throw new ArgumentOutOfRangeException(
-						$"{t.Name} has not been mapped to {nameof(CorElementType)}.");
+					throw new ArgumentOutOfRangeException($"{t.Name} has not been mapped to {nameof(CorElementType)}.");
 			}
 		}
 
-		internal static CorElementType TypeToCorType<T>()
-		{
-			return TypeToCorType(typeof(T));
-		}
+		internal static CorElementType TypeToCorType<T>() => TypeToCorType(typeof(T));
 
 		internal static int RidFromToken(int tk)
 		{
