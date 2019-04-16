@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 namespace RazorSharp.Native
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal unsafe struct GUID
+	internal unsafe struct NativeGuid
 	{
 		//	typedef struct _GUID {
 		//		unsigned long  Data1;
@@ -23,6 +23,6 @@ namespace RazorSharp.Native
 		public       ulong  Data1;
 		public       ushort Data2;
 		public       ushort Data3;
-		public fixed byte   Data4[8];
+		public fixed byte   Data4[sizeof(ulong)];
 	}
 }

@@ -48,7 +48,7 @@ namespace RazorSharp.Native.Win32
 		///     for <see cref="M:GetWindowText" />.
 		/// </remarks>
 		[DllImport(USER32_DLL, SetLastError = true)]
-		public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+		internal static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
 		/// <summary>
 		///     Changes the text of the specified window's title bar (if it has one). If the specified window is a control, the
@@ -78,16 +78,16 @@ namespace RazorSharp.Native.Win32
 		/// </remarks>
 		[DllImport(USER32_DLL, SetLastError = true, CharSet = CharSet.Auto)]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		public static extern bool SetWindowText(IntPtr hwnd, string lpString);
+		internal static extern bool SetWindowText(IntPtr hwnd, string lpString);
 
 		[DllImport(USER32_DLL, SetLastError = true)]
-		public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+		internal static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
 		// When you don't want the ProcessId, use this overload and pass IntPtr.Zero for the second parameter
 		[DllImport(USER32_DLL)]
-		public static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr processId);
+		internal static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr processId);
 
-		public static IntPtr FindWindowByCaption(string windowName)
+		internal static IntPtr FindWindowByCaption(string windowName)
 		{
 			return FindWindow(null, windowName);
 		}

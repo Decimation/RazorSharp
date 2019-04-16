@@ -223,7 +223,7 @@
     <Compile Include="Native\AllocationType.cs" />
     <Compile Include="Native\ConsoleOutputModes.cs" />
     <Compile Include="Native\FreeTypes.cs" />
-    <Compile Include="Native\GUID.cs" />
+    <Compile Include="Native\NativeGuid.cs" />
     <Compile Include="Native\Images\DllCharacteristics.cs" />
     <Compile Include="Native\Images\ImageDataDirectory.cs" />
     <Compile Include="Native\Images\ImageDirectoryEntry.cs" />

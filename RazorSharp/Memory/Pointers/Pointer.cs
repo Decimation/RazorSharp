@@ -354,6 +354,11 @@ namespace RazorSharp.Memory.Pointers
 			return ReadAny<Pointer<TType>>(elemOffset);
 		}
 
+		public void WritePointer<TType>(Pointer<TType> ptr, int elemOffset = 0)
+		{
+			WriteAny(ptr, elemOffset);
+		}
+
 
 		public int ReadUntil(Predicate<T> predicate)
 		{

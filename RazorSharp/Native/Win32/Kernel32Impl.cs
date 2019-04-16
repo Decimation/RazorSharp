@@ -88,7 +88,7 @@ namespace RazorSharp.Native.Win32
 		{
 			var info    = new MemoryBasicInformation();
 			var lpValue = VirtualQuery(lpAddress, ref info, (uint) sizeof(MemoryBasicInformation));
-			Conditions.Require(lpValue.ToInt64() == sizeof(MemoryBasicInformation));
+			Conditions.Ensure(lpValue.ToInt64() == sizeof(MemoryBasicInformation));
 			return info;
 		}
 

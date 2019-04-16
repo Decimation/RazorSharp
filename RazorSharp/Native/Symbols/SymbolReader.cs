@@ -73,12 +73,19 @@ namespace RazorSharp.Native.Symbols
 		public Symbol GetSymbol(string name)
 		{
 			Symbol[] symbols = GetSymbolsContainingName(name);
+			
+			if (symbols.Length == 0) {
+				return null;
+			}
+			
 			foreach (var symbol in symbols) {
 				if (symbol.Name == name) {
 					return symbol;
 				}
 			}
 
+
+			
 
 			List<string> names       = symbols.Select(x => x.Name).ToList();
 			string       closestName = StringUtil.FindClosest(name, names);
@@ -124,8 +131,10 @@ namespace RazorSharp.Native.Symbols
 
 		public Symbol[] GetSymbolsContainingName(string name)
 		{
-			var list = new List<Symbol>();
+			Conditions.Require(Symbols.Count > 0, "Symbols have not been loaded", null);
 
+			var list = new List<Symbol>();
+			
 			foreach (var sym in Symbols) {
 				if (sym.Name.Contains(name)) {
 					list.Add(sym);

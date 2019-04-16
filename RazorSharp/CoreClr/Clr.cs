@@ -148,6 +148,8 @@ namespace RazorSharp.CoreClr
 			return Functions.GetDelegateForFunctionPointer<TDelegate>(GetClrSymAddress(name).Address);
 		}
 
+		
+		
 		#region Constants and accessors
 
 		/// <summary>

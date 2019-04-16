@@ -40,12 +40,14 @@ namespace RazorSharp.Native.Images
 		public Pointer<byte> EndAddress => SectionAddress + (byte*) SectionSize - 1;
 
 
-		public ImageSectionHeader SectionHeader { get; }
+		internal ImageSectionHeader SectionHeader { get; }
+
+		public ImageSectionCharacteristics Characteristics => SectionHeader.Characteristics;
 
 		#endregion
 
 
-		public ImageSectionInfo(int                sectionNumber,
+		internal ImageSectionInfo(int                sectionNumber,
 		                        string             sectionName,
 		                        void*              sectionAddress,
 		                        int                sectionSize,

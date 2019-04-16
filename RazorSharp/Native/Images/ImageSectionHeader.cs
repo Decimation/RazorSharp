@@ -22,7 +22,7 @@ namespace RazorSharp.Native.Images
 	#endregion
 
 	[StructLayout(LayoutKind.Explicit)]
-	public struct ImageSectionHeader
+	internal struct ImageSectionHeader
 	{
 		static ImageSectionHeader()
 		{

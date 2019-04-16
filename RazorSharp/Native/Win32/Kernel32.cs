@@ -22,7 +22,7 @@ namespace RazorSharp.Native.Win32
 		internal static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
 		[DllImport(KERNEL32_DLL)]
-		public static extern uint GetLastError();
+		internal static extern uint GetLastError();
 
 		[DllImport(KERNEL32_DLL, SetLastError = true, PreserveSig = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]

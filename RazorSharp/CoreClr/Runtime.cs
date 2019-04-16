@@ -11,6 +11,7 @@ using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.HeapObjects;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Native.Symbols;
 using RazorSharp.Utilities;
 using Unsafe = RazorSharp.Memory.Unsafe;
 
@@ -53,6 +54,17 @@ namespace RazorSharp.CoreClr
 			return Clr.GetClrFunction<TDelegate>(name);
 		}
 
+		public static Symbol GetClrSymbol(string name)
+		{
+			return Clr.ClrSymbols.GetSymbol(name);
+		}
+		
+		public static Symbol[] GetClrSymbolContainingName(string name)
+		{
+			return Clr.ClrSymbols.GetSymbolsContainingName(name);
+		}
+
+		
 		public static T Alloc<T>(params object[] args)
 		{
 			var value = GCHeap.AllocateObject<T>(0);

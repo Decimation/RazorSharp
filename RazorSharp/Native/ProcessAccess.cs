@@ -6,8 +6,6 @@ using System;
 
 namespace RazorSharp.Native
 {
-	// todo: compare to ProcessAccessFlags
-
 	[Flags]
 	public enum ProcessAccess : uint
 	{

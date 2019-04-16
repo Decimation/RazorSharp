@@ -110,7 +110,6 @@ namespace RazorSharp.CoreClr.Structures
 
 		internal short ComponentSize => HasComponentSize ? (short) m_dwFlags.ComponentSize : (short) 0;
 
-
 		internal int BaseSize => (int) m_BaseSize;
 
 		/// <summary>
