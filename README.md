@@ -59,6 +59,7 @@ RazorSharp is tested on:
 - [ ] Read `MethodDescs` without Reflection
 - [ ] RazorSharp, ClrMD, Reflection, Cecil, dnlib, MetadataTools comparison
 - [x] Replace native pointers* with Pointer<T> for consistency
+- [ ] nint
 
 # License
 
