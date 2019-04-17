@@ -250,6 +250,7 @@
     <Compile Include="Native\Symbols\FindChildrenParams.cs" />
     <Compile Include="Native\Symbols\ISymbolProvider.cs" />
     <Compile Include="Native\Symbols\Symbol.cs" />
+    <Compile Include="Native\Symbols\SymbolAccess.cs" />
     <Compile Include="Native\Symbols\SymbolEnvironment.cs" />
     <Compile Include="Native\Symbols\SymbolInfo.cs" />
     <Compile Include="Native\Symbols\SymbolReader.cs" />

@@ -43,7 +43,7 @@ namespace RazorSharp.CoreClr
 			const string ERR = "The PDB specified by \"ClrPdb\" does not match the one returned by Microsoft's servers";
 			Conditions.NotNull(ClrPdb, nameof(ClrPdb));
 			string cd     = Environment.CurrentDirectory;
-			var    tmpSym = SymbolReader.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
+			var    tmpSym = SymbolAccess.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
 			Conditions.Require(ClrPdb.ContentEquals(tmpSym), ERR, nameof(ClrPdb));
 			DeleteSymbolFile(tmpSym);
 		}
@@ -67,7 +67,7 @@ namespace RazorSharp.CoreClr
 					clrSym = new FileInfo(CLR_PDB_FILE_SEARCH);
 				}
 				else {
-					clrSym = SymbolReader.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
+					clrSym = SymbolAccess.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
 				}
 			}
 

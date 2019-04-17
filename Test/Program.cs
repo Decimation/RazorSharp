@@ -42,7 +42,7 @@ namespace Test
 	#endregion
 
 
-	public static class Program
+	public static unsafe class Program
 	{
 		// Common library: RazorCommon
 		// Testing library: Sandbox
@@ -53,10 +53,7 @@ namespace Test
 			RuntimeHelpers.PrepareMethod(t.GetAnyMethod(n).MethodHandle);
 		}
 
-		struct IBCLoggerS
-		{
-			public uint dwInstrEnabled ;
-		}
+		
 
 		public static void Main(string[] args)
 		{
@@ -65,33 +62,8 @@ namespace Test
 
 			ModuleInitializer.GlobalSetup();
 
-
-			// s_bEnabled
-
-			Console.WriteLine(typeof(string).GetMethodTable());
-
-			Clr.LoadAllClrSymbols();
-
-			var ptr = Clr.GetClrSymAddress("s_bEnabled").Cast<int>();
-			ptr.Write(1);
-
-			var fnPtr = Clr.GetClrSymAddress("MetaDataTracker::s_IBCLogMetaDataAccess");
-			fnPtr.WritePointer(Clr.GetClrSymAddress("IBCLogger::LogMetaDataAccessStatic"));
 			
-			var fnPtr2 = Clr.GetClrSymAddress("MetaDataTracker::s_IBCLogMetaDataSearch");
-			fnPtr2.WritePointer(Clr.GetClrSymAddress("IBCLogger::LogMetaDataSearchAccessStatic"));
-
-			// g_IBCLogger
-
-			var ibc = Clr.GetClrSymAddress("g_IBCLogger").Cast<uint>();
-			ibc.Write(0x00000001 | 0x00000002 | 0x00000004);
-
-			Console.WriteLine(typeof(string).TypeHandle.Value);
-
-			var str = Marshal.PtrToStructure<IBCLoggerS>(ibc.Address);
-			Console.WriteLine("{0:X}",str.dwInstrEnabled);
-
-			Console.ReadLine();
+			
 
 
 			ModuleInitializer.GlobalClose();
