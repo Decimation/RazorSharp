@@ -12,6 +12,22 @@ Low-level utilities and tools for working with the CLR, CLR internal structures,
 RazorSharp aims to provide functionality similar to that of ClrMD, WinDbg SOS, and Reflection but in a faster and more efficient way, while also exposing more underlying metadata. 
 RazorSharp also allows for manipulation of the CLR and low-level operations with managed objects. Additionally, RazorSharp doesn't require attachment of a debugger to the process to acquire metadata. All metadata is acquired through memory; no debugging is necessary or used.
 
+# Usage
+
+RazorSharp must be set up to use certain features.
+
+Setup:
+
+```C#
+ModuleInitializer.GlobalSetup();
+```
+
+Close:
+
+```C#
+ModuleInitializer.GlobalClose();
+```
+
 # Features
 
 - [x] Calculating heap size of managed objects
@@ -43,6 +59,7 @@ RazorSharp is tested on:
 - [ ] Read `MethodDescs` without Reflection
 - [ ] RazorSharp, ClrMD, Reflection, Cecil, dnlib, MetadataTools comparison
 - [x] Replace native pointers* with Pointer<T> for consistency
+- [ ] nint
 
 # License
 
