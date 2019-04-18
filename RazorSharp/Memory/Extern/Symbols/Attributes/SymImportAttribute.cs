@@ -15,18 +15,16 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 		/// </summary>
 		public string Symbol { get; set; }
 
-		
-		
 
 		/// <summary>
-		///     Whether <see cref="Symbol" /> is the fully qualified name
+		///     Whether <see cref="Symbol" /> is the fully qualified name (don't use the member's name)
 		/// </summary>
 		public bool FullyQualified { get; set; }
 
 		/// <summary>
-		///     Whether to use the decorated method's name as the symbol.
+		///     Whether to use the decorated member's name as the symbol.
 		/// </summary>
-		public bool UseMethodNameOnly { get; set; }
+		public bool UseMemberNameOnly { get; set; }
 
 		/// <summary>
 		///     Whether to ignore <see cref="SymNamespaceAttribute.Namespace" /> if the enclosing type
@@ -34,9 +32,6 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 		/// </summary>
 		public bool IgnoreNamespace { get; set; }
 
-		public SymImportAttribute()
-		{
-			
-		}
+		public SymImportAttribute() { }
 	}
 }

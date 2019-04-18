@@ -54,7 +54,7 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		[Symcall(UseMethodNameOnly = true)]
+		[Symcall(UseMemberNameOnly = true)]
 		internal static Pointer<byte> JIT_GetStaticFieldAddr_Context(FieldDesc* value)
 		{
 			throw new NativeCallException();

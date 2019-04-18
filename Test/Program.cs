@@ -82,23 +82,32 @@ namespace Test
 			}
 		}
 
+		[ClrSymNamespace()]
+		struct GCHeap
+		{
+			[SymField(UseMemberNameOnly = true)]
+			public IntPtr g_pGCHeap;
+		}
+
 		public static void Main(string[] args)
 		{
 //			ModuleInitializer.GlobalSetup();
 
 
 
-			/*var dll = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.dll";
-			var plib = Kernel32.LoadLibrary(dll);
+//			var dll = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.dll";
+//			var plib = Kernel32.LoadLibrary(dll);
+
 			
 			
 			
-			var ms = new MyStruct();
-			Symload.Load(typeof(MyStruct), ms);
-			Console.WriteLine(ms.g_int);
+			var ms = new GCHeap();
+			ms = (GCHeap)Symload.Load(typeof(GCHeap), ms);
+			Console.WriteLine("{0:X}",ms.g_pGCHeap.ToInt64());
+			Debug.Assert(ms.g_pGCHeap == RazorSharp.CoreClr.Structures.GCHeap.GlobalHeap);
 			
 			
-			Kernel32.FreeLibrary(plib);*/
+//			Kernel32.FreeLibrary(plib);
 
 			Console.WriteLine(typeof(string).GetMetaType());
 

@@ -46,7 +46,6 @@ namespace RazorSharp.CoreClr.Structures
 		///     <para>Global CLR variable <c>g_pGCHeap</c></para>
 		///     <para>Global VM GC</para>
 		/// </summary>
-		
 		private static readonly IntPtr g_pGCHeap;
 
 		/// <summary>
@@ -115,7 +114,7 @@ namespace RazorSharp.CoreClr.Structures
 			throw new NativeCallException();
 		}
 
-		[Symcall(UseMethodNameOnly = true, IgnoreNamespace = true)]
+		[Symcall(UseMemberNameOnly = true, IgnoreNamespace = true)]
 		internal static void* AllocateObject(MethodTable* mt, int fHandleCom)
 		{
 			return null;

@@ -45,13 +45,13 @@ namespace RazorSharp.Memory.Extern.Symbols
 			string fullSym       = null;
 			string declaringName = member.DeclaringType.Name;
 
-			if (attr.FullyQualified && attr.Symbol != null && !attr.UseMethodNameOnly) {
+			if (attr.FullyQualified && attr.Symbol != null && !attr.UseMemberNameOnly) {
 				fullSym = attr.Symbol;
 			}
-			else if (attr.UseMethodNameOnly && attr.Symbol == null) {
+			else if (attr.UseMemberNameOnly && attr.Symbol == null) {
 				fullSym = member.Name;
 			}
-			else if (attr.Symbol != null && !attr.UseMethodNameOnly && !attr.FullyQualified) {
+			else if (attr.Symbol != null && !attr.UseMemberNameOnly && !attr.FullyQualified) {
 				fullSym = declaringName + SCOPE_RESOLUTION_OPERATOR + attr.Symbol;
 			}
 			else if (attr.Symbol == null) {
@@ -94,10 +94,10 @@ namespace RazorSharp.Memory.Extern.Symbols
 			fieldInfo.SetValue(inst, val);
 		}
 
-		public static void Load(Type t, object inst = null)
+		public static object Load(Type t, object inst = null)
 		{
 			if (IsBound(t)) {
-				return;
+				return inst;
 			}
 
 			// For now, only one image can be used per type
@@ -111,7 +111,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 			int lim = attributes.Length;
 
 			if (lim == 0) {
-				return;
+				return inst;
 			}
 
 			Global.Log.Information("Binding type {Name}", t.Name);
@@ -128,9 +128,11 @@ namespace RazorSharp.Memory.Extern.Symbols
 					fullSym = nameSpace + SCOPE_RESOLUTION_OPERATOR + fullSym;
 				}
 
+//				Global.Log.Debug("Loading symbol {Name}", fullSym);
+
 				var addr = mi.GetSymAddress(fullSym);
 
-
+		
 				switch (mem.MemberType) {
 					case MemberTypes.Constructor:
 						// The import is a function (ctor)
@@ -161,6 +163,8 @@ namespace RazorSharp.Memory.Extern.Symbols
 			// Don't dispose ClrSymbols - we need it for the life of the program
 			if (!ReferenceEquals(mi, Clr.ClrSymbols))
 				mi.Dispose();
+
+			return inst;
 		}
 
 		
