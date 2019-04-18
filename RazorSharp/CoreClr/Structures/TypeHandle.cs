@@ -49,6 +49,7 @@ namespace RazorSharp.CoreClr.Structures
 	// The entries in these tables (i.e. the code) are, however, often shared.
 	// Clients of TypeHandle don't need to know any of this detail; just use the
 	// GetInstantiation and HasInstantiation methods.
+	[ClrSymNamespace]
 	[StructLayout(LayoutKind.Explicit)]
 	internal unsafe struct TypeHandle
 	{
@@ -80,7 +81,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		#endregion
 
-		[ClrSymcall]
+		[Symcall]
 		internal MethodTable* GetMethodTable()
 		{
 			return null;
@@ -88,7 +89,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		static TypeHandle()
 		{
-			Symcall.BindQuick(typeof(TypeHandle));
+			Symload.Load(typeof(TypeHandle));
 		}
 	}
 }

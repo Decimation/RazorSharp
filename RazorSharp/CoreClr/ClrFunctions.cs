@@ -30,13 +30,14 @@ namespace RazorSharp.CoreClr
 	///         All GC-related functions are WKS, not SVR
 	///     </remarks>
 	/// </summary>
+	[ClrSymNamespace]
 	internal static unsafe class ClrFunctions
 	{
 		private static readonly GetRuntimeType JIT_GetRuntimeType;
 
 		static ClrFunctions()
 		{
-			Symcall.BindQuick(typeof(ClrFunctions));
+			Symload.Load(typeof(ClrFunctions));
 			JIT_GetRuntimeType = Runtime.GetClrFunction<GetRuntimeType>(nameof(JIT_GetRuntimeType));
 		}
 
@@ -53,7 +54,7 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		[ClrSymcall(UseMethodNameOnly = true)]
+		[Symcall(UseMethodNameOnly = true)]
 		internal static Pointer<byte> JIT_GetStaticFieldAddr_Context(FieldDesc* value)
 		{
 			throw new NativeCallException();
@@ -77,7 +78,7 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		[ClrSymcall(Symbol = "MemberLoader::FindField", FullyQualified = true)]
+		[Symcall(Symbol = "MemberLoader::FindField", FullyQualified = true)]
 		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT,
 		                                             Pointer<byte>        pszName,
 		                                             Pointer<byte>        pSig,

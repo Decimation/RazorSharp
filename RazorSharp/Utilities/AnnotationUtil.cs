@@ -10,6 +10,21 @@ namespace RazorSharp.Utilities
 {
 	internal static class AnnotationUtil
 	{
+		internal static (MemberInfo[], TAttribute[]) GetAnnotated<TAttribute>(this Type t) where TAttribute : Attribute
+		{
+			var members    = new List<MemberInfo>();
+			var attributes = new List<TAttribute>();
+
+			foreach (var member in t.GetMembers(ReflectionUtil.ALL_FLAGS)) {
+				if (Attribute.IsDefined(member, typeof(TAttribute))) {
+					members.Add(member);
+					attributes.Add(member.GetCustomAttribute<TAttribute>());
+				}
+			}
+
+			return (members.ToArray(), attributes.ToArray());
+		}
+
 		private static (TType[], TAttribute[]) GetAnnotated<TType, TAttribute>(Func<BindingFlags, TType[]> values,
 		                                                                       BindingFlags                flags,
 		                                                                       Func<TType, TAttribute>     getValue)

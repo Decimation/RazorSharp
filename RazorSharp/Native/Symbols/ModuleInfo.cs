@@ -12,18 +12,23 @@ namespace RazorSharp.Native.Symbols
 	public class ModuleInfo : IDisposable
 	{
 		private readonly SymbolEnvironment m_reader;
-		private readonly ProcessModule     m_module;
+		private readonly Pointer<byte> m_baseAddr;
 
-		public ModuleInfo(FileInfo pdb, ProcessModule module)
+		public ModuleInfo(FileInfo pdb, ProcessModule module) : this(pdb, module.BaseAddress)
+		{
+			
+		}
+		
+		public ModuleInfo(FileInfo pdb, Pointer<byte> baseAddr)
 		{
 			m_reader = new SymbolEnvironment(pdb.FullName);
-			m_module = module;
+			m_baseAddr = baseAddr;
 		}
 
 		public Pointer<byte> GetSymAddress(string name)
 		{
 			long ofs = m_reader.GetSymOffset(name);
-			return Modules.GetAddress(m_module, ofs);
+			return m_baseAddr + ofs;
 		}
 
 		public TDelegate GetFunction<TDelegate>(string name) where TDelegate : Delegate
@@ -34,7 +39,13 @@ namespace RazorSharp.Native.Symbols
 		public Pointer<byte>[] GetSymAddresses(string[] names)
 		{
 			var offsets = m_reader.GetSymOffsets(names);
-			return Modules.GetAddresses(m_module, offsets);
+			var rg = new Pointer<byte>[offsets.Length];
+			
+			for (int i = 0; i < rg.Length; i++) {
+				rg[i] = m_baseAddr + offsets[i];
+			}
+
+			return rg;
 		}
 
 		public void Dispose()

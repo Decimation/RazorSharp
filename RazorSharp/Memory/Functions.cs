@@ -60,7 +60,7 @@ namespace RazorSharp.Memory
 	///             <description>Requirements: function is DLL-exported</description>
 	///         </item>
 	///     </list>
-	///     <para>5. <see cref="Symcall" /> (<see cref="SymcallAttribute" />)</para>
+	///     <para>5. <see cref="Symload" /> (<see cref="SymcallAttribute" />)</para>
 	///     <list type="bullet">
 	///         <item>
 	///             <description>Runtime</description>

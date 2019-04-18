@@ -39,13 +39,14 @@ namespace RazorSharp.CoreClr.Structures
 	///         </item>
 	///     </list>
 	/// </summary>
-	[SymNamespace("WKS")]
+	[ClrSymNamespace("WKS")]
 	public unsafe struct GCHeap
 	{
 		/// <summary>
 		///     <para>Global CLR variable <c>g_pGCHeap</c></para>
 		///     <para>Global VM GC</para>
 		/// </summary>
+		
 		private static readonly IntPtr g_pGCHeap;
 
 		/// <summary>
@@ -82,7 +83,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		public int GCCount {
-			[ClrSymcall(Symbol = "GCHeap::GetGcCount", FullyQualified = true)]
+			[Symcall(Symbol = "GCHeap::GetGcCount", FullyQualified = true)]
 			get => throw new NativeCallException();
 		}
 
@@ -108,13 +109,13 @@ namespace RazorSharp.CoreClr.Structures
 		/// <param name="obj">Pointer to an object in the GC heap</param>
 		/// <param name="smallHeapOnly">Whether to include small GC heaps only</param>
 		/// <returns><c>true</c> if <paramref name="obj" /> is a heap pointer; <c>false</c> otherwise</returns>
-		[ClrSymcall]
+		[Symcall]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
 			throw new NativeCallException();
 		}
 
-		[ClrSymcall(UseMethodNameOnly = true, IgnoreNamespace = true)]
+		[Symcall(UseMethodNameOnly = true, IgnoreNamespace = true)]
 		internal static void* AllocateObject(MethodTable* mt, int fHandleCom)
 		{
 			return null;
@@ -135,7 +136,7 @@ namespace RazorSharp.CoreClr.Structures
 			return CSUnsafe.Read<T>(&objValuePtr);
 		}
 
-		[ClrSymcall(IgnoreNamespace = true)]
+		[Symcall(IgnoreNamespace = true)]
 		public bool IsGCInProgress(bool bConsiderGCStart = false)
 		{
 			throw new NativeCallException();
@@ -145,7 +146,7 @@ namespace RazorSharp.CoreClr.Structures
 		{
 			Conditions.Require(!GCSettings.IsServerGC, "GC must be WKS", nameof(GCHeap));
 
-			Symcall.BindQuick(typeof(GCHeap));
+			Symload.Load(typeof(GCHeap));
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 

@@ -66,6 +66,7 @@ namespace RazorSharp.CoreClr.Structures
 	///         This should only be accessed via <see cref="Pointer{T}" />
 	///     </remarks>
 	/// </summary>
+	[ClrSymNamespace]
 	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct MethodDesc
 	{
@@ -75,7 +76,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		static MethodDesc()
 		{
-			Symcall.BindQuick(typeof(MethodDesc));
+			Symload.Load(typeof(MethodDesc));
 		}
 
 		#region Fields
@@ -120,7 +121,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		/// <exception cref="NativeCallException"></exception>
 		internal IntPtr NativeCode {
-			[ClrSymcall(Symbol = "GetNativeCode")]
+			[Symcall(Symbol = "GetNativeCode")]
 			get => throw new NativeCallException();
 		}
 
@@ -131,7 +132,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal IntPtr PreImplementedCode {
-			[ClrSymcall(Symbol = "GetPreImplementedCode")]
+			[Symcall(Symbol = "GetPreImplementedCode")]
 			get => throw new NativeCallException();
 		}
 
@@ -166,7 +167,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal int SizeOf {
-			[ClrSymcall(Symbol = "SizeOf")]
+			[Symcall(Symbol = "SizeOf")]
 			get => throw new NativeCallException();
 		}
 
@@ -176,7 +177,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
-			[ClrSymcall(Symbol = "GetMethodTable")]
+			[Symcall(Symbol = "GetMethodTable")]
 			get => throw new NativeCallException();
 		}
 
@@ -187,13 +188,13 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal uint RVA {
-			[ClrSymcall(Symbol = "GetRVA")]
+			[Symcall(Symbol = "GetRVA")]
 			get => throw new NativeCallException();
 		}
 
 
 		internal int Token {
-			[ClrSymcall(Symbol = "GetMemberDef")]
+			[Symcall(Symbol = "GetMemberDef")]
 			get => throw new NativeCallException();
 		}
 
@@ -206,7 +207,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal bool IsConstructor {
-			[ClrSymcall(Symbol = "IsCtor")]
+			[Symcall(Symbol = "IsCtor")]
 			get => throw new NativeCallException();
 		}
 
@@ -219,7 +220,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal bool IsPointingToNativeCode {
-			[ClrSymcall(Symbol = "IsPointingToNativeCode")]
+			[Symcall(Symbol = "IsPointingToNativeCode")]
 			get => throw new NativeCallException();
 		}
 
@@ -296,7 +297,7 @@ namespace RazorSharp.CoreClr.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		[ClrSymcall]
+		[Symcall]
 		internal Pointer<ILMethod> GetILHeader(int fAllowOverrides = 0)
 		{
 			throw new NativeCallException();
@@ -305,7 +306,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		///     <remarks>Address-sensitive</remarks>
 		/// </summary>
-		[ClrSymcall]
+		[Symcall]
 		private long SetStableEntryPointInterlocked(ulong pCode)
 		{
 			throw new NativeCallException();
@@ -324,7 +325,7 @@ namespace RazorSharp.CoreClr.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		[ClrSymcall]
+		[Symcall]
 		internal void Reset()
 		{
 			throw new NativeCallException();

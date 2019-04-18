@@ -15,15 +15,8 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 		/// </summary>
 		public string Symbol { get; set; }
 
-		/// <summary>
-		///     Debugging symbol file (PDB, etc)
-		/// </summary>
-		public string Image { get; set; }
-
-		/// <summary>
-		///     <see cref="ProcessModule" /> from which to calculate the function address
-		/// </summary>
-		public string Module { get; set; }
+		
+		
 
 		/// <summary>
 		///     Whether <see cref="Symbol" /> is the fully qualified name
@@ -40,5 +33,10 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 		///     specifies a namespace.
 		/// </summary>
 		public bool IgnoreNamespace { get; set; }
+
+		public SymImportAttribute()
+		{
+			
+		}
 	}
 }

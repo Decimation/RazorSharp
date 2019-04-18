@@ -20,6 +20,10 @@ namespace RazorSharp.Memory
 		/// </summary>
 		internal static ProcessModuleCollection CurrentModules => Process.GetCurrentProcess().Modules;
 
+		internal static (string, Pointer<byte>)[] CurrentNativeModules {
+			get { return ProcessApi.GetProcessModules(Process.GetCurrentProcess()); }
+		}
+
 		public static ProcessModule GetModule(string name)
 		{
 			// todo: I shouldn't have to do this
@@ -27,11 +31,24 @@ namespace RazorSharp.Memory
 				return Clr.ClrModule;
 			}
 
-			foreach (ProcessModule m in CurrentModules)
+			foreach (ProcessModule m in CurrentModules) {
 				if (m.ModuleName == name)
 					return m;
+			}
+
 
 			return null;
+		}
+
+		public static (string, Pointer<byte>) GetNativeModule(string name)
+		{
+			foreach ((string, Pointer<byte>) pair in CurrentNativeModules) {
+				if (pair.Item1 == name) {
+					return pair;
+				}
+			}
+
+			return (null, null);
 		}
 
 		public static IntPtr GetModuleHandle(string name)
@@ -47,7 +64,12 @@ namespace RazorSharp.Memory
 		public static Pointer<byte> GetBaseAddress(string module)
 		{
 			var pm = GetModule(module);
-			return pm.BaseAddress;
+			if (pm != null) {
+				return pm.BaseAddress;
+			}
+			else {
+				return GetNativeModule(module).Item2;
+			}
 		}
 
 		private static Pointer<byte>[] GetAddressesInternal(Pointer<byte> baseAddr, long[] offset)

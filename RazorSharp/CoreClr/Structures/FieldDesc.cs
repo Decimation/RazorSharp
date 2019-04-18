@@ -48,12 +48,13 @@ namespace RazorSharp.CoreClr.Structures
 	///         This should only be accessed via <see cref="Pointer{T}" />
 	///     </remarks>
 	/// </summary>
+	[ClrSymNamespace]
 	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct FieldDesc
 	{
 		static FieldDesc()
 		{
-			Symcall.BindQuick(typeof(FieldDesc));
+			Symload.Load(typeof(FieldDesc));
 		}
 
 		private const int FIELD_OFFSET_MAX = (1 << 27) - 1;
@@ -181,7 +182,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		private int LoadSize {
-			[ClrSymcall(Symbol = "FieldDesc::LoadSize", FullyQualified = true)]
+			[Symcall(Symbol = "FieldDesc::LoadSize", FullyQualified = true)]
 			get => throw new NativeCallException(nameof(LoadSize));
 		}
 
@@ -211,7 +212,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
-			[ClrSymcall(Symbol = "FieldDesc::GetApproxEnclosingMethodTable", FullyQualified = true)]
+			[Symcall(Symbol = "FieldDesc::GetApproxEnclosingMethodTable", FullyQualified = true)]
 			get => throw new NativeCallException();
 		}
 
@@ -221,13 +222,13 @@ namespace RazorSharp.CoreClr.Structures
 			return GetStaticAddress(null);
 		}
 
-		[ClrSymcall]
+		[Symcall]
 		internal Pointer<byte> GetStaticAddress(void* value)
 		{
 			throw new NativeCallException(nameof(GetStaticAddress));
 		}
 
-		[ClrSymcall]
+		[Symcall]
 		internal Pointer<byte> GetStaticAddressHandle()
 		{
 			throw new NativeCallException(nameof(GetStaticAddressHandle));

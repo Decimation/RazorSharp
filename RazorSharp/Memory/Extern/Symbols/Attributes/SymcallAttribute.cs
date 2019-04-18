@@ -21,11 +21,11 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 	/// the corresponding <see cref="ProcessModule"/>'s <see cref="ProcessModule.BaseAddress"/>.
 	///     </para>
 	///     <para>This allows the calling of non-exported DLL functions.</para>
-	/// <seealso cref="Symcall"/>
+	/// <seealso cref="Symload"/>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method)]
 	public class SymcallAttribute : SymImportAttribute
 	{
-		
+		public SymcallAttribute() : base() {}
 	}
 }

@@ -25,9 +25,12 @@ using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.ILMethods;
 using RazorSharp.CoreJit;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Extern.Symbols;
+using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;
 using RazorSharp.Native.Symbols;
+using RazorSharp.Native.Win32;
 using RazorSharp.Utilities;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 using Unsafe = RazorSharp.Memory.Unsafe;
@@ -63,19 +66,43 @@ namespace Test
 			return raw.Split(';');
 		}
 
+		const string pdb = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.pdb";
+		
+		[SymNamespace(pdb,"NativeSharp.dll")]
+		struct MyStruct
+		{
+			
+			[SymField]
+			public int g_int;
+
+			[Symcall]
+			public void hello()
+			{
+				
+			}
+		}
+
 		public static void Main(string[] args)
 		{
 //			ModuleInitializer.GlobalSetup();
 
-			const string pdb = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.pdb";
-			
-			var sr = new SymbolReader();
-			sr.LoadAll(pdb,null);
-			Console.WriteLine(sr.GetSymbol("hello"));
-			
-			sr.Dispose();
 
+
+			/*var dll = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.dll";
+			var plib = Kernel32.LoadLibrary(dll);
 			
+			
+			
+			var ms = new MyStruct();
+			Symload.Load(typeof(MyStruct), ms);
+			Console.WriteLine(ms.g_int);
+			
+			
+			Kernel32.FreeLibrary(plib);*/
+
+			Console.WriteLine(typeof(string).GetMetaType());
+
+
 //			ModuleInitializer.GlobalClose();
 		}
 	}

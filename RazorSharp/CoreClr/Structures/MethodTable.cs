@@ -72,12 +72,13 @@ namespace RazorSharp.CoreClr.Structures
 	///         This should only be accessed via <see cref="Pointer{T}" />
 	///     </remarks>
 	/// </summary>
+	[ClrSymNamespace]
 	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct MethodTable
 	{
 		static MethodTable()
 		{
-			Symcall.BindQuick(typeof(MethodTable));
+			Symload.Load(typeof(MethodTable));
 		}
 
 
@@ -143,7 +144,7 @@ namespace RazorSharp.CoreClr.Structures
 			}
 		}
 
-		[ClrSymcall]
+		[Symcall]
 		private MethodTable* GetParentMethodTable()
 		{
 			return null;
@@ -194,7 +195,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal Pointer<MethodTable> Canon => GetCanonicalMethodTable();
 
-		[ClrSymcall]
+		[Symcall]
 		private MethodTable* GetCanonicalMethodTable()
 		{
 			throw new NativeCallException();
@@ -266,7 +267,7 @@ namespace RazorSharp.CoreClr.Structures
 		internal MethodDescChunk* MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
 
 
-		[ClrSymcall]
+		[Symcall]
 		internal uint GetSignatureCorElementType()
 		{
 			throw new NativeCallException();
