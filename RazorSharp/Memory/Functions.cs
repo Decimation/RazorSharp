@@ -5,10 +5,11 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Memory.Calling.Signatures;
-using RazorSharp.Memory.Calling.Signatures.Attributes;
-using RazorSharp.Memory.Calling.Symbols;
-using RazorSharp.Memory.Calling.Symbols.Attributes;
+using RazorSharp.Memory.Extern.Signatures;
+using RazorSharp.Memory.Extern.Signatures.Attributes;
+using RazorSharp.Memory.Extern.Symbols;
+using RazorSharp.Memory.Extern.Symbols.Attributes;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32;
 
 #endregion
@@ -77,7 +78,7 @@ namespace RazorSharp.Memory
 		static Functions()
 		{
 			const string SET_ENTRY_POINT = "MethodDesc::SetStableEntryPointInterlocked";
-			SetEntryPoint = Clr.GetClrFunction<SetEntryPointDelegate>(SET_ENTRY_POINT);
+			SetEntryPoint = Runtime.GetClrFunction<SetEntryPointDelegate>(SET_ENTRY_POINT);
 
 			/*const string GET_DELEGATE = "GetDelegateForFunctionPointerInternal";
 			GetDelegate = (GetDelegateDelegate) typeof(Marshal)
@@ -85,6 +86,9 @@ namespace RazorSharp.Memory
 			                                   .CreateDelegate(typeof(GetDelegateDelegate));*/
 		}
 
+		/// <summary>
+		/// Gets an exported function
+		/// </summary>
 		public static TDelegate GetFunction<TDelegate>(string dllName, string fn) where TDelegate : Delegate
 		{
 			var hModule = Kernel32.GetModuleHandle(dllName);
@@ -126,17 +130,17 @@ namespace RazorSharp.Memory
 
 		#region Get delegate
 
-		public static TDelegate GetDelegateForFunctionPointer<TDelegate>(IntPtr ptr) where TDelegate : Delegate
+		public static TDelegate GetDelegateForFunctionPointer<TDelegate>(Pointer<byte> ptr) where TDelegate : Delegate
 		{
 			return (TDelegate) GetDelegateForFunctionPointer(ptr, typeof(TDelegate));
 		}
 
-		public static Delegate GetDelegateForFunctionPointer(IntPtr ptr, Type t)
+		public static Delegate GetDelegateForFunctionPointer(Pointer<byte> ptr, Type t)
 		{
 //			Conditions.NotNull(GetDelegate, nameof(GetDelegate));
 //			return GetDelegate(ptr, t);
 
-			return Marshal.GetDelegateForFunctionPointer(ptr, t);
+			return Marshal.GetDelegateForFunctionPointer(ptr.Address, t);
 		}
 
 		public static void Swap(MethodInfo dest, MethodInfo src)

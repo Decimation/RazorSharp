@@ -5,12 +5,12 @@ using RazorSharp.CoreClr.Structures;
 
 #endregion
 
-namespace RazorSharp.Memory.Calling.Signatures.Attributes
+namespace RazorSharp.Memory.Extern.Signatures.Attributes
 {
 	/// <inheritdoc />
 	/// <summary>
 	///     <para>
-	///         Indicates that the attributed function is exposed via signature scanning (using
+	///         Indicates that the attributed function is implemented via signature scanning (using
 	///         <see cref="T:RazorSharp.Memory.SigScanner" /> internally).
 	///     </para>
 	///     <para>

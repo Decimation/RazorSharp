@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace RazorSharp.Memory.Calling
+namespace RazorSharp.Memory.Extern
 {
 	public class NativeCallException : NotImplementedException
 	{

@@ -144,16 +144,9 @@ namespace RazorSharp.Native.Symbols
 			return list.ToArray();
 		}
 
-		public Pointer<byte> GetSymAddress(string name, string module)
-		{
-			long offset = GetSymOffset(name);
-			return Modules.GetAddress(module, offset);
-		}
+		
 
-		public Pointer<byte> GetClrSymAddress(string name)
-		{
-			return GetSymAddress(name, Clr.CLR_DLL_SHORT);
-		}
+		
 
 		#region Retrieval
 

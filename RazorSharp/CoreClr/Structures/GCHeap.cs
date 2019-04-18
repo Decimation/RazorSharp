@@ -4,9 +4,9 @@ using System;
 using System.Runtime;
 using System.Runtime.CompilerServices;
 using RazorCommon.Diagnostics;
-using RazorSharp.Memory.Calling;
-using RazorSharp.Memory.Calling.Symbols;
-using RazorSharp.Memory.Calling.Symbols.Attributes;
+using RazorSharp.Memory.Extern;
+using RazorSharp.Memory.Extern.Symbols;
+using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -149,17 +149,17 @@ namespace RazorSharp.CoreClr.Structures
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 
-			g_pGCHeap = Clr.GetClrSymAddress(nameof(g_pGCHeap))
-			               .ReadPointer<byte>()
-			               .Address;
+			g_pGCHeap = Runtime.GetClrSymAddress(nameof(g_pGCHeap))
+			                   .ReadPointer<byte>()
+			                   .Address;
 
-			g_lowest_address = Clr.GetClrSymAddress(nameof(g_lowest_address))
-			                      .ReadPointer<byte>()
-			                      .Address;
+			g_lowest_address = Runtime.GetClrSymAddress(nameof(g_lowest_address))
+			                          .ReadPointer<byte>()
+			                          .Address;
 
-			g_highest_address = Clr.GetClrSymAddress(nameof(g_highest_address))
-			                       .ReadPointer<byte>()
-			                       .Address;
+			g_highest_address = Runtime.GetClrSymAddress(nameof(g_highest_address))
+			                           .ReadPointer<byte>()
+			                           .Address;
 		}
 	}
 }

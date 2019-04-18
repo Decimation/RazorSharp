@@ -1,8 +1,8 @@
 #region
 
 using System.Runtime.InteropServices;
-using RazorSharp.Memory.Calling.Symbols;
-using RazorSharp.Memory.Calling.Symbols.Attributes;
+using RazorSharp.Memory.Extern.Symbols;
+using RazorSharp.Memory.Extern.Symbols.Attributes;
 
 #endregion
 

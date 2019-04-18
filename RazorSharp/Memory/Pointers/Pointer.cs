@@ -5,6 +5,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -333,10 +334,7 @@ namespace RazorSharp.Memory.Pointers
 		#endregion
 
 
-		public MemoryBasicInformation Query()
-		{
-			return Kernel32.VirtualQuery(Address);
-		}
+		public MemoryBasicInformation Query() => Kernel32.VirtualQuery(Address);
 
 		public bool IsReadOnly => Query().Protect.HasFlag(MemoryProtection.ReadOnly);
 

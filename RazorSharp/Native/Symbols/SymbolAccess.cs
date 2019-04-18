@@ -15,10 +15,9 @@ namespace RazorSharp.Native.Symbols
 			return DownloadSymbolFile(dest, dll, out _);
 		}
 
-		internal static Task<FileInfo> DownloadSymbol(DirectoryInfo dest, FileInfo dll)
+		internal static Task<FileInfo> DownloadSymbolFileAsync(DirectoryInfo dest, FileInfo dll)
 		{
-			Func<FileInfo> fn = () => DownloadSymbolFile(dest, dll);
-			return new Task<FileInfo>(fn);
+			return new Task<FileInfo>(() => DownloadSymbolFile(dest, dll));
 		}
 
 		internal static FileInfo DownloadSymbolFile(DirectoryInfo dest, FileInfo dll, out DirectoryInfo super)
@@ -33,7 +32,7 @@ namespace RazorSharp.Native.Symbols
 
 
 			using (var cmdProc = Common.Shell("\"" + cmd + "\"")) {
-				var startTime = DateTimeOffset.Now;
+				
 
 				cmdProc.ErrorDataReceived += (sender, args) =>
 				{
@@ -50,15 +49,13 @@ namespace RazorSharp.Native.Symbols
 						break;
 					}
 
-					if (DateTimeOffset.Now.Subtract(startTime).TotalMinutes > 1.5) {
-						throw new TimeoutException("Could not download CLR symbols");
-					}
+					
 				}
 			}
 
 			Global.Log.Debug("Done downloading symbols");
 
-			string   pdbStr = dest.FullName + @"\" + Clr.CLR_PDB_SHORT;
+			string   pdbStr = Path.Combine(dest.FullName, Clr.CLR_PDB_SHORT);
 			FileInfo pdb;
 
 			if (Directory.Exists(pdbStr)) {

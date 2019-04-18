@@ -168,18 +168,15 @@ namespace RazorSharp.CoreClr
 		internal static int RidFromToken(int tk)
 		{
 			// #define RidFromToken(tk) ((RID) ((tk) & 0x00ffffff))
-			return tk & 0x00ffffff;
+			return tk & 0x00FFFFFF;
 		}
 
 		internal static long TypeFromToken(int tk)
 		{
 			// #define TypeFromToken(tk) ((ULONG32)((tk) & 0xff000000))
-			return tk & 0xff000000;
+			return tk & 0xFF000000;
 		}
 
-		internal static int TokenFromRid(int rid, CorTokenType tktype)
-		{
-			return rid | (int) tktype;
-		}
+		internal static int TokenFromRid(int rid, CorTokenType tktype) => rid | (int) tktype;
 	}
 }

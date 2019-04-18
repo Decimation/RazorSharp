@@ -3,8 +3,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -13,6 +16,7 @@ using System.Text;
 using System.Threading;
 using InlineIL;
 using RazorCommon;
+using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp;
@@ -21,10 +25,9 @@ using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.ILMethods;
 using RazorSharp.CoreJit;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Calling.Symbols;
-using RazorSharp.Memory.Calling.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;
+using RazorSharp.Native.Symbols;
 using RazorSharp.Utilities;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 using Unsafe = RazorSharp.Memory.Unsafe;
@@ -53,23 +56,27 @@ namespace Test
 			RuntimeHelpers.PrepareMethod(t.GetAnyMethod(n).MethodHandle);
 		}
 
-		
+		static string[] GetPathValues()
+		{
+			var raw = Environment.GetEnvironmentVariable("path", EnvironmentVariableTarget.Machine);
+			Conditions.NotNull(raw, nameof(raw));
+			return raw.Split(';');
+		}
 
 		public static void Main(string[] args)
 		{
-			// ICorJitCompiler
-			var pJit = CorJitCompiler.GetJit();
+//			ModuleInitializer.GlobalSetup();
 
-			ModuleInitializer.GlobalSetup();
+			const string pdb = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.pdb";
+			
+			var sr = new SymbolReader();
+			sr.LoadAll(pdb,null);
+			Console.WriteLine(sr.GetSymbol("hello"));
+			
+			sr.Dispose();
 
 			
-			
-
-
-			ModuleInitializer.GlobalClose();
-
-			// hwnd 000B0B74
-			// SunAwtFrame
+//			ModuleInitializer.GlobalClose();
 		}
 	}
 }

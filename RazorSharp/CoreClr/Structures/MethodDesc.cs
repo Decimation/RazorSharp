@@ -12,9 +12,9 @@ using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.ILMethods;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Calling;
-using RazorSharp.Memory.Calling.Symbols;
-using RazorSharp.Memory.Calling.Symbols.Attributes;
+using RazorSharp.Memory.Extern;
+using RazorSharp.Memory.Extern.Symbols;
+using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 using Unsafe = RazorSharp.Memory.Unsafe;
 

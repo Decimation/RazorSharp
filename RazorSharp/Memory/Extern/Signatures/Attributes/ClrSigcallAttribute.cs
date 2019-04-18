@@ -5,11 +5,11 @@ using RazorSharp.CoreClr;
 
 #endregion
 
-namespace RazorSharp.Memory.Calling.Signatures.Attributes
+namespace RazorSharp.Memory.Extern.Signatures.Attributes
 {
 	/// <inheritdoc />
 	/// <summary>
-	///     <see cref="T:RazorSharp.Memory.Calling.Signatures.Attributes.SigcallAttribute" /> for module
+	///     <see cref="T:RazorSharp.Memory.Extern.Signatures.Attributes.SigcallAttribute" /> for module
 	///     <see cref="Clr.CLR_DLL_SHORT" />
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method)]

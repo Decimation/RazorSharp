@@ -50,18 +50,26 @@ namespace RazorSharp.Memory
 			return pm.BaseAddress;
 		}
 
-		public static Pointer<byte>[] GetAddresses(string module, long[] offset)
+		private static Pointer<byte>[] GetAddressesInternal(Pointer<byte> baseAddr, long[] offset)
 		{
-			int lim = offset.Length;
-			var rg  = new Pointer<byte>[lim];
+			var rg = new Pointer<byte>[offset.Length];
 
-			Pointer<byte> ptr = GetBaseAddress(module);
 
-			for (int i = 0; i < lim; i++) {
-				rg[i] = ptr + offset[i];
+			for (int i = 0; i < rg.Length; i++) {
+				rg[i] = baseAddr + offset[i];
 			}
 
 			return rg;
+		}
+
+		public static Pointer<byte>[] GetAddresses(string module, long[] offset)
+		{
+			return GetAddresses(GetModule(module), offset);
+		}
+
+		public static Pointer<byte>[] GetAddresses(ProcessModule module, long[] offset)
+		{
+			return GetAddressesInternal(module.BaseAddress, offset);
 		}
 
 		public static Pointer<byte> GetAddress(string module, long offset)

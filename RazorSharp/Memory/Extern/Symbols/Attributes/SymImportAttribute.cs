@@ -1,19 +1,17 @@
-#region
-
 using System;
 using System.Diagnostics;
 
-#endregion
-
-namespace RazorSharp.Memory.Calling.Symbols.Attributes
+namespace RazorSharp.Memory.Extern.Symbols.Attributes
 {
-	[AttributeUsage(AttributeTargets.Method)]
-	public class SymcallAttribute : Attribute
+	/// <summary>
+	/// Indicates a resource is imported from a symbol file and retrieved from its corresponding <see cref="ProcessModule"/>
+	/// by adding the symbol's RVA to the module's <see cref="ProcessModule.BaseAddress"/>
+	/// <seealso cref="ModuleInfo"/>
+	/// </summary>
+	public class SymImportAttribute : Attribute
 	{
-		// todo: this configuration is a bit confusing
-
 		/// <summary>
-		///     Name of the method
+		///     Name of the symbol
 		/// </summary>
 		public string Symbol { get; set; }
 

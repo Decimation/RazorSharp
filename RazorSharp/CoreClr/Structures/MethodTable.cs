@@ -11,10 +11,11 @@ using RazorCommon.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Calling;
-using RazorSharp.Memory.Calling.Symbols;
-using RazorSharp.Memory.Calling.Symbols.Attributes;
+using RazorSharp.Memory.Extern;
+using RazorSharp.Memory.Extern.Symbols;
+using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
+// ReSharper disable MemberCanBeMadeStatic.Local
 
 // ReSharper disable ConvertToAutoProperty
 // ReSharper disable NonReadonlyMemberInGetHashCode
@@ -196,7 +197,7 @@ namespace RazorSharp.CoreClr.Structures
 		[ClrSymcall]
 		private MethodTable* GetCanonicalMethodTable()
 		{
-			return null;
+			throw new NativeCallException();
 		}
 
 

@@ -28,7 +28,18 @@ namespace RazorSharp.CoreClr
 			ClrDll     = GetClrDll();
 			ClrModule  = Modules.GetModule(CLR_DLL_SHORT);
 			ClrVersion = new Version(4, 0, 30319, 42000);
-			ClrSymbols = new SymbolReader();
+
+			
+			if (ClrPdb == null) {
+				ClrPdb         = GetClrSymbolFile();
+				IsPdbTemporary = true;
+			}
+			else {
+				Conditions.Require(ClrPdb.Exists);
+				IsPdbTemporary = false;
+			}
+
+			ClrSymbols = new ModuleInfo(ClrPdb, ClrModule);
 		}
 
 
@@ -40,11 +51,13 @@ namespace RazorSharp.CoreClr
 			// Good lord this problem took 3 hours to solve
 			// Turns out the pdb file was just out of date lmao
 
-			const string ERR = "The PDB specified by \"ClrPdb\" does not match the one returned by Microsoft's servers";
+			const string ERR = "The PDB specified by \"" + nameof(ClrPdb) +
+			                   "\" does not match the one returned by Microsoft's servers";
+
 			Conditions.NotNull(ClrPdb, nameof(ClrPdb));
 			string cd     = Environment.CurrentDirectory;
 			var    tmpSym = SymbolAccess.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
-			Conditions.Require(ClrPdb.ContentEquals(tmpSym), ERR, nameof(ClrPdb));
+			Conditions.Ensure(ClrPdb.ContentEquals(tmpSym), ERR, nameof(ClrPdb));
 			DeleteSymbolFile(tmpSym);
 		}
 
@@ -85,24 +98,8 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		internal static void LoadAllClrSymbols()
-		{
-			ClrSymbols.LoadAll(ClrPdb.FullName, null);
-			Global.Log.Debug("Loaded {Count} Clr symbols", ClrSymbols.Symbols.Count);
-		}
-
 		internal static void Setup()
 		{
-			if (ClrPdb == null) {
-				ClrPdb         = GetClrSymbolFile();
-				IsPdbTemporary = true;
-			}
-			else {
-				Conditions.Require(ClrPdb.Exists);
-				IsPdbTemporary = false;
-			}
-
-
 			IsSetup = true;
 		}
 
@@ -138,18 +135,12 @@ namespace RazorSharp.CoreClr
 			if (IsPdbTemporary)
 				DeleteSymbolFile(ClrPdb);
 
+			ClrSymbols.Dispose();
+
 			IsSetup = false;
 		}
 
-		internal static Pointer<byte> GetClrSymAddress(string name) => ClrSymbols.GetClrSymAddress(name);
 
-		internal static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate
-		{
-			return Functions.GetDelegateForFunctionPointer<TDelegate>(GetClrSymAddress(name).Address);
-		}
-
-		
-		
 		#region Constants and accessors
 
 		/// <summary>
@@ -190,9 +181,9 @@ namespace RazorSharp.CoreClr
 		///     <para>A PDB file will be searched for in <see cref="CLR_PDB_FILE_SEARCH" />;</para>
 		///     <para>or the symbol file will be automatically downloaded</para>
 		/// </summary>
-		internal static FileInfo ClrPdb { get; private set; }
+		internal static readonly FileInfo ClrPdb;
 
-		internal static readonly SymbolReader ClrSymbols;
+		internal static readonly ModuleInfo ClrSymbols;
 
 		private const string CLR_PDB_FILE_SEARCH = @"C:\Symbols\clr.pdb";
 

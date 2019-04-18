@@ -46,25 +46,15 @@ namespace RazorSharp.CoreClr
 
 		public static Pointer<byte> GetClrSymAddress(string name)
 		{
-			return Clr.GetClrSymAddress(name);
+			return Clr.ClrSymbols.GetSymAddress(name);
 		}
 
 		public static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate
 		{
-			return Clr.GetClrFunction<TDelegate>(name);
+			return Clr.ClrSymbols.GetFunction<TDelegate>(name);
 		}
 
-		public static Symbol GetClrSymbol(string name)
-		{
-			return Clr.ClrSymbols.GetSymbol(name);
-		}
-		
-		public static Symbol[] GetClrSymbolContainingName(string name)
-		{
-			return Clr.ClrSymbols.GetSymbolsContainingName(name);
-		}
 
-		
 		public static T Alloc<T>(params object[] args)
 		{
 			var value = GCHeap.AllocateObject<T>(0);

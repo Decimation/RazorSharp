@@ -43,7 +43,6 @@ namespace RazorSharp.Memory
 
 		public static bool Is64Bit => IntPtr.Size == sizeof(long);
 
-
 		/// <summary>
 		///     Checks whether an address is in range.
 		/// </summary>
@@ -62,29 +61,26 @@ namespace RazorSharp.Memory
 		}
 
 
-		public static IntPtr OffsetAs<TOriginal, TAs>(IntPtr p, int origElemCnt)
+		public static Pointer<byte> OffsetAs<TOrig, TAs>(Pointer<byte> p, int origElemCnt)
 		{
-			return p + OffsetCountAs<TOriginal, TAs>(origElemCnt);
+			return p + OffsetCountAs<TOrig, TAs>(origElemCnt);
 		}
 
 		/// <summary>
 		///     Calculates the element offset (count) of <paramref name="origElemCnt" /> in terms of <typeparamref name="TAs" />
 		/// </summary>
-		/// <param name="origElemCnt">Original element count in terms of <typeparamref name="TOriginal" /></param>
-		/// <typeparam name="TOriginal">Type of <paramref name="origElemCnt" /></typeparam>
+		/// <param name="origElemCnt">Original element count in terms of <typeparamref name="TOrig" /></param>
+		/// <typeparam name="TOrig">Type of <paramref name="origElemCnt" /></typeparam>
 		/// <typeparam name="TAs">Type to return <paramref name="origElemCnt" /> as</typeparam>
 		/// <returns></returns>
-		public static int OffsetCountAs<TOriginal, TAs>(int origElemCnt)
+		public static int OffsetCountAs<TOrig, TAs>(int origElemCnt)
 		{
-			int origByteCount = origElemCnt * Unsafe.SizeOf<TOriginal>();
+			int origByteCount = origElemCnt * Unsafe.SizeOf<TOrig>();
 			return origByteCount / Unsafe.SizeOf<TAs>();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int Size<T>(int elemCnt)
-		{
-			return CSUnsafe.SizeOf<T>() * elemCnt;
-		}
+		public static int Size<T>(int elemCnt) => CSUnsafe.SizeOf<T>() * elemCnt;
 
 		#region Zero
 
@@ -107,9 +103,9 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     Counts the number of allocations (allocated pointers)
 		/// </summary>
-		internal static int AllocCount { get; private set; }
+		public static int AllocCount { get; private set; }
 
-		internal static bool IsMemoryInUse => AllocCount > 0;
+		public static bool IsMemoryInUse => AllocCount > 0;
 
 		/// <summary>
 		///     Allocates basic reference types in the unmanaged heap.
@@ -125,7 +121,7 @@ namespace RazorSharp.Memory
 		/// <returns>A double indirection pointer to the unmanaged instance.</returns>
 		public static Pointer<T> AllocUnmanagedInstance<T>() where T : class
 		{
-			Conditions.Require(!typeof(T).IsArray);
+			Conditions.Require(!Runtime.IsArray<T>());
 			Conditions.Require(typeof(T) != typeof(string));
 
 
@@ -218,8 +214,7 @@ namespace RazorSharp.Memory
 		///     Allocates a native string from a UTF16 C# string
 		/// </summary>
 		/// <param name="s">Standard UTF16 C# string</param>
-		/// <param name="type"></param>
-		/// <returns></returns>
+		/// <param name="type">String type</param>
 		public static Pointer<byte> AllocString(string s, StringTypes type)
 		{
 			int           size = s.Length + 1;

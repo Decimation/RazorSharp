@@ -5,8 +5,9 @@ using RazorSharp.CoreClr;
 
 #endregion
 
-namespace RazorSharp.Memory.Calling.Symbols.Attributes
+namespace RazorSharp.Memory.Extern.Symbols.Attributes
 {
+	
 	[AttributeUsage(AttributeTargets.Method)]
 	public class ClrSymcallAttribute : SymcallAttribute
 	{

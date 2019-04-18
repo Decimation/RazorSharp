@@ -8,9 +8,9 @@ using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Calling;
-using RazorSharp.Memory.Calling.Symbols;
-using RazorSharp.Memory.Calling.Symbols.Attributes;
+using RazorSharp.Memory.Extern;
+using RazorSharp.Memory.Extern.Symbols;
+using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local

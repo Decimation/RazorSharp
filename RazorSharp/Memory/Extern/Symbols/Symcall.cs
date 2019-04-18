@@ -2,20 +2,24 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using RazorCommon.Diagnostics;
-using RazorSharp.Memory.Calling.Symbols.Attributes;
+using RazorSharp.CoreClr;
+using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Symbols;
 using RazorSharp.Utilities;
 
 #endregion
 
-namespace RazorSharp.Memory.Calling.Symbols
+namespace RazorSharp.Memory.Extern.Symbols
 {
+	/// <summary>
+	/// Provides operations for working with <see cref="SymImportAttribute"/>
+	/// </summary>
 	public static class Symcall
 	{
 		private const           string     SCOPE_RESOLUTION_OPERATOR = "::";
@@ -71,19 +75,21 @@ namespace RazorSharp.Memory.Calling.Symbols
 			return fullSym;
 		}
 
-		private static ISymbolProvider GetProvider(SymcallAttribute attr)
+		private static ModuleInfo GetInfo(SymcallAttribute attr)
 		{
-			/*if (attr.Image == Clr.CLR_DLL_SHORT) {
+			if (attr.Image == Clr.ClrPdb.FullName && attr.Module == Clr.CLR_DLL_SHORT) {
 				return Clr.ClrSymbols;
-			}*/
+			}
 
-			/*var sym = new SymbolReader();
-			sym.LoadAll(attr.Image, null);
-			return sym;*/
-
-			return new SymbolEnvironment(attr.Image);
+			return new ModuleInfo(new FileInfo(attr.Image), Modules.GetModule(attr.Module));
 		}
 
+
+		private static void LoadMethods()
+		{
+			
+		}
+		
 		public static void BindQuick(Type t)
 		{
 			if (IsBound(t)) {
@@ -105,8 +111,9 @@ namespace RazorSharp.Memory.Calling.Symbols
 			Global.Log.Information("Binding type {Name}", t.Name);
 
 
+			// For now, only one image can be used per type
 			var baseAttr = attributes[0];
-			var sym      = GetProvider(baseAttr);
+			var sym      = GetInfo(baseAttr);
 			var contexts = new string[lim];
 
 
@@ -129,14 +136,11 @@ namespace RazorSharp.Memory.Calling.Symbols
 			}
 
 
-			long[] offsets = sym.GetSymOffsets(contexts);
+			var addresses = sym.GetSymAddresses(contexts);
 
+			if (addresses.Length != lim) { }
 
-			Pointer<byte>[] addresses = Modules.GetAddresses(baseAttr.Module, offsets).ToArray();
-
-			Conditions.Require(addresses.Length == lim,
-			                   String.Format("addresses: {0} | offsets: {2} | lim: {1}",
-			                                 addresses.Length,lim,offsets.Length));
+			Conditions.Assert(addresses.Length == lim);
 
 			for (int i = 0; i < lim; i++) {
 				// .text	0000000180001000	000000018070E000	R	.	X	.	L	para	0001	public	CODE	64	0000	0000	0003	FFFFFFFFFFFFFFFF	FFFFFFFFFFFFFFFF
@@ -150,7 +154,9 @@ namespace RazorSharp.Memory.Calling.Symbols
 
 			BoundTypes.Add(t);
 
-			sym.Dispose();
+			// Don't dispose ClrSymbols - we need it for the life of the program
+			if (!ReferenceEquals(sym, Clr.ClrSymbols))
+				sym.Dispose();
 		}
 	}
 }

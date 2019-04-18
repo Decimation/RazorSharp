@@ -18,10 +18,7 @@ namespace RazorSharp.Utilities
 	/// </summary>
 	public static class ReflectionUtil
 	{
-		public static MetaType GetMetaType(this Type t)
-		{
-			return new MetaType(t.GetMethodTable());
-		}
+		public static MetaType GetMetaType(this Type t) => new MetaType(t.GetMethodTable());
 
 		/// <summary>
 		///     Executes a generic method

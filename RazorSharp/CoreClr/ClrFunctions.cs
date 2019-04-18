@@ -4,9 +4,9 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Memory.Calling;
-using RazorSharp.Memory.Calling.Symbols;
-using RazorSharp.Memory.Calling.Symbols.Attributes;
+using RazorSharp.Memory.Extern;
+using RazorSharp.Memory.Extern.Symbols;
+using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 
 // ReSharper disable IdentifierTypo
@@ -37,7 +37,7 @@ namespace RazorSharp.CoreClr
 		static ClrFunctions()
 		{
 			Symcall.BindQuick(typeof(ClrFunctions));
-			JIT_GetRuntimeType = Clr.GetClrFunction<GetRuntimeType>(nameof(JIT_GetRuntimeType));
+			JIT_GetRuntimeType = Runtime.GetClrFunction<GetRuntimeType>(nameof(JIT_GetRuntimeType));
 		}
 
 		/// <summary>
