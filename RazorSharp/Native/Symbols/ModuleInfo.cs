@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
@@ -9,26 +10,47 @@ using SharpPdb.Windows;
 
 namespace RazorSharp.Native.Symbols
 {
+	public enum SymbolRetrievalMode
+	{
+		Kernel,
+		PdbReader
+	}
+
 	/// <summary>
 	/// Combines a symbol file with a process module.
 	/// </summary>
 	public class ModuleInfo : IDisposable
 	{
-		private readonly PdbSymbols    m_reader;
-		private readonly Pointer<byte> m_baseAddr;
+		private readonly ISymbolResolver     m_reader;
+		private readonly Pointer<byte>       m_baseAddr;
+		private readonly SymbolRetrievalMode m_mode;
 
-		public ModuleInfo(FileInfo pdb, ProcessModule module) : this(pdb, module.BaseAddress) { }
+		public ModuleInfo(FileInfo pdb, ProcessModule module, SymbolRetrievalMode mode)
+			: this(pdb, module.BaseAddress, mode) { }
 
-		public ModuleInfo(FileInfo pdb, Pointer<byte> baseAddr)
+		public ModuleInfo(FileInfo pdb, Pointer<byte> baseAddr, SymbolRetrievalMode mode)
 		{
-			m_reader = new PdbSymbols(pdb);
 			m_baseAddr = baseAddr;
+			m_mode     = mode;
+
+			switch (m_mode) {
+				case SymbolRetrievalMode.Kernel:
+
+					m_reader = SymbolEnvironment.Instance;
+					((SymbolEnvironment) m_reader).Init(pdb.FullName);
+					break;
+				case SymbolRetrievalMode.PdbReader:
+					m_reader = new PdbSymbols(pdb);
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
 		}
 
 
 		public Pointer<byte> GetSymAddress(string name)
 		{
-			long ofs = m_reader.GetSymbol(name).Offset;
+			long ofs = m_reader.GetSymOffset(name);
 			return m_baseAddr + ofs;
 		}
 
@@ -39,7 +61,7 @@ namespace RazorSharp.Native.Symbols
 
 		public Pointer<byte>[] GetSymAddresses(string[] names)
 		{
-			var offsets = m_reader.GetSymbols(names).Select(x => x.Offset).ToArray();
+			var offsets = m_reader.GetSymOffsets(names);
 
 			var rg = new Pointer<byte>[offsets.Length];
 
@@ -50,6 +72,10 @@ namespace RazorSharp.Native.Symbols
 			return rg;
 		}
 
-		public void Dispose() { }
+		public void Dispose()
+		{
+			if (m_mode == SymbolRetrievalMode.Kernel)
+				((SymbolEnvironment) m_reader).Dispose();
+		}
 	}
 }

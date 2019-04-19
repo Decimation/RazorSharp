@@ -65,6 +65,7 @@ namespace RazorSharp.Memory.Pointers
 	///     </remarks>
 	/// </summary>
 	/// <typeparam name="T">Element type to point to</typeparam>
+	[DebuggerDisplay("{" + nameof(Dbg) + "}")]
 	public unsafe struct Pointer<T> : IFormattable
 	{
 		/// <summary>
@@ -73,6 +74,7 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		private void* m_value;
 
+		private string Dbg => ToString(PointerFormat.FMT_P);
 		#region Properties
 
 		/// <summary>

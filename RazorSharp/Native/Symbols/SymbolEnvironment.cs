@@ -12,7 +12,7 @@ using RazorSharp.Native.Win32;
 
 namespace RazorSharp.Native.Symbols
 {
-	public unsafe class SymbolEnvironment : ISymbolProvider
+	public unsafe class SymbolEnvironment : ISymbolProvider, ISymbolResolver
 	{
 		private ulong m_modBase;
 

@@ -259,6 +259,7 @@
     <Compile Include="Native\StandardHandles.cs" />
     <Compile Include="Native\Symbols\FindChildrenParams.cs" />
     <Compile Include="Native\Symbols\ISymbolProvider.cs" />
+    <Compile Include="Native\Symbols\ISymbolResolver.cs" />
     <Compile Include="Native\Symbols\ModuleInfo.cs" />
     <Compile Include="Native\Symbols\CvPdbParser.cs" />
     <Compile Include="Native\Symbols\PdbSymbols.cs" />

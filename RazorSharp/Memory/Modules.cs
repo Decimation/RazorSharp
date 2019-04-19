@@ -20,9 +20,8 @@ namespace RazorSharp.Memory
 		/// </summary>
 		internal static ProcessModuleCollection CurrentModules => Process.GetCurrentProcess().Modules;
 
-		internal static (string, Pointer<byte>)[] CurrentNativeModules {
-			get { return ProcessApi.GetProcessModules(Process.GetCurrentProcess()); }
-		}
+		internal static (string, Pointer<byte>)[] CurrentNativeModules 
+			=> ProcessApi.GetProcessModules(Process.GetCurrentProcess());
 
 		public static ProcessModule GetModule(string name)
 		{

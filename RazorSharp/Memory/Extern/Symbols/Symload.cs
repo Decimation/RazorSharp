@@ -35,7 +35,6 @@ namespace RazorSharp.Memory.Extern.Symbols
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsBound(Type t) => BoundTypes.Contains(t);
 
-		
 
 		private static string GetSymbolName(SymImportAttribute attr, [NotNull] MemberInfo member)
 		{
@@ -65,13 +64,21 @@ namespace RazorSharp.Memory.Extern.Symbols
 			return fullSym;
 		}
 
-		private static ModuleInfo GetInfo(SymNamespaceAttribute attr)
+		private static ModuleInfo GetInfo(SymNamespaceAttribute attr, Pointer<byte> baseAddr)
 		{
 			if (attr.Image == Clr.ClrPdb.FullName && attr.Module == Clr.CLR_DLL_SHORT) {
 				return Clr.ClrSymbols;
 			}
 
-			return new ModuleInfo(new FileInfo(attr.Image), Modules.GetBaseAddress(attr.Module));
+
+			return new ModuleInfo(new FileInfo(attr.Image),
+			                      baseAddr,
+			                      SymbolRetrievalMode.PdbReader);
+		}
+
+		private static ModuleInfo GetInfo(SymNamespaceAttribute attr)
+		{
+			return GetInfo(attr, Modules.GetBaseAddress(attr.Module));
 		}
 
 		private static void LoadField(object             inst,
@@ -85,16 +92,16 @@ namespace RazorSharp.Memory.Extern.Symbols
 			var symField  = (SymFieldAttribute) sym;
 			var fieldInfo = (FieldInfo) field;
 
-			var addr = module.GetSymAddress(fullSym);
+			var addr      = module.GetSymAddress(fullSym);
 			var fieldType = symField.LoadAs ?? fieldInfo.FieldType;
-			
+
 			// todo: also add special support for strings and other native types
-			
-			var val  = addr.ReadAnyEx(fieldType);
+
+			var val = addr.ReadAnyEx(fieldType);
 			fieldInfo.SetValue(inst, val);
 		}
 
-		public static object Load(Type t, object inst = null)
+		public static object Load(Type t, object inst = null, Pointer<byte> baseAddr = default)
 		{
 			if (IsBound(t)) {
 				return inst;
@@ -103,8 +110,8 @@ namespace RazorSharp.Memory.Extern.Symbols
 			// For now, only one image can be used per type
 			var    nameSpaceAttr = t.GetCustomAttribute<SymNamespaceAttribute>();
 			string nameSpace     = nameSpaceAttr?.Namespace;
-			var mi = GetInfo(nameSpaceAttr);
-			
+			var    mi            = !baseAddr.IsNull ? GetInfo(nameSpaceAttr, baseAddr) : GetInfo(nameSpaceAttr);
+
 			(MemberInfo[] members, SymImportAttribute[] attributes) = t.GetAnnotated<SymImportAttribute>();
 
 
@@ -132,7 +139,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 				var addr = mi.GetSymAddress(fullSym);
 
-		
+
 				switch (mem.MemberType) {
 					case MemberTypes.Constructor:
 						// The import is a function (ctor)
@@ -166,7 +173,5 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 			return inst;
 		}
-
-		
 	}
 }

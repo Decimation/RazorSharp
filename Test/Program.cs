@@ -84,36 +84,20 @@ namespace Test
 			}
 		}
 
+		// todo: organize symbols and pdb crap
 
 		public static void Main(string[] args)
 		{
-//			ModuleInitializer.GlobalSetup();
+			ModuleInitializer.GlobalSetup();
 
 
-
-//			var dll = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.dll";
-//			var plib = Kernel32.LoadLibrary(dll);
-
-
-			var x = new PdbSymbols(new FileInfo(pdb)).GetSymbol("g_int");
-			Console.WriteLine(x.Name);
-			
-
-			var ms = new MyStruct();
-			ms = (MyStruct) Symload.Load(typeof(MyStruct), ms);
-			Console.WriteLine(ms.g_int);
-
-			
-			
-
-//			Kernel32.FreeLibrary(plib);
 
 			Console.WriteLine(typeof(string).GetMetaType());
-			
-			
 
 
-//			ModuleInitializer.GlobalClose();
+
+
+			ModuleInitializer.GlobalClose();
 		}
 	}
 }

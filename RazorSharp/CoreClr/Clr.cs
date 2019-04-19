@@ -39,7 +39,7 @@ namespace RazorSharp.CoreClr
 				IsPdbTemporary = false;
 			}
 
-			ClrSymbols = new ModuleInfo(ClrPdb, ClrModule);
+			ClrSymbols = new ModuleInfo(ClrPdb, ClrModule, SymbolRetrievalMode.Kernel);
 		}
 
 

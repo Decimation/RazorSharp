@@ -48,6 +48,7 @@ namespace RazorSharp.Native.Win32
 					GetModuleFileNameEx(p.Handle, hMods[i], strbld, (strbld.Capacity));
 
 					pairs.Add((strbld.ToString(), hMods[i]));
+					
 				}
 			}
 
