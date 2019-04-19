@@ -1049,6 +1049,8 @@ namespace RazorSharp.Memory.Pointers
 			return p;
 		}
 
+		public static Pointer<T> operator +(Pointer<T> p, uint i) => p + (int) i;
+
 		/// <summary>
 		///     Decrements the <see cref="Address" /> by the specified number of elements.
 		///     <remarks>
@@ -1065,6 +1067,8 @@ namespace RazorSharp.Memory.Pointers
 			return p;
 		}
 
+		public static Pointer<T> operator -(Pointer<T> p, uint i) => p - (int) i;
+		
 		/// <summary>
 		///     Increments the <see cref="Pointer{T}" /> by one element.
 		/// </summary>

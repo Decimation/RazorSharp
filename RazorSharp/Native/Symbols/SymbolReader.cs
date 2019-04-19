@@ -21,6 +21,7 @@ namespace RazorSharp.Native.Symbols
 	///     Provides access to symbols in PDB files and matching them with the corresponding memory
 	///     location in an image
 	/// </summary>
+	[Obsolete]
 	public unsafe class SymbolReader : ISymbolProvider
 	{
 		private const string MASK_STR_DEFAULT = "*!*";

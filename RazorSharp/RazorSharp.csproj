@@ -116,8 +116,16 @@
       <HintPath>..\packages\Serilog.Sinks.Console.3.1.1\lib\net45\Serilog.Sinks.Console.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SharpPdb.Windows, Version=1.0.3.60, Culture=neutral, PublicKeyToken=3a5f07d24fadcaec, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpPdb.Windows.1.0.3.60\lib\net45\SharpPdb.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpUtilities, Version=1.4.4.0, Culture=neutral, PublicKeyToken=3a5f07d24fadcaec, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpUtilities.1.4.4\lib\net45\SharpUtilities.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Collections" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO" />
     <Reference Include="System.Memory, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
       <HintPath>..\..\..\.nuget\packages\system.memory\4.5.2\lib\netstandard2.0\System.Memory.dll</HintPath>
     </Reference>
@@ -252,6 +260,8 @@
     <Compile Include="Native\Symbols\FindChildrenParams.cs" />
     <Compile Include="Native\Symbols\ISymbolProvider.cs" />
     <Compile Include="Native\Symbols\ModuleInfo.cs" />
+    <Compile Include="Native\Symbols\CvPdbParser.cs" />
+    <Compile Include="Native\Symbols\PdbSymbols.cs" />
     <Compile Include="Native\Symbols\Symbol.cs" />
     <Compile Include="Native\Symbols\SymbolAccess.cs" />
     <Compile Include="Native\Symbols\SymbolEnvironment.cs" />

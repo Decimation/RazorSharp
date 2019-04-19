@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorCommon.Extensions;
 using RazorSharp.Native.Win32;
@@ -13,17 +14,44 @@ namespace RazorSharp.Native.Symbols
 {
 	public unsafe class SymbolEnvironment : ISymbolProvider
 	{
-		private readonly ulong    m_modBase;
-		private          string   m_img;
-		private          string[] m_nameBuffer;
+		private ulong m_modBase;
+
+		private string[] m_nameBuffer;
 
 		private IntPtr m_proc;
 		private Symbol m_symBuf;
 
 		private List<Symbol> m_symBuffer;
 
-		public SymbolEnvironment(string img)
+		private bool m_isLoaded;
+
+		private string m_img;
+
+		private SymbolEnvironment() { }
+
+		private static readonly SymbolEnvironment _instance;
+
+		public static SymbolEnvironment Instance {
+			[MethodImpl(MethodImplOptions.Synchronized)]
+			get {
+				lock (_instance) {
+					return _instance;
+				}
+			}
+		}
+
+
+		static SymbolEnvironment()
 		{
+			_instance = new SymbolEnvironment();
+		}
+
+		public void Init(string img)
+		{
+			if (m_isLoaded) {
+				Dispose();
+			}
+
 			m_img = img;
 
 			m_proc = Kernel32.GetCurrentProcess();
@@ -47,20 +75,23 @@ namespace RazorSharp.Native.Symbols
 			ulong baseAddr = 0;
 			ulong fileSize = 0;
 
-			bool getFile = SymbolReader.GetFileParams(img, ref baseAddr, ref fileSize);
+			bool getFile = SymbolReader.GetFileParams(m_img, ref baseAddr, ref fileSize);
 			NativeHelp.Call(getFile);
 
 			m_modBase = DbgHelp.SymLoadModule64(
 				m_proc,         // Process handle of the current process
 				IntPtr.Zero,    // Handle to the module's image file (not needed)
-				img,            // Path/name of the file
+				m_img,          // Path/name of the file
 				null,           // User-defined short name of the module (it can be NULL)
 				baseAddr,       // Base address of the module (cannot be NULL if .PDB file is used, otherwise it can be NULL)
 				(uint) fileSize // Size of the file (cannot be NULL if .PDB file is used, otherwise it can be NULL)
 			);
 
 			NativeHelp.Call(m_modBase != 0, nameof(DbgHelp.SymLoadModule64));
+
+			m_isLoaded = true;
 		}
+
 
 		public long GetSymOffset(string name)
 		{
@@ -115,12 +146,16 @@ namespace RazorSharp.Native.Symbols
 
 		public void Dispose()
 		{
+			Global.Log.Debug("Unloading symbols for image {Name}", m_img);
+
 			NativeHelp.Call(DbgHelp.SymUnloadModule64(m_proc, m_modBase), nameof(DbgHelp.SymUnloadModule64));
 
 			NativeHelp.Call(DbgHelp.SymCleanup(m_proc), nameof(DbgHelp.SymCleanup));
 
-			m_proc   = IntPtr.Zero;
-			m_symBuf = null;
+			m_proc     = IntPtr.Zero;
+			m_symBuf   = null;
+			m_isLoaded = false;
+			m_img      = null;
 		}
 
 		private bool FirstSymCallback(IntPtr sym, uint symSize, IntPtr userCtx)

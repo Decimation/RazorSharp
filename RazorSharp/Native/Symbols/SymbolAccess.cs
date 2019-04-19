@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using RazorCommon.Diagnostics;
+using RazorCommon.Extensions;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr;
 
@@ -81,6 +82,15 @@ namespace RazorSharp.Native.Symbols
 
 			Conditions.Ensure(pdb.Exists);
 			return pdb;
+		}
+
+		public static string Undname(string sz)
+		{
+			using (var cmd = Common.Shell($"undname \"{sz}\"", true)) {
+				var stdOut = cmd.StandardOutput.ReadToEnd();
+				var value  = stdOut.SubstringBetween("is :- \"","\"");
+				return value;
+			}
 		}
 	}
 }

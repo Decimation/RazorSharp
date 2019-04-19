@@ -19,6 +19,7 @@ using RazorCommon;
 using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
+using RazorCommon.Utilities;
 using RazorSharp;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
@@ -34,6 +35,8 @@ using RazorSharp.Native.Win32;
 using RazorSharp.Utilities;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 using Unsafe = RazorSharp.Memory.Unsafe;
+using System.Net.Http;
+using SharpPdb.Windows;
 
 #endregion
 
@@ -69,9 +72,8 @@ namespace Test
 		const string pdb = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.pdb";
 		
 		[SymNamespace(pdb,"NativeSharp.dll")]
-		struct MyStruct
+		private struct MyStruct
 		{
-			
 			[SymField]
 			public int g_int;
 
@@ -82,12 +84,6 @@ namespace Test
 			}
 		}
 
-		[ClrSymNamespace()]
-		struct GCHeap
-		{
-			[SymField(UseMemberNameOnly = true)]
-			public IntPtr g_pGCHeap;
-		}
 
 		public static void Main(string[] args)
 		{
@@ -98,18 +94,23 @@ namespace Test
 //			var dll = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.dll";
 //			var plib = Kernel32.LoadLibrary(dll);
 
+
+			var x = new PdbSymbols(new FileInfo(pdb)).GetSymbol("g_int");
+			Console.WriteLine(x.Name);
+			
+
+			var ms = new MyStruct();
+			ms = (MyStruct) Symload.Load(typeof(MyStruct), ms);
+			Console.WriteLine(ms.g_int);
+
 			
 			
-			
-			var ms = new GCHeap();
-			ms = (GCHeap)Symload.Load(typeof(GCHeap), ms);
-			Console.WriteLine("{0:X}",ms.g_pGCHeap.ToInt64());
-			Debug.Assert(ms.g_pGCHeap == RazorSharp.CoreClr.Structures.GCHeap.GlobalHeap);
-			
-			
+
 //			Kernel32.FreeLibrary(plib);
 
 			Console.WriteLine(typeof(string).GetMetaType());
+			
+			
 
 
 //			ModuleInitializer.GlobalClose();
