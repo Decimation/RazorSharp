@@ -167,6 +167,8 @@ namespace Test
 			       || candidate.Length > array.Length;
 		}
 
+		// todo: symbol address/offset difference between pdb (PdbFile) and kernel (DbgHelp)
+		
 		public static void Main(string[] args)
 		{
 			ModuleInitializer.GlobalSetup();
