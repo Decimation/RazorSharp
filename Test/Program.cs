@@ -100,17 +100,17 @@ namespace Test
 			//Console.WriteLine("Kernel txt seg {0:P}", Segments.GetSegment(".text").SectionAddress);
 
 			//Console.WriteLine("possible addr {0:X}", realAddr+pdb.GetSymOffset2(n));
-			Console.WriteLine("Kernel (addr: {0:P}) (ofs: {1:X}) (value: {2:X}) (raw addr: {3:X})",
+			Console.WriteLine("Kernel (addr: {0:P}) (ofs: {1:X}) (raw addr: {2:X})",
 			                  Runtime.GetClrSymAddress(n),
 			                  se.GetSymOffset(n),
-			                  Runtime.GetClrSymAddress(n).ReadAny<long>(),
 			                  se.GetSymbol(n).Address);
 
-			Console.WriteLine("Pdb (addr: {0:P}) (ofs: {1:X} {3:X}) (value: {2:X})",
+			Console.WriteLine("Pdb (addr: {0:P}) (ofs: {1:X} raw ofs: {2:X})",
 			                  mi.GetSymAddress(n),
 			                  pdb.GetSymOffset(n),
-			                  mi.GetSymAddress(n).ReadAny<long>(),
 			                  pdb.GetSymOffset2(n));
+
+			Console.WriteLine("Delta: {0:X}", Math.Abs(pdb.GetSymOffset(n)-se.GetSymOffset(n)));
 
 
 			var sym = pdb.GetSymbol(n);
@@ -123,14 +123,8 @@ namespace Test
 
 
 			reader.Position = ofs;
-			Console.WriteLine(sym.Flags);
-			Console.WriteLine((PublicSymbolFlags) reader.ReadUint());
-
-			var    symMem = reader.ReadByteArray(len);
-			byte[] rg     = BitConverter.GetBytes((uint) se.GetSymOffset(n));
-
-			Console.WriteLine(symMem.AutoJoin());
-			Console.WriteLine(symMem.Locate(rg).AutoJoin());
+//			Console.WriteLine(sym.Flags);
+//			Console.WriteLine((PublicSymbolFlags) reader.ReadUint());
 		}
 
 		static readonly int[] Empty = new int[0];
@@ -180,7 +174,7 @@ namespace Test
 
 			Cmp("JIT_GetRuntimeType");
 			Cmp("g_pGCHeap");
-
+			Cmp("g_pStringClass");
 
 			ModuleInitializer.GlobalClose();
 		}

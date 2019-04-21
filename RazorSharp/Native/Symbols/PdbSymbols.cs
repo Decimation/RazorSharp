@@ -38,7 +38,7 @@ namespace RazorSharp.Native.Symbols
 
 		public long[] GetSymOffsets(string[] names)
 		{
-			long[] rg = new long[names.Length];
+			var rg = new long[names.Length];
 
 			for (int i = 0; i < rg.Length; i++) {
 				rg[i] = GetSymOffset(names[i]);

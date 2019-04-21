@@ -16,8 +16,6 @@ namespace RazorSharp.Native.Symbols
 	{
 		private readonly byte[] m_symbolStructMemory;
 
-		public byte[] SymMem => m_symbolStructMemory;
-
 		internal Symbol(SymbolInfo* pSymInfo)
 		{
 			Name = NativeHelp.GetString(&pSymInfo->Name, pSymInfo->NameLen);
