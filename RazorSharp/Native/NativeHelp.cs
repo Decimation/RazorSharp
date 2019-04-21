@@ -74,6 +74,9 @@ namespace RazorSharp.Native
 			return new Win32Exception(code).Message;
 		}
 
+		public static string GetLastWin32ErrorMessage() 
+			=> GetMessageForWin32Error(Marshal.GetLastWin32Error());
+		
 		public static unsafe string GetString(sbyte* first, uint len)
 		{
 			return GetString(first, (int) len);

@@ -25,17 +25,20 @@ namespace RazorSharp.Native.Symbols
 		private readonly Pointer<byte>       m_baseAddr;
 		private readonly SymbolRetrievalMode m_mode;
 
+		public Pointer<byte> BaseAddress => m_baseAddr;
+
 		public ModuleInfo(FileInfo pdb, ProcessModule module, SymbolRetrievalMode mode)
 			: this(pdb, module.BaseAddress, mode) { }
 
 		public ModuleInfo(FileInfo pdb, Pointer<byte> baseAddr, SymbolRetrievalMode mode)
 		{
+			Conditions.NotNull(baseAddr.Address, nameof(baseAddr));
+			
 			m_baseAddr = baseAddr;
 			m_mode     = mode;
 
 			switch (m_mode) {
 				case SymbolRetrievalMode.Kernel:
-
 					m_reader = SymbolEnvironment.Instance;
 					((SymbolEnvironment) m_reader).Init(pdb.FullName);
 					break;

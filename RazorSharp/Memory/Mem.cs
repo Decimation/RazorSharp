@@ -36,10 +36,7 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public static unsafe class Mem
 	{
-		/// <summary>
-		///     Bytes in kilobytes
-		/// </summary>
-		internal const int BYTES_IN_KB = 1024;
+		
 
 		public static bool Is64Bit => IntPtr.Size == sizeof(long);
 

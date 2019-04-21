@@ -139,10 +139,7 @@ namespace RazorSharp.Native.Symbols
 			return cpy;
 		}
 
-		public Symbol GetSymbol(string name)
-		{
-			return GetSymbol(name, null);
-		}
+		public Symbol GetSymbol(string name) => GetSymbol(name, null);
 
 		public void Dispose()
 		{
@@ -206,6 +203,10 @@ namespace RazorSharp.Native.Symbols
 
 			var cpy = m_symBuf;
 			m_symBuf = null;
+
+			if (cpy == null) {
+				Global.Log.Warning("Could not find symbol {Name}", name);
+			}
 			return cpy;
 		}
 	}

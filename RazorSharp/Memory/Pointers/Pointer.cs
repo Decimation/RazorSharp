@@ -75,7 +75,9 @@ namespace RazorSharp.Memory.Pointers
 		private void* m_value;
 
 		private string Dbg => ToString(PointerFormat.FMT_P);
+		
 		#region Properties
+		
 
 		/// <summary>
 		///     Indexes <see cref="Address" /> as a reference.
@@ -632,6 +634,7 @@ namespace RazorSharp.Memory.Pointers
 
 		private object InvokeGenericMethod(string name, Type typeArgs, params object[] args)
 		{
+			Conditions.Require(!IsNull, nameof(IsNull));
 			return ReflectionUtil.InvokeGenericMethod(GetType(), name, this, new[] {typeArgs}, args);
 		}
 

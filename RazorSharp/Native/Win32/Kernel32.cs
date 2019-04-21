@@ -17,7 +17,7 @@ namespace RazorSharp.Native.Win32
 	{
 		internal const int ERROR_INVALID_PARAMETER = 0x57;
 
-		private const string KERNEL32_DLL = "kernel32.dll";
+		internal const string KERNEL32_DLL = "kernel32.dll";
 
 		internal static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
@@ -36,23 +36,6 @@ namespace RazorSharp.Native.Win32
 		[DllImport(KERNEL32_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 		internal static extern void GetNativeSystemInfo(out SystemInfo lpSystemInfo);
 
-
-		/// <summary>
-		///     Retrieves the address of an exported function or variable from the specified dynamic-link library (DLL).
-		/// </summary>
-		/// <param name="hModule"></param>
-		/// <param name="procName"></param>
-		/// <returns></returns>
-		[DllImport(KERNEL32_DLL, CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
-		internal static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
-
-		/// <summary>
-		///     Retrieves a module handle for the specified module. The module must have been loaded by the calling process.
-		/// </summary>
-		/// <param name="lpModuleName"></param>
-		/// <returns></returns>
-		[DllImport(KERNEL32_DLL, CharSet = CharSet.Auto)]
-		internal static extern IntPtr GetModuleHandle(string lpModuleName);
 
 		#region File
 
@@ -77,16 +60,7 @@ namespace RazorSharp.Native.Win32
 
 		#endregion
 
-		#region Library
-
-		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		internal static extern IntPtr LoadLibrary(string lpFileName);
-
-		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool FreeLibrary(IntPtr hModule);
-
-		#endregion
+		
 
 		#region Process
 

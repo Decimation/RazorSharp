@@ -4,6 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using RazorCommon.Strings;
+using RazorSharp.CoreClr;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 
@@ -65,7 +66,7 @@ namespace RazorSharp.Native.Images
 			{
 				SectionNumber,
 				SectionName,
-				String.Format("{0} ({1} K)", SectionSize, SectionSize / Mem.BYTES_IN_KB),
+				String.Format("{0} ({1} K)", SectionSize, SectionSize / Constants.KIBIBYTE),
 				Hex.ToHex(SectionAddress.ToInt64()),
 				Hex.ToHex(EndAddress.ToInt64()),
 				SectionHeader.Characteristics,

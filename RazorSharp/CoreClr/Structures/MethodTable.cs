@@ -15,6 +15,7 @@ using RazorSharp.Memory.Extern;
 using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
+
 // ReSharper disable MemberCanBeMadeStatic.Local
 
 // ReSharper disable ConvertToAutoProperty
@@ -137,18 +138,9 @@ namespace RazorSharp.CoreClr.Structures
 			// if enum_flag_HasIndirectParent is set. The indirection is offset by offsetof(MethodTable, m_pParentMethodTable).
 			// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
 			// for enum_flag_HasIndirectParentMethodTable.
-			get {
-				if (!IsParentIndirect)
-					return m_pParentMethodTable;
-				return GetParentMethodTable();
-			}
+			get { return m_pParentMethodTable; }
 		}
 
-		[Symcall]
-		private MethodTable* GetParentMethodTable()
-		{
-			return null;
-		}
 
 		// todo
 		internal Pointer<byte> Module => m_pLoaderModule;
@@ -172,8 +164,6 @@ namespace RazorSharp.CoreClr.Structures
 						return m_pEEClass;
 					case LowBits.MethodTable:
 						return Canon.Reference.EEClass;
-					case LowBits.Invalid:
-					case LowBits.Indirection:
 					default:
 						throw new NotImplementedException($"Union type {UnionType} is not implemented");
 				}

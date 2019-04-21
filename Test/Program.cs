@@ -37,6 +37,8 @@ using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 using Unsafe = RazorSharp.Memory.Unsafe;
 using System.Net.Http;
 using SharpPdb.Windows;
+using SharpPdb.Windows.SymbolRecords;
+using SharpUtilities;
 
 #endregion
 
@@ -69,32 +71,115 @@ namespace Test
 			return raw.Split(';');
 		}
 
-		const string pdb = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.pdb";
-		
-		[SymNamespace(pdb,"NativeSharp.dll")]
+		const string pdb2 = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.pdb";
+		const string dll  = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.dll";
+
+		[SymNamespace(pdb2, "NativeSharp.dll")]
 		private struct MyStruct
 		{
-			[SymField]
+			[SymField(UseMemberNameOnly = true)]
 			public int g_int;
 
-			[Symcall]
-			public void hello()
-			{
-				
-			}
+			[Symcall(UseMemberNameOnly = true)]
+			public void hello() { }
 		}
 
-		// todo: organize symbols and pdb crap
+
+		private static void Cmp(string n)
+		{
+			Console.WriteLine("\n-- {0} -- ", n);
+
+			var se     = SymbolEnvironment.Instance;
+			var pdb    = new PdbSymbols(Clr.ClrPdb);
+			var mi     = new ModuleInfo(Clr.ClrPdb, Clr.ClrModule, SymbolRetrievalMode.PdbReader);
+			var txtseg = pdb.File.DbiStream.SectionHeaders.First(f => f.Name == ".text");
+
+
+			var realAddr = (long) txtseg.VirtualAddress + Clr.ClrModule.BaseAddress.ToInt64();
+			//Console.WriteLine("Pdb txt seg {0:X}", realAddr);
+			//Console.WriteLine("Kernel txt seg {0:P}", Segments.GetSegment(".text").SectionAddress);
+
+			//Console.WriteLine("possible addr {0:X}", realAddr+pdb.GetSymOffset2(n));
+			Console.WriteLine("Kernel (addr: {0:P}) (ofs: {1:X}) (value: {2:X}) (raw addr: {3:X})",
+			                  Runtime.GetClrSymAddress(n),
+			                  se.GetSymOffset(n),
+			                  Runtime.GetClrSymAddress(n).ReadAny<long>(),
+			                  se.GetSymbol(n).Address);
+
+			Console.WriteLine("Pdb (addr: {0:P}) (ofs: {1:X} {3:X}) (value: {2:X})",
+			                  mi.GetSymAddress(n),
+			                  pdb.GetSymOffset(n),
+			                  mi.GetSymAddress(n).ReadAny<long>(),
+			                  pdb.GetSymOffset2(n));
+
+
+			var sym = pdb.GetSymbol(n);
+
+			var sref = sym.SymbolStream.References[sym.SymbolStreamIndex];
+
+			var    reader = sym.SymbolStream.Reader;
+			ushort len    = sref.DataLen;
+			uint   ofs    = sref.DataOffset;
+
+
+			reader.Position = ofs;
+			Console.WriteLine(sym.Flags);
+			Console.WriteLine((PublicSymbolFlags) reader.ReadUint());
+
+			var    symMem = reader.ReadByteArray(len);
+			byte[] rg     = BitConverter.GetBytes((uint) se.GetSymOffset(n));
+
+			Console.WriteLine(symMem.AutoJoin());
+			Console.WriteLine(symMem.Locate(rg).AutoJoin());
+		}
+
+		static readonly int[] Empty = new int[0];
+
+		public static int[] Locate(this byte[] self, byte[] candidate)
+		{
+			if (IsEmptyLocate(self, candidate))
+				return Empty;
+
+			var list = new List<int>();
+
+			for (int i = 0; i < self.Length; i++) {
+				if (!IsMatch(self, i, candidate))
+					continue;
+
+				list.Add(i);
+			}
+
+			return list.Count == 0 ? Empty : list.ToArray();
+		}
+
+		static bool IsMatch(byte[] array, int position, byte[] candidate)
+		{
+			if (candidate.Length > (array.Length - position))
+				return false;
+
+			for (int i = 0; i < candidate.Length; i++)
+				if (array[position + i] != candidate[i])
+					return false;
+
+			return true;
+		}
+
+		static bool IsEmptyLocate(byte[] array, byte[] candidate)
+		{
+			return array == null
+			       || candidate == null
+			       || array.Length == 0
+			       || candidate.Length == 0
+			       || candidate.Length > array.Length;
+		}
 
 		public static void Main(string[] args)
 		{
 			ModuleInitializer.GlobalSetup();
 
 
-
-			Console.WriteLine(typeof(string).GetMetaType());
-
-
+			Cmp("JIT_GetRuntimeType");
+			Cmp("g_pGCHeap");
 
 
 			ModuleInitializer.GlobalClose();

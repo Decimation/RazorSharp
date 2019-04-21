@@ -1,3 +1,6 @@
+using JetBrains.Annotations;
+// ReSharper disable ClassCannotBeInstantiated
+
 namespace RazorSharp.Memory.Fixed
 {
 	#region
@@ -36,6 +39,7 @@ namespace RazorSharp.Memory.Fixed
 		///         <para>From <see cref="System.Runtime.CompilerServices.JitHelpers" />. </para>
 		///     </remarks>
 		/// </summary>
+		[UsedImplicitly]
 		public sealed class PinningHelper
 		{
 			/// <summary>

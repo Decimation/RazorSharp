@@ -47,7 +47,7 @@ namespace RazorSharp.Memory
 		/// </exception>
 		public static SegmentType GetSegmentType(Pointer<byte> addr, string moduleName = null)
 		{
-			ImageSectionInfo[] sections = GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
+			ImageSectionInfo[] sections = GetPESectionInfo(ProcessApi.GetModuleHandle(moduleName));
 			foreach (var s in sections)
 				if (Mem.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address))
 					return Parse(s.SectionName);
@@ -57,7 +57,7 @@ namespace RazorSharp.Memory
 
 		public static ImageSectionInfo GetSegment(Pointer<byte> addr, string moduleName = null)
 		{
-			ImageSectionInfo[] sections = GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
+			ImageSectionInfo[] sections = GetPESectionInfo(ProcessApi.GetModuleHandle(moduleName));
 			foreach (var s in sections)
 				if (Mem.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address))
 					return s;
@@ -80,7 +80,7 @@ namespace RazorSharp.Memory
 		/// </exception>
 		public static ImageSectionInfo GetSegment(string segment, string moduleName = null)
 		{
-			ImageSectionInfo[] arr = GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
+			ImageSectionInfo[] arr = GetPESectionInfo(ProcessApi.GetModuleHandle(moduleName));
 
 			foreach (var t in arr)
 				if (t.SectionName == segment)
@@ -97,7 +97,7 @@ namespace RazorSharp.Memory
 		/// <returns>All of the segments as an array of <see cref="ImageSectionInfo" /></returns>
 		public static ImageSectionInfo[] GetSegments(string moduleName = null)
 		{
-			return GetPESectionInfo(Kernel32.GetModuleHandle(moduleName));
+			return GetPESectionInfo(ProcessApi.GetModuleHandle(moduleName));
 		}
 
 		public static void DumpAllSegments()

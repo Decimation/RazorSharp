@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
@@ -86,8 +87,11 @@ namespace RazorSharp.Native.Symbols
 
 		public static string Undname(string sz)
 		{
+			
 			using (var cmd = Common.Shell($"undname \"{sz}\"", true)) {
+				
 				var stdOut = cmd.StandardOutput.ReadToEnd();
+				stdOut = Encoding.ASCII.GetString(Encoding.Unicode.GetBytes(stdOut));
 				var value  = stdOut.SubstringBetween("is :- \"","\"");
 				return value;
 			}

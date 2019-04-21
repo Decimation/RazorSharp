@@ -2,8 +2,11 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
+using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Native;
 using RazorSharp.Native.Win32;
 
 #endregion
@@ -20,9 +23,26 @@ namespace RazorSharp.Memory
 		/// </summary>
 		internal static ProcessModuleCollection CurrentModules => Process.GetCurrentProcess().Modules;
 
-		internal static (string, Pointer<byte>)[] CurrentNativeModules 
+		internal static NativeModule[] CurrentNativeModules
 			=> ProcessApi.GetProcessModules(Process.GetCurrentProcess());
 
+		public static bool IsLoaded(string name)
+		{
+			foreach (var module in CurrentNativeModules) {
+				if (module.Name == name) {
+					return true;
+				}
+			}
+			
+			return GetModule(name) != null;
+		}
+
+		public static NativeModule LoadModule(string fileName)
+		{
+			var ptr = ProcessApi.LoadLibrary(fileName);
+			return CurrentNativeModules.First(m => m.BaseAddress == ptr);
+		}
+		
 		public static ProcessModule GetModule(string name)
 		{
 			// todo: I shouldn't have to do this
@@ -39,20 +59,21 @@ namespace RazorSharp.Memory
 			return null;
 		}
 
-		public static (string, Pointer<byte>) GetNativeModule(string name)
+		public static NativeModule GetNativeModule(string name)
 		{
-			foreach ((string, Pointer<byte>) pair in CurrentNativeModules) {
-				if (pair.Item1 == name) {
+			foreach (var pair in CurrentNativeModules) {
+				
+				if (pair.Name == name) {
 					return pair;
 				}
 			}
 
-			return (null, null);
+			return NativeModule.NullModule;
 		}
 
 		public static IntPtr GetModuleHandle(string name)
 		{
-			return Kernel32.GetModuleHandle(name);
+			return ProcessApi.GetModuleHandle(name);
 		}
 
 		public static IntPtr GetModuleHandle(ProcessModule module)
@@ -62,13 +83,19 @@ namespace RazorSharp.Memory
 
 		public static Pointer<byte> GetBaseAddress(string module)
 		{
+			Pointer<byte> ptr;
+
 			var pm = GetModule(module);
-			if (pm != null) {
-				return pm.BaseAddress;
+
+			ptr = pm?.BaseAddress ?? GetNativeModule(module).BaseAddress;
+
+			if (ptr.IsNull) {
+				string msg = String.Format("Module \"{0}\" is not loaded or the base address could not be retrieved",
+				                           module);
+				throw new Exception(msg);
 			}
-			else {
-				return GetNativeModule(module).Item2;
-			}
+
+			return ptr;
 		}
 
 		private static Pointer<byte>[] GetAddressesInternal(Pointer<byte> baseAddr, long[] offset)

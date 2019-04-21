@@ -11,7 +11,9 @@ using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Native;
 using RazorSharp.Native.Symbols;
+using RazorSharp.Native.Win32;
 using RazorSharp.Utilities;
 
 #endregion
@@ -92,7 +94,15 @@ namespace RazorSharp.Memory.Extern.Symbols
 			var symField  = (SymFieldAttribute) sym;
 			var fieldInfo = (FieldInfo) field;
 
-			var addr      = module.GetSymAddress(fullSym);
+			var addr = module.GetSymAddress(fullSym);
+//			Console.WriteLine(addr);
+//			Console.WriteLine("{0:X}",ProcessApi.GetProcAddress(module.BaseAddress.Address,"g_int").ToInt64());
+			
+			if (addr.IsNull) {
+				throw new NullReferenceException(
+					string.Format("Could not find the address of the symbol \"{0}\"", fullSym));
+			}
+
 			var fieldType = symField.LoadAs ?? fieldInfo.FieldType;
 
 			// todo: also add special support for strings and other native types
@@ -101,7 +111,12 @@ namespace RazorSharp.Memory.Extern.Symbols
 			fieldInfo.SetValue(inst, val);
 		}
 
-		public static object Load(Type t, object inst = null, Pointer<byte> baseAddr = default)
+		public static T GenericLoad<T>(T inst = default)
+		{
+			return (T) Load(typeof(T), inst);
+		}
+		
+		public static object Load(Type t, object inst = null)
 		{
 			if (IsBound(t)) {
 				return inst;
@@ -109,8 +124,17 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 			// For now, only one image can be used per type
 			var    nameSpaceAttr = t.GetCustomAttribute<SymNamespaceAttribute>();
+			Conditions.NotNull(nameSpaceAttr, nameof(nameSpaceAttr));
+			
 			string nameSpace     = nameSpaceAttr?.Namespace;
-			var    mi            = !baseAddr.IsNull ? GetInfo(nameSpaceAttr, baseAddr) : GetInfo(nameSpaceAttr);
+
+			Pointer<byte> baseAddr = null;
+			
+			if (!Modules.IsLoaded(nameSpaceAttr.Module)) {
+				throw new Exception(String.Format("Module {0} is not loaded", nameSpaceAttr.Module));
+			}
+			
+			var mi = !baseAddr.IsNull ? GetInfo(nameSpaceAttr, baseAddr) : GetInfo(nameSpaceAttr);
 
 			(MemberInfo[] members, SymImportAttribute[] attributes) = t.GetAnnotated<SymImportAttribute>();
 
@@ -154,11 +178,6 @@ namespace RazorSharp.Memory.Extern.Symbols
 						break;
 					case MemberTypes.Property:
 						break;
-					case MemberTypes.All:
-					case MemberTypes.Custom:
-					case MemberTypes.NestedType:
-					case MemberTypes.TypeInfo:
-					case MemberTypes.Event:
 					default:
 						throw new ArgumentOutOfRangeException();
 				}

@@ -91,7 +91,7 @@ C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Buffers.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Memory.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\System.Numerics.Vectors.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\obj\x64\Debug\Test.csproj.Fody.CopyLocal.cache
-C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\InlineIL.dll
-C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\InlineIL.xml
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\SharpPdb.Windows.dll
 C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\SharpUtilities.dll
+C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\InlineIL.dll
+C:\Users\Deci\RiderProjects\RazorSharp\Test\bin\x64\Debug\InlineIL.xml

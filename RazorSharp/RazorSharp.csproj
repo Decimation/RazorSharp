@@ -131,6 +131,7 @@
     </Reference>
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Threading.Thread" />
   </ItemGroup>
   <ItemGroup>
@@ -254,6 +255,7 @@
     <Compile Include="Native\MemState.cs" />
     <Compile Include="Native\MemType.cs" />
     <Compile Include="Native\NativeHelp.cs" />
+    <Compile Include="Native\NativeModule.cs" />
     <Compile Include="Native\ProcessAccess.cs" />
     <Compile Include="Native\ProcessorArchitecture.cs" />
     <Compile Include="Native\StandardHandles.cs" />
@@ -261,11 +263,11 @@
     <Compile Include="Native\Symbols\ISymbolProvider.cs" />
     <Compile Include="Native\Symbols\ISymbolResolver.cs" />
     <Compile Include="Native\Symbols\ModuleInfo.cs" />
-    <Compile Include="Native\Symbols\CvPdbParser.cs" />
     <Compile Include="Native\Symbols\PdbSymbols.cs" />
     <Compile Include="Native\Symbols\Symbol.cs" />
     <Compile Include="Native\Symbols\SymbolAccess.cs" />
     <Compile Include="Native\Symbols\SymbolEnvironment.cs" />
+    <Compile Include="Native\Symbols\SymbolExt.cs" />
     <Compile Include="Native\Symbols\SymbolInfo.cs" />
     <Compile Include="Native\Symbols\SymbolReader.cs" />
     <Compile Include="Native\Symbols\SymEnumOptions.cs" />

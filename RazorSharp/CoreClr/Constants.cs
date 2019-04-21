@@ -30,6 +30,10 @@ namespace RazorSharp.CoreClr
 		/// </summary>
 		internal static readonly int MinObjectSize = 2 * IntPtr.Size + sizeof(ObjHeader);
 
+		/// <summary>
+		/// KiB
+		/// </summary>
+		internal const int KIBIBYTE = 1024;
 
 		/// <summary>
 		///     <para>Sources:</para>

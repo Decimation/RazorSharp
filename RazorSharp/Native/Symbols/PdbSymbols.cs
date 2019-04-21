@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using SharpPdb.Windows;
 using SharpPdb.Windows.SymbolRecords;
@@ -13,13 +14,38 @@ namespace RazorSharp.Native.Symbols
 	{
 		private readonly PdbFile m_file;
 
+		public PdbFile File => m_file;
+
 		public PdbSymbols(FileInfo pdb)
 		{
 			m_file = new PdbFile(pdb.FullName);
 		}
 
-		public long   GetSymOffset(string    name)  => GetSymbol(name).Offset;
-		public long[] GetSymOffsets(string[] names) => GetSymbols(names).Select(x => (long) x.Offset).ToArray();
+		public long GetSymOffset2(string name)
+		{
+			var sym = GetSymbol(name);
+
+			return (long) sym.Offset;
+		}
+
+		public long GetSymOffset(string name)
+		{
+			var sym = GetSymbol(name);
+			var rva = m_file.FindRelativeVirtualAddress(sym.Segment, sym.Offset);
+
+			return (long) rva;
+		}
+
+		public long[] GetSymOffsets(string[] names)
+		{
+			long[] rg = new long[names.Length];
+
+			for (int i = 0; i < rg.Length; i++) {
+				rg[i] = GetSymOffset(names[i]);
+			}
+
+			return rg;
+		}
 
 		public Public32Symbol[] GetSymbols(string[] names)
 		{
@@ -32,20 +58,26 @@ namespace RazorSharp.Native.Symbols
 			return rg;
 		}
 
+
 		public Public32Symbol GetSymbol(string name)
 		{
 			if (name.Contains("::")) {
-				var sz = name.Split(new string[] {"::"}, StringSplitOptions.None);
+				var sz = name.Split(new[] {"::"}, StringSplitOptions.None);
 				name = sz.Last();
 			}
 
-			foreach (var symbol in m_file.PublicsStream.PublicSymbols) {
-//				if (SymbolAccess.Undname(symbol.Name).Contains(name)) {
-//					return symbol;
-//				}
-				if (symbol.Name.Contains(name))
+
+			var contains = m_file.PublicsStream.PublicSymbols.Where(s => s.Name.Contains(name)).ToArray();
+
+			foreach (var symbol in contains) {
+				if (symbol.CleanName() == name) {
+					//Console.WriteLine("Choosing {0} {1} {2}", symbol.CleanName(), symbol.Flags, symbol.Kind);
+
+
 					return symbol;
+				}
 			}
+
 
 			return null;
 		}

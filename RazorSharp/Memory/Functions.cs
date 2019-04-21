@@ -51,7 +51,7 @@ namespace RazorSharp.Memory
 	///             <description>Requirements: function is DLL-exported</description>
 	///         </item>
 	///     </list>
-	///     <para>4. <see cref="Kernel32.GetProcAddress" /></para>
+	///     <para>4. <see cref="ProcessApi.GetProcAddress" /></para>
 	///     <list type="bullet">
 	///         <item>
 	///             <description>Runtime</description>
@@ -91,8 +91,8 @@ namespace RazorSharp.Memory
 		/// </summary>
 		public static TDelegate GetFunction<TDelegate>(string dllName, string fn) where TDelegate : Delegate
 		{
-			var hModule = Kernel32.GetModuleHandle(dllName);
-			var hFn     = Kernel32.GetProcAddress(hModule, fn);
+			var hModule = ProcessApi.GetModuleHandle(dllName);
+			var hFn     = ProcessApi.GetProcAddress(hModule, fn);
 			return GetDelegateForFunctionPointer<TDelegate>(hFn);
 		}
 
