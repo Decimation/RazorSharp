@@ -74,7 +74,7 @@ namespace Test
 		const string pdb2 = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.pdb";
 		const string dll  = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.dll";
 
-		[SymNamespace(pdb2, "NativeSharp.dll")]
+		/*[SymNamespace(pdb2, "NativeSharp.dll")]
 		private struct MyStruct
 		{
 			[SymField(UseMemberNameOnly = true)]
@@ -82,7 +82,7 @@ namespace Test
 
 			[Symcall(UseMemberNameOnly = true)]
 			public void hello() { }
-		}
+		}*/
 
 
 		private static void Cmp(string n)
@@ -110,7 +110,7 @@ namespace Test
 			                  pdb.GetSymOffset(n),
 			                  pdb.GetSymOffset2(n));
 
-			Console.WriteLine("Delta: {0:X}", Math.Abs(pdb.GetSymOffset(n)-se.GetSymOffset(n)));
+			Console.WriteLine("Delta: {0:X}", Math.Abs(pdb.GetSymOffset(n) - se.GetSymOffset(n)));
 
 
 			var sym = pdb.GetSymbol(n);
@@ -168,7 +168,9 @@ namespace Test
 		}
 
 		// todo: symbol address/offset difference between pdb (PdbFile) and kernel (DbgHelp)
-		
+
+		struct MyStruct { }
+
 		public static void Main(string[] args)
 		{
 			ModuleInitializer.GlobalSetup();
@@ -177,6 +179,7 @@ namespace Test
 			Cmp("JIT_GetRuntimeType");
 			Cmp("g_pGCHeap");
 			Cmp("g_pStringClass");
+
 
 			ModuleInitializer.GlobalClose();
 		}
