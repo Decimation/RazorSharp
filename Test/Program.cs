@@ -169,7 +169,7 @@ namespace Test
 
 		// todo: symbol address/offset difference between pdb (PdbFile) and kernel (DbgHelp)
 
-		struct MyStruct { }
+		// todo: massive overhaul and refactoring
 
 		public static void Main(string[] args)
 		{
@@ -178,7 +178,12 @@ namespace Test
 
 			Cmp("JIT_GetRuntimeType");
 			Cmp("g_pGCHeap");
-			Cmp("g_pStringClass");
+			//Cmp("g_pStringClass");
+
+			var dllMod = ProcessApi.GetModuleInfo(Clr.ClrModule);
+			Console.WriteLine(Hex.ToHex(dllMod.lpBaseOfDll));
+
+			Pointer<int> ptr = 0UL;
 
 
 			ModuleInitializer.GlobalClose();

@@ -8,7 +8,7 @@ using RazorSharp.Memory.Pointers;
 
 namespace RazorSharp.Native.Win32
 {
-	internal static class ProcessApi
+	internal static unsafe class ProcessApi
 	{
 		private const string PSAPI_DLL = "psapi.dll";
 
@@ -23,6 +23,45 @@ namespace RazorSharp.Native.Win32
 		                                               IntPtr                                           hModule,
 		                                               [Out]                              StringBuilder lpBaseName,
 		                                               [In] [MarshalAs(UnmanagedType.U4)] int           nSize);
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct _MODULEINFO
+		{
+			public void* lpBaseOfDll;
+			public uint  SizeOfImage;
+			public void* EntryPoint;
+		}
+
+		public static _MODULEINFO GetModuleInfo(ProcessModule module)
+		{
+			return GetModuleInfo(Process.GetCurrentProcess(), module);
+		}
+
+		public static _MODULEINFO GetModuleInfo(Process proc, ProcessModule module)
+		{
+			var hProc = Kernel32.OpenProcess(proc);
+			var hMod  = GetModuleHandle(module);
+			return GetModuleInfo(hProc, hMod);
+		}
+
+		public static _MODULEINFO GetModuleInfo(IntPtr hProc, IntPtr hModule)
+		{
+			_MODULEINFO moduleInfo = default;
+
+			var pMod = new IntPtr(&moduleInfo);
+
+			NativeHelp.Call(GetModuleInformation(hProc,
+			                                     hModule,
+			                                     pMod,
+			                                     (uint) Marshal.SizeOf<_MODULEINFO>()));
+
+			Kernel32.CloseHandle(hProc);
+
+			return moduleInfo;
+		}
+
+		[DllImport(PSAPI_DLL)]
+		private static extern bool GetModuleInformation(IntPtr hProcess, IntPtr hModule, IntPtr lpmodinfo, uint cb);
 
 		internal static NativeModule[] GetProcessModules(Process p)
 		{
@@ -41,15 +80,14 @@ namespace RazorSharp.Native.Win32
 			if (EnumProcessModules(p.Handle, pModules, uiSize, out uint cbNeeded) == 1) {
 				// To determine how many modules were enumerated by the call to EnumProcessModules,
 				// divide the resulting value in the lpcbNeeded parameter by sizeof(HMODULE).
-				int uiTotalNumberofModules = (int) (cbNeeded / (IntPtr.Size));
+				int uiTotalNumberOfModules = (int) (cbNeeded / (IntPtr.Size));
 
-				for (int i = 0; i < uiTotalNumberofModules; i++) {
+				for (int i = 0; i < uiTotalNumberOfModules; i++) {
 					var strbld = new StringBuilder(Constants.KIBIBYTE);
 
 					GetModuleFileNameEx(p.Handle, hMods[i], strbld, (strbld.Capacity));
 
 					pairs.Add(new NativeModule(strbld.ToString(), hMods[i]));
-					
 				}
 			}
 
@@ -59,13 +97,14 @@ namespace RazorSharp.Native.Win32
 			return pairs.ToArray();
 		}
 
-		
-		
+
 		/// <summary>
 		///     Retrieves a module handle for the specified module. The module must have been loaded by the calling process.
 		/// </summary>
 		[DllImport(Kernel32.KERNEL32_DLL, CharSet = CharSet.Auto)]
 		internal static extern IntPtr GetModuleHandle(string lpModuleName);
+
+		internal static IntPtr GetModuleHandle(ProcessModule module) => GetModuleHandle(module.ModuleName);
 
 		/// <summary>
 		///     Retrieves the address of an exported function or variable from the specified dynamic-link library (DLL).
@@ -75,8 +114,6 @@ namespace RazorSharp.Native.Win32
 
 		#region Library
 
-		
-		
 		/// <returns>If the function succeeds, the return value is a handle to the module.</returns>
 		[DllImport(Kernel32.KERNEL32_DLL, SetLastError = true)]
 		internal static extern IntPtr LoadLibrary(string lpFileName);
@@ -84,7 +121,7 @@ namespace RazorSharp.Native.Win32
 		[DllImport(Kernel32.KERNEL32_DLL, SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool FreeLibrary(IntPtr hModule);
-		
+
 		#endregion
 	}
 }
