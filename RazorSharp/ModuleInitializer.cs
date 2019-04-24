@@ -30,8 +30,7 @@ namespace RazorSharp
 			// SHUT IT DOWN
 			Global.Log.Information("Unloading module");
 
-
-			SymbolReader.Close();
+			
 			Clr.Close();
 			Global.Close();
 

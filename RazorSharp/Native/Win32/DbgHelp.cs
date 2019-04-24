@@ -24,6 +24,8 @@ namespace RazorSharp.Native.Win32
 
 		internal const uint SYMOPT_UNDNAME = 0x2;
 
+		internal const uint MAX_SYM_NAME = 2000;
+
 
 		[DllImport(DBG_HELP_DLL)]
 		internal static extern ImageNtHeaders64* ImageNtHeader(IntPtr hModule);
@@ -132,7 +134,11 @@ namespace RazorSharp.Native.Win32
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool SymFromName(IntPtr hProcess, IntPtr name, IntPtr pSymbol);
 
-
+		[DllImport(DBG_HELP_DLL)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		internal static extern bool SymFromName(IntPtr hProcess, string name, IntPtr pSymbol);
+		
+		
 		[DllImport(DBG_HELP_DLL, SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool SymFromAddr(IntPtr hProc, ulong addr, ulong* displacement, SymbolInfo* pSym);
@@ -143,6 +149,10 @@ namespace RazorSharp.Native.Win32
 
 		[DllImport(DBG_HELP_DLL)]
 		internal static extern uint SymLoadModule64(IntPtr hProc, IntPtr h, string p, string s, ulong baseAddr,
+		                                            uint   fileSize);
+		
+		[DllImport(DBG_HELP_DLL)]
+		internal static extern uint SymLoadModuleEx(IntPtr hProc, IntPtr h, string p, string s, ulong baseAddr,
 		                                            uint   fileSize);
 
 		// BOOL SymGetModuleInfo64(HANDLE hProcess, DWORD64 qwAddr, PIMAGEHLP_MODULE64 ModuleInfo)

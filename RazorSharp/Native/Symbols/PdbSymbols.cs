@@ -21,13 +21,6 @@ namespace RazorSharp.Native.Symbols
 			m_file = new PdbFile(pdb.FullName);
 		}
 
-		public long GetSymOffset2(string name)
-		{
-			var sym = GetSymbol(name);
-
-			return (long) sym.Offset;
-		}
-
 		public long GetSymOffset(string name)
 		{
 			var sym = GetSymbol(name);
@@ -80,6 +73,11 @@ namespace RazorSharp.Native.Symbols
 
 
 			return null;
+		}
+
+		public void Dispose()
+		{
+			m_file.Dispose();
 		}
 	}
 }

@@ -89,9 +89,9 @@ namespace Test
 		{
 			Console.WriteLine("\n-- {0} -- ", n);
 
-			var se     = SymbolEnvironment.Instance;
+			var se     = new SymbolManager(Clr.ClrPdb);
 			var pdb    = new PdbSymbols(Clr.ClrPdb);
-			var mi     = new ModuleInfo(Clr.ClrPdb, Clr.ClrModule, SymbolRetrievalMode.PdbReader);
+			var mi     = new ModuleInfo(Clr.ClrPdb, Clr.ClrModule, SymbolRetrievalMode.PDB_READER);
 			var txtseg = pdb.File.DbiStream.SectionHeaders.First(f => f.Name == ".text");
 
 
@@ -105,10 +105,9 @@ namespace Test
 			                  se.GetSymOffset(n),
 			                  se.GetSymbol(n).Address);
 
-			Console.WriteLine("Pdb (addr: {0:P}) (ofs: {1:X} raw ofs: {2:X})",
+			Console.WriteLine("Pdb (addr: {0:P}) (ofs: {1:X})",
 			                  mi.GetSymAddress(n),
-			                  pdb.GetSymOffset(n),
-			                  pdb.GetSymOffset2(n));
+			                  pdb.GetSymOffset(n));
 
 			Console.WriteLine("Delta: {0:X}", Math.Abs(pdb.GetSymOffset(n) - se.GetSymOffset(n)));
 
@@ -123,68 +122,38 @@ namespace Test
 
 
 			reader.Position = ofs;
+			
+			se.Dispose();
+			pdb.Dispose();
+			
 //			Console.WriteLine(sym.Flags);
 //			Console.WriteLine((PublicSymbolFlags) reader.ReadUint());
 		}
 
-		static readonly int[] Empty = new int[0];
-
-		public static int[] Locate(this byte[] self, byte[] candidate)
-		{
-			if (IsEmptyLocate(self, candidate))
-				return Empty;
-
-			var list = new List<int>();
-
-			for (int i = 0; i < self.Length; i++) {
-				if (!IsMatch(self, i, candidate))
-					continue;
-
-				list.Add(i);
-			}
-
-			return list.Count == 0 ? Empty : list.ToArray();
-		}
-
-		static bool IsMatch(byte[] array, int position, byte[] candidate)
-		{
-			if (candidate.Length > (array.Length - position))
-				return false;
-
-			for (int i = 0; i < candidate.Length; i++)
-				if (array[position + i] != candidate[i])
-					return false;
-
-			return true;
-		}
-
-		static bool IsEmptyLocate(byte[] array, byte[] candidate)
-		{
-			return array == null
-			       || candidate == null
-			       || array.Length == 0
-			       || candidate.Length == 0
-			       || candidate.Length > array.Length;
-		}
+		
 
 		// todo: symbol address/offset difference between pdb (PdbFile) and kernel (DbgHelp)
 
 		// todo: massive overhaul and refactoring
+
+		// todo: DIA instead of dbghelp?
 
 		public static void Main(string[] args)
 		{
 			ModuleInitializer.GlobalSetup();
 
 
-			Cmp("JIT_GetRuntimeType");
-			Cmp("g_pGCHeap");
+			//Cmp("JIT_GetRuntimeType");
+			//Cmp("WKS::GCHeap::GetGcCount");
 			//Cmp("g_pStringClass");
 
-			var dllMod = ProcessApi.GetModuleInfo(Clr.ClrModule);
-			Console.WriteLine(Hex.ToHex(dllMod.lpBaseOfDll));
+			//Console.WriteLine(Clr.ClrSymbols.GetSymAddress("g_pGCHeap"));
 
-			Pointer<int> ptr = 0UL;
+			
+			
+			Console.WriteLine(GCHeap.GlobalHeap);
 
+			
 
 			ModuleInitializer.GlobalClose();
 		}

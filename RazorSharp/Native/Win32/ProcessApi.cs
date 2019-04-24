@@ -75,17 +75,17 @@ namespace RazorSharp.Native.Win32
 			var pModules = gch.AddrOfPinnedObject();
 
 			// Setting up the rest of the parameters for EnumProcessModules
-			uint uiSize = (uint) (IntPtr.Size * (hMods.Length));
+			uint uiSize = (uint) (IntPtr.Size * hMods.Length);
 
 			if (EnumProcessModules(p.Handle, pModules, uiSize, out uint cbNeeded) == 1) {
 				// To determine how many modules were enumerated by the call to EnumProcessModules,
 				// divide the resulting value in the lpcbNeeded parameter by sizeof(HMODULE).
-				int uiTotalNumberOfModules = (int) (cbNeeded / (IntPtr.Size));
+				int uiTotalNumberOfModules = (int) (cbNeeded / IntPtr.Size);
 
 				for (int i = 0; i < uiTotalNumberOfModules; i++) {
 					var strbld = new StringBuilder(Constants.KIBIBYTE);
 
-					GetModuleFileNameEx(p.Handle, hMods[i], strbld, (strbld.Capacity));
+					GetModuleFileNameEx(p.Handle, hMods[i], strbld, strbld.Capacity);
 
 					pairs.Add(new NativeModule(strbld.ToString(), hMods[i]));
 				}

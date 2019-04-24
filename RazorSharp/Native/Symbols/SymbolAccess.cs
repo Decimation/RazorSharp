@@ -7,11 +7,14 @@ using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Utilities;
 using RazorSharp.CoreClr;
+using RazorSharp.Native.Win32;
 
 namespace RazorSharp.Native.Symbols
 {
 	internal static class SymbolAccess
 	{
+		private const string MASK_STR_DEFAULT = "*!*";
+		
 		internal static FileInfo DownloadSymbolFile(DirectoryInfo dest, FileInfo dll)
 		{
 			return DownloadSymbolFile(dest, dll, out _);
@@ -95,6 +98,65 @@ namespace RazorSharp.Native.Symbols
 				var value  = stdOut.SubstringBetween("is :- \"","\"");
 				return value;
 			}
+		}
+
+		internal static unsafe bool GetFileSize(string pFileName, ref ulong fileSize)
+		{
+			var hFile = Kernel32.CreateFile(pFileName,
+			                                FileAccess.Read,
+			                                FileShare.Read,
+			                                IntPtr.Zero,
+			                                FileMode.Open,
+			                                0,
+			                                IntPtr.Zero);
+
+
+			if (hFile == Kernel32.INVALID_HANDLE_VALUE) {
+				return false;
+			}
+
+			fileSize = Kernel32.GetFileSize(hFile, null);
+
+			Conditions.Ensure(Kernel32.CloseHandle(hFile));
+
+			if (fileSize == Kernel32.INVALID_FILE_SIZE) {
+				return false;
+			}
+
+
+			return fileSize != Kernel32.INVALID_FILE_SIZE;
+		}
+
+		internal static bool GetFileParams(string pFileName, ref ulong baseAddr, ref ulong fileSize)
+		{
+			// Is it .PDB file ?
+
+			if (pFileName.Contains("pdb")) {
+				// Yes, it is a .PDB file 
+
+				// Determine its size, and use a dummy base address 
+
+				baseAddr = 0x10000000; // it can be any non-zero value, but if we load symbols 
+				// from more than one file, memory regions specified
+				// for different files should not overlap
+				// (region is "base address + file size")
+
+				if (!SymbolAccess.GetFileSize(pFileName, ref fileSize)) {
+					return false;
+				}
+			}
+			else {
+				// It is not a .PDB file 
+
+				// Base address and file size can be 0 
+
+				baseAddr = 0;
+				fileSize = 0;
+
+				throw new NotImplementedException();
+			}
+
+			return true;
 		}
 	}
 }

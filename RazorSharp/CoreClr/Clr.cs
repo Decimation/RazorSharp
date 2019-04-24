@@ -29,7 +29,7 @@ namespace RazorSharp.CoreClr
 			ClrModule  = Modules.GetModule(CLR_DLL_SHORT);
 			ClrVersion = new Version(4, 0, 30319, 42000);
 
-			
+
 			if (ClrPdb == null) {
 				ClrPdb         = GetClrSymbolFile();
 				IsPdbTemporary = true;
@@ -39,7 +39,7 @@ namespace RazorSharp.CoreClr
 				IsPdbTemporary = false;
 			}
 
-			ClrSymbols = new ModuleInfo(ClrPdb, ClrModule, SymbolRetrievalMode.Kernel);
+			ClrSymbols = new ModuleInfo(ClrPdb, ClrModule, SymbolRetrievalMode.KERNEL);
 		}
 
 

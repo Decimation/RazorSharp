@@ -2,8 +2,8 @@
 
 using System;
 using System.Runtime;
-using System.Runtime.CompilerServices;
 using RazorCommon.Diagnostics;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Extern;
 using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
@@ -20,7 +20,7 @@ namespace RazorSharp.CoreClr.Structures
 {
 	#region
 
-	using CSUnsafe = Unsafe;
+	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
 
@@ -46,16 +46,19 @@ namespace RazorSharp.CoreClr.Structures
 		///     <para>Global CLR variable <c>g_pGCHeap</c></para>
 		///     <para>Global VM GC</para>
 		/// </summary>
+		[SymField(Global = true)]
 		private static readonly IntPtr g_pGCHeap;
 
 		/// <summary>
 		///     <para>Global CLR variable <c>g_gc_lowest_address</c></para>
 		/// </summary>
+		[SymField(Global = true)]
 		private static readonly IntPtr g_lowest_address;
 
 		/// <summary>
 		///     <para>Global CLR variable <c>g_gc_highest_address</c></para>
 		/// </summary>
+		[SymField(Global = true)]
 		private static readonly IntPtr g_highest_address;
 
 		/// <summary>
@@ -86,9 +89,9 @@ namespace RazorSharp.CoreClr.Structures
 			get => throw new NativeCallException();
 		}
 
-		public bool IsHeapPointer<T>(T t, bool smallHeapOnly = false) where T : class
+		public bool IsHeapPointer<T>(T value, bool smallHeapOnly = false) where T : class
 		{
-			return IsHeapPointer(Memory.Unsafe.AddressOfHeap(t).ToPointer(), smallHeapOnly);
+			return IsHeapPointer(Unsafe.AddressOfHeap(value).ToPointer(), smallHeapOnly);
 		}
 
 		/// <summary>
@@ -135,12 +138,6 @@ namespace RazorSharp.CoreClr.Structures
 			return CSUnsafe.Read<T>(&objValuePtr);
 		}
 
-		[Symcall(IgnoreNamespace = true)]
-		public bool IsGCInProgress(bool bConsiderGCStart = false)
-		{
-			throw new NativeCallException();
-		}
-
 		static GCHeap()
 		{
 			Conditions.Require(!GCSettings.IsServerGC, "GC must be WKS", nameof(GCHeap));
@@ -149,7 +146,7 @@ namespace RazorSharp.CoreClr.Structures
 
 			// Retrieve the global variables from the data segment of the CLR DLL
 
-			g_pGCHeap = Runtime.GetClrSymAddress(nameof(g_pGCHeap))
+			/*g_pGCHeap = Runtime.GetClrSymAddress(nameof(g_pGCHeap))
 			                   .ReadPointer<byte>()
 			                   .Address;
 
@@ -159,7 +156,7 @@ namespace RazorSharp.CoreClr.Structures
 
 			g_highest_address = Runtime.GetClrSymAddress(nameof(g_highest_address))
 			                           .ReadPointer<byte>()
-			                           .Address;
+			                           .Address;*/
 		}
 	}
 }

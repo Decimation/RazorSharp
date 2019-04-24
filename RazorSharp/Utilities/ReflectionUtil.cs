@@ -74,29 +74,17 @@ namespace RazorSharp.Utilities
 
 		#region Methods
 
-		internal static MethodInfo[] GetAllMethods(this Type t)
-		{
-			return t.GetMethods(ALL_FLAGS);
-		}
+		internal static MethodInfo[] GetAllMethods(this Type t) => t.GetMethods(ALL_FLAGS);
 
-		internal static MethodInfo GetAnyMethod(this Type t, string name)
-		{
-			return t.GetMethod(name, ALL_FLAGS);
-		}
+		internal static MethodInfo GetAnyMethod(this Type t, string name) => t.GetMethod(name, ALL_FLAGS);
 
 		#endregion
 
 		#region Fields
 
-		internal static FieldInfo[] GetAllFields(this Type t)
-		{
-			return t.GetFields(ALL_FLAGS);
-		}
+		internal static FieldInfo[] GetAllFields(this Type t) => t.GetFields(ALL_FLAGS);
 
-		internal static FieldInfo GetAnyField(this Type t, string name)
-		{
-			return t.GetField(name, ALL_FLAGS);
-		}
+		internal static FieldInfo GetAnyField(this Type t, string name) => t.GetField(name, ALL_FLAGS);
 
 		/// <summary>
 		///     Gets the corresponding <see cref="FieldInfo" />s equivalent to the fields

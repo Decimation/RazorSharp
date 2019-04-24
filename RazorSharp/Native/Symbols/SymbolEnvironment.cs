@@ -12,7 +12,7 @@ using RazorSharp.Native.Win32;
 
 namespace RazorSharp.Native.Symbols
 {
-	public unsafe class SymbolEnvironment : ISymbolProvider, ISymbolResolver
+	public unsafe class SymbolEnvironment : ISymbolResolver
 	{
 		private ulong m_modBase;
 
@@ -75,7 +75,7 @@ namespace RazorSharp.Native.Symbols
 			ulong baseAddr = 0;
 			ulong fileSize = 0;
 
-			bool getFile = SymbolReader.GetFileParams(m_img, ref baseAddr, ref fileSize);
+			bool getFile = SymbolAccess.GetFileParams(m_img, ref baseAddr, ref fileSize);
 			NativeHelp.Call(getFile);
 
 			m_modBase = DbgHelp.SymLoadModule64(

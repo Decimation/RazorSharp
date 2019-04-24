@@ -52,6 +52,11 @@ namespace RazorSharp.Native
 		{
 			return new string(first);
 		}
+
+		public static unsafe string GetStringAlt(sbyte* first, int len)
+		{
+			return new string(first, 0, len);
+		}
 		
 		public static unsafe string GetString(sbyte* first, int len)
 		{
@@ -59,11 +64,11 @@ namespace RazorSharp.Native
 				return null;
 			}
 
-			return Marshal.PtrToStringAuto(new IntPtr(first), len).Erase(StringConstants.NULL_TERMINATOR);
+			return Marshal.PtrToStringAuto(new IntPtr(first), len)
+			              .Erase(StringConstants.NULL_TERMINATOR);
 
-			// return new string(first, 0,len);
-
-
+			//return new string(first, 0, len);
+			
 			/*byte[] rg = new byte[len];
 			Marshal.Copy(new IntPtr(first), rg, 0, rg.Length);
 			return Encoding.ASCII.GetString(rg);*/
@@ -74,9 +79,9 @@ namespace RazorSharp.Native
 			return new Win32Exception(code).Message;
 		}
 
-		public static string GetLastWin32ErrorMessage() 
+		public static string GetLastWin32ErrorMessage()
 			=> GetMessageForWin32Error(Marshal.GetLastWin32Error());
-		
+
 		public static unsafe string GetString(sbyte* first, uint len)
 		{
 			return GetString(first, (int) len);

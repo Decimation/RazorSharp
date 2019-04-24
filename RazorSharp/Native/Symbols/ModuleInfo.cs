@@ -12,8 +12,8 @@ namespace RazorSharp.Native.Symbols
 {
 	public enum SymbolRetrievalMode
 	{
-		Kernel,
-		PdbReader
+		KERNEL,
+		PDB_READER
 	}
 
 	/// <summary>
@@ -33,16 +33,15 @@ namespace RazorSharp.Native.Symbols
 		public ModuleInfo(FileInfo pdb, Pointer<byte> baseAddr, SymbolRetrievalMode mode)
 		{
 			Conditions.NotNull(baseAddr.Address, nameof(baseAddr));
-			
+
 			m_baseAddr = baseAddr;
 			m_mode     = mode;
 
 			switch (m_mode) {
-				case SymbolRetrievalMode.Kernel:
-					m_reader = SymbolEnvironment.Instance;
-					((SymbolEnvironment) m_reader).Init(pdb.FullName);
+				case SymbolRetrievalMode.KERNEL:
+					m_reader = new SymbolManager(pdb.FullName);
 					break;
-				case SymbolRetrievalMode.PdbReader:
+				case SymbolRetrievalMode.PDB_READER:
 					m_reader = new PdbSymbols(pdb);
 					break;
 				default:
@@ -77,8 +76,7 @@ namespace RazorSharp.Native.Symbols
 
 		public void Dispose()
 		{
-			if (m_mode == SymbolRetrievalMode.Kernel)
-				((SymbolEnvironment) m_reader).Dispose();
+			m_reader.Dispose();
 		}
 	}
 }

@@ -14,11 +14,14 @@ namespace RazorSharp.Native.Symbols
 	/// </summary>
 	public unsafe class Symbol
 	{
-		private readonly byte[] m_symbolStructMemory;
+		/// <summary>
+		/// Memory of the original <see cref="SymbolInfo"/>
+		/// </summary>
+		private readonly byte[] m_symStructMem;
 
-		internal Symbol(SymbolInfo* pSymInfo)
+		internal Symbol(SymbolInfo* pSymInfo, string name)
 		{
-			Name = NativeHelp.GetString(&pSymInfo->Name, pSymInfo->NameLen);
+			Name = name;
 
 			SizeOfStruct = pSymInfo->SizeOfStruct;
 			TypeIndex    = pSymInfo->TypeIndex;
@@ -33,10 +36,13 @@ namespace RazorSharp.Native.Symbols
 			Tag          = pSymInfo->Tag;
 
 			int realSize = GetSymbolInfoSize(pSymInfo);
-			m_symbolStructMemory = new byte[realSize];
+			m_symStructMem = new byte[realSize];
 
-			Marshal.Copy((IntPtr) pSymInfo, m_symbolStructMemory, 0, realSize);
+			Marshal.Copy((IntPtr) pSymInfo, m_symStructMem, 0, realSize);
 		}
+
+		internal Symbol(SymbolInfo* pSymInfo)
+			: this(pSymInfo, NativeHelp.GetString(&pSymInfo->Name, pSymInfo->NameLen)) { }
 
 		public string Name         { get; }
 		public uint   SizeOfStruct { get; }
@@ -57,16 +63,16 @@ namespace RazorSharp.Native.Symbols
 
 
 		/// <summary>
-		///     Copies the values of <see cref="m_symbolStructMemory" /> into unmanaged memory.
-		///     <seealso cref="m_symbolStructMemory" /> contains the wrapped <see cref="SymbolInfo" /> value.
+		///     Copies the values of <see cref="m_symStructMem" /> into unmanaged memory.
+		///     <seealso cref="m_symStructMem" /> contains the wrapped <see cref="SymbolInfo" /> value.
 		///     <remarks>
 		///         This memory must be freed with <see cref="Mem.Free{T}(Pointer{T})" />
 		///     </remarks>
 		/// </summary>
 		internal Pointer<SymbolInfo> GetSymbolInfo()
 		{
-			Pointer<byte> alloc = Mem.AllocUnmanaged<byte>(m_symbolStructMemory.Length);
-			alloc.WriteAll(m_symbolStructMemory);
+			Pointer<byte> alloc = Mem.AllocUnmanaged<byte>(m_symStructMem.Length);
+			alloc.WriteAll(m_symStructMem);
 			return alloc.Cast<SymbolInfo>();
 		}
 
@@ -79,7 +85,7 @@ namespace RazorSharp.Native.Symbols
 		public override string ToString()
 		{
 			return String.Format("Name: {0} | Offset: {1:X} | Address: {2:X} | Tag: {3} | Size: {4}",
-			                     Name, Offset, Address,TagEnum, Size);
+			                     Name, Offset, Address, TagEnum, Size);
 		}
 	}
 }

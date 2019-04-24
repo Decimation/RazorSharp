@@ -43,27 +43,27 @@ namespace RazorSharp.Memory.Extern.Symbols
 			Conditions.NotNull(member.DeclaringType, nameof(member.DeclaringType));
 
 			// Resolve the symbol
-			string fullSym       = null;
+			string name       = null;
 			string declaringName = member.DeclaringType.Name;
 
 			if (attr.FullyQualified && attr.Symbol != null && !attr.UseMemberNameOnly) {
-				fullSym = attr.Symbol;
+				name = attr.Symbol;
 			}
 			else if (attr.UseMemberNameOnly && attr.Symbol == null) {
-				fullSym = member.Name;
+				name = member.Name;
 			}
 			else if (attr.Symbol != null && !attr.UseMemberNameOnly && !attr.FullyQualified) {
-				fullSym = declaringName + SCOPE_RESOLUTION_OPERATOR + attr.Symbol;
+				name = declaringName + SCOPE_RESOLUTION_OPERATOR + attr.Symbol;
 			}
 			else if (attr.Symbol == null) {
 				// Auto resolve
-				fullSym = declaringName + SCOPE_RESOLUTION_OPERATOR + member.Name;
+				name = declaringName + SCOPE_RESOLUTION_OPERATOR + member.Name;
 			}
 
 
-			Conditions.NotNull(fullSym, nameof(fullSym));
+			Conditions.NotNull(name, nameof(name));
 
-			return fullSym;
+			return name;
 		}
 
 		private static ModuleInfo GetInfo(SymNamespaceAttribute attr, Pointer<byte> baseAddr)
@@ -73,9 +73,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 			}
 
 
-			return new ModuleInfo(new FileInfo(attr.Image),
-			                      baseAddr,
-			                      SymbolRetrievalMode.PdbReader);
+			return new ModuleInfo(new FileInfo(attr.Image), baseAddr, SymbolRetrievalMode.PDB_READER);
 		}
 
 		private static ModuleInfo GetInfo(SymNamespaceAttribute attr)
@@ -97,7 +95,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 			var addr = module.GetSymAddress(fullSym);
 //			Console.WriteLine(addr);
 //			Console.WriteLine("{0:X}",ProcessApi.GetProcAddress(module.BaseAddress.Address,"g_int").ToInt64());
-			
+
 			if (addr.IsNull) {
 				throw new NullReferenceException(
 					string.Format("Could not find the address of the symbol \"{0}\"", fullSym));
@@ -111,41 +109,38 @@ namespace RazorSharp.Memory.Extern.Symbols
 			fieldInfo.SetValue(inst, val);
 		}
 
-		public static T GenericLoad<T>(T inst = default)
+		public static T GenericLoad<T>(T value = default) => (T) Load(typeof(T), value);
+
+		public static object Load(Type type, object value = null)
 		{
-			return (T) Load(typeof(T), inst);
-		}
-		
-		public static object Load(Type t, object inst = null)
-		{
-			if (IsBound(t)) {
-				return inst;
+			if (IsBound(type)) {
+				return value;
 			}
 
 			// For now, only one image can be used per type
-			var    nameSpaceAttr = t.GetCustomAttribute<SymNamespaceAttribute>();
+			var nameSpaceAttr = type.GetCustomAttribute<SymNamespaceAttribute>();
 			Conditions.NotNull(nameSpaceAttr, nameof(nameSpaceAttr));
-			
-			string nameSpace     = nameSpaceAttr?.Namespace;
+
+			string nameSpace = nameSpaceAttr.Namespace;
 
 			Pointer<byte> baseAddr = null;
-			
+
 			if (!Modules.IsLoaded(nameSpaceAttr.Module)) {
-				throw new Exception(String.Format("Module {0} is not loaded", nameSpaceAttr.Module));
+				throw new Exception(String.Format("Module \"{0}\" is not loaded", nameSpaceAttr.Module));
 			}
-			
+
 			var mi = !baseAddr.IsNull ? GetInfo(nameSpaceAttr, baseAddr) : GetInfo(nameSpaceAttr);
 
-			(MemberInfo[] members, SymImportAttribute[] attributes) = t.GetAnnotated<SymImportAttribute>();
+			(MemberInfo[] members, SymImportAttribute[] attributes) = type.GetAnnotated<SymImportAttribute>();
 
 
 			int lim = attributes.Length;
 
 			if (lim == 0) {
-				return inst;
+				return value;
 			}
 
-			Global.Log.Information("Binding type {Name}", t.Name);
+			Global.Log.Information("Binding type {Name}", type.Name);
 
 			for (int i = 0; i < lim; i++) {
 				var attr = attributes[i];
@@ -153,30 +148,31 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 				// Resolve the symbol
 
-				string fullSym = GetSymbolName(attr, mem);
+				string name = GetSymbolName(attr, mem);
 
 				if (nameSpace != null && !attr.IgnoreNamespace) {
-					fullSym = nameSpace + SCOPE_RESOLUTION_OPERATOR + fullSym;
+					name = nameSpace + SCOPE_RESOLUTION_OPERATOR + name;
 				}
 
 //				Global.Log.Debug("Loading symbol {Name}", fullSym);
 
-				var addr = mi.GetSymAddress(fullSym);
+				var addr = mi.GetSymAddress(name);
 
 
+//				Global.Log.Debug("Symbol {Sym} address: {Addr}", fullSym, addr.ToString("P"));
+				
 				switch (mem.MemberType) {
 					case MemberTypes.Constructor:
 						// The import is a function (ctor)
 						Functions.SetStableEntryPoint((MethodInfo) mem, addr.Address);
 						break;
 					case MemberTypes.Field:
-						LoadField(inst, mi, fullSym, mem, attr);
+						Global.Log.Debug("Loading field {Name} with {Sym}", mem.Name, name);
+						LoadField(value, mi, name, mem, attr);
 						break;
 					case MemberTypes.Method:
 						// The import is a function
 						Functions.SetStableEntryPoint((MethodInfo) mem, addr.Address);
-						break;
-					case MemberTypes.Property:
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();
@@ -184,13 +180,13 @@ namespace RazorSharp.Memory.Extern.Symbols
 			}
 
 
-			BoundTypes.Add(t);
+			BoundTypes.Add(type);
 
 			// Don't dispose ClrSymbols - we need it for the life of the program
 			if (!ReferenceEquals(mi, Clr.ClrSymbols))
 				mi.Dispose();
 
-			return inst;
+			return value;
 		}
 	}
 }

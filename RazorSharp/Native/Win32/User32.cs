@@ -58,7 +58,7 @@ namespace RazorSharp.Native.Win32
 		///         information
 		///     </para>
 		/// </summary>
-		/// <param name="hwnd">C++ ( hWnd [in]. Type: HWND )<br />A handle to the window or control whose text is to be changed.</param>
+		/// <param name="hWnd">C++ ( hWnd [in]. Type: HWND )<br />A handle to the window or control whose text is to be changed.</param>
 		/// <param name="lpString">C++ ( lpString [in, optional]. Type: LPCTSTR )<br />The new title or control text.</param>
 		/// <returns>
 		///     If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.<br />
@@ -78,7 +78,7 @@ namespace RazorSharp.Native.Win32
 		/// </remarks>
 		[DllImport(USER32_DLL, SetLastError = true, CharSet = CharSet.Auto)]
 		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool SetWindowText(IntPtr hwnd, string lpString);
+		internal static extern bool SetWindowText(IntPtr hWnd, string lpString);
 
 		[DllImport(USER32_DLL, SetLastError = true)]
 		internal static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
@@ -87,9 +87,6 @@ namespace RazorSharp.Native.Win32
 		[DllImport(USER32_DLL)]
 		internal static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr processId);
 
-		internal static IntPtr FindWindowByCaption(string windowName)
-		{
-			return FindWindow(null, windowName);
-		}
+		internal static IntPtr FindWindowByCaption(string windowName) => FindWindow(null, windowName);
 	}
 }

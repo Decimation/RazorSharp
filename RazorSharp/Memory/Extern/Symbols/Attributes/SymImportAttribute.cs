@@ -10,6 +10,8 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 	/// </summary>
 	public class SymImportAttribute : Attribute
 	{
+		// todo: this configuration is a bit confusing
+		
 		/// <summary>
 		///     Name of the symbol
 		/// </summary>
