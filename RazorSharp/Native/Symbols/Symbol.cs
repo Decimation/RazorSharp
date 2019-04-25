@@ -71,7 +71,7 @@ namespace RazorSharp.Native.Symbols
 		/// </summary>
 		internal Pointer<SymbolInfo> GetSymbolInfo()
 		{
-			Pointer<byte> alloc = Mem.AllocUnmanaged<byte>(m_symStructMem.Length);
+			Pointer<byte> alloc = Mem.Alloc<byte>(m_symStructMem.Length);
 			alloc.WriteAll(m_symStructMem);
 			return alloc.Cast<SymbolInfo>();
 		}

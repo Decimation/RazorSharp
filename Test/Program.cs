@@ -36,9 +36,6 @@ using RazorSharp.Utilities;
 using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 using Unsafe = RazorSharp.Memory.Unsafe;
 using System.Net.Http;
-using SharpPdb.Windows;
-using SharpPdb.Windows.SymbolRecords;
-using SharpUtilities;
 
 #endregion
 
@@ -122,15 +119,14 @@ namespace Test
 
 
 			reader.Position = ofs;
-			
+
 			se.Dispose();
 			pdb.Dispose();
-			
+
 //			Console.WriteLine(sym.Flags);
 //			Console.WriteLine((PublicSymbolFlags) reader.ReadUint());
 		}
 
-		
 
 		// todo: symbol address/offset difference between pdb (PdbFile) and kernel (DbgHelp)
 
@@ -149,11 +145,11 @@ namespace Test
 
 			//Console.WriteLine(Clr.ClrSymbols.GetSymAddress("g_pGCHeap"));
 
-			
-			
+
+			Pointer<int> p = stackalloc int[256];
+			Console.WriteLine((p + 1).IsAligned<int>());
 			Console.WriteLine(GCHeap.GlobalHeap);
 
-			
 
 			ModuleInitializer.GlobalClose();
 		}

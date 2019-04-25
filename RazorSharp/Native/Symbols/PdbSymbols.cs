@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Pointers;
 using SharpPdb.Windows;
 using SharpPdb.Windows.SymbolRecords;
@@ -12,19 +13,17 @@ namespace RazorSharp.Native.Symbols
 {
 	public class PdbSymbols : ISymbolResolver
 	{
-		private readonly PdbFile m_file;
-
-		public PdbFile File => m_file;
+		public PdbFile File { get; }
 
 		public PdbSymbols(FileInfo pdb)
 		{
-			m_file = new PdbFile(pdb.FullName);
+			File = new PdbFile(pdb.FullName);
 		}
 
 		public long GetSymOffset(string name)
 		{
 			var sym = GetSymbol(name);
-			var rva = m_file.FindRelativeVirtualAddress(sym.Segment, sym.Offset);
+			var rva = File.FindRelativeVirtualAddress(sym.Segment, sym.Offset);
 
 			return (long) rva;
 		}
@@ -54,19 +53,17 @@ namespace RazorSharp.Native.Symbols
 
 		public Public32Symbol GetSymbol(string name)
 		{
-			if (name.Contains("::")) {
-				var sz = name.Split(new[] {"::"}, StringSplitOptions.None);
+			if (name.Contains(Symload.SCOPE_RESOLUTION_OPERATOR)) {
+				var sz = name.Split(new[] {Symload.SCOPE_RESOLUTION_OPERATOR}, StringSplitOptions.None);
 				name = sz.Last();
 			}
 
 
-			var contains = m_file.PublicsStream.PublicSymbols.Where(s => s.Name.Contains(name)).ToArray();
+			var contains = File.PublicsStream.PublicSymbols.Where(s => s.Name.Contains(name)).ToArray();
 
 			foreach (var symbol in contains) {
 				if (symbol.CleanName() == name) {
 					//Console.WriteLine("Choosing {0} {1} {2}", symbol.CleanName(), symbol.Flags, symbol.Kind);
-
-
 					return symbol;
 				}
 			}
@@ -77,7 +74,7 @@ namespace RazorSharp.Native.Symbols
 
 		public void Dispose()
 		{
-			m_file.Dispose();
+			File.Dispose();
 		}
 	}
 }

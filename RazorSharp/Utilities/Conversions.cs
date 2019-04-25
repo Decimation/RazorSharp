@@ -42,7 +42,7 @@ namespace RazorSharp.Utilities
 
 		public static TTo Convert<TTo>(byte[] mem) where TTo : struct
 		{
-			Pointer<byte> alloc = Mem.AllocUnmanaged<byte>(mem.Length);
+			Pointer<byte> alloc = Mem.Alloc<byte>(mem.Length);
 			alloc.WriteAll(mem);
 			var read = alloc.ReadAny<TTo>();
 			Mem.Free(alloc);

@@ -11,12 +11,11 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 	public class SymImportAttribute : Attribute
 	{
 		// todo: this configuration is a bit confusing
-		
+
 		/// <summary>
 		///     Name of the symbol
 		/// </summary>
 		public string Symbol { get; set; }
-
 
 		/// <summary>
 		///     Whether <see cref="Symbol" /> is the fully qualified name (don't use the member's name)

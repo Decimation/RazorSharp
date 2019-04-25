@@ -14,15 +14,16 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 		/// <summary>
 		/// Whether this should be interpreted as a global variable.
 		/// <remarks>
-		/// (Shortcut for <see cref="SymImportAttribute.IgnoreNamespace"/>
-		/// and <see cref="SymImportAttribute.FullyQualified"/>)
+		/// (Shortcut for <see cref="SymImportAttribute.IgnoreNamespace"/>,
+		/// <see cref="SymImportAttribute.UseMemberNameOnly"/> and <see cref="SymImportAttribute.FullyQualified"/>)
 		/// </remarks>
 		/// </summary>
 		public bool Global {
-			get => IgnoreNamespace && FullyQualified;
+			get => IgnoreNamespace && FullyQualified && UseMemberNameOnly;
 			set {
 				IgnoreNamespace = value;
 				FullyQualified  = value;
+				UseMemberNameOnly = value;
 			}
 		}
 

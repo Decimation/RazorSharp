@@ -119,10 +119,10 @@ namespace RazorSharp.CoreClr.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		/// <exception cref="NativeCallException"></exception>
+		/// <exception cref="SymImportException"></exception>
 		internal IntPtr NativeCode {
 			[Symcall(Symbol = "GetNativeCode")]
-			get => throw new NativeCallException();
+			get => throw new SymImportException();
 		}
 
 
@@ -133,7 +133,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal IntPtr PreImplementedCode {
 			[Symcall(Symbol = "GetPreImplementedCode")]
-			get => throw new NativeCallException();
+			get => throw new SymImportException();
 		}
 
 		/// <summary>
@@ -168,7 +168,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal int SizeOf {
 			[Symcall(Symbol = "SizeOf")]
-			get => throw new NativeCallException();
+			get => throw new SymImportException();
 		}
 
 		/// <summary>
@@ -178,7 +178,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
 			[Symcall(Symbol = "GetMethodTable")]
-			get => throw new NativeCallException();
+			get => throw new SymImportException();
 		}
 
 
@@ -189,13 +189,13 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal uint RVA {
 			[Symcall(Symbol = "GetRVA")]
-			get => throw new NativeCallException();
+			get => throw new SymImportException();
 		}
 
 
 		internal int Token {
 			[Symcall(Symbol = "GetMemberDef")]
-			get => throw new NativeCallException();
+			get => throw new SymImportException();
 		}
 
 		#region bool accessors
@@ -208,7 +208,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal bool IsConstructor {
 			[Symcall(Symbol = "IsCtor")]
-			get => throw new NativeCallException();
+			get => throw new SymImportException();
 		}
 
 		internal bool IsPreImplemented => PreImplementedCode != IntPtr.Zero;
@@ -221,7 +221,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal bool IsPointingToNativeCode {
 			[Symcall(Symbol = "IsPointingToNativeCode")]
-			get => throw new NativeCallException();
+			get => throw new SymImportException();
 		}
 
 		internal bool HasThis => Info.CallingConvention.HasFlag(CallingConventions.HasThis);
@@ -300,7 +300,7 @@ namespace RazorSharp.CoreClr.Structures
 		[Symcall]
 		internal Pointer<ILMethod> GetILHeader(int fAllowOverrides = 0)
 		{
-			throw new NativeCallException();
+			throw new SymImportException();
 		}
 
 		/// <summary>
@@ -309,7 +309,7 @@ namespace RazorSharp.CoreClr.Structures
 		[Symcall]
 		private long SetStableEntryPointInterlocked(ulong pCode)
 		{
-			throw new NativeCallException();
+			throw new SymImportException();
 		}
 
 
@@ -328,7 +328,7 @@ namespace RazorSharp.CoreClr.Structures
 		[Symcall]
 		internal void Reset()
 		{
-			throw new NativeCallException();
+			throw new SymImportException();
 		}
 
 

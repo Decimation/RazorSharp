@@ -75,9 +75,8 @@ namespace RazorSharp.Memory.Pointers
 		private void* m_value;
 
 		private string Dbg => ToString(PointerFormat.FMT_P);
-		
+
 		#region Properties
-		
 
 		/// <summary>
 		///     Indexes <see cref="Address" /> as a reference.
@@ -114,11 +113,6 @@ namespace RazorSharp.Memory.Pointers
 		///     Whether <see cref="Address" /> is <c>null</c> (<see cref="IntPtr.Zero" />).
 		/// </summary>
 		public bool IsNull => m_value == null;
-
-		/// <summary>
-		///     Whether <see cref="Address" /> is aligned on the current <see cref="IntPtr.Size" /> boundary.
-		/// </summary>
-		public bool IsAligned => Mem.IsAligned(Address);
 
 		/// <summary>
 		///     Whether the value being pointed to is <c>default</c> or <c>null</c> bytes
@@ -208,10 +202,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <param name="value">Value to retrieve the index of</param>
 		/// <param name="searchLength">How many elements to search, starting from the current index</param>
 		/// <returns>The index of the element if it was found; <see cref="Constants.INVALID_VALUE" /> if the element was not found</returns>
-		public int IndexOf(T value, int searchLength)
-		{
-			return IndexOf(value, 0, searchLength);
-		}
+		public int IndexOf(T value, int searchLength) => IndexOf(value, 0, searchLength);
 
 		#endregion
 
@@ -223,10 +214,7 @@ namespace RazorSharp.Memory.Pointers
 				Write(value, i - startIndex);
 		}
 
-		public void Set(T value, int elemCount)
-		{
-			Set(value, 0, elemCount);
-		}
+		public void Set(T value, int elemCount) => Set(value, 0, elemCount);
 
 		#endregion
 
@@ -253,10 +241,7 @@ namespace RazorSharp.Memory.Pointers
 		///     Initializes <paramref name="elemCount" /> elements with the default value of <typeparamref name="T" />.
 		/// </summary>
 		/// <param name="elemCount">Number of elements</param>
-		public void Init(int elemCount)
-		{
-			Set(default, elemCount);
-		}
+		public void Init(int elemCount) => Set(default, elemCount);
 
 
 		#region Contains
@@ -337,17 +322,13 @@ namespace RazorSharp.Memory.Pointers
 
 		#endregion
 
-
-		public MemoryBasicInformation Query() => Kernel32.VirtualQuery(Address);
-
-		public bool IsReadOnly => Query().Protect.HasFlag(MemoryProtection.ReadOnly);
-
+		public bool IsAligned<TType>()
+		{
+			return (unchecked((int) m_value) & Unsafe.SizeOf<TType>()) == 0;
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int Size(int elemCnt)
-		{
-			return elemCnt * ElementSize;
-		}
+		private int Size(int elemCnt) => elemCnt * ElementSize;
 
 		#region Read / write
 
@@ -750,10 +731,7 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Other methods
 
-		public Pointer<T> AddressOfIndex(int index)
-		{
-			return OffsetFast(index);
-		}
+		public Pointer<T> AddressOfIndex(int index) => OffsetFast(index);
 
 		public void Zero(int elemCnt)
 		{
@@ -788,26 +766,17 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		/// <typeparam name="TNew">Type to point to</typeparam>
 		/// <returns>A new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" /></returns>
-		public Pointer<TNew> Cast<TNew>()
-		{
-			return new Pointer<TNew>(Address);
-		}
+		public Pointer<TNew> Cast<TNew>() => new Pointer<TNew>(Address);
 
 		/// <summary>
 		///     Returns <see cref="Address" /> as a pointer.
 		/// </summary>
 		/// <returns></returns>
 		[Pure]
-		public void* ToPointer()
-		{
-			return m_value;
-		}
+		public void* ToPointer() => m_value;
 
 		[Pure]
-		public TUnmanaged* ToPointer<TUnmanaged>() where TUnmanaged : unmanaged
-		{
-			return (TUnmanaged*) m_value;
-		}
+		public TUnmanaged* ToPointer<TUnmanaged>() where TUnmanaged : unmanaged => (TUnmanaged*) m_value;
 
 		#region Integer conversions
 
@@ -815,37 +784,25 @@ namespace RazorSharp.Memory.Pointers
 		///     Converts <see cref="Address" /> to a 32-bit signed integer.
 		/// </summary>
 		/// <returns></returns>
-		public int ToInt32()
-		{
-			return (int) m_value;
-		}
+		public int ToInt32() => (int) m_value;
 
 		/// <summary>
 		///     Converts <see cref="Address" /> to a 64-bit signed integer.
 		/// </summary>
 		/// <returns></returns>
-		public long ToInt64()
-		{
-			return (long) m_value;
-		}
+		public long ToInt64() => (long) m_value;
 
 		/// <summary>
 		///     Converts <see cref="Address" /> to a 64-bit unsigned integer.
 		/// </summary>
 		/// <returns></returns>
-		public ulong ToUInt64()
-		{
-			return (ulong) m_value;
-		}
+		public ulong ToUInt64() => (ulong) m_value;
 
 		/// <summary>
 		///     Converts <see cref="Address" /> to a 32-bit unsigned integer.
 		/// </summary>
 		/// <returns></returns>
-		public uint ToUInt32()
-		{
-			return (uint) m_value;
-		}
+		public uint ToUInt32() => (uint) m_value;
 
 		#endregion
 
@@ -871,55 +828,25 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Implicit and explicit conversions
 
-		public static explicit /*implicit*/ operator bool(Pointer<T> ptr)
-		{
-			return !ptr.IsNil;
-		}
+		public static explicit /*implicit*/ operator bool(Pointer<T> ptr) => !ptr.IsNil;
 
-		public static implicit operator Pointer<T>(Pointer<byte> v)
-		{
-			return v.Address;
-		}
+		public static implicit operator Pointer<T>(Pointer<byte> v) => v.Address;
 
-		public static implicit operator Pointer<T>(void* v)
-		{
-			return new Pointer<T>(v);
-		}
+		public static implicit operator Pointer<T>(void* v) => new Pointer<T>(v);
 
-		public static implicit operator Pointer<T>(IntPtr p)
-		{
-			return new Pointer<T>(p.ToPointer());
-		}
+		public static implicit operator Pointer<T>(IntPtr p) => new Pointer<T>(p.ToPointer());
 
-		public static implicit operator Pointer<T>(long l)
-		{
-			return new Pointer<T>(l);
-		}
+		public static implicit operator Pointer<T>(long l) => new Pointer<T>(l);
 
-		public static implicit operator Pointer<T>(ulong ul)
-		{
-			return new Pointer<T>(ul);
-		}
+		public static implicit operator Pointer<T>(ulong ul) => new Pointer<T>(ul);
 
-		public static explicit operator void*(Pointer<T> ptr)
-		{
-			return ptr.ToPointer();
-		}
+		public static explicit operator void*(Pointer<T> ptr) => ptr.ToPointer();
 
-		public static explicit operator long(Pointer<T> ptr)
-		{
-			return ptr.ToInt64();
-		}
+		public static explicit operator long(Pointer<T> ptr) => ptr.ToInt64();
 
-		public static explicit operator ulong(Pointer<T> ptr)
-		{
-			return ptr.ToUInt64();
-		}
+		public static explicit operator ulong(Pointer<T> ptr) => ptr.ToUInt64();
 
-		public static explicit operator Pointer<byte>(Pointer<T> ptr)
-		{
-			return ptr.ToUInt64();
-		}
+		public static explicit operator Pointer<byte>(Pointer<T> ptr) => ptr.ToUInt64();
 
 		#endregion
 
@@ -931,10 +858,7 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		/// <param name="current">Current pointer (high address)</param>
 		/// <returns>The index</returns>
-		public int OffsetIndex(Pointer<byte> current)
-		{
-			return OffsetIndex<T>(current);
-		}
+		public int OffsetIndex(Pointer<byte> current) => OffsetIndex<T>(current);
 
 		/// <summary>
 		///     Returns the element index of a pointer relative to <see cref="Address" />
@@ -950,10 +874,7 @@ namespace RazorSharp.Memory.Pointers
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void* OffsetFast(int elemCnt)
-		{
-			return OffsetFast<T>(elemCnt);
-		}
+		private void* OffsetFast(int elemCnt) => OffsetFast<T>(elemCnt);
 
 		/// <summary>
 		///     Offsets a pointer by <paramref name="elemCnt" /> elements.
@@ -965,21 +886,12 @@ namespace RazorSharp.Memory.Pointers
 		///     <see cref="Unsafe.SizeOf{T}" /><c>)</c>
 		/// </returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void* OffsetFast<TType>(int elemCnt)
-		{
-			return (void*) ((long) m_value + Mem.Size<TType>(elemCnt));
-		}
+		private void* OffsetFast<TType>(int elemCnt) => (void*) ((long) m_value + Mem.Size<TType>(elemCnt));
 
 
-		public Pointer<T> Add<TType>(int elemCnt = 1)
-		{
-			return Add(Mem.Size<TType>(elemCnt));
-		}
+		public Pointer<T> Add<TType>(int elemCnt = 1) => Add(Mem.Size<TType>(elemCnt));
 
-		public Pointer<T> Subtract<TType>(int elemCnt = 1)
-		{
-			return Add<TType>(-elemCnt);
-		}
+		public Pointer<T> Subtract<TType>(int elemCnt = 1) => Add<TType>(-elemCnt);
 
 		/// <summary>
 		///     Increment <see cref="Address" /> by the specified number of bytes
@@ -1006,10 +918,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <returns>
 		///     <c>this</c>
 		/// </returns>
-		public Pointer<T> Subtract(long right = 1)
-		{
-			return Add(-right);
-		}
+		public Pointer<T> Subtract(long right = 1) => Add(-right);
 
 
 		/// <summary>
@@ -1033,10 +942,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <returns>
 		///     <c>this</c>
 		/// </returns>
-		public Pointer<T> Decrement(int elemCnt = 1)
-		{
-			return Increment(-elemCnt);
-		}
+		public Pointer<T> Decrement(int elemCnt = 1) => Increment(-elemCnt);
 
 		/// <summary>
 		///     Increments the <see cref="Address" /> by the specified number of elements.
@@ -1073,7 +979,7 @@ namespace RazorSharp.Memory.Pointers
 		}
 
 		public static Pointer<T> operator -(Pointer<T> p, uint i) => p - (int) i;
-		
+
 		/// <summary>
 		///     Increments the <see cref="Pointer{T}" /> by one element.
 		/// </summary>
@@ -1100,15 +1006,9 @@ namespace RazorSharp.Memory.Pointers
 			return p;
 		}
 
-		public static bool operator >=(Pointer<T> left, Pointer<T> right)
-		{
-			return left.ToInt64() >= right.ToInt64();
-		}
+		public static bool operator >=(Pointer<T> left, Pointer<T> right) => left.ToInt64() >= right.ToInt64();
 
-		public static bool operator <=(Pointer<T> left, Pointer<T> right)
-		{
-			return left.ToInt64() <= right.ToInt64();
-		}
+		public static bool operator <=(Pointer<T> left, Pointer<T> right) => left.ToInt64() <= right.ToInt64();
 
 		/// <summary>
 		///     Checks if <paramref name="left" /> <see cref="Address" /> is higher than <paramref name="right" />'s.
@@ -1119,10 +1019,7 @@ namespace RazorSharp.Memory.Pointers
 		///     <c>true</c> if <paramref name="left" /> points to a higher address than <paramref name="right" />;
 		///     <c>false</c> otherwise
 		/// </returns>
-		public static bool operator >(Pointer<T> left, Pointer<T> right)
-		{
-			return left.ToInt64() > right.ToInt64();
-		}
+		public static bool operator >(Pointer<T> left, Pointer<T> right) => left.ToInt64() > right.ToInt64();
 
 		/// <summary>
 		///     Checks if <paramref name="left" /> <see cref="Address" /> is lower than <paramref name="right" />'s.
@@ -1133,20 +1030,11 @@ namespace RazorSharp.Memory.Pointers
 		///     <c>true</c> if <paramref name="left" /> points to a lower address than <paramref name="right" />; <c>false</c>
 		///     otherwise
 		/// </returns>
-		public static bool operator <(Pointer<T> left, Pointer<T> right)
-		{
-			return left.ToInt64() < right.ToInt64();
-		}
+		public static bool operator <(Pointer<T> left, Pointer<T> right) => left.ToInt64() < right.ToInt64();
 
-		public static Pointer<T> operator +(Pointer<T> left, Pointer<T> right)
-		{
-			return left.ToInt64() + right.ToInt64();
-		}
+		public static Pointer<T> operator +(Pointer<T> left, Pointer<T> right) => left.ToInt64() + right.ToInt64();
 
-		public static Pointer<T> operator -(Pointer<T> left, Pointer<T> right)
-		{
-			return left.ToInt64() - right.ToInt64();
-		}
+		public static Pointer<T> operator -(Pointer<T> left, Pointer<T> right) => left.ToInt64() - right.ToInt64();
 
 		#endregion
 
@@ -1158,10 +1046,7 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		/// <param name="other">Other <see cref="Pointer{T}" /></param>
 		/// <returns></returns>
-		public bool Equals(Pointer<T> other)
-		{
-			return Address == other.Address;
-		}
+		public bool Equals(Pointer<T> other) => Address == other.Address;
 
 		public override bool Equals(object obj)
 		{
@@ -1177,15 +1062,9 @@ namespace RazorSharp.Memory.Pointers
 			return unchecked((int) (long) m_value);
 		}
 
-		public static bool operator ==(Pointer<T> left, Pointer<T> right)
-		{
-			return left.Equals(right);
-		}
+		public static bool operator ==(Pointer<T> left, Pointer<T> right) => left.Equals(right);
 
-		public static bool operator !=(Pointer<T> left, Pointer<T> right)
-		{
-			return !left.Equals(right);
-		}
+		public static bool operator !=(Pointer<T> left, Pointer<T> right) => !left.Equals(right);
 
 		#endregion
 
@@ -1276,16 +1155,10 @@ namespace RazorSharp.Memory.Pointers
 		}
 
 		[Pure]
-		public string ToString(string format)
-		{
-			return ToString(format, CultureInfo.CurrentCulture);
-		}
+		public string ToString(string format) => ToString(format, CultureInfo.CurrentCulture);
 
 		[Pure]
-		public override string ToString()
-		{
-			return ToString(PointerFormat.DefaultFormat);
-		}
+		public override string ToString() => ToString(PointerFormat.DefaultFormat);
 
 		#endregion
 	}

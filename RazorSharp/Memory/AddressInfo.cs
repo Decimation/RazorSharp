@@ -5,6 +5,7 @@ using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;
 using RazorSharp.Native.Images;
+using RazorSharp.Native.Win32;
 
 #endregion
 
@@ -18,7 +19,7 @@ namespace RazorSharp.Memory
 
 			IsOnStack = Mem.IsOnStack(Address);
 			IsInHeap  = GCHeap.GlobalHeap.Reference.IsHeapPointer(Address.ToPointer());
-			Page      = ptr.Query();
+			Page = Kernel32.VirtualQuery(ptr.Address);
 			Module    = Modules.FromAddress(ptr);
 			Segment   = Segments.GetSegment(ptr, Module?.FileName);
 		}

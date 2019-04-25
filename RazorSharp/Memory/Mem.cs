@@ -36,8 +36,6 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public static unsafe class Mem
 	{
-		
-
 		public static bool Is64Bit => IntPtr.Size == sizeof(long);
 
 		/// <summary>
@@ -52,9 +50,7 @@ namespace RazorSharp.Memory
 			// return m_CacheStackLimit < addr && addr <= m_CacheStackBase;
 			// if (!((object < g_gc_highest_address) && (object >= g_gc_lowest_address)))
 
-			return p.ToInt64() < hi.ToInt64() && p.ToInt64() >= lo.ToInt64();
-
-//			return max.ToInt64() < p.ToInt64() && p.ToInt64() <= min.ToInt64();
+			return p < hi && p >= lo;
 		}
 
 
@@ -113,10 +109,10 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <typeparam name="T">
 		///     Type to allocate; cannot be <c>string</c> or an array type (for that, use
-		///     <see cref="AllocUnmanaged{T}" />.)
+		///     <see cref="Alloc{T}" />.)
 		/// </typeparam>
 		/// <returns>A double indirection pointer to the unmanaged instance.</returns>
-		public static Pointer<T> AllocUnmanagedInstance<T>() where T : class
+		public static Pointer<T> AllocInstance<T>() where T : class
 		{
 			Conditions.Require(!Runtime.IsArray<T>());
 			Conditions.Require(typeof(T) != typeof(string));
@@ -128,7 +124,7 @@ namespace RazorSharp.Memory
 			// We'll allocate extra bytes (+ IntPtr.Size) for a pointer and write the address of
 			// the unmanaged "instance" there, as the CLR can only interpret
 			// reference types as a pointer.
-			Pointer<byte>        alloc       = AllocUnmanaged<byte>(baseSize + IntPtr.Size);
+			Pointer<byte>        alloc       = Alloc<byte>(baseSize + IntPtr.Size);
 			Pointer<MethodTable> methodTable = typeof(T).GetMethodTable();
 
 			// Write the pointer in the extra allocated bytes,
@@ -157,7 +153,7 @@ namespace RazorSharp.Memory
 		///     <para>
 		///         If <typeparamref name="T" /> is a reference type, a managed pointer of type <typeparamref name="T" /> will be
 		///         created in unmanaged memory, rather than the instance itself. For that, use
-		///         <see cref="AllocUnmanagedInstance{T}" />.
+		///         <see cref="AllocInstance{T}" />.
 		///     </para>
 		///     <para>
 		///         Once you are done using the memory, dispose using <see cref="Marshal.FreeHGlobal" />,
@@ -166,7 +162,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <typeparam name="T">Element type to allocate</typeparam>
 		/// <returns>A pointer to the allocated memory</returns>
-		public static Pointer<T> AllocUnmanaged<T>(int elemCnt = 1)
+		public static Pointer<T> Alloc<T>(int elemCnt = 1)
 		{
 			Conditions.Require(elemCnt > 0, nameof(elemCnt));
 			int size  = Size<T>(elemCnt);
@@ -178,23 +174,17 @@ namespace RazorSharp.Memory
 			return alloc;
 		}
 
-		public static Pointer<T> ReAllocUnmanaged<T>(Pointer<T> ptr, int elemCnt = 1)
+		public static Pointer<T> ReAlloc<T>(Pointer<T> ptr, int elemCnt = 1)
 		{
 			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) Size<T>(elemCnt));
 		}
 
 		/// <summary>
-		///     <para>Frees memory allocated from <see cref="AllocUnmanaged{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>
+		///     <para>Frees memory allocated from <see cref="Alloc{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>
 		/// </summary>
 		/// <param name="p">Pointer to allocated memory</param>
 		public static void Free<T>(Pointer<T> p)
 		{
-//			if (bZero) {
-			// AllocHGlobal is a wrapper of LocalAlloc
-//				uint size = Kernel32.LocalSize(p.ToPointer());
-//				Zero(p, (int) size);
-//			}
-
 			Marshal.FreeHGlobal(p.Address);
 			AllocCount--;
 		}
@@ -215,7 +205,7 @@ namespace RazorSharp.Memory
 		public static Pointer<byte> AllocString(string s, StringTypes type)
 		{
 			int           size = s.Length + 1;
-			Pointer<byte> ptr  = AllocUnmanaged<byte>(size);
+			Pointer<byte> ptr  = Alloc<byte>(size);
 			ptr.WriteString(s, type);
 			Conditions.Assert(ptr.ReadString(type) == s);
 
@@ -443,20 +433,6 @@ namespace RazorSharp.Memory
 			fixed (char* ptr = src) {
 				Copy(dest, startOfs, ptr, elemCnt);
 			}
-		}
-
-		#endregion
-
-		#region Alignment
-
-		public static bool IsAligned(IntPtr p)
-		{
-			return IsAligned(p, IntPtr.Size);
-		}
-
-		private static bool IsAligned(IntPtr p, int byteAlignment)
-		{
-			return (p.ToInt64() & (byteAlignment - 1)) == 0;
 		}
 
 		#endregion

@@ -9,6 +9,8 @@ namespace RazorSharp.Native
 {
 	public struct NativeModule : IDisposable
 	{
+		
+
 		private readonly (string m_fileName, Pointer<byte> m_baseAddr) m_value;
 
 		public string FileName => m_value.m_fileName;
@@ -20,15 +22,9 @@ namespace RazorSharp.Native
 
 		public static NativeModule NullModule => new NativeModule(null, null);
 
-		public static bool operator ==(NativeModule l, NativeModule r)
-		{
-			return l.m_value == r.m_value;
-		}
+		public static bool operator ==(NativeModule l, NativeModule r) => l.m_value == r.m_value;
 
-		public static bool operator !=(NativeModule l, NativeModule r)
-		{
-			return l.m_value != r.m_value;
-		}
+		public static bool operator !=(NativeModule l, NativeModule r) => l.m_value != r.m_value;
 
 
 		internal NativeModule(string fileName, Pointer<byte> baseAddr)
@@ -45,6 +41,18 @@ namespace RazorSharp.Native
 			ProcessApi.FreeLibrary(BaseAddress.Address);
 		}
 
+		public bool Equals(NativeModule other) => m_value.Equals(other.m_value);
+
+		public override bool Equals(object obj)
+		{
+			return obj is NativeModule other && Equals(other);
+		}
+
+		public override int GetHashCode()
+		{
+			return m_value.GetHashCode();
+		}
+		
 		public override string ToString()
 		{
 			return String.Format("Name: \"{0}\", base address: {1:P}", Name, BaseAddress);

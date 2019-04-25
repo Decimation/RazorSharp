@@ -8,6 +8,7 @@ using RazorSharp.Memory.Extern;
 using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
+#pragma warning disable 649
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable MemberCanBeMadeStatic.Global
@@ -86,7 +87,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		public int GCCount {
 			[Symcall(Symbol = "GCHeap::GetGcCount", FullyQualified = true)]
-			get => throw new NativeCallException();
+			get => throw new SymImportException();
 		}
 
 		public bool IsHeapPointer<T>(T value, bool smallHeapOnly = false) where T : class
@@ -114,21 +115,20 @@ namespace RazorSharp.CoreClr.Structures
 		[Symcall]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
-			throw new NativeCallException();
+			throw new SymImportException();
 		}
 
 		[Symcall(UseMemberNameOnly = true, IgnoreNamespace = true)]
 		internal static void* AllocateObject(MethodTable* mt, int fHandleCom)
 		{
-			return null;
+			throw new SymImportException();
 		}
 
 		public static object AllocateObject(Type type, int fHandleCom)
 		{
 			void* objValuePtr = AllocateObject(type.GetMethodTable().ToPointer<MethodTable>(), fHandleCom);
 
-			//var listNative = CSUnsafe.Read<List<int>>(&objValuePtr);
-			//Console.WriteLine(listNative);
+			
 			return CSUnsafe.Read<object>(&objValuePtr);
 		}
 
@@ -145,18 +145,6 @@ namespace RazorSharp.CoreClr.Structures
 			Symload.Load(typeof(GCHeap));
 
 			// Retrieve the global variables from the data segment of the CLR DLL
-
-			/*g_pGCHeap = Runtime.GetClrSymAddress(nameof(g_pGCHeap))
-			                   .ReadPointer<byte>()
-			                   .Address;
-
-			g_lowest_address = Runtime.GetClrSymAddress(nameof(g_lowest_address))
-			                          .ReadPointer<byte>()
-			                          .Address;
-
-			g_highest_address = Runtime.GetClrSymAddress(nameof(g_highest_address))
-			                           .ReadPointer<byte>()
-			                           .Address;*/
 		}
 	}
 }

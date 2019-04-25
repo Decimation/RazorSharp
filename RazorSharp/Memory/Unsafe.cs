@@ -305,10 +305,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <returns><see cref="IntPtr.Size" /> for reference types, size for value types</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int SizeOf<T>()
-		{
-			return CSUnsafe.SizeOf<T>();
-		}
+		public static int SizeOf<T>() => CSUnsafe.SizeOf<T>();
 
 
 		#region HeapSize

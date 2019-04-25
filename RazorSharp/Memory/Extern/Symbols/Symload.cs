@@ -25,7 +25,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 	/// </summary>
 	public static class Symload
 	{
-		private const           string     SCOPE_RESOLUTION_OPERATOR = "::";
+		internal const           string     SCOPE_RESOLUTION_OPERATOR = "::";
 		private static readonly ISet<Type> BoundTypes;
 
 		static Symload()
@@ -76,12 +76,10 @@ namespace RazorSharp.Memory.Extern.Symbols
 			return new ModuleInfo(new FileInfo(attr.Image), baseAddr, SymbolRetrievalMode.PDB_READER);
 		}
 
-		private static ModuleInfo GetInfo(SymNamespaceAttribute attr)
-		{
-			return GetInfo(attr, Modules.GetBaseAddress(attr.Module));
-		}
+		private static ModuleInfo GetInfo(SymNamespaceAttribute attr) 
+			=> GetInfo(attr, Modules.GetBaseAddress(attr.Module));
 
-		private static void LoadField(object             inst,
+		private static void LoadField(object             value,
 		                              ModuleInfo         module,
 		                              string             fullSym,
 		                              MemberInfo         field,
@@ -106,7 +104,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 			// todo: also add special support for strings and other native types
 
 			var val = addr.ReadAnyEx(fieldType);
-			fieldInfo.SetValue(inst, val);
+			fieldInfo.SetValue(value, val);
 		}
 
 		public static T GenericLoad<T>(T value = default) => (T) Load(typeof(T), value);
@@ -154,12 +152,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 					name = nameSpace + SCOPE_RESOLUTION_OPERATOR + name;
 				}
 
-//				Global.Log.Debug("Loading symbol {Name}", fullSym);
-
 				var addr = mi.GetSymAddress(name);
-
-
-//				Global.Log.Debug("Symbol {Sym} address: {Addr}", fullSym, addr.ToString("P"));
 				
 				switch (mem.MemberType) {
 					case MemberTypes.Constructor:
@@ -167,7 +160,6 @@ namespace RazorSharp.Memory.Extern.Symbols
 						Functions.SetStableEntryPoint((MethodInfo) mem, addr.Address);
 						break;
 					case MemberTypes.Field:
-						Global.Log.Debug("Loading field {Name} with {Sym}", mem.Name, name);
 						LoadField(value, mi, name, mem, attr);
 						break;
 					case MemberTypes.Method:

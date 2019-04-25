@@ -107,6 +107,10 @@
       <HintPath>..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SharpPdb.Windows, Version=1.0.3.60, Culture=neutral, PublicKeyToken=3a5f07d24fadcaec, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\.nuget\packages\sharppdb.windows\1.0.3.60\lib\net45\SharpPdb.Windows.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Core" />
@@ -122,6 +126,9 @@
     <Compile Include="Symtest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="SharpPdb.Windows">
+      <Version>1.0.3.60</Version>
+    </PackageReference>
     <PackageReference Include="System.Memory">
       <Version>4.5.2</Version>
     </PackageReference>

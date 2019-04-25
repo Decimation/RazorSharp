@@ -183,7 +183,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		private int LoadSize {
 			[Symcall(Symbol = "FieldDesc::LoadSize", FullyQualified = true)]
-			get => throw new NativeCallException(nameof(LoadSize));
+			get => throw new SymImportException(nameof(LoadSize));
 		}
 
 		internal FieldInfo Info => EnclosingType.Module.ResolveField(Token);
@@ -213,7 +213,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
 			[Symcall(Symbol = "FieldDesc::GetApproxEnclosingMethodTable", FullyQualified = true)]
-			get => throw new NativeCallException();
+			get => throw new SymImportException();
 		}
 
 
@@ -225,13 +225,13 @@ namespace RazorSharp.CoreClr.Structures
 		[Symcall]
 		internal Pointer<byte> GetStaticAddress(void* value)
 		{
-			throw new NativeCallException(nameof(GetStaticAddress));
+			throw new SymImportException(nameof(GetStaticAddress));
 		}
 
 		[Symcall]
 		internal Pointer<byte> GetStaticAddressHandle()
 		{
-			throw new NativeCallException(nameof(GetStaticAddressHandle));
+			throw new SymImportException(nameof(GetStaticAddressHandle));
 		}
 
 		internal Pointer<byte> GetStaticAddressContext()

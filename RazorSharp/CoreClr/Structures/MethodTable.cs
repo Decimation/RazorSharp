@@ -188,7 +188,7 @@ namespace RazorSharp.CoreClr.Structures
 		[Symcall]
 		private MethodTable* GetCanonicalMethodTable()
 		{
-			throw new NativeCallException();
+			throw new SymImportException();
 		}
 
 
@@ -260,7 +260,7 @@ namespace RazorSharp.CoreClr.Structures
 		[Symcall]
 		internal uint GetSignatureCorElementType()
 		{
-			throw new NativeCallException();
+			throw new SymImportException();
 		}
 
 		#endregion
