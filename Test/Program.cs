@@ -134,6 +134,8 @@ namespace Test
 
 		// todo: DIA instead of dbghelp?
 
+		
+		
 		public static void Main(string[] args)
 		{
 			ModuleInitializer.GlobalSetup();
@@ -149,6 +151,8 @@ namespace Test
 			Pointer<int> p = stackalloc int[256];
 			Console.WriteLine((p + 1).IsAligned<int>());
 			Console.WriteLine(GCHeap.GlobalHeap);
+			Console.WriteLine(Unsafe.UnboxFast<int>(1));
+			
 
 
 			ModuleInitializer.GlobalClose();

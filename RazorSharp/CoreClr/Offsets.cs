@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Runtime.CompilerServices;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 
@@ -33,6 +34,16 @@ namespace RazorSharp.CoreClr
 		internal const int CANON_MT_UNION_MT_OFFSET = 2;
 
 		/// <summary>
+		///     Heap offset to the first field.
+		///     <list type="bullet">
+		///         <item>
+		///             <description>+ 8 for <c>MethodTable*</c> (<see cref="IntPtr.Size" />)</description>
+		///         </item>
+		///     </list>
+		/// </summary>
+		public static readonly unsafe int OffsetToData = sizeof(MethodTable*);
+		
+		/// <summary>
 		///     Heap offset to the first array element.
 		///     <list type="bullet">
 		///         <item>
@@ -46,8 +57,11 @@ namespace RazorSharp.CoreClr
 		///         </item>
 		///     </list>
 		/// </summary>
-		public static readonly unsafe int OffsetToArrayData = sizeof(MethodTable*) + sizeof(uint) + sizeof(uint);
+		public static readonly int OffsetToArrayData = OffsetToData + sizeof(uint) + sizeof(uint);
 
+		public static readonly int OffsetToStringData = RuntimeHelpers.OffsetToStringData;
+
+		
 		#region EEClass
 
 		/// <summary>

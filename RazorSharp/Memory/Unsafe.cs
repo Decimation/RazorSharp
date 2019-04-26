@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using InlineIL;
 using JetBrains.Annotations;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
@@ -44,6 +45,13 @@ namespace RazorSharp.Memory
 				Pointer<byte> addr = AddressOfHeap(value, OffsetOptions.Fields);
 				return addr.ReadAny<T>();
 			}
+		}
+
+		public static ref T UnboxFast<T>(object value) where T : struct
+		{
+			IL.Push(value);
+			IL.Emit.Unbox(typeof(T));
+			return ref IL.ReturnRef<T>();
 		}
 
 		/// <summary>
@@ -143,6 +151,15 @@ namespace RazorSharp.Memory
 			return CSUnsafe.AsPointer(ref value);
 		}
 
+		public static Pointer<T> AddressOfData<T>(ref T value)
+		{
+			if (value.GetType().IsValueType) {
+				return Unsafe.AddressOf(ref value);
+			}
+			else {
+				return Unsafe.AddressOf(ref value).ReadPointer<byte>() + Offsets.OffsetToData;
+			}
+		}
 
 		/// <summary>
 		///     Returns the address of reference type <paramref name="value" />'s heap memory (raw data).
@@ -189,7 +206,7 @@ namespace RazorSharp.Memory
 
 					Conditions.Require(typeof(T) == typeof(string));
 					string s = value as string;
-					return AddressOfHeap(s) + RuntimeHelpers.OffsetToStringData;
+					return AddressOfHeap(s) + Offsets.OffsetToStringData;
 
 				case OffsetOptions.ArrayData:
 
@@ -202,7 +219,7 @@ namespace RazorSharp.Memory
 					// todo: ...and if it's a string, should this return StringData?
 
 					// Skip over the MethodTable*
-					return AddressOfHeap(value) + sizeof(MethodTable*);
+					return AddressOfHeap(value) + Offsets.OffsetToData;
 
 				case OffsetOptions.None:
 					return AddressOfHeap(value);

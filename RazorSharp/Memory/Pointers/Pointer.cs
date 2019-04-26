@@ -17,6 +17,7 @@ using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
 using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Structures;
 using RazorSharp.Native;
 using RazorSharp.Native.Win32;
 using RazorSharp.Utilities;
@@ -137,36 +138,38 @@ namespace RazorSharp.Memory.Pointers
 		#region Constructors
 
 		/// <summary>
-		///     Creates a new <see cref="T:RazorSharp.Memory.Pointers.Pointer`1" /> pointing to the address <paramref name="p" />
+		///     Creates a new <see cref="T:RazorSharp.Memory.Pointers.Pointer`1" /> pointing to the address <paramref name="value" />
 		/// </summary>
-		/// <param name="p">Address to point to</param>
-		public Pointer(IntPtr p) : this(p.ToPointer()) { }
+		/// <param name="value">Address to point to</param>
+		public Pointer(IntPtr value) : this(value.ToPointer()) { }
 
 		/// <summary>
-		///     Creates a new <see cref="Pointer{T}" /> pointing to the address <paramref name="v" />
+		///     Creates a new <see cref="Pointer{T}" /> pointing to the address <paramref name="value" />
 		/// </summary>
-		/// <param name="v">Address to point to</param>
-		public Pointer(void* v)
+		/// <remarks>
+		/// Root constructor.
+		/// </remarks>
+		/// <param name="value">Address to point to</param>
+		public Pointer(void* value)
 		{
-			// Root constructor
-			m_value = v;
+			m_value = value;
 		}
 
 		/// <summary>
-		///     Creates a new <see cref="T:RazorSharp.Memory.Pointers.Pointer`1" /> pointing to the address <paramref name="v" />
+		///     Creates a new <see cref="T:RazorSharp.Memory.Pointers.Pointer`1" /> pointing to the address <paramref name="value" />
 		///     represented as an <see cref="T:System.Int64" />
 		/// </summary>
-		/// <param name="v">Address to point to</param>
-		public Pointer(long v) : this((void*) v) { }
+		/// <param name="value">Address to point to</param>
+		public Pointer(long value) : this((void*) value) { }
 
-		public Pointer(ulong ul) : this((void*) ul) { }
+		public Pointer(ulong value) : this((void*) value) { }
 
 		/// <summary>
 		///     Creates a new <see cref="T:RazorSharp.Memory.Pointers.Pointer`1" /> pointing to the address of
-		///     <paramref name="t" />
+		///     <paramref name="value" />
 		/// </summary>
-		/// <param name="t">Variable whose address will be pointed to</param>
-		public Pointer(ref T t) : this(Unsafe.AddressOf(ref t).Address) { }
+		/// <param name="value">Variable whose address will be pointed to</param>
+		public Pointer(ref T value) : this(Unsafe.AddressOf(ref value).Address) { }
 
 		#endregion
 
@@ -226,16 +229,6 @@ namespace RazorSharp.Memory.Pointers
 			}
 		}
 
-		public IEnumerable<T> Where(int elemCount, Func<T, bool> predicate)
-		{
-			return CopyOut(elemCount).Where(predicate);
-		}
-
-		public IEnumerable<TResult> Select<TResult>(int elemCount, Func<T, TResult> selector)
-		{
-			return CopyOut(elemCount).Select(selector);
-		}
-
 
 		/// <summary>
 		///     Initializes <paramref name="elemCount" /> elements with the default value of <typeparamref name="T" />.
@@ -259,33 +252,6 @@ namespace RazorSharp.Memory.Pointers
 
 		#endregion
 
-		#region SequenceEqual
-
-		public bool SequenceEqual(T[] values)
-		{
-			return CopyOut(values.Length).SequenceEqual(values);
-		}
-
-		public bool SequenceEqual(IEnumerable<T> enumerable)
-		{
-			IEnumerator<T> enumerator = enumerable.GetEnumerator();
-			int            i          = 0;
-
-			while (enumerator.MoveNext()) {
-				var current = enumerator.Current;
-				Conditions.NotNull(current, nameof(current));
-
-				if (!current.Equals(this[i++])) {
-					enumerator.Dispose();
-					return false;
-				}
-			}
-
-			enumerator.Dispose();
-			return true;
-		}
-
-		#endregion
 
 		#endregion
 
@@ -293,7 +259,7 @@ namespace RazorSharp.Memory.Pointers
 		#region Bitwise operations
 
 		/// <summary>
-		///     Performs the bitwise AND (<c>&</c>) operation on <see cref="ToInt64" /> and
+		///     Performs the bitwise OR (<c>&amp;</c>) operation on <see cref="ToInt64" /> and
 		///     sets <see cref="Address" /> as the result
 		/// </summary>
 		/// <returns>
@@ -600,7 +566,11 @@ namespace RazorSharp.Memory.Pointers
 		[Pure]
 		public T Read(int elemOffset = 0) => ReadAny<T>(elemOffset);
 
-
+		public T ReadFast(int byteOffset = 0)
+		{
+			return CSUnsafe.Read<T>((void*) (((long) m_value) + byteOffset));
+		}
+		
 		/// <summary>
 		///     Reinterprets <see cref="Address" /> as a reference to a value of type <typeparamref name="T" />
 		/// </summary>
@@ -699,30 +669,11 @@ namespace RazorSharp.Memory.Pointers
 			return Cast<TType>().CopyOut(elemCnt);
 		}
 
-		// todo: verify this works
 		[Pure]
-		public T[] SafeCopyOut(int elemCnt)
-		{
-			Kernel32.VirtualProtect(Address, Size(elemCnt), MemoryProtection.ExecuteReadWrite,
-			                        out var oldProtect);
-
-			T[] buf = CopyOut(elemCnt);
-
-			Kernel32.VirtualProtect(Address, Size(elemCnt), oldProtect, out oldProtect);
-			return buf;
-		}
+		public byte[] CopyOutBytes(int elemCnt) => CopyOutAny<byte>(elemCnt);
 
 		[Pure]
-		public byte[] CopyOutBytes(int elemCnt)
-		{
-			return CopyOutAny<byte>(elemCnt);
-		}
-
-		[Pure]
-		public byte[] CopyOutBytes(int startIndex, int elemCnt)
-		{
-			return CopyOutAny<byte>(startIndex, elemCnt);
-		}
+		public byte[] CopyOutBytes(int startIndex, int elemCnt) => CopyOutAny<byte>(startIndex, elemCnt);
 
 		#endregion
 

@@ -4,8 +4,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using InlineIL;
 using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorSharp.CoreClr;
@@ -38,6 +40,15 @@ namespace RazorSharp.Memory
 	{
 		public static bool Is64Bit => IntPtr.Size == sizeof(long);
 
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static T ReadIL<T>(void* source)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldobj(typeof(T));
+			return IL.Return<T>();
+		}
+		
 		/// <summary>
 		///     Checks whether an address is in range.
 		/// </summary>
@@ -47,9 +58,6 @@ namespace RazorSharp.Memory
 		/// <returns><c>true</c> if the address is in range; <c>false</c> otherwise</returns>
 		public static bool IsAddressInRange(Pointer<byte> hi, Pointer<byte> p, Pointer<byte> lo)
 		{
-			// return m_CacheStackLimit < addr && addr <= m_CacheStackBase;
-			// if (!((object < g_gc_highest_address) && (object >= g_gc_lowest_address)))
-
 			return p < hi && p >= lo;
 		}
 
