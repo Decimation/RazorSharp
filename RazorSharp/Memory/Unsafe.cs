@@ -179,7 +179,7 @@ namespace RazorSharp.Memory
 			var tr = __makeref(value);
 
 			// NOTE:
-			// Strings have their data offset by RuntimeHelpers.OffsetToStringData
+			// Strings have their data offset by Offsets.OffsetToStringData
 			// Arrays have their data offset by IntPtr.Size * 2 bytes (may be different for 32 bit)
 			return **(IntPtr**) (&tr);
 		}

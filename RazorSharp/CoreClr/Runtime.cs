@@ -55,7 +55,7 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		public static T Alloc<T>(params object[] args)
+		public static T AllocObject<T>(params object[] args)
 		{
 			var value = GCHeap.AllocateObject<T>(0);
 			RunConstructor(value, args);

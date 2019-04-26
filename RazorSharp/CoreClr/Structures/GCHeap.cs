@@ -118,12 +118,18 @@ namespace RazorSharp.CoreClr.Structures
 			throw new SymImportException();
 		}
 
+		/// <summary>
+		/// Allocates a zero-initialized object on the GC heap.
+		/// </summary>
 		[Symcall(UseMemberNameOnly = true, IgnoreNamespace = true)]
 		internal static void* AllocateObject(MethodTable* mt, int fHandleCom)
 		{
 			throw new SymImportException();
 		}
 
+		/// <summary>
+		/// Allocates a zero-initialized object on the GC heap.
+		/// </summary>
 		public static object AllocateObject(Type type, int fHandleCom)
 		{
 			void* objValuePtr = AllocateObject(type.GetMethodTable().ToPointer<MethodTable>(), fHandleCom);
@@ -132,6 +138,9 @@ namespace RazorSharp.CoreClr.Structures
 			return CSUnsafe.Read<object>(&objValuePtr);
 		}
 
+		/// <summary>
+		/// Allocates a zero-initialized object on the GC heap.
+		/// </summary>
 		public static T AllocateObject<T>(int fHandleCom)
 		{
 			void* objValuePtr = AllocateObject(typeof(T).GetMethodTable().ToPointer<MethodTable>(), fHandleCom);

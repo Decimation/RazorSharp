@@ -23,7 +23,7 @@ namespace RazorSharp.Memory
 
 		/// <summary>
 		///     If the type is a <see cref="string" />, return the
-		///     pointer offset by <see cref="RuntimeHelpers.OffsetToStringData" /> so it
+		///     pointer offset by <see cref="Offsets.OffsetToStringData" /> so it
 		///     points to the string's characters.
 		///     <remarks>
 		///         Note: Equal to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>.

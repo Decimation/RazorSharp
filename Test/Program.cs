@@ -153,6 +153,7 @@ namespace Test
 			Console.WriteLine(GCHeap.GlobalHeap);
 			Console.WriteLine(Unsafe.UnboxFast<int>(1));
 			
+			
 
 
 			ModuleInitializer.GlobalClose();
