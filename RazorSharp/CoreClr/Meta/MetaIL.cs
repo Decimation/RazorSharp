@@ -108,7 +108,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		public override string ToString()
 		{
-			return ToTable().ToMarkDownString();
+			return ToTable().ToString();
 		}
 	}
 }

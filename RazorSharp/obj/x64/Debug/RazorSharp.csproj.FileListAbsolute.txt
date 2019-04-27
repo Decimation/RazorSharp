@@ -50,7 +50,3 @@ C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\obj\x64\Debug\RazorSharp.cspro
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Memory.dll
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Memory.xml
 C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\System.Buffers.dll
-C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\SharpPdb.Windows.dll
-C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\SharpUtilities.dll
-C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\SharpPdb.Windows.xml
-C:\Users\Deci\RiderProjects\RazorSharp\RazorSharp\bin\x64\Debug\SharpUtilities.xml

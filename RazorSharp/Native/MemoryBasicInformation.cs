@@ -75,7 +75,7 @@ namespace RazorSharp.Native
 			table.AddRow("State", State);
 			table.AddRow("Protect", Protect);
 			table.AddRow("Type", Type);
-			return table.ToMarkDownString();
+			return table.ToString();
 		}
 	}
 }

@@ -58,7 +58,7 @@ namespace RazorSharp.CoreClr.Structures
 			table.AddRow("Component size", m_componentSize);
 			table.AddRow("Flags", m_flags);
 
-			return table.ToMarkDownString();
+			return table.ToString();
 		}
 
 		#region Equality

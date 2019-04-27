@@ -20,13 +20,11 @@ namespace RazorSharp.Analysis
 {
 	public static class Inspect
 	{
-		private const string JOIN_BAR = " | ";
+		// todo: maybe add type name/info to labels
+		
+		#region Helper methods
 
-		/// <summary>
-		///     Whether to interpret the <see cref="MethodTable" />, <see cref="ObjHeader" />, and other internal
-		///     data structures as the TAs parameters.
-		/// </summary>
-		public static bool InterpretInternal { get; set; } = false;
+		private const string JOIN_BAR = " | ";
 
 		private static ConsoleTable StackHeapTypeTable<T>(ref T t, ToStringOptions options)
 		{
@@ -66,9 +64,9 @@ namespace RazorSharp.Analysis
 
 		private static string CreateInternalRowEntry(byte[] mem, ToStringOptions options)
 		{
-			return InterpretInternal
+			return /*InterpretInternal
 				? CreateRowEntry<byte>(mem, options)
-				: mem.AutoJoin(JOIN_BAR, options);
+				: */mem.AutoJoin(JOIN_BAR, options);
 		}
 
 		private static string CreateRowEntry<TAs>(byte[] mem, ToStringOptions options)
@@ -93,16 +91,18 @@ namespace RazorSharp.Analysis
 			return mem.AutoJoin(JOIN_BAR, options);
 		}
 
+		#endregion
+
 		#region Layout
 
-		public static void Layout<T>(T t) where T : class
+		public static void Layout<T>(T value) where T : class
 		{
-			Console.WriteLine(LayoutString(t));
+			Console.WriteLine(LayoutString(value));
 		}
 
-		public static void Layout<T>(ref T t)
+		public static void Layout<T>(ref T value)
 		{
-			Console.WriteLine(LayoutString(ref t));
+			Console.WriteLine(LayoutString(ref value));
 		}
 
 		public static void Layout<T>()
@@ -110,17 +110,17 @@ namespace RazorSharp.Analysis
 			Console.WriteLine(LayoutString<T>());
 		}
 
-		public static string LayoutString<T>(T t) where T : class
+		public static string LayoutString<T>(T value) where T : class
 		{
-			return LayoutString(ref t);
+			return LayoutString(ref value);
 		}
 
 		public static string LayoutString<T>()
 		{
-			return LayoutTable<T>().ToMarkDownString();
+			return LayoutTable<T>().ToString();
 		}
 
-		public static string LayoutString<T>(ref T t)
+		public static string LayoutString<T>(ref T value)
 		{
 			var         table     = LayoutTable<T>();
 			var         type      = typeof(T).GetMetaType();
@@ -134,27 +134,25 @@ namespace RazorSharp.Analysis
 			for (int i = 0; i < lim; i++) {
 				var field = fields[i];
 
-				addresses[i] = field.GetAddress(ref t).ToString(PointerFormat.FMT_P);
-				values[i]    = field.GetValue(t) ?? StringConstants.NULL_STR;
+				addresses[i] = field.GetAddress(ref value).ToString(PointerFormat.FORMAT_PTR);
+				values[i]    = field.GetValue(value) ?? StringConstants.NULL_STR;
 			}
 
-			table.Attach(1, "Address", addresses)
-			     .Attach("Value", values);
 
-			return table.ToMarkDownString();
+			table.AttachEnd( "Value", values)
+			     .AttachEnd( "Address", addresses);
+
+			return table.ToString();
 		}
 
-		private static ConsoleTable LayoutTable<T>()
+		public static ConsoleTable LayoutTable<T>()
 		{
 			var         type   = typeof(T).GetMetaType();
 			MetaField[] fields = type.InstanceFields.ToArray();
-			var         table  = new ConsoleTable("Offset", "Size", "Type", "Name");
+			var         table  = new ConsoleTable("Name", "Size", "Type", "Offset");
 
 			foreach (var field in fields) {
-				table.AddRow(field.Offset,
-				             field.Size,
-				             field.FieldType.Name,
-				             field.Name);
+				table.AddRow(field.Name, field.Size, field.FieldType.Name, field.Offset);
 			}
 
 			return table;
@@ -164,26 +162,26 @@ namespace RazorSharp.Analysis
 
 		#region Stack
 
-		public static void Stack<T>(ref T t, ToStringOptions options = Hex.DEFAULT)
+		public static void Stack<T>(ref T value, ToStringOptions options = Hex.DEFAULT)
 		{
-			Console.WriteLine(StackString(ref t, options));
+			Console.WriteLine(StackString(ref value, options));
 		}
 
-		public static string StackString<T>(ref T t, ToStringOptions options = Hex.DEFAULT)
+		public static string StackString<T>(ref T value, ToStringOptions options = Hex.DEFAULT)
 		{
-			Pointer<T> addr = Unsafe.AddressOf(ref t);
+			Pointer<T> addr = Unsafe.AddressOf(ref value);
 			int        size = Unsafe.SizeOf<T>();
 			var        type = typeof(T).GetMetaType();
 
 			var table = type.RuntimeType.IsValueType
-				? StackValueTypeTable(ref t, options)
-				: StackHeapTypeTable(ref t, options);
+				? StackValueTypeTable(ref value, options)
+				: StackHeapTypeTable(ref value, options);
 
 
 			var sb = new StringBuilder();
-			sb.AppendFormat("{0} @ {1:P}\n", t.GetType().Name, addr);
+			sb.AppendFormat("{0} @ {1:P}\n", value.GetType().Name, addr);
 			sb.AppendFormat("Size: {0}\n", size);
-			sb.Append(table.ToMarkDownString());
+			sb.Append(table);
 			return sb.ToString();
 		}
 
@@ -191,26 +189,26 @@ namespace RazorSharp.Analysis
 
 		#region Heap
 
-		public static string HeapString<T, TAs>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
+		public static string HeapString<T>(T value, ToStringOptions options = Hex.DEFAULT) where T : class
 		{
 			// Sizes
-			Pointer<byte> addr     = Unsafe.AddressOfHeap(t, OffsetOptions.Header);
-			int           heapSize = Unsafe.HeapSize(t);
+			Pointer<byte> addr     = Unsafe.AddressOfHeap(value, OffsetOptions.HEADER);
+			int           heapSize = Unsafe.HeapSize(value);
 
 			// Type info
-			var             type       = typeof(T).GetMetaType();
+			var             type       = value.GetType().GetMetaType();
 			List<MetaField> fields     = type.IsArray ? null : type.Fields.Where(x => !x.IsStatic).ToList();
 			List<string>    fieldNames = fields == null ? new List<string>() : fields.Select(x => x.Name).ToList();
-			fieldNames.Insert(0, "Header");
-			fieldNames.Insert(1, "MethodTable*");
+			fieldNames.Insert(0, "(Header)");
+			fieldNames.Insert(1, "(MethodTable*)");
 			var table = new ConsoleTable(fieldNames.ToArray());
 
 			// Object header
-			byte[] objHeaderMem = Runtime.ReadObjHeader(t).CopyOutBytes(IntPtr.Size);
+			byte[] objHeaderMem = Runtime.ReadObjHeader(value).CopyOutBytes(IntPtr.Size);
 			string objHeaderStr = CreateInternalRowEntry(objHeaderMem, options);
 
 			// MethodTable*
-			byte[] methodTablePtrMem = Unsafe.AddressOfHeap(t, OffsetOptions.None).CopyOut(IntPtr.Size);
+			byte[] methodTablePtrMem = Unsafe.AddressOfHeap(value, OffsetOptions.NONE).CopyOut(IntPtr.Size);
 			string methodTablePtrStr = CreateInternalRowEntry(methodTablePtrMem, options);
 
 			var row = new List<object>
@@ -218,41 +216,53 @@ namespace RazorSharp.Analysis
 				objHeaderStr, methodTablePtrStr
 			};
 
-			var           offsetType = type.IsArray ? OffsetOptions.ArrayData : OffsetOptions.Fields;
-			Pointer<byte> dataAddr   = Unsafe.AddressOfHeap(t, offsetType);
+			var           offsetType = type.IsArray ? OffsetOptions.ARRAY_DATA : OffsetOptions.FIELDS;
+			Pointer<byte> dataAddr   = Unsafe.AddressOfHeap(value, offsetType);
 
 			if (type.IsArray) {
-				table.AddColumn("length");
+				table.AddColumn("(length)");
 
 				// IntPtr 1: Header
 				// IntPtr 2: MethodTable*
 				// IntPtr 3: Length and padding (64bit)
-				int arraySize = heapSize - IntPtr.Size * 3;
+
+				//int arraySize = heapSize - IntPtr.Size * 3;
+				int arraySize = heapSize - Offsets.OffsetToArrayData;
 				int elemSize  = type.ComponentSize;
 
 				row.Add(CreateInternalRowEntry(dataAddr.CopyOut(-IntPtr.Size, IntPtr.Size), options));
 				for (int i = 0; i < arraySize; i += elemSize) {
-					table.AddColumn(String.Format("Index {0}", i / elemSize));
-					row.Add(CreateRowEntry<TAs>(dataAddr.CopyOut(i, elemSize), options));
+					table.AddColumn(String.Format("(Index {0})", i / elemSize));
+					row.Add(CreateRowEntry<byte>(dataAddr.CopyOut(i, elemSize), options));
 				}
 			}
 			else {
 				Conditions.NotNull(fields, nameof(fields));
 
 				foreach (var f in fields) {
-					Pointer<byte> rowPtr = f.GetAddress(ref t);
+					Pointer<byte> rowPtr = f.GetAddress(ref value);
 					int           size   = f.Size;
 					dataAddr += size;
-					row.Add(CreateRowEntry<TAs>(rowPtr.CopyOut(size), options));
+					row.Add(CreateRowEntry<byte>(rowPtr.CopyOut(size), options));
 				}
 
 				Pointer<byte> endAddr = addr - IntPtr.Size + heapSize;
 
+				// Surplus memory
 				if (dataAddr < endAddr) {
-					Pointer<byte> ptrDiff = endAddr - dataAddr;
+					int ptrDiff = (endAddr - dataAddr).ToInt32();
 
-					table.AddColumn("...");
-					row.Add(CreateRowEntry<TAs>(dataAddr.CopyOut(ptrDiff.ToInt32()), options));
+					if (type.IsString) {
+						for (int i = 0; i < ptrDiff; i++) {
+							table.AddColumn(String.Format("(Character {0})", i + 2));
+							row.Add(CreateRowEntry<byte>(dataAddr.CopyOut(sizeof(char)), options));
+							dataAddr += sizeof(char);
+						}
+					}
+					else {
+						table.AddColumn("(...)");
+						row.Add(CreateRowEntry<byte>(dataAddr.CopyOut(ptrDiff), options));
+					}
 				}
 			}
 
@@ -261,26 +271,17 @@ namespace RazorSharp.Analysis
 			table.AddRow(row.ToArray());
 
 			var sb = new StringBuilder();
-			sb.AppendFormat("{0} @ {1:P}\n", t.GetType().Name, addr);
+			sb.AppendFormat("{0} @ {1:P}\n", value.GetType().Name, addr);
 			sb.AppendFormat("Base size: {0}\n", type.BaseSize);
 			sb.AppendFormat("Heap size: {0}\n", heapSize);
-			sb.Append(table.ToMarkDownString());
+			sb.Append(table);
 			return sb.ToString();
 		}
 
-		public static string HeapString<T>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
-		{
-			return HeapString<T, byte>(t, options);
-		}
 
-		public static void Heap<T, TAs>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
+		public static void Heap<T>(T value, ToStringOptions options = Hex.DEFAULT) where T : class
 		{
-			Console.WriteLine(HeapString<T, TAs>(t, options));
-		}
-
-		public static void Heap<T>(T t, ToStringOptions options = Hex.DEFAULT) where T : class
-		{
-			Console.WriteLine(HeapString(t, options));
+			Console.WriteLine(HeapString(value, options));
 		}
 
 		#endregion

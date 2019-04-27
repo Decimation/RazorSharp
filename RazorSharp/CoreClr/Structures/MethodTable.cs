@@ -390,7 +390,7 @@ namespace RazorSharp.CoreClr.Structures
 			table.AddRow("Blittable", EEClass.Reference.IsBlittable.Prettify());
 
 
-			return table.ToMarkDownString();
+			return table.ToString();
 		}
 
 		#region Equality

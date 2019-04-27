@@ -126,7 +126,7 @@ namespace RazorSharp.CoreClr.Structures
 			table.AddRow("Count", Count);
 			table.AddRow("Flags and token range", m_flagsAndTokenRange);
 
-			return table.ToMarkDownString();
+			return table.ToString();
 		}
 	}
 }

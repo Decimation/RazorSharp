@@ -118,7 +118,7 @@ namespace RazorSharp.CoreClr.Structures.HeapObjects
 			table.AddRow("Length", m_stringLength);
 			table.AddRow("First char", m_firstChar);
 
-			return table.ToMarkDownString();
+			return table.ToString();
 		}
 	}
 }

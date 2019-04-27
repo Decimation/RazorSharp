@@ -100,7 +100,7 @@ namespace RazorSharp.CoreClr.Structures.HeapObjects
 			table.AddRow("MethodTable*", Hex.ToHex(m_methodTablePtr));
 
 
-			return table.ToMarkDownString();
+			return table.ToString();
 		}
 	}
 }

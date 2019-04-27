@@ -295,7 +295,7 @@ namespace RazorSharp.CoreClr.Structures
 			table.AddRow("Size", Size);
 			table.AddRow("Attributes", Info.Attributes);
 
-			return table.ToMarkDownString();
+			return table.ToString();
 		}
 
 		#endregion

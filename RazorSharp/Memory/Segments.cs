@@ -25,7 +25,7 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public static class Segments
 	{
-		internal const string TEXT_SEGMENT = ".text";
+		private const string TEXT_SEGMENT = ".text";
 
 		public static bool SegmentExists(string module, string segmentType)
 		{
@@ -119,7 +119,7 @@ namespace RazorSharp.Memory
 				table.AddRow(rowCpy);
 			}
 
-			Console.WriteLine(table.ToMarkDownString());
+			Console.WriteLine(table.ToString());
 		}
 
 		private static SegmentType Parse(string name)

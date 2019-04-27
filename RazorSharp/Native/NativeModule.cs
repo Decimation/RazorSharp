@@ -9,8 +9,6 @@ namespace RazorSharp.Native
 {
 	public struct NativeModule : IDisposable
 	{
-		
-
 		private readonly (string m_fileName, Pointer<byte> m_baseAddr) m_value;
 
 		public string FileName => m_value.m_fileName;

@@ -66,10 +66,7 @@ namespace RazorSharp.Memory.Extern.Signatures
 
 		#region IsBound
 
-		public static bool IsBound(Type t)
-		{
-			return BoundTypes.Contains(t);
-		}
+		private static bool IsBound(Type t) => BoundTypes.Contains(t);
 
 		#endregion
 

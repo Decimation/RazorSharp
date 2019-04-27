@@ -127,7 +127,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 			table.AddRow("IsFat", IsFat.Prettify());
 			table.AddRow("Max stack size", MaxStack);
 			table.AddRow("Local var sig tok", LocalVarSigTok);
-			return table.ToMarkDownString();
+			return table.ToString();
 		}
 	}
 

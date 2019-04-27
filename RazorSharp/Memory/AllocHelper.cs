@@ -132,7 +132,7 @@ namespace RazorSharp.Memory
 			table.AddRow("Allocated", IsAllocated(ptr));
 
 
-			Console.WriteLine(table.ToMarkDownString());
+			Console.WriteLine(table);
 		}
 
 		/// <summary>

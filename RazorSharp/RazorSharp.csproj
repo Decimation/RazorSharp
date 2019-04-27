@@ -100,8 +100,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="RazorCommon, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\RazorCommon.1.0.0\lib\net472\RazorCommon.dll</HintPath>
+    <Reference Include="RazorCommon, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\RazorCommon.1.0.3\lib\net472\RazorCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
@@ -115,12 +115,6 @@
     <Reference Include="Serilog.Sinks.Console, Version=3.1.1.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
       <HintPath>..\packages\Serilog.Sinks.Console.3.1.1\lib\net45\Serilog.Sinks.Console.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="SharpPdb.Windows, Version=1.0.3.60, Culture=neutral, PublicKeyToken=3a5f07d24fadcaec, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpPdb.Windows.1.0.3.60\lib\net45\SharpPdb.Windows.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpUtilities, Version=1.4.4.0, Culture=neutral, PublicKeyToken=3a5f07d24fadcaec, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpUtilities.1.4.4\lib\net45\SharpUtilities.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Collections" />
@@ -136,6 +130,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\Inspect.cs" />
+    <Compile Include="Analysis\InspectOptions.cs" />
     <Compile Include="CoreClr\Clr.cs" />
     <Compile Include="CoreClr\Meta\IMeta.cs" />
     <Compile Include="CoreClr\Meta\IMetaMember.cs" />
@@ -170,36 +165,6 @@
     <Compile Include="CoreClr\Structures\SyncBlockFlags.cs" />
     <Compile Include="CoreClr\Structures\TokenType.cs" />
     <Compile Include="CoreClr\Structures\TypeHandle.cs" />
-    <Compile Include="CoreJit\CorInfo.cs" />
-    <Compile Include="CoreJit\CorInfoCallConv.cs" />
-    <Compile Include="CoreJit\CorInfoCallInfo.cs" />
-    <Compile Include="CoreJit\CorInfoCallKind.cs" />
-    <Compile Include="CoreJit\CorInfoConstLookup.cs" />
-    <Compile Include="CoreJit\CorInfoHelperDesc.cs" />
-    <Compile Include="CoreJit\CorInfoHelpFunc.cs" />
-    <Compile Include="CoreJit\CorInfoIsAccessAllowedResult.cs" />
-    <Compile Include="CoreJit\CorInfoLookup.cs" />
-    <Compile Include="CoreJit\CorInfoOptions.cs" />
-    <Compile Include="CoreJit\CorInfoRegionKind.cs" />
-    <Compile Include="CoreJit\CorInfoResolvedToken.cs" />
-    <Compile Include="CoreJit\CorInfoRuntimeLookup.cs" />
-    <Compile Include="CoreJit\CorInfoRuntimeLookupKind.cs" />
-    <Compile Include="CoreJit\CorInfoSigInfo.cs" />
-    <Compile Include="CoreJit\CorInfoSigInst.cs" />
-    <Compile Include="CoreJit\CorInfoThisTransform.cs" />
-    <Compile Include="CoreJit\CorInfoTokenKind.cs" />
-    <Compile Include="CoreJit\CorInfoType.cs" />
-    <Compile Include="CoreJit\CorInfoLookupKind.cs" />
-    <Compile Include="CoreJit\CorJitCompilerNative.cs" />
-    <Compile Include="CoreJit\CorJitFlags.cs" />
-    <Compile Include="CoreJit\CorJitResult.cs" />
-    <Compile Include="CoreJit\CorJitCompiler.cs" />
-    <Compile Include="CoreJit\CorJitFlag.cs" />
-    <Compile Include="CoreJit\Hook.cs" />
-    <Compile Include="CoreJit\ICorJitCompiler.cs" />
-    <Compile Include="CoreJit\ILDump.cs" />
-    <Compile Include="CoreJit\InfoAccessType.cs" />
-    <Compile Include="CoreJit\JitConstants.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\ClrSymNamespaceAttribute.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\SymFieldAttribute.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\SymImportAttribute.cs" />
@@ -213,9 +178,9 @@
     <Compile Include="Memory\AddressInfo.cs" />
     <Compile Include="Memory\Assembler.cs" />
     <Compile Include="Memory\Extern\SymImportException.cs" />
-    <Compile Include="Memory\Extern\Signatures\Attributes\ClrSigcallAttribute.cs" />
-    <Compile Include="Memory\Extern\Signatures\Attributes\SigcallAttribute.cs" />
-    <Compile Include="Memory\Extern\Signatures\SignatureCall.cs" />
+    <Compile Include="Memory\Extern\Sigscan\Attributes\ClrSigcallAttribute.cs" />
+    <Compile Include="Memory\Extern\Sigscan\Attributes\SigcallAttribute.cs" />
+    <Compile Include="Memory\Extern\Sigscan\SignatureCall.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\SymcallAttribute.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\SymNamespaceAttribute.cs" />
     <Compile Include="Memory\Extern\Symbols\Symload.cs" />
@@ -226,8 +191,6 @@
     <Compile Include="Memory\Fixed\PinHelper.cs" />
     <Compile Include="Memory\Functions.cs" />
     <Compile Include="Memory\MemScanner.cs" />
-    <Compile Include="Memory\MemStream.cs" />
-    <Compile Include="Memory\ProcessHacker.cs" />
     <Compile Include="Memory\Region.cs" />
     <Compile Include="Memory\SegmentType.cs" />
     <Compile Include="ModuleInitializer.cs" />

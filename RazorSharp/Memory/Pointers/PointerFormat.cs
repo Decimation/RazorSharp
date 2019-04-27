@@ -40,7 +40,7 @@ namespace RazorSharp.Memory.Pointers
 		///         </item>
 		///     </list>
 		/// </summary>
-		public const string FMT_O = "O";
+		public const string FORMAT_OBJ = "O";
 
 		/// <summary>
 		///     <para>
@@ -48,20 +48,20 @@ namespace RazorSharp.Memory.Pointers
 		///         <see cref="Hex.ToHex(IntPtr, ToStringOptions)" /> format
 		///     </para>
 		/// </summary>
-		public const string FMT_P = "P";
+		public const string FORMAT_PTR = "P";
 
 		/// <summary>
-		///     Both <see cref="FMT_P" /> and <see cref="FMT_O" />
+		///     Both <see cref="FORMAT_PTR" /> and <see cref="FORMAT_OBJ" />
 		/// </summary>
-		public const string FMT_B = "B";
+		public const string FORMAT_BOTH = "B";
 
 		/// <summary>
 		///     64-bit integer (<see cref="Pointer{T}.ToInt64" />)
 		/// </summary>
-		public const string FMT_N = "N";
+		public const string FORMAT_INT = "N";
 
 		internal const string VAL_FMT = "{0} ({1})";
 
-		public static string DefaultFormat { get; set; } = FMT_P;
+		public static string DefaultFormat { get; set; } = FORMAT_PTR;
 	}
 }

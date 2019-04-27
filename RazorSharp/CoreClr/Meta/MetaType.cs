@@ -100,7 +100,7 @@ namespace RazorSharp.CoreClr.Meta
 						String.Format("{0} (token: {1}) (base size: {2}) (component size: {3}) (base fields size: {4})",
 						              Name, Token, BaseSize, ComponentSize, BaseFieldsSize);
 				case FMT_E:
-					return ToTable().ToMarkDownString();
+					return ToTable().ToString();
 				default:
 					throw new ArgumentOutOfRangeException();
 			}

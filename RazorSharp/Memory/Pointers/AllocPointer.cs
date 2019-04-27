@@ -84,10 +84,5 @@ namespace RazorSharp.Memory.Pointers
 		{
 			return GetEnumerator();
 		}
-
-		public override string ToString()
-		{
-			return Pointer.ToTable(Length).ToMarkDownString();
-		}
 	}
 }

@@ -4,14 +4,14 @@ using System.Linq;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Pointers;
-using SharpPdb.Windows;
-using SharpPdb.Windows.SymbolRecords;
+//using SharpPdb.Windows;
+//using SharpPdb.Windows.SymbolRecords;
 
 // ReSharper disable SuggestBaseTypeForParameter
 
 namespace RazorSharp.Native.Symbols
 {
-	public class PdbSymbols : ISymbolResolver
+	/*public class PdbSymbols : ISymbolResolver
 	{
 		public PdbFile File { get; }
 
@@ -76,5 +76,5 @@ namespace RazorSharp.Native.Symbols
 		{
 			File.Dispose();
 		}
-	}
+	}*/
 }

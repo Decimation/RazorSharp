@@ -72,7 +72,7 @@ namespace RazorSharp.CoreClr.Structures.HeapObjects
 			table.AddRow("Length", Length);
 
 
-			return table.ToMarkDownString();
+			return table.ToString();
 		}
 	}
 }

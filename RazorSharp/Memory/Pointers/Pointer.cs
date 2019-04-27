@@ -11,6 +11,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using InlineIL;
 using JetBrains.Annotations;
 using RazorCommon;
 using RazorCommon.Diagnostics;
@@ -75,7 +76,7 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		private void* m_value;
 
-		private string Dbg => ToString(PointerFormat.FMT_P);
+		private string Dbg => ToString(PointerFormat.FORMAT_PTR);
 
 		#region Properties
 
@@ -571,6 +572,20 @@ namespace RazorSharp.Memory.Pointers
 			return CSUnsafe.Read<T>((void*) (((long) m_value) + byteOffset));
 		}
 		
+		public T ReadFast__(int elemOffset = 0)
+		{
+			return CSUnsafe.Read<T>((void*) (((long) m_value) + (elemOffset*ElementSize)));
+		}
+
+		public T ReadFastInline()
+		{
+			IL.Emit.Ldarg_0();
+			IL.Emit.Ldfld(new FieldRef(typeof(Pointer<T>), nameof(m_value)));
+			IL.Emit.Conv_U();
+			IL.Emit.Ldobj(typeof(T));
+			return IL.Return<T>();
+		}
+		
 		/// <summary>
 		///     Reinterprets <see cref="Address" /> as a reference to a value of type <typeparamref name="T" />
 		/// </summary>
@@ -692,23 +707,6 @@ namespace RazorSharp.Memory.Pointers
 		public void ZeroBytes(int byteCnt)
 		{
 			Mem.Zero(m_value, byteCnt);
-		}
-
-		public ConsoleTable ToTable(int elemCnt)
-		{
-			var table = typeof(T).IsValueType
-				? new ConsoleTable("Address", "Offset", "Value")
-				: new ConsoleTable("Address", "Offset", "Pointer", "Value");
-
-			for (int i = 0; i < elemCnt; i++) {
-				Pointer<T> ptr = AddressOfIndex(i);
-				if (!typeof(T).IsValueType)
-					table.AddRow(ptr.ToString(PointerFormat.FMT_P), i, Hex.ToHex(ReadAny<long>(i)), ptr.ToStringSafe());
-				else
-					table.AddRow(ptr.ToString(PointerFormat.FMT_P), i, ptr.ToStringSafe());
-			}
-
-			return table;
 		}
 
 		/// <summary>
@@ -1042,14 +1040,14 @@ namespace RazorSharp.Memory.Pointers
 
 
 			switch (format.ToUpperInvariant()) {
-				case PointerFormat.FMT_N:
+				case PointerFormat.FORMAT_INT:
 					return ToInt64().ToString();
-				case PointerFormat.FMT_O:
+				case PointerFormat.FORMAT_OBJ:
 					return ToStringSafe();
-				case PointerFormat.FMT_P:
+				case PointerFormat.FORMAT_PTR:
 					return Hex.ToHex(ToInt64());
 
-				case PointerFormat.FMT_B:
+				case PointerFormat.FORMAT_BOTH:
 					string thisStr = ToStringSafe();
 
 					string typeName = typeof(T).ContainsAnyGenericParameters()
@@ -1061,7 +1059,7 @@ namespace RazorSharp.Memory.Pointers
 					return String.Format("{0} @ {1}: {2}", typeNameDisplay, Hex.ToHex(Address),
 					                     thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
 				default:
-					goto case PointerFormat.FMT_O;
+					goto case PointerFormat.FORMAT_OBJ;
 			}
 		}
 
@@ -1098,7 +1096,7 @@ namespace RazorSharp.Memory.Pointers
 					valueStr = Reference == null ? StringConstants.NULL_STR : Reference.ToString();
 
 				RETURN:
-				return String.Format(PointerFormat.VAL_FMT, valueStr, heapPtr.ToString(PointerFormat.FMT_P));
+				return String.Format(PointerFormat.VAL_FMT, valueStr, heapPtr.ToString(PointerFormat.FORMAT_PTR));
 			}
 
 

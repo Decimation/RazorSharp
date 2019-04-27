@@ -19,7 +19,7 @@ namespace RazorSharp.Memory
 		///     Return the pointer offset by <c>-</c><see cref="IntPtr.Size" />,
 		///     so it points to the object's <see cref="ObjHeader" />.
 		/// </summary>
-		Header,
+		HEADER,
 
 		/// <summary>
 		///     If the type is a <see cref="string" />, return the
@@ -29,7 +29,7 @@ namespace RazorSharp.Memory
 		///         Note: Equal to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>.
 		///     </remarks>
 		/// </summary>
-		StringData,
+		STRING_DATA,
 
 		/// <summary>
 		///     If the type is an array, return
@@ -39,19 +39,19 @@ namespace RazorSharp.Memory
 		///         Note: Equal to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>
 		///     </remarks>
 		/// </summary>
-		ArrayData,
+		ARRAY_DATA,
 
 		/// <summary>
 		///     If the type is a reference type, return
 		///     the pointer offset by <see cref="IntPtr.Size" /> so it points
 		///     to the object's fields.
 		/// </summary>
-		Fields,
+		FIELDS,
 
 		/// <summary>
 		///     Don't offset the heap pointer at all, so it
 		///     points to the <see cref="MethodTable" /> pointer.
 		/// </summary>
-		None
+		NONE
 	}
 }

@@ -102,7 +102,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 			table.AddRow("Flags", EnumUtil.CreateFlagsString(m_bFlags, Flags));
 			table.AddRow("Packing size", m_cbPackingSize);
 
-			return table.ToMarkDownString();
+			return table.ToString();
 		}
 	}
 }

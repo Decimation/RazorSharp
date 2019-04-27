@@ -33,7 +33,7 @@ namespace RazorSharp.Memory
 					return true;
 				}
 			}
-			
+
 			return GetModule(name) != null;
 		}
 
@@ -42,7 +42,7 @@ namespace RazorSharp.Memory
 			var ptr = ProcessApi.LoadLibrary(fileName);
 			return CurrentNativeModules.First(m => m.BaseAddress == ptr);
 		}
-		
+
 		public static ProcessModule GetModule(string name)
 		{
 			// todo: I shouldn't have to do this
@@ -62,7 +62,6 @@ namespace RazorSharp.Memory
 		public static NativeModule GetNativeModule(string name)
 		{
 			foreach (var pair in CurrentNativeModules) {
-				
 				if (pair.Name == name) {
 					return pair;
 				}

@@ -321,7 +321,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 
 
 //			table.RemoveFromRows(0, "0x0");
-			return table.ToMarkDownString();
+			return table.ToString();
 		}
 	}
 }

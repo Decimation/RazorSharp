@@ -129,7 +129,6 @@ namespace RazorSharp
 				Log.Warning("Memory leak: {Count} dangling pointer(s)", Mem.AllocCount);
 			}
 
-
 			Log.Dispose();
 			IsSetup = false;
 		}

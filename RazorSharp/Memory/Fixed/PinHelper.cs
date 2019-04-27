@@ -35,7 +35,7 @@ namespace RazorSharp.Memory.Fixed
 		///  </code>
 		///     <remarks>
 		///         <para><c>pData</c> is what <c>Object::GetData()</c> returns in VM.</para>
-		///         <para><c>pData</c> is also equal to offsetting the pointer by <see cref="OffsetOptions.Fields" />. </para>
+		///         <para><c>pData</c> is also equal to offsetting the pointer by <see cref="OffsetOptions.FIELDS" />. </para>
 		///         <para>From <see cref="System.Runtime.CompilerServices.JitHelpers" />. </para>
 		///     </remarks>
 		/// </summary>
@@ -43,7 +43,7 @@ namespace RazorSharp.Memory.Fixed
 		public sealed class PinningHelper
 		{
 			/// <summary>
-			///     Represents the first field in an object, such as <see cref="OffsetOptions.Fields" />.
+			///     Represents the first field in an object, such as <see cref="OffsetOptions.FIELDS" />.
 			/// </summary>
 			public byte Data;
 

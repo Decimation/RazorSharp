@@ -7,6 +7,7 @@ using InlineIL;
 using JetBrains.Annotations;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory.Fixed;
@@ -42,16 +43,9 @@ namespace RazorSharp.Memory
 		public static T Unbox<T>(object value) where T : struct
 		{
 			lock (value) {
-				Pointer<byte> addr = AddressOfHeap(value, OffsetOptions.Fields);
+				Pointer<byte> addr = AddressOfHeap(value, OffsetOptions.FIELDS);
 				return addr.ReadAny<T>();
 			}
-		}
-
-		public static ref T UnboxFast<T>(object value) where T : struct
-		{
-			IL.Push(value);
-			IL.Emit.Unbox(typeof(T));
-			return ref IL.ReturnRef<T>();
 		}
 
 		/// <summary>
@@ -202,18 +196,18 @@ namespace RazorSharp.Memory
 		public static Pointer<byte> AddressOfHeap<T>(T value, OffsetOptions offset) where T : class
 		{
 			switch (offset) {
-				case OffsetOptions.StringData:
+				case OffsetOptions.STRING_DATA:
 
 					Conditions.Require(typeof(T) == typeof(string));
 					string s = value as string;
 					return AddressOfHeap(s) + Offsets.OffsetToStringData;
 
-				case OffsetOptions.ArrayData:
+				case OffsetOptions.ARRAY_DATA:
 
 					Conditions.Require(Runtime.IsArray<T>());
 					return AddressOfHeap(value) + Offsets.OffsetToArrayData;
 
-				case OffsetOptions.Fields:
+				case OffsetOptions.FIELDS:
 
 					// todo: if the type is an array, should this return ArrayData,
 					// todo: ...and if it's a string, should this return StringData?
@@ -221,11 +215,11 @@ namespace RazorSharp.Memory
 					// Skip over the MethodTable*
 					return AddressOfHeap(value) + Offsets.OffsetToData;
 
-				case OffsetOptions.None:
+				case OffsetOptions.NONE:
 					return AddressOfHeap(value);
 
-				case OffsetOptions.Header:
-					return AddressOfHeap(value) - sizeof(MethodTable*);
+				case OffsetOptions.HEADER:
+					return AddressOfHeap(value) - Offsets.OffsetToData;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(offset), offset, null);
 			}
@@ -262,16 +256,16 @@ namespace RazorSharp.Memory
 
 
 		/// <summary>
-		///     Calculates the complete size of <paramref name="t" />'s data. If <typeparamref name="T" /> is
+		///     Calculates the complete size of <paramref name="value" />'s data. If <typeparamref name="T" /> is
 		///     a value type, this is equal to <see cref="SizeOf{T}" />. If <typeparamref name="T" /> is a
 		///     reference type, this is equal to <see cref="HeapSize{T}(T)" />.
 		/// </summary>
-		/// <param name="t">Value to calculate the size of</param>
-		/// <typeparam name="T">Type of <paramref name="t" /></typeparam>
-		/// <returns>The complete size of <paramref name="t" /></returns>
-		public static int AutoSizeOf<T>(T t)
+		/// <param name="value">Value to calculate the size of</param>
+		/// <typeparam name="T">Type of <paramref name="value" /></typeparam>
+		/// <returns>The complete size of <paramref name="value" /></returns>
+		public static int AutoSizeOf<T>(T value)
 		{
-			return typeof(T).IsValueType ? SizeOf<T>() : HeapSizeInternal(t);
+			return typeof(T).IsValueType ? SizeOf<T>() : HeapSizeInternal(value);
 		}
 
 		/// <summary>
@@ -358,10 +352,8 @@ namespace RazorSharp.Memory
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int HeapSize<T>(T value) where T : class
-		{
-			return HeapSizeInternal(value);
-		}
+		public static int HeapSize<T>(T value) where T : class 
+			=> HeapSizeInternal(value);
 
 
 		private static int HeapSizeInternal<T>(T value)
@@ -470,17 +462,15 @@ namespace RazorSharp.Memory
 		///         <para>This includes field padding.</para>
 		///     </remarks>
 		/// </summary>
-		public static int BaseFieldsSize<T>(T t) where T : class
-		{
-			return BaseFieldsSizeInternal(t);
-		}
+		public static int BaseFieldsSize<T>(T value) where T : class 
+			=> BaseFieldsSizeInternal(value);
 
 
-		private static int BaseFieldsSizeInternal<T>(T t)
+		private static int BaseFieldsSizeInternal<T>(T value)
 		{
 			// Sanity check
 			Conditions.Require(!typeof(T).IsValueType);
-			return Runtime.ReadMethodTable(ref t).Reference.NumInstanceFieldBytes;
+			return Runtime.ReadMethodTable(ref value).Reference.NumInstanceFieldBytes;
 		}
 
 		/// <summary>
@@ -521,10 +511,8 @@ namespace RazorSharp.Memory
 		/// <returns>
 		///     <see cref="MethodTable.BaseSize" />
 		/// </returns>
-		public static int BaseInstanceSize<T>() where T : class
-		{
-			return BaseInstanceSizeInternal<T>();
-		}
+		public static int BaseInstanceSize<T>() where T : class 
+			=> BaseInstanceSizeInternal<T>();
 
 
 		private static int BaseInstanceSizeInternal<T>()
@@ -549,41 +537,41 @@ namespace RazorSharp.Memory
 
 
 		/// <summary>
-		///     Copies the memory of <paramref name="t" /> into a <see cref="Byte" /> array.
+		///     Copies the memory of <paramref name="value" /> into a <see cref="Byte" /> array.
 		///     <remarks>
 		///         This includes the <see cref="MethodTable" /> pointer and <see cref="ObjHeader" />
 		///     </remarks>
 		/// </summary>
-		/// <param name="t">Value to copy the memory of</param>
+		/// <param name="value">Value to copy the memory of</param>
 		/// <typeparam name="T">Reference type</typeparam>
-		/// <returns>An array of <see cref="Byte" />s containing the raw memory of <paramref name="t" /></returns>
-		public static byte[] MemoryOf<T>(T t) where T : class
+		/// <returns>An array of <see cref="Byte" />s containing the raw memory of <paramref name="value" /></returns>
+		public static byte[] MemoryOf<T>(T value) where T : class
 		{
 			// Need to include the ObjHeader
-			Pointer<T> ptr = AddressOfHeap(t, OffsetOptions.Header).Address;
-			return ptr.Cast<byte>().CopyOut(HeapSize(t));
+			Pointer<T> ptr = AddressOfHeap(value, OffsetOptions.HEADER).Address;
+			return ptr.Cast<byte>().CopyOut(HeapSize(value));
 		}
 
 		/// <summary>
-		///     Copies the memory of <paramref name="t" /> into a <see cref="Byte" /> array.
+		///     Copies the memory of <paramref name="value" /> into a <see cref="Byte" /> array.
 		///     If <typeparamref name="T" /> is a pointer, the memory of the pointer will be returned.
 		/// </summary>
-		/// <param name="t">Value to copy the memory of</param>
+		/// <param name="value">Value to copy the memory of</param>
 		/// <typeparam name="T">Value type</typeparam>
-		/// <returns>An array of <see cref="Byte" />s containing the raw memory of <paramref name="t" /></returns>
-		public static byte[] MemoryOfVal<T>(T t)
+		/// <returns>An array of <see cref="Byte" />s containing the raw memory of <paramref name="value" /></returns>
+		public static byte[] MemoryOfVal<T>(T value)
 		{
-			Pointer<T> ptr = AddressOf(ref t);
+			Pointer<T> ptr = AddressOf(ref value);
 			return ptr.Cast<byte>().CopyOut(ptr.ElementSize);
 		}
 
-		public static byte[] MemoryOfFields<T>(T t) where T : class
+		public static byte[] MemoryOfFields<T>(T value) where T : class
 		{
-			int fieldSize = SizeOfData(t);
+			int fieldSize = SizeOfData(value);
 			var fields    = new byte[fieldSize];
 
 			// Skip over the MethodTable*
-			Marshal.Copy((AddressOfHeap(t) + IntPtr.Size).Address, fields, 0, fieldSize);
+			Marshal.Copy((AddressOfHeap(value) + IntPtr.Size).Address, fields, 0, fieldSize);
 			return fields;
 		}
 

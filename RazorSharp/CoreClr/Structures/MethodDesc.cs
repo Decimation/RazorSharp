@@ -368,7 +368,7 @@ namespace RazorSharp.CoreClr.Structures
 
 			table.AddRow("SizeOf", SizeOf);
 
-			return table.ToMarkDownString();
+			return table.ToString();
 		}
 
 		#endregion

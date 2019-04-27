@@ -72,7 +72,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 				ilCode.Add(opCode.Size);
 			}
 
-			Console.WriteLine(table.ToMarkDownString());
+			Console.WriteLine(table.ToString());
 		}
 
 		public void WriteOpCodes(OpCode[] opCodes)
@@ -147,7 +147,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 
 		public override string ToString()
 		{
-			return ToTable().ToMarkDownString();
+			return ToTable().ToString();
 		}
 	}
 }

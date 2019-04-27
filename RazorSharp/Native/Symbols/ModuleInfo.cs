@@ -6,7 +6,7 @@ using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
-using SharpPdb.Windows;
+//using SharpPdb.Windows;
 
 namespace RazorSharp.Native.Symbols
 {
@@ -42,7 +42,9 @@ namespace RazorSharp.Native.Symbols
 					m_reader = new SymbolManager(pdb.FullName);
 					break;
 				case SymbolRetrievalMode.PDB_READER:
-					m_reader = new PdbSymbols(pdb);
+					// m_reader = new PdbSymbols(pdb);
+					
+					throw new NotImplementedException();
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();

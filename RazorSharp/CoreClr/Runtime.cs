@@ -73,7 +73,7 @@ namespace RazorSharp.CoreClr
 		/// <returns>A pointer to the reference type's header</returns>
 		internal static Pointer<ObjHeader> ReadObjHeader<T>(T t) where T : class
 		{
-			return Unsafe.AddressOfHeap(t, OffsetOptions.Header).Cast<ObjHeader>();
+			return Unsafe.AddressOfHeap(t, OffsetOptions.HEADER).Cast<ObjHeader>();
 		}
 
 
