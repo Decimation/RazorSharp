@@ -94,10 +94,28 @@ namespace Test
 			private float m_x, m_y;
 		}
 
+		interface IString { }
+
+		struct NSString : IString
+		{
+			private fixed char m_rg[256];
+
+
+			static NSString alloc()
+			{
+				return default;
+			}
+
+			public void This() { }
+		}
+
 		public static void Main(string[] args)
 		{
 			ModuleInitializer.GlobalSetup();
 
+			var ll = new LinkedList<int>();
+			var node = ll.Find(1);
+			Console.WriteLine(node);
 
 			var value = new Point();
 			Inspect.Layout(ref value);
@@ -108,6 +126,13 @@ namespace Test
 			Inspect.Layout(ref value);
 
 			Inspect.Stack(ref value);
+
+			var nsString = new NSString();
+
+			var field = typeof(NSString).GetField("123");
+
+			nsString.This();
+
 
 			ModuleInitializer.GlobalClose();
 		}
