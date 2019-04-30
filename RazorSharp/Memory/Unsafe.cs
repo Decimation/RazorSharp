@@ -72,8 +72,8 @@ namespace RazorSharp.Memory
 
 		public static T DeepCopy<T>(T value) where T : class
 		{
-			Conditions.Require(typeof(T) != typeof(string), nameof(value));
-			Conditions.Require(!Runtime.IsArray<T>(), nameof(value));
+			Conditions.Require(!Runtime.IsString(value), nameof(value));
+			Conditions.Require(!Runtime.IsArray(value), nameof(value));
 
 			lock (value) {
 				var valueCpy = GCHeap.AllocateObject<T>(0);
@@ -198,13 +198,13 @@ namespace RazorSharp.Memory
 			switch (offset) {
 				case OffsetOptions.STRING_DATA:
 
-					Conditions.Require(typeof(T) == typeof(string));
+					Conditions.Require(Runtime.IsString(value));
 					string s = value as string;
 					return AddressOfHeap(s) + Offsets.OffsetToStringData;
 
 				case OffsetOptions.ARRAY_DATA:
 
-					Conditions.Require(Runtime.IsArray<T>());
+					Conditions.Require(Runtime.IsArray(value));
 					return AddressOfHeap(value) + Offsets.OffsetToArrayData;
 
 				case OffsetOptions.FIELDS:
@@ -397,8 +397,8 @@ namespace RazorSharp.Memory
 			 *
 			 */
 
-			if (typeof(T).IsArray) {
-				Conditions.Require(Runtime.IsArray<T>());
+			if (Runtime.IsArray(value)) {
+				Conditions.Require(Runtime.IsArray<T>(value));
 				var arr = value as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
@@ -406,11 +406,15 @@ namespace RazorSharp.Memory
 				length = arr.Length;
 
 				// Sanity check
-				Conditions.Assert(!(value is string));
+				Conditions.Assert(!Runtime.IsString(value));
 			}
-			else if (value is string str) {
+			else if (Runtime.IsString(value)) {
+				string str = value as string;
+				
 				// Sanity check
-				Conditions.Assert(!Runtime.IsArray<T>());
+				Conditions.Assert(!Runtime.IsArray<T>(value));
+				Conditions.NotNull(str, nameof(str));
+				
 				length = str.Length;
 			}
 

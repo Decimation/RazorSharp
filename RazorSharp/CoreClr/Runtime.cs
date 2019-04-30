@@ -62,10 +62,13 @@ namespace RazorSharp.CoreClr
 			return value;
 		}
 
-		internal static bool IsArray<T>()
-		{
-			return typeof(T).IsArray || typeof(T) == typeof(Array);
-		}
+		internal static bool IsString<T>() => typeof(T) == typeof(string);
+
+		internal static bool IsString<T>(T value) => value is string;
+
+		internal static bool IsArray<T>(T value) => value is Array;
+
+		internal static bool IsArray<T>() => typeof(T).IsArray || typeof(T) == typeof(Array);
 
 		/// <summary>
 		///     Reads a reference type's <see cref="ObjHeader" />
@@ -151,7 +154,7 @@ namespace RazorSharp.CoreClr
 
 		internal static ArrayObject** GetArrayObject<T>(ref T t) where T : class
 		{
-			Conditions.Require(IsArray<T>());
+			Conditions.Require(IsArray(t));
 
 			return (ArrayObject**) Unsafe.AddressOf(ref t);
 		}

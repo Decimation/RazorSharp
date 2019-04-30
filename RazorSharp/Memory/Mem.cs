@@ -123,7 +123,7 @@ namespace RazorSharp.Memory
 		public static Pointer<T> AllocInstance<T>() where T : class
 		{
 			Conditions.Require(!Runtime.IsArray<T>());
-			Conditions.Require(typeof(T) != typeof(string));
+			Conditions.Require(!Runtime.IsString<T>());
 
 
 			// Minimum size required for an instance

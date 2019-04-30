@@ -116,26 +116,28 @@ namespace Test
 
 		private static string nullptr_t = "Nullptr_t";
 
+		struct uchar
+		{
+			
+		}
+
+		static ref string get()
+		{
+			string s = "f";
+			return ref CSUnsafe.AsRef<string>(Unsafe.AddressOf(ref s).ToPointer());
+		}
+		
 		public static void Main(string[] args)
 		{
 			ModuleInitializer.GlobalSetup();
 
-			int  v = 256;
-			int* i = &v;
+			int[] i = new[] {1, 2, 3};
+			object rg = i;
+			object value = "foo";
+			Pointer<char> ptr = Unsafe.AddressOfHeap(value, OffsetOptions.STRING_DATA);
+			Console.WriteLine(ptr);
+			Console.WriteLine(Unsafe.AddressOfHeap(rg, OffsetOptions.ARRAY_DATA));
 
-			Pointer<char> p = null;
-			string        s = "foo";
-			sz = Unsafe.AddressOfHeap(s, OffsetOptions.STRING_DATA);
-			var p2 = Unsafe.AddressOf(ref p);
-			Nullptr(p2);
-			Console.WriteLine("{0:O} {0:P}", p2.Reference);
-
-			const ulong ul = 1UL;
-			Console.WriteLine(ul);
-
-			
-			Console.WriteLine(Unsafe.IsNil<string>(null));
-			
 			ModuleInitializer.GlobalClose();
 		}
 	}
