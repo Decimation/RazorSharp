@@ -131,6 +131,7 @@
   <ItemGroup>
     <Compile Include="Analysis\Inspect.cs" />
     <Compile Include="Analysis\InspectOptions.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="CoreClr\Clr.cs" />
     <Compile Include="CoreClr\Meta\IMeta.cs" />
     <Compile Include="CoreClr\Meta\IMetaMember.cs" />
@@ -138,7 +139,6 @@
     <Compile Include="CoreClr\Meta\MetaIL.cs" />
     <Compile Include="CoreClr\Meta\MetaMethod.cs" />
     <Compile Include="CoreClr\Meta\MetaType.cs" />
-    <Compile Include="CoreClr\Offsets.cs" />
     <Compile Include="CoreClr\Structures\CorElementType.cs" />
     <Compile Include="CoreClr\Structures\CorILMethodFlags.cs" />
     <Compile Include="CoreClr\Structures\CorTokenType.cs" />
@@ -267,8 +267,8 @@
     <Compile Include="CoreClr\Structures\MethodTable.cs" />
     <Compile Include="CoreClr\Structures\ObjHeader.cs" />
     <Compile Include="CoreClr\Structures\PackedDWORDFields.cs" />
-    <Compile Include="CoreClr\Constants.cs" />
     <Compile Include="CoreClr\Runtime.cs" />
+    <Compile Include="Offsets.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\AnnotationUtil.cs" />
     <Compile Include="Utilities\Conversions.cs" />

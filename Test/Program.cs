@@ -89,51 +89,53 @@ namespace Test
 
 		// todo: DIA instead of dbghelp?
 
-		private struct Point
+		struct NativeLinkedList
 		{
-			private float m_x, m_y;
-		}
+			private NativeNode* m_head;
 
-		interface IString { }
-
-		struct NSString : IString
-		{
-			private fixed char m_rg[256];
-
-
-			static NSString alloc()
+			public static NativeLinkedList Alloc()
 			{
-				return default;
+				var list = new NativeLinkedList
+				{
+					m_head = (NativeNode*) Mem.Alloc<NativeNode>()
+				};
+				return list;
 			}
-
-			public void This() { }
 		}
+
+		struct NativeNode { }
+
+		private static Pointer<char> sz;
+
+		static void Nullptr<T>(Pointer<Pointer<T>> p)
+		{
+			p.Reference = sz.Cast<T>();
+		}
+
+		
+
+		private static string nullptr_t = "Nullptr_t";
 
 		public static void Main(string[] args)
 		{
 			ModuleInitializer.GlobalSetup();
 
-			var ll = new LinkedList<int>();
-			var node = ll.Find(1);
-			Console.WriteLine(node);
+			int  v = 256;
+			int* i = &v;
 
-			var value = new Point();
-			Inspect.Layout(ref value);
+			Pointer<char> p = null;
+			string        s = "foo";
+			sz = Unsafe.AddressOfHeap(s, OffsetOptions.STRING_DATA);
+			var p2 = Unsafe.AddressOf(ref p);
+			Nullptr(p2);
+			Console.WriteLine("{0:O} {0:P}", p2.Reference);
 
-			string s = "foo";
-			Inspect.Heap(s);
+			const ulong ul = 1UL;
+			Console.WriteLine(ul);
 
-			Inspect.Layout(ref value);
-
-			Inspect.Stack(ref value);
-
-			var nsString = new NSString();
-
-			var field = typeof(NSString).GetField("123");
-
-			nsString.This();
-
-
+			
+			Console.WriteLine(Unsafe.IsNil<string>(null));
+			
 			ModuleInitializer.GlobalClose();
 		}
 	}

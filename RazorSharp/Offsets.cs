@@ -7,7 +7,7 @@ using RazorSharp.CoreClr.Structures.EE;
 
 #endregion
 
-namespace RazorSharp.CoreClr
+namespace RazorSharp
 {
 	public static class Offsets
 	{

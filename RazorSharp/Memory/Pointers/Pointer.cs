@@ -117,10 +117,15 @@ namespace RazorSharp.Memory.Pointers
 		public bool IsNull => m_value == null;
 
 		/// <summary>
-		///     Whether the value being pointed to is <c>default</c> or <c>null</c> bytes
+		///     Whether the value being pointed to is <c>default</c> or <c>null</c> bytes,
+		/// or this pointer is <c>null</c>.
 		/// </summary>
 		public bool IsNil {
 			get {
+				if (IsNull) {
+					return true;
+				}
+				
 				int    elemSize = ElementSize;
 				byte[] mem      = CopyOutBytes(elemSize);
 

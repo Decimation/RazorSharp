@@ -2,6 +2,7 @@
 
 using System;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Memory.Pointers;
 
 #endregion
 
@@ -9,7 +10,7 @@ using RazorSharp.CoreClr.Structures;
 // ReSharper disable IdentifierTypo
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp.CoreClr
+namespace RazorSharp
 {
 	internal static unsafe class Constants
 	{
@@ -126,6 +127,8 @@ namespace RazorSharp.CoreClr
 			       || cet == CorElementType.Ptr || cet == CorElementType.FnPtr;
 		}
 
+		internal static readonly Pointer<byte> NULLPTR = null;
+		
 		private static CorElementType TypeToCorType(Type t)
 		{
 			switch (Type.GetTypeCode(t)) {
