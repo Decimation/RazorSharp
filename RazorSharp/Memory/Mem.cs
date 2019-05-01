@@ -40,7 +40,7 @@ namespace RazorSharp.Memory
 	{
 		public static bool Is64Bit => IntPtr.Size == sizeof(long);
 
-		
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T ReadIL<T>(void* source)
 		{
@@ -48,7 +48,7 @@ namespace RazorSharp.Memory
 			IL.Emit.Ldobj(typeof(T));
 			return IL.Return<T>();
 		}
-		
+
 		/// <summary>
 		///     Checks whether an address is in range.
 		/// </summary>
@@ -84,6 +84,13 @@ namespace RazorSharp.Memory
 		public static int Size<T>(int elemCnt) => CSUnsafe.SizeOf<T>() * elemCnt;
 
 		#region Zero
+
+		public static void DestroyClass<T>(T value) where T : class
+		{
+			int           size = Unsafe.SizeOfData(value);
+			Pointer<byte> ptr  = Unsafe.AddressOfHeap(value, OffsetOptions.FIELDS);
+			ptr.ZeroBytes(size);
+		}
 
 		public static void Zero<T>(ref T t)
 		{

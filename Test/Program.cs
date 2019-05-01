@@ -89,54 +89,39 @@ namespace Test
 
 		// todo: DIA instead of dbghelp?
 
-		struct NativeLinkedList
-		{
-			private NativeNode* m_head;
 
-			public static NativeLinkedList Alloc()
-			{
-				var list = new NativeLinkedList
-				{
-					m_head = (NativeNode*) Mem.Alloc<NativeNode>()
-				};
-				return list;
-			}
-		}
+		private static void Nullptr<T>(Pointer<Pointer<T>> p) { }
 
-		struct NativeNode { }
-
-		private static Pointer<char> sz;
-
-		static void Nullptr<T>(Pointer<Pointer<T>> p)
-		{
-			p.Reference = sz.Cast<T>();
-		}
-
-		
 
 		private static string nullptr_t = "Nullptr_t";
 
-		struct uchar
-		{
-			
-		}
 
 		static ref string get()
 		{
 			string s = "f";
 			return ref CSUnsafe.AsRef<string>(Unsafe.AddressOf(ref s).ToPointer());
 		}
-		
+
+		struct i32 { }
+
+		private static List<int> _l;
+
+		static void G()
+		{
+			_l.Add(1);
+		}
+
 		public static void Main(string[] args)
 		{
 			ModuleInitializer.GlobalSetup();
 
-			int[] i = new[] {1, 2, 3};
-			object rg = i;
-			object value = "foo";
-			Pointer<char> ptr = Unsafe.AddressOfHeap(value, OffsetOptions.STRING_DATA);
-			Console.WriteLine(ptr);
-			Console.WriteLine(Unsafe.AddressOfHeap(rg, OffsetOptions.ARRAY_DATA));
+			_l = Runtime.AllocObject<List<int>>();
+			Console.WriteLine(_l);
+			Inspect.Heap(_l);
+			Mem.DestroyClass(_l);
+			Console.WriteLine(_l);
+			Inspect.Heap(_l);
+			GC.Collect();
 
 			ModuleInitializer.GlobalClose();
 		}
