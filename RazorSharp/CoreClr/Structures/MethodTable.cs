@@ -16,6 +16,9 @@ using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+// ReSharper disable ConvertToAutoPropertyWhenPossible
+
 // ReSharper disable MemberCanBeMadeStatic.Local
 
 // ReSharper disable ConvertToAutoProperty
@@ -95,7 +98,7 @@ namespace RazorSharp.CoreClr.Structures
 		}
 
 		private WORD FlagsLowValue => m_dwFlags.Flags;
-		private WORD Flags2Value   { get; }
+		private WORD Flags2Value   => m_wFlags2;
 
 		internal MethodTableFlags Flags => (MethodTableFlags) FlagsValue;
 
@@ -234,7 +237,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		internal int NumMethods => EEClass.Reference.NumMethods;
 
-		internal int NumInstanceFieldBytes => BaseSize - EEClass.Reference.GetBaseSizePadding();
+		internal int NumInstanceFieldBytes => BaseSize - EEClass.Reference.BaseSizePadding;
 
 		/// <summary>
 		///     Array of <see cref="FieldDesc" />s for this type.

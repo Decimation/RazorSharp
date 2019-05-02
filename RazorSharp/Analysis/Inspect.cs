@@ -122,7 +122,7 @@ namespace RazorSharp.Analysis
 		public static string LayoutString<T>(ref T value)
 		{
 			var         table     = LayoutTable<T>();
-			var         type      = typeof(T).GetMetaType();
+			var         type      = value.GetType().GetMetaType();
 			MetaField[] fields    = type.InstanceFields.ToArray();
 			int         lim       = fields.Length;
 			var         addresses = new object[lim];

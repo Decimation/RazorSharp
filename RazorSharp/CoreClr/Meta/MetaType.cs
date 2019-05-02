@@ -303,7 +303,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		public int NativeSize => Value.Reference.EEClass.Reference.NativeSize;
 
-		public int BaseSizePadding => Value.Reference.EEClass.Reference.GetBaseSizePadding();
+		public int BaseSizePadding => Value.Reference.EEClass.Reference.BaseSizePadding;
 
 		public int BaseFieldsSize => Value.Reference.NumInstanceFieldBytes;
 
