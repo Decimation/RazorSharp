@@ -57,9 +57,6 @@ namespace Test
 		// Testing library: Sandbox
 
 
-		
-
-
 		// todo: symbol address/offset difference between pdb (PdbFile) and kernel (DbgHelp)
 
 		// todo: massive overhaul and refactoring
@@ -71,11 +68,7 @@ namespace Test
 		{
 			ModuleInitializer.GlobalSetup();
 
-			
-			
 
-			
-			
 			ModuleInitializer.GlobalClose();
 		}
 	}

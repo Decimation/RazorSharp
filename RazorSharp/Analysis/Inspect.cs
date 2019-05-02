@@ -136,8 +136,7 @@ namespace RazorSharp.Analysis
 				addresses[i] = field.GetAddress(ref value).ToString(PointerFormat.FORMAT_PTR);
 				values[i]    = field.GetValue(value) ?? StringConstants.NULL_STR;
 			}
-
-
+			
 			table.AttachEnd("Value", values)
 			     .AttachEnd("Address", addresses);
 
