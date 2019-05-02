@@ -101,11 +101,11 @@ namespace RazorSharp.Utilities
 
 		#endregion
 
-		#region Members
+		#region Member
 
 		internal static MemberInfo[] GetAllMembers(this Type t) => t.GetMembers(ALL_FLAGS);
-		
-		internal static MemberInfo[] GetAnyMember(this Type t, string name) => t.GetMember(name,ALL_FLAGS);
+
+		internal static MemberInfo[] GetAnyMember(this Type t, string name) => t.GetMember(name, ALL_FLAGS);
 
 		#endregion
 
@@ -114,7 +114,7 @@ namespace RazorSharp.Utilities
 			var members    = new List<MemberInfo>();
 			var attributes = new List<TAttribute>();
 
-			foreach (var member in t.GetAllMembers()) {
+			foreach (var member in t.GetMembers(ReflectionUtil.ALL_FLAGS)) {
 				if (Attribute.IsDefined(member, typeof(TAttribute))) {
 					members.Add(member);
 					attributes.Add(member.GetCustomAttribute<TAttribute>());
