@@ -71,6 +71,8 @@ namespace Test
 		{
 			ModuleInitializer.GlobalSetup();
 
+			Console.WriteLine("{0:O}",typeof(string).GetMethodTable());
+			Inspect.Layout<string>();
 			
 			
 			ModuleInitializer.GlobalClose();

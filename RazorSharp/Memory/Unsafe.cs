@@ -311,10 +311,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <returns><see cref="IntPtr.Size" /> for reference types, size for value types</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int SizeOf<T>()
-		{
-			return CSUnsafe.SizeOf<T>();
-		}
+		public static int SizeOf<T>() => CSUnsafe.SizeOf<T>();
 
 
 		#region HeapSize
@@ -350,10 +347,7 @@ namespace RazorSharp.Memory
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int HeapSize<T>(T value) where T : class
-		{
-			return HeapSizeInternal(value);
-		}
+		public static int HeapSize<T>(T value) where T : class => HeapSizeInternal(value);
 
 
 		private static int HeapSizeInternal<T>(T value)
@@ -398,7 +392,6 @@ namespace RazorSharp.Memory
 			 */
 
 			if (Runtime.IsArray(value)) {
-				Conditions.Require(Runtime.IsArray(value));
 				var arr = value as Array;
 
 				// ReSharper disable once PossibleNullReferenceException

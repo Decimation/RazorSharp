@@ -32,10 +32,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static bool IsBound(Type t)
-		{
-			return BoundTypes.Contains(t);
-		}
+		private static bool IsBound(Type t) => BoundTypes.Contains(t);
 
 
 		private static string GetSymbolName(SymImportAttribute attr, [NotNull] MemberInfo member)
@@ -76,10 +73,8 @@ namespace RazorSharp.Memory.Extern.Symbols
 			return new ModuleInfo(new FileInfo(attr.Image), baseAddr, SymbolRetrievalMode.PDB_READER);
 		}
 
-		private static ModuleInfo GetInfo(SymNamespaceAttribute attr)
-		{
-			return GetInfo(attr, Modules.GetBaseAddress(attr.Module));
-		}
+		private static ModuleInfo GetInfo(SymNamespaceAttribute attr) 
+			=> GetInfo(attr, Modules.GetBaseAddress(attr.Module));
 
 		private static void LoadField(object             value,
 		                              ModuleInfo         module,
@@ -109,10 +104,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 			fieldInfo.SetValue(value, val);
 		}
 
-		public static T GenericLoad<T>(T value = default)
-		{
-			return (T) Load(typeof(T), value);
-		}
+		public static T GenericLoad<T>(T value = default) => (T) Load(typeof(T), value);
 
 		public static object Load(Type type, object value = null)
 		{
@@ -183,6 +175,8 @@ namespace RazorSharp.Memory.Extern.Symbols
 			if (!ReferenceEquals(mi, Clr.ClrSymbols))
 				mi.Dispose();
 
+			Global.Log.Debug("Done");
+			
 			return value;
 		}
 	}

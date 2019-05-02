@@ -234,7 +234,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		internal int NumMethods => EEClass.Reference.NumMethods;
 
-		internal int NumInstanceFieldBytes => BaseSize - EEClass.Reference.BaseSizePadding;
+		internal int NumInstanceFieldBytes => BaseSize - EEClass.Reference.GetBaseSizePadding();
 
 		/// <summary>
 		///     Array of <see cref="FieldDesc" />s for this type.
