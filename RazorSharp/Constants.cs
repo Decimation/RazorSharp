@@ -19,6 +19,14 @@ namespace RazorSharp
 		/// </summary>
 		internal const int INVALID_VALUE = -1;
 
+		/// <summary>
+		///     KiB
+		/// </summary>
+		internal const int KIBIBYTE = 1024;
+
+		private const int  RID_FROM_TOKEN  = 0x00FFFFFF;
+		private const uint TYPE_FROM_TOKEN = 0xFF000000;
+
 
 		/// <summary>
 		///     <para>Minimum GC object heap size</para>
@@ -31,10 +39,7 @@ namespace RazorSharp
 		/// </summary>
 		internal static readonly int MinObjectSize = 2 * IntPtr.Size + sizeof(ObjHeader);
 
-		/// <summary>
-		/// KiB
-		/// </summary>
-		internal const int KIBIBYTE = 1024;
+		internal static readonly Pointer<byte> NULLPTR = null;
 
 		/// <summary>
 		///     <para>Sources:</para>
@@ -127,8 +132,6 @@ namespace RazorSharp
 			       || cet == CorElementType.Ptr || cet == CorElementType.FnPtr;
 		}
 
-		internal static readonly Pointer<byte> NULLPTR = null;
-
 		private static CorElementType TypeToCorType(Type t)
 		{
 			switch (Type.GetTypeCode(t)) {
@@ -170,10 +173,10 @@ namespace RazorSharp
 			}
 		}
 
-		internal static CorElementType TypeToCorType<T>() => TypeToCorType(typeof(T));
-
-		private const int  RID_FROM_TOKEN  = 0x00FFFFFF;
-		private const uint TYPE_FROM_TOKEN = 0xFF000000;
+		internal static CorElementType TypeToCorType<T>()
+		{
+			return TypeToCorType(typeof(T));
+		}
 
 		internal static int RidFromToken(int tk)
 		{
@@ -187,6 +190,9 @@ namespace RazorSharp
 			return tk & TYPE_FROM_TOKEN;
 		}
 
-		internal static int TokenFromRid(int rid, CorTokenType tktype) => rid | (int) tktype;
+		internal static int TokenFromRid(int rid, CorTokenType tktype)
+		{
+			return rid | (int) tktype;
+		}
 	}
 }

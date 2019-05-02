@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using RazorCommon;
@@ -8,6 +9,7 @@ using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
+// ReSharper disable ReturnTypeCanBeEnumerable.Global
 
 #endregion
 
@@ -18,7 +20,10 @@ namespace RazorSharp.Utilities
 	/// </summary>
 	public static class ReflectionUtil
 	{
-		public static MetaType GetMetaType(this Type t) => new MetaType(t.GetMethodTable());
+		public static MetaType GetMetaType(this Type t)
+		{
+			return new MetaType(t.GetMethodTable());
+		}
 
 		/// <summary>
 		///     Executes a generic method
@@ -98,5 +103,28 @@ namespace RazorSharp.Utilities
 		}
 
 		#endregion
+
+		#region Members
+
+		internal static MemberInfo[] GetAllMembers(this Type t) => t.GetMembers(ALL_FLAGS);
+		
+		internal static MemberInfo[] GetAnyMember(this Type t, string name) => t.GetMember(name,ALL_FLAGS);
+
+		#endregion
+
+		internal static (MemberInfo[], TAttribute[]) GetAnnotated<TAttribute>(this Type t) where TAttribute : Attribute
+		{
+			var members    = new List<MemberInfo>();
+			var attributes = new List<TAttribute>();
+
+			foreach (var member in t.GetAllMembers()) {
+				if (Attribute.IsDefined(member, typeof(TAttribute))) {
+					members.Add(member);
+					attributes.Add(member.GetCustomAttribute<TAttribute>());
+				}
+			}
+
+			return (members.ToArray(), attributes.ToArray());
+		}
 	}
 }

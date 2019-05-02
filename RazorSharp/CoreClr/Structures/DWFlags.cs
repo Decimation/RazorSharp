@@ -32,12 +32,6 @@ namespace RazorSharp.CoreClr.Structures
 	{
 		#region Fields
 
-		[FieldOffset(0)]
-		private readonly WORD m_componentSize;
-
-		[FieldOffset(2)]
-		private readonly WORD m_flags;
-
 		#endregion
 
 
@@ -45,18 +39,20 @@ namespace RazorSharp.CoreClr.Structures
 		///     <para>The size of one component (or element).</para>
 		///     <para>Applicable only to strings and arrays.</para>
 		/// </summary>
-		internal WORD ComponentSize => m_componentSize;
+		[field: FieldOffset(0)]
+		internal WORD ComponentSize { get; }
 
 		/// <summary>
 		///     Flags
 		/// </summary>
-		internal WORD Flags => m_flags;
+		[field: FieldOffset(2)]
+		internal WORD Flags { get; }
 
 		public override string ToString()
 		{
 			var table = new ConsoleTable("Field", "Value");
-			table.AddRow("Component size", m_componentSize);
-			table.AddRow("Flags", m_flags);
+			table.AddRow("Component size", ComponentSize);
+			table.AddRow("Flags", Flags);
 
 			return table.ToString();
 		}
@@ -67,7 +63,7 @@ namespace RazorSharp.CoreClr.Structures
 		{
 			if (obj?.GetType() == GetType()) {
 				var dwOther = (DWFlags) obj;
-				return m_componentSize == dwOther.m_componentSize && m_flags == dwOther.m_flags;
+				return ComponentSize == dwOther.ComponentSize && Flags == dwOther.Flags;
 			}
 
 			return false;
@@ -75,13 +71,13 @@ namespace RazorSharp.CoreClr.Structures
 
 		public bool Equals(DWFlags other)
 		{
-			return m_componentSize == other.m_componentSize && m_flags == other.m_flags;
+			return ComponentSize == other.ComponentSize && Flags == other.Flags;
 		}
 
 		public override int GetHashCode()
 		{
 			unchecked {
-				return (m_componentSize.GetHashCode() * 397) ^ m_flags.GetHashCode();
+				return (ComponentSize.GetHashCode() * 397) ^ Flags.GetHashCode();
 			}
 		}
 

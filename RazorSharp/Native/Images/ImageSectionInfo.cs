@@ -4,8 +4,6 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using RazorCommon.Strings;
-using RazorSharp.CoreClr;
-using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 
 #endregion
@@ -49,10 +47,10 @@ namespace RazorSharp.Native.Images
 
 
 		internal ImageSectionInfo(int                sectionNumber,
-		                        string             sectionName,
-		                        void*              sectionAddress,
-		                        int                sectionSize,
-		                        ImageSectionHeader header)
+		                          string             sectionName,
+		                          void*              sectionAddress,
+		                          int                sectionSize,
+		                          ImageSectionHeader header)
 		{
 			SectionNumber    = sectionNumber;
 			SectionName      = sectionName;

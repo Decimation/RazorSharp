@@ -270,7 +270,6 @@
     <Compile Include="CoreClr\Runtime.cs" />
     <Compile Include="Offsets.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\AnnotationUtil.cs" />
     <Compile Include="Utilities\Conversions.cs" />
     <Compile Include="Utilities\ConversionType.cs" />
     <Compile Include="Utilities\ReflectionUtil.cs" />

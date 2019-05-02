@@ -57,30 +57,7 @@ namespace Test
 		// Testing library: Sandbox
 
 
-		private static void __Compile(Type t, string n)
-		{
-			RuntimeHelpers.PrepareMethod(t.GetAnyMethod(n).MethodHandle);
-		}
-
-		static string[] GetPathValues()
-		{
-			var raw = Environment.GetEnvironmentVariable("path", EnvironmentVariableTarget.Machine);
-			Conditions.NotNull(raw, nameof(raw));
-			return raw.Split(';');
-		}
-
-		const string pdb2 = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.pdb";
-		const string dll  = @"C:\Users\Deci\CLionProjects\NativeSharp\cmake-build-debug\NativeSharp.dll";
-
-		/*[SymNamespace(pdb2, "NativeSharp.dll")]
-		private struct MyStruct
-		{
-			[SymField(UseMemberNameOnly = true)]
-			public int g_int;
-
-			[Symcall(UseMemberNameOnly = true)]
-			public void hello() { }
-		}*/
+		
 
 
 		// todo: symbol address/offset difference between pdb (PdbFile) and kernel (DbgHelp)
@@ -88,21 +65,11 @@ namespace Test
 		// todo: massive overhaul and refactoring
 
 		// todo: DIA instead of dbghelp?
-
-
-		private static void Nullptr<T>(Pointer<Pointer<T>> p) { }
-
-		private static List<int> _l;
+		
 
 		public static void Main(string[] args)
 		{
 			ModuleInitializer.GlobalSetup();
-
-			Pointer<int> p = Mem.Alloc<int>(2);
-			p.WriteAll(255,256);
-			Console.WriteLine(p.ReadFastInline__());
-			Console.WriteLine(p.ReadFastInline__(1));
-			
 
 			
 			

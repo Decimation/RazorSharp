@@ -5,7 +5,7 @@ using RazorSharp.CoreClr.Structures;
 
 #endregion
 
-namespace RazorSharp.Memory.Extern.Signatures.Attributes
+namespace RazorSharp.Memory.Extern.Sigscan.Attributes
 {
 	/// <inheritdoc />
 	/// <summary>

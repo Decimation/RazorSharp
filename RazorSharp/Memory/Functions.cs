@@ -5,8 +5,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Memory.Extern.Signatures;
-using RazorSharp.Memory.Extern.Signatures.Attributes;
+using RazorSharp.Memory.Extern.Sigscan;
+using RazorSharp.Memory.Extern.Sigscan.Attributes;
 using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
@@ -87,7 +87,7 @@ namespace RazorSharp.Memory
 		}
 
 		/// <summary>
-		/// Gets an exported function
+		///     Gets an exported function
 		/// </summary>
 		public static TDelegate GetFunction<TDelegate>(string dllName, string fn) where TDelegate : Delegate
 		{

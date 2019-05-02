@@ -9,7 +9,6 @@ using RazorCommon.Diagnostics;
 using RazorCommon.Strings;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
-using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
@@ -21,7 +20,7 @@ namespace RazorSharp.Analysis
 	public static class Inspect
 	{
 		// todo: maybe add type name/info to labels
-		
+
 		#region Helper methods
 
 		private const string JOIN_BAR = " | ";
@@ -139,8 +138,8 @@ namespace RazorSharp.Analysis
 			}
 
 
-			table.AttachEnd( "Value", values)
-			     .AttachEnd( "Address", addresses);
+			table.AttachEnd("Value", values)
+			     .AttachEnd("Address", addresses);
 
 			return table.ToString();
 		}

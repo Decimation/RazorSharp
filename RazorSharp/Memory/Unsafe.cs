@@ -3,11 +3,9 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using InlineIL;
 using JetBrains.Annotations;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
-using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory.Fixed;
@@ -37,6 +35,7 @@ namespace RazorSharp.Memory
 	///     <seealso cref="CSUnsafe" />
 	///     <seealso cref="System.Runtime.CompilerServices.JitHelpers" />
 	///     <seealso cref="Mem" />
+	/// <seealso cref="Runtime" />
 	/// </summary>
 	public static unsafe class Unsafe
 	{
@@ -63,8 +62,8 @@ namespace RazorSharp.Memory
 		}
 
 		/// <summary>
-		/// Whether the value of <paramref name="value"/> is <c>default</c> or <c>null</c> bytes,
-		/// or <paramref name="value"/> is <c>null</c>
+		///     Whether the value of <paramref name="value" /> is <c>default</c> or <c>null</c> bytes,
+		///     or <paramref name="value" /> is <c>null</c>
 		/// </summary>
 		public static bool IsNil<T>([CanBeNull] T value)
 		{
@@ -73,8 +72,7 @@ namespace RazorSharp.Memory
 
 		public static T DeepCopy<T>(T value) where T : class
 		{
-			Conditions.Require(!Runtime.IsString(value), nameof(value));
-			Conditions.Require(!Runtime.IsArray(value), nameof(value));
+			Conditions.Require(!Runtime.IsArrayOrString(value), nameof(value));
 
 			lock (value) {
 				var valueCpy = GCHeap.AllocateObject<T>(0);
@@ -149,11 +147,10 @@ namespace RazorSharp.Memory
 		public static Pointer<T> AddressOfData<T>(ref T value)
 		{
 			if (value.GetType().IsValueType) {
-				return Unsafe.AddressOf(ref value);
+				return AddressOf(ref value);
 			}
-			else {
-				return Unsafe.AddressOf(ref value).ReadPointer<byte>() + Offsets.OffsetToData;
-			}
+
+			return AddressOf(ref value).ReadPointer<byte>() + Offsets.OffsetToData;
 		}
 
 		/// <summary>
@@ -253,9 +250,6 @@ namespace RazorSharp.Memory
 
 		#region Sizes
 
-		// todo: make an AutoSize method
-
-
 		/// <summary>
 		///     Calculates the complete size of <paramref name="value" />'s data. If <typeparamref name="T" /> is
 		///     a value type, this is equal to <see cref="SizeOf{T}" />. If <typeparamref name="T" /> is a
@@ -317,7 +311,10 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <returns><see cref="IntPtr.Size" /> for reference types, size for value types</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int SizeOf<T>() => CSUnsafe.SizeOf<T>();
+		public static int SizeOf<T>()
+		{
+			return CSUnsafe.SizeOf<T>();
+		}
 
 
 		#region HeapSize
@@ -353,8 +350,10 @@ namespace RazorSharp.Memory
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int HeapSize<T>(T value) where T : class 
-			=> HeapSizeInternal(value);
+		public static int HeapSize<T>(T value) where T : class
+		{
+			return HeapSizeInternal(value);
+		}
 
 
 		private static int HeapSizeInternal<T>(T value)
@@ -399,7 +398,7 @@ namespace RazorSharp.Memory
 			 */
 
 			if (Runtime.IsArray(value)) {
-				Conditions.Require(Runtime.IsArray<T>(value));
+				Conditions.Require(Runtime.IsArray(value));
 				var arr = value as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
@@ -411,11 +410,11 @@ namespace RazorSharp.Memory
 			}
 			else if (Runtime.IsString(value)) {
 				string str = value as string;
-				
+
 				// Sanity check
-				Conditions.Assert(!Runtime.IsArray<T>(value));
+				Conditions.Assert(!Runtime.IsArray(value));
 				Conditions.NotNull(str, nameof(str));
-				
+
 				length = str.Length;
 			}
 
@@ -467,8 +466,10 @@ namespace RazorSharp.Memory
 		///         <para>This includes field padding.</para>
 		///     </remarks>
 		/// </summary>
-		public static int BaseFieldsSize<T>(T value) where T : class 
-			=> BaseFieldsSizeInternal(value);
+		public static int BaseFieldsSize<T>(T value) where T : class
+		{
+			return BaseFieldsSizeInternal(value);
+		}
 
 
 		private static int BaseFieldsSizeInternal<T>(T value)
@@ -516,8 +517,10 @@ namespace RazorSharp.Memory
 		/// <returns>
 		///     <see cref="MethodTable.BaseSize" />
 		/// </returns>
-		public static int BaseInstanceSize<T>() where T : class 
-			=> BaseInstanceSizeInternal<T>();
+		public static int BaseInstanceSize<T>() where T : class
+		{
+			return BaseInstanceSizeInternal<T>();
+		}
 
 
 		private static int BaseInstanceSizeInternal<T>()

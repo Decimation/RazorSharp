@@ -3,7 +3,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;

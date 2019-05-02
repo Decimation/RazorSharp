@@ -1,10 +1,12 @@
+#region
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using RazorSharp.CoreClr;
-using RazorSharp.Memory.Pointers;
+
+#endregion
 
 namespace RazorSharp.Native.Win32
 {
@@ -23,14 +25,6 @@ namespace RazorSharp.Native.Win32
 		                                               IntPtr                                           hModule,
 		                                               [Out]                              StringBuilder lpBaseName,
 		                                               [In] [MarshalAs(UnmanagedType.U4)] int           nSize);
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct _MODULEINFO
-		{
-			public void* lpBaseOfDll;
-			public uint  SizeOfImage;
-			public void* EntryPoint;
-		}
 
 		public static _MODULEINFO GetModuleInfo(ProcessModule module)
 		{
@@ -104,13 +98,24 @@ namespace RazorSharp.Native.Win32
 		[DllImport(Kernel32.KERNEL32_DLL, CharSet = CharSet.Auto)]
 		internal static extern IntPtr GetModuleHandle(string lpModuleName);
 
-		internal static IntPtr GetModuleHandle(ProcessModule module) => GetModuleHandle(module.ModuleName);
+		internal static IntPtr GetModuleHandle(ProcessModule module)
+		{
+			return GetModuleHandle(module.ModuleName);
+		}
 
 		/// <summary>
 		///     Retrieves the address of an exported function or variable from the specified dynamic-link library (DLL).
 		/// </summary>
 		[DllImport(Kernel32.KERNEL32_DLL, CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
 		internal static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct _MODULEINFO
+		{
+			public void* lpBaseOfDll;
+			public uint  SizeOfImage;
+			public void* EntryPoint;
+		}
 
 		#region Library
 

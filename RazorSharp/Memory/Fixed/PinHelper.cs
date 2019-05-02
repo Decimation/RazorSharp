@@ -1,4 +1,9 @@
+#region
+
 using JetBrains.Annotations;
+
+#endregion
+
 // ReSharper disable ClassCannotBeInstantiated
 
 namespace RazorSharp.Memory.Fixed

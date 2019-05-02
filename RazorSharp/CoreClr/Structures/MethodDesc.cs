@@ -83,8 +83,6 @@ namespace RazorSharp.CoreClr.Structures
 
 		private ushort m_wFlags3AndTokenRemainder;
 
-		private byte m_chunkIndex;
-
 		private byte m_bFlags2;
 
 		private ushort m_wSlotNumber;
@@ -141,7 +139,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal string Name => Info.Name;
 
-		internal byte ChunkIndex => m_chunkIndex;
+		internal byte ChunkIndex { get; }
 
 		/// <summary>
 		///     <remarks>
@@ -259,7 +257,7 @@ namespace RazorSharp.CoreClr.Structures
 		public bool Equals(MethodDesc md)
 		{
 			bool a = m_wFlags3AndTokenRemainder == md.m_wFlags3AndTokenRemainder;
-			bool b = m_chunkIndex == md.m_chunkIndex;
+			bool b = ChunkIndex == md.ChunkIndex;
 			bool c = m_bFlags2 == md.m_bFlags2;
 			bool d = m_wSlotNumber == md.m_wSlotNumber;
 			bool e = m_wFlags == md.m_wFlags;
@@ -281,7 +279,7 @@ namespace RazorSharp.CoreClr.Structures
 		{
 			unchecked {
 				int hashCode = m_wFlags3AndTokenRemainder.GetHashCode();
-				hashCode = (hashCode * 397) ^ m_chunkIndex.GetHashCode();
+				hashCode = (hashCode * 397) ^ ChunkIndex.GetHashCode();
 				hashCode = (hashCode * 397) ^ m_bFlags2.GetHashCode();
 				hashCode = (hashCode * 397) ^ m_wSlotNumber.GetHashCode();
 				hashCode = (hashCode * 397) ^ m_wFlags.GetHashCode();

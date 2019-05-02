@@ -55,8 +55,6 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		private MethodDescChunk* m_next;
 
-		private byte m_size;
-
 		/// <summary>
 		///     The number of <see cref="MethodDesc" />s in this chunk minus 1
 		/// </summary>
@@ -70,7 +68,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		///     The size of this chunk minus 1 (in multiples of <see cref="MethodDesc.ALIGNMENT" />)
 		/// </summary>
-		internal byte Size => m_size;
+		internal byte Size { get; }
 
 
 		internal byte Count => (byte) (m_count + 1); //(byte) (m_count + 1);
@@ -122,7 +120,7 @@ namespace RazorSharp.CoreClr.Structures
 
 //			table.AddRow("m_next", (int) m_next);
 			table.AddRow("First MethodDesc", Hex.ToHex(FirstMethodDesc.Address));
-			table.AddRow("Size", m_size);
+			table.AddRow("Size", Size);
 			table.AddRow("Count", Count);
 			table.AddRow("Flags and token range", m_flagsAndTokenRange);
 

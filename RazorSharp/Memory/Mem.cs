@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using InlineIL;
@@ -81,7 +80,10 @@ namespace RazorSharp.Memory
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int Size<T>(int elemCnt) => CSUnsafe.SizeOf<T>() * elemCnt;
+		public static int CompleteSize<T>(int elemCnt)
+		{
+			return CSUnsafe.SizeOf<T>() * elemCnt;
+		}
 
 		#region Zero
 
@@ -179,7 +181,7 @@ namespace RazorSharp.Memory
 		public static Pointer<T> Alloc<T>(int elemCnt = 1)
 		{
 			Conditions.Require(elemCnt > 0, nameof(elemCnt));
-			int size  = Size<T>(elemCnt);
+			int size  = CompleteSize<T>(elemCnt);
 			var alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
 
@@ -190,7 +192,7 @@ namespace RazorSharp.Memory
 
 		public static Pointer<T> ReAlloc<T>(Pointer<T> ptr, int elemCnt = 1)
 		{
-			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) Size<T>(elemCnt));
+			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) CompleteSize<T>(elemCnt));
 		}
 
 		/// <summary>

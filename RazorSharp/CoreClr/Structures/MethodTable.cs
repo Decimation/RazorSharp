@@ -95,7 +95,7 @@ namespace RazorSharp.CoreClr.Structures
 		}
 
 		private WORD FlagsLowValue => m_dwFlags.Flags;
-		private WORD Flags2Value   => m_wFlags2;
+		private WORD Flags2Value   { get; }
 
 		internal MethodTableFlags Flags => (MethodTableFlags) FlagsValue;
 
@@ -132,14 +132,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		///     The parent type's <see cref="MethodTable" />.
 		/// </summary>
-		internal Pointer<MethodTable> Parent {
-			// On Linux ARM is a RelativeFixupPointer. Otherwise,
-			// Parent PTR_MethodTable if enum_flag_HasIndirectParent is not set. Pointer to indirection cell
-			// if enum_flag_HasIndirectParent is set. The indirection is offset by offsetof(MethodTable, m_pParentMethodTable).
-			// It allows casting helpers to go through parent chain naturally. Casting helper do not need need the explicit check
-			// for enum_flag_HasIndirectParentMethodTable.
-			get { return m_pParentMethodTable; }
-		}
+		internal Pointer<MethodTable> Parent => m_pParentMethodTable;
 
 
 		// todo
@@ -270,8 +263,6 @@ namespace RazorSharp.CoreClr.Structures
 		private DWFlags m_dwFlags;
 
 		private DWORD m_BaseSize;
-
-		private WORD m_wFlags2;
 
 		private WORD m_wToken;
 
@@ -410,7 +401,7 @@ namespace RazorSharp.CoreClr.Structures
 			unchecked {
 				int hashCode = m_dwFlags.GetHashCode();
 				hashCode = (hashCode * 397) ^ (int) m_BaseSize;
-				hashCode = (hashCode * 397) ^ m_wFlags2.GetHashCode();
+				hashCode = (hashCode * 397) ^ Flags2Value.GetHashCode();
 				hashCode = (hashCode * 397) ^ m_wToken.GetHashCode();
 				hashCode = (hashCode * 397) ^ m_wNumVirtuals.GetHashCode();
 				hashCode = (hashCode * 397) ^ m_wNumInterfaces.GetHashCode();
@@ -430,7 +421,7 @@ namespace RazorSharp.CoreClr.Structures
 		{
 			return m_dwFlags.Equals(other.m_dwFlags)
 			       && m_BaseSize == other.m_BaseSize
-			       && m_wFlags2 == other.m_wFlags2
+			       && Flags2Value == other.Flags2Value
 			       && m_wToken == other.m_wToken
 			       && m_wNumVirtuals == other.m_wNumVirtuals
 			       && m_wNumInterfaces == other.m_wNumInterfaces

@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using RazorCommon.Extensions;
 using RazorCommon.Strings;
-using RazorSharp.Memory.Pointers;
 
 #endregion
 
@@ -57,7 +56,7 @@ namespace RazorSharp.Native
 		{
 			return new string(first, 0, len);
 		}
-		
+
 		public static unsafe string GetString(sbyte* first, int len)
 		{
 			if (first == null || len <= 0) {
@@ -68,7 +67,7 @@ namespace RazorSharp.Native
 			              .Erase(StringConstants.NULL_TERMINATOR);
 
 			//return new string(first, 0, len);
-			
+
 			/*byte[] rg = new byte[len];
 			Marshal.Copy(new IntPtr(first), rg, 0, rg.Length);
 			return Encoding.ASCII.GetString(rg);*/
@@ -80,7 +79,9 @@ namespace RazorSharp.Native
 		}
 
 		public static string GetLastWin32ErrorMessage()
-			=> GetMessageForWin32Error(Marshal.GetLastWin32Error());
+		{
+			return GetMessageForWin32Error(Marshal.GetLastWin32Error());
+		}
 
 		public static unsafe string GetString(sbyte* first, uint len)
 		{

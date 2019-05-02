@@ -103,17 +103,11 @@ namespace RazorSharp.CoreClr.Structures.EE
 
 		private void* m_pccwTemplate;
 
-		private DWORD m_dwAttrClass;
-
 		private DWORD m_VMFlags;
 
 		private byte m_NormType;
 
 		private byte m_fFieldsArePacked;
-
-		private byte m_cbFixedEEClassFields;
-
-		private byte m_cbBaseSizePadding;
 
 		#endregion
 
@@ -125,7 +119,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///     Count of bytes of normal fields of this instance (<see cref="EEClass" />,
 		///     <see cref="LayoutEEClass" /> etc.). Doesn't count bytes of "packed" fields
 		/// </summary>
-		internal byte FixedEEClassFields => m_cbFixedEEClassFields;
+		internal byte FixedEEClassFields { get; }
 
 		/// <summary>
 		///     Corresponding <see cref="MethodTable" /> of this <see cref="EEClass" />
@@ -144,7 +138,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///         Equal to WinDbg's <c>!DumpClass</c> <c>"Class Attributes"</c> value in hexadecimal format.
 		///     </remarks>
 		/// </summary>
-		internal DWORD Attributes => m_dwAttrClass;
+		internal DWORD Attributes { get; }
 
 		/// <summary>
 		///     <remarks>
@@ -157,7 +151,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///     Number of bytes to subtract from <see cref="Structures.MethodTable.BaseSize" /> to get the actual number of bytes
 		///     of instance fields stored in the object on the GC heap.
 		/// </summary>
-		internal byte BaseSizePadding => m_cbBaseSizePadding;
+		internal byte BaseSizePadding { get; }
 
 		/// <summary>
 		///     <para>Size of fixed portion in bytes </para>
@@ -233,7 +227,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///     </remarks>
 		/// </summary>
 		private PackedDWORDFields* PackedFields =>
-			(PackedDWORDFields*) Unsafe.AddressOf(ref this).Add(m_cbFixedEEClassFields);
+			(PackedDWORDFields*) Unsafe.AddressOf(ref this).Add(FixedEEClassFields);
 
 		private Pointer<EEClass> ParentClass => m_pMethodTable->Parent.Reference.EEClass;
 
@@ -301,11 +295,11 @@ namespace RazorSharp.CoreClr.Structures.EE
 //			table.AddRow(nameof(ohDelegate), Hex.ToHex(ohDelegate));
 //			table.AddRow(nameof(m_ComInterfaceType), m_ComInterfaceType);
 //			table.AddRow(nameof(m_pccwTemplate), Hex.ToHex(m_pccwTemplate));
-			table.AddRow("Attributes", String.Format("{0} ({1})", Hex.ToHex(m_dwAttrClass), TypeAttributes));
+			table.AddRow("Attributes", String.Format("{0} ({1})", Hex.ToHex(Attributes), TypeAttributes));
 			table.AddRow("Normal type", NormalType);
 			table.AddRow("Fields are packed", m_fFieldsArePacked == 1);
-			table.AddRow("Fixed EEClass fields", m_cbFixedEEClassFields);
-			table.AddRow("Base size padding", m_cbBaseSizePadding);
+			table.AddRow("Fixed EEClass fields", FixedEEClassFields);
+			table.AddRow("Base size padding", BaseSizePadding);
 			table.AddRow("VMFlags", VMFlags.JoinFlags());
 			table.AddRow("Has layout", HasLayout);
 
