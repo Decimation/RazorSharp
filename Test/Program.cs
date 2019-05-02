@@ -1,4 +1,4 @@
-#region
+﻿#region
 
 using System;
 using System.Collections;
@@ -63,7 +63,6 @@ namespace Test
 
 		// todo: DIA instead of dbghelp?
 		
-
 		public static void Main(string[] args)
 		{
 			ModuleInitializer.GlobalSetup();
