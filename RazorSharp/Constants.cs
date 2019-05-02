@@ -128,7 +128,7 @@ namespace RazorSharp
 		}
 
 		internal static readonly Pointer<byte> NULLPTR = null;
-		
+
 		private static CorElementType TypeToCorType(Type t)
 		{
 			switch (Type.GetTypeCode(t)) {
@@ -172,16 +172,19 @@ namespace RazorSharp
 
 		internal static CorElementType TypeToCorType<T>() => TypeToCorType(typeof(T));
 
+		private const int  RID_FROM_TOKEN  = 0x00FFFFFF;
+		private const uint TYPE_FROM_TOKEN = 0xFF000000;
+
 		internal static int RidFromToken(int tk)
 		{
 			// #define RidFromToken(tk) ((RID) ((tk) & 0x00ffffff))
-			return tk & 0x00FFFFFF;
+			return tk & RID_FROM_TOKEN;
 		}
 
 		internal static long TypeFromToken(int tk)
 		{
 			// #define TypeFromToken(tk) ((ULONG32)((tk) & 0xff000000))
-			return tk & 0xFF000000;
+			return tk & TYPE_FROM_TOKEN;
 		}
 
 		internal static int TokenFromRid(int rid, CorTokenType tktype) => rid | (int) tktype;

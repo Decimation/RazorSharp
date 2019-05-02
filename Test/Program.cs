@@ -92,37 +92,20 @@ namespace Test
 
 		private static void Nullptr<T>(Pointer<Pointer<T>> p) { }
 
-
-		private static string nullptr_t = "Nullptr_t";
-
-
-		static ref string get()
-		{
-			string s = "f";
-			return ref CSUnsafe.AsRef<string>(Unsafe.AddressOf(ref s).ToPointer());
-		}
-
-		struct i32 { }
-
 		private static List<int> _l;
-
-		static void G()
-		{
-			_l.Add(1);
-		}
 
 		public static void Main(string[] args)
 		{
 			ModuleInitializer.GlobalSetup();
 
-			_l = Runtime.AllocObject<List<int>>();
-			Console.WriteLine(_l);
-			Inspect.Heap(_l);
-			Mem.DestroyClass(_l);
-			Console.WriteLine(_l);
-			Inspect.Heap(_l);
-			GC.Collect();
+			Pointer<int> p = Mem.Alloc<int>(2);
+			p.WriteAll(255,256);
+			Console.WriteLine(p.ReadFastInline__());
+			Console.WriteLine(p.ReadFastInline__(1));
+			
 
+			
+			
 			ModuleInitializer.GlobalClose();
 		}
 	}

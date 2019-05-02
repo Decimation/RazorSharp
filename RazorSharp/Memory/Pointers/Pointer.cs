@@ -125,7 +125,7 @@ namespace RazorSharp.Memory.Pointers
 				if (IsNull) {
 					return true;
 				}
-				
+
 				int    elemSize = ElementSize;
 				byte[] mem      = CopyOutBytes(elemSize);
 
@@ -257,7 +257,6 @@ namespace RazorSharp.Memory.Pointers
 		}
 
 		#endregion
-
 
 		#endregion
 
@@ -572,17 +571,13 @@ namespace RazorSharp.Memory.Pointers
 		[Pure]
 		public T Read(int elemOffset = 0) => ReadAny<T>(elemOffset);
 
-		public T ReadFast(int byteOffset = 0)
+
+		public T ReadFast(int elemOffset = 0)
 		{
-			return CSUnsafe.Read<T>((void*) (((long) m_value) + byteOffset));
-		}
-		
-		public T ReadFast__(int elemOffset = 0)
-		{
-			return CSUnsafe.Read<T>((void*) (((long) m_value) + (elemOffset*ElementSize)));
+			return CSUnsafe.Read<T>((void*) (((long) m_value) + (elemOffset * ElementSize)));
 		}
 
-		public T ReadFastInline()
+		public T ReadFastInlineAuto()
 		{
 			IL.Emit.Ldarg_0();
 			IL.Emit.Ldfld(new FieldRef(typeof(Pointer<T>), nameof(m_value)));
@@ -591,6 +586,29 @@ namespace RazorSharp.Memory.Pointers
 			return IL.Return<T>();
 		}
 		
+		public T ReadFastInline__(int byteOffset = 0)
+		{
+			IL.DeclareLocals(
+				typeof(int),
+				new LocalVar("byteOfs", typeof(int))
+			);
+
+			IL.Emit.Ldarg(nameof(byteOffset));
+			IL.Emit.Sizeof(typeof(T));
+			IL.Emit.Mul();
+			IL.Emit.Stloc("byteOfs");
+
+			IL.Emit.Ldarg_0();
+			IL.Emit.Ldfld(new FieldRef(typeof(Pointer<T>), nameof(m_value)));
+			IL.Emit.Conv_U();
+
+
+			IL.Emit.Ldloc("byteOfs");
+			IL.Emit.Add();
+			IL.Emit.Ldobj(typeof(T));
+			return IL.Return<T>();
+		}
+
 		/// <summary>
 		///     Reinterprets <see cref="Address" /> as a reference to a value of type <typeparamref name="T" />
 		/// </summary>

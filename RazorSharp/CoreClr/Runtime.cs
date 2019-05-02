@@ -70,13 +70,18 @@ namespace RazorSharp.CoreClr
 
 		internal static bool IsArray<T>() => typeof(T).IsArray || typeof(T) == typeof(Array);
 
+		internal static bool IsArrayOrString<T>() => IsArray<T>() || IsString<T>();
+
+		internal static bool IsArrayOrString<T>(T value) => IsArray<T>(value) || IsString<T>(value);
+		
 		/// <summary>
 		///     Reads a reference type's <see cref="ObjHeader" />
 		/// </summary>
 		/// <returns>A pointer to the reference type's header</returns>
-		internal static Pointer<ObjHeader> ReadObjHeader<T>(T t) where T : class
+		internal static Pointer<ObjHeader> ReadObjHeader<T>(T value) where T : class
 		{
-			return Unsafe.AddressOfHeap(t, OffsetOptions.HEADER).Cast<ObjHeader>();
+			return Unsafe.AddressOfHeap(value, OffsetOptions.HEADER)
+			             .Cast<ObjHeader>();
 		}
 
 
@@ -96,7 +101,7 @@ namespace RazorSharp.CoreClr
 		{
 			// We'll say arrays and strings are blittable cause they're
 			// usable with GCHandle
-			if (typeof(T).IsArray || typeof(T) == typeof(string))
+			if (IsArrayOrString<T>())
 				return true;
 
 			return typeof(T).GetMethodTable().Reference.IsBlittable;

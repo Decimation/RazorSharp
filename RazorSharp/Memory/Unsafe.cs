@@ -63,7 +63,8 @@ namespace RazorSharp.Memory
 		}
 
 		/// <summary>
-		/// Whether the value of <paramref name="value"/> is <c>default</c> or <c>null</c> bytes
+		/// Whether the value of <paramref name="value"/> is <c>default</c> or <c>null</c> bytes,
+		/// or <paramref name="value"/> is <c>null</c>
 		/// </summary>
 		public static bool IsNil<T>([CanBeNull] T value)
 		{

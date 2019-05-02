@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
@@ -132,5 +133,11 @@ namespace RazorSharp
 			Log.Dispose();
 			IsSetup = false;
 		}
+
+		internal static bool IsAdministrator()
+		{
+			return (new WindowsPrincipal(WindowsIdentity.GetCurrent()))
+			   .IsInRole(WindowsBuiltInRole.Administrator);
+		}  
 	}
 }

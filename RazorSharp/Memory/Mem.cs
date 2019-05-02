@@ -129,8 +129,7 @@ namespace RazorSharp.Memory
 		/// <returns>A double indirection pointer to the unmanaged instance.</returns>
 		public static Pointer<T> AllocInstance<T>() where T : class
 		{
-			Conditions.Require(!Runtime.IsArray<T>());
-			Conditions.Require(!Runtime.IsString<T>());
+			Conditions.Require(!Runtime.IsArrayOrString<T>());
 
 
 			// Minimum size required for an instance
@@ -360,7 +359,7 @@ namespace RazorSharp.Memory
 		///     <para>letting you write very high-performance generic code.</para>
 		///     <para>It's dangerous if you don't know what you're doing, but very worth if you do.</para>
 		/// </summary>
-		private static T ReadUsingTypedRef<T>(Pointer<byte> addr)
+		public static T ReadUsingTypedRef<T>(Pointer<byte> addr)
 		{
 			var address = addr.Address;
 
