@@ -1,12 +1,9 @@
-#region
-
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32;
-
-#endregion
 
 namespace RazorSharp.Native
 {
@@ -23,15 +20,9 @@ namespace RazorSharp.Native
 
 		public static NativeModule NullModule => new NativeModule(null, null);
 
-		public static bool operator ==(NativeModule l, NativeModule r)
-		{
-			return l.m_value == r.m_value;
-		}
+		public static bool operator ==(NativeModule l, NativeModule r) => l.m_value == r.m_value;
 
-		public static bool operator !=(NativeModule l, NativeModule r)
-		{
-			return l.m_value != r.m_value;
-		}
+		public static bool operator !=(NativeModule l, NativeModule r) => l.m_value != r.m_value;
 
 
 		internal NativeModule(string fileName, Pointer<byte> baseAddr)
@@ -40,18 +31,15 @@ namespace RazorSharp.Native
 		}
 
 		/// <summary>
-		///     This should only be freed if it was loaded using <see cref="Modules.LoadModule" />
-		///     (<see cref="ProcessApi.LoadLibrary" />)
+		/// This should only be freed if it was loaded using <see cref="Modules.LoadModule"/>
+		/// (<see cref="ProcessApi.LoadLibrary"/>)
 		/// </summary>
 		public void Dispose()
 		{
 			ProcessApi.FreeLibrary(BaseAddress.Address);
 		}
 
-		public bool Equals(NativeModule other)
-		{
-			return m_value.Equals(other.m_value);
-		}
+		public bool Equals(NativeModule other) => m_value.Equals(other.m_value);
 
 		public override bool Equals(object obj)
 		{
@@ -62,7 +50,7 @@ namespace RazorSharp.Native
 		{
 			return m_value.GetHashCode();
 		}
-
+		
 		public override string ToString()
 		{
 			return String.Format("Name: \"{0}\", base address: {1:P}", Name, BaseAddress);

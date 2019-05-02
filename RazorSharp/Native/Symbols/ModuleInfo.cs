@@ -1,14 +1,11 @@
-#region
-
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using RazorCommon.Diagnostics;
+using RazorSharp.CoreClr;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
-
-#endregion
-
 //using SharpPdb.Windows;
 
 namespace RazorSharp.Native.Symbols
@@ -20,12 +17,15 @@ namespace RazorSharp.Native.Symbols
 	}
 
 	/// <summary>
-	///     Combines a symbol file with a process module.
+	/// Combines a symbol file with a process module.
 	/// </summary>
 	public class ModuleInfo : IDisposable
 	{
-		private readonly SymbolRetrievalMode m_mode;
 		private readonly ISymbolResolver     m_reader;
+		private readonly Pointer<byte>       m_baseAddr;
+		private readonly SymbolRetrievalMode m_mode;
+
+		public Pointer<byte> BaseAddress => m_baseAddr;
 
 		public ModuleInfo(FileInfo pdb, ProcessModule module, SymbolRetrievalMode mode)
 			: this(pdb, module.BaseAddress, mode) { }
@@ -34,8 +34,8 @@ namespace RazorSharp.Native.Symbols
 		{
 			Conditions.NotNull(baseAddr.Address, nameof(baseAddr));
 
-			BaseAddress = baseAddr;
-			m_mode      = mode;
+			m_baseAddr = baseAddr;
+			m_mode     = mode;
 
 			switch (m_mode) {
 				case SymbolRetrievalMode.KERNEL:
@@ -43,7 +43,7 @@ namespace RazorSharp.Native.Symbols
 					break;
 				case SymbolRetrievalMode.PDB_READER:
 					// m_reader = new PdbSymbols(pdb);
-
+					
 					throw new NotImplementedException();
 					break;
 				default:
@@ -51,18 +51,11 @@ namespace RazorSharp.Native.Symbols
 			}
 		}
 
-		public Pointer<byte> BaseAddress { get; }
-
-		public void Dispose()
-		{
-			m_reader.Dispose();
-		}
-
 
 		public Pointer<byte> GetSymAddress(string name)
 		{
 			long ofs = m_reader.GetSymOffset(name);
-			return BaseAddress + ofs;
+			return m_baseAddr + ofs;
 		}
 
 		public TDelegate GetFunction<TDelegate>(string name) where TDelegate : Delegate
@@ -72,15 +65,20 @@ namespace RazorSharp.Native.Symbols
 
 		public Pointer<byte>[] GetSymAddresses(string[] names)
 		{
-			long[] offsets = m_reader.GetSymOffsets(names);
+			var offsets = m_reader.GetSymOffsets(names);
 
 			var rg = new Pointer<byte>[offsets.Length];
 
 			for (int i = 0; i < rg.Length; i++) {
-				rg[i] = BaseAddress + offsets[i];
+				rg[i] = m_baseAddr + offsets[i];
 			}
 
 			return rg;
+		}
+
+		public void Dispose()
+		{
+			m_reader.Dispose();
 		}
 	}
 }

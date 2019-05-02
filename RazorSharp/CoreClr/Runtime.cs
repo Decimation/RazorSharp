@@ -11,6 +11,7 @@ using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.HeapObjects;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Native.Symbols;
 using RazorSharp.Utilities;
 using Unsafe = RazorSharp.Memory.Unsafe;
 
@@ -61,36 +62,26 @@ namespace RazorSharp.CoreClr
 			return value;
 		}
 
-		internal static bool IsString<T>()
-		{
-			return typeof(T) == typeof(string);
-		}
+		internal static bool IsString<T>() => typeof(T) == typeof(string);
 
-		internal static bool IsString<T>(T value)
-		{
-			return value is string;
-		}
+		internal static bool IsString<T>(T value) => value is string;
 
-		internal static bool IsArray<T>(T value)
-		{
-			return value is Array;
-		}
+		internal static bool IsArray<T>(T value) => value is Array;
 
-		internal static bool IsArray<T>()
-		{
-			return typeof(T).IsArray || typeof(T) == typeof(Array);
-		}
+		internal static bool IsArray<T>() => typeof(T).IsArray || typeof(T) == typeof(Array);
 
-		internal static bool IsArrayOrString<T>()
-		{
-			return IsArray<T>() || IsString<T>();
-		}
+		internal static bool IsArrayOrString<T>() => IsArray<T>() || IsString<T>();
 
-		internal static bool IsArrayOrString<T>(T value)
-		{
-			return IsArray(value) || IsString(value);
-		}
+		internal static bool IsArrayOrString<T>(T value) => IsArray<T>(value) || IsString<T>(value);
 
+
+		public static void Compile(Type t, string n) => Compile(t.GetAnyMethod(n));
+
+		public static void Compile(MethodInfo methodInfo)
+		{
+			RuntimeHelpers.PrepareMethod(methodInfo.MethodHandle);
+		}
+		
 		/// <summary>
 		///     Reads a reference type's <see cref="ObjHeader" />
 		/// </summary>
@@ -118,18 +109,12 @@ namespace RazorSharp.CoreClr
 		{
 			// We'll say arrays and strings are blittable cause they're
 			// usable with GCHandle
-			return IsArrayOrString<T>() || typeof(T).GetMethodTable().Reference.IsBlittable;
+			if (IsArrayOrString<T>())
+				return true;
+
+			return typeof(T).GetMethodTable().Reference.IsBlittable;
 		}
 
-		public static void Compile(MethodInfo method)
-		{
-			RuntimeHelpers.PrepareMethod(method.MethodHandle);
-		}
-
-		public static void Compile(Type t, string n)
-		{
-			Compile(t.GetAnyMethod(n));
-		}
 
 		internal static TypeHandle GetHandle<T>(T value) where T : class
 		{

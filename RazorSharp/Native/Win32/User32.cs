@@ -87,9 +87,6 @@ namespace RazorSharp.Native.Win32
 		[DllImport(USER32_DLL)]
 		internal static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr processId);
 
-		internal static IntPtr FindWindowByCaption(string windowName)
-		{
-			return FindWindow(null, windowName);
-		}
+		internal static IntPtr FindWindowByCaption(string windowName) => FindWindow(null, windowName);
 	}
 }

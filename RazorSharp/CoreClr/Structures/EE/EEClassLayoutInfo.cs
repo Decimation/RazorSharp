@@ -38,7 +38,10 @@ namespace RazorSharp.CoreClr.Structures.EE
 		#region Fields
 
 		// why is there an m_cbNativeSize in EEClassLayoutInfo and EEClass?
+		private UINT32 m_cbNativeSize;
 
+
+		private UINT32 m_cbManagedSize;
 
 		// 1,2,4 or 8: this is equal to the largest of the alignment requirements
 		// of each of the EEClass's members. If the NStruct extends another NStruct,
@@ -52,6 +55,8 @@ namespace RazorSharp.CoreClr.Structures.EE
 
 		private BYTE m_bFlags;
 
+		private BYTE m_cbPackingSize;
+
 		private void* m_pFieldMarshalers;
 
 		#endregion
@@ -59,7 +64,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		/// <summary>
 		///     Packing size in bytes (1, 2, 4, 8 etc.)
 		/// </summary>
-		internal BYTE PackingSize { get; }
+		internal BYTE PackingSize => m_cbPackingSize;
 
 		/// <summary>
 		///     # of fields that are of the calltime-marshal variety.
@@ -75,14 +80,14 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///         </para>
 		///     </remarks>
 		/// </summary>
-		internal uint NativeSize { get; }
+		internal uint NativeSize => m_cbNativeSize;
 
 		/// <summary>
 		///     <remarks>
 		///         <para>Equal to <see cref="Unsafe.SizeOf{T}" /> </para>
 		///     </remarks>
 		/// </summary>
-		internal uint ManagedSize { get; }
+		internal uint ManagedSize => m_cbManagedSize;
 
 		internal LayoutFlags Flags       => (LayoutFlags) m_bFlags;
 		internal bool        ZeroSized   => Flags.HasFlag(LayoutFlags.ZeroSized);
@@ -92,10 +97,10 @@ namespace RazorSharp.CoreClr.Structures.EE
 		{
 			var table = new ConsoleTable("Field", "Value");
 
-			table.AddRow("Native size", NativeSize);
-			table.AddRow("Managed size", ManagedSize);
+			table.AddRow("Native size", m_cbNativeSize);
+			table.AddRow("Managed size", m_cbManagedSize);
 			table.AddRow("Flags", EnumUtil.CreateFlagsString(m_bFlags, Flags));
-			table.AddRow("Packing size", PackingSize);
+			table.AddRow("Packing size", m_cbPackingSize);
 
 			return table.ToString();
 		}

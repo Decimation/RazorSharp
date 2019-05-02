@@ -4,9 +4,9 @@ namespace RazorSharp.Analysis
 	public enum InspectOptions
 	{
 		HEADER,
-
+		
 		METHODTABLE,
-
-		FIELDS
+		
+		FIELDS,
 	}
 }

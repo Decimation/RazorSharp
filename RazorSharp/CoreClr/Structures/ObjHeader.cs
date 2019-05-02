@@ -28,16 +28,16 @@ namespace RazorSharp.CoreClr.Structures
 		[FieldOffset(0)]
 		private readonly UInt32 m_uAlignpad;
 
+		[FieldOffset(4)]
+		private UInt32 m_uSyncBlockValue;
 #endif
 
 		#endregion
 
 		#region Accessors
 
-		[field: FieldOffset(4)]
-		public UInt32 SyncBlock { get; private set; }
-
-		public SyncBlockFlags SyncBlockAsFlags => (SyncBlockFlags) SyncBlock;
+		public UInt32         SyncBlock        => m_uSyncBlockValue;
+		public SyncBlockFlags SyncBlockAsFlags => (SyncBlockFlags) m_uSyncBlockValue;
 
 		#endregion
 
@@ -51,14 +51,14 @@ namespace RazorSharp.CoreClr.Structures
 		{
 			// Should be interlocked
 
-			SyncBlock |= uBit;
+			m_uSyncBlockValue |= uBit;
 		}
 
 		public void ClearBit(uint uBit)
 		{
 			// Should be interlocked
 
-			SyncBlock &= ~uBit;
+			m_uSyncBlockValue &= ~uBit;
 		}
 
 		// todo
@@ -72,24 +72,24 @@ namespace RazorSharp.CoreClr.Structures
 		public void SetGCBit()
 		{
 			//m_uSyncBlockValue |= Constants.BIT_SBLK_GC_RESERVE;
-			SyncBlock |= (uint) SyncBlockFlags.BitSblkGcReserve;
+			m_uSyncBlockValue |= (uint) SyncBlockFlags.BitSblkGcReserve;
 		}
 
 		public void ClearGCBit()
 		{
 			//m_uSyncBlockValue &= Constants.BIT_SBLK_GC_RESERVE;
-			SyncBlock &= (uint) SyncBlockFlags.BitSblkGcReserve;
+			m_uSyncBlockValue &= (uint) SyncBlockFlags.BitSblkGcReserve;
 		}
 
 		public override string ToString()
 		{
-			byte[] bytes = BitConverter.GetBytes(SyncBlock);
+			byte[] bytes = BitConverter.GetBytes(m_uSyncBlockValue);
 			var    sb    = new StringBuilder();
 
 			foreach (byte v in bytes) sb.AppendFormat("{0} ", Convert.ToString(v, 2));
 
 			sb.Remove(sb.Length - 1, 1);
-			return $"Sync block: {SyncBlock} ({SyncBlockAsFlags}) [{bytes.AutoJoin()}] [{sb}]";
+			return $"Sync block: {m_uSyncBlockValue} ({SyncBlockAsFlags}) [{bytes.AutoJoin()}] [{sb}]";
 		}
 
 		#region Equality
@@ -106,14 +106,14 @@ namespace RazorSharp.CoreClr.Structures
 
 		public bool Equals(ObjHeader other)
 		{
-			return SyncBlock == other.SyncBlock;
+			return m_uSyncBlockValue == other.m_uSyncBlockValue;
 		}
 
 		public override int GetHashCode()
 		{
 			//return ((int) m_uAlignpad * 397) ^ (int) m_uSyncBlockValue;
 			// ReSharper disable once NonReadonlyMemberInGetHashCode
-			return SyncBlock.GetHashCode();
+			return m_uSyncBlockValue.GetHashCode();
 		}
 
 		public override bool Equals(object obj)

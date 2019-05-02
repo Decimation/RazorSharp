@@ -14,11 +14,6 @@ namespace RazorSharp.Native.Symbols
 {
 	public unsafe class SymbolEnvironment : ISymbolResolver
 	{
-		private static readonly SymbolEnvironment _instance;
-
-		private string m_img;
-
-		private bool  m_isLoaded;
 		private ulong m_modBase;
 
 		private string[] m_nameBuffer;
@@ -28,13 +23,13 @@ namespace RazorSharp.Native.Symbols
 
 		private List<Symbol> m_symBuffer;
 
+		private bool m_isLoaded;
 
-		static SymbolEnvironment()
-		{
-			_instance = new SymbolEnvironment();
-		}
+		private string m_img;
 
 		private SymbolEnvironment() { }
+
+		private static readonly SymbolEnvironment _instance;
 
 		public static SymbolEnvironment Instance {
 			[MethodImpl(MethodImplOptions.Synchronized)]
@@ -46,40 +41,9 @@ namespace RazorSharp.Native.Symbols
 		}
 
 
-		public long GetSymOffset(string name)
+		static SymbolEnvironment()
 		{
-			return GetSymbol(name).Offset;
-		}
-
-		public long[] GetSymOffsets(string[] names)
-		{
-			Symbol[] sym = GetSymbols(names);
-			int      lim = sym.Length;
-			var      ofs = new long[lim];
-
-//			Conditions.Ensure(sym.Length == lim, nameof(sym.Length));
-
-			for (int i = 0; i < lim; i++) {
-				ofs[i] = sym[i].Offset;
-			}
-
-			return ofs;
-
-			//return GetSymbols(names).Select(x => x.Offset).Reverse().ToArray();
-		}
-
-		public void Dispose()
-		{
-			Global.Log.Debug("Unloading symbols for image {Name}", m_img);
-
-			NativeHelp.Call(DbgHelp.SymUnloadModule64(m_proc, m_modBase), nameof(DbgHelp.SymUnloadModule64));
-
-			NativeHelp.Call(DbgHelp.SymCleanup(m_proc), nameof(DbgHelp.SymCleanup));
-
-			m_proc     = IntPtr.Zero;
-			m_symBuf   = null;
-			m_isLoaded = false;
-			m_img      = null;
+			_instance = new SymbolEnvironment();
 		}
 
 		public void Init(string img)
@@ -128,6 +92,29 @@ namespace RazorSharp.Native.Symbols
 			m_isLoaded = true;
 		}
 
+
+		public long GetSymOffset(string name)
+		{
+			return GetSymbol(name).Offset;
+		}
+
+		public long[] GetSymOffsets(string[] names)
+		{
+			Symbol[] sym = GetSymbols(names);
+			int      lim = sym.Length;
+			var      ofs = new long[lim];
+
+//			Conditions.Ensure(sym.Length == lim, nameof(sym.Length));
+
+			for (int i = 0; i < lim; i++) {
+				ofs[i] = sym[i].Offset;
+			}
+
+			return ofs;
+
+			//return GetSymbols(names).Select(x => x.Offset).Reverse().ToArray();
+		}
+
 		public Symbol[] GetSymbols(string[] names)
 		{
 			m_symBuffer  = new List<Symbol>(names.Length);
@@ -152,9 +139,20 @@ namespace RazorSharp.Native.Symbols
 			return cpy;
 		}
 
-		public Symbol GetSymbol(string name)
+		public Symbol GetSymbol(string name) => GetSymbol(name, null);
+
+		public void Dispose()
 		{
-			return GetSymbol(name, null);
+			Global.Log.Debug("Unloading symbols for image {Name}", m_img);
+
+			NativeHelp.Call(DbgHelp.SymUnloadModule64(m_proc, m_modBase), nameof(DbgHelp.SymUnloadModule64));
+
+			NativeHelp.Call(DbgHelp.SymCleanup(m_proc), nameof(DbgHelp.SymCleanup));
+
+			m_proc     = IntPtr.Zero;
+			m_symBuf   = null;
+			m_isLoaded = false;
+			m_img      = null;
 		}
 
 		private bool FirstSymCallback(IntPtr sym, uint symSize, IntPtr userCtx)
@@ -209,7 +207,6 @@ namespace RazorSharp.Native.Symbols
 			if (cpy == null) {
 				Global.Log.Warning("Could not find symbol {Name}", name);
 			}
-
 			return cpy;
 		}
 	}

@@ -2,6 +2,7 @@
 
 using System;
 using RazorSharp.CoreClr;
+using RazorSharp.Native.Symbols;
 
 #endregion
 
@@ -29,7 +30,7 @@ namespace RazorSharp
 			// SHUT IT DOWN
 			Global.Log.Information("Unloading module");
 
-
+			
 			Clr.Close();
 			Global.Close();
 

@@ -2,13 +2,12 @@
 
 using System;
 using System.Runtime;
-using System.Runtime.CompilerServices;
 using RazorCommon.Diagnostics;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Extern;
 using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
-
 #pragma warning disable 649
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -22,7 +21,7 @@ namespace RazorSharp.CoreClr.Structures
 {
 	#region
 
-	using CSUnsafe = Unsafe;
+	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
 
@@ -93,7 +92,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		public bool IsHeapPointer<T>(T value, bool smallHeapOnly = false) where T : class
 		{
-			return IsHeapPointer(Memory.Unsafe.AddressOfHeap(value).ToPointer(), smallHeapOnly);
+			return IsHeapPointer(Unsafe.AddressOfHeap(value).ToPointer(), smallHeapOnly);
 		}
 
 		/// <summary>
@@ -120,7 +119,7 @@ namespace RazorSharp.CoreClr.Structures
 		}
 
 		/// <summary>
-		///     Allocates a zero-initialized object on the GC heap.
+		/// Allocates a zero-initialized object on the GC heap.
 		/// </summary>
 		[Symcall(UseMemberNameOnly = true, IgnoreNamespace = true)]
 		internal static void* AllocateObject(MethodTable* mt, int fHandleCom)
@@ -129,18 +128,18 @@ namespace RazorSharp.CoreClr.Structures
 		}
 
 		/// <summary>
-		///     Allocates a zero-initialized object on the GC heap.
+		/// Allocates a zero-initialized object on the GC heap.
 		/// </summary>
 		public static object AllocateObject(Type type, int fHandleCom)
 		{
 			void* objValuePtr = AllocateObject(type.GetMethodTable().ToPointer<MethodTable>(), fHandleCom);
 
-
+			
 			return CSUnsafe.Read<object>(&objValuePtr);
 		}
 
 		/// <summary>
-		///     Allocates a zero-initialized object on the GC heap.
+		/// Allocates a zero-initialized object on the GC heap.
 		/// </summary>
 		public static T AllocateObject<T>(int fHandleCom)
 		{

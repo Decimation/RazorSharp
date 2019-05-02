@@ -42,7 +42,7 @@ namespace RazorSharp
 		///     </list>
 		/// </summary>
 		public static readonly unsafe int OffsetToData = sizeof(MethodTable*);
-
+		
 		/// <summary>
 		///     Heap offset to the first array element.
 		///     <list type="bullet">
@@ -61,7 +61,7 @@ namespace RazorSharp
 
 		public static readonly int OffsetToStringData = RuntimeHelpers.OffsetToStringData;
 
-
+		
 		#region EEClass
 
 		/// <summary>

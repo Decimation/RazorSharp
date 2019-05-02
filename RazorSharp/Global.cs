@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
@@ -35,6 +36,8 @@ namespace RazorSharp
 
 		internal static readonly Assembly Assembly;
 
+		internal static bool IsSetup { get; private set; }
+
 		/// <summary>
 		///     Sets up the logger and other values
 		/// </summary>
@@ -55,8 +58,6 @@ namespace RazorSharp
 
 			Assembly = Assembly.Load(ASM_STR);
 		}
-
-		internal static bool IsSetup { get; private set; }
 
 
 		private static void CheckCompatibility()

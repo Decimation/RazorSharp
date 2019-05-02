@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using RazorCommon.Diagnostics;
-using RazorSharp.Memory.Extern.Sigscan.Attributes;
+using RazorSharp.Memory.Extern.Signatures.Attributes;
 using RazorSharp.Utilities;
 
 #endregion
@@ -16,7 +16,7 @@ using RazorSharp.Utilities;
 
 #endregion
 
-namespace RazorSharp.Memory.Extern.Sigscan
+namespace RazorSharp.Memory.Extern.Signatures
 {
 	/// <summary>
 	///     Contains methods for operating with <see cref="SigcallAttribute" />-annotated functions
@@ -66,10 +66,7 @@ namespace RazorSharp.Memory.Extern.Sigscan
 
 		#region IsBound
 
-		private static bool IsBound(Type t)
-		{
-			return BoundTypes.Contains(t);
-		}
+		private static bool IsBound(Type t) => BoundTypes.Contains(t);
 
 		#endregion
 

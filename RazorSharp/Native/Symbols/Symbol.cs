@@ -15,7 +15,7 @@ namespace RazorSharp.Native.Symbols
 	public unsafe class Symbol
 	{
 		/// <summary>
-		///     Memory of the original <see cref="SymbolInfo" />
+		/// Memory of the original <see cref="SymbolInfo"/>
 		/// </summary>
 		private readonly byte[] m_symStructMem;
 

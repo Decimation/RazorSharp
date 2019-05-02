@@ -51,11 +51,16 @@ namespace RazorSharp.CoreClr.Structures.HeapObjects
 	{
 		#region Fields
 
+		private MethodTable* m_methodTablePtr;
+
+		private uint m_stringLength;
+
+		private char m_firstChar;
+
 		#endregion
 
-		public uint Length { get; }
-
-		public char FirstChar { get; }
+		public uint Length    => m_stringLength;
+		public char FirstChar => m_firstChar;
 
 		/// <summary>
 		///     <remarks>
@@ -64,7 +69,7 @@ namespace RazorSharp.CoreClr.Structures.HeapObjects
 		/// </summary>
 		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
 
-		public MethodTable* MethodTable { get; }
+		public MethodTable* MethodTable => m_methodTablePtr;
 
 		/// <summary>
 		///     <remarks>
@@ -109,9 +114,9 @@ namespace RazorSharp.CoreClr.Structures.HeapObjects
 		{
 			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Header*", Hex.ToHex(Header));
-			table.AddRow("MethodTable*", Hex.ToHex(MethodTable));
-			table.AddRow("Length", Length);
-			table.AddRow("First char", FirstChar);
+			table.AddRow("MethodTable*", Hex.ToHex(m_methodTablePtr));
+			table.AddRow("Length", m_stringLength);
+			table.AddRow("First char", m_firstChar);
 
 			return table.ToString();
 		}

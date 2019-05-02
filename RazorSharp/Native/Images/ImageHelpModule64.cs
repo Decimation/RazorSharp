@@ -42,9 +42,9 @@ namespace RazorSharp.Native.Images
 		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 780)]
 		public string CVData;
 
-		public int        PdbSig;
+		public int  PdbSig;
 		public NativeGuid PdbSig70;
-		public int        PdbAge;
+		public int  PdbAge;
 
 		[MarshalAs(UnmanagedType.Bool)]
 		public bool PdbUnmatched;

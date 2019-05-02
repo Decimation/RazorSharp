@@ -1,5 +1,3 @@
-#region
-
 using System;
 using System.IO;
 using System.Linq;
@@ -11,14 +9,12 @@ using RazorCommon.Utilities;
 using RazorSharp.CoreClr;
 using RazorSharp.Native.Win32;
 
-#endregion
-
 namespace RazorSharp.Native.Symbols
 {
 	internal static class SymbolAccess
 	{
 		private const string MASK_STR_DEFAULT = "*!*";
-
+		
 		internal static FileInfo DownloadSymbolFile(DirectoryInfo dest, FileInfo dll)
 		{
 			return DownloadSymbolFile(dest, dll, out _);
@@ -41,6 +37,8 @@ namespace RazorSharp.Native.Symbols
 
 
 			using (var cmdProc = Common.Shell("\"" + cmd + "\"")) {
+				
+
 				cmdProc.ErrorDataReceived += (sender, args) =>
 				{
 					Global.Log.Error("Process error: {Error}", args.Data);
@@ -55,6 +53,8 @@ namespace RazorSharp.Native.Symbols
 					if (ln.Contains("SYMCHK: PASSED + IGNORED files = 1")) {
 						break;
 					}
+
+					
 				}
 			}
 
@@ -90,10 +90,12 @@ namespace RazorSharp.Native.Symbols
 
 		public static string Undname(string sz)
 		{
+			
 			using (var cmd = Common.Shell($"undname \"{sz}\"", true)) {
-				string stdOut = cmd.StandardOutput.ReadToEnd();
+				
+				var stdOut = cmd.StandardOutput.ReadToEnd();
 				stdOut = Encoding.ASCII.GetString(Encoding.Unicode.GetBytes(stdOut));
-				string value = stdOut.SubstringBetween("is :- \"", "\"");
+				var value  = stdOut.SubstringBetween("is :- \"","\"");
 				return value;
 			}
 		}
@@ -139,7 +141,7 @@ namespace RazorSharp.Native.Symbols
 				// for different files should not overlap
 				// (region is "base address + file size")
 
-				if (!GetFileSize(pFileName, ref fileSize)) {
+				if (!SymbolAccess.GetFileSize(pFileName, ref fileSize)) {
 					return false;
 				}
 			}

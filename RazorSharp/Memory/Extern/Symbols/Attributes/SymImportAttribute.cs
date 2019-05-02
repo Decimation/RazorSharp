@@ -1,17 +1,12 @@
-#region
-
 using System;
 using System.Diagnostics;
-
-#endregion
 
 namespace RazorSharp.Memory.Extern.Symbols.Attributes
 {
 	/// <summary>
-	///     Indicates a resource is imported from a symbol file and retrieved from its corresponding
-	///     <see cref="ProcessModule" />
-	///     by adding the symbol's RVA to the module's <see cref="ProcessModule.BaseAddress" />
-	///     <seealso cref="ModuleInfo" />
+	/// Indicates a resource is imported from a symbol file and retrieved from its corresponding <see cref="ProcessModule"/>
+	/// by adding the symbol's RVA to the module's <see cref="ProcessModule.BaseAddress"/>
+	/// <seealso cref="ModuleInfo"/>
 	/// </summary>
 	public class SymImportAttribute : Attribute
 	{
@@ -37,5 +32,7 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 		///     specifies a namespace.
 		/// </summary>
 		public bool IgnoreNamespace { get; set; }
+
+		public SymImportAttribute() { }
 	}
 }

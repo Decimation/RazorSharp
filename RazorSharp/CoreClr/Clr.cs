@@ -8,6 +8,7 @@ using RazorCommon.Diagnostics;
 using RazorCommon.Extensions;
 using RazorCommon.Utilities;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Symbols;
 
 #endregion
@@ -173,7 +174,7 @@ namespace RazorSharp.CoreClr
 		///     Whether or not <see cref="ClrPdb" /> was automatically downloaded.
 		///     If <c>true</c>, <see cref="ClrPdb" /> will be deleted upon calling <see cref="Close" />.
 		/// </summary>
-		private static bool IsPdbTemporary { get; }
+		private static bool IsPdbTemporary { get; set; }
 
 		/// <summary>
 		///     <para>CLR symbol file</para>

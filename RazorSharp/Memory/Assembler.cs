@@ -28,7 +28,7 @@ namespace RazorSharp.Memory
 		/// <returns>An array of bytes containing the assembly code.</returns>
 		public static byte[] Assemble(string assembly, bool isProcess32Bit, ulong baseAddress = 0)
 		{
-			Conditions.Require(File.Exists(NASM_EXEC),
+			Conditions.Require(File.Exists(NASM_EXEC), 
 			                   "Could not find nasm.exe", nameof(NASM_EXEC));
 
 			// Note: Can't have PTR keyword

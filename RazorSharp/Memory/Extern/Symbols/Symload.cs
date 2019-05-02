@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
@@ -10,7 +11,9 @@ using RazorCommon.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Native;
 using RazorSharp.Native.Symbols;
+using RazorSharp.Native.Win32;
 using RazorSharp.Utilities;
 
 #endregion
@@ -18,11 +21,11 @@ using RazorSharp.Utilities;
 namespace RazorSharp.Memory.Extern.Symbols
 {
 	/// <summary>
-	///     Provides operations for working with <see cref="SymImportAttribute" />
+	/// Provides operations for working with <see cref="SymImportAttribute"/>
 	/// </summary>
 	public static class Symload
 	{
-		internal const          string     SCOPE_RESOLUTION_OPERATOR = "::";
+		internal const           string     SCOPE_RESOLUTION_OPERATOR = "::";
 		private static readonly ISet<Type> BoundTypes;
 
 		static Symload()
@@ -40,7 +43,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 			Conditions.NotNull(member.DeclaringType, nameof(member.DeclaringType));
 
 			// Resolve the symbol
-			string name          = null;
+			string name       = null;
 			string declaringName = member.DeclaringType.Name;
 
 			if (attr.FullyQualified && attr.Symbol != null && !attr.UseMemberNameOnly) {
@@ -87,13 +90,13 @@ namespace RazorSharp.Memory.Extern.Symbols
 			var symField  = (SymFieldAttribute) sym;
 			var fieldInfo = (FieldInfo) field;
 
-			Pointer<byte> addr = module.GetSymAddress(fullSym);
+			var addr = module.GetSymAddress(fullSym);
 //			Console.WriteLine(addr);
 //			Console.WriteLine("{0:X}",ProcessApi.GetProcAddress(module.BaseAddress.Address,"g_int").ToInt64());
 
 			if (addr.IsNull) {
 				throw new NullReferenceException(
-					String.Format("Could not find the address of the symbol \"{0}\"", fullSym));
+					string.Format("Could not find the address of the symbol \"{0}\"", fullSym));
 			}
 
 			var fieldType = symField.LoadAs ?? fieldInfo.FieldType;
@@ -149,8 +152,8 @@ namespace RazorSharp.Memory.Extern.Symbols
 					name = nameSpace + SCOPE_RESOLUTION_OPERATOR + name;
 				}
 
-				Pointer<byte> addr = mi.GetSymAddress(name);
-
+				var addr = mi.GetSymAddress(name);
+				
 				switch (mem.MemberType) {
 					case MemberTypes.Constructor:
 						// The import is a function (ctor)

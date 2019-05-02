@@ -44,11 +44,15 @@ namespace RazorSharp.CoreClr.Structures.HeapObjects
 	{
 		#region Fields
 
+		private MethodTable* m_methodTablePtr;
+
+		private uint m_numComponents;
+
 		private uint m_pad;
 
 		#endregion
 
-		public uint Length { get; }
+		public uint Length => m_numComponents;
 
 		/// <summary>
 		///     <remarks>
@@ -57,14 +61,14 @@ namespace RazorSharp.CoreClr.Structures.HeapObjects
 		/// </summary>
 		public ObjHeader* Header => (ObjHeader*) (Unsafe.AddressOf(ref this) - IntPtr.Size);
 
-		public MethodTable* MethodTable { get; }
+		public MethodTable* MethodTable => m_methodTablePtr;
 
 
 		public override string ToString()
 		{
 			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Header*", Hex.ToHex(Header));
-			table.AddRow("MethodTable*", Hex.ToHex(MethodTable));
+			table.AddRow("MethodTable*", Hex.ToHex(m_methodTablePtr));
 			table.AddRow("Length", Length);
 
 

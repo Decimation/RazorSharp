@@ -65,10 +65,8 @@ namespace RazorSharp.CoreClr
 
 		#region FieldField
 
-		internal static Pointer<FieldDesc> FindField(Type t, string name)
-		{
-			return FindField(t.GetMethodTable(), name);
-		}
+		internal static Pointer<FieldDesc> FindField(Type t, string name) 
+			=> FindField(t.GetMethodTable(), name);
 
 		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT, string name)
 		{
