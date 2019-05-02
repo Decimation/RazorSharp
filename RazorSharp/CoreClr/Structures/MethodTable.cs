@@ -267,6 +267,8 @@ namespace RazorSharp.CoreClr.Structures
 
 		private DWORD m_BaseSize;
 
+		private WORD m_wFlags2;
+
 		private WORD m_wToken;
 
 		private WORD m_wNumVirtuals;
@@ -404,7 +406,7 @@ namespace RazorSharp.CoreClr.Structures
 			unchecked {
 				int hashCode = m_dwFlags.GetHashCode();
 				hashCode = (hashCode * 397) ^ (int) m_BaseSize;
-				hashCode = (hashCode * 397) ^ Flags2Value.GetHashCode();
+				hashCode = (hashCode * 397) ^ m_wFlags2.GetHashCode();
 				hashCode = (hashCode * 397) ^ m_wToken.GetHashCode();
 				hashCode = (hashCode * 397) ^ m_wNumVirtuals.GetHashCode();
 				hashCode = (hashCode * 397) ^ m_wNumInterfaces.GetHashCode();
@@ -424,7 +426,7 @@ namespace RazorSharp.CoreClr.Structures
 		{
 			return m_dwFlags.Equals(other.m_dwFlags)
 			       && m_BaseSize == other.m_BaseSize
-			       && Flags2Value == other.Flags2Value
+			       && m_wFlags2 == other.m_wFlags2
 			       && m_wToken == other.m_wToken
 			       && m_wNumVirtuals == other.m_wNumVirtuals
 			       && m_wNumInterfaces == other.m_wNumInterfaces
