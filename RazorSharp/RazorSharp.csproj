@@ -100,10 +100,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="RazorCommon, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\RazorCommon.1.0.3\lib\net472\RazorCommon.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
       <HintPath>..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
       <Private>True</Private>
@@ -114,6 +110,10 @@
     </Reference>
     <Reference Include="Serilog.Sinks.Console, Version=3.1.1.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
       <HintPath>..\packages\Serilog.Sinks.Console.3.1.1\lib\net45\Serilog.Sinks.Console.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SimpleSharp, Version=1.0.4.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\SimpleSharp.1.0.4\lib\net472\SimpleSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -164,10 +164,14 @@
     <Compile Include="CoreClr\Structures\ProtectionLevel.cs" />
     <Compile Include="CoreClr\Structures\SyncBlockFlags.cs" />
     <Compile Include="CoreClr\Structures\TokenType.cs" />
+    <Compile Include="CoreClr\Structures\TypeDesc.cs" />
     <Compile Include="CoreClr\Structures\TypeHandle.cs" />
+    <Compile Include="ILDump.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\ClrSymNamespaceAttribute.cs" />
+    <Compile Include="Memory\Extern\Symbols\Attributes\ImportOptions.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\SymFieldAttribute.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\SymImportAttribute.cs" />
+    <Compile Include="Memory\Extern\Symbols\Attributes\SymImportOptions.cs" />
     <Compile Include="Memory\OffsetOptions.cs" />
     <Compile Include="Memory\Pointers\AllocPointer.cs" />
     <Compile Include="Memory\Pointers\Pointer.cs" />
@@ -222,7 +226,6 @@
     <Compile Include="Native\ProcessAccess.cs" />
     <Compile Include="Native\ProcessorArchitecture.cs" />
     <Compile Include="Native\StandardHandles.cs" />
-    <Compile Include="Native\Symbols\FindChildrenParams.cs" />
     <Compile Include="Native\Symbols\ISymbolResolver.cs" />
     <Compile Include="Native\Symbols\ModuleInfo.cs" />
     <Compile Include="Native\Symbols\PdbSymbols.cs" />
@@ -232,12 +235,9 @@
     <Compile Include="Native\Symbols\SymbolExt.cs" />
     <Compile Include="Native\Symbols\SymbolInfo.cs" />
     <Compile Include="Native\Symbols\SymbolManager.cs" />
-    <Compile Include="Native\Symbols\SymEnumOptions.cs" />
-    <Compile Include="Native\Symbols\SymSearchOptions.cs" />
     <Compile Include="Native\Symbols\SymTagEnum.cs" />
     <Compile Include="Native\Symbols\SymType.cs" />
     <Compile Include="Native\SystemInfo.cs" />
-    <Compile Include="Native\ThreadContext\Arm64NtNeon128.cs" />
     <Compile Include="Native\ThreadContext\Context.cs" />
     <Compile Include="Native\ThreadContext\Context64.cs" />
     <Compile Include="Native\ThreadContext\ContextFlags.cs" />
@@ -274,7 +274,6 @@
     <Compile Include="Utilities\ConversionType.cs" />
     <Compile Include="Utilities\ReflectionUtil.cs" />
     <Compile Include="Utilities\StandardOut.cs" />
-    <Compile Include="Utilities\VirtualCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

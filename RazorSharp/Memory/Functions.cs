@@ -115,12 +115,16 @@ namespace RazorSharp.Memory
 		///         Equal to <see cref="MethodDesc.SetStableEntryPoint" />, but this is implemented via a <see cref="Delegate" />
 		///     </remarks>
 		/// </summary>
-		public static void SetStableEntryPoint(MethodInfo mi, IntPtr pCode)
+		public static void SetStableEntryPoint(MethodInfo mi, Pointer<byte> pCode)
 		{
 			var  pMd    = (MethodDesc*) mi.MethodHandle.Value;
 			long result = SetEntryPoint(pMd, (ulong) pCode);
+			
 			if (!(result > 0)) {
-				Global.Log.Warning("Could not set entry point for {Method}", mi.Name);
+				Global.Log.Warning("Possible error setting entry point for {Method} (code: {Code})", mi.Name, result);
+			}
+			else {
+//				Global.Log.Warning("Set entry point for {Method} (code: {Code})", mi.Name, result);
 			}
 
 			//Conditions.Assert(result >0);

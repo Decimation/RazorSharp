@@ -5,9 +5,11 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorCommon.Diagnostics;
+using JetBrains.Annotations;
+using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.CoreClr.Structures.HeapObjects;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
@@ -62,6 +64,35 @@ namespace RazorSharp.CoreClr
 			return value;
 		}
 
+		#region Is
+
+		internal static bool IsPointer<T>()
+		{
+			return IsPointer(typeof(T));
+		}
+
+		internal static bool IsPointer<T>(T value)
+		{
+			if (value == null) {
+				return false;
+			}
+			return IsPointer(value.GetType());
+		}
+
+		private static bool IsPointer(Type type)
+		{
+			if (type.IsPointer || type == typeof(IntPtr)) {
+				return true;
+			}
+			else {
+				if (type.IsConstructedGenericType) {
+					return type.GetGenericTypeDefinition() == typeof(Pointer<>);
+				}
+			}
+
+			return false;
+		}
+
 		internal static bool IsString<T>() => typeof(T) == typeof(string);
 
 		internal static bool IsString<T>(T value) => value is string;
@@ -72,24 +103,25 @@ namespace RazorSharp.CoreClr
 
 		internal static bool IsArrayOrString<T>() => IsArray<T>() || IsString<T>();
 
-		internal static bool IsArrayOrString<T>(T value) => IsArray<T>(value) || IsString<T>(value);
+		internal static bool IsArrayOrString<T>(T value) => IsArray(value) || IsString(value);
 
+		#endregion
 
 		public static void Compile(Type t, string n) => Compile(t.GetAnyMethod(n));
+
 
 		public static void Compile(MethodInfo methodInfo)
 		{
 			RuntimeHelpers.PrepareMethod(methodInfo.MethodHandle);
 		}
-		
+
 		/// <summary>
 		///     Reads a reference type's <see cref="ObjHeader" />
 		/// </summary>
 		/// <returns>A pointer to the reference type's header</returns>
 		internal static Pointer<ObjHeader> ReadObjHeader<T>(T value) where T : class
 		{
-			return Unsafe.AddressOfHeap(value, OffsetOptions.HEADER)
-			             .Cast<ObjHeader>();
+			return Unsafe.AddressOfHeap(value, OffsetOptions.HEADER).Cast<ObjHeader>();
 		}
 
 
@@ -109,10 +141,7 @@ namespace RazorSharp.CoreClr
 		{
 			// We'll say arrays and strings are blittable cause they're
 			// usable with GCHandle
-			if (IsArrayOrString<T>())
-				return true;
-
-			return typeof(T).GetMethodTable().Reference.IsBlittable;
+			return IsArrayOrString<T>() || typeof(T).GetMethodTable().Reference.IsBlittable;
 		}
 
 
@@ -235,6 +264,12 @@ namespace RazorSharp.CoreClr
 			// I don't know why this is, but whatever
 
 			return t.IsArray ? Mem.ReadPointer<MethodTable>(typeHandle, Offsets.ARRAY_MT_PTR_OFFSET) : typeHandle;
+		}
+
+		// ReSharper disable once InconsistentNaming
+		internal static Pointer<EEClass> GetEEClass(this Type t)
+		{
+			return t.GetMethodTable().Reference.EEClass;
 		}
 
 		#endregion

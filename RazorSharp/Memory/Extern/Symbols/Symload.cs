@@ -2,12 +2,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
-using RazorCommon.Diagnostics;
+using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
@@ -15,6 +16,7 @@ using RazorSharp.Native;
 using RazorSharp.Native.Symbols;
 using RazorSharp.Native.Win32;
 using RazorSharp.Utilities;
+using SimpleSharp.Extensions;
 
 #endregion
 
@@ -25,7 +27,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 	/// </summary>
 	public static class Symload
 	{
-		internal const           string     SCOPE_RESOLUTION_OPERATOR = "::";
+		internal const          string     SCOPE_RESOLUTION_OPERATOR = "::";
 		private static readonly ISet<Type> BoundTypes;
 
 		static Symload()
@@ -34,30 +36,86 @@ namespace RazorSharp.Memory.Extern.Symbols
 		}
 
 
+		public static bool HasFlagFast(this SymImportOptions v, SymImportOptions f)
+		{
+			return (v & f) == f;
+		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static bool IsBound(Type t) => BoundTypes.Contains(t);
 
-
-		private static string GetSymbolName(SymImportAttribute attr, [NotNull] MemberInfo member)
+		public static string ResolveSymbolNameNew(SymImportAttribute attr,[NotNull] MemberInfo member)
 		{
 			Conditions.NotNull(member.DeclaringType, nameof(member.DeclaringType));
 
+			//var attr          = member.GetCustomAttribute<SymImportAttribute>();
+			var nameSpaceAttr = member.DeclaringType.GetCustomAttribute<SymNamespaceAttribute>();
+
+			// todo: replace this with a config system that makes more sense lol
+
 			// Resolve the symbol
-			string name       = null;
+
+			string resolvedName       = attr.Symbol ?? member.Name;
+			string nameSpace          = nameSpaceAttr.Namespace;
+			string enclosingNamespace = member.DeclaringType.Name;
+
+			var options = attr.Options2;
+
+
+			if (!options.HasFlag(ImportOptions.IgnoreEnclosingNamespace)) {
+				resolvedName = enclosingNamespace + SCOPE_RESOLUTION_OPERATOR + resolvedName;
+			}
+
+			if (!options.HasFlag(ImportOptions.IgnoreNamespace)) {
+				if (nameSpace != null) {
+					resolvedName = nameSpace + SCOPE_RESOLUTION_OPERATOR + resolvedName;
+				}
+			}
+
+			if (options.HasFlag(ImportOptions.UseAccessorName)) {
+				Conditions.Require(member.MemberType == MemberTypes.Method);
+				resolvedName = resolvedName.Replace("get_", "Get");
+			}
+
+			Conditions.NotNull(resolvedName, nameof(resolvedName));
+
+			return resolvedName;
+		}
+
+		private static string ResolveSymbolName(SymImportAttribute attr, [NotNull] MemberInfo member)
+		{
+			Conditions.NotNull(member.DeclaringType, nameof(member.DeclaringType));
+
+			// todo: replace this with a config system that makes more sense lol
+
+			// Resolve the symbol
+			string name          = null;
 			string declaringName = member.DeclaringType.Name;
 
-			if (attr.FullyQualified && attr.Symbol != null && !attr.UseMemberNameOnly) {
+
+			if (attr.Options.HasFlagFast(SymImportOptions.FullyQualified)
+			    && attr.Symbol != null
+			    && !attr.Options.HasFlagFast(SymImportOptions.UseMemberNameOnly)) {
 				name = attr.Symbol;
 			}
-			else if (attr.UseMemberNameOnly && attr.Symbol == null) {
+			else if (attr.Options.HasFlagFast(SymImportOptions.UseMemberNameOnly) && attr.Symbol == null) {
 				name = member.Name;
 			}
-			else if (attr.Symbol != null && !attr.UseMemberNameOnly && !attr.FullyQualified) {
+			else if (attr.Symbol != null && !attr.Options.HasFlagFast(SymImportOptions.UseMemberNameOnly)
+			                             && !attr.Options.HasFlagFast(SymImportOptions.FullyQualified)) {
 				name = declaringName + SCOPE_RESOLUTION_OPERATOR + attr.Symbol;
 			}
 			else if (attr.Symbol == null) {
 				// Auto resolve
 				name = declaringName + SCOPE_RESOLUTION_OPERATOR + member.Name;
+			}
+
+			if (attr.Symbol == null && !attr.Options.HasFlagFast(SymImportOptions.FullyQualified)
+			                        && !attr.Options.HasFlagFast(SymImportOptions.UseMemberNameOnly)
+			                        && member.MemberType == MemberTypes.Method
+			                        && attr is SymcallAttribute callAttr
+			                        && callAttr.Options.HasFlagFast(SymImportOptions.UseAccessorName)) {
+				name = declaringName + SCOPE_RESOLUTION_OPERATOR + member.Name.Replace("get_", "Get");
 			}
 
 
@@ -76,7 +134,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 			return new ModuleInfo(new FileInfo(attr.Image), baseAddr, SymbolRetrievalMode.PDB_READER);
 		}
 
-		private static ModuleInfo GetInfo(SymNamespaceAttribute attr) 
+		private static ModuleInfo GetInfo(SymNamespaceAttribute attr)
 			=> GetInfo(attr, Modules.GetBaseAddress(attr.Module));
 
 		private static void LoadField(object             value,
@@ -109,6 +167,16 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 		public static T GenericLoad<T>(T value = default) => (T) Load(typeof(T), value);
 
+		public static void Load(Assembly asm)
+		{
+			foreach (var type in asm.GetTypes()) {
+				if (Attribute.IsDefined(type, typeof(SymNamespaceAttribute))) {
+					// Global.Log.Debug("Binding {Name}", type.Name);
+					Load(type);
+				}
+			}
+		}
+
 		public static object Load(Type type, object value = null)
 		{
 			if (IsBound(type)) {
@@ -119,8 +187,6 @@ namespace RazorSharp.Memory.Extern.Symbols
 			var nameSpaceAttr = type.GetCustomAttribute<SymNamespaceAttribute>();
 			Conditions.NotNull(nameSpaceAttr, nameof(nameSpaceAttr));
 
-			string nameSpace = nameSpaceAttr.Namespace;
-
 			Pointer<byte> baseAddr = null;
 
 			if (!Modules.IsLoaded(nameSpaceAttr.Module)) {
@@ -129,6 +195,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 			var mi = !baseAddr.IsNull ? GetInfo(nameSpaceAttr, baseAddr) : GetInfo(nameSpaceAttr);
 
+			
 			(MemberInfo[] members, SymImportAttribute[] attributes) = type.GetAnnotated<SymImportAttribute>();
 
 
@@ -146,13 +213,13 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 				// Resolve the symbol
 
-				string name = GetSymbolName(attr, mem);
-
-				if (nameSpace != null && !attr.IgnoreNamespace) {
-					name = nameSpace + SCOPE_RESOLUTION_OPERATOR + name;
-				}
+				string name = ResolveSymbolNameNew(attr, mem);
 
 				var addr = mi.GetSymAddress(name);
+
+				string fmt = String.Format("Binding {0} (resolved: -> {1}) to {2}", mem.Name, name, addr);
+				Global.WriteLine(fmt);
+				Global.Log.Debug(fmt);
 				
 				switch (mem.MemberType) {
 					case MemberTypes.Constructor:
@@ -163,6 +230,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 						LoadField(value, mi, name, mem, attr);
 						break;
 					case MemberTypes.Method:
+						
 						// The import is a function
 						Functions.SetStableEntryPoint((MethodInfo) mem, addr.Address);
 						break;
@@ -179,7 +247,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 				mi.Dispose();
 
 			Global.Log.Debug("Done");
-			
+
 			return value;
 		}
 	}

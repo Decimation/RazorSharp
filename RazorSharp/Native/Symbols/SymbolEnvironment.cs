@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorCommon.Extensions;
+using SimpleSharp.Extensions;
 using RazorSharp.Native.Win32;
 
 #endregion

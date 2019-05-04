@@ -2,12 +2,13 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
-using RazorCommon.Diagnostics;
+using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory;
 using Serilog;
@@ -53,32 +54,24 @@ namespace RazorSharp
 			     .MinimumLevel.ControlledBy(levelSwitch)
 			     .WriteTo.Console(outputTemplate: OUTPUT_TEMPLATE_ALT, theme: SystemConsoleTheme.Colored)
 			     .CreateLogger();
-
+			
 			const string ASM_STR = "RazorSharp";
 
 			Assembly = Assembly.Load(ASM_STR);
+			
+			LogFile = new FileInfo(@"C:\Users\Deci\Desktop\log2.txt");
 		}
 
+		private static readonly FileInfo LogFile;
+		
+		internal static void WriteLine(string s)
+		{
+			File.AppendAllLines(LogFile.FullName, new []{s});
+		}
 
 		private static void CheckCompatibility()
 		{
-			/**
-			 * RazorSharp
-			 *
-			 * History:
-			 * 	- RazorSharp (deci-common-c)
-			 * 	- RazorSharpNeue
-			 * 	- RazorCLR
-			 * 	- RazorSharp
-			 *
-			 * Notes:
-			 *  - 32-bit is not fully supported
-			 *  - Most types are probably not thread-safe
-			 *
-			 * Goals:
-			 *  - Provide identical and better functionality of ClrMD, SOS, and Reflection
-			 * 	  but in a faster and more efficient way
-			 */
+			
 
 			/**
 			 * RazorSharp is tested on and targets:

@@ -11,22 +11,11 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 		/// </summary>
 		public Type LoadAs { get; set; }
 
-		/// <summary>
-		/// Whether this should be interpreted as a global variable.
-		/// <remarks>
-		/// (Shortcut for <see cref="SymImportAttribute.IgnoreNamespace"/>,
-		/// <see cref="SymImportAttribute.UseMemberNameOnly"/> and <see cref="SymImportAttribute.FullyQualified"/>)
-		/// </remarks>
-		/// </summary>
-		public bool Global {
-			get => IgnoreNamespace && FullyQualified && UseMemberNameOnly;
-			set {
-				IgnoreNamespace = value;
-				FullyQualified  = value;
-				UseMemberNameOnly = value;
-			}
-		}
-
 		public SymFieldAttribute() : base() { }
+
+		public SymFieldAttribute(SymImportOptions options) : base(options) { }
+
+		public SymFieldAttribute(string symbol, SymImportOptions options = SymImportOptions.None)
+			: base(symbol, options) { }
 	}
 }

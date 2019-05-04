@@ -7,13 +7,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using RazorCommon;
-using RazorCommon.Diagnostics;
-using RazorCommon.Utilities;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
+using SimpleSharp;
 
 #endregion
 
@@ -85,6 +86,15 @@ namespace RazorSharp.CoreClr.Meta
 			}
 		}
 
+		public IEnumerable<MetaField> MethodTableFields {
+			get {
+				var mtFields = RuntimeType.GetCorrespondingMethodTableFields();
+				foreach (var info in mtFields) {
+					yield return new MetaField(info);
+				}
+			}
+		}
+
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
 			if (String.IsNullOrEmpty(format))
@@ -96,8 +106,7 @@ namespace RazorSharp.CoreClr.Meta
 
 			switch (format.ToUpperInvariant()) {
 				case FMT_B:
-					return
-						String.Format("{0} (token: {1}) (base size: {2}) (component size: {3}) (base fields size: {4})",
+					return String.Format("{0} (token: {1}) (base size: {2}) (component size: {3}) (base fields size: {4})",
 						              Name, Token, BaseSize, ComponentSize, BaseFieldsSize);
 				case FMT_E:
 					return ToTable().ToString();
@@ -119,7 +128,7 @@ namespace RazorSharp.CoreClr.Meta
 			var         metaFields = new MetaField[fields.Length];
 
 			for (int i = 0; i < fields.Length; i++) {
-				metaFields[i] = new MetaField(fields[i].GetFieldDesc());
+				metaFields[i] = new MetaField(fields[i]);
 			}
 
 			return metaFields;

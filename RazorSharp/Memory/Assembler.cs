@@ -4,7 +4,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using RazorCommon.Diagnostics;
+using SimpleSharp.Diagnostics;
 
 #endregion
 

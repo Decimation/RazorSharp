@@ -2,7 +2,7 @@
 
 using System;
 using System.Diagnostics;
-using RazorCommon.Diagnostics;
+using SimpleSharp.Diagnostics;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.ThreadContext;

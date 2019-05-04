@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using RazorCommon.Diagnostics;
+using SimpleSharp.Diagnostics;
 using RazorSharp.Memory.Extern.Signatures.Attributes;
 using RazorSharp.Utilities;
 

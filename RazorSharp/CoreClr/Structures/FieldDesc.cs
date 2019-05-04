@@ -1,11 +1,12 @@
 #region
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Diagnostics;
-using RazorCommon.Strings;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Strings;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Extern;
@@ -182,7 +183,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		private int LoadSize {
-			[Symcall(Symbol = "FieldDesc::LoadSize", FullyQualified = true)]
+			[Symcall(Symbol = "FieldDesc::LoadSize", Options = SymImportOptions.FullyQualified)]
 			get => throw new SymImportException(nameof(LoadSize));
 		}
 
@@ -212,7 +213,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
-			[Symcall(Symbol = "FieldDesc::GetApproxEnclosingMethodTable", FullyQualified = true)]
+			[Symcall(Symbol = "FieldDesc::GetApproxEnclosingMethodTable", Options = SymImportOptions.FullyQualified)]
 			get => throw new SymImportException();
 		}
 
@@ -222,6 +223,7 @@ namespace RazorSharp.CoreClr.Structures
 			return GetStaticAddress(null);
 		}
 
+		
 		[Symcall]
 		internal Pointer<byte> GetStaticAddress(void* value)
 		{

@@ -2,8 +2,8 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Strings;
+using SimpleSharp;
+using SimpleSharp.Strings;
 using RazorSharp.Native.Win32;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global

@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using InlineIL;
 using JetBrains.Annotations;
-using RazorCommon.Diagnostics;
+using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
@@ -287,7 +287,7 @@ namespace RazorSharp.Memory
 			Pointer<MethodTable> mt = typeof(T).GetMethodTable();
 			Pointer<EEClass>     ee = mt.Reference.EEClass;
 			if (ee.Reference.HasLayout)
-				return (int) ee.Reference.LayoutInfo->ManagedSize;
+				return (int) ee.Reference.LayoutInfo.Reference.ManagedSize;
 
 			return Constants.INVALID_VALUE;
 		}
@@ -352,15 +352,19 @@ namespace RazorSharp.Memory
 		///     <para>Note: This also includes padding and overhead (<see cref="ObjHeader" /> and <see cref="MethodTable" /> ptr.)</para>
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int HeapSize<T>(T value) where T : class 
 			=> HeapSizeInternal(value);
 
-
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static int HeapSizeInternal<T>(T value)
 		{
 			// Sanity check
 			Conditions.Require(!typeof(T).IsValueType);
+
+
+			if (value == null) {
+				return Constants.INVALID_VALUE;
+			}
 
 			// By manually reading the MethodTable*, we can calculate the size correctly if the reference
 			// is boxed or cloaked
@@ -399,7 +403,6 @@ namespace RazorSharp.Memory
 			 */
 
 			if (Runtime.IsArray(value)) {
-				Conditions.Require(Runtime.IsArray<T>(value));
 				var arr = value as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
@@ -413,7 +416,7 @@ namespace RazorSharp.Memory
 				string str = value as string;
 				
 				// Sanity check
-				Conditions.Assert(!Runtime.IsArray<T>(value));
+				Conditions.Assert(!Runtime.IsArray(value));
 				Conditions.NotNull(str, nameof(str));
 				
 				length = str.Length;

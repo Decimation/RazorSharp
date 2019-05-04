@@ -2,7 +2,7 @@
 
 #region
 
-using RazorCommon;
+using SimpleSharp;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.ILMethods;
 using RazorSharp.Memory.Pointers;

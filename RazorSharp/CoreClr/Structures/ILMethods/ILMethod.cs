@@ -2,8 +2,8 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Utilities;
+using SimpleSharp;
+using SimpleSharp.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 

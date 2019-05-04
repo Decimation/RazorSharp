@@ -10,11 +10,11 @@ using RazorSharp.Native.Symbols;
 
 namespace RazorSharp
 {
-	public static class ModuleInitializer
+	internal static class ModuleInitializer
 	{
-		public static bool IsSetup { get; private set; }
+		internal static bool IsSetup { get; private set; }
 
-		public static void GlobalSetup()
+		internal static void GlobalSetup()
 		{
 			Global.Log.Information("Loading module");
 
@@ -25,7 +25,7 @@ namespace RazorSharp
 			IsSetup = true;
 		}
 
-		public static void GlobalClose()
+		internal static void GlobalClose()
 		{
 			// SHUT IT DOWN
 			Global.Log.Information("Unloading module");
@@ -42,12 +42,12 @@ namespace RazorSharp
 		/// </summary>
 		public static void Initialize()
 		{
-//			GlobalSetup();
+			GlobalSetup();
 
 			var appDomain = AppDomain.CurrentDomain;
 			appDomain.ProcessExit += (sender, eventArgs) =>
 			{
-//				GlobalCleanup();
+				GlobalClose();
 			};
 		}
 	}

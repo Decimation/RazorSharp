@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using RazorCommon;
-using RazorCommon.Diagnostics;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
@@ -90,9 +90,9 @@ namespace RazorSharp.Utilities
 
 		/// <summary>
 		///     Gets the corresponding <see cref="FieldInfo" />s equivalent to the fields
-		///     in <see cref="MethodTable.FieldDescList" />
+		///     in <see cref="MethodTable.FieldDescList" /> (<see cref="Runtime.ReadFieldDescs"/>)
 		/// </summary>
-		internal static FieldInfo[] GetMethodTableFields(this Type t)
+		internal static FieldInfo[] GetCorrespondingMethodTableFields(this Type t)
 		{
 			FieldInfo[] fields = t.GetFields(ALL_FLAGS);
 			Arrays.RemoveAll(ref fields, f => f.IsLiteral);

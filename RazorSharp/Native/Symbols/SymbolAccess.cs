@@ -3,9 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RazorCommon.Diagnostics;
-using RazorCommon.Extensions;
-using RazorCommon.Utilities;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Extensions;
+using SimpleSharp.Utilities;
 using RazorSharp.CoreClr;
 using RazorSharp.Native.Win32;
 

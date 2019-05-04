@@ -37,6 +37,9 @@ namespace RazorSharp.Native.Win32
 		internal static extern void GetNativeSystemInfo(out SystemInfo lpSystemInfo);
 
 
+		[DllImport(KERNEL32_DLL)]
+		internal static extern uint LocalSize(IntPtr hMem);
+		
 		#region File
 
 		internal const uint INVALID_FILE_SIZE = 0xFFFFFFFF;

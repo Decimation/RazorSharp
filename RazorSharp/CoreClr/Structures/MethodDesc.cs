@@ -4,11 +4,11 @@ using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Diagnostics;
-using RazorCommon.Extensions;
-using RazorCommon.Strings;
-using RazorCommon.Utilities;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Extensions;
+using SimpleSharp.Strings;
+using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.ILMethods;
 using RazorSharp.Memory;
@@ -121,7 +121,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		/// <exception cref="SymImportException"></exception>
 		internal IntPtr NativeCode {
-			[Symcall(Symbol = "GetNativeCode")]
+			[Symcall(SymImportOptions.UseAccessorName)]
 			get => throw new SymImportException();
 		}
 
@@ -132,7 +132,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal IntPtr PreImplementedCode {
-			[Symcall(Symbol = "GetPreImplementedCode")]
+			[Symcall(SymImportOptions.UseAccessorName)]
 			get => throw new SymImportException();
 		}
 
@@ -188,7 +188,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal uint RVA {
-			[Symcall(Symbol = "GetRVA")]
+			[Symcall(SymImportOptions.UseAccessorName)]
 			get => throw new SymImportException();
 		}
 
@@ -372,23 +372,5 @@ namespace RazorSharp.CoreClr.Structures
 		}
 
 		#endregion
-
-		/*public static void InjectJmp(Pointer<byte> addr, MethodInfo methodInfo)
-		{
-			var mm = new MetaMethod(methodInfo.GetMethodDesc());
-			mm.PrepareOverride();
-			Pointer<byte> targetAddr = mm.Function;
-
-			// Opcode: E9 cd
-			// Mnemonic: JMP rel32
-			// Description: Jump near, relative, displacement relative to next instruction.
-			addr.Write(0xE9);
-			addr++; // Move over jmp opcode
-			Pointer<byte> rel32 = targetAddr - addr;
-			rel32 += sizeof(int); // Add size of rel32 arg
-
-			addr.WriteAny(rel32.ToInt32());
-			Console.WriteLine("done inject");
-		}*/
 	}
 }

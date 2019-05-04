@@ -2,10 +2,10 @@
 
 using System;
 using System.Reflection;
-using RazorCommon;
-using RazorCommon.Diagnostics;
-using RazorCommon.Strings;
-using RazorCommon.Utilities;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Strings;
+using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory.Pointers;
 
@@ -30,6 +30,11 @@ namespace RazorSharp.CoreClr.Meta
 		internal MetaMethod(Pointer<MethodDesc> methodDesc)
 		{
 			Value = methodDesc;
+		}
+
+		public MetaMethod(MethodInfo methodInfo) : this(methodInfo.GetMethodDesc())
+		{
+			
 		}
 
 

@@ -3,10 +3,10 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Diagnostics;
-using RazorCommon.Extensions;
-using RazorCommon.Strings;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Extensions;
+using SimpleSharp.Strings;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
@@ -178,7 +178,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		internal EEClassLayoutInfo* LayoutInfo {
+		internal Pointer<EEClassLayoutInfo>  LayoutInfo {
 			get {
 				//return &((LayoutEEClass *) this)->m_LayoutInfo;
 				Conditions.Assert(HasLayout, "EEClass does not have LayoutInfo");
@@ -198,7 +198,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///         For use with <see cref="Runtime.IsBlittable{T}" />
 		///     </remarks>
 		/// </summary>
-		internal bool IsBlittable => HasLayout && LayoutInfo->IsBlittable;
+		internal bool IsBlittable => HasLayout && LayoutInfo.Reference.IsBlittable;
 
 		/// <summary>
 		///     Abstracted to MethodTable

@@ -2,7 +2,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorCommon.Diagnostics;
+using SimpleSharp.Diagnostics;
 using RazorSharp.Memory;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global

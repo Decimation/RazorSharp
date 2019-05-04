@@ -26,6 +26,11 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 	[AttributeUsage(AttributeTargets.Method)]
 	public class SymcallAttribute : SymImportAttribute
 	{
-		public SymcallAttribute() : base() {}
+		public SymcallAttribute() : base() { }
+
+		public SymcallAttribute(SymImportOptions options) : base(options) { }
+
+		public SymcallAttribute(string symbol, SymImportOptions options = SymImportOptions.None) 
+			: base(symbol, options) { }
 	}
 }

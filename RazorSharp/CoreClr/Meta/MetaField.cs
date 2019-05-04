@@ -32,6 +32,11 @@ namespace RazorSharp.CoreClr.Meta
 			Value = p;
 		}
 
+		public MetaField(FieldInfo field) : this(field.GetFieldDesc())
+		{
+			
+		}
+
 
 		public override string ToString()
 		{

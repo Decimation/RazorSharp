@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using RazorCommon.Utilities;
+using SimpleSharp.Utilities;
 using RazorSharp.Memory.Pointers;
 
 #endregion

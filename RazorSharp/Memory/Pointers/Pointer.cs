@@ -13,10 +13,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using InlineIL;
 using JetBrains.Annotations;
-using RazorCommon;
-using RazorCommon.Diagnostics;
-using RazorCommon.Extensions;
-using RazorCommon.Strings;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Extensions;
+using SimpleSharp.Strings;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Native;
@@ -299,7 +299,7 @@ namespace RazorSharp.Memory.Pointers
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int Size(int elemCnt) => elemCnt * ElementSize;
+		private int CompleteSize(int elemCnt) => elemCnt * ElementSize;
 
 		#region Read / write
 
@@ -571,8 +571,12 @@ namespace RazorSharp.Memory.Pointers
 		[Pure]
 		public T Read(int elemOffset = 0) => ReadAny<T>(elemOffset);
 
+		public T ReadFast()
+		{
+			return CSUnsafe.Read<T>(m_value);
+		}
 
-		public T ReadFast(int elemOffset = 0)
+		public T ReadFast(int elemOffset)
 		{
 			return CSUnsafe.Read<T>((void*) (((long) m_value) + (elemOffset * ElementSize)));
 		}
@@ -692,7 +696,7 @@ namespace RazorSharp.Memory.Pointers
 
 		public void Zero(int elemCnt)
 		{
-			Mem.Zero(m_value, Size(elemCnt));
+			Mem.Zero(m_value, CompleteSize(elemCnt));
 		}
 
 		public void ZeroBytes(int byteCnt)
@@ -826,10 +830,10 @@ namespace RazorSharp.Memory.Pointers
 		///     <see cref="Unsafe.SizeOf{T}" /><c>)</c>
 		/// </returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void* OffsetFast<TType>(int elemCnt) => (void*) ((long) m_value + Mem.Size<TType>(elemCnt));
+		private void* OffsetFast<TType>(int elemCnt) => (void*) ((long) m_value + Mem.CompleteSize<TType>(elemCnt));
 
 
-		public Pointer<T> Add<TType>(int elemCnt = 1) => Add(Mem.Size<TType>(elemCnt));
+		public Pointer<T> Add<TType>(int elemCnt = 1) => Add(Mem.CompleteSize<TType>(elemCnt));
 
 		public Pointer<T> Subtract<TType>(int elemCnt = 1) => Add<TType>(-elemCnt);
 

@@ -3,9 +3,9 @@
 #region
 
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Strings;
-using RazorCommon.Utilities;
+using SimpleSharp;
+using SimpleSharp.Strings;
+using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;

@@ -54,7 +54,7 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		[Symcall(UseMemberNameOnly = true)]
+		[Symcall(Options = SymImportOptions.UseMemberNameOnly)]
 		internal static Pointer<byte> JIT_GetStaticFieldAddr_Context(FieldDesc* value)
 		{
 			throw new SymImportException();
@@ -79,7 +79,7 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		[Symcall(Symbol = "MemberLoader::FindField", FullyQualified = true)]
+		[Symcall("MemberLoader::FindField", SymImportOptions.FullyQualified)]
 		internal static Pointer<FieldDesc> FindField(Pointer<MethodTable> pMT,
 		                                             Pointer<byte>        pszName,
 		                                             Pointer<byte>        pSig,

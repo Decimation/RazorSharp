@@ -99,12 +99,12 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib" />
-    <Reference Include="RazorCommon, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\RazorCommon.1.0.3\lib\net472\RazorCommon.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
       <HintPath>..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SimpleSharp, Version=1.0.4.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\SimpleSharp.1.0.4\lib\net472\SimpleSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -121,6 +121,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="SimpleSharp">
+      <Version>1.0.2</Version>
+    </PackageReference>
     <PackageReference Include="System.Memory">
       <Version>4.5.2</Version>
     </PackageReference>

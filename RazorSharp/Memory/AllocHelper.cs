@@ -3,9 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Diagnostics;
-using RazorCommon.Strings;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Strings;
 using RazorSharp.Memory.Pointers;
 using static RazorSharp.Memory.Unsafe;
 
@@ -41,7 +41,7 @@ namespace RazorSharp.Memory
 
 		public static Pointer<T> Alloc<T>(int elemCnt = 1)
 		{
-			var rg = new Range(Mem.Alloc<T>(elemCnt).Address, Mem.Size<T>(elemCnt));
+			var rg = new Range(Mem.Alloc<T>(elemCnt).Address, Mem.CompleteSize<T>(elemCnt));
 			Pool.Add(rg);
 			return rg.LowAddress;
 		}
@@ -52,7 +52,7 @@ namespace RazorSharp.Memory
 			int        index = IndexOf(orig.Address);
 
 			Pool.RemoveAt(index);
-			var rg = new Range(Mem.ReAlloc<byte>(orig.Address, elemCnt).Address, Mem.Size<T>(elemCnt));
+			var rg = new Range(Mem.ReAlloc<byte>(orig.Address, elemCnt).Address, Mem.CompleteSize<T>(elemCnt));
 			Pool.Add(rg);
 			return rg.LowAddress;
 		}

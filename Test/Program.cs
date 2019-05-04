@@ -15,11 +15,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using InlineIL;
-using RazorCommon;
-using RazorCommon.Diagnostics;
-using RazorCommon.Extensions;
-using RazorCommon.Strings;
-using RazorCommon.Utilities;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Extensions;
+using SimpleSharp.Strings;
+using SimpleSharp.Utilities;
 using RazorSharp;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
@@ -37,6 +37,7 @@ using Unsafe = RazorSharp.Memory.Unsafe;
 using System.Net.Http;
 using JetBrains.Annotations;
 using RazorSharp.Analysis;
+using RazorSharp.CoreClr.Structures.EE;
 
 #endregion
 
@@ -53,7 +54,7 @@ namespace Test
 
 	public static unsafe class Program
 	{
-		// Common library: RazorCommon
+		// Common library: SimpleSharp
 		// Testing library: Sandbox
 
 
@@ -62,13 +63,25 @@ namespace Test
 		// todo: massive overhaul and refactoring
 
 		// todo: DIA instead of dbghelp?
+
+
+		[ClrSymNamespace("WKS")]
+		public unsafe struct Struct
+		{
+			[SymField(Options=SymImportOptions.Global)]
+			public static readonly object g_dummy;
+		}
+
+		[ClrSymNamespace("WKS")]
+		public unsafe struct Struct2
+		{
+			[SymField(Options2 =ImportOptions.IgnoreNamespace | ImportOptions.IgnoreEnclosingNamespace)]
+			public static readonly object g_dummy;
+		}
 		
 		public static void Main(string[] args)
 		{
-			ModuleInitializer.GlobalSetup();
-
-
-			ModuleInitializer.GlobalClose();
+			Symload.Load(Global.Assembly);
 		}
 	}
 }

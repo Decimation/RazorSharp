@@ -2,8 +2,8 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Utilities;
+using SimpleSharp;
+using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Memory;
 
@@ -57,6 +57,11 @@ namespace RazorSharp.CoreClr.Structures.EE
 
 		private BYTE m_cbPackingSize;
 
+		/// <summary>
+		///     # of fields that are of the calltime-marshal variety.
+		/// </summary>
+		private UINT m_numCTMFields;
+		
 		private void* m_pFieldMarshalers;
 
 		#endregion
@@ -65,11 +70,6 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///     Packing size in bytes (1, 2, 4, 8 etc.)
 		/// </summary>
 		internal BYTE PackingSize => m_cbPackingSize;
-
-		/// <summary>
-		///     # of fields that are of the calltime-marshal variety.
-		/// </summary>
-		internal UINT NumCTMFields { get; }
 
 		/// <summary>
 		///     <para>Size (in bytes) of fixed portion of NStruct.</para>

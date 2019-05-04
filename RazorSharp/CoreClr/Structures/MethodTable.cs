@@ -4,10 +4,10 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorCommon;
-using RazorCommon.Diagnostics;
-using RazorCommon.Strings;
-using RazorCommon.Utilities;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Strings;
+using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory;

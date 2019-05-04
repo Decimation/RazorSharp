@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using RazorCommon;
-using RazorCommon.Diagnostics;
-using RazorCommon.Strings;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Strings;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
@@ -21,12 +21,41 @@ namespace RazorSharp.Analysis
 	public static class Inspect
 	{
 		// todo: maybe add type name/info to labels
+		// todo: break this up into components with options (more modular)
 
 		#region Helper methods
 
 		private const string JOIN_BAR = " | ";
 
-		private static ConsoleTable StackHeapTypeTable<T>(ref T t, ToStringOptions options)
+		private static string CreateValueString(object value)
+		{
+			string valStr;
+			if (Runtime.IsPointer(value)) {
+				valStr = Hex.TryCreateHex(value);
+			}
+			else if (value == null) {
+				valStr = StringConstants.NULL_STR;
+			}
+			else {
+				valStr = value.ToString();
+			}
+
+			return valStr;
+		}
+
+		private static void CheckOutput(ConsoleTable table)
+		{
+			var tableStr = table.ToString();
+			var splitStr = tableStr.Split('\n');
+			var maxLen = splitStr.Max(s => s.Length);
+			
+			
+			if (maxLen > Console.WindowWidth) {
+				Global.Log.Warning("Output too large");
+			}
+		}
+
+		private static ConsoleTable StackHeapTypeTable<T>(ref T t, FormatOptions options)
 		{
 			var type = typeof(T).GetMetaType();
 			Conditions.Require(!typeof(T).IsValueType);
@@ -40,7 +69,7 @@ namespace RazorSharp.Analysis
 			return table;
 		}
 
-		private static ConsoleTable StackValueTypeTable<T>(ref T t, ToStringOptions options)
+		private static ConsoleTable StackValueTypeTable<T>(ref T t, FormatOptions options)
 		{
 			var type = typeof(T).GetMetaType();
 			Conditions.Require(typeof(T).IsValueType);
@@ -62,23 +91,23 @@ namespace RazorSharp.Analysis
 			return table;
 		}
 
-		private static string CreateInternalRowEntry(byte[] mem, ToStringOptions options)
+		private static string CreateInternalRowEntry(byte[] mem, FormatOptions options)
 		{
 			return /*InterpretInternal
 				? CreateRowEntry<byte>(mem, options)
 				: */mem.AutoJoin(JOIN_BAR, options);
 		}
 
-		private static string CreateRowEntry<TAs>(byte[] mem, ToStringOptions options)
+		private static string CreateRowEntry<TAs>(byte[] mem, FormatOptions options)
 		{
 			switch (options) {
-				case ToStringOptions.None:
+				case FormatOptions.NONE:
 					break;
-				case ToStringOptions.Hex:
+				case FormatOptions.HEX:
 					break;
-				case ToStringOptions.ZeroPadHex:
+				case FormatOptions.ZERO_PAD_HEX:
 					break;
-				case ToStringOptions.PrefixHex:
+				case FormatOptions.PREFIX_HEX:
 					break;
 			}
 
@@ -141,6 +170,7 @@ namespace RazorSharp.Analysis
 			table.AttachEnd("Value", values)
 			     .AttachEnd("Address", addresses);
 
+			CheckOutput(table);
 			return table.ToString();
 		}
 
@@ -161,12 +191,12 @@ namespace RazorSharp.Analysis
 
 		#region Stack
 
-		public static void Stack<T>(ref T value, ToStringOptions options = Hex.DEFAULT)
+		public static void Stack<T>(ref T value, FormatOptions options = Hex.DEFAULT)
 		{
 			Console.WriteLine(StackString(ref value, options));
 		}
 
-		public static string StackString<T>(ref T value, ToStringOptions options = Hex.DEFAULT)
+		public static string StackString<T>(ref T value, FormatOptions options = Hex.DEFAULT)
 		{
 			Pointer<T> addr = Unsafe.AddressOf(ref value);
 			int        size = Unsafe.SizeOf<T>();
@@ -177,6 +207,8 @@ namespace RazorSharp.Analysis
 				: StackHeapTypeTable(ref value, options);
 
 
+			CheckOutput(table);
+			
 			var sb = new StringBuilder();
 			sb.AppendFormat("{0} @ {1:P}\n", value.GetType().Name, addr);
 			sb.AppendFormat("Size: {0}\n", size);
@@ -188,7 +220,7 @@ namespace RazorSharp.Analysis
 
 		#region Heap
 
-		public static string HeapString<T>(T value, ToStringOptions options = Hex.DEFAULT) where T : class
+		public static string HeapString<T>(T value, FormatOptions options = Hex.DEFAULT) where T : class
 		{
 			// Sizes
 			Pointer<byte> addr     = Unsafe.AddressOfHeap(value, OffsetOptions.HEADER);
@@ -269,6 +301,8 @@ namespace RazorSharp.Analysis
 			// Add the rows
 			table.AddRow(row.ToArray());
 
+			CheckOutput(table);
+			
 			var sb = new StringBuilder();
 			sb.AppendFormat("{0} @ {1:P}\n", value.GetType().Name, addr);
 			sb.AppendFormat("Base size: {0}\n", type.BaseSize);
@@ -278,11 +312,33 @@ namespace RazorSharp.Analysis
 		}
 
 
-		public static void Heap<T>(T value, ToStringOptions options = Hex.DEFAULT) where T : class
+		public static void Heap<T>(T value, FormatOptions options = Hex.DEFAULT) where T : class
 		{
 			Console.WriteLine(HeapString(value, options));
 		}
 
 		#endregion
+
+		public static string ValuesString<T>(T value)
+		{
+			var type = value.GetType().GetMetaType();
+			var fields = type.InstanceFields.ToArray();
+			var table = new ConsoleTable("Field", "Value");
+
+			foreach (var field in fields) {
+				var fieldValue = field.GetValue(value);
+				string valStr = CreateValueString(fieldValue);
+				table.AddRow(field.Name, valStr);
+			}
+			
+			CheckOutput(table);
+
+			return table.ToString();
+		}
+
+		public static void Values<T>(T value)
+		{
+			Console.WriteLine(ValuesString(value));
+		}
 	}
 }

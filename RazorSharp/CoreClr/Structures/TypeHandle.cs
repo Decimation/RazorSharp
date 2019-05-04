@@ -1,8 +1,12 @@
 #region
 
 using System.Runtime.InteropServices;
+using RazorSharp.Memory.Extern;
 using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
+using TADDR = System.UInt64;
+
+// ReSharper disable BuiltInTypeReferenceStyle
 
 #endregion
 
@@ -71,20 +75,30 @@ namespace RazorSharp.CoreClr.Structures
 //#endif
 //			};
 
+		#region Fields
+
+		[FieldOffset(0)]
+		private TADDR m_asTAddr;
+
 		[FieldOffset(0)]
 		private void* m_asPtr;
 
 		[FieldOffset(0)]
 		private MethodTable* m_asMT;
 
+		[FieldOffset(0)]
+		private TypeDesc* m_asTypeDesc;
+
 		// etc
+
+		#endregion
 
 		#endregion
 
 		[Symcall]
 		internal MethodTable* GetMethodTable()
 		{
-			return null;
+			throw new SymImportException();
 		}
 
 		static TypeHandle()

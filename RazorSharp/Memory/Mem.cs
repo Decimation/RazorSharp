@@ -8,8 +8,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using InlineIL;
-using RazorCommon.Diagnostics;
-using RazorCommon.Extensions;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Extensions;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory.Pointers;
@@ -81,7 +81,7 @@ namespace RazorSharp.Memory
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int Size<T>(int elemCnt) => CSUnsafe.SizeOf<T>() * elemCnt;
+		public static int CompleteSize<T>(int elemCnt) => Unsafe.SizeOf<T>() * elemCnt;
 
 		#region Zero
 
@@ -179,7 +179,7 @@ namespace RazorSharp.Memory
 		public static Pointer<T> Alloc<T>(int elemCnt = 1)
 		{
 			Conditions.Require(elemCnt > 0, nameof(elemCnt));
-			int size  = Size<T>(elemCnt);
+			int size  = CompleteSize<T>(elemCnt);
 			var alloc = Marshal.AllocHGlobal(size);
 			Zero(alloc, size);
 
@@ -190,7 +190,7 @@ namespace RazorSharp.Memory
 
 		public static Pointer<T> ReAlloc<T>(Pointer<T> ptr, int elemCnt = 1)
 		{
-			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) Size<T>(elemCnt));
+			return Marshal.ReAllocHGlobal(ptr.Address, (IntPtr) CompleteSize<T>(elemCnt));
 		}
 
 		/// <summary>
@@ -201,6 +201,17 @@ namespace RazorSharp.Memory
 		{
 			Marshal.FreeHGlobal(p.Address);
 			AllocCount--;
+		}
+
+		public static void Free<T>(Pointer<T> p, bool autoZero)
+		{
+			if (autoZero) {
+				uint cb = Kernel32.LocalSize(p.Address);
+				Free(p, (int) cb);
+			}
+			else {
+				Free(p);
+			}
 		}
 
 		public static void Free<T>(Pointer<T> p, int length)
