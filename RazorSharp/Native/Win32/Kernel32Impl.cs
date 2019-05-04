@@ -5,7 +5,6 @@ using System.Diagnostics;
 using SimpleSharp.Diagnostics;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Native.ThreadContext;
 
 #endregion
 
@@ -25,39 +24,7 @@ namespace RazorSharp.Native.Win32
 
 		#endregion
 
-		#region Process
-
-		internal static IntPtr OpenProcess(Process proc, ProcessAccess flags = ProcessAccess.All)
-		{
-			return OpenProcess(flags, false, (uint) proc.Id);
-		}
-
-		internal static IntPtr OpenCurrentProcess(ProcessAccess flags = ProcessAccess.All)
-		{
-			return OpenProcess(Process.GetCurrentProcess(), flags);
-		}
-
-		#endregion
-
 		#region Thread
-
-		internal static Context64 GetContext(ContextFlags flags)
-		{
-			var ctx     = new Context64();
-			var hThread = OpenThread(ThreadAccess.All, (int) GetCurrentThreadId());
-			ctx.ContextFlags = flags;
-			Conditions.Ensure(GetThreadContext(hThread, ref ctx));
-			Conditions.Ensure(CloseHandle(hThread));
-			return ctx;
-		}
-
-		internal static void SetContext(ref Context64 ctx)
-		{
-			var hThread = OpenThread(ThreadAccess.All, (int) GetCurrentThreadId());
-
-			Conditions.Ensure(SetThreadContext(hThread, ref ctx));
-			Conditions.Ensure(CloseHandle(hThread));
-		}
 
 		internal static (IntPtr Low, IntPtr High) GetCurrentThreadStackLimits()
 		{
@@ -68,9 +35,18 @@ namespace RazorSharp.Native.Win32
 			return (l, h);
 		}
 
-		internal static IntPtr OpenThread(ThreadAccess desiredAccess, int threadId)
+		#endregion
+
+		#region Process
+
+		internal static IntPtr OpenProcess(Process proc, ProcessAccess flags = ProcessAccess.All)
 		{
-			return OpenThread(desiredAccess, false, (uint) threadId);
+			return OpenProcess(flags, false, (uint) proc.Id);
+		}
+
+		internal static IntPtr OpenCurrentProcess(ProcessAccess flags = ProcessAccess.All)
+		{
+			return OpenProcess(Process.GetCurrentProcess(), flags);
 		}
 
 		#endregion

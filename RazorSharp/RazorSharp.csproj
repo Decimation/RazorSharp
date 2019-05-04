@@ -178,6 +178,7 @@
     <Compile Include="Memory\Pointers\Pointer.cs" />
     <Compile Include="Memory\Pointers\PointerFormat.cs" />
     <Compile Include="Memory\Pointers\StringTypes.cs" />
+    <Compile Include="Memory\SizeOfOptions.cs" />
     <Compile Include="Memory\Unsafe.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="Memory\AddressInfo.cs" />
@@ -236,13 +237,6 @@
     <Compile Include="Native\Symbols\SymTagEnum.cs" />
     <Compile Include="Native\Symbols\SymType.cs" />
     <Compile Include="Native\SystemInfo.cs" />
-    <Compile Include="Native\ThreadContext\Context.cs" />
-    <Compile Include="Native\ThreadContext\Context64.cs" />
-    <Compile Include="Native\ThreadContext\ContextFlags.cs" />
-    <Compile Include="Native\ThreadContext\FloatingSaveArea.cs" />
-    <Compile Include="Native\ThreadContext\M128A.cs" />
-    <Compile Include="Native\ThreadContext\ThreadAccess.cs" />
-    <Compile Include="Native\ThreadContext\XSaveFormat64.cs" />
     <Compile Include="Memory\AllocHelper.cs" />
     <Compile Include="Memory\Bits.cs" />
     <Compile Include="Memory\Mem.cs" />

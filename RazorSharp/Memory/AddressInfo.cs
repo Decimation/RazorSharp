@@ -19,7 +19,7 @@ namespace RazorSharp.Memory
 
 			IsOnStack = Mem.IsOnStack(Address);
 			IsInHeap  = GCHeap.GlobalHeap.Reference.IsHeapPointer(Address.ToPointer());
-			Page = Kernel32.VirtualQuery(ptr.Address);
+			Page      = Kernel32.VirtualQuery(ptr.Address);
 			Module    = Modules.FromAddress(ptr);
 			Segment   = Segments.GetSegment(ptr, Module?.FileName);
 		}

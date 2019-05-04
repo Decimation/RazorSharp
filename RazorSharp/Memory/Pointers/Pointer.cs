@@ -1076,7 +1076,7 @@ namespace RazorSharp.Memory.Pointers
 			}*/
 
 
-			if (!typeof(T).IsValueType) {
+			if (!Runtime.IsStruct<T>()) {
 				Pointer<byte> heapPtr = ReadPointer<byte>();
 				string        valueStr;
 

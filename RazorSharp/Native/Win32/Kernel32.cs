@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using RazorSharp.Native.ThreadContext;
 
 #endregion
 
@@ -92,25 +91,6 @@ namespace RazorSharp.Native.Win32
 
 		[DllImport(KERNEL32_DLL)]
 		internal static extern IntPtr GetCurrentThread();
-
-		[DllImport(KERNEL32_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
-		internal static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, uint threadId);
-
-		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		internal static extern bool GetThreadContext(IntPtr hThread, ref Context lpContext);
-
-		// Get context of thread x64, in x64 application
-		[DllImport(KERNEL32_DLL, SetLastError = true)]
-		internal static extern bool GetThreadContext(IntPtr hThread, ref Context64 lpContext);
-
-		[DllImport(KERNEL32_DLL)]
-		internal static extern bool SetThreadContext(IntPtr hThread, ref Context64 lpContext);
-
-		[DllImport(KERNEL32_DLL)]
-		internal static extern uint SuspendThread(IntPtr hThread);
-
-		[DllImport(KERNEL32_DLL)]
-		internal static extern uint ResumeThread(IntPtr hThread);
 
 		#endregion
 

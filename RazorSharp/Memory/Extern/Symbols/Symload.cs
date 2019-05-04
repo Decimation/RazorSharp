@@ -47,8 +47,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static bool IsBound(Type t) => BoundTypes.Contains(t);
-
-
+		
 		private static string ResolveSymbolName(SymImportAttribute attr, [NotNull] MemberInfo member)
 		{
 			Conditions.NotNull(member.DeclaringType, nameof(member.DeclaringType));

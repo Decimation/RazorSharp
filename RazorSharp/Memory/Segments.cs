@@ -113,6 +113,7 @@ namespace RazorSharp.Memory
 			var table = new ConsoleTable("Number", "Name",
 			                             "Size", "Address", "End Address", "Characteristics", "Module");
 			string moduleNameTable = moduleName ?? Process.GetCurrentProcess().MainModule.ModuleName; // todo
+			
 			foreach (var v in segments) {
 				object[] rowCpy = v.Row;
 				rowCpy[rowCpy.Length - 1] = moduleNameTable;

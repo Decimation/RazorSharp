@@ -58,7 +58,7 @@ namespace RazorSharp.Analysis
 		private static ConsoleTable StackHeapTypeTable<T>(ref T t, FormatOptions options)
 		{
 			var type = typeof(T).GetMetaType();
-			Conditions.Require(!typeof(T).IsValueType);
+			Conditions.Require(!Runtime.IsStruct<T>());
 			Pointer<T> addr = Unsafe.AddressOf(ref t);
 			var row = new List<object>
 			{
@@ -72,7 +72,7 @@ namespace RazorSharp.Analysis
 		private static ConsoleTable StackValueTypeTable<T>(ref T t, FormatOptions options)
 		{
 			var type = typeof(T).GetMetaType();
-			Conditions.Require(typeof(T).IsValueType);
+			Conditions.Require(Runtime.IsStruct<T>());
 			List<MetaField> fields     = type.Fields.Where(x => !x.IsStatic).ToList();
 			List<string>    fieldNames = fields.Select(x => x.Name).ToList();
 			var             table      = new ConsoleTable(fieldNames.ToArray());

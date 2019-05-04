@@ -40,6 +40,8 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public static unsafe class Unsafe
 	{
+		#region Other
+
 		public static T Unbox<T>(object value) where T : struct
 		{
 			lock (value) {
@@ -68,7 +70,7 @@ namespace RazorSharp.Memory
 			T             value = default;
 			Pointer<byte> addr;
 
-			if (typeof(T).IsValueType) {
+			if (Runtime.IsStruct<T>()) {
 				addr = AddressOf(ref value).Cast<byte>();
 			}
 			else {
@@ -121,6 +123,8 @@ namespace RazorSharp.Memory
 				return valueCpy;
 			}
 		}
+
+		#endregion
 
 		#region Set
 
@@ -189,7 +193,7 @@ namespace RazorSharp.Memory
 		{
 			var addr = AddressOf(ref value);
 
-			if (!value.GetType().IsValueType) {
+			if (!Runtime.IsStruct(value)) {
 				return addr.Cast<byte>();
 			}
 
@@ -295,6 +299,56 @@ namespace RazorSharp.Memory
 
 		// todo: make an AutoSize method
 
+		public static int SizeOfAuto<T>(T value = default, SizeOfOptions options = SizeOfOptions.Intrinsic)
+		{
+			var mt      = typeof(T).GetMethodTable();
+			var eeClass = mt.Reference.EEClass;
+
+
+			// If a value was supplied
+			if (!Runtime.IsNullOrDefault(value)) {
+				mt = value.GetType().GetMethodTable();
+				
+				switch (options) {
+					case SizeOfOptions.BaseFields:
+						return mt.Reference.NumInstanceFieldBytes;
+					case SizeOfOptions.BaseInstance:
+						return mt.Reference.BaseSize;
+						break;
+					case SizeOfOptions.Heap:
+						return HeapSizeInternal(value);
+						break;
+				}
+			}
+
+			switch (options) {
+				// Note: Arrays native size == 0
+				case SizeOfOptions.Native:
+					return eeClass.Reference.NativeSize;
+					break;
+				// Note: Arrays have no layout
+				case SizeOfOptions.Managed:
+					if (eeClass.Reference.HasLayout)
+						return (int) eeClass.Reference.LayoutInfo.Reference.ManagedSize;
+					else {
+						return Constants.INVALID_VALUE;
+					}
+				case SizeOfOptions.Intrinsic:
+					return CSUnsafe.SizeOf<T>();
+				case SizeOfOptions.BaseFields:
+					return mt.Reference.NumInstanceFieldBytes;
+				case SizeOfOptions.BaseInstance:
+					Conditions.Require(!Runtime.IsStruct<T>(), nameof(value));
+					return mt.Reference.BaseSize;
+				case SizeOfOptions.Heap:
+					throw new ArgumentException($"A value must be supplied to use {SizeOfOptions.Heap}");
+//				default:
+//					throw new ArgumentOutOfRangeException(nameof(options), options, null);
+			}
+
+
+			return Constants.INVALID_VALUE;
+		}
 
 		/// <summary>
 		///     Calculates the complete size of <paramref name="value" />'s data. If <typeparamref name="T" /> is
@@ -306,48 +360,7 @@ namespace RazorSharp.Memory
 		/// <returns>The complete size of <paramref name="value" /></returns>
 		public static int AutoSizeOf<T>(T value)
 		{
-			return typeof(T).IsValueType ? SizeOf<T>() : HeapSizeInternal(value);
-		}
-
-		/// <summary>
-		///     Returns the managed size of an object.
-		/// </summary>
-		/// <remarks>
-		///     Returned from <see cref="EEClassLayoutInfo.ManagedSize" />
-		/// </remarks>
-		/// <returns>
-		///     Managed size if the type has an <see cref="EEClassLayoutInfo" />; <see cref="Constants.INVALID_VALUE" />
-		///     otherwise
-		/// </returns>
-		public static int ManagedSizeOf<T>()
-		{
-			// Note: Arrays have no layout
-
-
-			Pointer<MethodTable> mt = typeof(T).GetMethodTable();
-			Pointer<EEClass>     ee = mt.Reference.EEClass;
-			if (ee.Reference.HasLayout)
-				return (int) ee.Reference.LayoutInfo.Reference.ManagedSize;
-
-			return Constants.INVALID_VALUE;
-		}
-
-		/// <summary>
-		///     <para>Returns the native (<see cref="Marshal" />) size of a type.</para>
-		/// </summary>
-		/// <remarks>
-		///     <para> Returned from <see cref="EEClass.NativeSize" /> </para>
-		///     <para> Equals <see cref="Marshal.SizeOf(Type)" /></para>
-		///     <para> Equals <see cref="StructLayoutAttribute.Size" /> when type isn't zero-sized.</para>
-		/// </remarks>
-		/// <returns>The native size if the type has a native representation; <see cref="Constants.INVALID_VALUE" /> otherwise</returns>
-		public static int NativeSizeOf<T>()
-		{
-			// Note: Arrays native size == 0
-
-			Pointer<MethodTable> mt     = typeof(T).GetMethodTable();
-			int                  native = mt.Reference.EEClass.Reference.NativeSize;
-			return native == 0 ? Constants.INVALID_VALUE : native;
+			return Runtime.IsStruct<T>() ? SizeOf<T>() : HeapSizeInternal(value);
 		}
 
 
@@ -399,7 +412,7 @@ namespace RazorSharp.Memory
 		private static int HeapSizeInternal<T>(T value)
 		{
 			// Sanity check
-			Conditions.Require(!typeof(T).IsValueType);
+			Conditions.Require(!Runtime.IsStruct<T>());
 
 
 			if (value == null) {
@@ -467,6 +480,42 @@ namespace RazorSharp.Memory
 
 		#endregion
 
+		#region Size of data
+
+		/// <summary>
+		///     Returns the size of the data in <paramref name="value"/>. If <typeparamref name="T"/> is a reference type,
+		/// this returns the size of <paramref name="value"/> not occupied by the <see cref="MethodTable" /> pointer and the <see cref="ObjHeader" />.
+		/// If <typeparamref name="T"/> is a value type, this returns <see cref="SizeOf{T}"/>.
+		/// </summary>
+		public static int SizeOfData<T>(T value)
+		{
+			if (Runtime.IsStruct(value)) {
+				return SizeOf<T>();
+			}
+			else {
+				// Subtract the size of the ObjHeader and MethodTable*
+				return HeapSizeInternal(value) - (IntPtr.Size + sizeof(MethodTable*));
+			}
+		}
+
+		/// <summary>
+		///     Returns the base size of the data in the type specified by <paramref name="t"/>. If <paramref name="t"/> is a reference type,
+		/// this returns the size of data not occupied by the <see cref="MethodTable" /> pointer, <see cref="ObjHeader" />, padding, and overhead.
+		/// If <paramref name="t"/> is a value type, this returns <see cref="SizeOf{T}"/>.
+		/// </summary>
+		public static int BaseSizeOfData(Type t)
+		{
+			if (t.IsValueType) {
+				return (int) ReflectionUtil.InvokeGenericMethod(typeof(Unsafe), nameof(SizeOf), null, new[] {t}, null);
+			}
+			else {
+				// Subtract the size of the ObjHeader and MethodTable*
+				return t.GetMetaType().NumInstanceFieldBytes;
+			}
+		}
+
+		#endregion
+
 		#region BaseFieldsSize
 
 		/// <summary>
@@ -490,8 +539,7 @@ namespace RazorSharp.Memory
 
 			return typeof(T).GetMethodTable().Reference.NumInstanceFieldBytes;
 		}
-		
-		
+
 
 		/// <summary>
 		///     <para>Returns the base size of the fields (data) in the heap.</para>
@@ -523,55 +571,6 @@ namespace RazorSharp.Memory
 			return Runtime.ReadMethodTable(ref value).Reference.NumInstanceFieldBytes;
 		}
 
-		/// <summary>
-		///     Returns the size of the data in <paramref name="value"/>. If <typeparamref name="T"/> is a reference type,
-		/// this returns the size of <paramref name="value"/> not occupied by the <see cref="MethodTable" /> pointer and the <see cref="ObjHeader" />.
-		/// If <typeparamref name="T"/> is a value type, this returns <see cref="SizeOf{T}"/>.
-		/// </summary>
-		public static int SizeOfData<T>(T value)
-		{
-			var type = value.GetType();
-
-			if (type.IsValueType) {
-				return SizeOf<T>();
-			}
-			else {
-				// Subtract the size of the ObjHeader and MethodTable*
-				return HeapSizeInternal(value) - (IntPtr.Size + sizeof(MethodTable*));
-			}
-		}
-		
-		/// <summary>
-		///     Returns the base size of the data in the type specified by <paramref name="t"/>. If <paramref name="t"/> is a reference type,
-		/// this returns the size of data not occupied by the <see cref="MethodTable" /> pointer, <see cref="ObjHeader" />, padding, and overhead.
-		/// If <paramref name="t"/> is a value type, this returns <see cref="SizeOf{T}"/>.
-		/// </summary>
-		public static int BaseSizeOfData(Type t)
-		{
-			
-
-			if (t.IsValueType) {
-				return (int) ReflectionUtil.InvokeGenericMethod(typeof(Unsafe), nameof(SizeOf), null, new[] {t}, null);
-			}
-			else {
-				// Subtract the size of the ObjHeader and MethodTable*
-				return t.GetMetaType().NumInstanceFieldBytes;
-			}
-		}
-
-		/*public static int SizeOfFields<T>(T t) where T : class
-		{
-			if (t is string str) {
-				return (str.Length * sizeof(char)) + sizeof(uint);
-			}
-
-			if (t is Array rg) {
-				return (rg.Length * Runtime.FindComponentSize(t)) + IntPtr.Size;
-			}
-
-			return SizeOfData(t);
-		}*/
-
 		#endregion
 
 		#region BaseInstanceSize
@@ -594,7 +593,7 @@ namespace RazorSharp.Memory
 		private static int BaseInstanceSizeInternal<T>()
 		{
 			// Sanity check
-			Conditions.Require(!typeof(T).IsValueType);
+			Conditions.Require(!Runtime.IsStruct<T>());
 			return typeof(T).GetMethodTable().Reference.BaseSize;
 		}
 
@@ -608,7 +607,7 @@ namespace RazorSharp.Memory
 		{
 			return (typeof(T).IsInterface || typeof(T) == typeof(object))
 			       && value != null
-			       && value.GetType().IsValueType;
+			       && Runtime.IsStruct(value);
 		}
 
 

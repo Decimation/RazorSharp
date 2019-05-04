@@ -69,11 +69,11 @@ namespace Test
 		struct Globals
 		{
 			[SymField(Options = SymImportOptions.FullyQualified, FieldOptions = SymFieldOptions.LoadDirect)]
-			public Pointer<byte> g_pStringClass;
+			public Pointer<_MethodTable> g_pStringClass;
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		class _MethodTable
+		struct _MethodTable
 		{
 			public int m_dwFlags;
 			public int BaseSize;
@@ -87,12 +87,15 @@ namespace Test
 
 		public static void Main(string[] args)
 		{
-			Globals g = default;
-			g = Symload.Load(g);
-			Console.WriteLine(g.g_pStringClass);
-			Console.WriteLine(typeof(string).GetMethodTable());
+			object o = 123D;
 
-			//Symload.LoadAll(Global.Assembly);
+			Console.WriteLine(Unsafe.HeapSize(o));
+			
+			Debug.Assert(Unsafe.HeapSize(o)==Unsafe.SizeOfAuto(o, SizeOfOptions.Heap));
+			Debug.Assert(Unsafe.SizeOf<object>()==Unsafe.SizeOfAuto(o, SizeOfOptions.Intrinsic));
+			Debug.Assert(Unsafe.BaseFieldsSize<object>()==Unsafe.SizeOfAuto<object>(default, SizeOfOptions.BaseFields));
+			Debug.Assert(Unsafe.BaseFieldsSize<object>(o)==Unsafe.SizeOfAuto<object>(o, SizeOfOptions.BaseFields));
+			Debug.Assert(Unsafe.BaseInstanceSize<object>()==Unsafe.SizeOfAuto(o, SizeOfOptions.BaseInstance));
 		}
 	}
 }

@@ -276,7 +276,7 @@ namespace RazorSharp.CoreClr.Structures
 			Conditions.Assert(Offset != FIELD_OFFSET_NEW_ENC);
 
 			var data = Unsafe.AddressOf(ref t).Address;
-			if (typeof(TInstance).IsValueType)
+			if (Runtime.IsString<TInstance>())
 				return data + Offset;
 
 			data =  Marshal.ReadIntPtr(data);

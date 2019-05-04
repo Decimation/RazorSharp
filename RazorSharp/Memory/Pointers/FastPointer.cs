@@ -1,4 +1,5 @@
 using System;
+using SimpleSharp.Strings;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 
@@ -110,37 +111,35 @@ namespace RazorSharp.Memory.Pointers
 			return this;
 		}
 
-
-		/// <summary>
-		///     Decrement <see cref="Address" /> by the specified number of elements
-		/// </summary>
-		/// <param name="elemCnt">Number of elements</param>
-		/// <returns>
-		///     <c>this</c>
-		/// </returns>
 		public FastPointer<T> Decrement(int elemCnt = 1) => Increment(-elemCnt);
 
 		#endregion
 
 		#region Operators
 
-		public static FastPointer<T> operator ++(FastPointer<T> p)
-		{
-			p.Increment();
-			return p;
-		}
+		public static FastPointer<T> operator ++(FastPointer<T> p) => p.Increment();
 
-		/// <summary>
-		///     Decrements the <see cref="Pointer{T}" /> by one element.
-		/// </summary>
-		/// <param name="p">
-		///     <see cref="Pointer{T}" />
-		/// </param>
-		/// <returns>The offset <see cref="Address" /></returns>
-		public static FastPointer<T> operator --(FastPointer<T> p)
+		public static FastPointer<T> operator --(FastPointer<T> p) => p.Decrement();
+
+		#endregion
+
+		#region Implicit and explicit conversions
+
+		public static implicit operator FastPointer<T>(void* v) => new FastPointer<T>(v);
+
+		public static implicit operator FastPointer<T>(IntPtr p) => new FastPointer<T>(p);
+
+		public static explicit operator FastPointer<T>(long l) => new FastPointer<T>(l);
+
+		public static explicit operator FastPointer<T>(ulong ul) => new FastPointer<T>(ul);
+
+		#endregion
+
+		#region ToString
+
+		public override string ToString()
 		{
-			p.Decrement();
-			return p;
+			return Hex.ToHex(Address);
 		}
 
 		#endregion

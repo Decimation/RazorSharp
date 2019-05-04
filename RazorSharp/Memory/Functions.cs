@@ -1,7 +1,6 @@
 #region
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
@@ -10,6 +9,7 @@ using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32;
+
 // ReSharper disable InvalidXmlDocComment
 
 #endregion
@@ -20,7 +20,7 @@ namespace RazorSharp.Memory
 	///     Methods of finding and executing DLL functions:
 	///     <para>
 	///         1. Sig scanning ((deprecated) <see cref="SignatureCall" />) (<see cref="Memory.MemScanner" />)
-	/// (deprecated) (<see cref="SigcallAttribute" />)
+	///         (deprecated) (<see cref="SigcallAttribute" />)
 	///     </para>
 	///     <list type="bullet">
 	///         <item>
@@ -79,15 +79,10 @@ namespace RazorSharp.Memory
 		{
 			const string SET_ENTRY_POINT = "MethodDesc::SetStableEntryPointInterlocked";
 			SetEntryPoint = Runtime.GetClrFunction<SetEntryPointDelegate>(SET_ENTRY_POINT);
-
-			/*const string GET_DELEGATE = "GetDelegateForFunctionPointerInternal";
-			GetDelegate = (GetDelegateDelegate) typeof(Marshal)
-			                                   .GetAnyMethod(GET_DELEGATE)
-			                                   .CreateDelegate(typeof(GetDelegateDelegate));*/
 		}
 
 		/// <summary>
-		/// Gets an exported function
+		///     Gets an exported function
 		/// </summary>
 		public static TDelegate GetFunction<TDelegate>(string dllName, string fn) where TDelegate : Delegate
 		{
@@ -108,8 +103,7 @@ namespace RazorSharp.Memory
 		private delegate long SetEntryPointDelegate(MethodDesc* value, ulong pCode);
 
 		private static readonly SetEntryPointDelegate SetEntryPoint;
-
-
+		
 		/// <summary>
 		///     <remarks>
 		///         Equal to <see cref="MethodDesc.SetStableEntryPoint" />, but this is implemented via a <see cref="Delegate" />
@@ -119,12 +113,9 @@ namespace RazorSharp.Memory
 		{
 			var  pMd    = (MethodDesc*) mi.MethodHandle.Value;
 			long result = SetEntryPoint(pMd, (ulong) pCode);
-			
+
 			if (!(result > 0)) {
 				Global.Log.Warning("Possible error setting entry point for {Method} (code: {Code})", mi.Name, result);
-			}
-			else {
-//				Global.Log.Warning("Set entry point for {Method} (code: {Code})", mi.Name, result);
 			}
 
 			//Conditions.Assert(result >0);
@@ -141,9 +132,6 @@ namespace RazorSharp.Memory
 
 		public static Delegate GetDelegateForFunctionPointer(Pointer<byte> ptr, Type t)
 		{
-//			Conditions.NotNull(GetDelegate, nameof(GetDelegate));
-//			return GetDelegate(ptr, t);
-
 			return Marshal.GetDelegateForFunctionPointer(ptr.Address, t);
 		}
 

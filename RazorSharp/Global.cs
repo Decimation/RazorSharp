@@ -33,7 +33,7 @@ namespace RazorSharp
 		private const string OUTPUT_TEMPLATE_ALT =
 			"[{Timestamp:HH:mm:ss.fff} ({Context}) {Level:u3}] {Message}{NewLine}";
 
-		internal static readonly Logger Log;
+		internal static readonly ILogger Log;
 
 		internal static readonly Assembly Assembly;
 
@@ -44,17 +44,21 @@ namespace RazorSharp
 		/// </summary>
 		static Global()
 		{
+#if DEBUG
 			var levelSwitch = new LoggingLevelSwitch
 			{
 				MinimumLevel = LogEventLevel.Debug
 			};
+
 
 			Log = new LoggerConfiguration()
 			     .Enrich.FromLogContext()
 			     .MinimumLevel.ControlledBy(levelSwitch)
 			     .WriteTo.Console(outputTemplate: OUTPUT_TEMPLATE_ALT, theme: SystemConsoleTheme.Colored)
 			     .CreateLogger();
-			
+#else
+			Log = Logger.None;
+#endif
 			const string ASM_STR = "RazorSharp";
 
 			Assembly = Assembly.Load(ASM_STR);
@@ -112,7 +116,10 @@ namespace RazorSharp
 				Log.Warning("Memory leak: {Count} dangling pointer(s)", Mem.AllocCount);
 			}
 
-			Log.Dispose();
+			if (Log is Logger logger) {
+				logger.Dispose();
+			}
+			
 			IsSetup = false;
 		}
 	}

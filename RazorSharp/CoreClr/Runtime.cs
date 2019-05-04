@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -44,7 +45,7 @@ namespace RazorSharp.CoreClr
 		{
 			return Clr.ClrSymbols.GetFunction<TDelegate>(name);
 		}
-		
+
 		public static T AllocObject<T>(params object[] args)
 		{
 			var value = GCHeap.AllocateObject<T>(default);
@@ -53,6 +54,27 @@ namespace RazorSharp.CoreClr
 		}
 
 		#region Is
+
+		internal static bool IsNullOrDefault<T>(T value)
+		{
+			return EqualityComparer<T>.Default.Equals(value, default(T));
+		}
+
+		#region Struct
+
+		internal static bool IsStruct<T>()
+		{
+			return typeof(T).IsValueType;
+		}
+
+		internal static bool IsStruct<T>(T value)
+		{
+			return value.GetType().IsValueType;
+		}
+
+		#endregion
+
+		#region Pointer
 
 		internal static bool IsPointer<T>()
 		{
@@ -64,6 +86,7 @@ namespace RazorSharp.CoreClr
 			if (value == null) {
 				return false;
 			}
+
 			return IsPointer(value.GetType());
 		}
 
@@ -74,23 +97,38 @@ namespace RazorSharp.CoreClr
 			}
 
 			if (type.IsConstructedGenericType) {
-				return type.GetGenericTypeDefinition() == typeof(Pointer<>);
+				var genDef = type.GetGenericTypeDefinition();
+				return genDef == typeof(Pointer<>) || genDef == typeof(FastPointer<>);
 			}
 
 			return false;
 		}
 
+		#endregion
+
+		#region String
+
 		internal static bool IsString<T>() => typeof(T) == typeof(string);
 
 		internal static bool IsString<T>(T value) => value is string;
+
+		#endregion
+
+		#region Array
 
 		internal static bool IsArray<T>(T value) => value is Array;
 
 		internal static bool IsArray<T>() => typeof(T).IsArray || typeof(T) == typeof(Array);
 
+		#endregion
+
+		#region Array or String
+
 		internal static bool IsArrayOrString<T>() => IsArray<T>() || IsString<T>();
 
 		internal static bool IsArrayOrString<T>(T value) => IsArray(value) || IsString(value);
+
+		#endregion
 
 		#endregion
 
@@ -213,7 +251,7 @@ namespace RazorSharp.CoreClr
 		internal static Pointer<MethodTable> ReadMethodTable<T>(ref T t)
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
-			if (typeof(T).IsValueType)
+			if (IsStruct<T>())
 				return typeof(T).GetMethodTable();
 
 			// We need to get the heap pointer manually because of type constraints
