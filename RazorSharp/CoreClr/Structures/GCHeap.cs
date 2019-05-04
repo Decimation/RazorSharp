@@ -47,23 +47,21 @@ namespace RazorSharp.CoreClr.Structures
 		///     <para>Global CLR variable <c>g_pGCHeap</c></para>
 		///     <para>Global VM GC</para>
 		/// </summary>
-		[SymField(SymImportOptions.Global)]
+		[SymField(SymImportOptions.FullyQualified)]
 		private static readonly IntPtr g_pGCHeap;
 
 		/// <summary>
 		///     <para>Global CLR variable <c>g_gc_lowest_address</c></para>
 		/// </summary>
-		[SymField(SymImportOptions.Global)]
+		[SymField(SymImportOptions.FullyQualified)]
 		private static readonly IntPtr g_lowest_address;
 
 		/// <summary>
 		///     <para>Global CLR variable <c>g_gc_highest_address</c></para>
 		/// </summary>
-		[SymField(SymImportOptions.Global)]
+		[SymField(SymImportOptions.FullyQualified)]
 		private static readonly IntPtr g_highest_address;
 
-		
-		
 		/// <summary>
 		///     The lowest address of the global GC heap.
 		/// </summary>
@@ -88,7 +86,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		public int GCCount {
-			[Symcall(Symbol = "GCHeap::GetGcCount", Options = SymImportOptions.FullyQualified)]
+			[Symcall("GetGcCount")]
 			get => throw new SymImportException();
 		}
 
@@ -123,7 +121,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		/// Allocates a zero-initialized object on the GC heap.
 		/// </summary>
-		[Symcall(SymImportOptions.UseMemberNameOnly | SymImportOptions.IgnoreNamespace)]
+		[Symcall(SymImportOptions.FullyQualified)]
 		internal static void* AllocateObject(MethodTable* mt, int fHandleCom)
 		{
 			throw new SymImportException();

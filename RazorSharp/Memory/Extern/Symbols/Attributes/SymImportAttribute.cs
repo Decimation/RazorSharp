@@ -16,8 +16,6 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 		///     Name of the symbol. If this is <c>null</c>, the member name will be used instead.
 		/// </summary>
 		public string Symbol { get; set; }
-		
-		public ImportOptions Options2 { get; set; }
 
 		public SymImportOptions Options { get; set; }
 

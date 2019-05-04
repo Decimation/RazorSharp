@@ -58,21 +58,10 @@ namespace RazorSharp
 			const string ASM_STR = "RazorSharp";
 
 			Assembly = Assembly.Load(ASM_STR);
-			
-			LogFile = new FileInfo(@"C:\Users\Deci\Desktop\log2.txt");
-		}
-
-		private static readonly FileInfo LogFile;
-		
-		internal static void WriteLine(string s)
-		{
-			File.AppendAllLines(LogFile.FullName, new []{s});
 		}
 
 		private static void CheckCompatibility()
 		{
-			
-
 			/**
 			 * RazorSharp is tested on and targets:
 			 *

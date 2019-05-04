@@ -12,11 +12,13 @@ using RazorSharp.Native.Win32;
 
 namespace RazorSharp.Native.Symbols
 {
+	[Obsolete]
 	public unsafe class SymbolEnvironment : ISymbolResolver
 	{
 		private ulong m_modBase;
 
 		private string[] m_nameBuffer;
+		private string m_singleNameBuffer;
 
 		private IntPtr m_proc;
 		private Symbol m_symBuf;
@@ -138,6 +140,31 @@ namespace RazorSharp.Native.Symbols
 
 			return cpy;
 		}
+		
+		public Symbol[] GetSymbolsContainingName(string name)
+		{
+			m_symBuffer  = new List<Symbol>();
+			m_singleNameBuffer = name;
+
+			bool symEnumSuccess = DbgHelp.SymEnumSymbols(
+				m_proc,             // Process handle of the current process
+				m_modBase,          // Base address of the module
+				null,               // Mask (NULL -> all symbols)
+				SymNameContainsCallback, // The callback function
+				IntPtr.Zero         // A used-defined context can be passed here, if necessary
+			);
+
+			NativeHelp.Call(symEnumSuccess, nameof(DbgHelp.SymEnumSymbols));
+
+
+			Symbol[] cpy = m_symBuffer.ToArray();
+			m_symBuffer.Clear();
+			
+			m_singleNameBuffer = null;
+			m_symBuffer  = null;
+
+			return cpy;
+		}
 
 		public Symbol GetSymbol(string name) => GetSymbol(name, null);
 
@@ -171,7 +198,18 @@ namespace RazorSharp.Native.Symbols
 
 			return true;
 		}
+		
+		private bool SymNameContainsCallback(IntPtr sym, uint symSize, IntPtr userCtx)
+		{
+			var    pSym    = (SymbolInfo*) sym;
+			string symName = NativeHelp.GetString(&pSym->Name, pSym->NameLen);
 
+			if (symName.Contains(m_singleNameBuffer)) {
+				m_symBuffer.Add(new Symbol(pSym));
+			}
+
+			return true;
+		}
 
 		private bool CollectSymCallback(IntPtr sym, uint symSize, IntPtr userCtx)
 		{

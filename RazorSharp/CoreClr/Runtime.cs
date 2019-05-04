@@ -35,17 +35,6 @@ namespace RazorSharp.CoreClr
 	/// </summary>
 	public static unsafe class Runtime
 	{
-		#region Compare
-
-		private static void AssertCompare(MemberInfo info, IMetaMember meta)
-		{
-			Conditions.Assert(info.MetadataToken == meta.Token);
-			Conditions.Assert(info.Name == meta.Name);
-			Conditions.Assert(info == meta.Info);
-		}
-
-		#endregion
-
 		public static Pointer<byte> GetClrSymAddress(string name)
 		{
 			return Clr.ClrSymbols.GetSymAddress(name);
@@ -55,11 +44,10 @@ namespace RazorSharp.CoreClr
 		{
 			return Clr.ClrSymbols.GetFunction<TDelegate>(name);
 		}
-
-
+		
 		public static T AllocObject<T>(params object[] args)
 		{
-			var value = GCHeap.AllocateObject<T>(0);
+			var value = GCHeap.AllocateObject<T>(default);
 			RunConstructor(value, args);
 			return value;
 		}
@@ -84,10 +72,9 @@ namespace RazorSharp.CoreClr
 			if (type.IsPointer || type == typeof(IntPtr)) {
 				return true;
 			}
-			else {
-				if (type.IsConstructedGenericType) {
-					return type.GetGenericTypeDefinition() == typeof(Pointer<>);
-				}
+
+			if (type.IsConstructedGenericType) {
+				return type.GetGenericTypeDefinition() == typeof(Pointer<>);
 			}
 
 			return false;

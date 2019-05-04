@@ -14,7 +14,6 @@ using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
-using SimpleSharp;
 
 #endregion
 
@@ -107,7 +106,7 @@ namespace RazorSharp.CoreClr.Meta
 			switch (format.ToUpperInvariant()) {
 				case FMT_B:
 					return String.Format("{0} (token: {1}) (base size: {2}) (component size: {3}) (base fields size: {4})",
-						              Name, Token, BaseSize, ComponentSize, BaseFieldsSize);
+						              Name, Token, BaseSize, ComponentSize, NumInstanceFieldBytes);
 				case FMT_E:
 					return ToTable().ToString();
 				default:
@@ -175,7 +174,7 @@ namespace RazorSharp.CoreClr.Meta
 			/* -- Sizes -- */
 			table.AddRow("Base size", BaseSize);
 			table.AddRow("Component size", ComponentSize);
-			table.AddRow("Base fields size", BaseFieldsSize);
+			table.AddRow("Base fields size", NumInstanceFieldBytes);
 
 			/* -- Flags -- */
 			table.AddRow("Flags", EnumUtil.CreateString(Flags));
@@ -313,8 +312,6 @@ namespace RazorSharp.CoreClr.Meta
 		public int NativeSize => Value.Reference.EEClass.Reference.NativeSize;
 
 		public int BaseSizePadding => Value.Reference.EEClass.Reference.BaseSizePadding;
-
-		public int BaseFieldsSize => Value.Reference.NumInstanceFieldBytes;
 
 		#endregion
 

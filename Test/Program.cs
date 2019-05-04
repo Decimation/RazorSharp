@@ -65,23 +65,34 @@ namespace Test
 		// todo: DIA instead of dbghelp?
 
 
-		[ClrSymNamespace("WKS")]
-		public unsafe struct Struct
+		[ClrSymNamespace]
+		struct Globals
 		{
-			[SymField(Options=SymImportOptions.Global)]
-			public static readonly object g_dummy;
+			[SymField(Options = SymImportOptions.FullyQualified, FieldOptions = SymFieldOptions.LoadDirect)]
+			public Pointer<byte> g_pStringClass;
 		}
 
-		[ClrSymNamespace("WKS")]
-		public unsafe struct Struct2
+		[StructLayout(LayoutKind.Sequential)]
+		class _MethodTable
 		{
-			[SymField(Options2 =ImportOptions.IgnoreNamespace | ImportOptions.IgnoreEnclosingNamespace)]
-			public static readonly object g_dummy;
+			public int m_dwFlags;
+			public int BaseSize;
+
+			public override string ToString()
+			{
+				return Inspect.ValuesString(this);
+			}
 		}
-		
+
+
 		public static void Main(string[] args)
 		{
-			Symload.Load(Global.Assembly);
+			Globals g = default;
+			g = Symload.Load(g);
+			Console.WriteLine(g.g_pStringClass);
+			Console.WriteLine(typeof(string).GetMethodTable());
+
+			//Symload.LoadAll(Global.Assembly);
 		}
 	}
 }

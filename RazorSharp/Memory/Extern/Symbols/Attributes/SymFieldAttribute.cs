@@ -8,10 +8,29 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 		/// <summary>
 		/// The <see cref="Type"/> to load this field as. If left unset, the field will be interpreted as
 		/// the target field's type.
+		/// <remarks>To use this, <see cref="FieldOptions"/> must be <see cref="SymFieldOptions.LoadAs"/>.</remarks>
 		/// </summary>
 		public Type LoadAs { get; set; }
+		
+		/// <summary>
+		/// Specifies the size of memory to be copied into the field. If this is not specified, the base size of
+		/// the field type will be used. (<see cref="Unsafe.BaseSizeOfData(Type)"/>)
+		///
+		/// <remarks>To use this, <see cref="FieldOptions"/> must be <see cref="SymFieldOptions.LoadDirect"/>.</remarks>
+		/// 
+		/// </summary>
+		public int SizeConst { get; set; }
+		
+		/// <summary>
+		/// Specifies how the target field will be loaded.
+		/// </summary>
+		public SymFieldOptions FieldOptions { get; set; }
 
-		public SymFieldAttribute() : base() { }
+		public SymFieldAttribute() : base()
+		{
+			FieldOptions = SymFieldOptions.LoadAs;
+			SizeConst = Constants.INVALID_VALUE;
+		}
 
 		public SymFieldAttribute(SymImportOptions options) : base(options) { }
 

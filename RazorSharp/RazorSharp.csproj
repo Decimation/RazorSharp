@@ -168,12 +168,13 @@
     <Compile Include="CoreClr\Structures\TypeHandle.cs" />
     <Compile Include="ILDump.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\ClrSymNamespaceAttribute.cs" />
-    <Compile Include="Memory\Extern\Symbols\Attributes\ImportOptions.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\SymFieldAttribute.cs" />
+    <Compile Include="Memory\Extern\Symbols\Attributes\SymFieldOptions.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\SymImportAttribute.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\SymImportOptions.cs" />
     <Compile Include="Memory\OffsetOptions.cs" />
     <Compile Include="Memory\Pointers\AllocPointer.cs" />
+    <Compile Include="Memory\Pointers\FastPointer.cs" />
     <Compile Include="Memory\Pointers\Pointer.cs" />
     <Compile Include="Memory\Pointers\PointerFormat.cs" />
     <Compile Include="Memory\Pointers\StringTypes.cs" />
@@ -182,9 +183,6 @@
     <Compile Include="Memory\AddressInfo.cs" />
     <Compile Include="Memory\Assembler.cs" />
     <Compile Include="Memory\Extern\SymImportException.cs" />
-    <Compile Include="Memory\Extern\Sigscan\Attributes\ClrSigcallAttribute.cs" />
-    <Compile Include="Memory\Extern\Sigscan\Attributes\SigcallAttribute.cs" />
-    <Compile Include="Memory\Extern\Sigscan\SignatureCall.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\SymcallAttribute.cs" />
     <Compile Include="Memory\Extern\Symbols\Attributes\SymNamespaceAttribute.cs" />
     <Compile Include="Memory\Extern\Symbols\Symload.cs" />

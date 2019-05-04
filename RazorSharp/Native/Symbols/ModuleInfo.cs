@@ -7,6 +7,7 @@ using RazorSharp.CoreClr;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 //using SharpPdb.Windows;
+// ReSharper disable ConvertToAutoPropertyWhenPossible
 
 namespace RazorSharp.Native.Symbols
 {
@@ -26,6 +27,8 @@ namespace RazorSharp.Native.Symbols
 		private readonly SymbolRetrievalMode m_mode;
 
 		public Pointer<byte> BaseAddress => m_baseAddr;
+
+		public ISymbolResolver Resolver => m_reader;
 
 		public ModuleInfo(FileInfo pdb, ProcessModule module, SymbolRetrievalMode mode)
 			: this(pdb, module.BaseAddress, mode) { }

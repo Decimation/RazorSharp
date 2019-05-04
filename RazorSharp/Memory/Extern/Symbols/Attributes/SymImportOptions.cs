@@ -2,41 +2,37 @@ using System;
 
 namespace RazorSharp.Memory.Extern.Symbols.Attributes
 {
+	/// <summary>
+	/// Specifies how the symbol will be resolved.
+	/// </summary>
 	[Flags]
 	public enum SymImportOptions
 	{
 		None = 0,
 		
 		/// <summary>
-		///     Whether <see cref="SymImportAttribute.Symbol" /> is the fully qualified name
-		/// (don't use the member's name)
+		/// Don't use <see cref="SymNamespaceAttribute.Namespace"/> in the symbol name resolution.
 		/// </summary>
-		FullyQualified = 1,
+		IgnoreNamespace = 1,
 		
 		/// <summary>
-		///     Whether to use the decorated member's name as the symbol name.
+		/// Don't use the enclosing type's name in the symbol name resolution.
 		/// </summary>
-		UseMemberNameOnly = 2,
-		
-		/// <summary>
-		///     Whether to ignore <see cref="SymNamespaceAttribute.Namespace" /> if the enclosing type
-		///     specifies a namespace.
-		/// </summary>
-		IgnoreNamespace = 4,
+		IgnoreEnclosingNamespace = 2,
 		
 		/// <summary>
 		/// If the method is a <c>get</c> accessor, replace the <c>get_</c> in the name with <c>Get</c>
 		/// </summary>
-		UseAccessorName = 8,
-		
+		UseAccessorName = 4,
 		
 		/// <summary>
-		/// Whether this should be interpreted as a global variable.
+		/// Use only the symbol name.
 		/// <remarks>
-		/// This is a combination of <see cref="IgnoreNamespace"/>, <see cref="UseMemberNameOnly"/>
-		/// and <see cref="FullyQualified"/>
+		/// This is a combination of <see cref="IgnoreNamespace"/>, <see cref="IgnoreEnclosingNamespace"/>.
+		/// This can also be used for global variables.
 		/// </remarks>
+		/// 
 		/// </summary>
-		Global = IgnoreNamespace | FullyQualified | UseMemberNameOnly
+		FullyQualified = IgnoreNamespace | IgnoreEnclosingNamespace,
 	}
 }

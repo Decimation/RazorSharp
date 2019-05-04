@@ -48,6 +48,39 @@ namespace RazorSharp.Memory
 			}
 		}
 
+		public static object LoadFromEx(Type type, byte[] mem)
+		{
+			return ReflectionUtil.InvokeGenericMethod(typeof(Unsafe), nameof(LoadFrom),
+			                                          null, new[] {type}, mem);
+		}
+
+		/// <summary>
+		/// Creates an instance of <typeparamref name="T"/> from <paramref name="mem"/>.
+		/// If <typeparamref name="T"/> is a reference type, <paramref name="mem"/> should not contain
+		/// object internals like its <see cref="MethodTable"/> pointer or its <see cref="ObjHeader"/>; it should
+		/// only contain its fields.
+		/// </summary>
+		/// <param name="mem">Memory to load from</param>
+		/// <typeparam name="T">Type to load</typeparam>
+		/// <returns>An instance created from <paramref name="mem"/></returns>
+		public static T LoadFrom<T>(byte[] mem)
+		{
+			T             value = default;
+			Pointer<byte> addr;
+
+			if (typeof(T).IsValueType) {
+				addr = AddressOf(ref value).Cast<byte>();
+			}
+			else {
+				value = Runtime.AllocObject<T>();
+				addr  = AddressOfData(ref value).Cast<byte>();
+			}
+
+			addr.WriteAll(mem);
+
+			return value;
+		}
+
 		/// <summary>
 		///     Interprets a dynamically allocated reference type in the heap as a proper managed type. This is useful when
 		///     you only have a pointer to a reference type's data in the heap but cannot dereference it because the CLR
@@ -146,14 +179,21 @@ namespace RazorSharp.Memory
 			return CSUnsafe.AsPointer(ref value);
 		}
 
-		public static Pointer<T> AddressOfData<T>(ref T value)
+		/// <summary>
+		/// Returns the address of the data of <see cref="value"/>. If <typeparamref name="T"/> is a value type,
+		/// this will return <see cref="AddressOf{T}"/>. If <typeparamref name="T"/> is a reference type,
+		/// this will return the equivalent of <see cref="AddressOfHeap{T}(T, OffsetOptions)"/> with
+		/// <see cref="OffsetOptions.FIELDS"/>.
+		/// </summary>
+		public static Pointer<byte> AddressOfData<T>(ref T value)
 		{
-			if (value.GetType().IsValueType) {
-				return Unsafe.AddressOf(ref value);
+			var addr = AddressOf(ref value);
+
+			if (!value.GetType().IsValueType) {
+				return addr.Cast<byte>();
 			}
-			else {
-				return Unsafe.AddressOf(ref value).ReadPointer<byte>() + Offsets.OffsetToData;
-			}
+
+			return addr.ReadPointer<byte>() + Offsets.OffsetToData;
 		}
 
 		/// <summary>
@@ -352,7 +392,7 @@ namespace RazorSharp.Memory
 		///     <para>Note: This also includes padding and overhead (<see cref="ObjHeader" /> and <see cref="MethodTable" /> ptr.)</para>
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
-		public static int HeapSize<T>(T value) where T : class 
+		public static int HeapSize<T>(T value) where T : class
 			=> HeapSizeInternal(value);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -414,11 +454,11 @@ namespace RazorSharp.Memory
 			}
 			else if (Runtime.IsString(value)) {
 				string str = value as string;
-				
+
 				// Sanity check
 				Conditions.Assert(!Runtime.IsArray(value));
 				Conditions.NotNull(str, nameof(str));
-				
+
 				length = str.Length;
 			}
 
@@ -450,6 +490,8 @@ namespace RazorSharp.Memory
 
 			return typeof(T).GetMethodTable().Reference.NumInstanceFieldBytes;
 		}
+		
+		
 
 		/// <summary>
 		///     <para>Returns the base size of the fields (data) in the heap.</para>
@@ -470,7 +512,7 @@ namespace RazorSharp.Memory
 		///         <para>This includes field padding.</para>
 		///     </remarks>
 		/// </summary>
-		public static int BaseFieldsSize<T>(T value) where T : class 
+		public static int BaseFieldsSize<T>(T value) where T : class
 			=> BaseFieldsSizeInternal(value);
 
 
@@ -482,13 +524,39 @@ namespace RazorSharp.Memory
 		}
 
 		/// <summary>
-		///     Returns the size of the data not occupied by the <see cref="MethodTable" /> pointer
-		///     and the <see cref="ObjHeader" />.
+		///     Returns the size of the data in <paramref name="value"/>. If <typeparamref name="T"/> is a reference type,
+		/// this returns the size of <paramref name="value"/> not occupied by the <see cref="MethodTable" /> pointer and the <see cref="ObjHeader" />.
+		/// If <typeparamref name="T"/> is a value type, this returns <see cref="SizeOf{T}"/>.
 		/// </summary>
-		public static int SizeOfData<T>(T t) where T : class
+		public static int SizeOfData<T>(T value)
 		{
-			// Subtract the size of the ObjHeader and MethodTable*
-			return HeapSize(t) - (IntPtr.Size + sizeof(MethodTable*));
+			var type = value.GetType();
+
+			if (type.IsValueType) {
+				return SizeOf<T>();
+			}
+			else {
+				// Subtract the size of the ObjHeader and MethodTable*
+				return HeapSizeInternal(value) - (IntPtr.Size + sizeof(MethodTable*));
+			}
+		}
+		
+		/// <summary>
+		///     Returns the base size of the data in the type specified by <paramref name="t"/>. If <paramref name="t"/> is a reference type,
+		/// this returns the size of data not occupied by the <see cref="MethodTable" /> pointer, <see cref="ObjHeader" />, padding, and overhead.
+		/// If <paramref name="t"/> is a value type, this returns <see cref="SizeOf{T}"/>.
+		/// </summary>
+		public static int BaseSizeOfData(Type t)
+		{
+			
+
+			if (t.IsValueType) {
+				return (int) ReflectionUtil.InvokeGenericMethod(typeof(Unsafe), nameof(SizeOf), null, new[] {t}, null);
+			}
+			else {
+				// Subtract the size of the ObjHeader and MethodTable*
+				return t.GetMetaType().NumInstanceFieldBytes;
+			}
 		}
 
 		/*public static int SizeOfFields<T>(T t) where T : class
@@ -519,7 +587,7 @@ namespace RazorSharp.Memory
 		/// <returns>
 		///     <see cref="MethodTable.BaseSize" />
 		/// </returns>
-		public static int BaseInstanceSize<T>() where T : class 
+		public static int BaseInstanceSize<T>() where T : class
 			=> BaseInstanceSizeInternal<T>();
 
 

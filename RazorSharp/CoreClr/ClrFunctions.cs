@@ -54,7 +54,7 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		[Symcall(Options = SymImportOptions.UseMemberNameOnly)]
+		[Symcall(SymImportOptions.FullyQualified)]
 		internal static Pointer<byte> JIT_GetStaticFieldAddr_Context(FieldDesc* value)
 		{
 			throw new SymImportException();

@@ -1,16 +1,16 @@
 #region
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Memory.Extern.Signatures;
-using RazorSharp.Memory.Extern.Signatures.Attributes;
 using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32;
+// ReSharper disable InvalidXmlDocComment
 
 #endregion
 
@@ -19,8 +19,8 @@ namespace RazorSharp.Memory
 	/// <summary>
 	///     Methods of finding and executing DLL functions:
 	///     <para>
-	///         1. Sig scanning (<see cref="SignatureCall" />) (<see cref="Memory.MemScanner" />) (
-	///         <see cref="SigcallAttribute" />)
+	///         1. Sig scanning ((deprecated) <see cref="SignatureCall" />) (<see cref="Memory.MemScanner" />)
+	/// (deprecated) (<see cref="SigcallAttribute" />)
 	///     </para>
 	///     <list type="bullet">
 	///         <item>
