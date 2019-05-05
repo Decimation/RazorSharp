@@ -18,7 +18,7 @@ namespace RazorSharp.Native.Win32
 
 		internal const string KERNEL32_DLL = "kernel32.dll";
 
-		internal static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
+		internal static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(Constants.INVALID_VALUE);
 
 		[DllImport(KERNEL32_DLL)]
 		internal static extern uint GetLastError();

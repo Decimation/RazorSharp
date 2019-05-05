@@ -40,13 +40,7 @@ namespace RazorSharp.Native.Win32
 		                                          void*                                userSearchPath,
 		                                          [MarshalAs(UnmanagedType.Bool)] bool fInvadeProcess);
 
-
-		[SuppressUnmanagedCodeSecurity]
-		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
-		[DllImport(DBG_HELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool SymGetTypeInfo(IntPtr                  hProcess, ulong modBase, uint typeId,
-		                                           ImageHelpSymbolTypeInfo getType,  void* pInfo);
+		
 
 		[SuppressUnmanagedCodeSecurity]
 		[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]

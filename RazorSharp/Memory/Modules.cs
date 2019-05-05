@@ -8,6 +8,7 @@ using RazorSharp.CoreClr;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;
 using RazorSharp.Native.Win32;
+using SimpleSharp.Strings;
 
 #endregion
 
@@ -37,10 +38,19 @@ namespace RazorSharp.Memory
 			return GetModule(name) != null;
 		}
 
+		public static void UnloadIfLoaded(string name)
+		{
+			var module = GetNativeModule(name);
+			if (module != NativeModule.NullModule) {
+				module.Dispose();
+				Global.Log.Debug("Unloaded {Name}", name);
+			}
+		}
+
 		public static NativeModule LoadModule(string fileName)
 		{
 			var ptr = ProcessApi.LoadLibrary(fileName);
-			return CurrentNativeModules.First(m => m.BaseAddress == ptr);
+			return CurrentNativeModules.First(m => m.FileName == fileName);
 		}
 
 		public static ProcessModule GetModule(string name)
@@ -80,21 +90,25 @@ namespace RazorSharp.Memory
 			return GetModuleHandle(module.ModuleName);
 		}
 
-		public static Pointer<byte> GetBaseAddress(string module)
+		public static Pointer<byte> GetBaseAddress(string name)
 		{
-			Pointer<byte> ptr;
+			if (name == Clr.CLR_DLL_SHORT) {
+				return Clr.ClrModule.BaseAddress;
+			}
+			
+			IntPtr baseAddr;
+			var mod = GetModule(name);
 
-			var pm = GetModule(module);
-
-			ptr = pm?.BaseAddress ?? GetNativeModule(module).BaseAddress;
-
-			if (ptr.IsNull) {
-				string msg = String.Format("Module \"{0}\" is not loaded or the base address could not be retrieved",
-				                           module);
-				throw new Exception(msg);
+			if (mod == null) {
+				baseAddr= CurrentNativeModules.First(f => f.Name == name).BaseAddress.Address;
+			}
+			else {
+				baseAddr= mod.BaseAddress;
 			}
 
-			return ptr;
+//			Global.Log.Debug("Base addr for {Name} {Addr}", name, Hex.ToHex(baseAddr));
+			
+			return baseAddr;
 		}
 
 		private static Pointer<byte>[] GetAddressesInternal(Pointer<byte> baseAddr, long[] offset)

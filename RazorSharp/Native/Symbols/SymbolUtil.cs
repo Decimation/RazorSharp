@@ -7,6 +7,7 @@ using SimpleSharp.Utilities;
 using RazorSharp.CoreClr;
 using RazorSharp.Native.Win32;
 using SimpleSharp.Extensions;
+// ReSharper disable RedundantAssignment
 
 // ReSharper disable UnusedMember.Local
 
@@ -130,7 +131,7 @@ namespace RazorSharp.Native.Symbols
 				// for different files should not overlap
 				// (region is "base address + file size")
 
-				if (!SymbolUtil.GetFileSize(pFileName, ref fileSize)) {
+				if (!GetFileSize(pFileName, ref fileSize)) {
 					return false;
 				}
 			}
@@ -180,9 +181,9 @@ namespace RazorSharp.Native.Symbols
 
 			Conditions.NotNull(pdb, nameof(pdb));
 			string cd     = Environment.CurrentDirectory;
-			var    tmpSym = SymbolUtil.DownloadSymbolFile(new DirectoryInfo(cd), dll);
+			var    tmpSym = DownloadSymbolFile(new DirectoryInfo(cd), dll);
 			Conditions.Ensure(pdb.ContentEquals(tmpSym), ERR, nameof(pdb));
-			SymbolUtil.DeleteSymbolFile(tmpSym);
+			DeleteSymbolFile(tmpSym);
 		}
 	}
 }

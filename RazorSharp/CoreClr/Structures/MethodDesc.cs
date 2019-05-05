@@ -17,6 +17,7 @@ using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 using Unsafe = RazorSharp.Memory.Unsafe;
+
 // ReSharper disable UnusedMember.Local
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
@@ -93,8 +94,8 @@ namespace RazorSharp.CoreClr.Structures
 		private ushort m_wFlags;
 
 		/// <summary>
-		///     Valid only if the function is non-virtual and
-		///     non-abstract (<see cref="SizeOf" /> <c>== 16</c>)
+		///     Valid only if the function is non-virtual,
+		///     non-abstract, non-generic (<see cref="SizeOf" /> <c>== 16</c>)
 		/// </summary>
 		private void* m_pFunction;
 
@@ -111,7 +112,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		internal IntPtr Function {
 			get => Info.MethodHandle.GetFunctionPointer();
-			set => SetStableEntryPoint(value);
+			set => SetEntryPoint(value);
 		}
 
 
@@ -168,7 +169,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal int SizeOf {
-			[SymCall(Symbol = "SizeOf")]
+			[SymCall(Symbol = nameof(SizeOf))]
 			get => throw new SymImportException();
 		}
 
@@ -304,20 +305,21 @@ namespace RazorSharp.CoreClr.Structures
 			throw new SymImportException();
 		}
 
+		
+		
 		/// <summary>
 		///     <remarks>Address-sensitive</remarks>
 		/// </summary>
 		[SymCall]
-		private long SetStableEntryPointInterlocked(ulong pCode)
+		private int SetNativeCodeInterlocked(ulong pCode)
 		{
 			throw new SymImportException();
 		}
 
-
-		internal void SetStableEntryPoint(Pointer<byte> pCode)
+		internal void SetEntryPoint(Pointer<byte> pCode)
 		{
 			Reset();
-			Conditions.Ensure(SetStableEntryPointInterlocked((ulong) pCode) > 0);
+			Conditions.Ensure(SetNativeCodeInterlocked((ulong) pCode) > 0);
 		}
 
 		/// <summary>

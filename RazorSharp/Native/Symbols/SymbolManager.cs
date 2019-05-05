@@ -7,6 +7,8 @@ using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32;
 using SimpleSharp.Diagnostics;
 
+// ReSharper disable ReturnTypeCanBeEnumerable.Global
+
 namespace RazorSharp.Native.Symbols
 {
 	/// <summary>
@@ -22,10 +24,15 @@ namespace RazorSharp.Native.Symbols
 
 		private static List<Symbol> _symBuffer;
 
+		/// <summary>
+		/// Current image
+		/// </summary>
 		private static FileInfo _pdb;
 
 		internal static bool IsSetup { get; private set; }
-		
+
+		internal static bool IsImageLoaded => _modBase != 0;
+
 		internal static FileInfo CurrentImage {
 			get => _pdb;
 			set {
@@ -45,7 +52,7 @@ namespace RazorSharp.Native.Symbols
 			_proc    = IntPtr.Zero;
 			_modBase = 0;
 			_pdb     = null;
-			
+
 			ClearBuffer();
 
 			IsSetup = false;
@@ -76,17 +83,34 @@ namespace RazorSharp.Native.Symbols
 
 		private static void UnloadModule()
 		{
-			if (_modBase != 0) {
-				Global.Log.Debug("Unloading image {Img}", _pdb.Name);
+			if (IsImageLoaded) {
+				Global.Log.Verbose("Unloading image {Img}", _pdb.Name);
 				NativeHelp.Call(DbgHelp.SymUnloadModule64(_proc, _modBase), nameof(DbgHelp.SymUnloadModule64));
 			}
 		}
-		
+
+		private static void CheckModule()
+		{
+			if (!IsImageLoaded) {
+				string msg =
+					$"Error loading image. This may be an error with {nameof(Load)}. Have you loaded an image?";
+
+				throw new Exception(msg);
+			}
+		}
+
+		internal static void Dump()
+		{
+			foreach (var symbol in GetSymbols()) {
+				Console.WriteLine(symbol);
+			}
+		}
+
 		private static void Load()
 		{
 			string img = _pdb.FullName;
 
-			Global.Log.Debug("Loading image {Img}", _pdb.Name);
+			Global.Log.Verbose("Loading image {Img}", _pdb.Name);
 
 			UnloadModule();
 			Conditions.Require(IsSetup, nameof(IsSetup));
@@ -106,7 +130,7 @@ namespace RazorSharp.Native.Symbols
 				(uint) fileSize // Size of the file (cannot be NULL if .PDB file is used, otherwise it can be NULL)
 			);
 
-			NativeHelp.Call(_modBase != 0, nameof(DbgHelp.SymLoadModule64));
+			CheckModule();
 		}
 
 		internal static long[] GetSymOffsets(string[] names)
@@ -119,8 +143,33 @@ namespace RazorSharp.Native.Symbols
 			return GetSymbol(name).Offset;
 		}
 
+		internal static Symbol[] GetSymbols()
+		{
+			CheckModule();
+			
+			_symBuffer        = new List<Symbol>();
+
+			bool symEnumSuccess = DbgHelp.SymEnumSymbols(
+				_proc,                   // Process handle of the current process
+				_modBase,                // Base address of the module
+				null,                    // Mask (NULL -> all symbols)
+				CollectSymCallback, // The callback function
+				IntPtr.Zero              // A used-defined context can be passed here, if necessary
+			);
+
+			NativeHelp.Call(symEnumSuccess, nameof(DbgHelp.SymEnumSymbols));
+
+
+			Symbol[] cpy = _symBuffer.ToArray();
+			ClearBuffer();
+
+			return cpy;
+		}
+
 		internal static Symbol[] GetSymbols(string[] names)
 		{
+			CheckModule();
+			
 			var rg = new Symbol[names.Length];
 
 			for (int i = 0; i < rg.Length; i++) {
@@ -130,9 +179,10 @@ namespace RazorSharp.Native.Symbols
 			return rg;
 		}
 
+		// note: doesn't check module
 		internal static Symbol GetSymbol(string name)
 		{
-			Conditions.Require(_modBase != 0, nameof(_modBase));
+			//CheckModule();
 
 			int sz = (int) (Marshal.SizeOf<SymbolInfo>() + DbgHelp.MAX_SYM_NAME * sizeof(byte)
 			                                             + sizeof(ulong) - 1 / sizeof(ulong));
@@ -163,6 +213,8 @@ namespace RazorSharp.Native.Symbols
 
 		internal static Symbol[] GetSymbolsContainingName(string name)
 		{
+			CheckModule();
+			
 			_symBuffer        = new List<Symbol>();
 			_singleNameBuffer = name;
 
@@ -183,6 +235,8 @@ namespace RazorSharp.Native.Symbols
 			return cpy;
 		}
 
+		#region Callbacks
+
 		private static bool SymNameContainsCallback(IntPtr sym, uint symSize, IntPtr userCtx)
 		{
 			var    pSym    = (SymbolInfo*) sym;
@@ -197,14 +251,13 @@ namespace RazorSharp.Native.Symbols
 
 		private static bool CollectSymCallback(IntPtr sym, uint symSize, IntPtr userCtx)
 		{
-			var    pSym    = (SymbolInfo*) sym;
-			string symName = NativeHelp.GetString(&pSym->Name, pSym->NameLen);
+			var pSym = (SymbolInfo*) sym;
 
-			if (_nameBuffer.Contains(symName)) {
-				_symBuffer.Add(new Symbol(pSym));
-			}
+			_symBuffer.Add(new Symbol(pSym));
 
-			return _symBuffer.Count != _nameBuffer.Length;
+			return true;
 		}
+
+		#endregion
 	}
 }

@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 
 #endregion
 
@@ -33,5 +34,7 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 		///     <see cref="ProcessModule" /> from which to calculate the value address
 		/// </summary>
 		public string Module { get; set; }
+
+		internal string ShortModuleName => new FileInfo(Module).Name;
 	}
 }

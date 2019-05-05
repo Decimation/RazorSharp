@@ -349,7 +349,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <param name="values">Values to write</param>
 		public void WriteAll(params T[] values)
 		{
-			Conditions.Assert(values.Length > 0);
+			Conditions.Require(values.Length > 0);
 			for (int i = 0; i < values.Length; i++)
 				this[i] = values[i];
 		}

@@ -73,7 +73,7 @@ namespace RazorSharp.CoreClr.Meta
 		///     </para>
 		///     <para>
 		///         <see cref="set_Function" /> sets the method entry point
-		///         (<see cref="MethodDesc.SetStableEntryPoint" />).
+		///         (<see cref="MethodDesc.SetEntryPoint" />).
 		///     </para>
 		/// </summary>
 		public Pointer<byte> Function {

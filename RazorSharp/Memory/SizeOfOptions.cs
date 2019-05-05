@@ -130,5 +130,7 @@ namespace RazorSharp.Memory
 		///     reference type, this is equal to <see cref="Heap"/>.
 		/// </summary>
 		Auto,
+		
+		
 	}
 }

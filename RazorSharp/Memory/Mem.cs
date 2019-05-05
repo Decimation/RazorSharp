@@ -85,10 +85,25 @@ namespace RazorSharp.Memory
 
 		#region Zero
 
-		public static void DestroyClass<T>(T value) where T : class
+		public static void Destroy<T>(ref T value)
 		{
-			int           size = Unsafe.SizeOfData(value);
-			Pointer<byte> ptr  = Unsafe.AddressOfHeap(value, OffsetOptions.FIELDS);
+			if (!Runtime.IsStruct(value)) {
+				DestroyClass(value);
+			}
+			else {
+				DestroyStruct(ref value);
+			}
+		}
+		
+		private static void DestroyStruct<T>(ref T value) /*where T : struct*/
+		{
+			value = default;
+		}
+
+		private static void DestroyClass<T>(T value) /*where T : class*/
+		{
+			int size = Unsafe.SizeOfData(value);
+			Pointer<byte> ptr  = Unsafe.AddressOfData(ref value);
 			ptr.ZeroBytes(size);
 		}
 

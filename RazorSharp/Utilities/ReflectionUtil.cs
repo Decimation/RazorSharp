@@ -46,7 +46,7 @@ namespace RazorSharp.Utilities
 			return method.Invoke(method.IsStatic ? null : instance, args);
 		}
 
-		public static OpCode[] GetAllOpCodes()
+		internal static OpCode[] GetAllOpCodes()
 		{
 			FieldInfo[] opCodesFields = typeof(OpCodes).GetFields(BindingFlags.Public | BindingFlags.Static);
 			var         opCodes       = new OpCode[opCodesFields.Length];
@@ -114,7 +114,7 @@ namespace RazorSharp.Utilities
 			var members    = new List<MemberInfo>();
 			var attributes = new List<TAttribute>();
 
-			foreach (var member in t.GetMembers(ReflectionUtil.ALL_FLAGS)) {
+			foreach (var member in t.GetAllMembers()) {
 				if (Attribute.IsDefined(member, typeof(TAttribute))) {
 					members.Add(member);
 					attributes.Add(member.GetCustomAttribute<TAttribute>());

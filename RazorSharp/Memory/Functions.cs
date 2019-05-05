@@ -77,8 +77,11 @@ namespace RazorSharp.Memory
 	{
 		static Functions()
 		{
-			const string SET_ENTRY_POINT = "MethodDesc::SetStableEntryPointInterlocked";
-			SetEntryPoint = Runtime.GetClrFunction<SetEntryPointDelegate>(SET_ENTRY_POINT);
+			const string RESET = "MethodDesc::Reset";
+			Reset = Runtime.GetClrFunction<ResetDelegate>(RESET);
+
+			const string SET_NATIVE_CODE = "MethodDesc::SetNativeCodeInterlocked";
+			SetNativeCode = Runtime.GetClrFunction<SetNativeCodeInterlockedDelegate>(SET_NATIVE_CODE);
 		}
 
 		/// <summary>
@@ -91,31 +94,34 @@ namespace RazorSharp.Memory
 			return GetDelegateForFunctionPointer<TDelegate>(hFn);
 		}
 
-		#region Set entry point
+		#region Delegate functions
 
-		/// <summary>
-		///     We implement <see cref="SetEntryPointDelegate" /> as a <see cref="Delegate" /> initially because
-		///     <see cref="MethodDesc.SetStableEntryPointInterlocked" /> has not been bound yet, and in order to bind
-		///     it we have to use this function.
-		/// </summary>
-		/// <param name="value"><c>this</c> pointer of a <see cref="MethodDesc" /></param>
-		/// <param name="pCode">Entry point</param>
-		private delegate long SetEntryPointDelegate(MethodDesc* value, ulong pCode);
+		private delegate int SetNativeCodeInterlockedDelegate(MethodDesc* value, ulong pCode, ulong pExpected = 0);
 
-		private static readonly SetEntryPointDelegate SetEntryPoint;
-		
+		private static readonly SetNativeCodeInterlockedDelegate SetNativeCode;
+
+		private delegate void ResetDelegate(MethodDesc* value);
+
+		private static readonly ResetDelegate Reset;
+
 		/// <summary>
 		///     <remarks>
-		///         Equal to <see cref="MethodDesc.SetStableEntryPoint" />, but this is implemented via a <see cref="Delegate" />
+		///         Equal to <see cref="MethodDesc.SetEntryPoint" />, but this is implemented via a <see cref="Delegate" />
 		///     </remarks>
 		/// </summary>
-		public static void SetStableEntryPoint(MethodInfo mi, Pointer<byte> pCode)
+		public static void SetEntryPoint(MethodInfo mi, Pointer<byte> pCode)
 		{
-			var  pMd    = (MethodDesc*) mi.MethodHandle.Value;
-			long result = SetEntryPoint(pMd, (ulong) pCode);
+			var md = (MethodDesc*) mi.MethodHandle.Value;
+			
+			Reset(md);
+			
+			int result = SetNativeCode(md, (ulong) pCode);
+
 
 			if (!(result > 0)) {
-				Global.Log.Warning("Possible error setting entry point for {Method} (code: {Code})", mi.Name, result);
+				Global.Log.Warning(
+					"Possible error setting entry point for {Method} (code: {Code}) (entry point: {PCode})",
+					mi.Name, result, pCode);
 			}
 
 			//Conditions.Assert(result >0);
@@ -138,7 +144,7 @@ namespace RazorSharp.Memory
 		public static void Swap(MethodInfo dest, MethodInfo src)
 		{
 			var srcCode = src.MethodHandle.GetFunctionPointer();
-			SetStableEntryPoint(dest, srcCode);
+			SetEntryPoint(dest, srcCode);
 		}
 
 		#endregion

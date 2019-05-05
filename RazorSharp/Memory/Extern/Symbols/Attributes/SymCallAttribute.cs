@@ -17,7 +17,7 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 	///     </para>
 	///     <para>
 	///         The annotated method's entry point (<see cref="MethodDesc.Function" />)
-	///         will be set (<see cref="Functions.SetStableEntryPoint" />) to the address of the symbol's RVA +
+	///         will be set (<see cref="Functions.SetEntryPoint" />) to the address of the symbol's RVA +
 	/// the corresponding <see cref="ProcessModule"/>'s <see cref="ProcessModule.BaseAddress"/>.
 	///     </para>
 	///     <para>This allows the calling of non-exported DLL functions.</para>

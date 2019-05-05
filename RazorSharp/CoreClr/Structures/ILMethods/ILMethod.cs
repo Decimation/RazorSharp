@@ -54,6 +54,13 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		internal bool IsTiny => Tiny.Reference.IsTiny;
 		internal bool IsFat  => Fat.Reference.IsFat;
 
+		internal static void Dump()
+		{
+			int cb = 25;
+			
+			
+		}
+
 		internal void WriteIL(byte[] rgOpCodes)
 		{
 			Code.SafeWrite(rgOpCodes);

@@ -171,7 +171,7 @@ namespace RazorSharp.Memory
 		{
 			var addr = AddressOf(ref value);
 
-			if (!Runtime.IsStruct(value)) {
+			if (Runtime.IsStruct(value)) {
 				return addr.Cast<byte>();
 			}
 

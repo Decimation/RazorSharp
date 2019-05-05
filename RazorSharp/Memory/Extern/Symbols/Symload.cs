@@ -47,7 +47,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static bool IsBound(Type t) => BoundTypes.Contains(t);
-		
+
 		private static string ResolveSymbolName(SymImportAttribute attr, [NotNull] MemberInfo member)
 		{
 			Conditions.NotNull(member.DeclaringType, nameof(member.DeclaringType));
@@ -62,7 +62,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 			string enclosingNamespace = member.DeclaringType.Name;
 
 			var options = attr.Options;
-			
+
 			if (!options.HasFlagFast(SymImportOptions.IgnoreEnclosingNamespace)) {
 				resolvedName = enclosingNamespace + SCOPE_RESOLUTION_OPERATOR + resolvedName;
 			}
@@ -94,10 +94,8 @@ namespace RazorSharp.Memory.Extern.Symbols
 		}
 
 		private static ModuleInfo GetInfo(SymNamespaceAttribute attr)
-			=> GetInfo(attr, Modules.GetBaseAddress(attr.Module));
+			=> GetInfo(attr, Modules.GetBaseAddress(attr.ShortModuleName));
 
-		
-		
 
 		private static void LoadField<T>(ref T              value,
 		                                 ModuleInfo         module,
@@ -149,11 +147,19 @@ namespace RazorSharp.Memory.Extern.Symbols
 					throw new ArgumentOutOfRangeException();
 			}
 
-			var ptr = fieldInfo.GetAddress(ref value);
-			ptr.WriteAnyEx(fieldType, loadedValue);
 
-			//fieldInfo.SetValueByAddr(ref value, loadedValue);
-			//fieldInfo.SetValue(value, loadedValue);
+			if (!fieldInfo.IsStatic) {
+				var ptr = fieldInfo.GetAddress(ref value);
+
+				if (fieldInfo.EnclosingType.IsValueType) {
+					ptr += Unsafe.AddressOf(ref value).Cast<byte>();
+				}
+
+				ptr.WriteAnyEx(fieldType, loadedValue);
+			}
+			else {
+				fieldInfo.SetValue(value, loadedValue);
+			}
 		}
 
 		public static void LoadAll(Assembly asm)
@@ -166,13 +172,111 @@ namespace RazorSharp.Memory.Extern.Symbols
 			}
 		}
 
+		private static void LoadComponents<T>(ref T value, Type type,ModuleInfo mi)
+		{
+			(MemberInfo[] members, SymImportAttribute[] attributes) = type.GetAnnotated<SymImportAttribute>();
+
+			int lim = attributes.Length;
+			
+			for (int i = 0; i < lim; i++) {
+				var attr = attributes[i];
+				var mem  = members[i];
+
+				// Resolve the symbol
+
+				string        name = ResolveSymbolName(attr, mem);
+				Pointer<byte> addr = mi.GetSymAddress(name);
+
+				switch (mem.MemberType) {
+					case MemberTypes.Constructor:
+						// The import is a function (ctor)
+						Functions.SetEntryPoint((MethodInfo) mem, addr.Address);
+						break;
+					case MemberTypes.Field:
+						LoadField(ref value, mi, name, mem, attr);
+						break;
+					case MemberTypes.Method:
+						// The import is a function
+						Functions.SetEntryPoint((MethodInfo) mem, addr.Address);
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+			}
+		}
+
+		public static void Reload<T>(ref T value)
+		{
+			var type = value.GetType();
+			Conditions.Require(IsBound(type));
+
+			var mi = GetModuleInfo(type);
+
+			LoadComponents(ref value, type, mi);
+		}
+
 		public static void Load(Type type) => Load(type, default(object));
 
 		public static T Load<T>(T value) => Load(value.GetType(), value);
 
-		public static void Unload<T>(T value)
+
+		public static void Unload<T>(ref T value, bool unloadModule = true)
 		{
-			
+			var type = value.GetType();
+
+			Conditions.Require(IsBound(type));
+
+			if (unloadModule) {
+				var    nameSpaceAttr = type.GetCustomAttribute<SymNamespaceAttribute>();
+				string shortName     = nameSpaceAttr.ShortModuleName;
+				Modules.UnloadIfLoaded(shortName);
+			}
+
+			Mem.Destroy(ref value);
+
+			(MemberInfo[] members, SymImportAttribute[] attributes) = type.GetAnnotated<SymImportAttribute>();
+
+			int lim = attributes.Length;
+
+			for (int i = 0; i < lim; i++) {
+				var mem = members[i];
+
+				switch (mem.MemberType) {
+					case MemberTypes.Field:
+						break;
+					case MemberTypes.Method:
+						var metaMethod = new MetaMethod(((MethodInfo) mem));
+						metaMethod.Reset();
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+			}
+
+
+			BoundTypes.Remove(type);
+		}
+
+
+		private static ModuleInfo GetModuleInfo(Type type)
+		{
+			var nameSpaceAttr = type.GetCustomAttribute<SymNamespaceAttribute>();
+			Conditions.NotNull(nameSpaceAttr, nameof(nameSpaceAttr));
+
+			Pointer<byte> baseAddr = null;
+
+			string shortName = nameSpaceAttr.ShortModuleName;
+
+			if (!Modules.IsLoaded(shortName)) {
+//				throw new Exception(String.Format("Module \"{0}\" is not loaded", nameSpaceAttr.Module));
+				Global.Log.Debug("Module {Name} is not loaded, loading", shortName);
+				var mod = Modules.LoadModule(nameSpaceAttr.Module);
+				baseAddr = mod.BaseAddress;
+			}
+
+			var mi = !baseAddr.IsNull ? GetInfo(nameSpaceAttr, baseAddr) : GetInfo(nameSpaceAttr);
+
+			return mi;
 		}
 		
 		public static T Load<T>(Type type, T value)
@@ -182,59 +286,10 @@ namespace RazorSharp.Memory.Extern.Symbols
 			}
 
 			// For now, only one image can be used per type
-			var nameSpaceAttr = type.GetCustomAttribute<SymNamespaceAttribute>();
-			Conditions.NotNull(nameSpaceAttr, nameof(nameSpaceAttr));
+			var mi = GetModuleInfo(type);
 
-			Pointer<byte> baseAddr = null;
 
-			if (!Modules.IsLoaded(nameSpaceAttr.Module)) {
-//				throw new Exception(String.Format("Module \"{0}\" is not loaded", nameSpaceAttr.Module));
-				var mod = Modules.LoadModule(nameSpaceAttr.Module);
-				baseAddr = mod.BaseAddress;
-			}
-
-			var mi = !baseAddr.IsNull ? GetInfo(nameSpaceAttr, baseAddr) : GetInfo(nameSpaceAttr);
-
-			(MemberInfo[] members, SymImportAttribute[] attributes) = type.GetAnnotated<SymImportAttribute>();
-
-			int lim = attributes.Length;
-
-			if (lim == 0) {
-				return value;
-			}
-
-//			Global.Log.Information("Binding type {Name}", type.Name);
-
-			for (int i = 0; i < lim; i++) {
-				var attr = attributes[i];
-				var mem  = members[i];
-
-				// Resolve the symbol
-
-				string name = ResolveSymbolName(attr, mem);
-
-				var addr = mi.GetSymAddress(name);
-
-//				string fmt = String.Format("Binding {0} (resolved: -> {1}) to {2}", mem.Name, name, addr);
-//				Global.Log.Debug(fmt);
-
-				switch (mem.MemberType) {
-					case MemberTypes.Constructor:
-						// The import is a function (ctor)
-						Functions.SetStableEntryPoint((MethodInfo) mem, addr.Address);
-						break;
-					case MemberTypes.Field:
-						LoadField(ref value, mi, name, mem, attr);
-						break;
-					case MemberTypes.Method:
-						// The import is a function
-						Functions.SetStableEntryPoint((MethodInfo) mem, addr.Address);
-						break;
-					default:
-						throw new ArgumentOutOfRangeException();
-				}
-			}
-
+			LoadComponents(ref value, type, mi);
 
 			BoundTypes.Add(type);
 
