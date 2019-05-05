@@ -40,6 +40,10 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.9")]
 
 
+// Test project
 [assembly: InternalsVisibleTo("Test")]
+
+// Benchmarking/testing solution
+[assembly: InternalsVisibleTo("Sandbox")]
 
 // nuget pack

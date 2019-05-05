@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 namespace RazorSharp.Native.Symbols
 {
 	public enum SymTagEnum

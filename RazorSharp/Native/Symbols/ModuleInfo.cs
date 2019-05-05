@@ -6,59 +6,43 @@ using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+
 //using SharpPdb.Windows;
-// ReSharper disable ConvertToAutoPropertyWhenPossible
+
 
 namespace RazorSharp.Native.Symbols
 {
-	public enum SymbolRetrievalMode
-	{
-		KERNEL,
-		PDB_READER
-	}
-
 	/// <summary>
 	/// Combines a symbol file with a process module.
 	/// </summary>
-	public class ModuleInfo : IDisposable
+	public class ModuleInfo
 	{
-		private readonly ISymbolResolver     m_reader;
-		private readonly Pointer<byte>       m_baseAddr;
-		private readonly SymbolRetrievalMode m_mode;
+		private readonly FileInfo m_pdb;
 
-		public Pointer<byte> BaseAddress => m_baseAddr;
+		public Pointer<byte> BaseAddress { get; }
 
-		public ISymbolResolver Resolver => m_reader;
+		public ModuleInfo(FileInfo pdb, ProcessModule module)
+			: this(pdb, module.BaseAddress) { }
 
-		public ModuleInfo(FileInfo pdb, ProcessModule module, SymbolRetrievalMode mode)
-			: this(pdb, module.BaseAddress, mode) { }
-
-		public ModuleInfo(FileInfo pdb, Pointer<byte> baseAddr, SymbolRetrievalMode mode)
+		public ModuleInfo(FileInfo pdb, Pointer<byte> baseAddr)
 		{
 			Conditions.NotNull(baseAddr.Address, nameof(baseAddr));
 
-			m_baseAddr = baseAddr;
-			m_mode     = mode;
-
-			switch (m_mode) {
-				case SymbolRetrievalMode.KERNEL:
-					m_reader = new SymbolManager(pdb.FullName);
-					break;
-				case SymbolRetrievalMode.PDB_READER:
-					// m_reader = new PdbSymbols(pdb);
-					
-					throw new NotImplementedException();
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+			BaseAddress = baseAddr;
+			m_pdb       = pdb;
 		}
 
 
+		public Symbol GetSymbol(string name)
+		{
+			SymbolManager.CurrentImage = m_pdb;
+			return SymbolManager.GetSymbol(name);
+		}
+
 		public Pointer<byte> GetSymAddress(string name)
 		{
-			long ofs = m_reader.GetSymOffset(name);
-			return m_baseAddr + ofs;
+			long ofs = GetSymbol(name).Offset;
+			return BaseAddress + ofs;
 		}
 
 		public TDelegate GetFunction<TDelegate>(string name) where TDelegate : Delegate
@@ -68,20 +52,16 @@ namespace RazorSharp.Native.Symbols
 
 		public Pointer<byte>[] GetSymAddresses(string[] names)
 		{
-			var offsets = m_reader.GetSymOffsets(names);
+			SymbolManager.CurrentImage = m_pdb;
+			var offsets = SymbolManager.GetSymOffsets(names);
 
 			var rg = new Pointer<byte>[offsets.Length];
 
 			for (int i = 0; i < rg.Length; i++) {
-				rg[i] = m_baseAddr + offsets[i];
+				rg[i] = BaseAddress + offsets[i];
 			}
 
 			return rg;
-		}
-
-		public void Dispose()
-		{
-			m_reader.Dispose();
 		}
 	}
 }

@@ -40,7 +40,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 		}
 
 
-		public static bool HasFlagFast(this SymImportOptions value, SymImportOptions flag)
+		private static bool HasFlagFast(this SymImportOptions value, SymImportOptions flag)
 		{
 			return (value & flag) == flag;
 		}
@@ -55,8 +55,6 @@ namespace RazorSharp.Memory.Extern.Symbols
 			//var attr          = member.GetCustomAttribute<SymImportAttribute>();
 			var nameSpaceAttr = member.DeclaringType.GetCustomAttribute<SymNamespaceAttribute>();
 
-			// todo: replace this with a config system that makes more sense lol
-
 			// Resolve the symbol
 
 			string resolvedName       = attr.Symbol ?? member.Name;
@@ -64,8 +62,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 			string enclosingNamespace = member.DeclaringType.Name;
 
 			var options = attr.Options;
-
-
+			
 			if (!options.HasFlagFast(SymImportOptions.IgnoreEnclosingNamespace)) {
 				resolvedName = enclosingNamespace + SCOPE_RESOLUTION_OPERATOR + resolvedName;
 			}
@@ -93,12 +90,14 @@ namespace RazorSharp.Memory.Extern.Symbols
 			}
 
 
-			return new ModuleInfo(new FileInfo(attr.Image), baseAddr, SymbolRetrievalMode.PDB_READER);
+			return new ModuleInfo(new FileInfo(attr.Image), baseAddr);
 		}
 
 		private static ModuleInfo GetInfo(SymNamespaceAttribute attr)
 			=> GetInfo(attr, Modules.GetBaseAddress(attr.Module));
 
+		
+		
 
 		private static void LoadField<T>(ref T              value,
 		                                 ModuleInfo         module,
@@ -171,6 +170,11 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 		public static T Load<T>(T value) => Load(value.GetType(), value);
 
+		public static void Unload<T>(T value)
+		{
+			
+		}
+		
 		public static T Load<T>(Type type, T value)
 		{
 			if (IsBound(type)) {
@@ -184,7 +188,9 @@ namespace RazorSharp.Memory.Extern.Symbols
 			Pointer<byte> baseAddr = null;
 
 			if (!Modules.IsLoaded(nameSpaceAttr.Module)) {
-				throw new Exception(String.Format("Module \"{0}\" is not loaded", nameSpaceAttr.Module));
+//				throw new Exception(String.Format("Module \"{0}\" is not loaded", nameSpaceAttr.Module));
+				var mod = Modules.LoadModule(nameSpaceAttr.Module);
+				baseAddr = mod.BaseAddress;
 			}
 
 			var mi = !baseAddr.IsNull ? GetInfo(nameSpaceAttr, baseAddr) : GetInfo(nameSpaceAttr);
@@ -221,7 +227,6 @@ namespace RazorSharp.Memory.Extern.Symbols
 						LoadField(ref value, mi, name, mem, attr);
 						break;
 					case MemberTypes.Method:
-
 						// The import is a function
 						Functions.SetStableEntryPoint((MethodInfo) mem, addr.Address);
 						break;
@@ -232,10 +237,6 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 
 			BoundTypes.Add(type);
-
-			// Don't dispose ClrSymbols - we need it for the life of the program
-			if (!ReferenceEquals(mi, Clr.ClrSymbols))
-				mi.Dispose();
 
 //			Global.Log.Debug("Done");
 

@@ -39,27 +39,9 @@ namespace RazorSharp.CoreClr
 				IsPdbTemporary = false;
 			}
 
-			ClrSymbols = new ModuleInfo(ClrPdb, ClrModule, SymbolRetrievalMode.KERNEL);
+			ClrSymbols = new ModuleInfo(ClrPdb, ClrModule);
 		}
 
-
-		/// <summary>
-		///     Matches <see cref="ClrPdb" /> with the symbol file returned by Microsoft's servers
-		/// </summary>
-		internal static void CheckSymbolIntegrity()
-		{
-			// Good lord this problem took 3 hours to solve
-			// Turns out the pdb file was just out of date lmao
-
-			const string ERR = "The PDB specified by \"" + nameof(ClrPdb) +
-			                   "\" does not match the one returned by Microsoft's servers";
-
-			Conditions.NotNull(ClrPdb, nameof(ClrPdb));
-			string cd     = Environment.CurrentDirectory;
-			var    tmpSym = SymbolAccess.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
-			Conditions.Ensure(ClrPdb.ContentEquals(tmpSym), ERR, nameof(ClrPdb));
-			DeleteSymbolFile(tmpSym);
-		}
 
 		private static FileInfo GetClrSymbolFile()
 		{
@@ -80,7 +62,7 @@ namespace RazorSharp.CoreClr
 					clrSym = new FileInfo(CLR_PDB_FILE_SEARCH);
 				}
 				else {
-					clrSym = SymbolAccess.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
+					clrSym = SymbolUtil.DownloadSymbolFile(new DirectoryInfo(cd), ClrDll);
 				}
 			}
 
@@ -101,30 +83,9 @@ namespace RazorSharp.CoreClr
 		internal static void Setup()
 		{
 			IsSetup = true;
+			
 		}
 
-
-		/// <summary>
-		///     Deletes an automatically downloaded pdb file
-		/// </summary>
-		private static void DeleteSymbolFile(FileInfo pdb)
-		{
-			// Delete temporarily downloaded symbol files
-			Conditions.NotNull(pdb.Directory, nameof(pdb.Directory));
-
-			// This (should) equal IsPdbTemporary
-			if (pdb.Directory.FullName.Contains(Environment.CurrentDirectory)) {
-				Global.Log.Debug("Deleting temporary PDB file");
-
-				var files = new FileSystemInfo[] {pdb, pdb.Directory, pdb.Directory.Parent};
-
-				foreach (var file in files) {
-					file.Delete();
-					file.Refresh();
-					Conditions.Assert(!file.Exists);
-				}
-			}
-		}
 
 		internal static void Close()
 		{
@@ -133,9 +94,7 @@ namespace RazorSharp.CoreClr
 			// This won't delete the symbol file if it wasn't manually downloaded
 			// but we'll make sure anyway
 			if (IsPdbTemporary)
-				DeleteSymbolFile(ClrPdb);
-
-			ClrSymbols.Dispose();
+				SymbolUtil.DeleteSymbolFile(ClrPdb);
 
 			IsSetup = false;
 		}
@@ -179,7 +138,7 @@ namespace RazorSharp.CoreClr
 		/// <summary>
 		///     <para>CLR symbol file</para>
 		///     <para>A PDB file will be searched for in <see cref="CLR_PDB_FILE_SEARCH" />;</para>
-		///     <para>or the symbol file will be automatically downloaded</para>
+		///     <para>otherwise the symbol file will be automatically downloaded</para>
 		/// </summary>
 		internal static readonly FileInfo ClrPdb;
 

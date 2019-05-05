@@ -10,29 +10,45 @@ using RazorSharp.Native.Symbols;
 
 namespace RazorSharp
 {
+	/// <summary>
+	/// Initializers. Every type that needs to be set up/closed has:
+	/// <list type="bullet">
+	/// <item>
+	/// <description><see cref="Setup"/> method</description>
+	/// </item>
+	/// <item>
+	/// <description><see cref="Close"/> method</description>
+	/// </item>
+	/// <item>
+	/// <description><see cref="IsSetup"/> property</description>
+	/// </item>
+	/// </list>
+	/// </summary>
 	internal static class ModuleInitializer
 	{
 		internal static bool IsSetup { get; private set; }
 
-		internal static void GlobalSetup()
+		internal static void Setup()
 		{
-			Global.Log.Information("Loading module");
+			Global.Log.Information("Loading {Module}", Global.NAME);
 
 			// Init code
+			SymbolManager.Setup();
 			Global.Setup();
 			Clr.Setup();
 
 			IsSetup = true;
 		}
 
-		internal static void GlobalClose()
+		internal static void Close()
 		{
 			// SHUT IT DOWN
-			Global.Log.Information("Unloading module");
+			Global.Log.Information("Unloading {Module}", Global.NAME);
 
-			
+
 			Clr.Close();
 			Global.Close();
+			SymbolManager.Close();
 
 			IsSetup = false;
 		}
@@ -42,13 +58,10 @@ namespace RazorSharp
 		/// </summary>
 		public static void Initialize()
 		{
-			GlobalSetup();
+			Setup();
 
 			var appDomain = AppDomain.CurrentDomain;
-			appDomain.ProcessExit += (sender, eventArgs) =>
-			{
-				GlobalClose();
-			};
+			appDomain.ProcessExit += (sender, eventArgs) => { Close(); };
 		}
 	}
 }

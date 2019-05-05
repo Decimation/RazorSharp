@@ -183,7 +183,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		private int LoadSize {
-			[Symcall(Symbol = "FieldDesc::LoadSize", Options = SymImportOptions.FullyQualified)]
+			[SymCall(Symbol = "FieldDesc::LoadSize", Options = SymImportOptions.FullyQualified)]
 			get => throw new SymImportException(nameof(LoadSize));
 		}
 
@@ -213,7 +213,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
-			[Symcall(Symbol = "FieldDesc::GetApproxEnclosingMethodTable", Options = SymImportOptions.FullyQualified)]
+			[SymCall(Symbol = "FieldDesc::GetApproxEnclosingMethodTable", Options = SymImportOptions.FullyQualified)]
 			get => throw new SymImportException();
 		}
 
@@ -224,13 +224,13 @@ namespace RazorSharp.CoreClr.Structures
 		}
 
 		
-		[Symcall]
+		[SymCall]
 		internal Pointer<byte> GetStaticAddress(void* value)
 		{
 			throw new SymImportException(nameof(GetStaticAddress));
 		}
 
-		[Symcall]
+		[SymCall]
 		internal Pointer<byte> GetStaticAddressHandle()
 		{
 			throw new SymImportException(nameof(GetStaticAddressHandle));

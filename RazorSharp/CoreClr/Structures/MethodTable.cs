@@ -15,6 +15,7 @@ using RazorSharp.Memory.Extern;
 using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
+// ReSharper disable UnusedMember.Local
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -181,7 +182,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal Pointer<MethodTable> Canon => GetCanonicalMethodTable();
 
-		[Symcall]
+		[SymCall]
 		private MethodTable* GetCanonicalMethodTable()
 		{
 			throw new SymImportException();
@@ -253,7 +254,7 @@ namespace RazorSharp.CoreClr.Structures
 		internal MethodDescChunk* MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
 
 
-		[Symcall]
+		[SymCall]
 		internal uint GetSignatureCorElementType()
 		{
 			throw new SymImportException();

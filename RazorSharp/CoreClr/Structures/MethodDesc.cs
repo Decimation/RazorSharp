@@ -17,6 +17,7 @@ using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 using Unsafe = RazorSharp.Memory.Unsafe;
+// ReSharper disable UnusedMember.Local
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
 
@@ -121,7 +122,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		/// <exception cref="SymImportException"></exception>
 		internal IntPtr NativeCode {
-			[Symcall(SymImportOptions.UseAccessorName)]
+			[SymCall(SymImportOptions.UseAccessorName)]
 			get => throw new SymImportException();
 		}
 
@@ -132,7 +133,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal IntPtr PreImplementedCode {
-			[Symcall(SymImportOptions.UseAccessorName)]
+			[SymCall(SymImportOptions.UseAccessorName)]
 			get => throw new SymImportException();
 		}
 
@@ -167,7 +168,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal int SizeOf {
-			[Symcall(Symbol = "SizeOf")]
+			[SymCall(Symbol = "SizeOf")]
 			get => throw new SymImportException();
 		}
 
@@ -177,7 +178,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
-			[Symcall(Symbol = "GetMethodTable")]
+			[SymCall(Symbol = "GetMethodTable")]
 			get => throw new SymImportException();
 		}
 
@@ -188,13 +189,13 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal uint RVA {
-			[Symcall(SymImportOptions.UseAccessorName)]
+			[SymCall(SymImportOptions.UseAccessorName)]
 			get => throw new SymImportException();
 		}
 
 
 		internal int Token {
-			[Symcall(Symbol = "GetMemberDef")]
+			[SymCall(Symbol = "GetMemberDef")]
 			get => throw new SymImportException();
 		}
 
@@ -207,7 +208,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal bool IsConstructor {
-			[Symcall(Symbol = "IsCtor")]
+			[SymCall(Symbol = "IsCtor")]
 			get => throw new SymImportException();
 		}
 
@@ -220,7 +221,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal bool IsPointingToNativeCode {
-			[Symcall(Symbol = "IsPointingToNativeCode")]
+			[SymCall(Symbol = "IsPointingToNativeCode")]
 			get => throw new SymImportException();
 		}
 
@@ -297,7 +298,7 @@ namespace RazorSharp.CoreClr.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		[Symcall]
+		[SymCall]
 		internal Pointer<ILMethod> GetILHeader(int fAllowOverrides = 0)
 		{
 			throw new SymImportException();
@@ -306,7 +307,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		///     <remarks>Address-sensitive</remarks>
 		/// </summary>
-		[Symcall]
+		[SymCall]
 		private long SetStableEntryPointInterlocked(ulong pCode)
 		{
 			throw new SymImportException();
@@ -325,7 +326,7 @@ namespace RazorSharp.CoreClr.Structures
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		[Symcall]
+		[SymCall]
 		internal void Reset()
 		{
 			throw new SymImportException();

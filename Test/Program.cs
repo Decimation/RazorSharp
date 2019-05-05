@@ -64,38 +64,25 @@ namespace Test
 
 		// todo: DIA instead of dbghelp?
 
+		const string dll = @"C:\Users\Deci\CLionProjects\NativeLib64\cmake-build-debug\NativeLib64.dll";
+		const string pdb = @"C:\Users\Deci\CLionProjects\NativeLib64\cmake-build-debug\NativeLib64.pdb";
 
-		[ClrSymNamespace]
-		struct Globals
+		[SymNamespace(pdb, dll)]
+		struct Structure
 		{
-			[SymField(Options = SymImportOptions.FullyQualified, FieldOptions = SymFieldOptions.LoadDirect)]
-			public Pointer<_MethodTable> g_pStringClass;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		struct _MethodTable
-		{
-			public int m_dwFlags;
-			public int BaseSize;
-
-			public override string ToString()
-			{
-				return Inspect.ValuesString(this);
-			}
+			[SymCall(SymImportOptions.IgnoreEnclosingNamespace)]
+			public void hello() { }
 		}
 
 
 		public static void Main(string[] args)
 		{
-			object o = 123D;
+			var struc = new Structure();
+			struc = Symload.Load(struc);
 
-			Console.WriteLine(Unsafe.HeapSize(o));
-			
-			Debug.Assert(Unsafe.HeapSize(o)==Unsafe.SizeOfAuto(o, SizeOfOptions.Heap));
-			Debug.Assert(Unsafe.SizeOf<object>()==Unsafe.SizeOfAuto(o, SizeOfOptions.Intrinsic));
-			Debug.Assert(Unsafe.BaseFieldsSize<object>()==Unsafe.SizeOfAuto<object>(default, SizeOfOptions.BaseFields));
-			Debug.Assert(Unsafe.BaseFieldsSize<object>(o)==Unsafe.SizeOfAuto<object>(o, SizeOfOptions.BaseFields));
-			Debug.Assert(Unsafe.BaseInstanceSize<object>()==Unsafe.SizeOfAuto(o, SizeOfOptions.BaseInstance));
+			struc.hello();
+
+			Console.WriteLine(typeof(string).GetMethodTable());
 		}
 	}
 }

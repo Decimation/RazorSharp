@@ -24,36 +24,30 @@ namespace RazorSharp.Native.Win32
 		                                               [Out]                              StringBuilder lpBaseName,
 		                                               [In] [MarshalAs(UnmanagedType.U4)] int           nSize);
 
-		[StructLayout(LayoutKind.Sequential)]
-		public struct _MODULEINFO
-		{
-			public void* lpBaseOfDll;
-			public uint  SizeOfImage;
-			public void* EntryPoint;
-		}
+		
 
-		public static _MODULEINFO GetModuleInfo(ProcessModule module)
+		public static NativeModuleInfo GetModuleInfo(ProcessModule module)
 		{
 			return GetModuleInfo(Process.GetCurrentProcess(), module);
 		}
 
-		public static _MODULEINFO GetModuleInfo(Process proc, ProcessModule module)
+		public static NativeModuleInfo GetModuleInfo(Process proc, ProcessModule module)
 		{
 			var hProc = Kernel32.OpenProcess(proc);
 			var hMod  = GetModuleHandle(module);
 			return GetModuleInfo(hProc, hMod);
 		}
 
-		public static _MODULEINFO GetModuleInfo(IntPtr hProc, IntPtr hModule)
+		public static NativeModuleInfo GetModuleInfo(IntPtr hProc, IntPtr hModule)
 		{
-			_MODULEINFO moduleInfo = default;
+			NativeModuleInfo moduleInfo = default;
 
 			var pMod = new IntPtr(&moduleInfo);
 
 			NativeHelp.Call(GetModuleInformation(hProc,
 			                                     hModule,
 			                                     pMod,
-			                                     (uint) Marshal.SizeOf<_MODULEINFO>()));
+			                                     (uint) Marshal.SizeOf<NativeModuleInfo>()));
 
 			Kernel32.CloseHandle(hProc);
 

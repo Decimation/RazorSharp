@@ -95,7 +95,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		#endregion
 
-		[Symcall]
+		[SymCall]
 		internal MethodTable* GetMethodTable()
 		{
 			throw new SymImportException();

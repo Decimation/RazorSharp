@@ -15,7 +15,7 @@ namespace RazorSharp
 	internal static unsafe class Constants
 	{
 		/// <summary>
-		///     De facto value representing an invalid value or a failure
+		///     Common value representing an invalid value or a failure
 		/// </summary>
 		internal const int INVALID_VALUE = -1;
 
@@ -126,8 +126,6 @@ namespace RazorSharp
 			       || cet == CorElementType.I || cet == CorElementType.U
 			       || cet == CorElementType.Ptr || cet == CorElementType.FnPtr;
 		}
-
-		internal static readonly Pointer<byte> NULLPTR = null;
 
 		private static CorElementType TypeToCorType(Type t)
 		{

@@ -12,6 +12,7 @@ using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory;
 using Serilog;
+using Serilog.Context;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
@@ -21,11 +22,13 @@ using Serilog.Sinks.SystemConsole.Themes;
 namespace RazorSharp
 {
 	/// <summary>
-	///     The core of RazorSharp. Contains the logger and <see cref="Setup" />
+	///     The core of RazorSharp. Contains the logger and such.
 	/// </summary>
 	internal static class Global
 	{
 		internal const string CONTEXT_PROP = "Context";
+
+		internal const string NAME = "RazorSharp";
 
 		private const string OUTPUT_TEMPLATE =
 			"[{Timestamp:HH:mm:ss} {Level:u3}] [{Context}] {Message:lj}{NewLine}{Exception}";
@@ -59,9 +62,16 @@ namespace RazorSharp
 #else
 			Log = Logger.None;
 #endif
-			const string ASM_STR = "RazorSharp";
 
-			Assembly = Assembly.Load(ASM_STR);
+			Assembly = Assembly.Load(NAME);
+		}
+
+		internal static void ContextLog(string prop, Action fn)
+		{
+
+			using (LogContext.PushProperty(CONTEXT_PROP, prop)) {
+				fn();
+			}
 		}
 
 		private static void CheckCompatibility()

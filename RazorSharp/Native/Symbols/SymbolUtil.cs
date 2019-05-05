@@ -1,17 +1,18 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using SimpleSharp.Diagnostics;
-using SimpleSharp.Extensions;
 using SimpleSharp.Utilities;
 using RazorSharp.CoreClr;
 using RazorSharp.Native.Win32;
+using SimpleSharp.Extensions;
+
+// ReSharper disable UnusedMember.Local
 
 namespace RazorSharp.Native.Symbols
 {
-	internal static class SymbolAccess
+	internal static class SymbolUtil
 	{
 		private const string MASK_STR_DEFAULT = "*!*";
 		
@@ -88,18 +89,6 @@ namespace RazorSharp.Native.Symbols
 			return pdb;
 		}
 
-		public static string Undname(string sz)
-		{
-			
-			using (var cmd = Common.Shell($"undname \"{sz}\"", true)) {
-				
-				var stdOut = cmd.StandardOutput.ReadToEnd();
-				stdOut = Encoding.ASCII.GetString(Encoding.Unicode.GetBytes(stdOut));
-				var value  = stdOut.SubstringBetween("is :- \"","\"");
-				return value;
-			}
-		}
-
 		internal static unsafe bool GetFileSize(string pFileName, ref ulong fileSize)
 		{
 			var hFile = Kernel32.CreateFile(pFileName,
@@ -141,7 +130,7 @@ namespace RazorSharp.Native.Symbols
 				// for different files should not overlap
 				// (region is "base address + file size")
 
-				if (!SymbolAccess.GetFileSize(pFileName, ref fileSize)) {
+				if (!SymbolUtil.GetFileSize(pFileName, ref fileSize)) {
 					return false;
 				}
 			}
@@ -157,6 +146,43 @@ namespace RazorSharp.Native.Symbols
 			}
 
 			return true;
+		}
+
+		/// <summary>
+		///     Deletes an automatically downloaded pdb file
+		/// </summary>
+		internal static void DeleteSymbolFile(FileInfo pdb)
+		{
+			// Delete temporarily downloaded symbol files
+			Conditions.NotNull(pdb.Directory, nameof(pdb.Directory));
+
+			// This (should) equal IsPdbTemporary
+			if (pdb.Directory.FullName.Contains(Environment.CurrentDirectory)) {
+				Global.Log.Debug("Deleting temporary PDB file");
+
+				var files = new FileSystemInfo[] {pdb, pdb.Directory, pdb.Directory.Parent};
+
+				foreach (var file in files) {
+					file.Delete();
+					file.Refresh();
+					Conditions.Assert(!file.Exists);
+				}
+			}
+		}
+
+		internal static void CheckSymbolIntegrity(FileInfo pdb, FileInfo dll)
+		{
+			// Good lord this problem took 3 hours to solve
+			// Turns out the pdb file was just out of date lmao
+
+			const string ERR = "The PDB specified by \"" + nameof(pdb) +
+			                   "\" does not match the one returned by Microsoft's servers";
+
+			Conditions.NotNull(pdb, nameof(pdb));
+			string cd     = Environment.CurrentDirectory;
+			var    tmpSym = SymbolUtil.DownloadSymbolFile(new DirectoryInfo(cd), dll);
+			Conditions.Ensure(pdb.ContentEquals(tmpSym), ERR, nameof(pdb));
+			SymbolUtil.DeleteSymbolFile(tmpSym);
 		}
 	}
 }

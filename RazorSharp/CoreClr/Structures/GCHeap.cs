@@ -86,7 +86,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		public int GCCount {
-			[Symcall("GetGcCount")]
+			[SymCall("GetGcCount")]
 			get => throw new SymImportException();
 		}
 
@@ -112,7 +112,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <param name="obj">Pointer to an object in the GC heap</param>
 		/// <param name="smallHeapOnly">Whether to include small GC heaps only</param>
 		/// <returns><c>true</c> if <paramref name="obj" /> is a heap pointer; <c>false</c> otherwise</returns>
-		[Symcall]
+		[SymCall]
 		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
 			throw new SymImportException();
@@ -121,7 +121,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		/// Allocates a zero-initialized object on the GC heap.
 		/// </summary>
-		[Symcall(SymImportOptions.FullyQualified)]
+		[SymCall(SymImportOptions.FullyQualified)]
 		internal static void* AllocateObject(MethodTable* mt, int fHandleCom)
 		{
 			throw new SymImportException();

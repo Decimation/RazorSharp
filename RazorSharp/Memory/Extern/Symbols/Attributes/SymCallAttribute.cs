@@ -24,13 +24,13 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 	/// <seealso cref="Symload"/>
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method)]
-	public class SymcallAttribute : SymImportAttribute
+	public class SymCallAttribute : SymImportAttribute
 	{
-		public SymcallAttribute() : base() { }
+		public SymCallAttribute() : base() { }
 
-		public SymcallAttribute(SymImportOptions options) : base(options) { }
+		public SymCallAttribute(SymImportOptions options) : base(options) { }
 
-		public SymcallAttribute(string symbol, SymImportOptions options = SymImportOptions.None) 
+		public SymCallAttribute(string symbol, SymImportOptions options = SymImportOptions.None) 
 			: base(symbol, options) { }
 	}
 }

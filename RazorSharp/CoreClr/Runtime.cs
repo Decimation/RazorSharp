@@ -59,6 +59,11 @@ namespace RazorSharp.CoreClr
 		{
 			return EqualityComparer<T>.Default.Equals(value, default(T));
 		}
+		
+		internal static bool IsNullOrDefaultFast<T>(T value)
+		{
+			return Unsafe.AddressOf(ref value).IsNil;
+		}
 
 		#region Struct
 

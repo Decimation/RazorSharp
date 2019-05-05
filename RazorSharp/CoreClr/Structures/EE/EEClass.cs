@@ -10,6 +10,7 @@ using SimpleSharp.Strings;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+// ReSharper disable UnusedMember.Local
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 

@@ -126,28 +126,6 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-		#region Set
-
-		public static void Set<T, TField>(T value, string name, TField f)
-		{
-			var m = value.GetType().GetMetaType();
-			m[name].SetValue(value, f);
-		}
-
-		public static void Set<T, TField>(ref T value, string name, TField f)
-		{
-			var m = value.GetType().GetMetaType();
-			m[name].SetValueByAddr(ref value, f);
-		}
-
-		public static void Set<T, TField>(Pointer<T> value, string name, TField f)
-		{
-			var m = typeof(T).GetMetaType();
-			value.Add(m[name].Offset).WriteAny(f);
-		}
-
-		#endregion
-
 		#region Address
 
 		/// <summary>
@@ -297,35 +275,44 @@ namespace RazorSharp.Memory
 
 		#region Sizes
 
-		// todo: make an AutoSize method
-
-		public static int SizeOfAuto<T>(T value = default, SizeOfOptions options = SizeOfOptions.Intrinsic)
+		
+		public static int SizeOfAuto<T>(SizeOfOptions options = SizeOfOptions.Intrinsic)
 		{
+			return SizeOfAuto<T>(default, options);
+		}
+
+		public static int SizeOfAuto<T>(T value, SizeOfOptions options = SizeOfOptions.Intrinsic)
+		{
+//			if (Runtime.IsNullOrDefault(value) && options == SizeOfOptions.Intrinsic) { }
+
 			var mt      = typeof(T).GetMethodTable();
 			var eeClass = mt.Reference.EEClass;
 
+			if (options == SizeOfOptions.Auto) {
+				if (Runtime.IsStruct<T>()) {
+					// Break into the next switch branch which will go to case Intrinsic
+					options = SizeOfOptions.Intrinsic;
+				}
+				else {
+					// Break into the next switch branch which will go to case Heap
+					options = SizeOfOptions.Heap;
+				}
+			}
 
 			// If a value was supplied
 			if (!Runtime.IsNullOrDefault(value)) {
 				mt = value.GetType().GetMethodTable();
-				
+
 				switch (options) {
-					case SizeOfOptions.BaseFields:
-						return mt.Reference.NumInstanceFieldBytes;
-					case SizeOfOptions.BaseInstance:
-						return mt.Reference.BaseSize;
-						break;
-					case SizeOfOptions.Heap:
-						return HeapSizeInternal(value);
-						break;
+					case SizeOfOptions.BaseFields:   return mt.Reference.NumInstanceFieldBytes;
+					case SizeOfOptions.BaseInstance: return mt.Reference.BaseSize;
+					case SizeOfOptions.Heap:         return HeapSizeInternal(value);
 				}
 			}
 
 			switch (options) {
 				// Note: Arrays native size == 0
-				case SizeOfOptions.Native:
-					return eeClass.Reference.NativeSize;
-					break;
+				case SizeOfOptions.Native: return eeClass.Reference.NativeSize;
 				// Note: Arrays have no layout
 				case SizeOfOptions.Managed:
 					if (eeClass.Reference.HasLayout)
@@ -333,15 +320,15 @@ namespace RazorSharp.Memory
 					else {
 						return Constants.INVALID_VALUE;
 					}
-				case SizeOfOptions.Intrinsic:
-					return CSUnsafe.SizeOf<T>();
-				case SizeOfOptions.BaseFields:
-					return mt.Reference.NumInstanceFieldBytes;
+
+				case SizeOfOptions.Intrinsic:  return CSUnsafe.SizeOf<T>();
+				case SizeOfOptions.BaseFields: return mt.Reference.NumInstanceFieldBytes;
 				case SizeOfOptions.BaseInstance:
 					Conditions.Require(!Runtime.IsStruct<T>(), nameof(value));
 					return mt.Reference.BaseSize;
 				case SizeOfOptions.Heap:
 					throw new ArgumentException($"A value must be supplied to use {SizeOfOptions.Heap}");
+
 //				default:
 //					throw new ArgumentOutOfRangeException(nameof(options), options, null);
 			}
@@ -349,20 +336,6 @@ namespace RazorSharp.Memory
 
 			return Constants.INVALID_VALUE;
 		}
-
-		/// <summary>
-		///     Calculates the complete size of <paramref name="value" />'s data. If <typeparamref name="T" /> is
-		///     a value type, this is equal to <see cref="SizeOf{T}" />. If <typeparamref name="T" /> is a
-		///     reference type, this is equal to <see cref="HeapSize{T}(T)" />.
-		/// </summary>
-		/// <param name="value">Value to calculate the size of</param>
-		/// <typeparam name="T">Type of <paramref name="value" /></typeparam>
-		/// <returns>The complete size of <paramref name="value" /></returns>
-		public static int AutoSizeOf<T>(T value)
-		{
-			return Runtime.IsStruct<T>() ? SizeOf<T>() : HeapSizeInternal(value);
-		}
-
 
 		/// <summary>
 		///     <para>Returns the size of a type in memory.</para>
@@ -401,7 +374,7 @@ namespace RazorSharp.Memory
 		/// <remarks>
 		///     <para>Source: /src/vm/object.inl: 45</para>
 		///     <para>Equals the Son Of Strike "!do" command.</para>
-		///     <para>Equals <see cref="Unsafe.BaseInstanceSize{T}()" /> for objects that aren't arrays or strings.</para>
+		///     <para>Equals <see cref="SizeOfAuto{T}(T,SizeOfOptions)" /> with <see cref="SizeOfOptions.BaseInstance"/> for objects that aren't arrays or strings.</para>
 		///     <para>Note: This also includes padding and overhead (<see cref="ObjHeader" /> and <see cref="MethodTable" /> ptr.)</para>
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
@@ -512,89 +485,6 @@ namespace RazorSharp.Memory
 				// Subtract the size of the ObjHeader and MethodTable*
 				return t.GetMetaType().NumInstanceFieldBytes;
 			}
-		}
-
-		#endregion
-
-		#region BaseFieldsSize
-
-		/// <summary>
-		///     <para>Returns the base size of the fields (data) in the heap.</para>
-		///     <para>This follows the formula of:</para>
-		///     <para><see cref="MethodTable.BaseSize" /> - <see cref="EEClass.BaseSizePadding" /></para>
-		///     <remarks>
-		///         <para>Use <see cref="BaseFieldsSize{T}(T)" /> if the value may be boxed.</para>
-		///         <para>Returned from <see cref="MethodTable.NumInstanceFieldBytes" /></para>
-		///         <para>This includes field padding.</para>
-		///     </remarks>
-		/// </summary>
-		/// <returns><see cref="Constants.MinObjectSize" /> if type is an array, fields size otherwise</returns>
-		public static int BaseFieldsSize<T>()
-		{
-			//inline DWORD MethodTable::GetNumInstanceFieldBytes()
-			//{
-			//	return(GetBaseSize() - GetClass()->GetBaseSizePadding());
-			//}
-
-
-			return typeof(T).GetMethodTable().Reference.NumInstanceFieldBytes;
-		}
-
-
-		/// <summary>
-		///     <para>Returns the base size of the fields (data) in the heap.</para>
-		///     <para>This follows the formula of:</para>
-		///     <para><see cref="MethodTable.BaseSize" /> - <see cref="EEClass.BaseSizePadding" /></para>
-		///     <para>
-		///         Compared to <see cref="BaseFieldsSize{T}()" />, this manually reads the <c>MethodTable*</c>, making
-		///         this work for boxed values.
-		///     </para>
-		///     <code>
-		/// object o = 123;
-		/// Unsafe.BaseFieldsSize(ref o);  // == 4 (boxed int, base fields size of int (sizeof(int)))
-		/// Unsafe.BaseFieldsSize&lt;object&gt;; // == 0 (base fields size of object)
-		/// </code>
-		///     <remarks>
-		///         <para>Returned from <see cref="MethodTable.NumInstanceFieldBytes" /></para>
-		///         <para>Equals <see cref="Unsafe.SizeOf{T}()" /> for value types</para>
-		///         <para>This includes field padding.</para>
-		///     </remarks>
-		/// </summary>
-		public static int BaseFieldsSize<T>(T value) where T : class
-			=> BaseFieldsSizeInternal(value);
-
-
-		private static int BaseFieldsSizeInternal<T>(T value)
-		{
-			// Sanity check
-			Conditions.Require(!typeof(T).IsValueType);
-			return Runtime.ReadMethodTable(ref value).Reference.NumInstanceFieldBytes;
-		}
-
-		#endregion
-
-		#region BaseInstanceSize
-
-		/// <summary>
-		///     <para>Returns the base instance size according to the TypeHandle (<c>MethodTable</c>).</para>
-		///     <para>This is the minimum heap size of a type.</para>
-		///     <para>By default, this equals <see cref="Constants.MinObjectSize" /> (<c>24</c> (x64) or <c>12</c> (x84)).</para>
-		/// </summary>
-		/// <remarks>
-		///     <para>Returned from <see cref="MethodTable.BaseSize" /></para>
-		/// </remarks>
-		/// <returns>
-		///     <see cref="MethodTable.BaseSize" />
-		/// </returns>
-		public static int BaseInstanceSize<T>() where T : class
-			=> BaseInstanceSizeInternal<T>();
-
-
-		private static int BaseInstanceSizeInternal<T>()
-		{
-			// Sanity check
-			Conditions.Require(!Runtime.IsStruct<T>());
-			return typeof(T).GetMethodTable().Reference.BaseSize;
 		}
 
 		#endregion

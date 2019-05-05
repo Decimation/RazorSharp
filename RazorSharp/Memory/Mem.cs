@@ -133,7 +133,7 @@ namespace RazorSharp.Memory
 
 
 			// Minimum size required for an instance
-			int baseSize = Unsafe.BaseInstanceSize<T>();
+			int baseSize = Unsafe.SizeOfAuto<T>(SizeOfOptions.BaseInstance);
 
 			// We'll allocate extra bytes (+ IntPtr.Size) for a pointer and write the address of
 			// the unmanaged "instance" there, as the CLR can only interpret

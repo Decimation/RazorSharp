@@ -11,6 +11,9 @@ namespace RazorSharp.Memory
 
 	#endregion
 	
+	/// <summary>
+	/// Specifies how sizes are calculated
+	/// </summary>
 	public enum SizeOfOptions
 	{
 		/// <summary>
@@ -113,10 +116,19 @@ namespace RazorSharp.Memory
 		/// <para>A value must be supplied.</para>
 		///     <para>Source: /src/vm/object.inl: 45</para>
 		///     <para>Equals the Son Of Strike "!do" command.</para>
-		///     <para>Equals <see cref="Unsafe.BaseInstanceSize{T}()" /> for objects that aren't arrays or strings.</para>
+		///     <para>Equals <see cref="BaseInstance" /> for objects that aren't arrays or strings.</para>
 		///     <para>Note: This also includes padding and overhead (<see cref="ObjHeader" /> and <see cref="MethodTable" /> ptr.)</para>
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		Heap,
+		
+		
+		
+		/// <summary>
+		///     Calculates the complete size of the value's data. If the type parameter is
+		///     a value type, this is equal to option <see cref="Intrinsic"/>. If the type parameter is a
+		///     reference type, this is equal to <see cref="Heap"/>.
+		/// </summary>
+		Auto,
 	}
 }
