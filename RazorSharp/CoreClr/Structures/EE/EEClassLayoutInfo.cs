@@ -84,7 +84,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 
 		/// <summary>
 		///     <remarks>
-		///         <para>Equal to <see cref="Unsafe.SizeOf{T}" /> </para>
+		///         <para>Equal to <see cref="Unsafe.SizeOf{T}()" /> </para>
 		///     </remarks>
 		/// </summary>
 		internal uint ManagedSize => m_cbManagedSize;

@@ -39,5 +39,7 @@ namespace RazorSharp.Native.Symbols
 		public ULONG   NameLen;
 		public ULONG   MaxNameLen;
 		public CHAR    Name;
+
+		internal static readonly int SIZE = Marshal.SizeOf<SymbolInfo>();
 	}
 }

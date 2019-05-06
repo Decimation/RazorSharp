@@ -7,6 +7,7 @@ using SimpleSharp;
 using SimpleSharp.Strings;
 using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 

@@ -66,99 +66,43 @@ namespace Test
 
 		// todo: DIA instead of dbghelp?
 
-		const string dll = @"C:\Users\Deci\CLionProjects\NativeLib64\cmake-build-debug\NativeLib64.dll";
-		const string pdb = @"C:\Users\Deci\CLionProjects\NativeLib64\cmake-build-debug\NativeLib64.pdb";
-
-		[SymNamespace(pdb, dll)]
-		class Structure
+		private static void Test()
 		{
-			[SymField(SymImportOptions.FullyQualified)]
-			public int g_int32;
+			var s = new Structure();
 
-			[SymCall(SymImportOptions.IgnoreEnclosingNamespace)]
-			public void hello()
-			{
-				Console.WriteLine("Orig");
-			}
-		}
+			s.hello();
 
-		[DllImport(dll)]
-		static extern void RunFunc();
+			s = Symload.Load(s);
+			s.hello();
 
 
-		static void test()
-		{
-			var struc = new Structure();
+			Symload.Reload(ref s);
 
-			struc.hello();
+			Console.WriteLine(s.g_int32);
+			Symload.Unload(ref s);
+			Console.WriteLine(s.g_int32);
 
-			struc = Symload.Load(struc);
-
-
-			struc.hello();
-
-
-			Symload.Reload(ref struc);
-
-			Console.WriteLine(struc.g_int32);
-
-
-			Symload.Unload(ref struc);
-
-			Console.WriteLine("Unload");
-			Console.WriteLine(struc.g_int32);
-
-
-			struc.hello();
-		}
-
-		private static char get_Chars(string s, int i)
-		{
-			return default;
-		}
-
-		private static long ADDR  = Runtime.GetClrSymAddress("JIT_GetRuntimeType").ToInt64();
-		private static long ADDR2 = Runtime.GetClrSymAddress("JIT_GetRuntimeType").ToInt64();
-
-		public static Type Calli(long md)
-		{
-			IL.Emit.Ldarg_0();
-			IL.Emit.Ldsfld(new FieldRef(typeof(Program), nameof(ADDR)));
-			IL.Emit.Conv_I();
-			IL.Emit.Calli(new StandAloneMethodSig(CallingConventions.Standard,
-			                                      new TypeRef(typeof(Type)),
-			                                      new TypeRef(typeof(void*))));
-			return IL.Return<Type>();
-		}
-
-		public static Type __Calli(long md)
-		{
-			return null;
-		}
-
-
-		private static void GenIL(byte[] il)
-		{
-			Type cls         = typeof(Program);
-			int  methodToken = cls.GetAnyMethod("__Calli").MetadataToken;
-			int  methodSize  = il.Length;
-			int  flags       = 0;
-
-			fixed (byte* p = il) {
-				MethodRental.SwapMethodBody(cls, methodToken, (IntPtr) p, methodSize, flags);
-			}
+			Console.WriteLine(Unsafe.SizeOf<int>());
 		}
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			// SetMethodEntryPoint
+			SymbolManager.CurrentImage = new FileInfo(Structure.PDB);
 
-			var s = new Structure();
-			
-            s.hello();
-            s = Symload.Load(s);
-            s.hello();
+
+			var mod=Modules.LoadModule(Structure.DLL);
+			var mi = new ModuleInfo(new FileInfo(Structure.PDB), mod);
+			var sz = mi.GetSymAddress("sz").ReadPointer<byte>();
+			Conditions.Assert(sz.ReadString(StringTypes.ANSI)=="Hello, World");
+
+
+			Pointer<EEClass> ee = typeof(string).GetMethodTable()
+			                                    .Reference
+			                                    .EEClass;
+
+			Console.WriteLine(ee);
+			Console.WriteLine(ee.Reference.FieldDescList.ToString("O"));
 		}
 	}
 }

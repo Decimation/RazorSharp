@@ -5,6 +5,7 @@
 using System;
 using System.Reflection;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory.Pointers;
 
 #endregion
@@ -165,6 +166,11 @@ namespace RazorSharp.CoreClr.Meta
 			return Value.Reference.GetValue(t);
 		}
 
+		public void SetValue(object t, object value)
+		{
+			Value.Reference.SetValue(t, value);
+		}
+		
 		public void SetValue<TInstance>(TInstance t, object value)
 		{
 			Value.Reference.SetValue(t, value);

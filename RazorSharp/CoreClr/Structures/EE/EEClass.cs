@@ -8,6 +8,7 @@ using SimpleSharp.Diagnostics;
 using SimpleSharp.Extensions;
 using SimpleSharp.Strings;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 // ReSharper disable UnusedMember.Local
@@ -183,10 +184,10 @@ namespace RazorSharp.CoreClr.Structures.EE
 			get {
 				//return &((LayoutEEClass *) this)->m_LayoutInfo;
 				Conditions.Assert(HasLayout, "EEClass does not have LayoutInfo");
-
-
-				//IntPtr thisptr = PointerUtils.Add(Unsafe.AddressOf(ref this), sizeof(EEClass)).Address;
-				var thisptr = Unsafe.AddressOf(ref this).Add(sizeof(EEClass)).Address;
+				
+				var thisptr = Unsafe.AddressOf(ref this)
+				                    .Add(sizeof(EEClass))
+				                    .Address;
 
 				// ReSharper disable once ArrangeRedundantParentheses
 				return &((LayoutEEClass*) thisptr)->m_LayoutInfo;
@@ -250,7 +251,8 @@ namespace RazorSharp.CoreClr.Structures.EE
 				int                  fieldCount = pClass.Reference.NumInstanceFields + pClass.Reference.NumStaticFields;
 				Pointer<MethodTable> pParentMT  = m_pMethodTable->Parent;
 
-				if (!pParentMT.IsNull) fieldCount -= pParentMT.Reference.EEClass.Reference.NumInstanceFields;
+				if (!pParentMT.IsNull) 
+					fieldCount -= pParentMT.Reference.EEClass.Reference.NumInstanceFields;
 
 				return fieldCount;
 			}
@@ -261,30 +263,47 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		internal FieldDesc* FieldDescList {
+		internal Pointer<FieldDesc>  FieldDescList {
 			get {
 				//PTR_HOST_MEMBER_TADDR(EEClass, this, m_pFieldDescList)
-				Pointer<FieldDesc> p = Unsafe.AddressOf(ref this).Address;
-				p.Add((long) m_pFieldDescList);
-				p.Add(Offsets.FIELD_DESC_LIST_FIELD_OFFSET);
-				return (FieldDesc*) p;
+				return Runtime.PTR_HOST_MEMBER_TADDR(ref  this, FIELD_DESC_LIST_FIELD_OFFSET, m_pFieldDescList);
 			}
 		}
+		
+		
+		
 
 		/// <summary>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		internal MethodDescChunk* MethodDescChunkList {
+		internal Pointer<MethodDescChunk>  MethodDescChunkList {
 			//todo: verify
 			get {
-				Pointer<MethodDescChunk> p = Unsafe.AddressOf(ref this).Address;
-				p.Add((long) m_pChunks);
-				p.Add(Offsets.CHUNKS_FIELD_OFFSET);
-				return (MethodDescChunk*) p;
+				return Runtime.PTR_HOST_MEMBER_TADDR(ref  this, CHUNKS_FIELD_OFFSET, m_pChunks);
 			}
 		}
+
+		#endregion
+		
+		#region EEClass
+
+		/// <summary>
+		///     Offset for the field <see cref="EEClass.m_pFieldDescList" />
+		///     <remarks>
+		///         Relative to address of a <see cref="EEClass" />
+		///     </remarks>
+		/// </summary>
+		private const int FIELD_DESC_LIST_FIELD_OFFSET = 24;
+
+		/// <summary>
+		///     Offset for the field <see cref="EEClass.m_pChunks" />
+		///     <remarks>
+		///         Relative to address of a <see cref="EEClass" />
+		///     </remarks>
+		/// </summary>
+		private const int CHUNKS_FIELD_OFFSET = 32;
 
 		#endregion
 

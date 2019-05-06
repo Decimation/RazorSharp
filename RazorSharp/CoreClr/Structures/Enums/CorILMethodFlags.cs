@@ -7,7 +7,7 @@ using RazorSharp.CoreClr.Structures.ILMethods;
 
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp.CoreClr.Structures
+namespace RazorSharp.CoreClr.Structures.Enums
 {
 	/// <summary>
 	///     Use with <see cref="FatILMethod.FlagsValue" /> or <see cref="TinyILMethod.Flags_CodeSize" />.

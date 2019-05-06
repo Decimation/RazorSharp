@@ -32,12 +32,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 		private const string GET_PROPERTY_PREFIX       = "get_";
 		private const string GET_PROPERTY_REPLACEMENT  = "Get";
 
-		private static readonly ISet<Type> BoundTypes;
-
-		static Symload()
-		{
-			BoundTypes = new HashSet<Type>();
-		}
+		private static readonly ISet<Type> BoundTypes = new HashSet<Type>();
 
 
 		private static bool HasFlagFast(this SymImportOptions value, SymImportOptions flag)
@@ -83,6 +78,8 @@ namespace RazorSharp.Memory.Extern.Symbols
 			return resolvedName;
 		}
 
+		#region Get ModuleInfo
+
 		private static ModuleInfo GetInfo(SymNamespaceAttribute attr, Pointer<byte> baseAddr)
 		{
 			if (attr.Image == Clr.ClrPdb.FullName && attr.Module == Clr.CLR_DLL_SHORT) {
@@ -96,6 +93,52 @@ namespace RazorSharp.Memory.Extern.Symbols
 		private static ModuleInfo GetInfo(SymNamespaceAttribute attr)
 			=> GetInfo(attr, Modules.GetBaseAddress(attr.ShortModuleName));
 
+		private static ModuleInfo GetModuleInfo(MemberInfo type)
+		{
+			var nameSpaceAttr = type.GetCustomAttribute<SymNamespaceAttribute>();
+			Conditions.NotNull(nameSpaceAttr, nameof(nameSpaceAttr));
+
+			Pointer<byte> baseAddr = null;
+
+			string shortName = nameSpaceAttr.ShortModuleName;
+
+			if (!Modules.IsLoaded(shortName)) {
+//				throw new Exception(String.Format("Module \"{0}\" is not loaded", nameSpaceAttr.Module));
+				Global.Log.Debug("Module {Name} is not loaded, loading", shortName);
+				var mod = Modules.LoadModule(nameSpaceAttr.Module);
+				baseAddr = mod.BaseAddress;
+			}
+
+			var mi = !baseAddr.IsNull ? GetInfo(nameSpaceAttr, baseAddr) : GetInfo(nameSpaceAttr);
+
+			return mi;
+		}
+
+		#endregion
+
+		#region Load
+
+		public static T Load<T>(Type type, T value)
+		{
+			if (IsBound(type)) {
+				return value;
+			}
+
+			// For now, only one image can be used per type
+			var mi = GetModuleInfo(type);
+
+			LoadComponents(ref value, type, mi);
+
+			BoundTypes.Add(type);
+
+//			Global.Log.Debug("Done");
+
+			return value;
+		}
+
+		public static void Load(Type type) => Load(type, default(object));
+
+		public static T Load<T>(T value) => Load(value.GetType(), value);
 
 		private static void LoadField<T>(ref T              value,
 		                                 ModuleInfo         module,
@@ -151,9 +194,6 @@ namespace RazorSharp.Memory.Extern.Symbols
 			if (!fieldInfo.IsStatic) {
 				var ptr = fieldInfo.GetAddress(ref value);
 
-				if (fieldInfo.EnclosingType.IsValueType) {
-					ptr += Unsafe.AddressOf(ref value).Cast<byte>();
-				}
 
 				ptr.WriteAnyEx(fieldType, loadedValue);
 			}
@@ -172,12 +212,12 @@ namespace RazorSharp.Memory.Extern.Symbols
 			}
 		}
 
-		private static void LoadComponents<T>(ref T value, Type type,ModuleInfo mi)
+		private static void LoadComponents<T>(ref T value, Type type, ModuleInfo mi)
 		{
 			(MemberInfo[] members, SymImportAttribute[] attributes) = type.GetAnnotated<SymImportAttribute>();
 
 			int lim = attributes.Length;
-			
+
 			for (int i = 0; i < lim; i++) {
 				var attr = attributes[i];
 				var mem  = members[i];
@@ -205,25 +245,18 @@ namespace RazorSharp.Memory.Extern.Symbols
 			}
 		}
 
-		public static void Reload<T>(ref T value)
+		#endregion
+
+		#region Unload
+
+		private static void UnloadStaticField(MemberInfo field)
 		{
-			var type = value.GetType();
-			Conditions.Require(IsBound(type));
-
-			var mi = GetModuleInfo(type);
-
-			LoadComponents(ref value, type, mi);
+			var fi = (FieldInfo) field;
+			fi.SetValue(null, default);
 		}
 
-		public static void Load(Type type) => Load(type, default(object));
-
-		public static T Load<T>(T value) => Load(value.GetType(), value);
-
-
-		public static void Unload<T>(ref T value, bool unloadModule = true)
+		public static void Unload(Type type, bool unloadModule = true)
 		{
-			var type = value.GetType();
-
 			Conditions.Require(IsBound(type));
 
 			if (unloadModule) {
@@ -232,7 +265,6 @@ namespace RazorSharp.Memory.Extern.Symbols
 				Modules.UnloadIfLoaded(shortName);
 			}
 
-			Mem.Destroy(ref value);
 
 			(MemberInfo[] members, SymImportAttribute[] attributes) = type.GetAnnotated<SymImportAttribute>();
 
@@ -243,9 +275,15 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 				switch (mem.MemberType) {
 					case MemberTypes.Field:
+						// The field will be deleted later
+						if (((FieldInfo) mem).IsStatic) {
+							UnloadStaticField(mem);
+						}
+
 						break;
 					case MemberTypes.Method:
-						var metaMethod = new MetaMethod(((MethodInfo) mem));
+						// Calling the function will now result in an access violation
+						var metaMethod = new MetaMethod((MethodInfo) mem);
 						metaMethod.Reset();
 						break;
 					default:
@@ -253,49 +291,29 @@ namespace RazorSharp.Memory.Extern.Symbols
 				}
 			}
 
-
 			BoundTypes.Remove(type);
 		}
 
-
-		private static ModuleInfo GetModuleInfo(Type type)
+		public static void Unload<T>(ref T value, bool unloadModule = true)
 		{
-			var nameSpaceAttr = type.GetCustomAttribute<SymNamespaceAttribute>();
-			Conditions.NotNull(nameSpaceAttr, nameof(nameSpaceAttr));
+			var type = value.GetType();
 
-			Pointer<byte> baseAddr = null;
+			Unload(type, unloadModule);
 
-			string shortName = nameSpaceAttr.ShortModuleName;
-
-			if (!Modules.IsLoaded(shortName)) {
-//				throw new Exception(String.Format("Module \"{0}\" is not loaded", nameSpaceAttr.Module));
-				Global.Log.Debug("Module {Name} is not loaded, loading", shortName);
-				var mod = Modules.LoadModule(nameSpaceAttr.Module);
-				baseAddr = mod.BaseAddress;
-			}
-
-			var mi = !baseAddr.IsNull ? GetInfo(nameSpaceAttr, baseAddr) : GetInfo(nameSpaceAttr);
-
-			return mi;
+			Mem.Destroy(ref value);
 		}
-		
-		public static T Load<T>(Type type, T value)
-		{
-			if (IsBound(type)) {
-				return value;
-			}
 
-			// For now, only one image can be used per type
+		#endregion
+
+
+		public static void Reload<T>(ref T value)
+		{
+			var type = value.GetType();
+			Conditions.Require(IsBound(type));
+
 			var mi = GetModuleInfo(type);
 
-
 			LoadComponents(ref value, type, mi);
-
-			BoundTypes.Add(type);
-
-//			Global.Log.Debug("Done");
-
-			return value;
 		}
 	}
 }

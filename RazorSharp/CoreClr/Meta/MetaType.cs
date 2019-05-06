@@ -12,6 +12,7 @@ using SimpleSharp.Diagnostics;
 using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
+using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 

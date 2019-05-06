@@ -10,6 +10,7 @@ using SimpleSharp.Strings;
 using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.EE;
+using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Extern;
 using RazorSharp.Memory.Extern.Symbols;
@@ -243,7 +244,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		///     Array of <see cref="FieldDesc" />s for this type.
 		/// </summary>
-		internal FieldDesc* FieldDescList => EEClass.Reference.FieldDescList;
+		internal FieldDesc*  FieldDescList => EEClass.Reference.FieldDescList.ToPointer<FieldDesc>();
 
 		/// <summary>
 		///     Length of the <see cref="FieldDescList" />
@@ -251,7 +252,7 @@ namespace RazorSharp.CoreClr.Structures
 		internal int FieldDescListLength => EEClass.Reference.FieldDescListLength;
 
 		// todo
-		internal MethodDescChunk* MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
+		internal Pointer<MethodDescChunk>  MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
 
 
 		[SymCall]
@@ -373,7 +374,7 @@ namespace RazorSharp.CoreClr.Structures
 			// EEClass fields
 			table.AddRow("FieldDesc List", Hex.ToHex(FieldDescList));
 			table.AddRow("FieldDesc List length", FieldDescListLength);
-			table.AddRow("MethodDescChunk List", Hex.ToHex(MethodDescChunkList));
+			table.AddRow("MethodDescChunk List", MethodDescChunkList);
 
 			table.AddRow("Number instance fields", NumInstanceFields);
 			table.AddRow("Number static fields", NumStaticFields);

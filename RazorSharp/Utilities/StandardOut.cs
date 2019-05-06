@@ -21,7 +21,7 @@ namespace RazorSharp.Utilities
 		///     Patch the console to allow for ANSI escape sequences and special formatting.
 		/// </summary>
 		[Obsolete]
-		public static void ModConsole()
+		internal static void ModConsole()
 		{
 			Console.OutputEncoding = Encoding.Unicode; // todo: Encoding.Unicode / UTF8? Any difference?
 			var handle = Kernel32.GetConsoleHandle();

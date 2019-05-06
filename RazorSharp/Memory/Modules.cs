@@ -27,30 +27,35 @@ namespace RazorSharp.Memory
 		internal static NativeModule[] CurrentNativeModules
 			=> ProcessApi.GetProcessModules(Process.GetCurrentProcess());
 
+		// todo: ProcessModules are actually updated when they are natively loaded
+		// todo: remove CurrentNativeModules
+
 		public static bool IsLoaded(string name)
 		{
-			foreach (var module in CurrentNativeModules) {
-				if (module.Name == name) {
-					return true;
-				}
-			}
-
 			return GetModule(name) != null;
 		}
 
 		public static void UnloadIfLoaded(string name)
 		{
-			var module = GetNativeModule(name);
-			if (module != NativeModule.NullModule) {
-				module.Dispose();
-				Global.Log.Debug("Unloaded {Name}", name);
+			var mod = GetModule(name);
+
+			if (mod != null) {
+				ProcessApi.FreeLibrary(mod.BaseAddress);
 			}
 		}
 
-		public static NativeModule LoadModule(string fileName)
+		public static ProcessModule LoadModule(string fileName)
 		{
+			//var ptr = ProcessApi.LoadLibrary(fileName);
+			//return CurrentNativeModules.First(m => m.FileName == fileName);
 			var ptr = ProcessApi.LoadLibrary(fileName);
-			return CurrentNativeModules.First(m => m.FileName == fileName);
+			
+			foreach (ProcessModule m in CurrentModules) {
+				if (m.FileName == fileName)
+					return m;
+			}
+
+			return null;
 		}
 
 		public static ProcessModule GetModule(string name)
@@ -80,46 +85,31 @@ namespace RazorSharp.Memory
 			return NativeModule.NullModule;
 		}
 
-		public static IntPtr GetModuleHandle(string name)
-		{
-			return ProcessApi.GetModuleHandle(name);
-		}
-
-		public static IntPtr GetModuleHandle(ProcessModule module)
-		{
-			return GetModuleHandle(module.ModuleName);
-		}
 
 		public static Pointer<byte> GetBaseAddress(string name)
 		{
 			if (name == Clr.CLR_DLL_SHORT) {
 				return Clr.ClrModule.BaseAddress;
 			}
-			
-			IntPtr baseAddr;
+
 			var mod = GetModule(name);
 
-			if (mod == null) {
-				baseAddr= CurrentNativeModules.First(f => f.Name == name).BaseAddress.Address;
-			}
-			else {
-				baseAddr= mod.BaseAddress;
-			}
+			Pointer<byte> baseAddr = mod?.BaseAddress ?? IntPtr.Zero;
+			
 
 //			Global.Log.Debug("Base addr for {Name} {Addr}", name, Hex.ToHex(baseAddr));
-			
+
 			return baseAddr;
 		}
 
 		private static Pointer<byte>[] GetAddressesInternal(Pointer<byte> baseAddr, long[] offset)
 		{
 			var rg = new Pointer<byte>[offset.Length];
-
-
+			
 			for (int i = 0; i < rg.Length; i++) {
 				rg[i] = baseAddr + offset[i];
 			}
-
+			
 			return rg;
 		}
 

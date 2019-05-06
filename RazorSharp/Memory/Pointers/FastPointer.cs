@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using SimpleSharp.Strings;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
@@ -31,7 +32,7 @@ namespace RazorSharp.Memory.Pointers
 			set => m_value = (void*) value;
 		}
 
-		public int ElementSize => Unsafe.SizeOf<T>();
+		public int ElementSize => CSUnsafe.SizeOf<T>();
 
 		#endregion
 
@@ -57,10 +58,8 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Read
 
-		public T Read()
-		{
-			return CSUnsafe.Read<T>(m_value);
-		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public T Read() => CSUnsafe.Read<T>(m_value);
 
 		public T Read(int elemOffset)
 		{
@@ -71,10 +70,8 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Write
 
-		public void Write(T value)
-		{
-			CSUnsafe.Write(m_value, value);
-		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Write(T value) => CSUnsafe.Write(m_value, value);
 
 		public void Write(T value, int elemOffset)
 		{
@@ -85,10 +82,8 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Reference
 
-		public ref T AsRef()
-		{
-			return ref CSUnsafe.AsRef<T>(m_value);
-		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public ref T AsRef() => ref CSUnsafe.AsRef<T>(m_value);
 
 		public ref T AsRef(int elemOffset)
 		{

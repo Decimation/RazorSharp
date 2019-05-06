@@ -4,6 +4,7 @@ using System;
 using System.Runtime.CompilerServices;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
+using RazorSharp.CoreClr.Structures.Enums;
 
 #endregion
 
@@ -62,24 +63,6 @@ namespace RazorSharp
 		public static readonly int OffsetToStringData = RuntimeHelpers.OffsetToStringData;
 
 		
-		#region EEClass
-
-		/// <summary>
-		///     Offset for the field <see cref="EEClass.m_pFieldDescList" />
-		///     <remarks>
-		///         Relative to address of a <see cref="EEClass" />
-		///     </remarks>
-		/// </summary>
-		internal const int FIELD_DESC_LIST_FIELD_OFFSET = 24;
-
-		/// <summary>
-		///     Offset for the field <see cref="EEClass.m_pChunks" />
-		///     <remarks>
-		///         Relative to address of a <see cref="EEClass" />
-		///     </remarks>
-		/// </summary>
-		internal const int CHUNKS_FIELD_OFFSET = 32;
-
-		#endregion
+		
 	}
 }

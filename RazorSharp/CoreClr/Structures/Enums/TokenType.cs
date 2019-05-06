@@ -1,4 +1,4 @@
-namespace RazorSharp.CoreClr.Structures
+namespace RazorSharp.CoreClr.Structures.Enums
 {
 	public enum TokenType : uint
 	{

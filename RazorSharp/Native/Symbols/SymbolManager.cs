@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32;
@@ -19,7 +20,7 @@ namespace RazorSharp.Native.Symbols
 		private static IntPtr _proc;
 		private static ulong  _modBase;
 
-		private static string[] _nameBuffer;
+//		private static string[] _nameBuffer;
 		private static string   _singleNameBuffer;
 
 		private static List<Symbol> _symBuffer;
@@ -31,7 +32,11 @@ namespace RazorSharp.Native.Symbols
 
 		internal static bool IsSetup { get; private set; }
 
-		internal static bool IsImageLoaded => _modBase != 0;
+
+		internal static bool IsImageLoaded {
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get => _modBase != 0;
+		}
 
 		internal static FileInfo CurrentImage {
 			get => _pdb;
@@ -99,12 +104,6 @@ namespace RazorSharp.Native.Symbols
 			}
 		}
 
-		internal static void Dump()
-		{
-			foreach (var symbol in GetSymbols()) {
-				Console.WriteLine(symbol);
-			}
-		}
 
 		private static void Load()
 		{
@@ -146,15 +145,15 @@ namespace RazorSharp.Native.Symbols
 		internal static Symbol[] GetSymbols()
 		{
 			CheckModule();
-			
-			_symBuffer        = new List<Symbol>();
+
+			_symBuffer = new List<Symbol>();
 
 			bool symEnumSuccess = DbgHelp.SymEnumSymbols(
-				_proc,                   // Process handle of the current process
-				_modBase,                // Base address of the module
-				null,                    // Mask (NULL -> all symbols)
+				_proc,              // Process handle of the current process
+				_modBase,           // Base address of the module
+				null,               // Mask (NULL -> all symbols)
 				CollectSymCallback, // The callback function
-				IntPtr.Zero              // A used-defined context can be passed here, if necessary
+				IntPtr.Zero         // A used-defined context can be passed here, if necessary
 			);
 
 			NativeHelp.Call(symEnumSuccess, nameof(DbgHelp.SymEnumSymbols));
@@ -169,7 +168,7 @@ namespace RazorSharp.Native.Symbols
 		internal static Symbol[] GetSymbols(string[] names)
 		{
 			CheckModule();
-			
+
 			var rg = new Symbol[names.Length];
 
 			for (int i = 0; i < rg.Length; i++) {
@@ -184,11 +183,10 @@ namespace RazorSharp.Native.Symbols
 		{
 			//CheckModule();
 
-			int sz = (int) (Marshal.SizeOf<SymbolInfo>() + DbgHelp.MAX_SYM_NAME * sizeof(byte)
-			                                             + sizeof(ulong) - 1 / sizeof(ulong));
+			int sz = (int) (SymbolInfo.SIZE + DbgHelp.MAX_SYM_NAME * sizeof(byte) + sizeof(ulong) - 1 / sizeof(ulong));
 
 			Pointer<SymbolInfo> buffer = stackalloc byte[sz];
-			buffer.Reference.SizeOfStruct = (uint) Marshal.SizeOf<SymbolInfo>();
+			buffer.Reference.SizeOfStruct = (uint) SymbolInfo.SIZE;
 			buffer.Reference.MaxNameLen   = DbgHelp.MAX_SYM_NAME;
 
 
@@ -208,13 +206,13 @@ namespace RazorSharp.Native.Symbols
 
 			_singleNameBuffer = null;
 			_symBuffer        = null;
-			_nameBuffer       = null;
+//			_nameBuffer       = null;
 		}
 
 		internal static Symbol[] GetSymbolsContainingName(string name)
 		{
 			CheckModule();
-			
+
 			_symBuffer        = new List<Symbol>();
 			_singleNameBuffer = name;
 
@@ -230,6 +228,7 @@ namespace RazorSharp.Native.Symbols
 
 
 			Symbol[] cpy = _symBuffer.ToArray();
+			
 			ClearBuffer();
 
 			return cpy;

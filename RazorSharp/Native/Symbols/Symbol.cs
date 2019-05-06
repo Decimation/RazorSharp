@@ -4,6 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+using SimpleSharp.Extensions;
 
 #endregion
 
@@ -59,6 +60,8 @@ namespace RazorSharp.Native.Symbols
 
 		public SymTagEnum TagEnum => (SymTagEnum) Tag;
 
+		public SymbolFlag FlagsEnum => (SymbolFlag) Flags;
+
 		public long Offset => (long) (Address - ModBase);
 
 
@@ -84,8 +87,8 @@ namespace RazorSharp.Native.Symbols
 
 		public override string ToString()
 		{
-			return String.Format("Name: {0} | Offset: {1:X} | Address: {2:X} | Tag: {3} | Size: {4}",
-			                     Name, Offset, Address, TagEnum, Size);
+			return String.Format("Name: {0} | Offset: {1:X} | Address: {2:X} | Tag: {3} | Flags: {4}",
+			                     Name, Offset, Address, TagEnum, FlagsEnum);
 		}
 	}
 }

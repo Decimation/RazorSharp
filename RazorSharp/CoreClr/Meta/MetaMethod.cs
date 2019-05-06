@@ -7,6 +7,7 @@ using SimpleSharp.Diagnostics;
 using SimpleSharp.Strings;
 using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory.Pointers;
 
 #endregion

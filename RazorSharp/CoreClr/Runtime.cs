@@ -189,6 +189,36 @@ namespace RazorSharp.CoreClr
 			return typeof(TType).GetFieldDesc(fieldName).Reference.Offset;
 		}
 
+		#region PTR_HOST_MEMBER_TADDR
+
+		/// <summary>
+		/// Retrieves the target address of a host instance pointer and
+		/// offsets it by the given member's offset within the type.
+		/// </summary>
+		/// <param name="value"><c>this</c> pointer</param>
+		/// <param name="fieldName">Field name</param>
+		/// <param name="fieldValue">Value of the field</param>
+		/// <typeparam name="T">Type</typeparam>
+		internal static Pointer<byte> PTR_HOST_MEMBER_TADDR<T>(ref T    value,
+		                                                       string        fieldName,
+		                                                       Pointer<byte> fieldValue) where T : struct
+		{
+			// PTR_HOST_MEMBER_TADDR(type, host, memb)
+
+			// note: this could be done with just "value" and "fieldName" but it causes significant overhead
+
+			return PTR_HOST_MEMBER_TADDR(ref value, OffsetOf<T>(fieldName), fieldValue);
+		}
+
+		internal static Pointer<byte> PTR_HOST_MEMBER_TADDR<T>(ref T         value,
+		                                                       long          ofs,
+		                                                       Pointer<byte> fieldValue) where T : struct
+		{ 
+			return Unsafe.AddressOf(ref value).Add((long) fieldValue).Add(ofs).Cast<byte>();
+		}
+
+		#endregion
+
 		/// <summary>
 		///     Runs a constructor whose parameters match <paramref name="args" />
 		/// </summary>
@@ -240,6 +270,24 @@ namespace RazorSharp.CoreClr
 
 		#region MethodTable
 
+		internal static TypeHandle ReadTypeHandle<T>(T value)
+		{
+			if (IsStruct<T>())
+				return typeof(T).GetTypeHandle();
+
+			// We need to get the heap pointer manually because of type constraints
+			var ptr = *(IntPtr*) Unsafe.AddressOf(ref value);
+			var mt  = *(TypeHandle*) ptr;
+
+			return mt;
+		}
+
+		internal static TypeHandle GetTypeHandle(this Type t)
+		{
+			var typeHandle = t.TypeHandle.Value;
+			return *(TypeHandle*) &typeHandle;
+		}
+
 		/// <summary>
 		///     <para>Manually reads a CLR <see cref="MethodTable" /> (TypeHandle).</para>
 		///     <para>
@@ -248,7 +296,7 @@ namespace RazorSharp.CoreClr
 		///     </para>
 		/// </summary>
 		/// <returns>A pointer to type <typeparamref name="T" />'s <see cref="MethodTable" /></returns>
-		internal static Pointer<MethodTable> ReadMethodTable<T>(ref T t)
+		internal static Pointer<MethodTable> ReadMethodTable<T>(T t)
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
 			if (IsStruct<T>())
@@ -321,7 +369,7 @@ namespace RazorSharp.CoreClr
 
 		internal static Pointer<FieldDesc>[] GetFieldDescs<T>(T t)
 		{
-			return ReadFieldDescs(ReadMethodTable(ref t));
+			return ReadFieldDescs(ReadMethodTable(t));
 		}
 
 		internal static Pointer<FieldDesc>[] GetFieldDescs(this Type t)

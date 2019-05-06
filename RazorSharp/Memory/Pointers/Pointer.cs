@@ -827,7 +827,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <typeparam name="TType">Element type</typeparam>
 		/// <returns>
 		///     <see cref="Address" /> <c>+</c> <c>(</c><paramref name="elemCnt" /> <c>*</c>
-		///     <see cref="Unsafe.SizeOf{T}" /><c>)</c>
+		///     <see cref="Unsafe.SizeOf{T}()" /><c>)</c>
 		/// </returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void* OffsetFast<TType>(int elemCnt) => (void*) ((long) m_value + Mem.CompleteSize<TType>(elemCnt));

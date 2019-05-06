@@ -88,23 +88,13 @@ namespace RazorSharp.Memory
 		public static void Destroy<T>(ref T value)
 		{
 			if (!Runtime.IsStruct(value)) {
-				DestroyClass(value);
+				int           size = Unsafe.SizeOfData(value);
+				Pointer<byte> ptr  = Unsafe.AddressOfData(ref value);
+				ptr.ZeroBytes(size);
 			}
 			else {
-				DestroyStruct(ref value);
+				value = default;
 			}
-		}
-		
-		private static void DestroyStruct<T>(ref T value) /*where T : struct*/
-		{
-			value = default;
-		}
-
-		private static void DestroyClass<T>(T value) /*where T : class*/
-		{
-			int size = Unsafe.SizeOfData(value);
-			Pointer<byte> ptr  = Unsafe.AddressOfData(ref value);
-			ptr.ZeroBytes(size);
 		}
 
 		public static void Zero<T>(ref T t)
@@ -148,7 +138,7 @@ namespace RazorSharp.Memory
 
 
 			// Minimum size required for an instance
-			int baseSize = Unsafe.SizeOfAuto<T>(SizeOfOptions.BaseInstance);
+			int baseSize = Unsafe.SizeOf<T>(SizeOfOptions.BaseInstance);
 
 			// We'll allocate extra bytes (+ IntPtr.Size) for a pointer and write the address of
 			// the unmanaged "instance" there, as the CLR can only interpret

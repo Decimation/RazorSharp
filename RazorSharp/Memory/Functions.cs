@@ -2,13 +2,16 @@
 
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Memory.Extern;
 using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32;
+using RazorSharp.Utilities;
 
 // ReSharper disable InvalidXmlDocComment
 
@@ -83,6 +86,7 @@ namespace RazorSharp.Memory
 			const string SET_NATIVE_CODE = "MethodDesc::SetNativeCodeInterlocked";
 			SetNativeCode = Runtime.GetClrFunction<SetNativeCodeInterlockedDelegate>(SET_NATIVE_CODE);
 		}
+		
 
 		/// <summary>
 		///     Gets an exported function
@@ -96,7 +100,7 @@ namespace RazorSharp.Memory
 
 		#region Delegate functions
 
-		private delegate int SetNativeCodeInterlockedDelegate(MethodDesc* value, ulong pCode, ulong pExpected = 0);
+		private delegate bool SetNativeCodeInterlockedDelegate(MethodDesc* value, ulong pCode, ulong pExpected = 0);
 
 		private static readonly SetNativeCodeInterlockedDelegate SetNativeCode;
 
@@ -112,19 +116,17 @@ namespace RazorSharp.Memory
 		public static void SetEntryPoint(MethodInfo mi, Pointer<byte> pCode)
 		{
 			var md = (MethodDesc*) mi.MethodHandle.Value;
-			
+
 			Reset(md);
-			
-			int result = SetNativeCode(md, (ulong) pCode);
+
+			bool result = SetNativeCode(md, (ulong) pCode);
 
 
-			if (!(result > 0)) {
+			if (!result) {
 				Global.Log.Warning(
 					"Possible error setting entry point for {Method} (code: {Code}) (entry point: {PCode})",
 					mi.Name, result, pCode);
 			}
-
-			//Conditions.Assert(result >0);
 		}
 
 		#endregion

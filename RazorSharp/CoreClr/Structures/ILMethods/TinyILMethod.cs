@@ -2,6 +2,7 @@
 
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory.Pointers;
 
 #endregion

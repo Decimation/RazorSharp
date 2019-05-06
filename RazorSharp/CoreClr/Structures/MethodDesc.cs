@@ -10,6 +10,7 @@ using SimpleSharp.Extensions;
 using SimpleSharp.Strings;
 using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.CoreClr.Structures.ILMethods;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Extern;

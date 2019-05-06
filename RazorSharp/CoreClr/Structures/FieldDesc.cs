@@ -8,6 +8,7 @@ using SimpleSharp;
 using SimpleSharp.Diagnostics;
 using SimpleSharp.Strings;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Extern;
 using RazorSharp.Memory.Extern.Symbols;
@@ -272,15 +273,21 @@ namespace RazorSharp.CoreClr.Structures
 		internal IntPtr GetAddress<TInstance>(ref TInstance t)
 		{
 			Conditions.Assert(!IsStatic, "You cannot get the address of a static field (yet)");
-			Conditions.Assert(Runtime.ReadMethodTable(ref t) == EnclosingMethodTable);
+			Conditions.Assert(Runtime.ReadMethodTable(t) == EnclosingMethodTable);
 			Conditions.Assert(Offset != FIELD_OFFSET_NEW_ENC);
 
 			var data = Unsafe.AddressOf(ref t).Address;
 			if (Runtime.IsString<TInstance>())
 				return data + Offset;
 
-			data =  Marshal.ReadIntPtr(data);
-			data += IntPtr.Size + Offset;
+			if (!Runtime.IsStruct<TInstance>()) {
+				data =  Marshal.ReadIntPtr(data);
+				data += IntPtr.Size + Offset;
+			}
+			else {
+				data += Offset;
+			}
+			
 
 			return data;
 		}

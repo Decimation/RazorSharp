@@ -42,6 +42,11 @@ namespace RazorSharp.Memory
 	{
 		#region Other
 
+		/*public static TInt EnumValue<TEnum, TInt>(TEnum value) where TEnum : Enum
+		{
+			return AddrOf(ref value).Cast<TInt>().Read();
+		}*/
+
 		public static T Unbox<T>(object value) where T : struct
 		{
 			lock (value) {
@@ -276,12 +281,12 @@ namespace RazorSharp.Memory
 		#region Sizes
 
 		
-		public static int SizeOfAuto<T>(SizeOfOptions options = SizeOfOptions.Intrinsic)
+		public static int SizeOf<T>(SizeOfOptions options)
 		{
-			return SizeOfAuto<T>(default, options);
+			return SizeOf<T>(default, options);
 		}
 
-		public static int SizeOfAuto<T>(T value, SizeOfOptions options = SizeOfOptions.Intrinsic)
+		public static int SizeOf<T>(T value, SizeOfOptions options = SizeOfOptions.Intrinsic)
 		{
 //			if (Runtime.IsNullOrDefault(value) && options == SizeOfOptions.Intrinsic) { }
 
@@ -374,7 +379,7 @@ namespace RazorSharp.Memory
 		/// <remarks>
 		///     <para>Source: /src/vm/object.inl: 45</para>
 		///     <para>Equals the Son Of Strike "!do" command.</para>
-		///     <para>Equals <see cref="SizeOfAuto{T}(T,SizeOfOptions)" /> with <see cref="SizeOfOptions.BaseInstance"/> for objects that aren't arrays or strings.</para>
+		///     <para>Equals <see cref="SizeOf{T}(T,RazorSharp.Memory.SizeOfOptions)" /> with <see cref="SizeOfOptions.BaseInstance"/> for objects that aren't arrays or strings.</para>
 		///     <para>Note: This also includes padding and overhead (<see cref="ObjHeader" /> and <see cref="MethodTable" /> ptr.)</para>
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
@@ -386,15 +391,14 @@ namespace RazorSharp.Memory
 		{
 			// Sanity check
 			Conditions.Require(!Runtime.IsStruct<T>());
-
-
+			
 			if (value == null) {
 				return Constants.INVALID_VALUE;
 			}
 
 			// By manually reading the MethodTable*, we can calculate the size correctly if the reference
 			// is boxed or cloaked
-			Pointer<MethodTable> methodTable = Runtime.ReadMethodTable(ref value);
+			Pointer<MethodTable> methodTable = Runtime.ReadMethodTable(value);
 
 			// Value of GetSizeField()
 			int length = 0;
@@ -458,7 +462,7 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     Returns the size of the data in <paramref name="value"/>. If <typeparamref name="T"/> is a reference type,
 		/// this returns the size of <paramref name="value"/> not occupied by the <see cref="MethodTable" /> pointer and the <see cref="ObjHeader" />.
-		/// If <typeparamref name="T"/> is a value type, this returns <see cref="SizeOf{T}"/>.
+		/// If <typeparamref name="T"/> is a value type, this returns <see cref="SizeOf{T}()"/>.
 		/// </summary>
 		public static int SizeOfData<T>(T value)
 		{
@@ -474,7 +478,7 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     Returns the base size of the data in the type specified by <paramref name="t"/>. If <paramref name="t"/> is a reference type,
 		/// this returns the size of data not occupied by the <see cref="MethodTable" /> pointer, <see cref="ObjHeader" />, padding, and overhead.
-		/// If <paramref name="t"/> is a value type, this returns <see cref="SizeOf{T}"/>.
+		/// If <paramref name="t"/> is a value type, this returns <see cref="SizeOf{T}()"/>.
 		/// </summary>
 		public static int BaseSizeOfData(Type t)
 		{

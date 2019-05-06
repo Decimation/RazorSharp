@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace RazorSharp.CoreClr.Structures
+namespace RazorSharp.CoreClr.Structures.Enums
 {
 	/// <summary>
 	///     <para>Sources:</para>
