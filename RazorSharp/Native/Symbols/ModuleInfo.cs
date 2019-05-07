@@ -13,7 +13,7 @@ using RazorSharp.Memory.Pointers;
 namespace RazorSharp.Native.Symbols
 {
 	/// <summary>
-	/// Combines a symbol file with a process module.
+	/// Combines a symbol with a process module.
 	/// </summary>
 	public class ModuleInfo
 	{
@@ -31,7 +31,6 @@ namespace RazorSharp.Native.Symbols
 			BaseAddress = baseAddr;
 			m_pdb       = pdb;
 		}
-
 
 		public Symbol GetSymbol(string name)
 		{

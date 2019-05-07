@@ -27,9 +27,9 @@ namespace RazorSharp.CoreClr.Structures
 	internal unsafe struct PackedDWORDFields
 	{
 		/// <summary>
-		///     <see cref="EEClassFieldId.COUNT" /> == <see cref="LENGTH" />
+		///     <see cref="EEClassFieldId.COUNT" /> == <see cref="LENGTH" /> == <c>11</c>
 		/// </summary>
-		private const int LENGTH = 11;
+		private const int LENGTH = (int) EEClassFieldId.COUNT;
 
 		private const int MAX_LENGTH_BITS = 5;
 		private const int BITS_PER_DWORD  = 32;
@@ -82,8 +82,7 @@ namespace RazorSharp.CoreClr.Structures
 				// extracted in the destination DWORD.
 				DWORD dwValueShift = dwOffset % BITS_PER_DWORD;
 				DWORD dwValueMask  = ((1U << (int) dwLength) - 1) << (int) dwValueShift;
-
-
+				
 				// Mask out the bits we want and shift them down into the bottom of the result DWORD.
 
 				fixed (PackedDWORDFields* p = &this) {

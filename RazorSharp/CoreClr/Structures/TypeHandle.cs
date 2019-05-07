@@ -105,9 +105,7 @@ namespace RazorSharp.CoreClr.Structures
 
 		internal Pointer<MethodTable> MethodTable {
 			[SymCall(SymImportOptions.UseAccessorName)]
-			get {
-				throw new SymImportException();
-			}
+			get => throw new SymImportException();
 		}
 
 		static TypeHandle()

@@ -4,10 +4,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using SimpleSharp;
-using SimpleSharp.Diagnostics;
-using SimpleSharp.Strings;
-using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.CoreClr.Structures.Enums;
@@ -16,6 +12,11 @@ using RazorSharp.Memory.Extern;
 using RazorSharp.Memory.Extern.Symbols;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Strings;
+using SimpleSharp.Utilities;
+
 // ReSharper disable UnusedMember.Local
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -200,13 +201,14 @@ namespace RazorSharp.CoreClr.Structures
 			}
 		}
 
-		internal bool   HasComponentSize => Flags.HasFlag(MethodTableFlags.HasComponentSize);
-		internal bool   IsArray          => Flags.HasFlag(MethodTableFlags.Array);
-		internal bool   IsStringOrArray  => HasComponentSize;
-		internal bool   IsBlittable      => EEClass.Reference.IsBlittable;
-		internal bool   IsString         => HasComponentSize && !IsArray;
-		internal bool   ContainsPointers => Flags.HasFlag(MethodTableFlags.ContainsPointers);
-		internal string Name             => RuntimeType.Name;
+		internal bool HasComponentSize => Flags.HasFlag(MethodTableFlags.HasComponentSize);
+		internal bool IsArray          => Flags.HasFlag(MethodTableFlags.Array);
+		internal bool IsStringOrArray  => HasComponentSize;
+		internal bool IsBlittable      => EEClass.Reference.IsBlittable;
+		internal bool IsString         => HasComponentSize && !IsArray;
+		internal bool ContainsPointers => Flags.HasFlag(MethodTableFlags.ContainsPointers);
+
+		internal string Name => RuntimeType.Name;
 
 		// internal name: GetTypeDefRid
 		internal int Token => Constants.TokenFromRid(OrigToken, CorTokenType.TypeDef);
@@ -231,20 +233,17 @@ namespace RazorSharp.CoreClr.Structures
 		}
 
 
-		internal int NumInstanceFields => EEClass.Reference.NumInstanceFields;
-
-		internal int NumStaticFields => EEClass.Reference.NumStaticFields;
-
+		internal int NumInstanceFields  => EEClass.Reference.NumInstanceFields;
+		internal int NumStaticFields    => EEClass.Reference.NumStaticFields;
 		internal int NumNonVirtualSlots => EEClass.Reference.NumNonVirtualSlots;
-
-		internal int NumMethods => EEClass.Reference.NumMethods;
+		internal int NumMethods         => EEClass.Reference.NumMethods;
 
 		internal int NumInstanceFieldBytes => BaseSize - EEClass.Reference.BaseSizePadding;
 
 		/// <summary>
 		///     Array of <see cref="FieldDesc" />s for this type.
 		/// </summary>
-		internal FieldDesc*  FieldDescList => EEClass.Reference.FieldDescList.ToPointer<FieldDesc>();
+		internal FieldDesc* FieldDescList => EEClass.Reference.FieldDescList.ToPointer<FieldDesc>();
 
 		/// <summary>
 		///     Length of the <see cref="FieldDescList" />
@@ -252,7 +251,7 @@ namespace RazorSharp.CoreClr.Structures
 		internal int FieldDescListLength => EEClass.Reference.FieldDescListLength;
 
 		// todo
-		internal Pointer<MethodDescChunk>  MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
+		internal Pointer<MethodDescChunk> MethodDescChunkList => EEClass.Reference.MethodDescChunkList;
 
 
 		[SymCall]
@@ -283,46 +282,47 @@ namespace RazorSharp.CoreClr.Structures
 
 		private void* m_pWriteableData;
 
-		#region Union
+		#region Union 1
 
 		/// <summary>
-		///     <para>Union</para>
+		///     <para>Union 1</para>
 		///     <para>EEClass* 		<see cref="m_pEEClass" /></para>
 		///     <para>MethodTable* 	<see cref="m_pCanonMT" /></para>
 		/// </summary>
-		private EEClass* m_pEEClass;
+		private void* m_union1;
 
-
-		private MethodTable* m_pCanonMT => (MethodTable*) m_pEEClass;
+		private EEClass*     m_pEEClass => (EEClass*) m_union1;
+		private MethodTable* m_pCanonMT => (MethodTable*) m_union1;
 
 		#endregion
 
-		#region Union
+		#region Union 2
 
 		/// <summary>
-		///     <para>Union</para>
+		///     <para>Union 2</para>
 		///     <para>void* 		<see cref="m_pPerInstInfo" /></para>
 		///     <para>void* 		<see cref="m_ElementTypeHnd" /></para>
 		///     <para>void*		<see cref="m_pMultipurposeSlot1" /></para>
 		/// </summary>
-		private void* m_pPerInstInfo;
+		private void* m_union2;
 
-
-		private void* m_ElementTypeHnd     => m_pPerInstInfo;
-		private void* m_pMultipurposeSlot1 => m_pPerInstInfo;
+		private void* m_pPerInstInfo       => m_union2;
+		private void* m_ElementTypeHnd     => m_union2;
+		private void* m_pMultipurposeSlot1 => m_union2;
 
 		#endregion
 
-		#region Union
+		#region Union 3
 
 		/// <summary>
-		///     <para>Union</para>
-		///     <para>void* 		m_pInterfaceMap</para>
-		///     <para>void* 		m_pMultipurposeSlot2</para>
+		///     <para>Union 3</para>
+		///     <para>void* 		<see cref="m_pInterfaceMap" /></para>
+		///     <para>void* 		<see cref="m_pMultipurposeSlot2" /></para>
 		/// </summary>
-		private void* m_pInterfaceMap;
+		private void* m_union3;
 
-		public void* m_pMultipurposeSlot2 => m_pInterfaceMap;
+		private void* m_pInterfaceMap      => m_union3;
+		private void* m_pMultipurposeSlot2 => m_union3;
 
 		#endregion
 
@@ -332,12 +332,12 @@ namespace RazorSharp.CoreClr.Structures
 		private const long UNION_MASK = 3;
 
 		/// <summary>
-		///     Describes what the union at offset <c>40</c> (<see cref="m_pEEClass" />, <see cref="m_pCanonMT" />)
+		///     Describes what the union at offset <c>40</c> (<see cref="m_union1" />)
 		///     contains.
 		/// </summary>
 		private LowBits UnionType {
 			get {
-				long l = (long) m_pEEClass;
+				long l = (long) m_union1;
 				return (LowBits) (l & UNION_MASK);
 			}
 		}
@@ -348,7 +348,7 @@ namespace RazorSharp.CoreClr.Structures
 		{
 			var table = new ConsoleTable("Field", "Value");
 
-			table.AddRow("Name", RuntimeType.Name);
+			table.AddRow("Name", Name);
 			table.AddRow("Base size", m_BaseSize);
 
 			if (HasComponentSize)
@@ -393,15 +393,9 @@ namespace RazorSharp.CoreClr.Structures
 
 		#region Equality
 
-		public static bool operator ==(MethodTable a, MethodTable b)
-		{
-			return a.Equals(b);
-		}
+		public static bool operator ==(MethodTable a, MethodTable b) => a.Equals(b);
 
-		public static bool operator !=(MethodTable a, MethodTable b)
-		{
-			return !a.Equals(b);
-		}
+		public static bool operator !=(MethodTable a, MethodTable b) => !a.Equals(b);
 
 		public override int GetHashCode()
 		{
@@ -415,7 +409,7 @@ namespace RazorSharp.CoreClr.Structures
 				hashCode = (hashCode * 397) ^ unchecked((int) (long) m_pParentMethodTable);
 				hashCode = (hashCode * 397) ^ unchecked((int) (long) m_pLoaderModule);
 				hashCode = (hashCode * 397) ^ unchecked((int) (long) m_pWriteableData);
-				hashCode = (hashCode * 397) ^ unchecked((int) (long) m_pEEClass);
+				hashCode = (hashCode * 397) ^ unchecked((int) (long) m_union1);
 				hashCode = (hashCode * 397) ^ unchecked((int) (long) m_pCanonMT);
 
 				//hashCode = (hashCode * 397) ^ m_slotInfo.GetHashCode();
@@ -435,7 +429,7 @@ namespace RazorSharp.CoreClr.Structures
 			       && m_pParentMethodTable == other.m_pParentMethodTable
 			       && m_pLoaderModule == other.m_pLoaderModule
 			       && m_pWriteableData == other.m_pWriteableData
-			       && m_pEEClass == other.m_pEEClass
+			       && m_union1 == other.m_union1
 			       && m_pCanonMT == other.m_pCanonMT;
 
 			// && m_slotInfo.Equals(other.m_slotInfo)

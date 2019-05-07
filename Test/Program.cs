@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -85,24 +86,48 @@ namespace Test
 			Console.WriteLine(Unsafe.SizeOf<int>());
 		}
 
+		struct NotAligned
+		{
+			private byte  b1;
+			private int   i1;
+			private byte  b2;
+			private short s1;
+		}
+
+
+		struct Component<T>
+		{
+			public Pointer<T> Value { get; }
+
+			internal Component(Pointer<T> value)
+			{
+				Value = value;
+			}
+		}
+
+		private static Component<T> GetComponent<T>(string name)
+		{
+			var mi = new ModuleInfo(new FileInfo(Structure.PDB), 
+			                        Modules.GetModule(new FileInfo(Structure.DLL).Name));
+
+			return new Component<T>(mi.GetSymAddress(name));
+		}
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			SymbolManager.CurrentImage = new FileInfo(Structure.PDB);
+			Modules.LoadModule(Structure.DLL);
+			
+			var cmp = GetComponent<byte>("g_szStr");
+			Console.WriteLine(cmp.Value.ReadCString(StringTypes.ANSI));
+			
+			var cmp2 = GetComponent<byte>("g_szWStr");
+			Console.WriteLine(cmp2.Value.ReadCString(StringTypes.UNI));
+			
+			var cmp3 = GetComponent<byte>("g_sz16Str");
+			Console.WriteLine(cmp3.Value.ReadCString(StringTypes.UNI));
 
-
-			var mod=Modules.LoadModule(Structure.DLL);
-			var mi = new ModuleInfo(new FileInfo(Structure.PDB), mod);
-			var sz = mi.GetSymAddress("sz").ReadPointer<byte>();
-			Conditions.Assert(sz.ReadString(StringTypes.ANSI)=="Hello, World");
-
-
-			Pointer<EEClass> ee = typeof(string).GetMethodTable()
-			                                    .Reference
-			                                    .EEClass;
-
-			Console.WriteLine(ee);
-			Console.WriteLine(ee.Reference.FieldDescList.ToString("O"));
+			
 		}
 	}
 }

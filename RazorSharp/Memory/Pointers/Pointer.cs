@@ -303,6 +303,23 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Read / write
 
+		/// <summary>
+		/// Reads a C-style string.
+		/// </summary>
+		public string ReadCString(StringTypes type = StringTypes.ANSI)
+		{
+			switch (type) {
+				case StringTypes.ANSI:
+					return ReadPointer<byte>().ReadString(StringTypes.ANSI);
+					break;
+				case StringTypes.UNI:
+					return ReadPointer<short>().ReadString(StringTypes.UNI);
+					break;
+				default: 
+					throw new ArgumentOutOfRangeException(nameof(type), type, null);
+			}
+		}
+
 		public Pointer<TType> ReadPointer<TType>(int elemOffset = 0)
 		{
 			return ReadAny<Pointer<TType>>(elemOffset);
@@ -570,16 +587,6 @@ namespace RazorSharp.Memory.Pointers
 		/// <returns>The value read from the offset <see cref="Address" /></returns>
 		[Pure]
 		public T Read(int elemOffset = 0) => ReadAny<T>(elemOffset);
-
-		public T ReadFast()
-		{
-			return CSUnsafe.Read<T>(m_value);
-		}
-
-		public T ReadFast(int elemOffset)
-		{
-			return CSUnsafe.Read<T>((void*) (((long) m_value) + (elemOffset * ElementSize)));
-		}
 
 		/// <summary>
 		///     Reinterprets <see cref="Address" /> as a reference to a value of type <typeparamref name="T" />

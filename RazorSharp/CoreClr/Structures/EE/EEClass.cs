@@ -11,6 +11,7 @@ using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+
 // ReSharper disable UnusedMember.Local
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
@@ -72,20 +73,22 @@ namespace RazorSharp.CoreClr.Structures.EE
 		private void* m_pChunks;
 
 
-		#region Union
+		#region Union 1
 
 		/// <summary>
-		///     <para>Union</para>
+		///     <para>Union 1</para>
 		///     <para>void* <see cref="m_ohDelegate" /></para>
 		///     <para>uint <see cref="m_cbNativeSize" /></para>
 		///     <para>int <see cref="m_ComInterfaceType" /></para>
 		/// </summary>
-		private void* m_ohDelegate;
+		private void* m_union1;
+
+		private void* m_ohDelegate => m_union1;
 
 		private uint m_cbNativeSize {
 			get {
 				fixed (EEClass* value = &this) {
-					Pointer<uint> ptr = &value->m_ohDelegate;
+					Pointer<uint> ptr = &value->m_union1;
 					return ptr.Reference;
 				}
 			}
@@ -94,7 +97,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		private int m_ComInterfaceType {
 			get {
 				fixed (EEClass* value = &this) {
-					Pointer<int> ptr = &value->m_ohDelegate;
+					Pointer<int> ptr = &value->m_union1;
 					return ptr.Reference;
 				}
 			}
@@ -146,7 +149,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///         Equal to WinDbg's <c>!DumpClass</c> <c>"Class Attributes"</c> value in hexadecimal format.
 		///     </remarks>
 		/// </summary>
-		internal DWORD Attributes => m_dwAttrClass;
+		private DWORD Attributes => m_dwAttrClass;
 
 		/// <summary>
 		///     <remarks>
@@ -180,11 +183,11 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		internal Pointer<EEClassLayoutInfo>  LayoutInfo {
+		internal Pointer<EEClassLayoutInfo> LayoutInfo {
 			get {
 				//return &((LayoutEEClass *) this)->m_LayoutInfo;
 				Conditions.Assert(HasLayout, "EEClass does not have LayoutInfo");
-				
+
 				var thisptr = Unsafe.AddressOf(ref this)
 				                    .Add(sizeof(EEClass))
 				                    .Address;
@@ -195,7 +198,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		}
 
 		/// <summary>
-		///     Abstracted to MethodTable
+		///     Abstracted to <see cref="MethodTable"/>
 		///     <remarks>
 		///         For use with <see cref="Runtime.IsBlittable{T}" />
 		///     </remarks>
@@ -203,22 +206,22 @@ namespace RazorSharp.CoreClr.Structures.EE
 		internal bool IsBlittable => HasLayout && LayoutInfo.Reference.IsBlittable;
 
 		/// <summary>
-		///     Abstracted to MethodTable
+		///     Abstracted to <see cref="MethodTable"/>
 		/// </summary>
 		internal int NumInstanceFields => (int) GetPackableField(EEClassFieldId.NumInstanceFields);
 
 		/// <summary>
-		///     Abstracted to MethodTable
+		///     Abstracted to <see cref="MethodTable"/>
 		/// </summary>
 		internal int NumStaticFields => (int) GetPackableField(EEClassFieldId.NumStaticFields);
 
 		/// <summary>
-		///     Abstracted to MethodTable
+		///     Abstracted to <see cref="MethodTable"/>
 		/// </summary>
 		internal int NumMethods => (int) GetPackableField(EEClassFieldId.NumMethods);
 
 		/// <summary>
-		///     Abstracted to MethodTable
+		///     Abstracted to <see cref="MethodTable"/>
 		/// </summary>
 		internal int NumNonVirtualSlots => (int) GetPackableField(EEClassFieldId.NumNonVirtualSlots);
 
@@ -240,7 +243,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		private Pointer<EEClass> ParentClass => m_pMethodTable->Parent.Reference.EEClass;
 
 		/// <summary>
-		///     Abstracted to MethodTable
+		///     Abstracted to <see cref="MethodTable"/>
 		/// </summary>
 		internal int FieldDescListLength {
 			//There are (m_wNumInstanceFields - GetParentClass()->m_wNumInstanceFields + m_wNumStaticFields) entries
@@ -251,7 +254,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 				int                  fieldCount = pClass.Reference.NumInstanceFields + pClass.Reference.NumStaticFields;
 				Pointer<MethodTable> pParentMT  = m_pMethodTable->Parent;
 
-				if (!pParentMT.IsNull) 
+				if (!pParentMT.IsNull)
 					fieldCount -= pParentMT.Reference.EEClass.Reference.NumInstanceFields;
 
 				return fieldCount;
@@ -263,31 +266,28 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		internal Pointer<FieldDesc>  FieldDescList {
+		internal Pointer<FieldDesc> FieldDescList {
 			get {
 				//PTR_HOST_MEMBER_TADDR(EEClass, this, m_pFieldDescList)
-				return Runtime.PTR_HOST_MEMBER_TADDR(ref  this, FIELD_DESC_LIST_FIELD_OFFSET, m_pFieldDescList);
+				return Runtime.PTR_HOST_MEMBER_TADDR(ref this,
+				                                     FIELD_DESC_LIST_FIELD_OFFSET, m_pFieldDescList);
 			}
 		}
-		
-		
-		
+
 
 		/// <summary>
 		///     <remarks>
 		///         Address-sensitive
 		///     </remarks>
 		/// </summary>
-		internal Pointer<MethodDescChunk>  MethodDescChunkList {
+		internal Pointer<MethodDescChunk> MethodDescChunkList {
 			//todo: verify
-			get {
-				return Runtime.PTR_HOST_MEMBER_TADDR(ref  this, CHUNKS_FIELD_OFFSET, m_pChunks);
-			}
+			get { return Runtime.PTR_HOST_MEMBER_TADDR(ref this, CHUNKS_FIELD_OFFSET, m_pChunks); }
 		}
 
 		#endregion
-		
-		#region EEClass
+
+		#region EEClass offsets
 
 		/// <summary>
 		///     Offset for the field <see cref="EEClass.m_pFieldDescList" />

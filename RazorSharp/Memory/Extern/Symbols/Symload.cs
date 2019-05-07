@@ -93,7 +93,8 @@ namespace RazorSharp.Memory.Extern.Symbols
 		private static ModuleInfo GetInfo(SymNamespaceAttribute attr)
 			=> GetInfo(attr, Modules.GetBaseAddress(attr.ShortModuleName));
 
-		private static ModuleInfo GetModuleInfo(MemberInfo type)
+		// ReSharper disable once SuggestBaseTypeForParameter
+		private static ModuleInfo GetModuleInfo(Type type)
 		{
 			var nameSpaceAttr = type.GetCustomAttribute<SymNamespaceAttribute>();
 			Conditions.NotNull(nameSpaceAttr, nameof(nameSpaceAttr));
