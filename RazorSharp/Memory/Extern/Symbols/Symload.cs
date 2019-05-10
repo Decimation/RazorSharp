@@ -33,8 +33,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 		private const string GET_PROPERTY_REPLACEMENT  = "Get";
 
 		private static readonly ISet<Type> BoundTypes = new HashSet<Type>();
-
-
+		
 		private static bool HasFlagFast(this SymImportOptions value, SymImportOptions flag)
 		{
 			return (value & flag) == flag;

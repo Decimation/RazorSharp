@@ -16,6 +16,7 @@ using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Symbols;
 using RazorSharp.Utilities;
+using SimpleSharp.Strings;
 using Unsafe = RazorSharp.Memory.Unsafe;
 
 #endregion
@@ -62,15 +63,11 @@ namespace RazorSharp.CoreClr
 
 		#region Struct
 
-		internal static bool IsStruct<T>()
-		{
-			return typeof(T).IsValueType;
-		}
+		internal static bool IsStruct<T>() => IsStruct(typeof(T));
 
-		internal static bool IsStruct<T>(T value)
-		{
-			return value.GetType().IsValueType;
-		}
+		internal static bool IsStruct<T>(T value) => IsStruct(value.GetType());
+
+		internal static bool IsStruct(Type value) => value.IsValueType;
 
 		#endregion
 
@@ -90,7 +87,7 @@ namespace RazorSharp.CoreClr
 			return IsPointer(value.GetType());
 		}
 
-		private static bool IsPointer(Type type)
+		internal static bool IsPointer(Type type)
 		{
 			if (type.IsPointer || type == typeof(IntPtr)) {
 				return true;
@@ -199,7 +196,7 @@ namespace RazorSharp.CoreClr
 		/// <param name="fieldName">Field name</param>
 		/// <param name="fieldValue">Value of the field</param>
 		/// <typeparam name="T">Type</typeparam>
-		internal static Pointer<byte> PTR_HOST_MEMBER_TADDR<T>(ref T    value,
+		internal static Pointer<byte> PTR_HOST_MEMBER_TADDR<T>(ref T         value,
 		                                                       string        fieldName,
 		                                                       Pointer<byte> fieldValue) where T : struct
 		{
@@ -213,7 +210,7 @@ namespace RazorSharp.CoreClr
 		internal static Pointer<byte> PTR_HOST_MEMBER_TADDR<T>(ref T         value,
 		                                                       long          ofs,
 		                                                       Pointer<byte> fieldValue) where T : struct
-		{ 
+		{
 			return Unsafe.AddressOf(ref value).Add((long) fieldValue).Add(ofs).Cast<byte>();
 		}
 
@@ -275,9 +272,9 @@ namespace RazorSharp.CoreClr
 			if (IsStruct<T>())
 				return typeof(T).GetTypeHandle();
 
-			// We need to get the heap pointer manually because of type constraints
-			var ptr = *(IntPtr*) Unsafe.AddressOf(ref value);
-			var mt  = *(TypeHandle*) ptr;
+
+			Unsafe.TryGetAddressOfHeap(value, out Pointer<byte> ptr);
+			var mt = *(TypeHandle*) ptr;
 
 			return mt;
 		}
@@ -302,9 +299,8 @@ namespace RazorSharp.CoreClr
 			if (IsStruct<T>())
 				return typeof(T).GetMethodTable();
 
-			// We need to get the heap pointer manually because of type constraints
-			var          ptr = *(IntPtr*) Unsafe.AddressOf(ref t);
-			MethodTable* mt  = *(MethodTable**) ptr;
+			Unsafe.TryGetAddressOfHeap(t, out Pointer<byte> ptr);
+			MethodTable* mt = *(MethodTable**) ptr;
 
 			return mt;
 		}

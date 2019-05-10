@@ -86,6 +86,37 @@ namespace RazorSharp.CoreClr.Meta
 			}
 		}
 
+		/// <summary>
+		/// <see cref="InstanceFields"/> with transient fields
+		/// </summary>
+		public IEnumerable<IReadWriteField> MemoryFields {
+			get {
+				var instanceFields = InstanceFields.Cast<IReadWriteField>().ToList();
+
+				if (!IsStruct) {
+					instanceFields.Insert(0, GetObjectHeaderField());
+					instanceFields.Insert(1, GetMethodTableField());
+				}
+
+				return instanceFields;
+			}
+		}
+
+		
+		
+
+		public bool IsStruct => Runtime.IsStruct(RuntimeType);
+
+		public IReadWriteField GetMethodTableField()
+		{
+			return new MethodTableField(RuntimeType.GetMethodTable());
+		}
+
+		public IReadWriteField GetObjectHeaderField()
+		{
+			return new ObjectHeaderField(null);
+		}
+
 		public IEnumerable<MetaField> MethodTableFields {
 			get {
 				var mtFields = RuntimeType.GetCorrespondingMethodTableFields();
@@ -106,8 +137,9 @@ namespace RazorSharp.CoreClr.Meta
 
 			switch (format.ToUpperInvariant()) {
 				case FMT_B:
-					return String.Format("{0} (token: {1}) (base size: {2}) (component size: {3}) (base fields size: {4})",
-						              Name, Token, BaseSize, ComponentSize, NumInstanceFieldBytes);
+					return String.Format(
+						"{0} (token: {1}) (base size: {2}) (component size: {3}) (base fields size: {4})",
+						Name, Token, BaseSize, ComponentSize, NumInstanceFieldBytes);
 				case FMT_E:
 					return ToTable().ToString();
 				default:

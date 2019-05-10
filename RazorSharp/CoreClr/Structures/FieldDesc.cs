@@ -276,17 +276,19 @@ namespace RazorSharp.CoreClr.Structures
 			Conditions.Assert(Runtime.ReadMethodTable(t) == EnclosingMethodTable);
 			Conditions.Assert(Offset != FIELD_OFFSET_NEW_ENC);
 
+			// todo: addressofdata
 			var data = Unsafe.AddressOf(ref t).Address;
-			if (Runtime.IsString<TInstance>())
-				return data + Offset;
+//			if (Runtime.IsString<TInstance>(t))
+//				return data + Offset;
 
-			if (!Runtime.IsStruct<TInstance>()) {
-				data =  Marshal.ReadIntPtr(data);
-				data += IntPtr.Size + Offset;
+			if (!Runtime.IsStruct<TInstance>(t)) {
+				Unsafe.TryGetAddressOfHeap(t, out var ptr);
+				data = ptr.Address;
+				
 			}
-			else {
-				data += Offset;
-			}
+			
+			data += Offset;
+			
 			
 
 			return data;

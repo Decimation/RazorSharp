@@ -112,8 +112,8 @@
       <HintPath>..\packages\Serilog.Sinks.Console.3.1.1\lib\net45\Serilog.Sinks.Console.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SimpleSharp, Version=1.0.4.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\SimpleSharp.1.0.4\lib\net472\SimpleSharp.dll</HintPath>
+    <Reference Include="SimpleSharp, Version=1.0.6.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\SimpleSharp.1.0.6\lib\net472\SimpleSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -129,16 +129,23 @@
     <Reference Include="System.Threading.Thread" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis\Gadget.cs" />
+    <Compile Include="Analysis\GadgetOptions.cs" />
     <Compile Include="Analysis\Inspect.cs" />
     <Compile Include="Analysis\InspectOptions.cs" />
+    <Compile Include="Analysis\LayoutInfo.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="CoreClr\Clr.cs" />
+    <Compile Include="CoreClr\Meta\IMemoryExposed.cs" />
     <Compile Include="CoreClr\Meta\IMeta.cs" />
     <Compile Include="CoreClr\Meta\IMetaMember.cs" />
+    <Compile Include="CoreClr\Meta\IReadWriteField.cs" />
     <Compile Include="CoreClr\Meta\MetaField.cs" />
     <Compile Include="CoreClr\Meta\MetaIL.cs" />
     <Compile Include="CoreClr\Meta\MetaMethod.cs" />
     <Compile Include="CoreClr\Meta\MetaType.cs" />
+    <Compile Include="CoreClr\Meta\MethodTableField.cs" />
+    <Compile Include="CoreClr\Meta\ObjectHeaderField.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClass.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClassFieldId.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClassLayoutInfo.cs" />

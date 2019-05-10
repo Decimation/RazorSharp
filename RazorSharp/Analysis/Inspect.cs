@@ -22,6 +22,7 @@ namespace RazorSharp.Analysis
 	{
 		// todo: maybe add type name/info to labels
 		// todo: break this up into components with options (more modular)
+		// todo: rewrite
 
 		#region Helper methods
 

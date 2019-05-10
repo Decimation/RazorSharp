@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using InlineIL;
@@ -183,27 +184,20 @@ namespace RazorSharp.Memory
 			return addr.ReadPointer<byte>() + Offsets.OffsetToData;
 		}
 
-		/// <summary>
-		///     Returns the address of reference type <paramref name="value" />'s heap memory (raw data).
-		///     <remarks>
-		///         <para>
-		///             Note: This does not pin the reference in memory if it is a reference type.
-		///             This may require pinning to prevent the GC from moving the object.
-		///             If the GC compacts the heap, this pointer may become invalid.
-		///         </para>
-		///     </remarks>
-		/// </summary>
-		/// <param name="value">Reference type to return the heap address of</param>
-		/// <returns>The address of the heap object.</returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Pointer<byte> AddressOfHeap<T>(T value) where T : class
+		public static bool TryGetAddressOfHeap<T>(T value, OffsetOptions options, out Pointer<byte> ptr)
 		{
-			var tr = __makeref(value);
+			if (Runtime.IsStruct(value)) {
+				ptr = null;
+				return false;
+			}
 
-			// NOTE:
-			// Strings have their data offset by Offsets.OffsetToStringData
-			// Arrays have their data offset by IntPtr.Size * 2 bytes (may be different for 32 bit)
-			return **(IntPtr**) (&tr);
+			ptr = AddressOfHeapInternal(value, options);
+			return true;
+		}
+
+		public static bool TryGetAddressOfHeap<T>(T value, out Pointer<byte> ptr)
+		{
+			return TryGetAddressOfHeap(value, OffsetOptions.NONE, out ptr);
 		}
 
 		/// <summary>
@@ -221,19 +215,32 @@ namespace RazorSharp.Memory
 		/// <param name="offset">Offset type</param>
 		/// <returns>The address of <paramref name="value" /></returns>
 		/// <exception cref="ArgumentOutOfRangeException">If <paramref name="offset"></paramref> is out of range.</exception>
-		public static Pointer<byte> AddressOfHeap<T>(T value, OffsetOptions offset) where T : class
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Pointer<byte> AddressOfHeap<T>(T value,OffsetOptions offset = OffsetOptions.NONE) where T : class
+			=> AddressOfHeapInternal(value, offset);
+
+		private static Pointer<byte> AddressOfHeapInternal<T>(T value, OffsetOptions offset)
 		{
+			// It is already assumed value is a class type
+
+			var tr = __makeref(value);
+
+			// NOTE:
+			// Strings have their data offset by Offsets.OffsetToStringData
+			// Arrays have their data offset by IntPtr.Size * 2 bytes (may be different for 32 bit)
+			var heapPtr = **(IntPtr**) (&tr);
+
 			switch (offset) {
 				case OffsetOptions.STRING_DATA:
 
 					Conditions.Require(Runtime.IsString(value));
 					string s = value as string;
-					return AddressOfHeap(s) + Offsets.OffsetToStringData;
+					return heapPtr + Offsets.OffsetToStringData;
 
 				case OffsetOptions.ARRAY_DATA:
 
 					Conditions.Require(Runtime.IsArray(value));
-					return AddressOfHeap(value) + Offsets.OffsetToArrayData;
+					return heapPtr + Offsets.OffsetToArrayData;
 
 				case OffsetOptions.FIELDS:
 
@@ -241,17 +248,18 @@ namespace RazorSharp.Memory
 					// todo: ...and if it's a string, should this return StringData?
 
 					// Skip over the MethodTable*
-					return AddressOfHeap(value) + Offsets.OffsetToData;
+					return heapPtr + Offsets.OffsetToData;
 
 				case OffsetOptions.NONE:
-					return AddressOfHeap(value);
+					return heapPtr;
 
 				case OffsetOptions.HEADER:
-					return AddressOfHeap(value) - Offsets.OffsetToData;
+					return heapPtr - Offsets.OffsetToData;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(offset), offset, null);
 			}
 		}
+		
 
 		public static Pointer<byte> AddressOfFunction<T>(string name)
 		{
@@ -280,7 +288,6 @@ namespace RazorSharp.Memory
 
 		#region Sizes
 
-		
 		public static int SizeOf<T>(SizeOfOptions options)
 		{
 			return SizeOf<T>(default, options);
@@ -391,7 +398,7 @@ namespace RazorSharp.Memory
 		{
 			// Sanity check
 			Conditions.Require(!Runtime.IsStruct<T>());
-			
+
 			if (value == null) {
 				return Constants.INVALID_VALUE;
 			}

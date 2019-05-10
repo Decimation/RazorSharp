@@ -107,7 +107,7 @@ namespace Test
 
 		private static Component<T> GetComponent<T>(string name)
 		{
-			var mi = new ModuleInfo(new FileInfo(Structure.PDB), 
+			var mi = new ModuleInfo(new FileInfo(Structure.PDB),
 			                        Modules.GetModule(new FileInfo(Structure.DLL).Name));
 
 			return new Component<T>(mi.GetSymAddress(name));
@@ -116,18 +116,20 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			Modules.LoadModule(Structure.DLL);
-			
-			var cmp = GetComponent<byte>("g_szStr");
-			Console.WriteLine(cmp.Value.ReadCString(StringTypes.ANSI));
-			
-			var cmp2 = GetComponent<byte>("g_szWStr");
-			Console.WriteLine(cmp2.Value.ReadCString(StringTypes.UNI));
-			
-			var cmp3 = GetComponent<byte>("g_sz16Str");
-			Console.WriteLine(cmp3.Value.ReadCString(StringTypes.UNI));
+			string value = "foo";
 
-			
+			Inspect.Layout<string>(value);
+
+
+			var info = Gadget.Layout(
+				value,
+				GadgetOptions.FieldSizes | GadgetOptions.FieldOffsets | GadgetOptions.FieldTypes |
+				GadgetOptions.FieldAddresses  | GadgetOptions.InternalStructures);
+			Console.WriteLine(info);
+
+
+			var mt = Runtime.ReadTypeHandle(value);
+			Console.WriteLine();
 		}
 	}
 }

@@ -26,17 +26,14 @@ namespace RazorSharp.CoreClr.Meta
 	///         </item>
 	///     </list>
 	/// </summary>
-	public class MetaField : IMetaMember
+	public class MetaField : IMetaMember, IReadWriteField
 	{
 		internal MetaField(Pointer<FieldDesc> p)
 		{
 			Value = p;
 		}
 
-		public MetaField(FieldInfo field) : this(field.GetFieldDesc())
-		{
-			
-		}
+		public MetaField(FieldInfo field) : this(field.GetFieldDesc()) { }
 
 
 		public override string ToString()
@@ -156,22 +153,14 @@ namespace RazorSharp.CoreClr.Meta
 			return Value.Reference.GetStaticAddressContext();
 		}
 
+		public Pointer<byte> InternalValue => null;
+
 		public object GetValue(object value)
 		{
 			return Value.Reference.GetValue(value);
 		}
 
-		public object GetValue<TInstance>(TInstance t)
-		{
-			return Value.Reference.GetValue(t);
-		}
-
 		public void SetValue(object t, object value)
-		{
-			Value.Reference.SetValue(t, value);
-		}
-		
-		public void SetValue<TInstance>(TInstance t, object value)
 		{
 			Value.Reference.SetValue(t, value);
 		}
@@ -179,12 +168,6 @@ namespace RazorSharp.CoreClr.Meta
 		public Pointer<byte> GetAddress<TInstance>(ref TInstance t)
 		{
 			return Value.Reference.GetAddress(ref t);
-		}
-
-		public void SetValueByAddr<TInstance, TField>(ref TInstance inst, TField value)
-		{
-			Pointer<byte> addr = GetAddress(ref inst);
-			addr.WriteAny(value);
 		}
 
 		#endregion
