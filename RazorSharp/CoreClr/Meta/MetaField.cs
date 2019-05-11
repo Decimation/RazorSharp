@@ -26,7 +26,7 @@ namespace RazorSharp.CoreClr.Meta
 	///         </item>
 	///     </list>
 	/// </summary>
-	public class MetaField : IMetaMember, IReadWriteField
+	public class MetaField : IMetaMember, IReadableStructure
 	{
 		internal MetaField(Pointer<FieldDesc> p)
 		{
@@ -83,6 +83,18 @@ namespace RazorSharp.CoreClr.Meta
 
 		public CorElementType CorType => Value.Reference.CorType;
 
+		public int MemoryOffset {
+			get {
+				int ofs = Offset;
+				
+				if (!EnclosingMetaType.IsStruct) {
+					ofs += Offsets.OffsetToData;
+				}
+
+				return ofs;
+			}
+		}
+
 		/// <summary>
 		///     <para>Size of the field</para>
 		/// </summary>
@@ -120,6 +132,8 @@ namespace RazorSharp.CoreClr.Meta
 		public Type EnclosingType => Value.Reference.EnclosingType;
 
 		public Type FieldType => Value.Reference.FieldType;
+
+		public string TypeName => FieldType.Name;
 
 		public MetaType EnclosingMetaType => new MetaType(Value.Reference.EnclosingMethodTable);
 
@@ -165,9 +179,9 @@ namespace RazorSharp.CoreClr.Meta
 			Value.Reference.SetValue(t, value);
 		}
 
-		public Pointer<byte> GetAddress<TInstance>(ref TInstance t)
+		public Pointer<byte> GetAddress<TInstance>(ref TInstance value)
 		{
-			return Value.Reference.GetAddress(ref t);
+			return Value.Reference.GetAddress(ref value);
 		}
 
 		#endregion

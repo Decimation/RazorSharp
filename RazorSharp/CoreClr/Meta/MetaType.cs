@@ -89,9 +89,9 @@ namespace RazorSharp.CoreClr.Meta
 		/// <summary>
 		/// <see cref="InstanceFields"/> with transient fields
 		/// </summary>
-		public IEnumerable<IReadWriteField> MemoryFields {
+		public IEnumerable<IReadableStructure> MemoryFields {
 			get {
-				var instanceFields = InstanceFields.Cast<IReadWriteField>().ToList();
+				var instanceFields = InstanceFields.Cast<IReadableStructure>().ToList();
 
 				if (!IsStruct) {
 					instanceFields.Insert(0, GetObjectHeaderField());
@@ -102,20 +102,42 @@ namespace RazorSharp.CoreClr.Meta
 			}
 		}
 
-		
-		
+		public IEnumerable<PaddingField> Padding {
+			get {
+				var nextOffsetOrSize = NumInstanceFieldBytes;
+				var memFields        = InstanceFields.ToArray(); // todo: maybe use MemoryFields?
+
+				for (int i = 0; i < memFields.Length; i++) {
+					// start padding
+
+					if (i != memFields.Length - 1) {
+						nextOffsetOrSize = Fields[i + 1].Offset;
+					}
+
+					int nextSectOfsCandidate = Fields[i].Offset + Fields[i].Size;
+
+					int baseOfs = 0;
+
+					if (nextSectOfsCandidate < nextOffsetOrSize) {
+						int padSize   = nextOffsetOrSize - nextSectOfsCandidate;
+						int ro        = baseOfs + nextSectOfsCandidate;
+						int lo        = ro + (padSize - 1);
+						int padOffset = nextSectOfsCandidate + baseOfs;
+
+						yield return new PaddingField(padOffset, padSize);
+					}
+					
+					// end padding
+				}
+			}
+		}
+
 
 		public bool IsStruct => Runtime.IsStruct(RuntimeType);
 
-		public IReadWriteField GetMethodTableField()
-		{
-			return new MethodTableField(RuntimeType.GetMethodTable());
-		}
+		internal static IReadableStructure GetMethodTableField() => new MethodTableField();
 
-		public IReadWriteField GetObjectHeaderField()
-		{
-			return new ObjectHeaderField(null);
-		}
+		internal static IReadableStructure GetObjectHeaderField() => new ObjectHeaderField();
 
 		public IEnumerable<MetaField> MethodTableFields {
 			get {

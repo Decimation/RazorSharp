@@ -9,44 +9,27 @@ namespace RazorSharp.CoreClr.Meta
 	/// <summary>
 	/// Represents the <see cref="ObjHeader"/> pointer in heap memory of an object.
 	/// </summary>
-	public unsafe class ObjectHeaderField : IReadWriteField
+	public unsafe class ObjectHeaderField : TransientField
 	{
-		private Pointer<ObjHeader> m_value;
-
-		internal ObjectHeaderField(Pointer<ObjHeader> ptr)
-		{
-			m_value = ptr;
-		}
+		internal ObjectHeaderField() : base(-IntPtr.Size) { }
 		
-		public int Token => Constants.INVALID_VALUE;
-		public string Name => nameof(ObjHeader);
-		public Pointer<byte> InternalValue => m_value.Cast<byte>();
-
-		public object GetValue(object value)
+		public override object GetValue(object value)
 		{
 			Conditions.Require(!Runtime.IsStruct(value), nameof(value));
 			return Runtime.ReadObjHeader(value);
 		}
 
-		public void SetValue(object t, object value)
+		public override Pointer<byte> GetAddress<TInstance>(ref TInstance value)
 		{
-			throw new System.NotImplementedException();
-		}
+			Conditions.Require(!Runtime.IsStruct(value), nameof(value));
 
-		public Pointer<byte> GetAddress<TInstance>(ref TInstance t)
-		{
-			Conditions.Require(!Runtime.IsStruct(t), nameof(t));
-
-			Unsafe.TryGetAddressOfHeap(t, OffsetOptions.HEADER, out var ptr);
+			Unsafe.TryGetAddressOfHeap(value, OffsetOptions.HEADER, out var ptr);
 
 			return ptr;
 		}
 
-		public int Offset {
-			get => -IntPtr.Size;
-			set { throw new InvalidOperationException(); }
-		}
-
-		public int Size => sizeof(ObjHeader);
+		public override string Name => "Object Header";
+		
+		public override string TypeName => nameof(ObjHeader);
 	}
 }

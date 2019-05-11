@@ -86,31 +86,13 @@ namespace Test
 			Console.WriteLine(Unsafe.SizeOf<int>());
 		}
 
-		struct NotAligned
+		public struct NotAlignedStruct
 		{
-			private byte  b1;
-			private int   i1;
-			private byte  b2;
-			private short s1;
-		}
+			public byte m_byte1;
+			public int  m_int;
 
-
-		struct Component<T>
-		{
-			public Pointer<T> Value { get; }
-
-			internal Component(Pointer<T> value)
-			{
-				Value = value;
-			}
-		}
-
-		private static Component<T> GetComponent<T>(string name)
-		{
-			var mi = new ModuleInfo(new FileInfo(Structure.PDB),
-			                        Modules.GetModule(new FileInfo(Structure.DLL).Name));
-
-			return new Component<T>(mi.GetSymAddress(name));
+			public byte  m_byte2;
+			public short m_short;
 		}
 
 		[HandleProcessCorruptedStateExceptions]
@@ -118,18 +100,21 @@ namespace Test
 		{
 			string value = "foo";
 
-			Inspect.Layout<string>(value);
+			
+			var options = InspectOptions.Sizes | InspectOptions.Types 
+			                                   | InspectOptions.FieldOffsets 
+			                                   | InspectOptions.Padding;
 
 
-			var info = Gadget.Layout(
-				value,
-				GadgetOptions.FieldSizes | GadgetOptions.FieldOffsets | GadgetOptions.FieldTypes |
-				GadgetOptions.FieldAddresses  | GadgetOptions.InternalStructures);
-			Console.WriteLine(info);
 
 
-			var mt = Runtime.ReadTypeHandle(value);
-			Console.WriteLine();
+			var layout = Inspect.Layout<NotAlignedStruct>(options);
+
+			Console.WriteLine(layout);
+
+			layout.SortNatural(InspectOptions.FieldOffsets);
+			
+			Console.WriteLine(layout);
 		}
 	}
 }

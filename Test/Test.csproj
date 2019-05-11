@@ -103,8 +103,8 @@
       <HintPath>..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SimpleSharp, Version=1.0.6.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\SimpleSharp.1.0.6\lib\net472\SimpleSharp.dll</HintPath>
+    <Reference Include="SimpleSharp, Version=1.0.8.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\SimpleSharp.1.0.8\lib\net472\SimpleSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
