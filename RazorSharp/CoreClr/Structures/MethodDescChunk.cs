@@ -83,10 +83,12 @@ namespace RazorSharp.CoreClr.Structures
 			get {
 				// return m_next.GetValueMaybeNull(PTR_HOST_MEMBER_TADDR(MethodDescChunk, this, m_next));
 
-				Pointer<MethodDescChunk> __this = Unsafe.AddressOf(ref this);
+				/*Pointer<MethodDescChunk> __this = Unsafe.AddressOf(ref this);
 				__this.Add(IntPtr.Size);
 				__this.Add((int) m_next);
-				return __this;
+				return __this;*/
+
+				return null;
 			}
 		}
 

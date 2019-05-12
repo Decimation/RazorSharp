@@ -67,6 +67,8 @@ namespace Test
 
 		// todo: DIA instead of dbghelp?
 
+		// todo: rewrite ToString methods
+
 		private static void Test()
 		{
 			var s = new Structure();
@@ -76,12 +78,15 @@ namespace Test
 			s = Symload.Load(s);
 			s.hello();
 
+			Pointer<byte> p = s.g_szStr;
+			Console.WriteLine("cstr: {0}", p.ReadCString());
 
 			Symload.Reload(ref s);
 
 			Console.WriteLine(s.g_int32);
 			Symload.Unload(ref s);
 			Console.WriteLine(s.g_int32);
+
 
 			Console.WriteLine(Unsafe.SizeOf<int>());
 		}
@@ -95,26 +100,43 @@ namespace Test
 			public short m_short;
 		}
 
-		[HandleProcessCorruptedStateExceptions]
-		public static void Main(string[] args)
+		private static void Test<T>(T value)
 		{
-			string value = "foo";
+			var options = InspectOptions.Values | InspectOptions.FieldOffsets
+			                                    | InspectOptions.Addresses
+			                                    | InspectOptions.InternalStructures
+			                                    | InspectOptions.MemoryOffsets
+			                                    | InspectOptions.AuxiliaryInfo;
 
-			
-			var options = InspectOptions.Sizes | InspectOptions.Types 
-			                                   | InspectOptions.FieldOffsets 
-			                                   | InspectOptions.Padding;
-
-
-
-
-			var layout = Inspect.Layout<NotAlignedStruct>(options);
-
-			Console.WriteLine(layout);
-
-			layout.SortNatural(InspectOptions.FieldOffsets);
-			
+			var layout = Inspect.Layout<T>(InspectOptions.Types);
+			layout.Options |= options;
+			layout.Populate(ref value);
 			Console.WriteLine(layout);
 		}
+
+		private static void Hello()
+		{
+			Console.WriteLine("Hello, World!");
+		}
+
+
+		[StructLayout(LayoutKind.Explicit)]
+		struct MyStruct
+		{
+			[FieldOffset(0)]
+			private long A;
+
+			[FieldOffset(16)]
+			private long B;
+
+			public void Offset()
+			{
+				Console.WriteLine(Runtime.OffsetOf(ref this, ref B));
+			}
+		}
+
+
+		[HandleProcessCorruptedStateExceptions]
+		public static void Main(string[] args) { }
 	}
 }

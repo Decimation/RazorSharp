@@ -4,7 +4,7 @@ using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using SimpleSharp.Diagnostics;
 
-namespace RazorSharp.CoreClr.Meta
+namespace RazorSharp.CoreClr.Meta.Transient
 {
 	/// <summary>
 	/// Represents the <see cref="ObjHeader"/> pointer in heap memory of an object.
@@ -21,11 +21,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		public override Pointer<byte> GetAddress<TInstance>(ref TInstance value)
 		{
-			Conditions.Require(!Runtime.IsStruct(value), nameof(value));
-
-			Unsafe.TryGetAddressOfHeap(value, OffsetOptions.HEADER, out var ptr);
-
-			return ptr;
+			return base.GetAddress(ref value, OffsetOptions.HEADER);
 		}
 
 		public override string Name => "Object Header";

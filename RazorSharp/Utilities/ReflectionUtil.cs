@@ -9,6 +9,7 @@ using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
+
 // ReSharper disable ReturnTypeCanBeEnumerable.Global
 
 #endregion
@@ -31,19 +32,16 @@ namespace RazorSharp.Utilities
 		/// <param name="typeArgs">Generic type parameters</param>
 		/// <param name="args">Method arguments</param>
 		/// <returns>Return value of the method specified by <seealso cref="name" /></returns>
-		public static object InvokeGenericMethod(Type            t,
-		                                         string          name,
-		                                         object          instance,
-		                                         Type[]          typeArgs,
+		public static object InvokeGenericMethod(Type            t,        string name,
+		                                         object          instance, Type[] typeArgs,
 		                                         params object[] args)
 		{
 			var method = t.GetAnyMethod(name);
 			Conditions.NotNull(method, nameof(method));
 
-
 			method = method.MakeGenericMethod(typeArgs);
 
-			return method.Invoke(method.IsStatic ? null : instance, args);
+			return method.Invoke(instance, args);
 		}
 
 		internal static OpCode[] GetAllOpCodes()
@@ -109,7 +107,8 @@ namespace RazorSharp.Utilities
 
 		#endregion
 
-		internal static (MemberInfo[], TAttribute[]) GetAnnotated<TAttribute>(this Type t) where TAttribute : Attribute
+		internal static (MemberInfo[], TAttribute[]) GetAnnotated<TAttribute>(this Type t)
+			where TAttribute : Attribute
 		{
 			var members    = new List<MemberInfo>();
 			var attributes = new List<TAttribute>();

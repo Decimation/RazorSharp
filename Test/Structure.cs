@@ -1,5 +1,7 @@
 using System;
+using JetBrains.Annotations;
 using RazorSharp.Memory.Extern.Symbols.Attributes;
+// ReSharper disable InconsistentNaming
 
 namespace Test
 {

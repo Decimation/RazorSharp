@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using InlineIL;
 using JetBrains.Annotations;
 using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr.Meta;
@@ -23,6 +24,8 @@ using Unsafe = RazorSharp.Memory.Unsafe;
 
 namespace RazorSharp.CoreClr
 {
+	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+
 	/// <summary>
 	///     Provides utilities for manipulating, reading, and writing CLR structures.
 	///     <para>Related files:</para>
@@ -56,10 +59,64 @@ namespace RazorSharp.CoreClr
 
 		#region Is
 
-		internal static bool IsNullOrDefault<T>(T value)
+		#region Unmanaged
+
+		private class U<T> where T : unmanaged { }
+
+		public static bool IsUnmanaged(this Type t)
 		{
-			return EqualityComparer<T>.Default.Equals(value, default(T));
+			try {
+				// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+				typeof(U<>).MakeGenericType(t);
+				return true;
+			}
+			catch (Exception) {
+				return false;
+			}
 		}
+
+		public static bool IsUnmanaged<T>() => typeof(T).IsUnmanaged();
+
+		#endregion
+		
+		public static bool IsBoxed<T>(in T value)
+		{
+			return (typeof(T).IsInterface || typeof(T) == typeof(object))
+			       && value != null && IsStruct(value);
+		}
+
+		
+
+		#region Nil
+		
+		/// <summary>
+		/// Whether the value of <paramref name="value"/> is <c>default</c> or <c>null</c> bytes,
+		/// or <paramref name="value"/> is <c>null</c>
+		///
+		/// <remarks>"Nil" is <c>null</c> or <c>default</c>.</remarks>
+		/// </summary>
+		public static bool IsNil<T>([CanBeNull] T value)
+		{
+			return Unsafe.AddressOf(ref value).IsNil;
+		}
+
+		// ReSharper disable once UnusedParameter.Global
+		public static bool IsNilFast<T>([CanBeNull] T value)
+		{
+			// Fastest method for calculating whether a value is nil.
+			IL.Emit.Ldarg(nameof(value));
+			IL.Emit.Ldnull();
+			IL.Emit.Ceq();
+			IL.Emit.Ret();
+			return IL.Return<bool>();
+		}
+
+		internal static bool IsNullOrDefault<T>([CanBeNull] T value)
+		{
+			return EqualityComparer<T>.Default.Equals(value, default);
+		}
+
+		#endregion
 
 		#region Struct
 
@@ -172,6 +229,8 @@ namespace RazorSharp.CoreClr
 			return Unsafe.AddressOfHeap(value).ReadAny<TypeHandle>();
 		}
 
+		#region Offset
+
 		/// <summary>
 		///     Returns the field offset of the specified field, by name.
 		/// </summary>
@@ -181,10 +240,31 @@ namespace RazorSharp.CoreClr
 		/// <param name="fieldName">Name of the field</param>
 		/// <typeparam name="TType">Enclosing type</typeparam>
 		/// <returns>Field offset</returns>
-		internal static int OffsetOf<TType>(string fieldName)
+		public static int OffsetOf<TType>(string fieldName)
 		{
 			return typeof(TType).GetFieldDesc(fieldName).Reference.Offset;
 		}
+
+		public static int OffsetOf<T>(ref T value, ref void* field)
+		{
+			// Faster way of calculating offset
+			var ptrValue = Unsafe.AddressOf(ref value).Cast();
+
+			fixed (void** ptrField = &field) {
+				return (int) (ptrField - ptrValue);
+			}
+		}
+
+		public static int OffsetOf<T, TField>(ref T value, ref TField field)
+		{
+			// Faster way of calculating offset
+			var ptrValue = Unsafe.AddressOf(ref value).Cast();
+			var ptrField = Unsafe.AddressOf(ref field).Cast();
+
+			return (int) (ptrField - ptrValue);
+		}
+
+		#endregion
 
 		#region PTR_HOST_MEMBER_TADDR
 
@@ -196,9 +276,8 @@ namespace RazorSharp.CoreClr
 		/// <param name="fieldName">Field name</param>
 		/// <param name="fieldValue">Value of the field</param>
 		/// <typeparam name="T">Type</typeparam>
-		internal static Pointer<byte> PTR_HOST_MEMBER_TADDR<T>(ref T         value,
-		                                                       string        fieldName,
-		                                                       Pointer<byte> fieldValue) where T : struct
+		internal static Pointer<byte> PTR_HOST_MEMBER_TADDR<T>(ref T value, string fieldName, Pointer<byte> fieldValue)
+			where T : struct
 		{
 			// PTR_HOST_MEMBER_TADDR(type, host, memb)
 
@@ -207,11 +286,24 @@ namespace RazorSharp.CoreClr
 			return PTR_HOST_MEMBER_TADDR(ref value, OffsetOf<T>(fieldName), fieldValue);
 		}
 
-		internal static Pointer<byte> PTR_HOST_MEMBER_TADDR<T>(ref T         value,
-		                                                       long          ofs,
-		                                                       Pointer<byte> fieldValue) where T : struct
+		internal static Pointer<byte> PTR_HOST_MEMBER_TADDR<T>(ref T value, ref void* field) where T : struct
 		{
-			return Unsafe.AddressOf(ref value).Add((long) fieldValue).Add(ofs).Cast<byte>();
+			var ofs       = OffsetOf(ref value, ref field);
+			var fieldLong = (long) field;
+			return Unsafe.AddressOf(ref value).Add(ofs).Add(fieldLong).Cast();
+		}
+
+		internal static Pointer<byte> PTR_HOST_MEMBER_TADDR<T, TField>(ref T value, ref TField field) where T : struct
+		{
+			var ofs       = OffsetOf(ref value, ref field);
+			var fieldLong = CSUnsafe.As<TField, long>(ref field);
+			return Unsafe.AddressOf(ref value).Add(ofs).Add(fieldLong).Cast();
+		}
+
+		internal static Pointer<byte> PTR_HOST_MEMBER_TADDR<T>(ref T value, long ofs, Pointer<byte> fieldValue)
+			where T : struct
+		{
+			return Unsafe.AddressOf(ref value).Add((long) fieldValue).Add(ofs).Cast();
 		}
 
 		#endregion
@@ -296,8 +388,8 @@ namespace RazorSharp.CoreClr
 		internal static Pointer<MethodTable> ReadMethodTable<T>(T t)
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
-			if (IsStruct<T>())
-				return typeof(T).GetMethodTable();
+			if (IsStruct(t))
+				return t.GetType().GetMethodTable();
 
 			Unsafe.TryGetAddressOfHeap(t, out Pointer<byte> ptr);
 			MethodTable* mt = *(MethodTable**) ptr;
@@ -306,13 +398,8 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		/// <summary>
-		///     Returns a pointer to a type's TypeHandle as a <see cref="MethodTable" />
-		/// </summary>
-		/// <param name="t">Type to return the corresponding <see cref="MethodTable" /> for.</param>
-		/// <returns>A <see cref="Pointer{T}" /> to type <paramref name="t" />'s <see cref="MethodTable" /></returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal static Pointer<MethodTable> GetMethodTable(this Type t)
+		[Obsolete]
+		private static Pointer<MethodTable> ReadGetMethodTable(this Type t)
 		{
 			var typeHandle = t.TypeHandle.Value;
 
@@ -335,6 +422,20 @@ namespace RazorSharp.CoreClr
 			return t.IsArray ? Mem.ReadPointer<MethodTable>(typeHandle, Offsets.ARRAY_MT_PTR_OFFSET) : typeHandle;
 		}
 
+		/// <summary>
+		///     Returns a pointer to a type's TypeHandle as a <see cref="MethodTable" />
+		/// </summary>
+		/// <param name="t">Type to return the corresponding <see cref="MethodTable" /> for.</param>
+		/// <returns>A <see cref="Pointer{T}" /> to type <paramref name="t" />'s <see cref="MethodTable" /></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static Pointer<MethodTable> GetMethodTable(this Type t)
+		{
+			var typeHandle      = t.TypeHandle.Value;
+			var typeHandleValue = *(TypeHandle*) &typeHandle;
+
+			return typeHandleValue.MethodTable;
+		}
+
 		// ReSharper disable once InconsistentNaming
 		internal static Pointer<EEClass> GetEEClass(this Type t)
 		{
@@ -354,7 +455,12 @@ namespace RazorSharp.CoreClr
 		/// <returns></returns>
 		private static Pointer<FieldDesc>[] ReadFieldDescs(Pointer<MethodTable> mt)
 		{
-			int len  = mt.Reference.FieldDescListLength;
+			int len = mt.Reference.FieldDescListLength;
+
+			if (len == 0) {
+				return null;
+			}
+
 			var lpFd = new Pointer<FieldDesc>[len];
 
 			for (int i = 0; i < len; i++)
@@ -449,5 +555,7 @@ namespace RazorSharp.CoreClr
 		}
 
 		#endregion
+
+		
 	}
 }

@@ -41,6 +41,39 @@ namespace RazorSharp.Memory
 		public static bool Is64Bit => IntPtr.Size == sizeof(long);
 
 
+		public static int strlen<T>(Pointer<byte> ptr) where T : unmanaged
+		{
+			int length = 0;
+
+			T* pEnd = ptr.ToPointer<T>();
+			while (!Runtime.IsNilFast((*pEnd++))) ;
+			length = (int) ((pEnd - ptr.ToPointer<T>()) - 1);
+
+			return length;
+		}
+
+		public static int strlen(Pointer<byte> ptr)
+		{
+			int length = 0;
+
+			byte* pEnd = ptr.ToPointer<byte>();
+			while (*pEnd++ != '\0') ;
+			length = (int) ((pEnd - ptr.ToPointer<byte>()) - 1);
+
+			return length;
+		}
+
+		public static int wstrlen(Pointer<byte> ptr)
+		{
+			int length = 0;
+
+			char* pEnd = ptr.ToPointer<char>();
+			while (*pEnd++ != '\0') ;
+			length = (int) ((pEnd - ptr.ToPointer<char>()) - 1);
+
+			return length;
+		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static T ReadIL<T>(void* source)
 		{

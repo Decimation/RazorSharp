@@ -56,10 +56,9 @@ namespace RazorSharp.Memory
 			}
 		}
 
-		public static object LoadFromEx(Type type, byte[] mem)
+		public static object LoadFrom(Type type, byte[] mem)
 		{
-			return ReflectionUtil.InvokeGenericMethod(typeof(Unsafe), nameof(LoadFrom),
-			                                          null, new[] {type}, mem);
+			return ReflectionUtil.InvokeGenericMethod(typeof(Unsafe), nameof(LoadFrom), null,new[] {type}, mem);
 		}
 
 		/// <summary>
@@ -73,15 +72,16 @@ namespace RazorSharp.Memory
 		/// <returns>An instance created from <paramref name="mem"/></returns>
 		public static T LoadFrom<T>(byte[] mem)
 		{
-			T             value = default;
+			T value = default;
+
 			Pointer<byte> addr;
 
 			if (Runtime.IsStruct<T>()) {
-				addr = AddressOf(ref value).Cast<byte>();
+				addr = AddressOf(ref value).Cast();
 			}
 			else {
 				value = Runtime.AllocObject<T>();
-				addr  = AddressOfData(ref value).Cast<byte>();
+				addr  = AddressOfData(ref value).Cast();
 			}
 
 			addr.WriteAll(mem);
@@ -103,19 +103,9 @@ namespace RazorSharp.Memory
 			return CSUnsafe.Read<T>(&cpy);
 		}
 
-		/// <summary>
-		/// Whether the value of <paramref name="value"/> is <c>default</c> or <c>null</c> bytes,
-		/// or <paramref name="value"/> is <c>null</c>
-		/// </summary>
-		public static bool IsNil<T>([CanBeNull] T value)
-		{
-			return AddressOf(ref value).IsNil;
-		}
-
 		public static T DeepCopy<T>(T value) where T : class
 		{
-			Conditions.Require(!Runtime.IsString(value), nameof(value));
-			Conditions.Require(!Runtime.IsArray(value), nameof(value));
+			Conditions.Require(!Runtime.IsArrayOrString(value), nameof(value));
 
 			lock (value) {
 				var valueCpy = GCHeap.AllocateObject<T>(0);
@@ -178,7 +168,7 @@ namespace RazorSharp.Memory
 			var addr = AddressOf(ref value);
 
 			if (Runtime.IsStruct(value)) {
-				return addr.Cast<byte>();
+				return addr.Cast();
 			}
 
 			return addr.ReadPointer<byte>() + Offsets.OffsetToData;
@@ -216,7 +206,7 @@ namespace RazorSharp.Memory
 		/// <returns>The address of <paramref name="value" /></returns>
 		/// <exception cref="ArgumentOutOfRangeException">If <paramref name="offset"></paramref> is out of range.</exception>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Pointer<byte> AddressOfHeap<T>(T value,OffsetOptions offset = OffsetOptions.NONE) where T : class
+		public static Pointer<byte> AddressOfHeap<T>(T value, OffsetOptions offset = OffsetOptions.NONE) where T : class
 			=> AddressOfHeapInternal(value, offset);
 
 		private static Pointer<byte> AddressOfHeapInternal<T>(T value, OffsetOptions offset)
@@ -259,7 +249,7 @@ namespace RazorSharp.Memory
 					throw new ArgumentOutOfRangeException(nameof(offset), offset, null);
 			}
 		}
-		
+
 
 		public static Pointer<byte> AddressOfFunction<T>(string name)
 		{
@@ -399,7 +389,7 @@ namespace RazorSharp.Memory
 			// Sanity check
 			Conditions.Require(!Runtime.IsStruct<T>());
 
-			if (value == null) {
+			if (Runtime.IsNullOrDefault(value)) {
 				return Constants.INVALID_VALUE;
 			}
 
@@ -489,8 +479,8 @@ namespace RazorSharp.Memory
 		/// </summary>
 		public static int BaseSizeOfData(Type t)
 		{
-			if (t.IsValueType) {
-				return (int) ReflectionUtil.InvokeGenericMethod(typeof(Unsafe), nameof(SizeOf), null, new[] {t}, null);
+			if (Runtime.IsStruct(t)) {
+				return (int) ReflectionUtil.InvokeGenericMethod(typeof(Unsafe), nameof(SizeOf), null,new[] {t});
 			}
 			else {
 				// Subtract the size of the ObjHeader and MethodTable*
@@ -503,14 +493,6 @@ namespace RazorSharp.Memory
 		#endregion
 
 		#region Misc
-
-		public static bool IsBoxed<T>(in T value)
-		{
-			return (typeof(T).IsInterface || typeof(T) == typeof(object))
-			       && value != null
-			       && Runtime.IsStruct(value);
-		}
-
 
 		/// <summary>
 		///     Copies the memory of <paramref name="value" /> into a <see cref="Byte" /> array.
@@ -525,7 +507,7 @@ namespace RazorSharp.Memory
 		{
 			// Need to include the ObjHeader
 			Pointer<T> ptr = AddressOfHeap(value, OffsetOptions.HEADER).Address;
-			return ptr.Cast<byte>().CopyOut(HeapSize(value));
+			return ptr.Cast().CopyOut(HeapSize(value));
 		}
 
 		/// <summary>
@@ -538,7 +520,7 @@ namespace RazorSharp.Memory
 		public static byte[] MemoryOfVal<T>(T value)
 		{
 			Pointer<T> ptr = AddressOf(ref value);
-			return ptr.Cast<byte>().CopyOut(ptr.ElementSize);
+			return ptr.Cast().CopyOut(ptr.ElementSize);
 		}
 
 		public static byte[] MemoryOfFields<T>(T value) where T : class

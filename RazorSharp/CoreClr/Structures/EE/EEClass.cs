@@ -191,8 +191,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 				var thisptr = Unsafe.AddressOf(ref this)
 				                    .Add(sizeof(EEClass))
 				                    .Address;
-
-				// ReSharper disable once ArrangeRedundantParentheses
+				
 				return &((LayoutEEClass*) thisptr)->m_LayoutInfo;
 			}
 		}
@@ -269,8 +268,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		internal Pointer<FieldDesc> FieldDescList {
 			get {
 				//PTR_HOST_MEMBER_TADDR(EEClass, this, m_pFieldDescList)
-				return Runtime.PTR_HOST_MEMBER_TADDR(ref this,
-				                                     FIELD_DESC_LIST_FIELD_OFFSET, m_pFieldDescList);
+				return Runtime.PTR_HOST_MEMBER_TADDR(ref this, FD_LIST_FIELD_OFFSET, m_pFieldDescList);
 			}
 		}
 
@@ -282,7 +280,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		/// </summary>
 		internal Pointer<MethodDescChunk> MethodDescChunkList {
 			//todo: verify
-			get { return Runtime.PTR_HOST_MEMBER_TADDR(ref this, CHUNKS_FIELD_OFFSET, m_pChunks); }
+			get { return Runtime.PTR_HOST_MEMBER_TADDR(ref this, ref m_pChunks); }
 		}
 
 		#endregion
@@ -295,7 +293,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		///         Relative to address of a <see cref="EEClass" />
 		///     </remarks>
 		/// </summary>
-		private const int FIELD_DESC_LIST_FIELD_OFFSET = 24;
+		private const int FD_LIST_FIELD_OFFSET = 24;
 
 		/// <summary>
 		///     Offset for the field <see cref="EEClass.m_pChunks" />

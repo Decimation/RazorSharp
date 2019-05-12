@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using JetBrains.Annotations;
 
 namespace RazorSharp.Memory.Extern.Symbols.Attributes
 {
@@ -8,6 +9,7 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 	/// by adding the symbol's RVA to the module's <see cref="ProcessModule.BaseAddress"/>
 	/// <seealso cref="ModuleInfo"/>
 	/// </summary>
+	[MeansImplicitUse]
 	public class SymImportAttribute : Attribute
 	{
 		// todo: this configuration is a bit confusing

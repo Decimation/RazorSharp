@@ -315,7 +315,10 @@ namespace RazorSharp.Memory.Pointers
 				case StringTypes.UNI:
 					return ReadPointer<short>().ReadString(StringTypes.UNI);
 					break;
-				default: 
+				case StringTypes.CHAR32:
+					return ReadPointer<int>().ReadString(StringTypes.CHAR32);
+					break;
+				default:
 					throw new ArgumentOutOfRangeException(nameof(type), type, null);
 			}
 		}
@@ -504,6 +507,8 @@ namespace RazorSharp.Memory.Pointers
 					return new string((sbyte*) m_value);
 				case StringTypes.UNI:
 					return new string((char*) m_value);
+				case StringTypes.CHAR32:
+					
 				default:
 					throw new ArgumentOutOfRangeException(nameof(s), s, null);
 			}
@@ -718,6 +723,8 @@ namespace RazorSharp.Memory.Pointers
 		/// <typeparam name="TNew">Type to point to</typeparam>
 		/// <returns>A new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" /></returns>
 		public Pointer<TNew> Cast<TNew>() => new Pointer<TNew>(Address);
+
+		public Pointer<byte> Cast() => Cast<byte>();
 
 		/// <summary>
 		///     Returns <see cref="Address" /> as a pointer.

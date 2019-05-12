@@ -25,6 +25,7 @@ namespace RazorSharp.CoreClr.Meta
 	///             </description>
 	///         </item>
 	///     </list>
+	/// <remarks>Corresponds to <see cref="System.Reflection.FieldInfo"/></remarks>
 	/// </summary>
 	public class MetaField : IMetaMember, IReadableStructure
 	{
@@ -167,8 +168,6 @@ namespace RazorSharp.CoreClr.Meta
 			return Value.Reference.GetStaticAddressContext();
 		}
 
-		public Pointer<byte> InternalValue => null;
-
 		public object GetValue(object value)
 		{
 			return Value.Reference.GetValue(value);
@@ -185,5 +184,10 @@ namespace RazorSharp.CoreClr.Meta
 		}
 
 		#endregion
+
+		public static implicit operator MetaField(FieldInfo fieldInfo)
+		{
+			return new MetaField(fieldInfo);
+		}
 	}
 }

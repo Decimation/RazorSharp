@@ -20,7 +20,7 @@ namespace RazorSharp.Memory.Pointers
 		ANSI,
 
 		/// <summary>
-		///     (2-byte) (<see cref="char" />, <see cref="short" />, <see cref="ushort" />  ) string
+		///     (2-byte) (<see cref="char" />, <see cref="short" />, <see cref="ushort" /> ) string
 		/// <example>
 		/// <list type="bullet">
 		/// <item>

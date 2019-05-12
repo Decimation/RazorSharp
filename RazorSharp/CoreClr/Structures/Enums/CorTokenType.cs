@@ -37,7 +37,6 @@ namespace RazorSharp.CoreClr.Structures.Enums
 		String                 = 0x70000000,
 		Name                   = 0x71000000,
 
-		BaseType =
-			0x72000000 // Leave this on the high end value. This does not correspond to metadata table
+		BaseType = 0x72000000 // Leave this on the high end value. This does not correspond to metadata table
 	}
 }

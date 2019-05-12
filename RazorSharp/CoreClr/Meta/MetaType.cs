@@ -7,12 +7,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using RazorSharp.CoreClr.Meta.Transient;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
 using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.CoreClr.Structures.Enums;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 
@@ -43,6 +45,7 @@ namespace RazorSharp.CoreClr.Meta
 	///             </description>
 	///         </item>
 	///     </list>
+	/// <remarks>Corresponds to <see cref="Type"/></remarks>
 	/// </summary>
 	public class MetaType : IMeta, IFormattable
 	{
@@ -55,6 +58,8 @@ namespace RazorSharp.CoreClr.Meta
 		///     Basic
 		/// </summary>
 		private const string FMT_B = "B";
+
+		public MetaType(Type t) : this(t.GetMethodTable()) { }
 
 		internal MetaType(Pointer<MethodTable> p)
 		{
@@ -80,6 +85,10 @@ namespace RazorSharp.CoreClr.Meta
 
 		public IEnumerable<MetaField> InstanceFields {
 			get {
+				if (IsArray) {
+					return Array.Empty<MetaField>();
+				}
+
 				return Fields
 				      .Where(f => !f.FieldInfo.IsStatic && !f.FieldInfo.IsLiteral)
 				      .OrderBy(f => f.Offset);
@@ -91,7 +100,8 @@ namespace RazorSharp.CoreClr.Meta
 		/// </summary>
 		public IEnumerable<IReadableStructure> MemoryFields {
 			get {
-				var instanceFields = InstanceFields.Cast<IReadableStructure>().ToList();
+				List<IReadableStructure> instanceFields = InstanceFields.Cast<IReadableStructure>().ToList();
+
 
 				if (!IsStruct) {
 					instanceFields.Insert(0, GetObjectHeaderField());
@@ -116,22 +126,61 @@ namespace RazorSharp.CoreClr.Meta
 
 					int nextSectOfsCandidate = Fields[i].Offset + Fields[i].Size;
 
-					int baseOfs = 0;
-
 					if (nextSectOfsCandidate < nextOffsetOrSize) {
-						int padSize   = nextOffsetOrSize - nextSectOfsCandidate;
-						int ro        = baseOfs + nextSectOfsCandidate;
-						int lo        = ro + (padSize - 1);
-						int padOffset = nextSectOfsCandidate + baseOfs;
+						int padSize = nextOffsetOrSize - nextSectOfsCandidate;
 
-						yield return new PaddingField(padOffset, padSize);
+						yield return new PaddingField(nextSectOfsCandidate, padSize);
 					}
-					
+
 					// end padding
 				}
 			}
 		}
 
+
+		public IReadableStructure[] GetElementFields(object value)
+		{
+			if (!IsStringOrArray) {
+				return Array.Empty<IReadableStructure>();
+			}
+			
+			Conditions.Require(value.GetType() == RuntimeType, nameof(value));
+			
+
+			int lim;
+			
+			switch (value) {
+				case string str:
+					lim = str.Length - 1;
+					break;
+				case Array rg:
+					lim = rg.Length;
+					break;
+				default:
+					throw new InvalidOperationException();
+			}
+			
+			var elementFields = new List<IReadableStructure>(lim);
+
+			if (IsArray) {
+				int d = 1;
+				if (Mem.Is64Bit) {
+					d++;
+				}
+
+				elementFields.Capacity = lim + d;
+				
+				elementFields.AddRange(ElementField.CreateArrayStructures());
+			}
+
+			for (int i = 0; i < lim; i++) {
+				var element = ElementField.Create(this, i);
+				
+				elementFields.Add(element);
+			}
+
+			return elementFields.ToArray();
+		}
 
 		public bool IsStruct => Runtime.IsStruct(RuntimeType);
 
@@ -270,6 +319,8 @@ namespace RazorSharp.CoreClr.Meta
 		{
 			return ToString(format, CultureInfo.CurrentCulture);
 		}
+
+		public static implicit operator MetaType(Type type) => new MetaType(type);
 
 		#region Accessors
 

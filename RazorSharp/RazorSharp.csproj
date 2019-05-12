@@ -131,7 +131,7 @@
   <ItemGroup>
     <Compile Include="Analysis\Inspect.cs" />
     <Compile Include="Analysis\InspectOptions.cs" />
-    <Compile Include="Analysis\InspectOld.cs" />
+    <Compile Include="Analysis\InspectUtil.cs" />
     <Compile Include="Analysis\LayoutInfo.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="CoreClr\Clr.cs" />
@@ -142,10 +142,11 @@
     <Compile Include="CoreClr\Meta\MetaIL.cs" />
     <Compile Include="CoreClr\Meta\MetaMethod.cs" />
     <Compile Include="CoreClr\Meta\MetaType.cs" />
-    <Compile Include="CoreClr\Meta\MethodTableField.cs" />
-    <Compile Include="CoreClr\Meta\ObjectHeaderField.cs" />
-    <Compile Include="CoreClr\Meta\PaddingField.cs" />
-    <Compile Include="CoreClr\Meta\TransientField.cs" />
+    <Compile Include="CoreClr\Meta\Transient\ElementField.cs" />
+    <Compile Include="CoreClr\Meta\Transient\MethodTableField.cs" />
+    <Compile Include="CoreClr\Meta\Transient\ObjectHeaderField.cs" />
+    <Compile Include="CoreClr\Meta\Transient\PaddingField.cs" />
+    <Compile Include="CoreClr\Meta\Transient\TransientField.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClass.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClassFieldId.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClassLayoutInfo.cs" />

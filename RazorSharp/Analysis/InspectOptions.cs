@@ -1,11 +1,14 @@
 using System;
-using System.Collections.Generic;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Meta.Transient;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
 
 namespace RazorSharp.Analysis
 {
+	/// <summary>
+	/// Controls how objects are inspected. Field/structure names are implicitly enabled.
+	/// </summary>
 	[Flags]
 	public enum InspectOptions
 	{
@@ -43,7 +46,7 @@ namespace RazorSharp.Analysis
 
 		/// <summary>
 		/// Display internal runtime structures such as <see cref="MethodTable"/> and <see cref="ObjHeader"/>
-		/// <remarks><see cref="MethodTableField"/>, <see cref="ObjectHeaderField"/></remarks>
+		/// <remarks><see cref="MethodTableField"/>, <see cref="ObjectHeaderField"/>; not a column</remarks>
 		/// </summary>
 		InternalStructures = 32,
 
@@ -53,59 +56,26 @@ namespace RazorSharp.Analysis
 		/// </summary>
 		MemoryOffsets = 64,
 		
+		/// <summary>
+		/// Display padding.
+		/// <remarks><see cref="PaddingField"/>; not a column</remarks>
+		/// </summary>
 		Padding = 128,
-	}
-
-	internal static class InspectUtil
-	{
+		
 		/// <summary>
-		/// <see cref="InspectOptions.Sizes"/>
+		/// Display <see cref="string"/> or array elements.
+		/// <remarks>
+		/// <see cref="ElementField"/>; not a column
+		/// <para>This has significant overhead as fields and data have to be reloaded.</para>
+		/// </remarks>
 		/// </summary>
-		private const string SIZES_STR = "Size";
-
+		ArrayOrString = 256,
+		
 		/// <summary>
-		/// <see cref="InspectOptions.Addresses"/>
+		/// Display miscellaneous/auxiliary info such as <see cref="Unsafe.HeapSize{T}(T)"/>
+		/// and <see cref="Unsafe.SizeOf{T}()"/>
+		/// <remarks>Requires a value to compute heap size; not a column</remarks>
 		/// </summary>
-		private const string ADDRESSES_STR = "Address";
-
-		/// <summary>
-		/// <see cref="InspectOptions.FieldOffsets"/>
-		/// </summary>
-		private const string FIELD_OFFSETS_STR = "Field Offset";
-
-		/// <summary>
-		/// <see cref="InspectOptions.Types"/>
-		/// </summary>
-		private const string TYPES_STR = "Type";
-
-		/// <summary>
-		/// <see cref="InspectOptions.Values"/>
-		/// </summary>
-		private const string VALUES_STR = "Sizes";
-
-		/// <summary>
-		/// <see cref="InspectOptions.MemoryOffsets"/>
-		/// </summary>
-		private const string MEM_OFFSETS_STR = "Memory Offset";
-
-		internal static readonly Dictionary<InspectOptions, string> StringName;
-
-		static InspectUtil()
-		{
-			StringName = new Dictionary<InspectOptions, string>
-			{
-				{InspectOptions.Sizes, SIZES_STR},
-				{InspectOptions.Addresses, ADDRESSES_STR},
-				{InspectOptions.FieldOffsets, FIELD_OFFSETS_STR},
-				{InspectOptions.Types, TYPES_STR},
-				{InspectOptions.Values, VALUES_STR},
-				{InspectOptions.MemoryOffsets, MEM_OFFSETS_STR},
-			};
-		}
-
-		internal static bool HasFlagFast(this InspectOptions value, InspectOptions flag)
-		{
-			return (value & flag) == flag;
-		}
+		AuxiliaryInfo = 512,
 	}
 }

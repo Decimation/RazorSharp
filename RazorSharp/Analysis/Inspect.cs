@@ -11,7 +11,7 @@ using SimpleSharp;
 
 namespace RazorSharp.Analysis
 {
-	public static unsafe class Inspect
+	public static class Inspect
 	{
 		#region LayoutInfo
 
@@ -67,10 +67,10 @@ namespace RazorSharp.Analysis
 			=> Layout<T>(options).ToString();
 
 		public static string LayoutString<T>(ref T value, InspectOptions options = DEFAULT_VALUE_PROVIDED)
-			=> Layout<T>(ref value, options).ToString();
+			=> Layout(ref value, options).ToString();
 
 		public static string LayoutString<T>(T value, InspectOptions options = DEFAULT_VALUE_PROVIDED)
-			=> Layout<T>(value, options).ToString();
+			=> Layout(value, options).ToString();
 
 		#endregion
 	}

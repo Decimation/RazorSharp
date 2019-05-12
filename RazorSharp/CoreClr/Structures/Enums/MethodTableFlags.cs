@@ -1,6 +1,7 @@
 #region
 
 using System;
+// ReSharper disable InconsistentNaming
 
 #endregion
 

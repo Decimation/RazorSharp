@@ -156,7 +156,7 @@ namespace RazorSharp.CoreClr.Structures
 				// return
 				//PTR_MethodDescChunk(dac_cast<TADDR>(this) -
 				//                    (sizeof(MethodDescChunk) + (GetMethodDescIndex() * MethodDesc::ALIGNMENT)));
-				Pointer<MethodDescChunk> __this = Unsafe.AddressOf(ref this).Address;
+				Pointer<MethodDescChunk> __this = Unsafe.AddressOf(ref this).Cast<MethodDescChunk>();
 				__this.Subtract(sizeof(MethodDescChunk) + ChunkIndex * ALIGNMENT);
 				return __this;
 			}
@@ -170,7 +170,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal int SizeOf {
-			[SymCall(Symbol = nameof(SizeOf))]
+			[SymCall(nameof(SizeOf))]
 			get => throw new SymImportException();
 		}
 
@@ -180,7 +180,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
-			[SymCall(Symbol = "GetMethodTable")]
+			[SymCall("GetMethodTable")]
 			get => throw new SymImportException();
 		}
 
@@ -197,7 +197,7 @@ namespace RazorSharp.CoreClr.Structures
 
 
 		internal int Token {
-			[SymCall(Symbol = "GetMemberDef")]
+			[SymCall("GetMemberDef")]
 			get => throw new SymImportException();
 		}
 
@@ -210,7 +210,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal bool IsConstructor {
-			[SymCall(Symbol = "IsCtor")]
+			[SymCall("IsCtor")]
 			get => throw new SymImportException();
 		}
 
@@ -223,7 +223,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     </remarks>
 		/// </summary>
 		internal bool IsPointingToNativeCode {
-			[SymCall(Symbol = "IsPointingToNativeCode")]
+			[SymCall(nameof(IsPointingToNativeCode))]
 			get => throw new SymImportException();
 		}
 
@@ -306,8 +306,7 @@ namespace RazorSharp.CoreClr.Structures
 			throw new SymImportException();
 		}
 
-		
-		
+
 		/// <summary>
 		///     <remarks>Address-sensitive</remarks>
 		/// </summary>

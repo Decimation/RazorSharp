@@ -1,7 +1,9 @@
 using System;
+using JetBrains.Annotations;
 
 namespace RazorSharp.Memory.Extern.Symbols.Attributes
 {
+	[MeansImplicitUse]
 	[AttributeUsage(AttributeTargets.Field)]
 	public class SymFieldAttribute : SymImportAttribute
 	{

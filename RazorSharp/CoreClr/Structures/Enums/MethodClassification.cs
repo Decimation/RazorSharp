@@ -1,3 +1,4 @@
+// ReSharper disable InconsistentNaming
 namespace RazorSharp.CoreClr.Structures.Enums
 {
 	/// <summary>

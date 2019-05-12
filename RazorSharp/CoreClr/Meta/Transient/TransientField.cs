@@ -1,0 +1,64 @@
+#region
+
+using System;
+using System.Reflection;
+using RazorSharp.CoreClr.Structures;
+using RazorSharp.Memory;
+using RazorSharp.Memory.Pointers;
+using SimpleSharp.Diagnostics;
+
+#endregion
+
+namespace RazorSharp.CoreClr.Meta.Transient
+{
+	/// <summary>
+	///     Represents a readable structure or field in memory. This is used for fields that exist in memory but
+	///     don't have a <see cref="MemberInfo" />.
+	///     <example><see cref="MethodTable" />, <see cref="ObjHeader" />, etc</example>
+	/// </summary>
+	public abstract class TransientField : IReadableStructure
+	{
+		private readonly int m_offset;
+
+		protected TransientField(int memOffset) : this(memOffset, IntPtr.Size) { }
+
+		protected TransientField(int memOffset, int offset, int size)
+		{
+			MemoryOffset = memOffset;
+			Size         = size;
+			m_offset     = offset;
+		}
+
+		private TransientField(int memOffset, int size) : this(memOffset, Constants.INVALID_VALUE, size) { }
+
+		public int Token => throw new NotSupportedException();
+
+		public abstract string Name { get; }
+
+		public abstract object GetValue(object value);
+
+		public abstract Pointer<byte> GetAddress<TInstance>(ref TInstance value);
+
+		/// <summary>
+		///     Field offset
+		/// </summary>
+		public int Offset {
+			get => m_offset;
+			set => throw new NotSupportedException();
+		}
+
+		public int MemoryOffset { get; }
+
+		public int Size { get; }
+
+		public abstract string TypeName { get; }
+
+		protected Pointer<byte> GetAddress<TInstance>(ref TInstance value, OffsetOptions options)
+		{
+			Conditions.Require(!Runtime.IsStruct(value), nameof(value));
+			Unsafe.TryGetAddressOfHeap(value, options, out Pointer<byte> ptr);
+
+			return ptr;
+		}
+	}
+}

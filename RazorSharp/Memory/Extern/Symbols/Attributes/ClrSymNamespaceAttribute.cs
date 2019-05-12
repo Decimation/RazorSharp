@@ -1,8 +1,10 @@
 using System;
+using JetBrains.Annotations;
 using RazorSharp.CoreClr;
 
 namespace RazorSharp.Memory.Extern.Symbols.Attributes
 {
+	[MeansImplicitUse]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 	public class ClrSymNamespaceAttribute : SymNamespaceAttribute
 	{

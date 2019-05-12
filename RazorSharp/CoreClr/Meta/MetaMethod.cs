@@ -25,6 +25,7 @@ namespace RazorSharp.CoreClr.Meta
 	///             </description>
 	///         </item>
 	///     </list>
+	/// <remarks>Corresponds to <see cref="System.Reflection.MethodInfo"/></remarks>
 	/// </summary>
 	public class MetaMethod : IMetaMember
 	{
@@ -33,10 +34,7 @@ namespace RazorSharp.CoreClr.Meta
 			Value = methodDesc;
 		}
 
-		public MetaMethod(MethodInfo methodInfo) : this(methodInfo.GetMethodDesc())
-		{
-			
-		}
+		public MetaMethod(MethodInfo methodInfo) : this(methodInfo.GetMethodDesc()) { }
 
 
 		public override string ToString()
@@ -191,5 +189,10 @@ namespace RazorSharp.CoreClr.Meta
 		}
 
 		#endregion
+
+		public static implicit operator MetaMethod(MethodInfo methodInfo)
+		{
+			return new MetaMethod(methodInfo);
+		}
 	}
 }

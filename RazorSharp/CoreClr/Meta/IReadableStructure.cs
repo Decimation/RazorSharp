@@ -25,16 +25,16 @@ namespace RazorSharp.CoreClr.Meta
 		/// <remarks>This is <see cref="FieldDesc.Offset"/> for most types.</remarks>
 		/// </summary>
 		int Offset { get; set; }
-		
+
 		/// <summary>
 		/// Memory offset relative to <see cref="Unsafe.AddressOfData{T}(ref T)"/>
 		/// </summary>
 		int MemoryOffset { get; }
-		
+
 		/// <summary>
 		/// The size of this structure.
 		/// </summary>
-		int Size   { get; }
+		int Size { get; }
 
 		/// <summary>
 		/// The type name of this structure.

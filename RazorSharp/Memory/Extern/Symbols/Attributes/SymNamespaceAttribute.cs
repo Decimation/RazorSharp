@@ -3,11 +3,13 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using JetBrains.Annotations;
 
 #endregion
 
 namespace RazorSharp.Memory.Extern.Symbols.Attributes
 {
+	[MeansImplicitUse]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
 	public class SymNamespaceAttribute : Attribute
 	{

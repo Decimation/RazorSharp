@@ -158,6 +158,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </exception>
 		internal Pointer<EEClass> EEClass {
 			get {
+				
 				switch (UnionType) {
 					case LowBits.EEClass:
 						return m_pEEClass;
@@ -335,7 +336,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     Describes what the union at offset <c>40</c> (<see cref="m_union1" />)
 		///     contains.
 		/// </summary>
-		private LowBits UnionType {
+		public LowBits UnionType {
 			get {
 				long l = (long) m_union1;
 				return (LowBits) (l & UNION_MASK);

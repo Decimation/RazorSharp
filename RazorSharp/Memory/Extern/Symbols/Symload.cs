@@ -33,7 +33,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 		private const string GET_PROPERTY_REPLACEMENT  = "Get";
 
 		private static readonly ISet<Type> BoundTypes = new HashSet<Type>();
-		
+
 		private static bool HasFlagFast(this SymImportOptions value, SymImportOptions flag)
 		{
 			return (value & flag) == flag;
@@ -84,7 +84,6 @@ namespace RazorSharp.Memory.Extern.Symbols
 			if (attr.Image == Clr.ClrPdb.FullName && attr.Module == Clr.CLR_DLL_SHORT) {
 				return Clr.ClrSymbols;
 			}
-
 
 			return new ModuleInfo(new FileInfo(attr.Image), baseAddr);
 		}
@@ -177,13 +176,19 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 					var mem = addr.CopyOutBytes(size);
 
-					loadedValue = Unsafe.LoadFromEx(fieldType, mem);
+					loadedValue = Unsafe.LoadFrom(fieldType, mem);
 
 					break;
 				case SymFieldOptions.LoadAs:
 					var fieldLoadType = symField.LoadAs ?? fieldType;
 
-					loadedValue = addr.ReadAnyEx(fieldLoadType);
+					if (Runtime.IsPointer(fieldLoadType)) {
+						loadedValue = addr;
+					}
+					else {
+						loadedValue = addr.ReadAnyEx(fieldLoadType);
+					}
+
 
 					break;
 				default:
@@ -194,8 +199,12 @@ namespace RazorSharp.Memory.Extern.Symbols
 			if (!fieldInfo.IsStatic) {
 				var ptr = fieldInfo.GetAddress(ref value);
 
-
-				ptr.WriteAnyEx(fieldType, loadedValue);
+				if (Runtime.IsPointer(fieldInfo.FieldType)) {
+					ptr.WritePointer((Pointer<byte>) loadedValue);
+				}
+				else {
+					ptr.WriteAnyEx(fieldType, loadedValue);
+				}
 			}
 			else {
 				fieldInfo.SetValue(value, loadedValue);
@@ -264,7 +273,6 @@ namespace RazorSharp.Memory.Extern.Symbols
 				string shortName     = nameSpaceAttr.ShortModuleName;
 				Modules.UnloadIfLoaded(shortName);
 			}
-
 
 			(MemberInfo[] members, SymImportAttribute[] attributes) = type.GetAnnotated<SymImportAttribute>();
 

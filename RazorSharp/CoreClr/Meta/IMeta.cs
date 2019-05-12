@@ -1,7 +1,7 @@
 namespace RazorSharp.CoreClr.Meta
 {
 	/// <summary>
-	/// Represents a structure which provides metadata.
+	/// Represents a structure which provides a name and metadata token.
 	/// </summary>
 	public interface IMeta
 	{

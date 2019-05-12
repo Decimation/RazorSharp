@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using JetBrains.Annotations;
 using RazorSharp.CoreClr.Structures;
 
 #endregion
@@ -23,6 +24,7 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 	///     <para>This allows the calling of non-exported DLL functions.</para>
 	/// <seealso cref="Symload"/>
 	/// </summary>
+	[MeansImplicitUse]
 	[AttributeUsage(AttributeTargets.Method)]
 	public class SymCallAttribute : SymImportAttribute
 	{
