@@ -77,5 +77,8 @@ namespace RazorSharp.Analysis
 		/// <remarks>Requires a value to compute heap size; not a column</remarks>
 		/// </summary>
 		AuxiliaryInfo = 512,
+		
+		
+		Recursive = 1024, // todo
 	}
 }
