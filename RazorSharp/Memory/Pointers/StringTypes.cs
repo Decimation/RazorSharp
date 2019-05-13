@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices;
+
 namespace RazorSharp.Memory.Pointers
 {
 	public enum StringTypes
@@ -16,6 +18,7 @@ namespace RazorSharp.Memory.Pointers
 		/// </item>
 		/// </list>
 		/// </example>
+		/// <remarks>Equal to <see cref="UnmanagedType.LPStr"/></remarks>
 		/// </summary>
 		ANSI,
 
@@ -31,9 +34,20 @@ namespace RazorSharp.Memory.Pointers
 		/// </item>
 		/// </list>
 		/// </example>
+		/// <remarks>Equal to <see cref="UnmanagedType.LPWStr"/></remarks>
 		/// </summary>
 		UNI,
 		
+		/// <summary>
+		///     (4-byte) (<see cref="int" />, <see cref="uint" />) string
+		/// <example>
+		/// <list type="bullet">
+		/// <item>
+		///<description><c>const char32_t*</c></description>
+		/// </item>
+		/// </list>
+		/// </example>
+		/// </summary>
 		CHAR32
 	}
 }

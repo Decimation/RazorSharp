@@ -508,7 +508,8 @@ namespace RazorSharp.Memory.Pointers
 				case StringTypes.UNI:
 					return new string((char*) m_value);
 				case StringTypes.CHAR32:
-					
+					int len = Mem.StringLength<int>(m_value);
+					return Encoding.UTF32.GetString(CopyOutBytes(len * sizeof(int)));
 				default:
 					throw new ArgumentOutOfRangeException(nameof(s), s, null);
 			}

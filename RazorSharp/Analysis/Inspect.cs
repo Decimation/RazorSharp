@@ -13,6 +13,9 @@ namespace RazorSharp.Analysis
 {
 	public static class Inspect
 	{
+		// Old: https://github.com/Decimation/RazorSharp/blob/3a3573f368cf021002cc15b466ca653129faf92c/RazorSharp/Analysis/ObjectLayout.cs
+		// Also: https://github.com/SergeyTeplyakov/ObjectLayoutInspector
+		
 		#region LayoutInfo
 
 		/// <summary>

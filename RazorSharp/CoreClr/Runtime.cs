@@ -78,17 +78,16 @@ namespace RazorSharp.CoreClr
 		public static bool IsUnmanaged<T>() => typeof(T).IsUnmanaged();
 
 		#endregion
-		
+
 		public static bool IsBoxed<T>(in T value)
 		{
 			return (typeof(T).IsInterface || typeof(T) == typeof(object))
 			       && value != null && IsStruct(value);
 		}
 
-		
 
 		#region Nil
-		
+
 		/// <summary>
 		/// Whether the value of <paramref name="value"/> is <c>default</c> or <c>null</c> bytes,
 		/// or <paramref name="value"/> is <c>null</c>
@@ -100,8 +99,7 @@ namespace RazorSharp.CoreClr
 			return Unsafe.AddressOf(ref value).IsNil;
 		}
 
-		// ReSharper disable once UnusedParameter.Global
-		public static bool IsNilFast<T>([CanBeNull] T value)
+		public static bool IsNilFast<T>([CanBeNull, UsedImplicitly] T value)
 		{
 			// Fastest method for calculating whether a value is nil.
 			IL.Emit.Ldarg(nameof(value));
@@ -137,7 +135,7 @@ namespace RazorSharp.CoreClr
 
 		internal static bool IsPointer<T>(T value)
 		{
-			if (value == null) {
+			if (IsNilFast(value)) {
 				return false;
 			}
 
@@ -555,7 +553,5 @@ namespace RazorSharp.CoreClr
 		}
 
 		#endregion
-
-		
 	}
 }

@@ -230,7 +230,6 @@
     <Compile Include="Native\ProcessAccess.cs" />
     <Compile Include="Native\ProcessorArchitecture.cs" />
     <Compile Include="Native\StandardHandles.cs" />
-    <Compile Include="Native\Symbols\ComponentSymbol.cs" />
     <Compile Include="Native\Symbols\SymbolFlag.cs" />
     <Compile Include="Native\Symbols\SymbolManager.cs" />
     <Compile Include="Native\Symbols\ModuleInfo.cs" />
