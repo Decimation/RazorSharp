@@ -50,7 +50,7 @@ namespace RazorSharp
 #if DEBUG
 			var levelSwitch = new LoggingLevelSwitch
 			{
-				MinimumLevel = LogEventLevel.Debug
+				MinimumLevel = LogEventLevel.Verbose
 			};
 
 
@@ -68,7 +68,6 @@ namespace RazorSharp
 
 		internal static void ContextLog(string prop, Action fn)
 		{
-
 			using (LogContext.PushProperty(CONTEXT_PROP, prop)) {
 				fn();
 			}

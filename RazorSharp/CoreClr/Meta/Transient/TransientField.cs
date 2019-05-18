@@ -20,8 +20,6 @@ namespace RazorSharp.CoreClr.Meta.Transient
 	{
 		private readonly int m_offset;
 
-		protected TransientField(int memOffset) : this(memOffset, IntPtr.Size) { }
-
 		protected TransientField(int memOffset, int offset, int size)
 		{
 			MemoryOffset = memOffset;
@@ -29,7 +27,7 @@ namespace RazorSharp.CoreClr.Meta.Transient
 			m_offset     = offset;
 		}
 
-		private TransientField(int memOffset, int size) : this(memOffset, Constants.INVALID_VALUE, size) { }
+		protected TransientField(int memOffset, int offset) : this(memOffset, offset, IntPtr.Size) { }
 
 		public int Token => throw new NotSupportedException();
 
@@ -52,6 +50,8 @@ namespace RazorSharp.CoreClr.Meta.Transient
 		public int Size { get; }
 
 		public abstract string TypeName { get; }
+
+		public MemberInfo Info => throw new NotSupportedException();
 
 		protected Pointer<byte> GetAddress<TInstance>(ref TInstance value, OffsetOptions options)
 		{

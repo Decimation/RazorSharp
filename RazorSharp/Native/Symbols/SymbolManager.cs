@@ -35,7 +35,7 @@ namespace RazorSharp.Native.Symbols
 
 		internal static bool IsImageLoaded {
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get => _modBase != 0;
+			get => _modBase != default;
 		}
 
 		internal static FileInfo CurrentImage {
@@ -72,8 +72,7 @@ namespace RazorSharp.Native.Symbols
 			// SYMOPT_DEBUG option asks DbgHelp to print additional troubleshooting
 			// messages to debug output - use the debugger's Debug Output window
 			// to view the messages
-
-
+			
 			options |= DbgHelp.SYMOPT_DEBUG;
 
 			DbgHelp.SymSetOptions(options);

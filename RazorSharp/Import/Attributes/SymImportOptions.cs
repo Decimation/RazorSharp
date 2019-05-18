@@ -1,6 +1,6 @@
 using System;
 
-namespace RazorSharp.Memory.Extern.Symbols.Attributes
+namespace RazorSharp.Import.Attributes
 {
 	/// <summary>
 	/// Specifies how the symbol will be resolved.

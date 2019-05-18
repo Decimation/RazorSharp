@@ -2,11 +2,10 @@
 
 using System;
 using System.Runtime;
+using RazorSharp.Import;
+using RazorSharp.Import.Attributes;
 using SimpleSharp.Diagnostics;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Extern;
-using RazorSharp.Memory.Extern.Symbols;
-using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 #pragma warning disable 649
 
@@ -41,56 +40,20 @@ namespace RazorSharp.CoreClr.Structures
 	///     </list>
 	/// </summary>
 	[ClrSymNamespace("WKS")]
-	public unsafe struct GCHeap
+	internal unsafe struct GCHeap
 	{
-		/// <summary>
-		///     <para>Global CLR variable <c>g_pGCHeap</c></para>
-		///     <para>Global VM GC</para>
-		/// </summary>
-		[SymField(SymImportOptions.FullyQualified)]
-		private static readonly IntPtr g_pGCHeap;
-
-		/// <summary>
-		///     <para>Global CLR variable <c>g_gc_lowest_address</c></para>
-		/// </summary>
-		[SymField(SymImportOptions.FullyQualified)]
-		private static readonly IntPtr g_lowest_address;
-
-		/// <summary>
-		///     <para>Global CLR variable <c>g_gc_highest_address</c></para>
-		/// </summary>
-		[SymField(SymImportOptions.FullyQualified)]
-		private static readonly IntPtr g_highest_address;
-
-		/// <summary>
-		///     The lowest address of the global GC heap.
-		/// </summary>
-		public static Pointer<byte> LowestAddress => g_lowest_address;
-
-		/// <summary>
-		///     The highest address of the global GC heap.
-		/// </summary>
-		public static Pointer<byte> HighestAddress => g_highest_address;
-
-		/// <summary>
-		///     Total size of the managed GC heap
-		/// </summary>
-		public static long Size => Math.Abs(g_highest_address.ToInt64() - g_lowest_address.ToInt64());
-
-		public static Pointer<GCHeap> GlobalHeap => (GCHeap*) g_pGCHeap;
-
 		/// <summary>
 		///     Returns the number of GCs that have occurred.
 		///     <remarks>
 		///         <para>Source: /src/gc/gcinterface.h: 710</para>
 		///     </remarks>
 		/// </summary>
-		public int GCCount {
+		internal int GCCount {
 			[SymCall("GetGcCount")]
 			get => throw new SymImportException();
 		}
 
-		public bool IsHeapPointer<T>(T value, bool smallHeapOnly = false) where T : class
+		internal bool IsHeapPointer<T>(T value, bool smallHeapOnly = false) where T : class
 		{
 			return IsHeapPointer(Unsafe.AddressOfHeap(value).ToPointer(), smallHeapOnly);
 		}
@@ -113,38 +76,9 @@ namespace RazorSharp.CoreClr.Structures
 		/// <param name="smallHeapOnly">Whether to include small GC heaps only</param>
 		/// <returns><c>true</c> if <paramref name="obj" /> is a heap pointer; <c>false</c> otherwise</returns>
 		[SymCall]
-		public bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
+		internal bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
 		{
-			throw new SymImportException();
-		}
-
-		/// <summary>
-		/// Allocates a zero-initialized object on the GC heap.
-		/// </summary>
-		[SymCall(SymImportOptions.FullyQualified)]
-		internal static void* AllocateObject(MethodTable* mt, int fHandleCom)
-		{
-			throw new SymImportException();
-		}
-
-		/// <summary>
-		/// Allocates a zero-initialized object on the GC heap.
-		/// </summary>
-		public static object AllocateObject(Type type, int fHandleCom)
-		{
-			void* objValuePtr = AllocateObject(type.GetMethodTable().ToPointer<MethodTable>(), fHandleCom);
-
-			
-			return CSUnsafe.Read<object>(&objValuePtr);
-		}
-
-		/// <summary>
-		/// Allocates a zero-initialized object on the GC heap.
-		/// </summary>
-		public static T AllocateObject<T>(int fHandleCom)
-		{
-			void* objValuePtr = AllocateObject(typeof(T).GetMethodTable().ToPointer<MethodTable>(), fHandleCom);
-			return CSUnsafe.Read<T>(&objValuePtr);
+			throw new SymImportException(nameof(IsHeapPointer));
 		}
 
 		static GCHeap()

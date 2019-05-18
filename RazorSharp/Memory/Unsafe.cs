@@ -108,7 +108,7 @@ namespace RazorSharp.Memory
 			Conditions.Require(!Runtime.IsArrayOrString(value), nameof(value));
 
 			lock (value) {
-				var valueCpy = GCHeap.AllocateObject<T>(0);
+				var valueCpy = GlobalHeap.AllocateObject<T>(0);
 
 				fixed (byte* data = &PinHelper.GetPinningHelper(valueCpy).Data) {
 					Pointer<byte> ptr = data;

@@ -83,7 +83,6 @@ namespace RazorSharp.CoreClr
 		internal static void Setup()
 		{
 			IsSetup = true;
-			
 		}
 
 

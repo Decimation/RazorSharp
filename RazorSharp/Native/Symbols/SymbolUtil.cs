@@ -7,6 +7,7 @@ using SimpleSharp.Utilities;
 using RazorSharp.CoreClr;
 using RazorSharp.Native.Win32;
 using SimpleSharp.Extensions;
+
 // ReSharper disable RedundantAssignment
 
 // ReSharper disable UnusedMember.Local
@@ -16,7 +17,7 @@ namespace RazorSharp.Native.Symbols
 	internal static class SymbolUtil
 	{
 		private const string MASK_STR_DEFAULT = "*!*";
-		
+
 		internal static FileInfo DownloadSymbolFile(DirectoryInfo dest, FileInfo dll)
 		{
 			return DownloadSymbolFile(dest, dll, out _);
@@ -39,8 +40,6 @@ namespace RazorSharp.Native.Symbols
 
 
 			using (var cmdProc = Common.Shell("\"" + cmd + "\"")) {
-				
-
 				cmdProc.ErrorDataReceived += (sender, args) =>
 				{
 					Global.Log.Error("Process error: {Error}", args.Data);
@@ -51,12 +50,10 @@ namespace RazorSharp.Native.Symbols
 				var stdOut = cmdProc.StandardOutput;
 				while (!stdOut.EndOfStream) {
 					string ln = stdOut.ReadLine();
-					Conditions.NotNull(ln, nameof(ln));
-					if (ln.Contains("SYMCHK: PASSED + IGNORED files = 1")) {
+
+					if (ln != null && ln.Contains("SYMCHK: PASSED + IGNORED files = 1")) {
 						break;
 					}
-
-					
 				}
 			}
 
@@ -182,8 +179,14 @@ namespace RazorSharp.Native.Symbols
 			Conditions.NotNull(pdb, nameof(pdb));
 			string cd     = Environment.CurrentDirectory;
 			var    tmpSym = DownloadSymbolFile(new DirectoryInfo(cd), dll);
-			Conditions.Ensure(pdb.ContentEquals(tmpSym), ERR, nameof(pdb));
+
+			bool ok = pdb.ContentEquals(tmpSym);
+			
 			DeleteSymbolFile(tmpSym);
+			
+			if (!ok) {
+				throw new FileLoadException(ERR);
+			}
 		}
 	}
 }

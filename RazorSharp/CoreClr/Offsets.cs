@@ -6,6 +6,8 @@ using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.CoreClr.Structures.Enums;
 
+// ReSharper disable ConvertToConstant.Global
+
 #endregion
 
 namespace RazorSharp
@@ -35,6 +37,16 @@ namespace RazorSharp
 		internal const int CANON_MT_UNION_MT_OFFSET = 2;
 
 		/// <summary>
+		/// Size of the length field and padding (x64)
+		/// </summary>
+		public static readonly int ArrayStubSize = IntPtr.Size;
+
+		/// <summary>
+		/// Size of the length field and first character
+		/// </summary>
+		public static readonly int StringStubSize = sizeof(char) + sizeof(int);
+
+		/// <summary>
 		///     Heap offset to the first field.
 		///     <list type="bullet">
 		///         <item>
@@ -42,8 +54,8 @@ namespace RazorSharp
 		///         </item>
 		///     </list>
 		/// </summary>
-		public static readonly unsafe int OffsetToData = sizeof(MethodTable*);
-		
+		public static readonly int OffsetToData = IntPtr.Size;
+
 		/// <summary>
 		///     Heap offset to the first array element.
 		///     <list type="bullet">
@@ -58,11 +70,8 @@ namespace RazorSharp
 		///         </item>
 		///     </list>
 		/// </summary>
-		public static readonly int OffsetToArrayData = OffsetToData + sizeof(uint) + sizeof(uint);
+		public static readonly int OffsetToArrayData = OffsetToData + ArrayStubSize;
 
 		public static readonly int OffsetToStringData = RuntimeHelpers.OffsetToStringData;
-
-		
-		
 	}
 }

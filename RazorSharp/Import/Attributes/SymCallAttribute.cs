@@ -4,10 +4,11 @@ using System;
 using System.Diagnostics;
 using JetBrains.Annotations;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Memory;
 
 #endregion
 
-namespace RazorSharp.Memory.Extern.Symbols.Attributes
+namespace RazorSharp.Import.Attributes
 {
 	/// <inheritdoc />
 	/// <summary>

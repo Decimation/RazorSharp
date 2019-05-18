@@ -6,9 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Memory.Extern;
-using RazorSharp.Memory.Extern.Symbols;
-using RazorSharp.Memory.Extern.Symbols.Attributes;
+using RazorSharp.Import;
+using RazorSharp.Import.Attributes;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32;
 using RazorSharp.Utilities;
@@ -116,12 +115,12 @@ namespace RazorSharp.Memory
 		public static void SetEntryPoint(MethodInfo mi, Pointer<byte> pCode)
 		{
 			var md = (MethodDesc*) mi.MethodHandle.Value;
-
+			
+			// This will be the first function to fail if clr.pdb and clr.dll are mismatched
 			Reset(md);
 
 			bool result = SetNativeCode(md, (ulong) pCode);
-
-
+			
 			if (!result) {
 				Global.Log.Warning(
 					"Possible error setting entry point for {Method} (code: {Code}) (entry point: {PCode})",

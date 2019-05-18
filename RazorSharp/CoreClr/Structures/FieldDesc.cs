@@ -9,10 +9,9 @@ using SimpleSharp.Diagnostics;
 using SimpleSharp.Strings;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.Enums;
+using RazorSharp.Import;
+using RazorSharp.Import.Attributes;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Extern;
-using RazorSharp.Memory.Extern.Symbols;
-using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local

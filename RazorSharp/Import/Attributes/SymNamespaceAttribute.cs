@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 
 #endregion
 
-namespace RazorSharp.Memory.Extern.Symbols.Attributes
+namespace RazorSharp.Import.Attributes
 {
 	[MeansImplicitUse]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]

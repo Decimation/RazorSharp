@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace RazorSharp.Memory.Extern
+namespace RazorSharp.Import
 {
 	public class SymImportException : NotImplementedException
 	{

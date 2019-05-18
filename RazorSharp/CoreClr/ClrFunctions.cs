@@ -4,9 +4,8 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.Memory.Extern;
-using RazorSharp.Memory.Extern.Symbols;
-using RazorSharp.Memory.Extern.Symbols.Attributes;
+using RazorSharp.Import;
+using RazorSharp.Import.Attributes;
 using RazorSharp.Memory.Pointers;
 
 // ReSharper disable IdentifierTypo

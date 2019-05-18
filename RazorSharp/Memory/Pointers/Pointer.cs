@@ -120,24 +120,7 @@ namespace RazorSharp.Memory.Pointers
 		///     Whether the value being pointed to is <c>default</c> or <c>null</c> bytes,
 		/// or this pointer is <c>null</c>.
 		/// </summary>
-		public bool IsNil {
-			get {
-				if (IsNull) {
-					return true;
-				}
-
-				int    elemSize = ElementSize;
-				byte[] mem      = CopyOutBytes(elemSize);
-
-				for (int i = 0; i < elemSize; i++) {
-					if (mem[i] != 0U) {
-						return false;
-					}
-				}
-
-				return true;
-			}
-		}
+		public bool IsNil => Runtime.IsNilFast(Reference);
 
 		#endregion
 
@@ -215,18 +198,6 @@ namespace RazorSharp.Memory.Pointers
 
 		#endregion
 
-		#region Set
-
-		public void Set(T value, int startIndex, int elemCount)
-		{
-			for (int i = startIndex; i < elemCount + startIndex; i++)
-				Write(value, i - startIndex);
-		}
-
-		public void Set(T value, int elemCount) => Set(value, 0, elemCount);
-
-		#endregion
-
 
 		public IEnumerator<T> GetEnumerator(int elemCount)
 		{
@@ -234,29 +205,6 @@ namespace RazorSharp.Memory.Pointers
 				yield return this[i];
 			}
 		}
-
-
-		/// <summary>
-		///     Initializes <paramref name="elemCount" /> elements with the default value of <typeparamref name="T" />.
-		/// </summary>
-		/// <param name="elemCount">Number of elements</param>
-		public void Init(int elemCount) => Set(default, elemCount);
-
-
-		#region Contains
-
-		/// <summary>
-		///     Determines whether the pointer contains <paramref name="value" /> from the range specified.
-		/// </summary>
-		/// <param name="value">Value to search for</param>
-		/// <param name="searchLength">Number of elements to search (range)</param>
-		/// <returns><c>true</c> if the value was found within the range specified, <c>false</c> otherwise</returns>
-		public bool Contains(T value, int searchLength)
-		{
-			return IndexOf(value, searchLength) != Constants.INVALID_VALUE;
-		}
-
-		#endregion
 
 		#endregion
 
@@ -293,10 +241,6 @@ namespace RazorSharp.Memory.Pointers
 
 		#endregion
 
-		public bool IsAligned<TType>()
-		{
-			return (unchecked((int) m_value) & Unsafe.SizeOf<TType>()) == 0;
-		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private int CompleteSize(int elemCnt) => elemCnt * ElementSize;
@@ -398,95 +342,6 @@ namespace RazorSharp.Memory.Pointers
 
 			Cast<byte>().WriteAll(bytes);
 			WriteAny<byte>(0, bytes.Length + 1);
-		}
-
-
-		// todo: WIP
-		public object ReadNative(UnmanagedType type, params object[] args)
-		{
-			throw new NotImplementedException();
-			switch (type) {
-				case UnmanagedType.Bool:
-					int value = ReadAny<int>();
-					return value > 0;
-					break;
-				case UnmanagedType.I1:
-					break;
-				case UnmanagedType.U1:
-					break;
-				case UnmanagedType.I2:
-					break;
-				case UnmanagedType.U2:
-					break;
-				case UnmanagedType.I4:
-					break;
-				case UnmanagedType.U4:
-					break;
-				case UnmanagedType.I8:
-					break;
-				case UnmanagedType.U8:
-					break;
-				case UnmanagedType.R4:
-					break;
-				case UnmanagedType.R8:
-					break;
-				case UnmanagedType.Currency:
-					break;
-				case UnmanagedType.BStr:
-					break;
-				case UnmanagedType.LPStr:
-					break;
-				case UnmanagedType.LPWStr:
-					break;
-				case UnmanagedType.LPTStr:
-					break;
-				case UnmanagedType.ByValTStr:
-					break;
-				case UnmanagedType.IUnknown:
-					break;
-				case UnmanagedType.IDispatch:
-					break;
-				case UnmanagedType.Struct:
-					break;
-				case UnmanagedType.Interface:
-					break;
-				case UnmanagedType.SafeArray:
-					break;
-				case UnmanagedType.ByValArray:
-					break;
-				case UnmanagedType.SysInt:
-					break;
-				case UnmanagedType.SysUInt:
-					break;
-				case UnmanagedType.VBByRefStr:
-					break;
-				case UnmanagedType.AnsiBStr:
-					break;
-				case UnmanagedType.TBStr:
-					break;
-				case UnmanagedType.VariantBool:
-					break;
-				case UnmanagedType.FunctionPtr:
-					break;
-				case UnmanagedType.AsAny:
-					break;
-				case UnmanagedType.LPArray:
-					break;
-				case UnmanagedType.LPStruct:
-					break;
-				case UnmanagedType.CustomMarshaler:
-					break;
-				case UnmanagedType.Error:
-					break;
-				case UnmanagedType.IInspectable:
-					break;
-				case UnmanagedType.HString:
-					break;
-				case UnmanagedType.LPUTF8Str:
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(type), type, null);
-			}
 		}
 
 		/// <summary>
@@ -609,7 +464,8 @@ namespace RazorSharp.Memory.Pointers
 		private object InvokeGenericMethod(string name, Type typeArgs, params object[] args)
 		{
 			Conditions.Require(!IsNull, nameof(IsNull));
-			return ReflectionUtil.InvokeGenericMethod(GetType(), name, this, new[] {typeArgs}, args);
+			return ReflectionUtil.InvokeGenericMethod(GetType(), name, this, 
+			                                          new[] {typeArgs}, args);
 		}
 
 		public void WriteAnyEx(Type t, object value, int elemOffset = 0)
@@ -728,7 +584,7 @@ namespace RazorSharp.Memory.Pointers
 		public Pointer<byte> Cast() => Cast<byte>();
 
 		/// <summary>
-		///     Returns <see cref="Address" /> as a pointer.
+		///     Returns <see cref="Address" /> as a native pointer.
 		/// </summary>
 		/// <returns></returns>
 		[Pure]

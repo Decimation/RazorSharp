@@ -1,9 +1,8 @@
 #region
 
 using System.Runtime.InteropServices;
-using RazorSharp.Memory.Extern;
-using RazorSharp.Memory.Extern.Symbols;
-using RazorSharp.Memory.Extern.Symbols.Attributes;
+using RazorSharp.Import;
+using RazorSharp.Import.Attributes;
 using RazorSharp.Memory.Pointers;
 using TADDR = System.UInt64;
 
@@ -105,9 +104,9 @@ namespace RazorSharp.CoreClr.Structures
 
 		internal Pointer<MethodTable> MethodTable {
 			[SymCall(SymImportOptions.UseAccessorName)]
-			get => throw new SymImportException();
+			get => throw new SymImportException(nameof(MethodTable));
 		}
-
+		
 		static TypeHandle()
 		{
 			Symload.Load(typeof(TypeHandle));

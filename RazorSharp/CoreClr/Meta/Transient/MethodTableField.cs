@@ -1,3 +1,4 @@
+using System;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
@@ -10,7 +11,7 @@ namespace RazorSharp.CoreClr.Meta.Transient
 	/// </summary>
 	public unsafe class MethodTableField : TransientField
 	{
-		internal MethodTableField() : base(0) { }
+		internal MethodTableField() : base(0, -IntPtr.Size) { }
 
 		public override object GetValue(object value)
 		{
@@ -25,6 +26,6 @@ namespace RazorSharp.CoreClr.Meta.Transient
 
 		public override string TypeName => nameof(MethodTable);
 
-		public override string Name => "MethodTable pointer";
+		public override string Name => "(MethodTable pointer)";
 	}
 }

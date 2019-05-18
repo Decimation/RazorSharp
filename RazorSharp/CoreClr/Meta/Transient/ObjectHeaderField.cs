@@ -11,7 +11,7 @@ namespace RazorSharp.CoreClr.Meta.Transient
 	/// </summary>
 	public unsafe class ObjectHeaderField : TransientField
 	{
-		internal ObjectHeaderField() : base(-IntPtr.Size) { }
+		internal ObjectHeaderField() : base(-IntPtr.Size, -IntPtr.Size*2) { }
 		
 		public override object GetValue(object value)
 		{
@@ -24,7 +24,7 @@ namespace RazorSharp.CoreClr.Meta.Transient
 			return base.GetAddress(ref value, OffsetOptions.HEADER);
 		}
 
-		public override string Name => "Object Header";
+		public override string Name => "(Object Header)";
 		
 		public override string TypeName => nameof(ObjHeader);
 	}

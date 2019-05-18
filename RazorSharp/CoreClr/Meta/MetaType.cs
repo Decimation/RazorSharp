@@ -47,7 +47,7 @@ namespace RazorSharp.CoreClr.Meta
 	///     </list>
 	/// <remarks>Corresponds to <see cref="Type"/></remarks>
 	/// </summary>
-	public class MetaType : IMeta, IFormattable
+	public class MetaType : IMetadata, IFormattable
 	{
 		/// <summary>
 		///     Exhaustive
@@ -81,7 +81,7 @@ namespace RazorSharp.CoreClr.Meta
 			AllFields = new VirtualCollection<MetaField>(GetAnyField, GetAllFields);
 		}
 
-		private unsafe Pointer<EEClassLayoutInfo> LayoutInfo => Value.Reference.EEClass.Reference.LayoutInfo;
+		private Pointer<EEClassLayoutInfo> LayoutInfo => Value.Reference.EEClass.Reference.LayoutInfo;
 
 		public IEnumerable<MetaField> InstanceFields {
 			get {
@@ -101,7 +101,6 @@ namespace RazorSharp.CoreClr.Meta
 		public IEnumerable<IReadableStructure> MemoryFields {
 			get {
 				List<IReadableStructure> instanceFields = InstanceFields.Cast<IReadableStructure>().ToList();
-
 
 				if (!IsStruct) {
 					instanceFields.Insert(0, GetObjectHeaderField());
@@ -137,18 +136,17 @@ namespace RazorSharp.CoreClr.Meta
 			}
 		}
 
-
 		public IReadableStructure[] GetElementFields(object value)
 		{
 			if (!IsStringOrArray) {
 				return Array.Empty<IReadableStructure>();
 			}
-			
+
 			Conditions.Require(value.GetType() == RuntimeType, nameof(value));
-			
+
 
 			int lim;
-			
+
 			switch (value) {
 				case string str:
 					lim = str.Length - 1;
@@ -159,7 +157,7 @@ namespace RazorSharp.CoreClr.Meta
 				default:
 					throw new InvalidOperationException();
 			}
-			
+
 			var elementFields = new List<IReadableStructure>(lim);
 
 			if (IsArray) {
@@ -169,13 +167,13 @@ namespace RazorSharp.CoreClr.Meta
 				}
 
 				elementFields.Capacity = lim + d;
-				
+
 				elementFields.AddRange(ElementField.CreateArrayStructures());
 			}
 
 			for (int i = 0; i < lim; i++) {
 				var element = ElementField.Create(this, i);
-				
+
 				elementFields.Add(element);
 			}
 
@@ -340,6 +338,8 @@ namespace RazorSharp.CoreClr.Meta
 
 
 		public CorElementType NormalType => Value.Reference.EEClass.Reference.NormalType;
+
+		public MemberInfo Info => RuntimeType;
 
 		public string Name => Value.Reference.Name;
 

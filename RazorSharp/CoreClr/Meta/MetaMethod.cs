@@ -27,7 +27,7 @@ namespace RazorSharp.CoreClr.Meta
 	///     </list>
 	/// <remarks>Corresponds to <see cref="System.Reflection.MethodInfo"/></remarks>
 	/// </summary>
-	public class MetaMethod : IMetaMember
+	public class MetaMethod : IMetadata
 	{
 		internal MetaMethod(Pointer<MethodDesc> methodDesc)
 		{

@@ -48,11 +48,21 @@ namespace RazorSharp.Native.Images
 		#endregion
 
 
+		public static bool operator ==(ImageSectionInfo lhs, ImageSectionInfo rhs)
+		{
+			return lhs.Equals(rhs);
+		}
+
+		public static bool operator !=(ImageSectionInfo lhs, ImageSectionInfo rhs)
+		{
+			return !(lhs == rhs);
+		}
+
 		internal ImageSectionInfo(int                sectionNumber,
-		                        string             sectionName,
-		                        void*              sectionAddress,
-		                        int                sectionSize,
-		                        ImageSectionHeader header)
+		                          string             sectionName,
+		                          void*              sectionAddress,
+		                          int                sectionSize,
+		                          ImageSectionHeader header)
 		{
 			SectionNumber    = sectionNumber;
 			SectionName      = sectionName;
@@ -72,6 +82,30 @@ namespace RazorSharp.Native.Images
 				SectionHeader.Characteristics,
 				"-"
 			};
+
+		public bool Equals(ImageSectionInfo other)
+		{
+			return m_sectionAddress == other.m_sectionAddress && SectionNumber == other.SectionNumber &&
+			       string.Equals(SectionName, other.SectionName) && SectionSize == other.SectionSize &&
+			       SectionHeader.Equals(other.SectionHeader);
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is ImageSectionInfo other && Equals(other);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked {
+				int hashCode = unchecked((int) (long) m_sectionAddress);
+				hashCode = (hashCode * 397) ^ SectionNumber;
+				hashCode = (hashCode * 397) ^ (SectionName != null ? SectionName.GetHashCode() : 0);
+				hashCode = (hashCode * 397) ^ SectionSize;
+				hashCode = (hashCode * 397) ^ SectionHeader.GetHashCode();
+				return hashCode;
+			}
+		}
 
 
 		public override string ToString()

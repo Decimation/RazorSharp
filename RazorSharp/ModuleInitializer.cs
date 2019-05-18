@@ -2,6 +2,7 @@
 
 using System;
 using RazorSharp.CoreClr;
+using RazorSharp.Import;
 using RazorSharp.Native.Symbols;
 
 #endregion
@@ -11,7 +12,7 @@ using RazorSharp.Native.Symbols;
 namespace RazorSharp
 {
 	/// <summary>
-	/// Initializers. Every type that needs to be set up/closed has:
+	/// Initializers shim. Every type that needs to be set up/closed has:
 	/// <list type="bullet">
 	/// <item>
 	/// <description><see cref="Setup"/> method</description>
@@ -47,8 +48,10 @@ namespace RazorSharp
 
 
 			Clr.Close();
+			Symload.UnloadAll(Global.Assembly);
 			Global.Close();
 			SymbolManager.Close();
+			
 
 			IsSetup = false;
 		}

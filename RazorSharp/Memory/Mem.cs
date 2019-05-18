@@ -40,6 +40,32 @@ namespace RazorSharp.Memory
 	{
 		public static bool Is64Bit => IntPtr.Size == sizeof(long);
 
+		// todo: WIP
+		public static bool IsValid(Pointer<byte> ptr)
+		{
+			if (ptr.IsNull) {
+				return false;
+			}
+
+			var info = new AddressInfo(ptr);
+			
+			return info.IsAllocated || info.IsInHeap || info.IsInModule || info.IsInPage || 
+			       info.IsInSegment || info.IsOnStack || info.IsInUnmanagedHeap;
+		}
+
+		public static bool IsInUnmanagedHeap(Pointer<byte> ptr)
+		{
+			var heaps = HeapApi.GetHeapEntries();
+			
+			foreach (var heap in heaps) {
+				if (ptr == heap.lpData) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 
 		public static int StringLength<T>(Pointer<byte> ptr) where T : unmanaged
 		{

@@ -1,7 +1,8 @@
 using System;
 using JetBrains.Annotations;
+using RazorSharp.Memory;
 
-namespace RazorSharp.Memory.Extern.Symbols.Attributes
+namespace RazorSharp.Import.Attributes
 {
 	[MeansImplicitUse]
 	[AttributeUsage(AttributeTargets.Field)]
@@ -16,7 +17,7 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 
 		/// <summary>
 		/// Specifies the size of memory to be copied into the field. If this is not specified, the base size of
-		/// the field type will be used. (<see cref="Unsafe.BaseSizeOfData(Type)"/>)
+		/// the field type will be used. (<see cref="Unsafe.BaseSizeOfData"/>)
 		///
 		/// <remarks>To use this, <see cref="FieldOptions"/> must be <see cref="SymFieldOptions.LoadDirect"/>.</remarks>
 		/// 
@@ -28,15 +29,14 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 		/// </summary>
 		public SymFieldOptions FieldOptions { get; set; } = SymFieldOptions.LoadAs;
 
-		public SymFieldAttribute() : base()
+		public SymFieldAttribute() : base() { }
+
+		public SymFieldAttribute(SymImportOptions options, SymFieldOptions loadOptions) : this(options)
 		{
-			
+			FieldOptions = loadOptions;
 		}
 
-		public SymFieldAttribute(SymImportOptions options) : base(options)
-		{
-			
-		}
+		public SymFieldAttribute(SymImportOptions options) : base(options) { }
 
 		public SymFieldAttribute(string symbol, SymImportOptions options = SymImportOptions.None)
 			: base(symbol, options) { }

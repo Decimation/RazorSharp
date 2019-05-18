@@ -2,7 +2,7 @@ using System;
 using JetBrains.Annotations;
 using RazorSharp.CoreClr;
 
-namespace RazorSharp.Memory.Extern.Symbols.Attributes
+namespace RazorSharp.Import.Attributes
 {
 	[MeansImplicitUse]
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]

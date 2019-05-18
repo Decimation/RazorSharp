@@ -52,7 +52,7 @@ namespace RazorSharp.CoreClr
 
 		public static T AllocObject<T>(params object[] args)
 		{
-			var value = GCHeap.AllocateObject<T>(default);
+			var value = GlobalHeap.AllocateObject<T>(default);
 			RunConstructor(value, args);
 			return value;
 		}
@@ -87,6 +87,7 @@ namespace RazorSharp.CoreClr
 
 
 		#region Nil
+		
 
 		/// <summary>
 		/// Whether the value of <paramref name="value"/> is <c>default</c> or <c>null</c> bytes,
@@ -94,11 +95,6 @@ namespace RazorSharp.CoreClr
 		///
 		/// <remarks>"Nil" is <c>null</c> or <c>default</c>.</remarks>
 		/// </summary>
-		public static bool IsNil<T>([CanBeNull] T value)
-		{
-			return Unsafe.AddressOf(ref value).IsNil;
-		}
-
 		public static bool IsNilFast<T>([CanBeNull, UsedImplicitly] T value)
 		{
 			// Fastest method for calculating whether a value is nil.
@@ -135,11 +131,7 @@ namespace RazorSharp.CoreClr
 
 		internal static bool IsPointer<T>(T value)
 		{
-			if (IsNilFast(value)) {
-				return false;
-			}
-
-			return IsPointer(value.GetType());
+			return !IsNilFast(value) && IsPointer(value.GetType());
 		}
 
 		internal static bool IsPointer(Type type)
@@ -359,19 +351,20 @@ namespace RazorSharp.CoreClr
 
 		internal static TypeHandle ReadTypeHandle<T>(T value)
 		{
-			if (IsStruct<T>())
-				return typeof(T).GetTypeHandle();
+			if (IsStruct<T>(value))
+				return value.GetType().GetTypeHandle();
 
 
 			Unsafe.TryGetAddressOfHeap(value, out Pointer<byte> ptr);
+			Conditions.Ensure(!ptr.IsNull);
 			var mt = *(TypeHandle*) ptr;
 
 			return mt;
 		}
 
-		internal static TypeHandle GetTypeHandle(this Type t)
+		internal static TypeHandle GetTypeHandle(this Type value)
 		{
-			var typeHandle = t.TypeHandle.Value;
+			var typeHandle = value.TypeHandle.Value;
 			return *(TypeHandle*) &typeHandle;
 		}
 
@@ -383,13 +376,14 @@ namespace RazorSharp.CoreClr
 		///     </para>
 		/// </summary>
 		/// <returns>A pointer to type <typeparamref name="T" />'s <see cref="MethodTable" /></returns>
-		internal static Pointer<MethodTable> ReadMethodTable<T>(T t)
+		internal static Pointer<MethodTable> ReadMethodTable<T>(T value)
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
-			if (IsStruct(t))
-				return t.GetType().GetMethodTable();
+			if (IsStruct(value))
+				return value.GetType().GetMethodTable();
 
-			Unsafe.TryGetAddressOfHeap(t, out Pointer<byte> ptr);
+			Unsafe.TryGetAddressOfHeap(value, out Pointer<byte> ptr);
+			Conditions.Ensure(!ptr.IsNull);
 			MethodTable* mt = *(MethodTable**) ptr;
 
 			return mt;
@@ -430,7 +424,6 @@ namespace RazorSharp.CoreClr
 		{
 			var typeHandle      = t.TypeHandle.Value;
 			var typeHandleValue = *(TypeHandle*) &typeHandle;
-
 			return typeHandleValue.MethodTable;
 		}
 
@@ -467,17 +460,17 @@ namespace RazorSharp.CoreClr
 			return lpFd;
 		}
 
-		internal static Pointer<FieldDesc>[] GetFieldDescs<T>(T t)
+		internal static Pointer<FieldDesc>[] GetFieldDescs<T>(T value)
 		{
-			return ReadFieldDescs(ReadMethodTable(t));
+			return ReadFieldDescs(ReadMethodTable(value));
 		}
 
-		internal static Pointer<FieldDesc>[] GetFieldDescs(this Type t)
+		internal static Pointer<FieldDesc>[] GetFieldDescs(this Type value)
 		{
 //			RazorContract.Requires(!t.IsArray, "Arrays do not have fields");
 			// Adds about 1k ns
 //			lpFd = lpFd.OrderBy(x => x.ToInt64()).ToArray();
-			return ReadFieldDescs(t.GetMethodTable());
+			return ReadFieldDescs(value.GetMethodTable());
 		}
 
 
@@ -488,7 +481,7 @@ namespace RazorSharp.CoreClr
 			Conditions.NotNull(fieldInfo, nameof(fieldInfo));
 			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
 
-			if (Environment.Is64BitProcess) {
+			if (Mem.Is64Bit) {
 				Conditions.Assert(fieldDesc.Reference.Info == fieldInfo);
 				Conditions.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
 			}

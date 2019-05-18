@@ -1,4 +1,4 @@
-namespace RazorSharp.Memory.Extern.Symbols.Attributes
+namespace RazorSharp.Import.Attributes
 {
 	/// <summary>
 	/// Specifies how the field will be loaded.
@@ -20,6 +20,8 @@ namespace RazorSharp.Memory.Extern.Symbols.Attributes
 		/// Loads the value as the type specified by <see cref="SymFieldAttribute.LoadAs"/>
 		/// (or the field type if the type isn't specified)
 		/// </summary>
-		LoadAs
+		LoadAs,
+		
+		LoadFast
 	}
 }

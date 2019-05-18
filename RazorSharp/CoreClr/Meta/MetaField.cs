@@ -7,6 +7,7 @@ using System.Reflection;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory.Pointers;
+using SimpleSharp;
 
 #endregion
 
@@ -27,7 +28,7 @@ namespace RazorSharp.CoreClr.Meta
 	///     </list>
 	/// <remarks>Corresponds to <see cref="System.Reflection.FieldInfo"/></remarks>
 	/// </summary>
-	public class MetaField : IMetaMember, IReadableStructure
+	public class MetaField : IReadableStructure
 	{
 		internal MetaField(Pointer<FieldDesc> p)
 		{
@@ -35,7 +36,6 @@ namespace RazorSharp.CoreClr.Meta
 		}
 
 		public MetaField(FieldInfo field) : this(field.GetFieldDesc()) { }
-
 
 		public override string ToString()
 		{
@@ -148,6 +148,11 @@ namespace RazorSharp.CoreClr.Meta
 
 		#region Methods
 
+		public Pointer<byte> GetValueAddress<T>(ref T value)
+		{
+			return IsStatic ? GetStaticAddressContext() : GetAddress(ref value);
+		}
+
 		public Pointer<byte> GetStaticAddress()
 		{
 			return Value.Reference.GetStaticAddress();
@@ -185,9 +190,6 @@ namespace RazorSharp.CoreClr.Meta
 
 		#endregion
 
-		public static implicit operator MetaField(FieldInfo fieldInfo)
-		{
-			return new MetaField(fieldInfo);
-		}
+		public static implicit operator MetaField(FieldInfo fieldInfo) => new MetaField(fieldInfo);
 	}
 }

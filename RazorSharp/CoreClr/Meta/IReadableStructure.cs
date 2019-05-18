@@ -1,3 +1,4 @@
+using System.Reflection;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
@@ -7,7 +8,7 @@ namespace RazorSharp.CoreClr.Meta
 	/// <summary>
 	/// Represents a readable structure or field in memory.
 	/// </summary>
-	public interface IReadableStructure : IMeta
+	public interface IReadableStructure : IMetadata
 	{
 		/// <summary>
 		/// Gets the value of this structure.

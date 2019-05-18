@@ -6,6 +6,8 @@ using SimpleSharp;
 using SimpleSharp.Strings;
 using RazorSharp.Native.Win32;
 
+// ReSharper disable NonReadonlyMemberInGetHashCode
+
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -65,7 +67,48 @@ namespace RazorSharp.Native
 		/// </summary>
 		public MemType Type;
 
-		public override string ToString()
+		public bool IsReadable => Protect.HasFlag(MemoryProtection.ExecuteRead)
+		                          || Protect.HasFlag(MemoryProtection.ReadOnly)
+		                          || Protect.HasFlag(MemoryProtection.ReadWrite)
+		                          || Protect.HasFlag(MemoryProtection.ExecuteWriteCopy);
+
+		public bool Equals(MemoryBasicInformation other)
+		{
+			return BaseAddress.Equals(other.BaseAddress) && AllocationBase.Equals(other.AllocationBase) &&
+			       AllocationProtect == other.AllocationProtect && RegionSize.Equals(other.RegionSize) &&
+			       State == other.State && Protect == other.Protect && Type == other.Type;
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is MemoryBasicInformation other && Equals(other);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked {
+				int hashCode = BaseAddress.GetHashCode();
+				hashCode = (hashCode * 397) ^ AllocationBase.GetHashCode();
+				hashCode = (hashCode * 397) ^ (int) AllocationProtect;
+				hashCode = (hashCode * 397) ^ RegionSize.GetHashCode();
+				hashCode = (hashCode * 397) ^ (int) State;
+				hashCode = (hashCode * 397) ^ (int) Protect;
+				hashCode = (hashCode * 397) ^ (int) Type;
+				return hashCode;
+			}
+		}
+
+		public static bool operator ==(MemoryBasicInformation left, MemoryBasicInformation right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(MemoryBasicInformation left, MemoryBasicInformation right)
+		{
+			return !left.Equals(right);
+		}
+
+		public ConsoleTable ToTable()
 		{
 			var table = new ConsoleTable("Field", "Value");
 			table.AddRow("Base address", Hex.ToHex(BaseAddress));
@@ -75,7 +118,13 @@ namespace RazorSharp.Native
 			table.AddRow("State", State);
 			table.AddRow("Protect", Protect);
 			table.AddRow("Type", Type);
-			return table.ToString();
+			return table;
+		}
+
+		public override string ToString()
+		{
+			return String.Format("State: {0} | Protection: {1} | Type: {2} | Allocation: {3}",
+			                     State, Protect, Type, AllocationProtect);
 		}
 	}
 }

@@ -12,10 +12,9 @@ using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.CoreClr.Structures.ILMethods;
+using RazorSharp.Import;
+using RazorSharp.Import.Attributes;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Extern;
-using RazorSharp.Memory.Extern.Symbols;
-using RazorSharp.Memory.Extern.Symbols.Attributes;
 using RazorSharp.Memory.Pointers;
 using Unsafe = RazorSharp.Memory.Unsafe;
 
@@ -125,7 +124,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// <exception cref="SymImportException"></exception>
 		internal IntPtr NativeCode {
 			[SymCall(SymImportOptions.UseAccessorName)]
-			get => throw new SymImportException();
+			get => throw new SymImportException(nameof(NativeCode));
 		}
 
 
@@ -136,7 +135,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal IntPtr PreImplementedCode {
 			[SymCall(SymImportOptions.UseAccessorName)]
-			get => throw new SymImportException();
+			get => throw new SymImportException(nameof(PreImplementedCode));
 		}
 
 		/// <summary>
@@ -171,7 +170,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal int SizeOf {
 			[SymCall(nameof(SizeOf))]
-			get => throw new SymImportException();
+			get => throw new SymImportException(nameof(SizeOf));
 		}
 
 		/// <summary>
@@ -181,7 +180,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
 			[SymCall("GetMethodTable")]
-			get => throw new SymImportException();
+			get => throw new SymImportException(nameof(EnclosingMethodTable));
 		}
 
 
@@ -192,13 +191,13 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal uint RVA {
 			[SymCall(SymImportOptions.UseAccessorName)]
-			get => throw new SymImportException();
+			get => throw new SymImportException(nameof(RVA));
 		}
 
 
 		internal int Token {
 			[SymCall("GetMemberDef")]
-			get => throw new SymImportException();
+			get => throw new SymImportException(nameof(Token));
 		}
 
 		#region bool accessors
@@ -211,7 +210,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal bool IsConstructor {
 			[SymCall("IsCtor")]
-			get => throw new SymImportException();
+			get => throw new SymImportException(nameof(IsConstructor));
 		}
 
 		internal bool IsPreImplemented => PreImplementedCode != IntPtr.Zero;
@@ -224,7 +223,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal bool IsPointingToNativeCode {
 			[SymCall(nameof(IsPointingToNativeCode))]
-			get => throw new SymImportException();
+			get => throw new SymImportException(nameof(IsPointingToNativeCode));
 		}
 
 		internal bool HasThis => Info.CallingConvention.HasFlag(CallingConventions.HasThis);

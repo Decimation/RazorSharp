@@ -1,7 +1,9 @@
 using System;
 using JetBrains.Annotations;
-using RazorSharp.Memory.Extern.Symbols.Attributes;
+using RazorSharp.Import.Attributes;
+
 // ReSharper disable InconsistentNaming
+#pragma warning disable 0649
 
 namespace Test
 {
@@ -25,6 +27,9 @@ namespace Test
 		
 		[SymField(SymImportOptions.FullyQualified)]
 		public int* g_sz32Str;
+
+//		[SymField(nameof(g_sz32Str),SymImportOptions.FullyQualified)]
+//		public string g_sz32Str2;
 
 		[SymCall(SymImportOptions.IgnoreEnclosingNamespace)]
 		public void hello()

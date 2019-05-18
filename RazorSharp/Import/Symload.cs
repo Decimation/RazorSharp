@@ -4,24 +4,23 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
-using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
-using RazorSharp.Memory.Extern.Symbols.Attributes;
+using RazorSharp.Import.Attributes;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Native;
 using RazorSharp.Native.Symbols;
-using RazorSharp.Native.Win32;
 using RazorSharp.Utilities;
-using SimpleSharp.Extensions;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Strings;
+using Unsafe = RazorSharp.Memory.Unsafe;
 
 #endregion
 
-namespace RazorSharp.Memory.Extern.Symbols
+namespace RazorSharp.Import
 {
 	/// <summary>
 	/// Provides operations for working with <see cref="SymImportAttribute"/>
@@ -77,6 +76,15 @@ namespace RazorSharp.Memory.Extern.Symbols
 			return resolvedName;
 		}
 
+		private static void AssemblyWork(Assembly asm, Action<Type> fn)
+		{
+			foreach (var type in asm.GetTypes()) {
+				if (Attribute.IsDefined(type, typeof(SymNamespaceAttribute))) {
+					fn(type);
+				}
+			}
+		}
+
 		#region Get ModuleInfo
 
 		private static ModuleInfo GetInfo(SymNamespaceAttribute attr, Pointer<byte> baseAddr)
@@ -117,6 +125,9 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 		#region Load
 
+		/// <summary>
+		/// Base function for binding and loading symbol imports.
+		/// </summary>
 		public static T Load<T>(Type type, T value)
 		{
 			if (IsBound(type)) {
@@ -130,7 +141,8 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 			BoundTypes.Add(type);
 
-//			Global.Log.Debug("Done");
+			Global.Log.Verbose("[{Status}] Done loading {Name}",  
+			                   StringConstants.CHECK_MARK, type.Name);
 
 			return value;
 		}
@@ -138,6 +150,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 		public static void Load(Type type) => Load(type, default(object));
 
 		public static T Load<T>(T value) => Load(value.GetType(), value);
+
 
 		private static void LoadField<T>(ref T              value,
 		                                 ModuleInfo         module,
@@ -148,16 +161,16 @@ namespace RazorSharp.Memory.Extern.Symbols
 			// todo: use FieldDescs and pointers
 
 			var symField  = (SymFieldAttribute) sym;
-			var fieldInfo = new MetaField(((FieldInfo) field));
+			var fieldInfo = new MetaField((FieldInfo) field);
 
 			var addr = module.GetSymAddress(fullSym);
-//			Console.WriteLine(addr);
-//			Console.WriteLine("{0:X}",ProcessApi.GetProcAddress(module.BaseAddress.Address,"g_int").ToInt64());
 
 			if (addr.IsNull) {
 				string msg = String.Format("Could not find the address of the symbol \"{0}\"", fullSym);
 				throw new NullReferenceException(msg);
 			}
+
+			// fieldInfo.DebugAddresses(ref value);
 
 			var options   = symField.FieldOptions;
 			var fieldType = fieldInfo.FieldType;
@@ -189,41 +202,35 @@ namespace RazorSharp.Memory.Extern.Symbols
 						loadedValue = addr.ReadAnyEx(fieldLoadType);
 					}
 
-
 					break;
+				case SymFieldOptions.LoadFast:
+					var fieldSize = fieldInfo.Size;
+					var memCpy    = addr.CopyOutBytes(fieldSize);
+					var fieldAddr = fieldInfo.GetValueAddress(ref value);
+					fieldAddr.WriteAll(memCpy);
+					return;
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
 
 
-			if (!fieldInfo.IsStatic) {
-				var ptr = fieldInfo.GetAddress(ref value);
+			Pointer<byte> ptr = fieldInfo.GetValueAddress(ref value);
 
-				if (Runtime.IsPointer(fieldInfo.FieldType)) {
-					ptr.WritePointer((Pointer<byte>) loadedValue);
-				}
-				else {
-					ptr.WriteAnyEx(fieldType, loadedValue);
-				}
+			if (Runtime.IsPointer(fieldInfo.FieldType)) {
+				ptr.WritePointer((Pointer<byte>) loadedValue);
 			}
 			else {
-				fieldInfo.SetValue(value, loadedValue);
+				ptr.WriteAnyEx(fieldType, loadedValue);
 			}
 		}
 
-		public static void LoadAll(Assembly asm)
-		{
-			foreach (var type in asm.GetTypes()) {
-				if (Attribute.IsDefined(type, typeof(SymNamespaceAttribute))) {
-					// Global.Log.Debug("Binding {Name}", type.Name);
-					Load(type);
-				}
-			}
-		}
+
+		public static void LoadAll(Assembly asm) => AssemblyWork(asm, Load);
+
 
 		private static void LoadComponents<T>(ref T value, Type type, ModuleInfo mi)
 		{
-			(MemberInfo[] members, SymImportAttribute[] attributes) = type.GetAnnotated<SymImportAttribute>();
+			var (members, attributes) = type.GetAnnotated<SymImportAttribute>();
 
 			int lim = attributes.Length;
 
@@ -237,16 +244,13 @@ namespace RazorSharp.Memory.Extern.Symbols
 				Pointer<byte> addr = mi.GetSymAddress(name);
 
 				switch (mem.MemberType) {
+					case MemberTypes.Method:
 					case MemberTypes.Constructor:
-						// The import is a function (ctor)
+						// The import is a function or (ctor)
 						Functions.SetEntryPoint((MethodInfo) mem, addr.Address);
 						break;
 					case MemberTypes.Field:
 						LoadField(ref value, mi, name, mem, attr);
-						break;
-					case MemberTypes.Method:
-						// The import is a function
-						Functions.SetEntryPoint((MethodInfo) mem, addr.Address);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();
@@ -258,15 +262,15 @@ namespace RazorSharp.Memory.Extern.Symbols
 
 		#region Unload
 
-		private static void UnloadStaticField(MemberInfo field)
-		{
-			var fi = (FieldInfo) field;
-			fi.SetValue(null, default);
-		}
+		public static void UnloadAll(Assembly asm) => AssemblyWork(asm, Unload);
 
-		public static void Unload(Type type, bool unloadModule = true)
+		public static void Unload(Type type) => Unload(type, false);
+
+		public static void Unload(Type type, bool unloadModule)
 		{
-			Conditions.Require(IsBound(type));
+			if (!IsBound(type)) {
+				return;
+			}
 
 			if (unloadModule) {
 				var    nameSpaceAttr = type.GetCustomAttribute<SymNamespaceAttribute>();
@@ -284,14 +288,15 @@ namespace RazorSharp.Memory.Extern.Symbols
 				switch (mem.MemberType) {
 					case MemberTypes.Field:
 						// The field will be deleted later
-						if (((FieldInfo) mem).IsStatic) {
-							UnloadStaticField(mem);
+						var fi = (FieldInfo) mem;
+						if (fi.IsStatic) {
+							fi.SetValue(null, default);
 						}
 
 						break;
 					case MemberTypes.Method:
 						// Calling the function will now result in an access violation
-						var metaMethod = new MetaMethod((MethodInfo) mem);
+						MetaMethod metaMethod = (MethodInfo) mem;
 						metaMethod.Reset();
 						break;
 					default:
@@ -302,7 +307,7 @@ namespace RazorSharp.Memory.Extern.Symbols
 			BoundTypes.Remove(type);
 		}
 
-		public static void Unload<T>(ref T value, bool unloadModule = true)
+		public static void Unload<T>(ref T value, bool unloadModule = false)
 		{
 			var type = value.GetType();
 
