@@ -16,6 +16,8 @@ namespace RazorSharp.Memory
 		/// <param name="bitPos">Beginning offset</param>
 		public static int ReadBits(int number, int nBits, int bitPos) => ((1 << nBits) - 1) & (number >> bitPos);
 
+		public static int ReadBits(uint number, int nBits, int bitPos) => ReadBits((int) number, nBits, bitPos);
+		
 		/**
 		 * #define GETMASK(index, size) (((1 << (size)) - 1) << (index))
 		 * #define READFROM(data, index, size) (((data) & GETMASK((index), (size))) >> (index))

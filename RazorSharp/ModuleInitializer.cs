@@ -25,7 +25,7 @@ namespace RazorSharp
 	/// </item>
 	/// </list>
 	/// </summary>
-	internal static class ModuleInitializer
+	internal static class ModuleInitializer /*: IReleasable */
 	{
 		internal static bool IsSetup { get; private set; }
 
@@ -64,7 +64,10 @@ namespace RazorSharp
 			Setup();
 
 			var appDomain = AppDomain.CurrentDomain;
-			appDomain.ProcessExit += (sender, eventArgs) => { Close(); };
+			appDomain.ProcessExit += (sender, eventArgs) =>
+			{
+				Close();
+			};
 		}
 	}
 }

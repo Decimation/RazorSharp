@@ -21,8 +21,7 @@ namespace RazorSharp.Native.Symbols
 
 		public Pointer<byte> BaseAddress { get; }
 
-		public ModuleInfo(FileInfo pdb, ProcessModule module)
-			: this(pdb, module.BaseAddress) { }
+		public ModuleInfo(FileInfo pdb, ProcessModule module) : this(pdb, module.BaseAddress) { }
 
 		public ModuleInfo(FileInfo pdb, Pointer<byte> baseAddr)
 		{

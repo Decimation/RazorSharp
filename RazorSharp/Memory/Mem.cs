@@ -98,6 +98,8 @@ namespace RazorSharp.Memory
 			IL.Emit.Ldobj(typeof(T));
 			return IL.Return<T>();
 		}
+		
+		
 
 		/// <summary>
 		///     Checks whether an address is in range.

@@ -4,6 +4,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using SimpleSharp.Extensions;
 using SimpleSharp.Strings;
 using RazorSharp.Memory.Pointers;
@@ -48,6 +49,38 @@ namespace RazorSharp.Native
 			}
 		}
 
+		public static byte[] GetBytes(string s)
+		{
+			var rg = new byte[s.Length];
+
+			unsafe {
+				fixed (char* c = s) {
+					for (int i = 0; i < rg.Length; i++) {
+						rg[i] = (byte) c[i];
+					}
+				}
+			}
+			
+
+			return rg;
+		}
+		
+		public static sbyte[] GetSBytes(string s)
+		{
+			var rg = new sbyte[s.Length];
+
+			unsafe {
+				fixed (char* c = s) {
+					for (int i = 0; i < rg.Length; i++) {
+						rg[i] = (sbyte) c[i];
+					}
+				}
+			}
+			
+
+			return rg;
+		}
+		
 		public static unsafe string GetString(sbyte* first)
 		{
 			return new string(first);

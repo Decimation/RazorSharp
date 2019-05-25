@@ -179,5 +179,6 @@ namespace RazorSharp
 		internal static long TypeFromToken(int tk) => tk & TYPE_FROM_TOKEN;
 
 		internal static int TokenFromRid(int rid, CorTokenType tktype) => rid | (int) tktype;
+		public const int BITS_PER_DWORD = 32;
 	}
 }

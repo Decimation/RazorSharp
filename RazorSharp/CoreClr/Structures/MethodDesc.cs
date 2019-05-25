@@ -302,7 +302,7 @@ namespace RazorSharp.CoreClr.Structures
 		[SymCall]
 		internal Pointer<ILMethod> GetILHeader(int fAllowOverrides = 0)
 		{
-			throw new SymImportException();
+			throw new SymImportException(nameof(GetILHeader));
 		}
 
 
@@ -312,7 +312,7 @@ namespace RazorSharp.CoreClr.Structures
 		[SymCall]
 		private int SetNativeCodeInterlocked(ulong pCode)
 		{
-			throw new SymImportException();
+			throw new SymImportException(nameof(SetNativeCodeInterlocked));
 		}
 
 		internal void SetEntryPoint(Pointer<byte> pCode)
@@ -330,7 +330,7 @@ namespace RazorSharp.CoreClr.Structures
 		[SymCall]
 		internal void Reset()
 		{
-			throw new SymImportException();
+			throw new SymImportException(nameof(Reset));
 		}
 
 

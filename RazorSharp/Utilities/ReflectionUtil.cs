@@ -23,6 +23,8 @@ namespace RazorSharp.Utilities
 	{
 		public static MetaType GetMetaType(this Type t) => new MetaType(t.GetMethodTable());
 
+		
+
 		/// <summary>
 		///     Executes a generic method
 		/// </summary>

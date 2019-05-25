@@ -39,7 +39,10 @@ namespace RazorSharp.Import
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static bool IsBound(Type t) => BoundTypes.Contains(t);
+		private static bool IsBound(Type t)
+		{
+			return BoundTypes.Contains(t);
+		}
 
 		private static string ResolveSymbolName(SymImportAttribute attr, [NotNull] MemberInfo member)
 		{
@@ -130,6 +133,8 @@ namespace RazorSharp.Import
 		/// </summary>
 		public static T Load<T>(Type type, T value)
 		{
+			// todo: prevent binding during unloading
+			
 			if (IsBound(type)) {
 				return value;
 			}

@@ -54,7 +54,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		public static Pointer<byte> HighestAddress => g_highest_address;
 
-		private static Pointer<GCHeap> GlobalHeapValue => g_pGCHeap;
+		internal static Pointer<GCHeap> GlobalHeapValue => g_pGCHeap;
 
 		public static int GCCount => GlobalHeapValue.Reference.GCCount;
 
@@ -91,7 +91,7 @@ namespace RazorSharp.CoreClr.Structures
 			return AllocateObjectInternal<T>(typeof(T), fHandleCom);
 		}
 
-		internal static bool IsHeapPointer<T>(T value, bool smallHeapOnly = false) where T : class
+		public static bool IsHeapPointer<T>(T value, bool smallHeapOnly = false) where T : class
 		{
 			return GlobalHeapValue.Reference.IsHeapPointer(value, smallHeapOnly);
 		}
@@ -99,6 +99,11 @@ namespace RazorSharp.CoreClr.Structures
 		internal static unsafe bool IsHeapPointer(Pointer<byte> obj, bool smallHeapOnly = false)
 		{
 			return GlobalHeapValue.Reference.IsHeapPointer(obj.ToPointer(), smallHeapOnly);
+		}
+
+		internal static string Debug()
+		{
+			return g_pGCHeap.ToInt64().ToString("X");
 		}
 
 

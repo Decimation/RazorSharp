@@ -40,11 +40,6 @@ namespace RazorSharp.CoreClr
 	/// </summary>
 	public static unsafe class Runtime
 	{
-		public static Pointer<byte> GetClrSymAddress(string name)
-		{
-			return Clr.ClrSymbols.GetSymAddress(name);
-		}
-
 		public static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate
 		{
 			return Clr.ClrSymbols.GetFunction<TDelegate>(name);
@@ -52,7 +47,7 @@ namespace RazorSharp.CoreClr
 
 		public static T AllocObject<T>(params object[] args)
 		{
-			var value = GlobalHeap.AllocateObject<T>(default);
+			var value = GlobalHeap.AllocateObject<T>();
 			RunConstructor(value, args);
 			return value;
 		}
@@ -87,7 +82,6 @@ namespace RazorSharp.CoreClr
 
 
 		#region Nil
-		
 
 		/// <summary>
 		/// Whether the value of <paramref name="value"/> is <c>default</c> or <c>null</c> bytes,
@@ -108,6 +102,23 @@ namespace RazorSharp.CoreClr
 		internal static bool IsNullOrDefault<T>([CanBeNull] T value)
 		{
 			return EqualityComparer<T>.Default.Equals(value, default);
+		}
+
+		#endregion
+
+		#region Reference
+
+		public static bool IsReferenceOrContainsReferences<T>()
+		{
+			return IsReferenceOrContainsReferences(typeof(T));
+		}
+
+		public static bool IsReferenceOrContainsReferences(Type type)
+		{
+			// https://github.com/dotnet/coreclr/blob/master/src/vm/jitinterface.cpp#L7507
+			var mt = type.GetMethodTable();
+
+			return !type.IsValueType || mt.Reference.ContainsPointers;
 		}
 
 		#endregion
@@ -174,6 +185,25 @@ namespace RazorSharp.CoreClr
 
 		#endregion
 
+		/// <summary>
+		///     Determines whether a type is blittable; that is, they don't
+		///     require conversion between managed and unmanaged code.
+		///     <remarks>
+		///         <para>Returned from <see cref="MethodTable.IsBlittable" /></para>
+		///         <para>
+		///             Note: If the type is an array or <c>string</c>, <see cref="MethodTable.IsBlittable" /> determines it
+		///             unblittable,
+		///             but <see cref="IsBlittable{T}" /> returns <c>true</c>, as <see cref="GCHandle" /> determines it blittable.
+		///         </para>
+		///     </remarks>
+		/// </summary>
+		internal static bool IsBlittable<T>()
+		{
+			// We'll say arrays and strings are blittable cause they're
+			// usable with GCHandle
+			return IsArrayOrString<T>() || typeof(T).GetMethodTable().Reference.IsBlittable;
+		}
+		
 		#endregion
 
 		public static void Compile(Type t, string n) => Compile(t.GetAnyMethod(n));
@@ -194,24 +224,7 @@ namespace RazorSharp.CoreClr
 		}
 
 
-		/// <summary>
-		///     Determines whether a type is blittable; that is, they don't
-		///     require conversion between managed and unmanaged code.
-		///     <remarks>
-		///         <para>Returned from <see cref="MethodTable.IsBlittable" /></para>
-		///         <para>
-		///             Note: If the type is an array or <c>string</c>, <see cref="MethodTable.IsBlittable" /> determines it
-		///             unblittable,
-		///             but <see cref="IsBlittable{T}" /> returns <c>true</c>, as <see cref="GCHandle" /> determines it blittable.
-		///         </para>
-		///     </remarks>
-		/// </summary>
-		internal static bool IsBlittable<T>()
-		{
-			// We'll say arrays and strings are blittable cause they're
-			// usable with GCHandle
-			return IsArrayOrString<T>() || typeof(T).GetMethodTable().Reference.IsBlittable;
-		}
+		
 
 
 		internal static TypeHandle GetHandle<T>(T value) where T : class

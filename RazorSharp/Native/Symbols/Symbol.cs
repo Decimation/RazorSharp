@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using SimpleSharp.Extensions;
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 #endregion
 
@@ -29,12 +30,12 @@ namespace RazorSharp.Native.Symbols
 			Index        = pSymInfo->Index;
 			Size         = pSymInfo->Size;
 			ModBase      = pSymInfo->ModBase;
-			Flags        = pSymInfo->Flags;
+			Flags        = (SymbolFlag) pSymInfo->Flags;
 			Value        = pSymInfo->Value;
 			Address      = pSymInfo->Address;
 			Register     = pSymInfo->Register;
 			Scope        = pSymInfo->Scope;
-			Tag          = pSymInfo->Tag;
+			Tag          = (SymTagEnum)pSymInfo->Tag;
 
 			int realSize = GetSymbolInfoSize(pSymInfo);
 			m_symStructMem = new byte[realSize];
@@ -51,16 +52,14 @@ namespace RazorSharp.Native.Symbols
 		public uint   Index        { get; }
 		public uint   Size         { get; }
 		public ulong  ModBase      { get; }
-		public uint   Flags        { get; }
 		public ulong  Value        { get; }
 		public ulong  Address      { get; }
 		public uint   Register     { get; }
 		public uint   Scope        { get; }
-		public uint   Tag          { get; }
 
-		public SymTagEnum TagEnum => (SymTagEnum) Tag;
+		public SymTagEnum Tag { get; }
 
-		public SymbolFlag FlagsEnum => (SymbolFlag) Flags;
+		public SymbolFlag Flags { get; }
 
 		public long Offset => (long) (Address - ModBase);
 
@@ -88,7 +87,7 @@ namespace RazorSharp.Native.Symbols
 		public override string ToString()
 		{
 			return String.Format("Name: {0} | Offset: {1:X} | Address: {2:X} | Tag: {3} | Flags: {4}",
-			                     Name, Offset, Address, TagEnum, FlagsEnum);
+			                     Name, Offset, Address, Tag, Flags);
 		}
 	}
 }

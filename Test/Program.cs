@@ -39,6 +39,7 @@ using JetBrains.Annotations;
 using RazorSharp.Analysis;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.EE;
+using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Import;
 
 #endregion
@@ -114,22 +115,23 @@ namespace Test
 			Console.WriteLine(layout);
 		}
 
-
+		struct MyClass
+		{
+			public static readonly int VALUE = 32;
+		}
+		
+		
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			var ptr = Marshal.AllocHGlobal(256);
-			var ai  = new AddressInfo(ptr);
-			Console.WriteLine(ai);
-			Console.WriteLine(Mem.IsValid(ptr));
+			//DbgHelp.LoadLibrary();
 
-			int i = 255;
-			Pointer<int> p = &i;
-			Console.WriteLine(Kernel32.VirtualQuery(p.Address).IsReadable);
+			
+			var field = (MetaField) typeof(MyClass).GetAnyField("VALUE");
+			Console.WriteLine(field.GetValue(null));
 
-			foreach (var heap in HeapApi.GetProcessHeaps()) {
-				Console.WriteLine(Hex.ToHex(heap));
-			}
+			Console.WriteLine(field.Debug());
+			Console.WriteLine(field.GetCurrentStaticAddress().ReadAny<int>());
 		}
 	}
 }

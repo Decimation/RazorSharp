@@ -27,7 +27,7 @@ namespace RazorSharp.Native
 	///     </a>
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential)]
-	public struct MemoryBasicInformation
+	public struct MemoryBasicInformation : IEquatable<MemoryBasicInformation>
 	{
 		/// <summary>
 		///     A pointer to the base address of the region of pages.

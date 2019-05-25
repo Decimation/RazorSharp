@@ -51,13 +51,7 @@ namespace RazorSharp.CoreClr
 			void* ptr = JIT_GetRuntimeType(value);
 			return CSUnsafe.Read<Type>(&ptr);
 		}
-
-
-		[SymCall(SymImportOptions.FullyQualified)]
-		internal static Pointer<byte> JIT_GetStaticFieldAddr_Context(FieldDesc* value)
-		{
-			throw new SymImportException();
-		}
+		
 
 		private delegate void* GetRuntimeType(MethodTable* value);
 
@@ -87,7 +81,7 @@ namespace RazorSharp.CoreClr
 		                                             int                  bCaseSens)
 		{
 			// pSignature can be NULL to find any field with the given name
-			throw new SymImportException();
+			throw new SymImportException(nameof(FindField));
 		}
 
 		#endregion

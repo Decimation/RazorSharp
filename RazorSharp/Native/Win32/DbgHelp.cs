@@ -129,6 +129,7 @@ namespace RazorSharp.Native.Win32
 		internal static extern bool SymFromName(IntPtr hProcess, IntPtr name, IntPtr pSymbol);
 
 		[DllImport(DBG_HELP_DLL)]
+		[SuppressUnmanagedCodeSecurity]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		internal static extern bool SymFromName(IntPtr hProcess, string name, IntPtr pSymbol);
 		

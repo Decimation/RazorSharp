@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32;
+using SimpleSharp;
 using SimpleSharp.Diagnostics;
 
 // ReSharper disable ReturnTypeCanBeEnumerable.Global
@@ -15,14 +16,11 @@ namespace RazorSharp.Native.Symbols
 	/// <summary>
 	/// Provides access to symbols in a specified image
 	/// </summary>
-	internal static unsafe class SymbolManager
+	internal static unsafe class SymbolManager /*: IReleasable */
 	{
-		private static IntPtr _proc;
-		private static ulong  _modBase;
-
-//		private static string[] _nameBuffer;
-		private static string   _singleNameBuffer;
-
+		private static IntPtr       _proc;
+		private static ulong        _modBase;
+		private static string       _singleNameBuffer;
 		private static List<Symbol> _symBuffer;
 
 		/// <summary>
@@ -72,7 +70,7 @@ namespace RazorSharp.Native.Symbols
 			// SYMOPT_DEBUG option asks DbgHelp to print additional troubleshooting
 			// messages to debug output - use the debugger's Debug Output window
 			// to view the messages
-			
+
 			options |= DbgHelp.SYMOPT_DEBUG;
 
 			DbgHelp.SymSetOptions(options);
@@ -188,7 +186,6 @@ namespace RazorSharp.Native.Symbols
 			buffer.Reference.SizeOfStruct = (uint) SymbolInfo.SIZE;
 			buffer.Reference.MaxNameLen   = DbgHelp.MAX_SYM_NAME;
 
-
 			if (DbgHelp.SymFromName(_proc, name, buffer.Address)) {
 				fixed (sbyte* firstChar = &buffer.Reference.Name) {
 					var symName = NativeHelp.GetStringAlt(firstChar, (int) buffer.Reference.NameLen);
@@ -227,7 +224,7 @@ namespace RazorSharp.Native.Symbols
 
 
 			Symbol[] cpy = _symBuffer.ToArray();
-			
+
 			ClearBuffer();
 
 			return cpy;

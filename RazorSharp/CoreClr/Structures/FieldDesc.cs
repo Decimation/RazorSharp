@@ -13,6 +13,7 @@ using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Utilities;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 
@@ -83,8 +84,13 @@ namespace RazorSharp.CoreClr.Structures
 		///     <para>unsigned m_dwOffset : 27;</para>
 		///     <para>unsigned m_type : 5;</para>
 		/// </summary>
+		[Bitfield("dwOffset",27)]
+		[Bitfield("type", 5)]
 		private uint m_dword2;
 
+		public uint dw1 => m_dword1;
+		public uint dw2 => m_dword2;
+		
 		#endregion
 
 		#region Accessors
@@ -112,6 +118,10 @@ namespace RazorSharp.CoreClr.Structures
 		internal int Offset {
 			get => (int) (m_dword2 & 0x7FFFFFF);
 			set => m_dword2 = (uint) Bits.WriteTo((int) m_dword2, 0, DW2_OFFSET_BITS, value);
+		}
+
+		internal int Offset2 {
+			get { return Bitfield.GetValue(this, nameof(m_dword2), "dwOffset"); }
 		}
 
 		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
@@ -214,7 +224,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal Pointer<MethodTable> EnclosingMethodTable {
 			[SymCall(Symbol = "FieldDesc::GetApproxEnclosingMethodTable", Options = SymImportOptions.FullyQualified)]
-			get => throw new SymImportException();
+			get => throw new SymImportException(nameof(EnclosingMethodTable));
 		}
 
 
@@ -223,6 +233,12 @@ namespace RazorSharp.CoreClr.Structures
 			return GetStaticAddress(null);
 		}
 
+		[SymCall]
+		internal Pointer<byte> GetCurrentStaticAddress()
+		{
+			throw new SymImportException(nameof(GetStaticAddress));
+		}
+		
 		
 		[SymCall]
 		internal Pointer<byte> GetStaticAddress(void* value)
@@ -234,13 +250,6 @@ namespace RazorSharp.CoreClr.Structures
 		internal Pointer<byte> GetStaticAddressHandle()
 		{
 			throw new SymImportException(nameof(GetStaticAddressHandle));
-		}
-
-		internal Pointer<byte> GetStaticAddressContext()
-		{
-			fixed (FieldDesc* value = &this) {
-				return ClrFunctions.JIT_GetStaticFieldAddr_Context(value);
-			}
 		}
 
 		#endregion

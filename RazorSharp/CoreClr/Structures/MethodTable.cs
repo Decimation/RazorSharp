@@ -124,12 +124,11 @@ namespace RazorSharp.CoreClr.Structures
 		///     Class token if it fits into 16-bits. If this is (WORD)-1, the class token is stored in the TokenOverflow optional
 		///     member.
 		/// </summary>
-		private int OrigToken => m_wToken;
+		private int RawToken => m_wToken;
 
 
 		internal int NumVirtuals => m_wNumVirtuals;
-
-
+		
 		internal int NumInterfaces => m_wNumInterfaces;
 
 		internal bool IsParentIndirect => Flags.HasFlag(MethodTableFlags.HasIndirectParent);
@@ -187,7 +186,7 @@ namespace RazorSharp.CoreClr.Structures
 		[SymCall]
 		private MethodTable* GetCanonicalMethodTable()
 		{
-			throw new SymImportException();
+			throw new SymImportException(nameof(GetCanonicalMethodTable));
 		}
 
 
@@ -211,7 +210,7 @@ namespace RazorSharp.CoreClr.Structures
 		internal string Name => RuntimeType.Name;
 
 		// internal name: GetTypeDefRid
-		internal int Token => Constants.TokenFromRid(OrigToken, CorTokenType.TypeDef);
+		internal int Token => Constants.TokenFromRid(RawToken, CorTokenType.TypeDef);
 
 
 		/// <summary>
@@ -257,7 +256,7 @@ namespace RazorSharp.CoreClr.Structures
 		[SymCall]
 		internal uint GetSignatureCorElementType()
 		{
-			throw new SymImportException();
+			throw new SymImportException(nameof(GetSignatureCorElementType));
 		}
 
 		#endregion

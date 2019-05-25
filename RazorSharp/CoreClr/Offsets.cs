@@ -3,14 +3,13 @@
 using System;
 using System.Runtime.CompilerServices;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.CoreClr.Structures.Enums;
 
 // ReSharper disable ConvertToConstant.Global
 
 #endregion
 
-namespace RazorSharp
+namespace RazorSharp.CoreClr
 {
 	public static class Offsets
 	{

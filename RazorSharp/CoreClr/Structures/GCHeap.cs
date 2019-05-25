@@ -50,7 +50,7 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal int GCCount {
 			[SymCall("GetGcCount")]
-			get => throw new SymImportException();
+			get => throw new SymImportException(nameof(GCCount));
 		}
 
 		internal bool IsHeapPointer<T>(T value, bool smallHeapOnly = false) where T : class

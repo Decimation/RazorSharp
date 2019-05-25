@@ -18,7 +18,7 @@ namespace RazorSharp.CoreClr
 	/// <summary>
 	///     Contains the resources for working with the CLR.
 	/// </summary>
-	internal static class Clr
+	internal static class Clr /*: IReleasable */
 	{
 		/// <summary>
 		///     Retrieves resources

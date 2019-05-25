@@ -10,7 +10,9 @@ using System.Security.Principal;
 using System.Text;
 using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
+using RazorSharp.Import;
 using RazorSharp.Memory;
+using RazorSharp.Native.Symbols;
 using Serilog;
 using Serilog.Context;
 using Serilog.Core;
@@ -24,7 +26,7 @@ namespace RazorSharp
 	/// <summary>
 	///     The core of RazorSharp. Contains the logger and such.
 	/// </summary>
-	internal static class Global
+	internal static class Global /*: IReleasable */
 	{
 		internal const string CONTEXT_PROP = "Context";
 
@@ -64,6 +66,11 @@ namespace RazorSharp
 #endif
 
 			Assembly = Assembly.Load(NAME);
+		}
+
+		internal static void Cache()
+		{
+			Symload.LoadAll(Assembly);
 		}
 
 		internal static void ContextLog(string prop, Action fn)

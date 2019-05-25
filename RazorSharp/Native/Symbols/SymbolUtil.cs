@@ -39,6 +39,8 @@ namespace RazorSharp.Native.Symbols
 			                           symChk.FullName, dll.FullName, dest.FullName);
 
 
+			
+			
 			using (var cmdProc = Common.Shell("\"" + cmd + "\"")) {
 				cmdProc.ErrorDataReceived += (sender, args) =>
 				{

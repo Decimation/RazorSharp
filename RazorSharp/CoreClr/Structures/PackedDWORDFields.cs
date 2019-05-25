@@ -32,7 +32,6 @@ namespace RazorSharp.CoreClr.Structures
 		private const int LENGTH = (int) EEClassFieldId.COUNT;
 
 		private const int MAX_LENGTH_BITS = 5;
-		private const int BITS_PER_DWORD  = 32;
 
 		[FieldOffset(0)]
 		private fixed DWORD m_rgUnpackedFields[LENGTH];
@@ -74,13 +73,13 @@ namespace RazorSharp.CoreClr.Structures
 		private DWORD BitVectorGet(DWORD dwOffset, DWORD dwLength)
 		{
 			// Calculate the start and end naturally aligned DWORDs from which the value will come.
-			DWORD dwStartBlock = dwOffset / BITS_PER_DWORD;
-			DWORD dwEndBlock   = (dwOffset + dwLength - 1) / BITS_PER_DWORD;
+			DWORD dwStartBlock = dwOffset / Constants.BITS_PER_DWORD;
+			DWORD dwEndBlock   = (dwOffset + dwLength - 1) / Constants.BITS_PER_DWORD;
 			if (dwStartBlock == dwEndBlock) {
 				// Easy case: the new value fits entirely within one aligned DWORD. Compute the number of bits
 				// we'll need to shift the extracted value (to the right) and a mask of the bits that will be
 				// extracted in the destination DWORD.
-				DWORD dwValueShift = dwOffset % BITS_PER_DWORD;
+				DWORD dwValueShift = dwOffset % Constants.BITS_PER_DWORD;
 				DWORD dwValueMask  = ((1U << (int) dwLength) - 1) << (int) dwValueShift;
 				
 				// Mask out the bits we want and shift them down into the bottom of the result DWORD.
@@ -94,8 +93,7 @@ namespace RazorSharp.CoreClr.Structures
 			// can be at most DWORD-sized itself). For simplicity we'll simply break this into two separate
 			// non-spanning gets and stitch the result together from that. We can revisit this in the future
 			// if the perf is a problem.
-			DWORD dwInitialBits =
-				BITS_PER_DWORD - dwOffset % BITS_PER_DWORD; // Number of bits to get in the first DWORD
+			DWORD dwInitialBits = Constants.BITS_PER_DWORD - dwOffset % Constants.BITS_PER_DWORD; // Number of bits to get in the first DWORD
 			DWORD dwReturn;
 
 			// Get the initial (low-order) bits from the first DWORD.
