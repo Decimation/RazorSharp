@@ -116,7 +116,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		#endregion
 
-		internal Pointer<MethodDesc> Value { get; }
+		private Pointer<MethodDesc> Value { get; }
 
 		#region Flags
 

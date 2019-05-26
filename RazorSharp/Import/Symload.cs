@@ -30,8 +30,11 @@ namespace RazorSharp.Import
 		private const string SCOPE_RESOLUTION_OPERATOR = "::";
 		private const string GET_PROPERTY_PREFIX       = "get_";
 		private const string GET_PROPERTY_REPLACEMENT  = "Get";
+		
 
 		private static readonly ISet<Type> BoundTypes = new HashSet<Type>();
+
+		
 
 		private static bool HasFlagFast(this SymImportOptions value, SymImportOptions flag)
 		{
@@ -301,8 +304,7 @@ namespace RazorSharp.Import
 						break;
 					case MemberTypes.Method:
 						// Calling the function will now result in an access violation
-						MetaMethod metaMethod = (MethodInfo) mem;
-						metaMethod.Reset();
+						Functions.ResetFunction((MethodInfo) mem);
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();

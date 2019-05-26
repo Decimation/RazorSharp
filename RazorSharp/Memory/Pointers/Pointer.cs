@@ -67,7 +67,7 @@ namespace RazorSharp.Memory.Pointers
 	///     </remarks>
 	/// </summary>
 	/// <typeparam name="T">Element type to point to</typeparam>
-	[DebuggerDisplay("{" + nameof(Dbg) + "}")]
+//	[DebuggerDisplay("{" + nameof(Dbg) + "}")]
 	public unsafe struct Pointer<T> : IFormattable
 	{
 		/// <summary>
@@ -75,8 +75,6 @@ namespace RazorSharp.Memory.Pointers
 		///     <para>We want this to be the only field so it can be represented as a pointer in memory.</para>
 		/// </summary>
 		private void* m_value;
-
-		private string Dbg => ToString(PointerFormat.FORMAT_PTR);
 
 		#region Properties
 
@@ -254,18 +252,17 @@ namespace RazorSharp.Memory.Pointers
 		{
 			switch (type) {
 				case StringTypes.ANSI:
-					return ReadPointer<byte>().ReadString(StringTypes.ANSI);
-					break;
+					return ReadCString<byte>(type);
 				case StringTypes.UNI:
-					return ReadPointer<short>().ReadString(StringTypes.UNI);
-					break;
+					return ReadCString<short>(type);
 				case StringTypes.CHAR32:
-					return ReadPointer<int>().ReadString(StringTypes.CHAR32);
-					break;
+					return ReadCString<int>(type);
 				default:
 					throw new ArgumentOutOfRangeException(nameof(type), type, null);
 			}
 		}
+
+		private string ReadCString<TChar>(StringTypes type) => ReadPointer<TChar>().ReadString(type);
 
 		public Pointer<TType> ReadPointer<TType>(int elemOffset = 0)
 		{
@@ -313,6 +310,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <param name="values">Values to write</param>
 		public void WriteAll(params T[] values)
 		{
+			Conditions.NotNull(values, nameof(values));
 			Conditions.Require(values.Length > 0);
 			for (int i = 0; i < values.Length; i++)
 				this[i] = values[i];

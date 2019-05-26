@@ -138,7 +138,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		public MetaType EnclosingMetaType => new MetaType(Value.Reference.EnclosingMethodTable);
 
-		internal Pointer<FieldDesc> Value { get; }
+		private Pointer<FieldDesc> Value { get; }
 
 //		public Pointer<MethodTable> FieldMethodTable => m_pFieldDesc.Reference.FieldMethodTable;
 
@@ -186,19 +186,6 @@ namespace RazorSharp.CoreClr.Meta
 		public Pointer<byte> GetAddress<TInstance>(ref TInstance value)
 		{
 			return Value.Reference.GetAddress(ref value);
-		}
-
-		public string Debug()
-		{
-			var table = new ConsoleTable("Property", "Value");
-
-			table.AddRow("Value", Value);
-			table.AddRow("Name", Name);
-			table.AddRow(nameof(GetStaticAddress), GetStaticAddress());
-			table.AddRow(nameof(GetStaticAddressHandle), GetStaticAddressHandle());
-			table.AddRow(nameof(GetCurrentStaticAddress), GetCurrentStaticAddress());
-
-			return table.ToString();
 		}
 
 		#endregion

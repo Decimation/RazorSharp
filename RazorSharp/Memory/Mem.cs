@@ -187,8 +187,7 @@ namespace RazorSharp.Memory
 		public static Pointer<T> AllocInstance<T>() where T : class
 		{
 			Conditions.Require(!Runtime.IsArrayOrString<T>());
-
-
+			
 			// Minimum size required for an instance
 			int baseSize = Unsafe.SizeOf<T>(SizeOfOptions.BaseInstance);
 
@@ -200,7 +199,7 @@ namespace RazorSharp.Memory
 
 			// Write the pointer in the extra allocated bytes,
 			// pointing to the MethodTable* (skip over the extra pointer and the ObjHeader)
-			alloc.WriteAny(alloc.Address + sizeof(MethodTable*) * 2);
+			alloc.WriteAny(alloc.Address + Offsets.ObjectOverhead);
 
 			// Write the ObjHeader
 			// (this'll already be zeroed, but this is just self-documentation)
@@ -212,8 +211,9 @@ namespace RazorSharp.Memory
 			// Managed pointers point to the MethodTable* in the GC heap
 			alloc.WriteAny(methodTable, 2);
 
-
-			return alloc.Cast<T>();
+			var valuePtr = alloc.Cast<T>();
+			
+			return valuePtr;
 		}
 
 		/// <summary>

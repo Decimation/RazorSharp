@@ -68,11 +68,7 @@ namespace RazorSharp
 			Assembly = Assembly.Load(NAME);
 		}
 
-		internal static void Cache()
-		{
-			Symload.LoadAll(Assembly);
-		}
-
+		
 		internal static void ContextLog(string prop, Action fn)
 		{
 			using (LogContext.PushProperty(CONTEXT_PROP, prop)) {

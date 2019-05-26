@@ -11,7 +11,7 @@ using RazorSharp.CoreClr.Structures.Enums;
 
 namespace RazorSharp.CoreClr
 {
-	public static class Offsets
+	public static unsafe class Offsets
 	{
 		/// <summary>
 		///     The offset, in bytes, of an array's actual <see cref="MethodTable" /> pointer, relative to the
@@ -44,6 +44,8 @@ namespace RazorSharp.CoreClr
 		/// Size of the length field and first character
 		/// </summary>
 		public static readonly int StringStubSize = sizeof(char) + sizeof(int);
+
+		public static readonly int ObjectOverhead = sizeof(ObjHeader) + sizeof(MethodTable*);
 
 		/// <summary>
 		///     Heap offset to the first field.

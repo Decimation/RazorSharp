@@ -45,6 +45,33 @@ namespace RazorSharp.CoreClr
 			return Clr.ClrSymbols.GetFunction<TDelegate>(name);
 		}
 
+
+		public static T StackAllocObject<T>(Pointer<byte> stack, params object[] args)
+		{
+			var methodTable = typeof(T).GetMethodTable();
+
+			var objPtr = stack.Address + Offsets.ObjectOverhead;
+			
+			// Write the pointer in the extra allocated bytes,
+			// pointing to the MethodTable* (skip over the extra pointer and the ObjHeader)
+			stack.WriteAny(objPtr);
+
+			// Write the ObjHeader
+			// (this'll already be zeroed, but this is just self-documentation)
+			// +4 int (sync block)
+			// +4 int (padding, x64)
+			stack.WriteAny(0L, 1);
+
+			// Write the MethodTable
+			// Managed pointers point to the MethodTable* in the GC heap
+			stack.WriteAny(methodTable, 2);
+			
+			var cpy = objPtr;
+			var value = CSUnsafe.Read<T>(&cpy);
+			
+			return value;
+		}
+		
 		public static T AllocObject<T>(params object[] args)
 		{
 			var value = GlobalHeap.AllocateObject<T>();

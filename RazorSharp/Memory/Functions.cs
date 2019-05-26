@@ -107,6 +107,13 @@ namespace RazorSharp.Memory
 
 		private static readonly ResetDelegate Reset;
 
+		public static void ResetFunction(MethodInfo mi)
+		{
+			// We can't use GetMethodDesc here
+			var md = (MethodDesc*) mi.MethodHandle.Value;
+			Reset(md);
+		}
+		
 		/// <summary>
 		///     <remarks>
 		///         Equal to <see cref="MethodDesc.SetEntryPoint" />, but this is implemented via a <see cref="Delegate" />
@@ -114,6 +121,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		public static void SetEntryPoint(MethodInfo mi, Pointer<byte> pCode)
 		{
+			// We can't use GetMethodDesc here
 			var md = (MethodDesc*) mi.MethodHandle.Value;
 			
 			// This will be the first function to fail if clr.pdb and clr.dll are mismatched

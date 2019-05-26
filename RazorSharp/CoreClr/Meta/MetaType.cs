@@ -461,7 +461,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		#endregion
 
-		internal Pointer<MethodTable> Value { get; }
+		private Pointer<MethodTable> Value { get; }
 
 		#endregion
 	}
