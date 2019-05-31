@@ -76,7 +76,7 @@ namespace RazorSharp.Memory
 
 			Pointer<byte> addr;
 
-			if (RuntimeInfo.IsStruct<T>()) {
+			if (RtInfo.IsStruct<T>()) {
 				addr = AddressOf(ref value).Cast();
 			}
 			else {
@@ -105,7 +105,7 @@ namespace RazorSharp.Memory
 
 		public static T DeepCopy<T>(T value) where T : class
 		{
-			Conditions.Require(!RuntimeInfo.IsArrayOrString(value), nameof(value));
+			Conditions.Require(!RtInfo.IsArrayOrString(value), nameof(value));
 
 			lock (value) {
 				var valueCpy = GlobalHeap.AllocateObject<T>(0);
@@ -167,7 +167,7 @@ namespace RazorSharp.Memory
 		{
 			var addr = AddressOf(ref value);
 
-			if (RuntimeInfo.IsStruct(value)) {
+			if (RtInfo.IsStruct(value)) {
 				return addr.Cast();
 			}
 
@@ -176,7 +176,7 @@ namespace RazorSharp.Memory
 
 		public static bool TryGetAddressOfHeap<T>(T value, OffsetOptions options, out Pointer<byte> ptr)
 		{
-			if (RuntimeInfo.IsStruct(value)) {
+			if (RtInfo.IsStruct(value)) {
 				ptr = null;
 				return false;
 			}
@@ -223,13 +223,13 @@ namespace RazorSharp.Memory
 			switch (offset) {
 				case OffsetOptions.STRING_DATA:
 
-					Conditions.Require(RuntimeInfo.IsString(value));
+					Conditions.Require(RtInfo.IsString(value));
 					string s = value as string;
 					return heapPtr + Offsets.OffsetToStringData;
 
 				case OffsetOptions.ARRAY_DATA:
 
-					Conditions.Require(RuntimeInfo.IsArray(value));
+					Conditions.Require(RtInfo.IsArray(value));
 					return heapPtr + Offsets.OffsetToArrayData;
 
 				case OffsetOptions.FIELDS:
@@ -291,7 +291,7 @@ namespace RazorSharp.Memory
 			var eeClass = mt.Reference.EEClass;
 
 			if (options == SizeOfOptions.Auto) {
-				if (RuntimeInfo.IsStruct<T>()) {
+				if (RtInfo.IsStruct<T>()) {
 					// Break into the next switch branch which will go to case Intrinsic
 					options = SizeOfOptions.Intrinsic;
 				}
@@ -302,7 +302,7 @@ namespace RazorSharp.Memory
 			}
 
 			// If a value was supplied
-			if (!RuntimeInfo.IsNullOrDefault(value)) {
+			if (!RtInfo.IsNullOrDefault(value)) {
 				mt = value.GetType().GetMethodTable();
 
 				switch (options) {
@@ -326,7 +326,7 @@ namespace RazorSharp.Memory
 				case SizeOfOptions.Intrinsic:  return CSUnsafe.SizeOf<T>();
 				case SizeOfOptions.BaseFields: return mt.Reference.NumInstanceFieldBytes;
 				case SizeOfOptions.BaseInstance:
-					Conditions.Require(!RuntimeInfo.IsStruct<T>(), nameof(value));
+					Conditions.Require(!RtInfo.IsStruct<T>(), nameof(value));
 					return mt.Reference.BaseSize;
 				case SizeOfOptions.Heap:
 					throw new ArgumentException($"A value must be supplied to use {SizeOfOptions.Heap}");
@@ -387,9 +387,9 @@ namespace RazorSharp.Memory
 		private static int HeapSizeInternal<T>(T value)
 		{
 			// Sanity check
-			Conditions.Require(!RuntimeInfo.IsStruct<T>());
+			Conditions.Require(!RtInfo.IsStruct<T>());
 
-			if (RuntimeInfo.IsNullOrDefault(value)) {
+			if (RtInfo.IsNullOrDefault(value)) {
 				return Constants.INVALID_VALUE;
 			}
 
@@ -429,7 +429,7 @@ namespace RazorSharp.Memory
 			 *
 			 */
 
-			if (RuntimeInfo.IsArray(value)) {
+			if (RtInfo.IsArray(value)) {
 				var arr = value as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
@@ -437,13 +437,13 @@ namespace RazorSharp.Memory
 				length = arr.Length;
 
 				// Sanity check
-				Conditions.Assert(!RuntimeInfo.IsString(value));
+				Conditions.Assert(!RtInfo.IsString(value));
 			}
-			else if (RuntimeInfo.IsString(value)) {
+			else if (RtInfo.IsString(value)) {
 				string str = value as string;
 
 				// Sanity check
-				Conditions.Assert(!RuntimeInfo.IsArray(value));
+				Conditions.Assert(!RtInfo.IsArray(value));
 				Conditions.NotNull(str, nameof(str));
 
 				length = str.Length;
@@ -463,7 +463,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		public static int SizeOfData<T>(T value)
 		{
-			if (RuntimeInfo.IsStruct(value)) {
+			if (RtInfo.IsStruct(value)) {
 				return SizeOf<T>();
 			}
 			else {
@@ -479,7 +479,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		public static int BaseSizeOfData(Type t)
 		{
-			if (RuntimeInfo.IsStruct(t)) {
+			if (RtInfo.IsStruct(t)) {
 				return (int) ReflectionUtil.InvokeGenericMethod(typeof(Unsafe), nameof(SizeOf), null,new[] {t});
 			}
 			else {

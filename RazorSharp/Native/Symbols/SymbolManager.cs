@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32;
-using SimpleSharp;
 using SimpleSharp.Diagnostics;
 
 // ReSharper disable ReturnTypeCanBeEnumerable.Global
@@ -16,54 +14,60 @@ namespace RazorSharp.Native.Symbols
 	/// <summary>
 	/// Provides access to symbols in a specified image
 	/// </summary>
-	internal static unsafe class SymbolManager /*: IReleasable */
+	internal sealed unsafe class SymbolManager : Releasable
 	{
-		private static IntPtr       _proc;
-		private static ulong        _modBase;
-		private static string       _singleNameBuffer;
-		private static List<Symbol> _symBuffer;
+		private IntPtr       m_proc;
+		private ulong        m_modBase;
+		private string       m_singleNameBuffer;
+		private List<Symbol> m_symBuffer;
+		private FileInfo     m_pdb;
 
-		/// <summary>
-		/// Current image
-		/// </summary>
-		private static FileInfo _pdb;
-
-		internal static bool IsSetup { get; private set; }
-
-
-		internal static bool IsImageLoaded {
+		internal bool IsImageLoaded {
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get => _modBase != default;
+			get => m_modBase != default;
 		}
 
-		internal static FileInfo CurrentImage {
-			get => _pdb;
+		internal FileInfo CurrentImage {
+			get => m_pdb;
 			set {
-				if (_pdb != value) {
-					_pdb = value;
+				if (m_pdb != value) {
+					m_pdb = value;
 					Load();
 				}
 			}
 		}
 
-		internal static void Close()
-		{
-			Conditions.Require(IsSetup, nameof(IsSetup));
-			UnloadModule();
-			NativeHelp.Call(DbgHelp.SymCleanup(_proc), nameof(DbgHelp.SymCleanup));
+		#region Singleton
 
-			_proc    = IntPtr.Zero;
-			_modBase = 0;
-			_pdb     = null;
+		private SymbolManager() { }
+
+		/// <summary>
+		/// Gets an instance of <see cref="SymbolManager"/>
+		/// </summary>
+		public static SymbolManager Value { get; private set; } = new SymbolManager();
+
+		#endregion
+
+		public override void Close()
+		{
+			UnloadModule();
+			NativeHelp.Call(DbgHelp.SymCleanup(m_proc), nameof(DbgHelp.SymCleanup));
+
+			m_proc    = IntPtr.Zero;
+			m_modBase = 0;
+			m_pdb     = null;
 
 			ClearBuffer();
 
-			IsSetup = false;
+			// Delete instance
+			Value = null;
+
+			base.Close();
 		}
 
-		internal static void Setup()
+		public override void Setup()
 		{
-			_proc = Kernel32.GetCurrentProcess();
+			m_proc = Kernel32.GetCurrentProcess();
 
 			uint options = DbgHelp.SymGetOptions();
 
@@ -76,22 +80,22 @@ namespace RazorSharp.Native.Symbols
 			DbgHelp.SymSetOptions(options);
 
 			// Initialize DbgHelp and load symbols for all modules of the current process 
-			bool symInit = DbgHelp.SymInitialize(_proc, null, false);
+			bool symInit = DbgHelp.SymInitialize(m_proc, null, false);
 
 			NativeHelp.Call(symInit, nameof(DbgHelp.SymInitialize));
 
-			IsSetup = true;
+			base.Setup();
 		}
 
-		private static void UnloadModule()
+		private void UnloadModule()
 		{
 			if (IsImageLoaded) {
-				Global.Log.Verbose("Unloading image {Img}", _pdb.Name);
-				NativeHelp.Call(DbgHelp.SymUnloadModule64(_proc, _modBase), nameof(DbgHelp.SymUnloadModule64));
+				Global.Log.Verbose("Unloading image {Img}", m_pdb.Name);
+				NativeHelp.Call(DbgHelp.SymUnloadModule64(m_proc, m_modBase), nameof(DbgHelp.SymUnloadModule64));
 			}
 		}
 
-		private static void CheckModule()
+		private void CheckModule()
 		{
 			if (!IsImageLoaded) {
 				string msg =
@@ -101,12 +105,11 @@ namespace RazorSharp.Native.Symbols
 			}
 		}
 
-
-		private static void Load()
+		private void Load()
 		{
-			string img = _pdb.FullName;
+			string img = m_pdb.FullName;
 
-			Global.Log.Verbose("Loading image {Img}", _pdb.Name);
+			Global.Log.Verbose("Loading image {Img}", m_pdb.Name);
 
 			UnloadModule();
 			Conditions.Require(IsSetup, nameof(IsSetup));
@@ -117,8 +120,8 @@ namespace RazorSharp.Native.Symbols
 			bool getFile = SymbolUtil.GetFileParams(img, ref baseAddr, ref fileSize);
 			NativeHelp.Call(getFile);
 
-			_modBase = DbgHelp.SymLoadModule64(
-				_proc,          // Process handle of the current process
+			m_modBase = DbgHelp.SymLoadModule64(
+				m_proc,         // Process handle of the current process
 				IntPtr.Zero,    // Handle to the module's image file (not needed)
 				img,            // Path/name of the file
 				null,           // User-defined short name of the module (it can be NULL)
@@ -129,25 +132,25 @@ namespace RazorSharp.Native.Symbols
 			CheckModule();
 		}
 
-		internal static long[] GetSymOffsets(string[] names)
+		internal long[] GetSymOffsets(string[] names)
 		{
 			return GetSymbols(names).Select(x => x.Offset).ToArray();
 		}
 
-		internal static long GetSymOffset(string name)
+		internal long GetSymOffset(string name)
 		{
 			return GetSymbol(name).Offset;
 		}
 
-		internal static Symbol[] GetSymbols()
+		internal Symbol[] GetSymbols()
 		{
 			CheckModule();
 
-			_symBuffer = new List<Symbol>();
+			m_symBuffer = new List<Symbol>();
 
 			bool symEnumSuccess = DbgHelp.SymEnumSymbols(
-				_proc,              // Process handle of the current process
-				_modBase,           // Base address of the module
+				m_proc,             // Process handle of the current process
+				m_modBase,          // Base address of the module
 				null,               // Mask (NULL -> all symbols)
 				CollectSymCallback, // The callback function
 				IntPtr.Zero         // A used-defined context can be passed here, if necessary
@@ -156,13 +159,13 @@ namespace RazorSharp.Native.Symbols
 			NativeHelp.Call(symEnumSuccess, nameof(DbgHelp.SymEnumSymbols));
 
 
-			Symbol[] cpy = _symBuffer.ToArray();
+			Symbol[] cpy = m_symBuffer.ToArray();
 			ClearBuffer();
 
 			return cpy;
 		}
 
-		internal static Symbol[] GetSymbols(string[] names)
+		internal Symbol[] GetSymbols(string[] names)
 		{
 			CheckModule();
 
@@ -176,7 +179,7 @@ namespace RazorSharp.Native.Symbols
 		}
 
 		// note: doesn't check module
-		internal static Symbol GetSymbol(string name)
+		internal Symbol GetSymbol(string name)
 		{
 			//CheckModule();
 
@@ -186,7 +189,7 @@ namespace RazorSharp.Native.Symbols
 			buffer.Reference.SizeOfStruct = (uint) SymbolInfo.SIZE;
 			buffer.Reference.MaxNameLen   = DbgHelp.MAX_SYM_NAME;
 
-			if (DbgHelp.SymFromName(_proc, name, buffer.Address)) {
+			if (DbgHelp.SymFromName(m_proc, name, buffer.Address)) {
 				fixed (sbyte* firstChar = &buffer.Reference.Name) {
 					var symName = NativeHelp.GetStringAlt(firstChar, (int) buffer.Reference.NameLen);
 					return new Symbol(buffer.ToPointer<SymbolInfo>(), symName);
@@ -196,25 +199,25 @@ namespace RazorSharp.Native.Symbols
 			throw new Exception(String.Format("Symbol \"{0}\" not found", name));
 		}
 
-		private static void ClearBuffer()
+		private void ClearBuffer()
 		{
-			_symBuffer?.Clear();
+			m_symBuffer?.Clear();
 
-			_singleNameBuffer = null;
-			_symBuffer        = null;
+			m_singleNameBuffer = null;
+			m_symBuffer        = null;
 //			_nameBuffer       = null;
 		}
 
-		internal static Symbol[] GetSymbolsContainingName(string name)
+		internal Symbol[] GetSymbolsContainingName(string name)
 		{
 			CheckModule();
 
-			_symBuffer        = new List<Symbol>();
-			_singleNameBuffer = name;
+			m_symBuffer        = new List<Symbol>();
+			m_singleNameBuffer = name;
 
 			bool symEnumSuccess = DbgHelp.SymEnumSymbols(
-				_proc,                   // Process handle of the current process
-				_modBase,                // Base address of the module
+				m_proc,                  // Process handle of the current process
+				m_modBase,               // Base address of the module
 				null,                    // Mask (NULL -> all symbols)
 				SymNameContainsCallback, // The callback function
 				IntPtr.Zero              // A used-defined context can be passed here, if necessary
@@ -223,7 +226,7 @@ namespace RazorSharp.Native.Symbols
 			NativeHelp.Call(symEnumSuccess, nameof(DbgHelp.SymEnumSymbols));
 
 
-			Symbol[] cpy = _symBuffer.ToArray();
+			Symbol[] cpy = m_symBuffer.ToArray();
 
 			ClearBuffer();
 
@@ -232,23 +235,23 @@ namespace RazorSharp.Native.Symbols
 
 		#region Callbacks
 
-		private static bool SymNameContainsCallback(IntPtr sym, uint symSize, IntPtr userCtx)
+		private bool SymNameContainsCallback(IntPtr sym, uint symSize, IntPtr userCtx)
 		{
 			var    pSym    = (SymbolInfo*) sym;
 			string symName = NativeHelp.GetString(&pSym->Name, pSym->NameLen);
 
-			if (symName.Contains(_singleNameBuffer)) {
-				_symBuffer.Add(new Symbol(pSym));
+			if (symName.Contains(m_singleNameBuffer)) {
+				m_symBuffer.Add(new Symbol(pSym));
 			}
 
 			return true;
 		}
 
-		private static bool CollectSymCallback(IntPtr sym, uint symSize, IntPtr userCtx)
+		private bool CollectSymCallback(IntPtr sym, uint symSize, IntPtr userCtx)
 		{
 			var pSym = (SymbolInfo*) sym;
 
-			_symBuffer.Add(new Symbol(pSym));
+			m_symBuffer.Add(new Symbol(pSym));
 
 			return true;
 		}

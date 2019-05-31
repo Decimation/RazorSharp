@@ -30,16 +30,16 @@ namespace RazorSharp
 	///         <listheader>Implicit inheritance:</listheader>
 	///         <item>
 	///             <description>
-	///                 <see cref="IReleasable" />
+	///                 <see cref="Releasable" />
 	///             </description>
 	///         </item>
 	///     </list>
 	/// </summary>
-	internal static class Global /*: IReleasable */
+	internal static class Global /*: Releasable */
 	{
-		internal const string CONTEXT_PROP = "Context";
+		#region Logger
 
-		internal const string NAME = "RazorSharp";
+		internal const string CONTEXT_PROP = "Context";
 
 		private const string OUTPUT_TEMPLATE =
 			"[{Timestamp:HH:mm:ss} {Level:u3}] [{Context}] {Message:lj}{NewLine}{Exception}";
@@ -49,6 +49,13 @@ namespace RazorSharp
 
 		internal static readonly ILogger Log;
 
+		#endregion
+
+		/// <summary>
+		/// Name of this module.
+		/// </summary>
+		internal const string NAME = "RazorSharp";
+		
 		internal static readonly Assembly Assembly;
 
 		internal static bool IsSetup { get; private set; }
@@ -77,7 +84,7 @@ namespace RazorSharp
 			Assembly = Assembly.Load(NAME);
 		}
 
-		
+
 		internal static void ContextLog(string prop, Action fn)
 		{
 			using (LogContext.PushProperty(CONTEXT_PROP, prop)) {
@@ -105,7 +112,7 @@ namespace RazorSharp
 			 * Other versions will probably work but we're just making sure
 			 * todo - determine compatibility
 			 */
-			Conditions.Require(Environment.Version == Clr.ClrVersion);
+			Conditions.Require(Environment.Version == Clr.Value.ClrVersion);
 
 			Conditions.Require(!GCSettings.IsServerGC);
 
@@ -140,7 +147,7 @@ namespace RazorSharp
 			if (Log is Logger logger) {
 				logger.Dispose();
 			}
-			
+
 			IsSetup = false;
 		}
 	}

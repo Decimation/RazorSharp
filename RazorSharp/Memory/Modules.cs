@@ -49,7 +49,7 @@ namespace RazorSharp.Memory
 			//var ptr = ProcessApi.LoadLibrary(fileName);
 			//return CurrentNativeModules.First(m => m.FileName == fileName);
 			var ptr = ProcessApi.LoadLibrary(fileName);
-			
+
 			foreach (ProcessModule m in CurrentModules) {
 				if (m.FileName == fileName)
 					return m;
@@ -61,8 +61,8 @@ namespace RazorSharp.Memory
 		public static ProcessModule GetModule(string name)
 		{
 			// todo: I shouldn't have to do this
-			if (name == Clr.CLR_DLL_SHORT && Clr.IsSetup) {
-				return Clr.ClrModule;
+			if (ModuleInitializer.IsSetup && Clr.Value.IsSetup && name == Clr.CLR_DLL_SHORT) {
+				return Clr.Value.ClrModule;
 			}
 
 			foreach (ProcessModule m in CurrentModules) {
@@ -89,13 +89,13 @@ namespace RazorSharp.Memory
 		public static Pointer<byte> GetBaseAddress(string name)
 		{
 			if (name == Clr.CLR_DLL_SHORT) {
-				return Clr.ClrModule.BaseAddress;
+				return Clr.Value.ClrModule.BaseAddress;
 			}
 
 			var mod = GetModule(name);
 
 			Pointer<byte> baseAddr = mod?.BaseAddress ?? IntPtr.Zero;
-			
+
 
 //			Global.Log.Debug("Base addr for {Name} {Addr}", name, Hex.ToHex(baseAddr));
 
@@ -105,11 +105,11 @@ namespace RazorSharp.Memory
 		private static Pointer<byte>[] GetAddressesInternal(Pointer<byte> baseAddr, long[] offset)
 		{
 			var rg = new Pointer<byte>[offset.Length];
-			
+
 			for (int i = 0; i < rg.Length; i++) {
 				rg[i] = baseAddr + offset[i];
 			}
-			
+
 			return rg;
 		}
 

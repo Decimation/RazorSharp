@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -23,9 +22,9 @@ using Unsafe = RazorSharp.Memory.Unsafe;
 namespace RazorSharp.Import
 {
 	/// <summary>
-	/// Provides operations for working with <see cref="SymImportAttribute"/>
-	/// <para></para>
-	/// <list type="bullet">
+	///     Provides operations for working with <see cref="SymImportAttribute" />
+	///     <para></para>
+	///     <list type="bullet">
 	///         <listheader>Implicit inheritance:</listheader>
 	///         <item>
 	///             <description>
@@ -39,7 +38,7 @@ namespace RazorSharp.Import
 		private const string SCOPE_RESOLUTION_OPERATOR = "::";
 		private const string GET_PROPERTY_PREFIX       = "get_";
 		private const string GET_PROPERTY_REPLACEMENT  = "Get";
-		
+
 		private static readonly ISet<Type> BoundTypes = new HashSet<Type>();
 
 		/// <summary>
@@ -54,10 +53,10 @@ namespace RazorSharp.Import
 			foreach (var type in BoundTypes) {
 				Unload(type);
 			}
-			
+
 			BoundTypes.Clear();
 		}
-		
+
 		private static bool HasFlagFast(this SymImportOptions value, SymImportOptions flag)
 		{
 			return (value & flag) == flag;
@@ -113,12 +112,23 @@ namespace RazorSharp.Import
 			}
 		}
 
+
+		public static void Reload<T>(ref T value)
+		{
+			var type = value.GetType();
+			Conditions.Require(IsBound(type));
+
+			var mi = GetModuleInfo(type);
+
+			LoadComponents(ref value, type, mi);
+		}
+
 		#region Get ModuleInfo
 
 		private static ModuleInfo GetInfo(SymNamespaceAttribute attr, Pointer<byte> baseAddr)
 		{
-			if (attr.Image == Clr.ClrPdb.FullName && attr.Module == Clr.CLR_DLL_SHORT) {
-				return Clr.ClrSymbols;
+			if (attr.Image == Clr.Value.ClrPdb.FullName && attr.Module == Clr.CLR_DLL_SHORT) {
+				return Clr.Value.ClrSymbols;
 			}
 
 			return new ModuleInfo(new FileInfo(attr.Image), baseAddr);
@@ -153,12 +163,12 @@ namespace RazorSharp.Import
 		#region Load
 
 		/// <summary>
-		/// Base function for binding and loading symbol imports.
+		///     Base function for binding and loading symbol imports.
 		/// </summary>
 		public static T Load<T>(Type type, T value)
 		{
 			// todo: prevent binding during unloading
-			
+
 			if (IsBound(type)) {
 				return value;
 			}
@@ -170,7 +180,7 @@ namespace RazorSharp.Import
 
 			BoundTypes.Add(type);
 
-			Global.Log.Verbose("[{Status}] Done loading {Name}",  
+			Global.Log.Verbose("[{Status}] Done loading {Name}",
 			                   StringConstants.CHECK_MARK, type.Name);
 
 			return value;
@@ -192,11 +202,11 @@ namespace RazorSharp.Import
 			var symField  = (SymFieldAttribute) sym;
 			var fieldInfo = new MetaField((FieldInfo) field);
 
-			var addr = module.GetSymAddress(fullSym);
+			Pointer<byte> addr = module.GetSymAddress(fullSym);
 
 			if (addr.IsNull) {
 				string msg = String.Format("Could not find the address of the symbol \"{0}\"", fullSym);
-				throw new NullReferenceException(msg);
+				throw new SymImportException(msg);
 			}
 
 			// fieldInfo.DebugAddresses(ref value);
@@ -210,13 +220,13 @@ namespace RazorSharp.Import
 
 			switch (options) {
 				case SymFieldOptions.LoadDirect:
-					var size = symField.SizeConst;
+					int size = symField.SizeConst;
 
 					if (size == Constants.INVALID_VALUE) {
 						size = Unsafe.BaseSizeOfData(fieldType);
 					}
 
-					var mem = addr.CopyOutBytes(size);
+					byte[] mem = addr.CopyOutBytes(size);
 
 					loadedValue = Unsafe.LoadFrom(fieldType, mem);
 
@@ -224,7 +234,7 @@ namespace RazorSharp.Import
 				case SymFieldOptions.LoadAs:
 					var fieldLoadType = symField.LoadAs ?? fieldType;
 
-					if (RuntimeInfo.IsPointer(fieldLoadType)) {
+					if (RtInfo.IsPointer(fieldLoadType)) {
 						loadedValue = addr;
 					}
 					else {
@@ -233,9 +243,9 @@ namespace RazorSharp.Import
 
 					break;
 				case SymFieldOptions.LoadFast:
-					var fieldSize = fieldInfo.Size;
-					var memCpy    = addr.CopyOutBytes(fieldSize);
-					var fieldAddr = fieldInfo.GetValueAddress(ref value);
+					int           fieldSize = fieldInfo.Size;
+					byte[]        memCpy    = addr.CopyOutBytes(fieldSize);
+					Pointer<byte> fieldAddr = fieldInfo.GetValueAddress(ref value);
 					fieldAddr.WriteAll(memCpy);
 					return;
 				default:
@@ -245,7 +255,7 @@ namespace RazorSharp.Import
 
 			Pointer<byte> ptr = fieldInfo.GetValueAddress(ref value);
 
-			if (RuntimeInfo.IsPointer(fieldInfo.FieldType)) {
+			if (RtInfo.IsPointer(fieldInfo.FieldType)) {
 				ptr.WritePointer((Pointer<byte>) loadedValue);
 			}
 			else {
@@ -259,7 +269,7 @@ namespace RazorSharp.Import
 
 		private static void LoadComponents<T>(ref T value, Type type, ModuleInfo mi)
 		{
-			var (members, attributes) = type.GetAnnotated<SymImportAttribute>();
+			(MemberInfo[] members, SymImportAttribute[] attributes) = type.GetAnnotated<SymImportAttribute>();
 
 			int lim = attributes.Length;
 
@@ -345,16 +355,5 @@ namespace RazorSharp.Import
 		}
 
 		#endregion
-
-
-		public static void Reload<T>(ref T value)
-		{
-			var type = value.GetType();
-			Conditions.Require(IsBound(type));
-
-			var mi = GetModuleInfo(type);
-
-			LoadComponents(ref value, type, mi);
-		}
 	}
 }

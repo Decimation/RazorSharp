@@ -118,7 +118,7 @@ namespace RazorSharp.Memory.Pointers
 		///     Whether the value being pointed to is <c>default</c> or <c>null</c> bytes,
 		/// or this pointer is <c>null</c>.
 		/// </summary>
-		public bool IsNil => RuntimeInfo.IsNilFast(Reference);
+		public bool IsNil => RtInfo.IsNil(Reference);
 
 		#endregion
 
@@ -945,7 +945,7 @@ namespace RazorSharp.Memory.Pointers
 			}*/
 
 
-			if (!RuntimeInfo.IsStruct<T>()) {
+			if (!RtInfo.IsStruct<T>()) {
 				Pointer<byte> heapPtr = ReadPointer<byte>();
 				string        valueStr;
 

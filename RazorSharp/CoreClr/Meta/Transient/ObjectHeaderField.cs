@@ -15,7 +15,7 @@ namespace RazorSharp.CoreClr.Meta.Transient
 		
 		public override object GetValue(object value)
 		{
-			Conditions.Require(!RuntimeInfo.IsStruct(value), nameof(value));
+			Conditions.Require(!RtInfo.IsStruct(value), nameof(value));
 			return Runtime.ReadObjHeader(value);
 		}
 

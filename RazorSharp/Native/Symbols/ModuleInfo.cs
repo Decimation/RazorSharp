@@ -33,8 +33,8 @@ namespace RazorSharp.Native.Symbols
 
 		public Symbol GetSymbol(string name)
 		{
-			SymbolManager.CurrentImage = m_pdb;
-			return SymbolManager.GetSymbol(name);
+			SymbolManager.Value.CurrentImage = m_pdb;
+			return SymbolManager.Value.GetSymbol(name);
 		}
 
 		public Pointer<byte> GetSymAddress(string name)
@@ -50,8 +50,8 @@ namespace RazorSharp.Native.Symbols
 
 		public Pointer<byte>[] GetSymAddresses(string[] names)
 		{
-			SymbolManager.CurrentImage = m_pdb;
-			var offsets = SymbolManager.GetSymOffsets(names);
+			SymbolManager.Value.CurrentImage = m_pdb;
+			var offsets = SymbolManager.Value.GetSymOffsets(names);
 
 			var rg = new Pointer<byte>[offsets.Length];
 

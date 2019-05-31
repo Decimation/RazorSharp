@@ -8,15 +8,18 @@ using RazorSharp.Memory.Pointers;
 
 namespace RazorSharp.CoreClr
 {
-	public static class RuntimeInfo
+	public static class RtInfo
 	{
 		#region Is
 
 		#region Unmanaged
 
-		private class U<T> where T : unmanaged { }
+		/// <summary>
+		/// Dummy class for use with <see cref="RtInfo.IsUnmanaged{T}"/> and <see cref="IsUnmanaged"/>
+		/// </summary>
+		private sealed class U<T> where T : unmanaged { }
 
-		public static bool IsUnmanaged(this Type t)
+		public static bool IsUnmanaged(Type t)
 		{
 			try {
 				// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
@@ -28,7 +31,7 @@ namespace RazorSharp.CoreClr
 			}
 		}
 
-		public static bool IsUnmanaged<T>() => typeof(T).IsUnmanaged();
+		public static bool IsUnmanaged<T>() => IsUnmanaged(typeof(T));
 
 		#endregion
 
@@ -42,11 +45,12 @@ namespace RazorSharp.CoreClr
 		///         <para>
 		///             Note: If the type is an array or <c>string</c>, <see cref="MethodTable.IsBlittable" /> determines it
 		///             unblittable,
-		///             but <see cref="IsBlittable{T}" /> returns <c>true</c>, as <see cref="GCHandle" /> determines it blittable.
+		///             but <see cref="IsBlittable{T}" /> returns <c>true</c>, as <see cref="GCHandle" /> determines it
+		/// blittable.
 		///         </para>
 		///     </remarks>
 		/// </summary>
-		internal static bool IsBlittable<T>()
+		public static bool IsBlittable<T>()
 		{
 			// We'll say arrays and strings are blittable cause they're
 			// usable with GCHandle
@@ -69,7 +73,7 @@ namespace RazorSharp.CoreClr
 		///
 		/// <remarks>"Nil" is <c>null</c> or <c>default</c>.</remarks>
 		/// </summary>
-		public static bool IsNilFast<T>([CanBeNull, UsedImplicitly] T value)
+		public static bool IsNil<T>([CanBeNull, UsedImplicitly] T value)
 		{
 			// Fastest method for calculating whether a value is nil.
 			IL.Emit.Ldarg(nameof(value));
@@ -105,27 +109,39 @@ namespace RazorSharp.CoreClr
 
 		#region Struct
 
-		internal static bool IsStruct<T>()        => IsStruct(typeof(T));
-		internal static bool IsStruct<T>(T value) => IsStruct(value.GetType());
-		internal static bool IsStruct(Type value) => value.IsValueType;
+		public static bool IsStruct<T>()        => IsStruct(typeof(T));
+		public static bool IsStruct<T>(T value) => IsStruct(value.GetType());
+		public static bool IsStruct(Type value) => value.IsValueType;
+
+		#endregion
+
+		#region Class
+
+		public static bool IsClass<T>()        => !IsStruct<T>();
+		public static bool IsClass<T>(T value) => !IsStruct(value);
+		public static bool IsClass(Type value) => !IsStruct(value);
 
 		#endregion
 
 		#region Pointer
 
-		internal static bool IsPointer<T>()
+		public static bool IsPointer<T>()
 		{
 			return IsPointer(typeof(T));
 		}
 
-		internal static bool IsPointer<T>(T value)
+		public static bool IsPointer<T>(T value)
 		{
-			return !RuntimeInfo.IsNilFast(value) && IsPointer(value.GetType());
+			return !IsNil(value) && IsPointer(value.GetType());
 		}
 
-		internal static bool IsPointer(Type type)
+		/// <summary>
+		/// Determines whether <paramref name="type"/> is a native pointer, <see cref="IntPtr"/>, <see cref="UIntPtr"/>,
+		/// <see cref="Pointer{T}"/>, or <see cref="FastPointer{T}"/>
+		/// </summary>
+		public static bool IsPointer(Type type)
 		{
-			if (type.IsPointer || type == typeof(IntPtr)) {
+			if (type.IsPointer || type == typeof(IntPtr) || type == typeof(UIntPtr)) {
 				return true;
 			}
 
@@ -141,27 +157,32 @@ namespace RazorSharp.CoreClr
 
 		#region String
 
-		internal static bool IsString<T>()        => typeof(T) == typeof(string);
-		internal static bool IsString<T>(T value) => value is string;
+		public static bool IsString<T>()        => typeof(T) == typeof(string);
+		public static bool IsString<T>(T value) => value is string;
 
 		#endregion
 
+
 		#region Array
 
-		internal static bool IsArray<T>(T value) => value is Array;
-		internal static bool IsArray<T>()        => typeof(T).IsArray || typeof(T) == typeof(Array);
+		public static bool IsArray<T>(T value) => value is Array;
+		public static bool IsArray<T>()        => typeof(T).IsArray || typeof(T) == typeof(Array);
 
 		#endregion
 
 		#region Array or String
 
-		internal static bool IsArrayOrString<T>()        => RuntimeInfo.IsArray<T>() || RuntimeInfo.IsString<T>();
-		internal static bool IsArrayOrString<T>(T value) => RuntimeInfo.IsArray(value) || RuntimeInfo.IsString(value);
+		public static bool IsArrayOrString<T>()        => IsArray<T>() || IsString<T>();
+		public static bool IsArrayOrString<T>(T value) => IsArray(value) || IsString(value);
 
 		#endregion
 
 		#region Real
 
+		/// <summary>
+		/// Determines whether <paramref name="t"/> is a floating-point number.
+		/// </summary>
+		/// <returns><c>true</c> if <paramref name="t"/> is a floating-point number; <c>false</c> otherwise</returns>
 		public static bool IsReal(Type t)
 		{
 			switch (Type.GetTypeCode(t)) {
@@ -174,15 +195,23 @@ namespace RazorSharp.CoreClr
 			}
 		}
 
+		/// <summary>
+		/// Determines whether <typeparamref name="T"/> is a floating-point number.
+		/// </summary>
+		/// <returns><c>true</c> if <typeparamref name="T"/> is a floating-point number; <c>false</c> otherwise</returns>
 		public static bool IsReal<T>()
 		{
 			return IsReal(typeof(T));
 		}
-		
+
 		#endregion
 
 		#region Integer
 
+		/// <summary>
+		/// Determines whether <paramref name="t"/> is an integer
+		/// </summary>
+		/// <returns><c>true</c> if <paramref name="t"/> is an integer; <c>false</c> otherwise</returns>
 		public static bool IsInteger(Type t)
 		{
 			switch (Type.GetTypeCode(t)) {
@@ -200,6 +229,10 @@ namespace RazorSharp.CoreClr
 			}
 		}
 
+		/// <summary>
+		/// Determines whether <typeparamref name="T"/> is an integer
+		/// </summary>
+		/// <returns><c>true</c> if <typeparamref name="T"/> is an integer; <c>false</c> otherwise</returns>
 		public static bool IsInteger<T>()
 		{
 			return IsInteger(typeof(T));
@@ -209,11 +242,19 @@ namespace RazorSharp.CoreClr
 
 		#region Numeric
 
+		/// <summary>
+		/// Determines whether <paramref name="t"/> is an integer or a floating-point number.
+		/// </summary>
+		/// <returns><c>true</c> if <paramref name="t"/> is an integer or a floating-point number; <c>false</c> otherwise</returns>
 		public static bool IsNumeric(Type t)
 		{
 			return IsReal(t) || IsInteger(t);
 		}
 
+		/// <summary>
+		/// Determines whether <typeparamref name="T"/> is an integer or a floating-point number.
+		/// </summary>
+		/// <returns><c>true</c> if <typeparamref name="T"/> is an integer or a floating-point number; <c>false</c> otherwise</returns>
 		public static bool IsNumeric<T>()
 		{
 			return IsNumeric(typeof(T));

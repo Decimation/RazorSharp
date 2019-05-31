@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using InlineIL;
+using JetBrains.Annotations;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory.Pointers;
@@ -75,7 +76,7 @@ namespace RazorSharp.Memory
 			int length = 0;
 
 			T* pEnd = ptr.ToPointer<T>();
-			while (!RuntimeInfo.IsNilFast(*pEnd++)) { }
+			while (!RtInfo.IsNil(*pEnd++)) { }
 
 			length = (int) (pEnd - ptr.ToPointer<T>() - 1);
 
@@ -95,7 +96,8 @@ namespace RazorSharp.Memory
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T ReadIL<T>(void* source)
+		// ReSharper disable once InconsistentNaming
+		public static T ReadIL<T>([UsedImplicitly] void* source)
 		{
 			IL.Emit.Ldarg(nameof(source));
 			IL.Emit.Ldobj(typeof(T));
@@ -114,8 +116,7 @@ namespace RazorSharp.Memory
 		{
 			return p < hi && p >= lo;
 		}
-
-
+		
 		public static Pointer<byte> OffsetAs<TOrig, TAs>(Pointer<byte> p, int origElemCnt)
 		{
 			return p + OffsetCountAs<TOrig, TAs>(origElemCnt);
@@ -141,7 +142,7 @@ namespace RazorSharp.Memory
 
 		public static void Destroy<T>(ref T value)
 		{
-			if (!RuntimeInfo.IsStruct(value)) {
+			if (!RtInfo.IsStruct(value)) {
 				int           size = Unsafe.SizeOfData(value);
 				Pointer<byte> ptr  = Unsafe.AddressOfData(ref value);
 				ptr.ZeroBytes(size);
@@ -188,7 +189,7 @@ namespace RazorSharp.Memory
 		/// <returns>A double indirection pointer to the unmanaged instance.</returns>
 		public static Pointer<T> AllocInstance<T>() where T : class
 		{
-			Conditions.Require(!RuntimeInfo.IsArrayOrString<T>());
+			Conditions.Require(!RtInfo.IsArrayOrString<T>());
 
 			// Minimum size required for an instance
 			int baseSize = Unsafe.SizeOf<T>(SizeOfOptions.BaseInstance);

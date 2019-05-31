@@ -9,7 +9,7 @@ namespace RazorSharp.Import.Attributes
 	public class ClrSymNamespaceAttribute : SymNamespaceAttribute
 	{
 		public ClrSymNamespaceAttribute(string nameSpace) 
-			: base(Clr.ClrPdb.FullName, Clr.CLR_DLL_SHORT, nameSpace) { }
+			: base(Clr.Value.ClrPdb.FullName, Clr.CLR_DLL_SHORT, nameSpace) { }
 
 		public ClrSymNamespaceAttribute() : this(null) { }
 	}

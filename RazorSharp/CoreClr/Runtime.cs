@@ -42,7 +42,7 @@ namespace RazorSharp.CoreClr
 	{
 		public static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate
 		{
-			return Clr.ClrSymbols.GetFunction<TDelegate>(name);
+			return Clr.Value.ClrSymbols.GetFunction<TDelegate>(name);
 		}
 
 
@@ -216,7 +216,7 @@ namespace RazorSharp.CoreClr
 
 		internal static ArrayObject** GetArrayObject<T>(ref T t) where T : class
 		{
-			Conditions.Require(RuntimeInfo.IsArray(t));
+			Conditions.Require(RtInfo.IsArray(t));
 
 			return (ArrayObject**) Unsafe.AddressOf(ref t);
 		}
@@ -237,7 +237,7 @@ namespace RazorSharp.CoreClr
 
 		internal static TypeHandle ReadTypeHandle<T>(T value)
 		{
-			if (RuntimeInfo.IsStruct<T>(value))
+			if (RtInfo.IsStruct<T>(value))
 				return value.GetType().GetTypeHandle();
 
 
@@ -265,7 +265,7 @@ namespace RazorSharp.CoreClr
 		internal static Pointer<MethodTable> ReadMethodTable<T>(T value)
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
-			if (RuntimeInfo.IsStruct(value))
+			if (RtInfo.IsStruct(value))
 				return value.GetType().GetMethodTable();
 
 			Unsafe.TryGetAddressOfHeap(value, out Pointer<byte> ptr);

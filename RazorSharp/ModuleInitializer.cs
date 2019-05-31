@@ -12,55 +12,58 @@ using RazorSharp.Native.Symbols;
 namespace RazorSharp
 {
 	/// <summary>
-	/// Initializers shim. Every type that needs to be set up/closed has:
-	/// <list type="bullet">
-	/// <item>
-	/// <description><see cref="Setup"/> method</description>
-	/// </item>
-	/// <item>
-	/// <description><see cref="Close"/> method</description>
-	/// </item>
-	/// <item>
-	/// <description><see cref="IsSetup"/> property</description>
-	/// </item>
-	/// </list>
-	/// <list type="bullet">
+	///     Initializers shim. Every type that needs to be set up/closed has:
+	///     <list type="bullet">
+	///         <item>
+	///             <description><see cref="Setup" /> method</description>
+	///         </item>
+	///         <item>
+	///             <description><see cref="Close" /> method</description>
+	///         </item>
+	///         <item>
+	///             <description><see cref="IsSetup" /> property</description>
+	///         </item>
+	///     </list>
+	///     <list type="bullet">
 	///         <listheader>Implicit inheritance:</listheader>
 	///         <item>
 	///             <description>
-	///                 <see cref="IReleasable" />
+	///                 <see cref="Releasable" />
 	///             </description>
 	///         </item>
 	///     </list>
 	/// </summary>
-	internal static class ModuleInitializer /*: IReleasable */
+	internal static class ModuleInitializer /*: Releasable */
 	{
 		internal static bool IsSetup { get; private set; }
 
-		internal static void Setup()
+		private static void Setup()
 		{
 			Global.Log.Information("Loading {Module}", Global.NAME);
 
 			// Init code
-			SymbolManager.Setup();
+
+			Clr.Value.Setup();
+			SymbolManager.Value.Setup();
 			Global.Setup();
-			Clr.Setup();
 
 			IsSetup = true;
+
+			Global.Log.Debug("Loaded {Module}", Global.NAME);
 		}
 
-		internal static void Close()
+		private static void Close()
 		{
 			// SHUT IT DOWN
 			Global.Log.Information("Unloading {Module}", Global.NAME);
 
 
-			Clr.Close();
+			Clr.Value.Close();
 			Symload.UnloadAll(Global.Assembly);
 			Symload.Clear();
 			Global.Close();
-			SymbolManager.Close();
-			
+			SymbolManager.Value.Close();
+
 
 			IsSetup = false;
 		}

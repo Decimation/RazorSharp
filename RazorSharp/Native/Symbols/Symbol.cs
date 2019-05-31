@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using SimpleSharp.Extensions;
+
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
 #endregion
@@ -35,7 +36,7 @@ namespace RazorSharp.Native.Symbols
 			Address      = pSymInfo->Address;
 			Register     = pSymInfo->Register;
 			Scope        = pSymInfo->Scope;
-			Tag          = (SymTagEnum)pSymInfo->Tag;
+			Tag          = (SymTagEnum) pSymInfo->Tag;
 
 			int realSize = GetSymbolInfoSize(pSymInfo);
 			m_symStructMem = new byte[realSize];
@@ -46,20 +47,18 @@ namespace RazorSharp.Native.Symbols
 		internal Symbol(SymbolInfo* pSymInfo)
 			: this(pSymInfo, NativeHelp.GetString(&pSymInfo->Name, pSymInfo->NameLen)) { }
 
-		public string Name         { get; }
-		public uint   SizeOfStruct { get; }
-		public uint   TypeIndex    { get; }
-		public uint   Index        { get; }
-		public uint   Size         { get; }
-		public ulong  ModBase      { get; }
-		public ulong  Value        { get; }
-		public ulong  Address      { get; }
-		public uint   Register     { get; }
-		public uint   Scope        { get; }
-
-		public SymTagEnum Tag { get; }
-
-		public SymbolFlag Flags { get; }
+		public string     Name         { get; }
+		public uint       SizeOfStruct { get; }
+		public uint       TypeIndex    { get; }
+		public uint       Index        { get; }
+		public uint       Size         { get; }
+		public ulong      ModBase      { get; }
+		public ulong      Value        { get; }
+		public ulong      Address      { get; }
+		public uint       Register     { get; }
+		public uint       Scope        { get; }
+		public SymTagEnum Tag          { get; }
+		public SymbolFlag Flags        { get; }
 
 		public long Offset => (long) (Address - ModBase);
 

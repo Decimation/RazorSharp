@@ -147,7 +147,7 @@
     <Compile Include="CoreClr\Meta\Transient\PaddingField.cs" />
     <Compile Include="CoreClr\Meta\Transient\TransientField.cs" />
     <Compile Include="CoreClr\Offsets.cs" />
-    <Compile Include="CoreClr\RuntimeInfo.cs" />
+    <Compile Include="CoreClr\RtInfo.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClass.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClassFieldId.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClassLayoutInfo.cs" />
@@ -187,7 +187,6 @@
     <Compile Include="ILDump.cs" />
     <Compile Include="Import\SymImportException.cs" />
     <Compile Include="Import\Symload.cs" />
-    <Compile Include="IReleasable.cs" />
     <Compile Include="Memory\OffsetOptions.cs" />
     <Compile Include="Memory\Pointers\AllocPointer.cs" />
     <Compile Include="Memory\Pointers\FastPointer.cs" />
@@ -239,9 +238,9 @@
     <Compile Include="Native\Region.cs" />
     <Compile Include="Native\StandardHandles.cs" />
     <Compile Include="Native\Symbols\SymbolFlag.cs" />
-    <Compile Include="Native\Symbols\SymbolManager.cs" />
     <Compile Include="Native\Symbols\ModuleInfo.cs" />
     <Compile Include="Native\Symbols\Symbol.cs" />
+    <Compile Include="Native\Symbols\SymbolManager.cs" />
     <Compile Include="Native\Symbols\SymbolUtil.cs" />
     <Compile Include="Native\Symbols\SymbolInfo.cs" />
     <Compile Include="Native\Symbols\SymTagEnum.cs" />
@@ -271,6 +270,7 @@
     <Compile Include="CoreClr\Runtime.cs" />
     <Compile Include="Native\NativeModuleInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Releasable.cs" />
     <Compile Include="Utilities\Binary\Attributes\Bitfield.cs" />
     <Compile Include="Utilities\Binary\Attributes\BitfieldAttribute.cs" />
     <Compile Include="Utilities\Binary\Bits.cs" />

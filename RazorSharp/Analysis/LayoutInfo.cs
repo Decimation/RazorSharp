@@ -122,7 +122,7 @@ namespace RazorSharp.Analysis
 			// Make sure it's the same type
 			Conditions.Require(value.GetType().MetadataToken == m_type.RuntimeType.MetadataToken);
 
-			if (!RuntimeInfo.IsStruct(value)) {
+			if (!RtInfo.IsStruct(value)) {
 				m_heapSize = Unsafe.SizeOf(value, SizeOfOptions.Heap);
 			}
 
