@@ -147,6 +147,7 @@
     <Compile Include="CoreClr\Meta\Transient\PaddingField.cs" />
     <Compile Include="CoreClr\Meta\Transient\TransientField.cs" />
     <Compile Include="CoreClr\Offsets.cs" />
+    <Compile Include="CoreClr\RuntimeInfo.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClass.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClassFieldId.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClassLayoutInfo.cs" />
@@ -175,6 +176,7 @@
     <Compile Include="CoreClr\Structures\ILMethods\TinyILMethod.cs" />
     <Compile Include="CoreClr\Structures\TypeDesc.cs" />
     <Compile Include="CoreClr\Structures\TypeHandle.cs" />
+    <Compile Include="IAllocator.cs" />
     <Compile Include="Import\Attributes\ClrSymNamespaceAttribute.cs" />
     <Compile Include="Import\Attributes\SymCallAttribute.cs" />
     <Compile Include="Import\Attributes\SymFieldAttribute.cs" />
@@ -245,7 +247,6 @@
     <Compile Include="Native\Symbols\SymTagEnum.cs" />
     <Compile Include="Native\SystemInfo.cs" />
     <Compile Include="Memory\AllocHelper.cs" />
-    <Compile Include="Memory\Bits.cs" />
     <Compile Include="Memory\Mem.cs" />
     <Compile Include="Memory\Modules.cs" />
     <Compile Include="Memory\Segments.cs" />
@@ -270,9 +271,9 @@
     <Compile Include="CoreClr\Runtime.cs" />
     <Compile Include="Native\NativeModuleInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Statics.cs" />
-    <Compile Include="Utilities\Bitfield.cs" />
-    <Compile Include="Utilities\BitfieldAttribute.cs" />
+    <Compile Include="Utilities\Binary\Attributes\Bitfield.cs" />
+    <Compile Include="Utilities\Binary\Attributes\BitfieldAttribute.cs" />
+    <Compile Include="Utilities\Binary\Bits.cs" />
     <Compile Include="Utilities\Conversions.cs" />
     <Compile Include="Utilities\ConversionType.cs" />
     <Compile Include="Utilities\ReflectionUtil.cs" />

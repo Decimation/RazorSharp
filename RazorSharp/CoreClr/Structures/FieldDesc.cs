@@ -14,6 +14,8 @@ using RazorSharp.Import.Attributes;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
+using RazorSharp.Utilities.Binary;
+using RazorSharp.Utilities.Binary.Attributes;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 

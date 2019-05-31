@@ -25,6 +25,15 @@ namespace RazorSharp
 {
 	/// <summary>
 	///     The core of RazorSharp. Contains the logger and such.
+	/// <para></para>
+	/// <list type="bullet">
+	///         <listheader>Implicit inheritance:</listheader>
+	///         <item>
+	///             <description>
+	///                 <see cref="IReleasable" />
+	///             </description>
+	///         </item>
+	///     </list>
 	/// </summary>
 	internal static class Global /*: IReleasable */
 	{

@@ -107,10 +107,14 @@ namespace RazorSharp.Memory
 
 		private static readonly ResetDelegate Reset;
 
-		public static void ResetFunction(MethodInfo mi)
+		public static void ResetFunction(MethodInfo mi) => ResetFunction(mi, out _);
+
+		private static void ResetFunction(MethodInfo mi, out MethodDesc* md)
 		{
 			// We can't use GetMethodDesc here
-			var md = (MethodDesc*) mi.MethodHandle.Value;
+			md = (MethodDesc*) mi.MethodHandle.Value;
+			
+			// This will be the first function to fail if clr.pdb and clr.dll are mismatched
 			Reset(md);
 		}
 		
@@ -121,11 +125,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		public static void SetEntryPoint(MethodInfo mi, Pointer<byte> pCode)
 		{
-			// We can't use GetMethodDesc here
-			var md = (MethodDesc*) mi.MethodHandle.Value;
-			
-			// This will be the first function to fail if clr.pdb and clr.dll are mismatched
-			Reset(md);
+			ResetFunction(mi, out var md);
 
 			bool result = SetNativeCode(md, (ulong) pCode);
 			

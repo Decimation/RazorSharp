@@ -4,17 +4,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using InlineIL;
-using SimpleSharp.Diagnostics;
-using SimpleSharp.Extensions;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;
 using RazorSharp.Native.Win32;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Extensions;
 
 #endregion
 
@@ -35,8 +35,17 @@ namespace RazorSharp.Memory
 	///     Provides functions for interacting with memory.
 	///     <seealso cref="Unsafe" />
 	///     <seealso cref="CSUnsafe" />
+	///     <para></para>
+	///     <list type="bullet">
+	///         <listheader>Implicit inheritance:</listheader>
+	///         <item>
+	///             <description>
+	///                 <see cref="IAllocator" />
+	///             </description>
+	///         </item>
+	///     </list>
 	/// </summary>
-	public static unsafe class Mem
+	public static unsafe class Mem /*: IAllocator */
 	{
 		public static bool Is64Bit => IntPtr.Size == sizeof(long);
 
@@ -48,22 +57,16 @@ namespace RazorSharp.Memory
 			}
 
 			var info = new AddressInfo(ptr);
-			
-			return info.IsAllocated || info.IsInHeap || info.IsInModule || info.IsInPage || 
+
+			return info.IsAllocated || info.IsInHeap || info.IsInModule || info.IsInPage ||
 			       info.IsInSegment || info.IsOnStack || info.IsInUnmanagedHeap;
 		}
 
 		public static bool IsInUnmanagedHeap(Pointer<byte> ptr)
 		{
-			var heaps = HeapApi.GetHeapEntries();
-			
-			foreach (var heap in heaps) {
-				if (ptr == heap.lpData) {
-					return true;
-				}
-			}
+			ProcessHeapEntry[] heaps = HeapApi.GetHeapEntries();
 
-			return false;
+			return heaps.Any(heap => ptr == heap.lpData);
 		}
 
 
@@ -72,9 +75,9 @@ namespace RazorSharp.Memory
 			int length = 0;
 
 			T* pEnd = ptr.ToPointer<T>();
-			while (!Runtime.IsNilFast((*pEnd++))) { }
+			while (!RuntimeInfo.IsNilFast(*pEnd++)) { }
 
-			length = (int) ((pEnd - ptr.ToPointer<T>()) - 1);
+			length = (int) (pEnd - ptr.ToPointer<T>() - 1);
 
 			return length;
 		}
@@ -86,7 +89,7 @@ namespace RazorSharp.Memory
 			byte* pEnd = ptr.ToPointer<byte>();
 			while (*pEnd++ != '\0') { }
 
-			length = (int) ((pEnd - ptr.ToPointer<byte>()) - 1);
+			length = (int) (pEnd - ptr.ToPointer<byte>() - 1);
 
 			return length;
 		}
@@ -98,8 +101,7 @@ namespace RazorSharp.Memory
 			IL.Emit.Ldobj(typeof(T));
 			return IL.Return<T>();
 		}
-		
-		
+
 
 		/// <summary>
 		///     Checks whether an address is in range.
@@ -139,7 +141,7 @@ namespace RazorSharp.Memory
 
 		public static void Destroy<T>(ref T value)
 		{
-			if (!Runtime.IsStruct(value)) {
+			if (!RuntimeInfo.IsStruct(value)) {
 				int           size = Unsafe.SizeOfData(value);
 				Pointer<byte> ptr  = Unsafe.AddressOfData(ref value);
 				ptr.ZeroBytes(size);
@@ -186,8 +188,8 @@ namespace RazorSharp.Memory
 		/// <returns>A double indirection pointer to the unmanaged instance.</returns>
 		public static Pointer<T> AllocInstance<T>() where T : class
 		{
-			Conditions.Require(!Runtime.IsArrayOrString<T>());
-			
+			Conditions.Require(!RuntimeInfo.IsArrayOrString<T>());
+
 			// Minimum size required for an instance
 			int baseSize = Unsafe.SizeOf<T>(SizeOfOptions.BaseInstance);
 
@@ -211,8 +213,8 @@ namespace RazorSharp.Memory
 			// Managed pointers point to the MethodTable* in the GC heap
 			alloc.WriteAny(methodTable, 2);
 
-			var valuePtr = alloc.Cast<T>();
-			
+			Pointer<T> valuePtr = alloc.Cast<T>();
+
 			return valuePtr;
 		}
 

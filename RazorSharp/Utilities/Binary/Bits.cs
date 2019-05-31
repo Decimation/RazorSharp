@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 #endregion
 
-namespace RazorSharp.Memory
+namespace RazorSharp.Utilities.Binary
 {
 	public static class Bits
 	{

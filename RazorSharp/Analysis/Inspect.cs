@@ -51,7 +51,7 @@ namespace RazorSharp.Analysis
 
 		public static LayoutInfo Layout<T>(T value, InspectOptions options = DEFAULT_VALUE_PROVIDED)
 		{
-			if (Runtime.IsStruct(value) && options.HasFlagFast(InspectOptions.Addresses)) {
+			if (RuntimeInfo.IsStruct(value) && options.HasFlagFast(InspectOptions.Addresses)) {
 				throw new InvalidOperationException(
 					$"Use the ref-qualified method when using {InspectOptions.Addresses} with value types");
 			}

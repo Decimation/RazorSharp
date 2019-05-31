@@ -34,6 +34,7 @@ namespace RazorSharp
 		/// </summary>
 		internal static void DumpILToConsole(byte* ilCode, int len)
 		{
+			// todo: don't use literals here
 			int i, j, k;
 			for (i = 0; i < len; i++) {
 				Console.Write("IL_{0:X}: ", i);

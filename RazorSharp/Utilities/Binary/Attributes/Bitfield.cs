@@ -1,10 +1,8 @@
 using System;
 using System.Reflection;
-using RazorSharp.CoreClr.Meta;
-using RazorSharp.Memory;
 using SimpleSharp.Diagnostics;
 
-namespace RazorSharp.Utilities
+namespace RazorSharp.Utilities.Binary.Attributes
 {
 	public static class Bitfield
 	{

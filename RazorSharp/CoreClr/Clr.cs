@@ -17,6 +17,15 @@ namespace RazorSharp.CoreClr
 {
 	/// <summary>
 	///     Contains the resources for working with the CLR.
+	/// <para></para>
+	/// <list type="bullet">
+	///         <listheader>Implicit inheritance:</listheader>
+	///         <item>
+	///             <description>
+	///                 <see cref="IReleasable" />
+	///             </description>
+	///         </item>
+	///     </list>
 	/// </summary>
 	internal static class Clr /*: IReleasable */
 	{

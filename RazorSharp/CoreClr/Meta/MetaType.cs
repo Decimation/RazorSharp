@@ -180,7 +180,7 @@ namespace RazorSharp.CoreClr.Meta
 			return elementFields.ToArray();
 		}
 
-		public bool IsStruct => Runtime.IsStruct(RuntimeType);
+		public bool IsStruct => RuntimeInfo.IsStruct(RuntimeType);
 
 		internal static IReadableStructure GetMethodTableField() => new MethodTableField();
 

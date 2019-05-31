@@ -5,6 +5,7 @@ namespace RazorSharp
 {
 	/// <summary>
 	/// <list type="bullet">
+	/// <listheader>Inheriting types:</listheader>
 	/// <item>
 	/// <description><see cref="Global"/></description>
 	/// </item>
@@ -21,7 +22,7 @@ namespace RazorSharp
 	/// </summary>
 	internal interface IReleasable
 	{
-		bool IsSetup { get; set; }
+		bool IsSetup { get; /* private set; */ }
 		void Setup();
 		void Close();
 	}

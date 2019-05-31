@@ -46,12 +46,13 @@ namespace RazorSharp.CoreClr
 		}
 
 
+		// todo: WIP
 		public static T StackAllocObject<T>(Pointer<byte> stack, params object[] args)
 		{
 			var methodTable = typeof(T).GetMethodTable();
 
 			var objPtr = stack.Address + Offsets.ObjectOverhead;
-			
+
 			// Write the pointer in the extra allocated bytes,
 			// pointing to the MethodTable* (skip over the extra pointer and the ObjHeader)
 			stack.WriteAny(objPtr);
@@ -65,13 +66,13 @@ namespace RazorSharp.CoreClr
 			// Write the MethodTable
 			// Managed pointers point to the MethodTable* in the GC heap
 			stack.WriteAny(methodTable, 2);
-			
-			var cpy = objPtr;
+
+			var cpy   = objPtr;
 			var value = CSUnsafe.Read<T>(&cpy);
-			
+
 			return value;
 		}
-		
+
 		public static T AllocObject<T>(params object[] args)
 		{
 			var value = GlobalHeap.AllocateObject<T>();
@@ -79,159 +80,7 @@ namespace RazorSharp.CoreClr
 			return value;
 		}
 
-		#region Is
-
-		#region Unmanaged
-
-		private class U<T> where T : unmanaged { }
-
-		public static bool IsUnmanaged(this Type t)
-		{
-			try {
-				// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
-				typeof(U<>).MakeGenericType(t);
-				return true;
-			}
-			catch (Exception) {
-				return false;
-			}
-		}
-
-		public static bool IsUnmanaged<T>() => typeof(T).IsUnmanaged();
-
-		#endregion
-
-		public static bool IsBoxed<T>(in T value)
-		{
-			return (typeof(T).IsInterface || typeof(T) == typeof(object))
-			       && value != null && IsStruct(value);
-		}
-
-
-		#region Nil
-
-		/// <summary>
-		/// Whether the value of <paramref name="value"/> is <c>default</c> or <c>null</c> bytes,
-		/// or <paramref name="value"/> is <c>null</c>
-		///
-		/// <remarks>"Nil" is <c>null</c> or <c>default</c>.</remarks>
-		/// </summary>
-		public static bool IsNilFast<T>([CanBeNull, UsedImplicitly] T value)
-		{
-			// Fastest method for calculating whether a value is nil.
-			IL.Emit.Ldarg(nameof(value));
-			IL.Emit.Ldnull();
-			IL.Emit.Ceq();
-			IL.Emit.Ret();
-			return IL.Return<bool>();
-		}
-
-		internal static bool IsNullOrDefault<T>([CanBeNull] T value)
-		{
-			return EqualityComparer<T>.Default.Equals(value, default);
-		}
-
-		#endregion
-
-		#region Reference
-
-		public static bool IsReferenceOrContainsReferences<T>()
-		{
-			return IsReferenceOrContainsReferences(typeof(T));
-		}
-
-		public static bool IsReferenceOrContainsReferences(Type type)
-		{
-			// https://github.com/dotnet/coreclr/blob/master/src/vm/jitinterface.cpp#L7507
-			var mt = type.GetMethodTable();
-
-			return !type.IsValueType || mt.Reference.ContainsPointers;
-		}
-
-		#endregion
-
-		#region Struct
-
-		internal static bool IsStruct<T>() => IsStruct(typeof(T));
-
-		internal static bool IsStruct<T>(T value) => IsStruct(value.GetType());
-
-		internal static bool IsStruct(Type value) => value.IsValueType;
-
-		#endregion
-
-		#region Pointer
-
-		internal static bool IsPointer<T>()
-		{
-			return IsPointer(typeof(T));
-		}
-
-		internal static bool IsPointer<T>(T value)
-		{
-			return !IsNilFast(value) && IsPointer(value.GetType());
-		}
-
-		internal static bool IsPointer(Type type)
-		{
-			if (type.IsPointer || type == typeof(IntPtr)) {
-				return true;
-			}
-
-			if (type.IsConstructedGenericType) {
-				var genDef = type.GetGenericTypeDefinition();
-				return genDef == typeof(Pointer<>) || genDef == typeof(FastPointer<>);
-			}
-
-			return false;
-		}
-
-		#endregion
-
-		#region String
-
-		internal static bool IsString<T>() => typeof(T) == typeof(string);
-
-		internal static bool IsString<T>(T value) => value is string;
-
-		#endregion
-
-		#region Array
-
-		internal static bool IsArray<T>(T value) => value is Array;
-
-		internal static bool IsArray<T>() => typeof(T).IsArray || typeof(T) == typeof(Array);
-
-		#endregion
-
-		#region Array or String
-
-		internal static bool IsArrayOrString<T>() => IsArray<T>() || IsString<T>();
-
-		internal static bool IsArrayOrString<T>(T value) => IsArray(value) || IsString(value);
-
-		#endregion
-
-		/// <summary>
-		///     Determines whether a type is blittable; that is, they don't
-		///     require conversion between managed and unmanaged code.
-		///     <remarks>
-		///         <para>Returned from <see cref="MethodTable.IsBlittable" /></para>
-		///         <para>
-		///             Note: If the type is an array or <c>string</c>, <see cref="MethodTable.IsBlittable" /> determines it
-		///             unblittable,
-		///             but <see cref="IsBlittable{T}" /> returns <c>true</c>, as <see cref="GCHandle" /> determines it blittable.
-		///         </para>
-		///     </remarks>
-		/// </summary>
-		internal static bool IsBlittable<T>()
-		{
-			// We'll say arrays and strings are blittable cause they're
-			// usable with GCHandle
-			return IsArrayOrString<T>() || typeof(T).GetMethodTable().Reference.IsBlittable;
-		}
 		
-		#endregion
 
 		public static void Compile(Type t, string n) => Compile(t.GetAnyMethod(n));
 
@@ -249,9 +98,6 @@ namespace RazorSharp.CoreClr
 		{
 			return Unsafe.AddressOfHeap(value, OffsetOptions.HEADER).Cast<ObjHeader>();
 		}
-
-
-		
 
 
 		internal static TypeHandle GetHandle<T>(T value) where T : class
@@ -370,7 +216,7 @@ namespace RazorSharp.CoreClr
 
 		internal static ArrayObject** GetArrayObject<T>(ref T t) where T : class
 		{
-			Conditions.Require(IsArray(t));
+			Conditions.Require(RuntimeInfo.IsArray(t));
 
 			return (ArrayObject**) Unsafe.AddressOf(ref t);
 		}
@@ -391,7 +237,7 @@ namespace RazorSharp.CoreClr
 
 		internal static TypeHandle ReadTypeHandle<T>(T value)
 		{
-			if (IsStruct<T>(value))
+			if (RuntimeInfo.IsStruct<T>(value))
 				return value.GetType().GetTypeHandle();
 
 
@@ -419,7 +265,7 @@ namespace RazorSharp.CoreClr
 		internal static Pointer<MethodTable> ReadMethodTable<T>(T value)
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
-			if (IsStruct(value))
+			if (RuntimeInfo.IsStruct(value))
 				return value.GetType().GetMethodTable();
 
 			Unsafe.TryGetAddressOfHeap(value, out Pointer<byte> ptr);

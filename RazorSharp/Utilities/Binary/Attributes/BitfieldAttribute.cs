@@ -1,6 +1,6 @@
 using System;
 
-namespace RazorSharp.Utilities
+namespace RazorSharp.Utilities.Binary.Attributes
 {
 	[AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
 	public class BitfieldAttribute : Attribute

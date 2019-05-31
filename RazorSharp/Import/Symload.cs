@@ -24,18 +24,40 @@ namespace RazorSharp.Import
 {
 	/// <summary>
 	/// Provides operations for working with <see cref="SymImportAttribute"/>
+	/// <para></para>
+	/// <list type="bullet">
+	///         <listheader>Implicit inheritance:</listheader>
+	///         <item>
+	///             <description>
+	///                 <see cref="IAllocator" />
+	///             </description>
+	///         </item>
+	///     </list>
 	/// </summary>
-	public static class Symload
+	public static class Symload /*: IAllocator */
 	{
 		private const string SCOPE_RESOLUTION_OPERATOR = "::";
 		private const string GET_PROPERTY_PREFIX       = "get_";
 		private const string GET_PROPERTY_REPLACEMENT  = "Get";
 		
-
 		private static readonly ISet<Type> BoundTypes = new HashSet<Type>();
 
-		
+		/// <summary>
+		///     Counts the number of bound types
+		/// </summary>
+		public static int AllocCount => BoundTypes.Count;
 
+		public static bool IsMemoryInUse => AllocCount > 0;
+
+		public static void Clear()
+		{
+			foreach (var type in BoundTypes) {
+				Unload(type);
+			}
+			
+			BoundTypes.Clear();
+		}
+		
 		private static bool HasFlagFast(this SymImportOptions value, SymImportOptions flag)
 		{
 			return (value & flag) == flag;
@@ -116,7 +138,6 @@ namespace RazorSharp.Import
 			string shortName = nameSpaceAttr.ShortModuleName;
 
 			if (!Modules.IsLoaded(shortName)) {
-//				throw new Exception(String.Format("Module \"{0}\" is not loaded", nameSpaceAttr.Module));
 				Global.Log.Debug("Module {Name} is not loaded, loading", shortName);
 				var mod = Modules.LoadModule(nameSpaceAttr.Module);
 				baseAddr = mod.BaseAddress;
@@ -203,7 +224,7 @@ namespace RazorSharp.Import
 				case SymFieldOptions.LoadAs:
 					var fieldLoadType = symField.LoadAs ?? fieldType;
 
-					if (Runtime.IsPointer(fieldLoadType)) {
+					if (RuntimeInfo.IsPointer(fieldLoadType)) {
 						loadedValue = addr;
 					}
 					else {
@@ -224,7 +245,7 @@ namespace RazorSharp.Import
 
 			Pointer<byte> ptr = fieldInfo.GetValueAddress(ref value);
 
-			if (Runtime.IsPointer(fieldInfo.FieldType)) {
+			if (RuntimeInfo.IsPointer(fieldInfo.FieldType)) {
 				ptr.WritePointer((Pointer<byte>) loadedValue);
 			}
 			else {

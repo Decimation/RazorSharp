@@ -50,7 +50,6 @@ namespace Test
 	#region
 
 	using DWORD = UInt32;
-	using Ptr = Pointer<byte>;
 
 	#endregion
 
@@ -115,33 +114,9 @@ namespace Test
 			Console.WriteLine(layout);
 		}
 
-		private struct MyClass
-		{
-			public static readonly int VALUE = 32;
-		}
+		
 
-
-		struct Generic<T> : IFormattable
-		{
-			private void* m_value;
-
-
-			public int ReadInt32()
-			{
-				return 1;
-			}
-
-			public string ToString(string format, IFormatProvider formatProvider)
-			{
-				throw new NotImplementedException();
-			}
-		}
-
-		static int* glvalue()
-		{
-			int i = 0;
-			return &i;
-		}
+		
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -149,6 +124,8 @@ namespace Test
 			string sz = "foo";
 			Console.WriteLine(sz);
 			Console.WriteLine(typeof(string).GetMetaType());
+
+			int i = 0;
 		}
 	}
 }

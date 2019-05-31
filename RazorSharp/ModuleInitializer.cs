@@ -24,6 +24,14 @@ namespace RazorSharp
 	/// <description><see cref="IsSetup"/> property</description>
 	/// </item>
 	/// </list>
+	/// <list type="bullet">
+	///         <listheader>Implicit inheritance:</listheader>
+	///         <item>
+	///             <description>
+	///                 <see cref="IReleasable" />
+	///             </description>
+	///         </item>
+	///     </list>
 	/// </summary>
 	internal static class ModuleInitializer /*: IReleasable */
 	{
@@ -49,6 +57,7 @@ namespace RazorSharp
 
 			Clr.Close();
 			Symload.UnloadAll(Global.Assembly);
+			Symload.Clear();
 			Global.Close();
 			SymbolManager.Close();
 			

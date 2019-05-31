@@ -199,7 +199,7 @@ namespace RazorSharp.CoreClr.Structures.EE
 		/// <summary>
 		///     Abstracted to <see cref="MethodTable"/>
 		///     <remarks>
-		///         For use with <see cref="Runtime.IsBlittable{T}" />
+		///         For use with <see cref="RuntimeInfo.IsBlittable{T}" />
 		///     </remarks>
 		/// </summary>
 		internal bool IsBlittable => HasLayout && LayoutInfo.Reference.IsBlittable;

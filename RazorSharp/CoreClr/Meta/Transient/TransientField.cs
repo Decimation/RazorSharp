@@ -55,7 +55,7 @@ namespace RazorSharp.CoreClr.Meta.Transient
 
 		protected Pointer<byte> GetAddress<TInstance>(ref TInstance value, OffsetOptions options)
 		{
-			Conditions.Require(!Runtime.IsStruct(value), nameof(value));
+			Conditions.Require(!RuntimeInfo.IsStruct(value), nameof(value));
 			Unsafe.TryGetAddressOfHeap(value, options, out Pointer<byte> ptr);
 
 			return ptr;
