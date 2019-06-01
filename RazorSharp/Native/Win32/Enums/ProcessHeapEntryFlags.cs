@@ -1,6 +1,6 @@
 using System;
 
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Win32.Enums
 {
 	[Flags]
 	public enum ProcessHeapEntryFlags : ushort

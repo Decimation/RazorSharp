@@ -6,6 +6,7 @@ using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;
 using RazorSharp.Native.Images;
 using RazorSharp.Native.Win32;
+using RazorSharp.Native.Win32.Structures;
 
 #endregion
 

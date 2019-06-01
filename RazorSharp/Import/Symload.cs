@@ -6,6 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
+using RazorSharp.Components;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Import.Attributes;
@@ -234,12 +235,7 @@ namespace RazorSharp.Import
 				case SymFieldOptions.LoadAs:
 					var fieldLoadType = symField.LoadAs ?? fieldType;
 
-					if (RtInfo.IsPointer(fieldLoadType)) {
-						loadedValue = addr;
-					}
-					else {
-						loadedValue = addr.ReadAnyEx(fieldLoadType);
-					}
+					loadedValue = RtInfo.IsPointer(fieldLoadType) ? addr : addr.ReadAnyEx(fieldLoadType);
 
 					break;
 				case SymFieldOptions.LoadFast:
@@ -343,6 +339,8 @@ namespace RazorSharp.Import
 			}
 
 			BoundTypes.Remove(type);
+
+			Global.Log.Verbose("Unloaded {Name}", type.Name);
 		}
 
 		public static void Unload<T>(ref T value, bool unloadModule = false)

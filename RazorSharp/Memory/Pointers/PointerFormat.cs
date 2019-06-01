@@ -35,7 +35,7 @@ namespace RazorSharp.Memory.Pointers
 		///         <item>
 		///             <description>
 		///                 If the <see cref="Pointer{T}" />'s type is a number type, its value will be returned as well its
-		///                 value in <see cref="Hex.ToHex(long, ToStringOptions)" /> format.
+		///                 value in <see cref="Hex.ToHex(long, FormatOptions)" /> format.
 		///             </description>
 		///         </item>
 		///     </list>
@@ -45,7 +45,7 @@ namespace RazorSharp.Memory.Pointers
 		/// <summary>
 		///     <para>
 		///         Pointer (<see cref="P:RazorSharp.Memory.Pointers.Pointer`1.Address" />) in
-		///         <see cref="Hex.ToHex(IntPtr, ToStringOptions)" /> format
+		///         <see cref="Hex.ToHex(IntPtr, FormatOptions)" /> format
 		///     </para>
 		/// </summary>
 		public const string FORMAT_PTR = "P";
@@ -62,6 +62,8 @@ namespace RazorSharp.Memory.Pointers
 
 		internal const string VAL_FMT = "{0} ({1})";
 
+		internal const string CHAR_PTR = "Char*";
+		
 		public static string DefaultFormat { get; set; } = FORMAT_PTR;
 	}
 }

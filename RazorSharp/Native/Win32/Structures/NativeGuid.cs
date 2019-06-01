@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Win32.Structures
 {
 	[StructLayout(LayoutKind.Sequential)]
 	internal unsafe struct NativeGuid
@@ -20,9 +20,9 @@ namespace RazorSharp.Native
 		//		unsigned char  Data4[ 8 ];
 		//	} GUID;
 
-		public       ulong  Data1;
-		public       ushort Data2;
-		public       ushort Data3;
-		public fixed byte   Data4[sizeof(ulong)];
+		internal       ulong  Data1;
+		internal       ushort Data2;
+		internal       ushort Data3;
+		internal fixed byte   Data4[sizeof(ulong)];
 	}
 }

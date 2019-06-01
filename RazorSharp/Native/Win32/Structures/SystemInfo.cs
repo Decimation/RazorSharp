@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorSharp.Native.Win32.Enums;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 
@@ -9,7 +10,7 @@ using System.Runtime.InteropServices;
 
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Win32.Structures
 {
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct SystemInfo

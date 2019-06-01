@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Win32.Enums
 {
 	[Flags]
 	internal enum ConsoleOutputModes : uint

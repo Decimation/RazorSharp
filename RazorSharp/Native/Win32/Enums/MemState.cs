@@ -4,7 +4,7 @@ using System;
 
 #endregion
 
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Win32.Enums
 {
 	/// <summary>
 	///     <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-_memory_basic_information">

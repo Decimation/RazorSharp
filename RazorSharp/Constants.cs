@@ -1,6 +1,7 @@
 #region
 
 using System;
+using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory.Pointers;
@@ -13,7 +14,7 @@ using RazorSharp.Memory.Pointers;
 
 namespace RazorSharp
 {
-	internal static unsafe class Constants
+	internal static class Constants
 	{
 		/// <summary>
 		///     Common value representing an invalid value or a failure
@@ -30,7 +31,7 @@ namespace RazorSharp
 		///         </item>
 		///     </list>
 		/// </summary>
-		internal static readonly int MinObjectSize = 2 * IntPtr.Size + sizeof(ObjHeader);
+		internal static readonly int MinObjectSize = Offsets.ObjectOverhead + IntPtr.Size;
 
 		/// <summary>
 		/// KiB
@@ -180,6 +181,6 @@ namespace RazorSharp
 
 		internal static int TokenFromRid(int rid, CorTokenType tktype) => rid | (int) tktype;
 		
-		internal const int BITS_PER_DWORD = 32;
+		internal const int BITS_PER_DWORD = sizeof(int) * 8;
 	}
 }

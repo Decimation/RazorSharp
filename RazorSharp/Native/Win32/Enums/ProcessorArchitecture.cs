@@ -1,4 +1,4 @@
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Win32.Enums
 {
 	internal enum ProcessorArchitecture : ushort
 	{

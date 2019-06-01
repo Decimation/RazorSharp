@@ -5,6 +5,8 @@ using System.Diagnostics;
 using SimpleSharp.Diagnostics;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Native.Win32.Enums;
+using RazorSharp.Native.Win32.Structures;
 
 #endregion
 

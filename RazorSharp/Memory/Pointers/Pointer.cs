@@ -21,6 +21,7 @@ using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Native;
 using RazorSharp.Native.Win32;
+using RazorSharp.Native.Win32.Enums;
 using RazorSharp.Utilities;
 
 // ReSharper disable HeuristicUnreachableCode
@@ -559,6 +560,8 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Other methods
 
+		private bool IsCharPointer() => typeof(T) == typeof(char);
+
 		public Pointer<T> AddressOfIndex(int index) => OffsetFast(index);
 
 		public void Zero(int elemCnt)
@@ -902,7 +905,6 @@ namespace RazorSharp.Memory.Pointers
 			if (formatProvider == null)
 				formatProvider = CultureInfo.CurrentCulture;
 
-
 			switch (format.ToUpperInvariant()) {
 				case PointerFormat.FORMAT_INT:
 					return ToInt64().ToString();
@@ -918,10 +920,11 @@ namespace RazorSharp.Memory.Pointers
 						? Formatting.GenericName(typeof(T))
 						: typeof(T).Name;
 
-					string typeNameDisplay = typeof(T) == typeof(char) ? "Char*" : typeName;
+					string typeNameDisplay = IsCharPointer() ? PointerFormat.CHAR_PTR : typeName;
 
 					return String.Format("{0} @ {1}: {2}", typeNameDisplay, Hex.ToHex(Address),
-					                     thisStr.Contains('\n') ? '\n' + thisStr : thisStr);
+					                     thisStr.Contains(Environment.NewLine) ? Environment.NewLine + thisStr 
+						                     : thisStr);
 				default:
 					goto case PointerFormat.FORMAT_OBJ;
 			}
@@ -929,15 +932,17 @@ namespace RazorSharp.Memory.Pointers
 
 		public string ToStringSafe()
 		{
+			// todo: rewrite this
+			
 			if (IsNull)
 				return StringConstants.NULL_STR;
 
 
-			if (typeof(T).IsIntegerType())
+			if (RtInfo.IsInteger<T>())
 				return String.Format(PointerFormat.VAL_FMT, Reference, Hex.TryCreateHex(Reference));
 
 			/* Special support for C-string */
-			if (typeof(T) == typeof(char))
+			if (IsCharPointer())
 				return ReadString(StringTypes.UNI);
 
 			/*if (typeof(T) == typeof(sbyte)) {

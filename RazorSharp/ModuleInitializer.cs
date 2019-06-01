@@ -1,6 +1,7 @@
 #region
 
 using System;
+using RazorSharp.Components;
 using RazorSharp.CoreClr;
 using RazorSharp.Import;
 using RazorSharp.Native.Symbols;

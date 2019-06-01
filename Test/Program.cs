@@ -68,36 +68,7 @@ namespace Test
 
 		// todo: rewrite ToString methods
 
-		private static void Test()
-		{
-			var s = new Structure();
-
-			s.hello();
-
-			s = Symload.Load(s);
-			s.hello();
-
-			Pointer<byte> p = s.g_szStr;
-			Console.WriteLine("const char*: {0}", p.ReadCString());
-
-			Pointer<byte> p2 = s.g_szWStr;
-			Console.WriteLine("const wchar_t*: {0}", p2.ReadCString(StringTypes.UNI));
-
-			Pointer<byte> p3 = s.g_sz16Str;
-			Console.WriteLine("const char16_t*: {0}", p3.ReadCString(StringTypes.UNI));
-
-			Pointer<byte> p4 = s.g_sz32Str;
-			Console.WriteLine("const char32_t*: {0}", p4.ReadCString(StringTypes.CHAR32));
-
-			Symload.Reload(ref s);
-
-			Console.WriteLine(s.g_int32);
-			Symload.Unload(ref s);
-			Console.WriteLine(s.g_int32);
-
-
-			Console.WriteLine(Unsafe.SizeOf<int>());
-		}
+		
 
 		private static void Test<T>(T value)
 		{
@@ -114,10 +85,13 @@ namespace Test
 			Console.WriteLine(layout);
 		}
 
-		
 
+		[Pure]
+		public static int Hello()
+		{
+			return 1;
+		}
 		
-
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -126,6 +100,9 @@ namespace Test
 			Console.WriteLine(typeof(string).GetMetaType());
 
 			int i = 0;
+			Console.WriteLine(Constants.MinObjectSize);
+			Console.WriteLine(RtInfo.IsUnmanaged<int>());
+			Console.WriteLine(RtInfo.IsUnmanaged<string>());
 		}
 	}
 }

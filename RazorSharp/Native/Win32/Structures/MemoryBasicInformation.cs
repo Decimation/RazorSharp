@@ -2,9 +2,9 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorSharp.Native.Win32.Enums;
 using SimpleSharp;
 using SimpleSharp.Strings;
-using RazorSharp.Native.Win32;
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
 
@@ -15,7 +15,7 @@ using RazorSharp.Native.Win32;
 
 // ReSharper disable UnassignedReadonlyField
 
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Win32.Structures
 {
 	/// <summary>
 	///     Contains information about a range of pages in the virtual address space of a process.

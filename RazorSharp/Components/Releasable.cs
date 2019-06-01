@@ -2,7 +2,7 @@ using RazorSharp.CoreClr;
 using RazorSharp.Native.Symbols;
 using SimpleSharp.Diagnostics;
 
-namespace RazorSharp
+namespace RazorSharp.Components
 {
 	/// <summary>
 	///     <list type="bullet">

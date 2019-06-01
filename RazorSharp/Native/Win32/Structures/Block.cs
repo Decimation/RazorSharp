@@ -6,17 +6,12 @@ using System.Runtime.InteropServices;
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 // ReSharper disable BuiltInTypeReferenceStyle
 
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Win32.Structures
 {
-	using DWORD = UInt32;
-	using WORD = UInt16;
-
 	[StructLayout(LayoutKind.Sequential)]
-	internal struct Region
+	internal unsafe struct Block
 	{
-		public UInt32 dwCommittedSize;
-		public UInt32 dwUnCommittedSize;
-		public IntPtr lpFirstBlock;
-		public IntPtr lpLastBlock;
+		public       IntPtr hMem;
+		public fixed UInt32  dwReserved[3];
 	}
 }

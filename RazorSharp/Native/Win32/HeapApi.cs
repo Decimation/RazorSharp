@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using RazorSharp.Native.Win32.Enums;
+using RazorSharp.Native.Win32.Structures;
 
 namespace RazorSharp.Native.Win32
 {

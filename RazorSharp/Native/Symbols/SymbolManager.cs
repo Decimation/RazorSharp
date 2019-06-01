@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using RazorSharp.Components;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32;
 using SimpleSharp.Diagnostics;

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using InlineIL;
@@ -8,6 +9,9 @@ using RazorSharp.Memory.Pointers;
 
 namespace RazorSharp.CoreClr
 {
+	/// <summary>
+	/// Provides auxiliary runtime information
+	/// </summary>
 	public static class RtInfo
 	{
 		#region Is
@@ -15,10 +19,15 @@ namespace RazorSharp.CoreClr
 		#region Unmanaged
 
 		/// <summary>
-		/// Dummy class for use with <see cref="RtInfo.IsUnmanaged{T}"/> and <see cref="IsUnmanaged"/>
+		/// Dummy class for use with <see cref="IsUnmanaged{T}"/> and <see cref="IsUnmanaged"/>
 		/// </summary>
+		// ReSharper disable once UnusedTypeParameter
 		private sealed class U<T> where T : unmanaged { }
 
+		/// <summary>
+		/// Determines whether <paramref name="t"/> fits the <c>unmanaged</c> type constraint.
+		/// </summary>
+		/// <returns><c>true</c> if <paramref name="t"/> fits the unmanaged constraint; <c>false</c> otherwise</returns>
 		public static bool IsUnmanaged(Type t)
 		{
 			try {
@@ -31,6 +40,10 @@ namespace RazorSharp.CoreClr
 			}
 		}
 
+		/// <summary>
+		/// Determines whether <typeparamref name="T"/> fits the <c>unmanaged</c> type constraint.
+		/// </summary>
+		/// <returns><c>true</c> if <typeparamref name="T"/> fits the unmanaged constraint; <c>false</c> otherwise</returns>
 		public static bool IsUnmanaged<T>() => IsUnmanaged(typeof(T));
 
 		#endregion
@@ -100,7 +113,7 @@ namespace RazorSharp.CoreClr
 		public static bool IsReferenceOrContainsReferences(Type type)
 		{
 			// https://github.com/dotnet/coreclr/blob/master/src/vm/jitinterface.cpp#L7507
-			var mt = type.GetMethodTable();
+			Pointer<MethodTable> mt = type.GetMethodTable();
 
 			return !type.IsValueType || mt.Reference.ContainsPointers;
 		}
@@ -112,14 +125,6 @@ namespace RazorSharp.CoreClr
 		public static bool IsStruct<T>()        => IsStruct(typeof(T));
 		public static bool IsStruct<T>(T value) => IsStruct(value.GetType());
 		public static bool IsStruct(Type value) => value.IsValueType;
-
-		#endregion
-
-		#region Class
-
-		public static bool IsClass<T>()        => !IsStruct<T>();
-		public static bool IsClass<T>(T value) => !IsStruct(value);
-		public static bool IsClass(Type value) => !IsStruct(value);
 
 		#endregion
 

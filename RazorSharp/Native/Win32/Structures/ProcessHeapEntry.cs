@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 // ReSharper disable BuiltInTypeReferenceStyle
 
-namespace RazorSharp.Native
+namespace RazorSharp.Native.Win32.Structures
 {
 	using DWORD = UInt32;
 	using WORD = UInt16;

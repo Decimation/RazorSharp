@@ -1,7 +1,7 @@
 using RazorSharp.Import;
 using RazorSharp.Memory;
 
-namespace RazorSharp
+namespace RazorSharp.Components
 {
 	/// <summary>
 	/// <list type="bullet">

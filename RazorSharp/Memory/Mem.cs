@@ -9,11 +9,14 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using InlineIL;
 using JetBrains.Annotations;
+using RazorSharp.Components;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native;
 using RazorSharp.Native.Win32;
+using RazorSharp.Native.Win32.Enums;
+using RazorSharp.Native.Win32.Structures;
 using SimpleSharp.Diagnostics;
 using SimpleSharp.Extensions;
 

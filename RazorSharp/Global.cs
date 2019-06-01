@@ -8,6 +8,7 @@ using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
+using RazorSharp.Components;
 using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Import;

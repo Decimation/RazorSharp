@@ -130,9 +130,8 @@ namespace RazorSharp.Memory
 			bool result = SetNativeCode(md, (ulong) pCode);
 			
 			if (!result) {
-				Global.Log.Warning(
-					"Possible error setting entry point for {Method} (code: {Code}) (entry point: {PCode})",
-					mi.Name, result, pCode);
+				Global.Log.Warning("Possible error setting entry point for {Method} (entry point: {PCode})",
+					mi.Name, pCode);
 			}
 		}
 
