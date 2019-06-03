@@ -49,7 +49,7 @@ namespace RazorSharp.Memory
 		{
 			ImageSectionInfo[] sections = GetPESectionInfo(ProcessApi.GetModuleHandle(moduleName));
 			foreach (var s in sections)
-				if (Mem.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address))
+				if (MemInfo.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address))
 					return Parse(s.SectionName);
 
 			throw new Exception($"Could not find corresponding segment for {Hex.ToHex(addr.Address)}");
@@ -59,7 +59,7 @@ namespace RazorSharp.Memory
 		{
 			ImageSectionInfo[] sections = GetPESectionInfo(ProcessApi.GetModuleHandle(moduleName));
 			foreach (var s in sections)
-				if (Mem.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address))
+				if (MemInfo.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address))
 					return s;
 
 			return default;

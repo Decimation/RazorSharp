@@ -26,7 +26,7 @@ namespace RazorSharp.Native.Images
 	{
 		static ImageSectionHeader()
 		{
-			Conditions.Require(Mem.Is64Bit);
+			Conditions.Require(MemInfo.Is64Bit);
 		}
 
 		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = ImageSectionInfo.IMAGE_SIZEOF_SHORT_NAME)]

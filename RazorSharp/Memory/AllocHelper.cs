@@ -154,7 +154,7 @@ namespace RazorSharp.Memory
 
 			internal bool IsAddrInRange(IntPtr p)
 			{
-				return Mem.IsAddressInRange(HighAddress, p, LowAddress);
+				return MemInfo.IsAddressInRange(HighAddress, p, LowAddress);
 			}
 		}
 	}

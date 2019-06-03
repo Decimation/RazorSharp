@@ -35,7 +35,7 @@ namespace RazorSharp.CoreClr
 				typeof(U<>).MakeGenericType(t);
 				return true;
 			}
-			catch (Exception) {
+			catch {
 				return false;
 			}
 		}

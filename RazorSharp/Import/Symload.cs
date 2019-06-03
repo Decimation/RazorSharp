@@ -349,7 +349,7 @@ namespace RazorSharp.Import
 
 			Unload(type, unloadModule);
 
-			Mem.Destroy(ref value);
+			Cleanup.Destroy(ref value);
 		}
 
 		#endregion

@@ -188,8 +188,11 @@
     <Compile Include="ILDump.cs" />
     <Compile Include="Import\SymImportException.cs" />
     <Compile Include="Import\Symload.cs" />
+    <Compile Include="Memory\Cleanup.cs" />
+    <Compile Include="Memory\MemInfo.cs" />
     <Compile Include="Memory\OffsetOptions.cs" />
     <Compile Include="Memory\Pointers\FastPointer.cs" />
+    <Compile Include="Memory\Pointers\NPointer.cs" />
     <Compile Include="Memory\Pointers\Pointer.cs" />
     <Compile Include="Memory\Pointers\PointerFormat.cs" />
     <Compile Include="Memory\Pointers\StringTypes.cs" />

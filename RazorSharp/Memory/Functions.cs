@@ -125,7 +125,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		public static void SetEntryPoint(MethodInfo mi, Pointer<byte> pCode)
 		{
-			ResetFunction(mi, out var md);
+			ResetFunction(mi, out MethodDesc* md);
 
 			bool result = SetNativeCode(md, (ulong) pCode);
 			

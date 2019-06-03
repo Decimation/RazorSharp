@@ -91,7 +91,7 @@ namespace RazorSharp.Native.Symbols
 		private void UnloadModule()
 		{
 			if (IsImageLoaded) {
-				Global.Log.Verbose("Unloading image {Img}", m_pdb.Name);
+//				Global.Log.Verbose("Unloading image {Img}", m_pdb.Name);
 				NativeHelp.Call(DbgHelp.SymUnloadModule64(m_proc, m_modBase), nameof(DbgHelp.SymUnloadModule64));
 			}
 		}

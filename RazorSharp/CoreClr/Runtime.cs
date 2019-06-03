@@ -367,7 +367,7 @@ namespace RazorSharp.CoreClr
 			Conditions.NotNull(fieldInfo, nameof(fieldInfo));
 			Pointer<FieldDesc> fieldDesc = fieldInfo.FieldHandle.Value;
 
-			if (Mem.Is64Bit) {
+			if (MemInfo.Is64Bit) {
 				Conditions.Assert(fieldDesc.Reference.Info == fieldInfo);
 				Conditions.Assert(fieldDesc.Reference.Token == fieldInfo.MetadataToken);
 			}

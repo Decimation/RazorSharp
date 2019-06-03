@@ -51,27 +51,7 @@ namespace RazorSharp.Memory
 	/// </summary>
 	public static unsafe class Mem /*: IAllocator */
 	{
-		public static bool Is64Bit => IntPtr.Size == sizeof(long);
-
-		// todo: WIP
-		public static bool IsValid(Pointer<byte> ptr)
-		{
-			if (ptr.IsNull) {
-				return false;
-			}
-
-			var info = new AddressInfo(ptr);
-
-			return info.IsAllocated || info.IsInHeap || info.IsInModule || info.IsInPage ||
-			       info.IsInSegment || info.IsOnStack || info.IsInUnmanagedHeap;
-		}
-
-		public static bool IsInUnmanagedHeap(Pointer<byte> ptr)
-		{
-			ProcessHeapEntry[] heaps = HeapApi.GetHeapEntries();
-
-			return heaps.Any(heap => ptr == heap.lpData);
-		}
+		
 
 
 		public static int StringLength<T>(Pointer<byte> ptr) where T : unmanaged
@@ -108,18 +88,6 @@ namespace RazorSharp.Memory
 		}
 
 
-		/// <summary>
-		///     Checks whether an address is in range.
-		/// </summary>
-		/// <param name="hi">The end address</param>
-		/// <param name="p">Address to check</param>
-		/// <param name="lo">The start address</param>
-		/// <returns><c>true</c> if the address is in range; <c>false</c> otherwise</returns>
-		public static bool IsAddressInRange(Pointer<byte> hi, Pointer<byte> p, Pointer<byte> lo)
-		{
-			return p < hi && p >= lo;
-		}
-		
 		public static Pointer<byte> OffsetAs<TOrig, TAs>(Pointer<byte> p, int origElemCnt)
 		{
 			return p + OffsetCountAs<TOrig, TAs>(origElemCnt);
@@ -143,18 +111,6 @@ namespace RazorSharp.Memory
 
 		#region Zero
 
-		public static void Destroy<T>(ref T value)
-		{
-			if (!RtInfo.IsStruct(value)) {
-				int           size = Unsafe.SizeOfData(value);
-				Pointer<byte> ptr  = Unsafe.AddressOfData(ref value);
-				ptr.ZeroBytes(size);
-			}
-			else {
-				value = default;
-			}
-		}
-
 		public static void Zero<T>(ref T t)
 		{
 			Zero(Unsafe.AddressOf(ref t).Address, Unsafe.SizeOf<T>());
@@ -167,7 +123,6 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
-
 
 		#region Alloc / free
 
@@ -452,42 +407,7 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-		#region Stack
-
-		/// <summary>
-		///     Determines whether a variable is on the current thread's stack.
-		/// </summary>
-		public static bool IsOnStack<T>(ref T t)
-		{
-			return IsOnStack(Unsafe.AddressOf(ref t).Address);
-		}
-
-		public static bool IsOnStack(Pointer<byte> ptr)
-		{
-//			(IntPtr low, IntPtr high) bounds = Kernel32.GetCurrentThreadStackLimits();
-//			return RazorMath.Between(((IntPtr) v).ToInt64(), bounds.low.ToInt64(), bounds.high.ToInt64(), true);
-
-			// https://github.com/dotnet/coreclr/blob/c82bd22d4bab4369c0989a1c2ca2758d29a0da36/src/vm/threads.h
-			// 3620
-			return IsAddressInRange(StackBase, ptr.Address, StackLimit);
-		}
-
-		/// <summary>
-		///     Stack Base / Bottom of stack (high address)
-		/// </summary>
-		public static Pointer<byte> StackBase => Kernel32.GetCurrentThreadStackLimits().High;
-
-		/// <summary>
-		///     Stack Limit / Ceiling of stack (low address)
-		/// </summary>
-		public static Pointer<byte> StackLimit => Kernel32.GetCurrentThreadStackLimits().Low;
-
-		/// <summary>
-		///     Should equal <c>4 MB</c> for 64-bit and <c>1 MB</c> for 32-bit
-		/// </summary>
-		public static long StackSize => StackBase.ToInt64() - StackLimit.ToInt64();
-
-		#endregion
+		
 
 		// todo: the Copy methods should probably be implemented in Pointer for consistency
 

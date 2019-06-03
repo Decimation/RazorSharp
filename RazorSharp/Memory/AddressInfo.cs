@@ -22,9 +22,9 @@ namespace RazorSharp.Memory
 			Address = ptr;
 
 
-			IsOnStack         = Mem.IsOnStack(Address);
+			IsOnStack         = MemInfo.IsOnStack(Address);
 			IsInHeap          = GlobalHeap.IsHeapPointer(ptr);
-			IsInUnmanagedHeap = Mem.IsInUnmanagedHeap(ptr);
+			IsInUnmanagedHeap = MemInfo.IsInUnmanagedHeap(ptr);
 
 			Page        = Kernel32.VirtualQuery(ptr.Address);
 			Module      = Modules.FromAddress(ptr);

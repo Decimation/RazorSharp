@@ -141,7 +141,7 @@ namespace RazorSharp.Memory
 				var lo = module.BaseAddress;
 				var hi = lo + module.ModuleMemorySize;
 
-				if (Mem.IsAddressInRange(hi, ptr, lo)) {
+				if (MemInfo.IsAddressInRange(hi, ptr, lo)) {
 					return module;
 				}
 			}

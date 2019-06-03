@@ -40,7 +40,7 @@ namespace RazorSharp
 	{
 		#region Logger
 
-		internal const string CONTEXT_PROP = "Context";
+		private const string CONTEXT_PROP = "Context";
 
 		private const string OUTPUT_TEMPLATE =
 			"[{Timestamp:HH:mm:ss} {Level:u3}] [{Context}] {Message:lj}{NewLine}{Exception}";
@@ -48,7 +48,7 @@ namespace RazorSharp
 		private const string OUTPUT_TEMPLATE_ALT =
 			"[{Timestamp:HH:mm:ss.fff} ({Context}) {Level:u3}] {Message}{NewLine}";
 
-		internal static readonly ILogger Log;
+		internal static ILogger Log { get; private set; }
 
 		#endregion
 
@@ -79,12 +79,16 @@ namespace RazorSharp
 			     .WriteTo.Console(outputTemplate: OUTPUT_TEMPLATE_ALT, theme: SystemConsoleTheme.Colored)
 			     .CreateLogger();
 #else
-			Log = Logger.None;
+			SuppressLogger();
 #endif
 
 			Assembly = Assembly.Load(NAME);
 		}
 
+		internal static void SuppressLogger()
+		{
+			Log = Logger.None;
+		}
 
 		internal static void ContextLog(string prop, Action fn)
 		{
@@ -104,7 +108,7 @@ namespace RazorSharp
 			 * - Workstation Concurrent GC
 			 *
 			 */
-			Conditions.Require(Mem.Is64Bit);
+			Conditions.Require(MemInfo.Is64Bit);
 			Conditions.Require(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
 			/**
@@ -148,6 +152,8 @@ namespace RazorSharp
 			if (Log is Logger logger) {
 				logger.Dispose();
 			}
+
+			Log = null;
 
 			IsSetup = false;
 		}

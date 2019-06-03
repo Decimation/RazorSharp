@@ -72,6 +72,8 @@ namespace RazorSharp.Native.Win32.Structures
 		                          || Protect.HasFlag(MemoryProtection.ReadWrite)
 		                          || Protect.HasFlag(MemoryProtection.ExecuteWriteCopy);
 
+		public bool IsAccessible => !Protect.HasFlag(MemoryProtection.NoAccess);
+
 		public bool Equals(MemoryBasicInformation other)
 		{
 			return BaseAddress.Equals(other.BaseAddress) && AllocationBase.Equals(other.AllocationBase) &&

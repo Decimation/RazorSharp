@@ -162,7 +162,7 @@ namespace RazorSharp.CoreClr.Meta
 
 			if (IsArray) {
 				int d = 1;
-				if (Mem.Is64Bit) {
+				if (MemInfo.Is64Bit) {
 					d++;
 				}
 

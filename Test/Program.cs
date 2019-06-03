@@ -59,17 +59,7 @@ namespace Test
 		// Common library: SimpleSharp
 		// Testing library: Sandbox
 
-
-		// todo: maybe switch to SharpPdb
-
-		// todo: massive overhaul and refactoring
-
-		// todo: DIA instead of dbghelp?
-
-		// todo: rewrite ToString methods
-
 		
-
 		private static void Test<T>(T value)
 		{
 			var options = InspectOptions.Values | InspectOptions.FieldOffsets
@@ -84,25 +74,20 @@ namespace Test
 			layout.Populate(ref value);
 			Console.WriteLine(layout);
 		}
-
-
-		[Pure]
-		public static int Hello()
-		{
-			return 1;
-		}
 		
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			string sz = "foo";
-			Console.WriteLine(sz);
-			Console.WriteLine(typeof(string).GetMetaType());
+			Global.SuppressLogger();
+			
+			Pointer<byte> p = stackalloc byte[256];
+			Console.WriteLine(MemInfo.IsValid(p));
 
-			int i = 0;
-			Console.WriteLine(Constants.MinObjectSize);
-			Console.WriteLine(RtInfo.IsUnmanaged<int>());
-			Console.WriteLine(RtInfo.IsUnmanaged<string>());
+			Pointer<byte> p2 = 1L;
+			Console.WriteLine(MemInfo.IsValid(p2));
+
+			Pointer<byte> p3 = null;
+			Console.WriteLine(MemInfo.IsReadable(p3));
 		}
 	}
 }

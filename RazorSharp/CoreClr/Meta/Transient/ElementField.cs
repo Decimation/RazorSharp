@@ -59,7 +59,7 @@ namespace RazorSharp.CoreClr.Meta.Transient
 		{
 			ElementField[] rgElem;
 
-			if (Mem.Is64Bit) {
+			if (MemInfo.Is64Bit) {
 				rgElem = new ElementField[2];
 
 				MetaType padElem     = typeof(int);

@@ -45,7 +45,7 @@ namespace RazorSharp.CoreClr.Structures
 		static ObjHeader()
 		{
 			Conditions.Require(sizeof(ObjHeader) == IntPtr.Size);
-			Conditions.Require(Mem.Is64Bit);
+			Conditions.Require(MemInfo.Is64Bit);
 		}
 
 		public void SetBit(uint uBit)
