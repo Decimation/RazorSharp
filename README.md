@@ -60,6 +60,10 @@ RazorSharp is tested on:
 - [ ] RazorSharp, ClrMD, Reflection, Cecil, dnlib, MetadataTools comparison
 - [x] Replace native pointers* with Pointer<T> for consistency
 - [ ] nint
+- [ ] Massive overhaul and refactoring
+- [ ] Possibly use `DIA` instead of `DbgHelp`
+- [ ] Possibly use `SharpPdb` instead of `DbgHelp`
+- [ ] Rewrite `ToString` methods
 
 # License
 
