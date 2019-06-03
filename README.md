@@ -9,12 +9,12 @@ Low-level utilities and tools for working with the CLR, CLR internal structures,
 
 # Goals
 
-RazorSharp aims to provide functionality similar to that of ClrMD, WinDbg SOS, and Reflection but in a faster and more efficient way, while also exposing more underlying metadata. 
-RazorSharp also allows for manipulation of the CLR and low-level operations with managed objects. Additionally, RazorSharp doesn't require attachment of a debugger to the process to acquire metadata. All metadata is acquired through memory; no debugging is necessary or used.
+`RazorSharp` aims to provide functionality similar to that of `ClrMD`, `WinDbg SOS`, and `Reflection` but in a faster and more efficient way, while also exposing more underlying metadata. 
+`RazorSharp` also allows for manipulation of the CLR and low-level operations with managed objects. Additionally, `RazorSharp` doesn't require attachment of a debugger to the process to acquire metadata. All metadata is acquired through memory; no debugging is necessary or used.
 
 # Usage
 
-RazorSharp must be set up to use certain features.
+`RazorSharp` must be set up to use certain features.
 
 Setup:
 
@@ -48,7 +48,7 @@ ModuleInitializer.GlobalClose();
 - [x] `PackedDWORDFields`
 
 # Compatibility
-RazorSharp is tested on:
+`RazorSharp` is tested on:
 - 64-bit only (32-bit is not fully supported)
 - Windows only
 - .NET CLR only
@@ -56,9 +56,9 @@ RazorSharp is tested on:
 
 # todo
 - [ ] `MethodDescChunk`
-- [ ] Read `MethodDescs` without Reflection
-- [ ] RazorSharp, ClrMD, Reflection, Cecil, dnlib, MetadataTools comparison
-- [x] Replace native pointers* with Pointer<T> for consistency
+- [ ] Read `MethodDescs` without `Reflection`
+- [ ] `RazorSharp`, `ClrMD`, `Reflection`, `Cecil`, `dnlib`, `MetadataTools` comparison
+- [x] Replace native pointers* with `Pointer<T>` for consistency
 - [ ] nint
 - [ ] Massive overhaul and refactoring
 - [ ] Possibly use `DIA` instead of `DbgHelp`
