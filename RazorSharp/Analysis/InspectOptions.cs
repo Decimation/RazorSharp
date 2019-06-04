@@ -1,6 +1,6 @@
 using System;
 using RazorSharp.CoreClr.Meta;
-using RazorSharp.CoreClr.Meta.Transient;
+using RazorSharp.CoreClr.Meta.Virtual;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
 

@@ -12,7 +12,6 @@ using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
-using RazorSharp.CoreClr.Structures.HeapObjects;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Symbols;
@@ -27,7 +26,7 @@ namespace RazorSharp.CoreClr
 	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	/// <summary>
-	///     Provides utilities for manipulating, reading, and writing CLR structures.
+	///     Provides utilities for manipulating, reading, writing, and interacting with CLR structures.
 	///     <para>Related files:</para>
 	///     <list type="bullet">
 	///         <item>
@@ -40,39 +39,24 @@ namespace RazorSharp.CoreClr
 	/// </summary>
 	public static unsafe class Runtime
 	{
+		/// <summary>
+		/// Retrieves a <see cref="Delegate"/> for a CLR function with the name <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name">Fully-qualified CLR function name</param>
+		/// <typeparam name="TDelegate"><see cref="Delegate"/> type</typeparam>
+		/// <returns>Executable <see cref="Delegate"/> for the specified function</returns>
 		public static TDelegate GetClrFunction<TDelegate>(string name) where TDelegate : Delegate
 		{
 			return Clr.Value.ClrSymbols.GetFunction<TDelegate>(name);
 		}
 
 
-		// todo: WIP
-		public static T StackAllocObject<T>(Pointer<byte> stack, params object[] args)
-		{
-			var methodTable = typeof(T).GetMethodTable();
-
-			var objPtr = stack.Address + Offsets.ObjectOverhead;
-
-			// Write the pointer in the extra allocated bytes,
-			// pointing to the MethodTable* (skip over the extra pointer and the ObjHeader)
-			stack.WriteAny(objPtr);
-
-			// Write the ObjHeader
-			// (this'll already be zeroed, but this is just self-documentation)
-			// +4 int (sync block)
-			// +4 int (padding, x64)
-			stack.WriteAny(0L, 1);
-
-			// Write the MethodTable
-			// Managed pointers point to the MethodTable* in the GC heap
-			stack.WriteAny(methodTable, 2);
-
-			var cpy   = objPtr;
-			var value = CSUnsafe.Read<T>(&cpy);
-
-			return value;
-		}
-
+		/// <summary>
+		/// Allocates an object of type <typeparamref name="T"/> in the GC heap.
+		/// </summary>
+		/// <param name="args">Constructor arguments</param>
+		/// <typeparam name="T">Type to allocate</typeparam>
+		/// <returns>An initialized object</returns>
 		public static T AllocObject<T>(params object[] args)
 		{
 			var value = GlobalHeap.AllocateObject<T>();
@@ -80,10 +64,7 @@ namespace RazorSharp.CoreClr
 			return value;
 		}
 
-		
-
 		public static void Compile(Type t, string n) => Compile(t.GetAnyMethod(n));
-
 
 		public static void Compile(MethodInfo methodInfo)
 		{
@@ -212,32 +193,12 @@ namespace RazorSharp.CoreClr
 			return false;
 		}
 
-		#region HeapObjects
-
-		internal static ArrayObject** GetArrayObject<T>(ref T t) where T : class
-		{
-			Conditions.Require(RtInfo.IsArray(t));
-
-			return (ArrayObject**) Unsafe.AddressOf(ref t);
-		}
-
-		internal static StringObject** GetStringObject(ref string s)
-		{
-			return (StringObject**) Unsafe.AddressOf(ref s);
-		}
-
-		internal static HeapObject** GetHeapObject<T>(ref T t) where T : class
-		{
-			return (HeapObject**) Unsafe.AddressOf(ref t);
-		}
-
-		#endregion
 
 		#region MethodTable
 
 		internal static TypeHandle ReadTypeHandle<T>(T value)
 		{
-			if (RtInfo.IsStruct<T>(value))
+			if (RtInfo.IsStruct(value))
 				return value.GetType().GetTypeHandle();
 
 

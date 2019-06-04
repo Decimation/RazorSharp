@@ -138,7 +138,8 @@ namespace RazorSharp.CoreClr.Meta
 		internal void PrepareOverride()
 		{
 			Reset();
-			if (!IsPointingToNativeCode) Prepare();
+			if (!IsPointingToNativeCode) 
+				Prepare();
 		}
 
 		public MetaIL GetILHeader(int fAllowOverrides = 0)

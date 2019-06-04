@@ -16,6 +16,9 @@ using Unsafe = RazorSharp.Memory.Unsafe;
 
 namespace RazorSharp.Analysis
 {
+	/// <summary>
+	/// Provides layout information of objects.
+	/// </summary>
 	public class LayoutInfo
 	{
 		private IReadableStructure[] m_fields;
@@ -147,6 +150,7 @@ namespace RazorSharp.Analysis
 
 			var valueCpy = value;
 
+			// todo: use MetaField here with ToValueString
 			HandleOption(InspectOptions.Values, field => field.GetValue(valueCpy));
 		}
 

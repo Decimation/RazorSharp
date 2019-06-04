@@ -4,12 +4,12 @@ using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using SimpleSharp.Diagnostics;
 
-namespace RazorSharp.CoreClr.Meta.Transient
+namespace RazorSharp.CoreClr.Meta.Virtual
 {
 	/// <summary>
 	/// Represents the <see cref="MethodTable"/> pointer in heap memory of an object.
 	/// </summary>
-	public unsafe class MethodTableField : TransientField
+	public unsafe class MethodTableField : VirtualField
 	{
 		internal MethodTableField() : base(0, -IntPtr.Size) { }
 

@@ -79,15 +79,9 @@ namespace Test
 		public static void Main(string[] args)
 		{
 			Global.SuppressLogger();
-			
-			Pointer<byte> p = stackalloc byte[256];
-			Console.WriteLine(MemInfo.IsValid(p));
-
-			Pointer<byte> p2 = 1L;
-			Console.WriteLine(MemInfo.IsValid(p2));
-
-			Pointer<byte> p3 = null;
-			Console.WriteLine(MemInfo.IsReadable(p3));
+			Segments.DumpSegments();
+			int[] values = {1, 2, 3};
+			Console.WriteLine(Inspect.DumpFields(values));
 		}
 	}
 }

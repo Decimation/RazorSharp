@@ -9,25 +9,25 @@ using SimpleSharp.Diagnostics;
 
 #endregion
 
-namespace RazorSharp.CoreClr.Meta.Transient
+namespace RazorSharp.CoreClr.Meta.Virtual
 {
 	/// <summary>
 	///     Represents a readable structure or field in memory. This is used for fields that exist in memory but
 	///     don't have a <see cref="MemberInfo" />.
 	///     <example><see cref="MethodTable" />, <see cref="ObjHeader" />, etc</example>
 	/// </summary>
-	public abstract class TransientField : IReadableStructure
+	public abstract class VirtualField : IReadableStructure
 	{
 		private readonly int m_offset;
 
-		protected TransientField(int memOffset, int offset, int size)
+		protected VirtualField(int memOffset, int offset, int size)
 		{
 			MemoryOffset = memOffset;
 			Size         = size;
 			m_offset     = offset;
 		}
 
-		protected TransientField(int memOffset, int offset) : this(memOffset, offset, IntPtr.Size) { }
+		protected VirtualField(int memOffset, int offset) : this(memOffset, offset, IntPtr.Size) { }
 
 		public int Token => throw new NotSupportedException();
 

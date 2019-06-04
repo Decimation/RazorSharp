@@ -29,8 +29,6 @@ namespace RazorSharp.Utilities
 			Kernel32.GetConsoleMode(handle, out var mode);
 			mode |= ConsoleOutputModes.EnableVirtualTerminalProcessing;
 			Kernel32.SetConsoleMode(handle, mode);
-
-//			Logger.Log(Level.Standard, Flags.Info, "Console modded");
 		}
 	}
 }

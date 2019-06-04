@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using InlineIL;
 using JetBrains.Annotations;
@@ -146,7 +147,7 @@ namespace RazorSharp.CoreClr
 		/// </summary>
 		public static bool IsPointer(Type type)
 		{
-			if (type.IsPointer || type == typeof(IntPtr) || type == typeof(UIntPtr)) {
+			if (type.IsPointer || type == typeof(IntPtr) || type == typeof(UIntPtr) || type == typeof(Pointer)) {
 				return true;
 			}
 

@@ -161,13 +161,13 @@ namespace RazorSharp.CoreClr.Structures
 
 		internal bool IsFixedBuffer => Formatting.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
 
-		internal bool IsAutoProperty {
-			get {
-				string demangled = Formatting.NameOfAutoProperty(Name);
-				if (demangled != null)
-					return Formatting.NameOfAutoPropertyBackingField(demangled) == Name;
+		
 
-				return false;
+		internal bool IsBackingField {
+			get {
+				var backingFieldName = Formatting.NameOfBackingField(Name);
+
+				return backingFieldName != null && backingFieldName != Name;
 			}
 		}
 

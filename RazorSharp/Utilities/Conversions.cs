@@ -58,10 +58,9 @@ namespace RazorSharp.Utilities
 		/// <typeparam name="TFrom">Inherent type</typeparam>
 		/// <typeparam name="TTo">Type to reinterpret <typeparamref name="TFrom" /> as</typeparam>
 		/// <returns></returns>
-		public static TTo ReinterpretCast<TFrom, TTo>(TFrom value)
+		private static TTo ReinterpretCast<TFrom, TTo>(TFrom value)
 		{
-			Pointer<TFrom> addr = Unsafe.AddressOf(ref value);
-			return addr.ReadAny<TTo>();
+			return Unsafe.AddressOf(ref value).ReadAny<TTo>();
 		}
 	}
 }

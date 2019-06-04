@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using RazorSharp.Analysis;
 using SimpleSharp;
 using SimpleSharp.Extensions;
 using SimpleSharp.Strings;
@@ -33,29 +34,15 @@ namespace RazorSharp.Memory
 		}
 
 		/// <summary>
-		///     Gets the segment type (<see cref="SegmentType" />) in which <paramref name="addr" /> resides.
+		///     Gets the segment (<see cref="ImageSectionInfo" />) in which <paramref name="addr" /> resides.
 		/// </summary>
-		/// <param name="addr">Address to find the <see cref="SegmentType" /> of</param>
+		/// <param name="addr">Address to find the <see cref="ImageSectionInfo" /> of</param>
 		/// <param name="moduleName">DLL module name; <c>null</c> for the current module</param>
 		/// <returns>
-		///     The corresponding <see cref="SegmentType" /> if <paramref name="addr" /> is in the address space
-		///     of the specified module <paramref name="moduleName" />
+		///     The corresponding <see cref="ImageSectionInfo" /> if <paramref name="addr" /> is within the address space
+		///     of the specified module <paramref name="moduleName" />; <c>default</c> if a segment could not be found
 		/// </returns>
-		/// <exception cref="Exception">
-		///     If the address <paramref name="addr" /> is not found in the address space of
-		///     module <paramref name="moduleName" />
-		/// </exception>
-		public static SegmentType GetSegmentType(Pointer<byte> addr, string moduleName = null)
-		{
-			ImageSectionInfo[] sections = GetPESectionInfo(ProcessApi.GetModuleHandle(moduleName));
-			foreach (var s in sections)
-				if (MemInfo.IsAddressInRange(s.EndAddress.Address, addr.Address, s.SectionAddress.Address))
-					return Parse(s.SectionName);
-
-			throw new Exception($"Could not find corresponding segment for {Hex.ToHex(addr.Address)}");
-		}
-
-		public static ImageSectionInfo GetSegment(Pointer<byte> addr, string moduleName = null)
+		public static ImageSectionInfo FromAddress(Pointer<byte> addr, string moduleName = null)
 		{
 			ImageSectionInfo[] sections = GetPESectionInfo(ProcessApi.GetModuleHandle(moduleName));
 			foreach (var s in sections)
@@ -113,15 +100,26 @@ namespace RazorSharp.Memory
 			var table = new ConsoleTable("Number", "Name",
 			                             "Size", "Address", "End Address", "Characteristics", "Module");
 			string moduleNameTable = moduleName ?? Process.GetCurrentProcess().MainModule.ModuleName; // todo
-			
+
 			foreach (var v in segments) {
-				object[] rowCpy = v.Row;
+				object[] rowCpy =
+				{
+					v.SectionNumber, 
+					v.SectionName,
+					String.Format("{0} ({1} K)", v.SectionSize, v.SectionSize / Constants.KIBIBYTE),
+					Hex.ToHex(v.SectionAddress.ToInt64()),
+					Hex.ToHex(v.EndAddress.ToInt64()),
+					v.Characteristics,
+					"-"
+				};
 				rowCpy[rowCpy.Length - 1] = moduleNameTable;
 				table.AddRow(rowCpy);
 			}
 
 			Console.WriteLine(table.ToString());
 		}
+
+		
 
 		private static SegmentType Parse(string name)
 		{

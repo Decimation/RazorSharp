@@ -112,8 +112,8 @@
       <HintPath>..\packages\Serilog.Sinks.Console.3.1.1\lib\net45\Serilog.Sinks.Console.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SimpleSharp, Version=1.0.8.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\SimpleSharp.1.0.8\lib\net472\SimpleSharp.dll</HintPath>
+    <Reference Include="SimpleSharp, Version=1.1.2.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\SimpleSharp.1.1.2\lib\net472\SimpleSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -143,11 +143,11 @@
     <Compile Include="CoreClr\Meta\MetaIL.cs" />
     <Compile Include="CoreClr\Meta\MetaMethod.cs" />
     <Compile Include="CoreClr\Meta\MetaType.cs" />
-    <Compile Include="CoreClr\Meta\Transient\ElementField.cs" />
-    <Compile Include="CoreClr\Meta\Transient\MethodTableField.cs" />
-    <Compile Include="CoreClr\Meta\Transient\ObjectHeaderField.cs" />
-    <Compile Include="CoreClr\Meta\Transient\PaddingField.cs" />
-    <Compile Include="CoreClr\Meta\Transient\TransientField.cs" />
+    <Compile Include="CoreClr\Meta\Virtual\ElementField.cs" />
+    <Compile Include="CoreClr\Meta\Virtual\MethodTableField.cs" />
+    <Compile Include="CoreClr\Meta\Virtual\ObjectHeaderField.cs" />
+    <Compile Include="CoreClr\Meta\Virtual\PaddingField.cs" />
+    <Compile Include="CoreClr\Meta\Virtual\VirtualField.cs" />
     <Compile Include="CoreClr\Offsets.cs" />
     <Compile Include="CoreClr\RtInfo.cs" />
     <Compile Include="CoreClr\Structures\EE\EEClass.cs" />
@@ -224,7 +224,6 @@
     <Compile Include="Native\Images\MagicType.cs" />
     <Compile Include="Native\Images\SubSystemType.cs" />
     <Compile Include="Native\NativeHelp.cs" />
-    <Compile Include="Native\NativeModule.cs" />
     <Compile Include="Native\Symbols\SymbolFlag.cs" />
     <Compile Include="Native\Symbols\ModuleInfo.cs" />
     <Compile Include="Native\Symbols\Symbol.cs" />
@@ -262,10 +261,6 @@
     <Compile Include="CoreClr\ClrFunctions.cs" />
     <Compile Include="CoreClr\Structures\DWFlags.cs" />
     <Compile Include="CoreClr\Structures\FieldDesc.cs" />
-    <Compile Include="CoreClr\Structures\HeapObjects\ArrayObject.cs" />
-    <Compile Include="CoreClr\Structures\HeapObjects\HeapObject.cs" />
-    <Compile Include="CoreClr\Structures\HeapObjects\IHeapObject.cs" />
-    <Compile Include="CoreClr\Structures\HeapObjects\StringObject.cs" />
     <Compile Include="CoreClr\Structures\MethodDesc.cs" />
     <Compile Include="CoreClr\Structures\MethodDescChunk.cs" />
     <Compile Include="CoreClr\Structures\MethodTable.cs" />
@@ -291,11 +286,11 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props'))" />
-    <Error Condition="!Exists('..\packages\Fody.4.2.1\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.4.2.1\build\Fody.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props'))" />
     <Error Condition="!Exists('..\packages\InlineIL.Fody.1.1.2\build\InlineIL.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\InlineIL.Fody.1.1.2\build\InlineIL.Fody.props'))" />
+    <Error Condition="!Exists('..\packages\Fody.5.0.6\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.5.0.6\build\Fody.targets'))" />
   </Target>
-  <Import Project="..\packages\Fody.4.2.1\build\Fody.targets" Condition="Exists('..\packages\Fody.4.2.1\build\Fody.targets')" />
+  <Import Project="..\packages\Fody.5.0.6\build\Fody.targets" Condition="Exists('..\packages\Fody.5.0.6\build\Fody.targets')" />
   <!--<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>

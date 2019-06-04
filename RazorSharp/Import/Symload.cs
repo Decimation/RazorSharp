@@ -128,6 +128,7 @@ namespace RazorSharp.Import
 
 		private static ModuleInfo GetInfo(SymNamespaceAttribute attr, Pointer<byte> baseAddr)
 		{
+			// todo: I shouldn't have to do this
 			if (attr.Image == Clr.Value.ClrPdb.FullName && attr.Module == Clr.CLR_DLL_SHORT) {
 				return Clr.Value.ClrSymbols;
 			}
@@ -148,9 +149,9 @@ namespace RazorSharp.Import
 
 			string shortName = nameSpaceAttr.ShortModuleName;
 
-			if (!Modules.IsLoaded(shortName)) {
+			if (!Modules.IsLoaded(shortName, out var mod)) {
 				Global.Log.Debug("Module {Name} is not loaded, loading", shortName);
-				var mod = Modules.LoadModule(nameSpaceAttr.Module);
+				mod = Modules.LoadModule(nameSpaceAttr.Module);
 				baseAddr = mod.BaseAddress;
 			}
 
@@ -310,7 +311,7 @@ namespace RazorSharp.Import
 			if (unloadModule) {
 				var    nameSpaceAttr = type.GetCustomAttribute<SymNamespaceAttribute>();
 				string shortName     = nameSpaceAttr.ShortModuleName;
-				Modules.UnloadIfLoaded(shortName);
+				Modules.Unload(shortName);
 			}
 
 			(MemberInfo[] members, SymImportAttribute[] attributes) = type.GetAnnotated<SymImportAttribute>();

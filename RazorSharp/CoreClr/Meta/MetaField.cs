@@ -8,6 +8,7 @@ using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory.Pointers;
 using SimpleSharp;
+using SimpleSharp.Strings;
 
 #endregion
 
@@ -37,6 +38,19 @@ namespace RazorSharp.CoreClr.Meta
 
 		public MetaField(FieldInfo field) : this(field.GetFieldDesc()) { }
 
+		public string ToValueString(object value)
+		{
+			var fieldValue = GetValue(value);
+
+			if (IsAnyPointer) {
+				if (Hex.TryCreateHex(fieldValue, out string str)) {
+					return str;
+				}
+			}
+
+			return fieldValue.ToString();
+		}
+
 		public override string ToString()
 		{
 			var info = Value.Reference.Info;
@@ -59,6 +73,8 @@ namespace RazorSharp.CoreClr.Meta
 
 		public bool IsPointer => Value.Reference.IsPointer;
 
+		public bool IsAnyPointer => RtInfo.IsPointer(FieldType);
+
 		/// <summary>
 		///     Whether the field is <c>static</c>
 		/// </summary>
@@ -73,7 +89,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		public bool IsFixedBuffer => Value.Reference.IsFixedBuffer;
 
-		public bool IsAutoProperty => Value.Reference.IsAutoProperty;
+		public bool IsBackingField => Value.Reference.IsBackingField;
 
 		#endregion
 
@@ -87,7 +103,7 @@ namespace RazorSharp.CoreClr.Meta
 		public int MemoryOffset {
 			get {
 				int ofs = Offset;
-				
+
 				if (!EnclosingMetaType.IsStruct) {
 					ofs += Offsets.OffsetToData;
 				}
@@ -129,6 +145,20 @@ namespace RazorSharp.CoreClr.Meta
 		public MemberInfo Info => FieldInfo;
 
 		public string Name => Value.Reference.Name;
+
+		public string CleanName {
+			get {
+//				if (IsFixedBuffer) {
+//					return Formatting.TypeNameOfFixedBuffer(Name);
+//				}
+
+				if (IsBackingField) {
+					return Formatting.NameOfBackingField(Name);
+				}
+
+				return Name;
+			}
+		}
 
 		public Type EnclosingType => Value.Reference.EnclosingType;
 

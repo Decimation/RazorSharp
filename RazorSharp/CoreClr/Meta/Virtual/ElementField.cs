@@ -4,14 +4,14 @@ using RazorSharp.Memory.Pointers;
 
 // ReSharper disable ReturnTypeCanBeEnumerable.Global
 
-namespace RazorSharp.CoreClr.Meta.Transient
+namespace RazorSharp.CoreClr.Meta.Virtual
 {
 	// todo: wip
 
 	/// <summary>
 	/// Represents a <see cref="string"/> or array element in heap memory.
 	/// </summary>
-	public class ElementField : TransientField
+	public class ElementField : VirtualField
 	{
 		// Used for array or string elements
 		private ElementField(int      fieldOfs,

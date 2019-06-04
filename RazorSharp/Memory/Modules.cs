@@ -24,26 +24,37 @@ namespace RazorSharp.Memory
 		/// </summary>
 		internal static ProcessModuleCollection CurrentModules => Process.GetCurrentProcess().Modules;
 
-		internal static NativeModule[] CurrentNativeModules
-			=> ProcessApi.GetProcessModules(Process.GetCurrentProcess());
-
-		// todo: ProcessModules are actually updated when they are natively loaded
-		// todo: remove CurrentNativeModules
-
-		public static bool IsLoaded(string name)
+		
+		/// <summary>
+		/// Checks whether there is a <see cref="ProcessModule"/> loaded with the <see cref="ProcessModule.ModuleName"/>
+		/// of <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name"><see cref="ProcessModule.ModuleName"/> to search for</param>
+		/// <param name="module"><see cref="ProcessModule"/> to populate if the module is found; <c>null</c> if the module isn't loaded</param>
+		/// <returns><c>true</c> if the module is loaded; <c>false</c> otherwise</returns>
+		public static bool IsLoaded(string name, out ProcessModule module)
 		{
-			return GetModule(name) != null;
+			module = GetModule(name);
+			return  module != null;
 		}
 
-		public static void UnloadIfLoaded(string name)
+		/// <summary>
+		/// Unloads any <see cref="ProcessModule"/> with the <see cref="ProcessModule.ModuleName"/>
+		/// of <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name"><see cref="ProcessModule.ModuleName"/> to search for</param>
+		public static void Unload(string name)
 		{
-			var mod = GetModule(name);
-
-			if (mod != null) {
+			if (IsLoaded(name, out var mod)) {
 				ProcessApi.FreeLibrary(mod.BaseAddress);
 			}
 		}
 
+		/// <summary>
+		/// Loads a module into the current process.
+		/// </summary>
+		/// <param name="fileName">File name of the module to load</param>
+		/// <returns><see cref="ProcessModule"/> of the module which was loaded</returns>
 		public static ProcessModule LoadModule(string fileName)
 		{
 			//var ptr = ProcessApi.LoadLibrary(fileName);
@@ -58,10 +69,15 @@ namespace RazorSharp.Memory
 			return null;
 		}
 
+		/// <summary>
+		/// Returns any <see cref="ProcessModule"/> with the <see cref="ProcessModule.ModuleName"/>
+		/// of <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name"><see cref="ProcessModule.ModuleName"/> to search for</param>
 		public static ProcessModule GetModule(string name)
 		{
 			// todo: I shouldn't have to do this
-			if (ModuleInitializer.IsSetup && Clr.Value.IsSetup && name == Clr.CLR_DLL_SHORT) {
+			if (ModuleInitializer.IsSetup && name == Clr.CLR_DLL_SHORT) {
 				return Clr.Value.ClrModule;
 			}
 
@@ -73,22 +89,16 @@ namespace RazorSharp.Memory
 
 			return null;
 		}
-
-		public static NativeModule GetNativeModule(string name)
-		{
-			foreach (var pair in CurrentNativeModules) {
-				if (pair.Name == name) {
-					return pair;
-				}
-			}
-
-			return NativeModule.NullModule;
-		}
-
-
+		
+		/// <summary>
+		/// Returns any <see cref="ProcessModule.BaseAddress"/> with the <see cref="ProcessModule.ModuleName"/>
+		/// of <paramref name="name"/>.
+		/// </summary>
+		/// <param name="name"><see cref="ProcessModule.ModuleName"/> to search for</param>
 		public static Pointer<byte> GetBaseAddress(string name)
 		{
-			if (name == Clr.CLR_DLL_SHORT) {
+			// todo: I shouldn't have to do this
+			if (ModuleInitializer.IsSetup && name == Clr.CLR_DLL_SHORT) {
 				return Clr.Value.ClrModule.BaseAddress;
 			}
 
@@ -96,45 +106,15 @@ namespace RazorSharp.Memory
 
 			Pointer<byte> baseAddr = mod?.BaseAddress ?? IntPtr.Zero;
 
-
-//			Global.Log.Debug("Base addr for {Name} {Addr}", name, Hex.ToHex(baseAddr));
-
 			return baseAddr;
 		}
-
-		private static Pointer<byte>[] GetAddressesInternal(Pointer<byte> baseAddr, long[] offset)
-		{
-			var rg = new Pointer<byte>[offset.Length];
-
-			for (int i = 0; i < rg.Length; i++) {
-				rg[i] = baseAddr + offset[i];
-			}
-
-			return rg;
-		}
-
-		public static Pointer<byte>[] GetAddresses(string module, long[] offset)
-		{
-			return GetAddresses(GetModule(module), offset);
-		}
-
-		public static Pointer<byte>[] GetAddresses(ProcessModule module, long[] offset)
-		{
-			return GetAddressesInternal(module.BaseAddress, offset);
-		}
-
-		public static Pointer<byte> GetAddress(string module, long offset)
-		{
-			Pointer<byte> ptr = GetBaseAddress(module);
-			return ptr + offset;
-		}
-
-		public static Pointer<byte> GetAddress(ProcessModule module, long offset)
-		{
-			Pointer<byte> ptr = module.BaseAddress;
-			return ptr + offset;
-		}
-
+		
+		/// <summary>
+		/// Searches for a <see cref="ProcessModule"/> in which <paramref name="ptr"/> is within its address space.
+		/// </summary>
+		/// <param name="ptr">Address to search with</param>
+		/// <returns><see cref="ProcessModule"/> where <paramref name="ptr"/> is within its address space; <c>null</c>
+		/// if a <see cref="ProcessModule"/> could not be found</returns>
 		public static ProcessModule FromAddress(Pointer<byte> ptr)
 		{
 			foreach (ProcessModule module in CurrentModules) {

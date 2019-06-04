@@ -49,6 +49,8 @@ namespace RazorSharp.Analysis
 				{InspectOptions.MemoryOffsets, MEM_OFFSETS_STR},
 			};
 		}
+		
+		
 
 		internal static bool HasFlagFast(this InspectOptions value, InspectOptions flag)
 		{

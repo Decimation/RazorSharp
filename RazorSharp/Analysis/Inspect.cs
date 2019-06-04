@@ -9,13 +9,18 @@ using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 using SimpleSharp;
 
+// ReSharper disable ParameterTypeCanBeEnumerable.Global
+
 namespace RazorSharp.Analysis
 {
+	/// <summary>
+	/// Provides utilities for inspecting objects.
+	/// </summary>
 	public static class Inspect
 	{
 		// Old: https://github.com/Decimation/RazorSharp/blob/3a3573f368cf021002cc15b466ca653129faf92c/RazorSharp/Analysis/ObjectLayout.cs
-		// Also: https://github.com/SergeyTeplyakov/ObjectLayoutInspector
-		
+		// See also: https://github.com/SergeyTeplyakov/ObjectLayoutInspector
+
 		#region LayoutInfo
 
 		/// <summary>
@@ -38,7 +43,7 @@ namespace RazorSharp.Analysis
 			return info;
 		}
 
-		public static LayoutInfo Layout<T>(InspectOptions options = DEFAULT_TYPE_ONLY) 
+		public static LayoutInfo Layout<T>(InspectOptions options = DEFAULT_TYPE_ONLY)
 			=> Layout(typeof(T), options);
 
 		public static LayoutInfo Layout<T>(ref T value, InspectOptions options = DEFAULT_VALUE_PROVIDED)
@@ -57,6 +62,33 @@ namespace RazorSharp.Analysis
 			}
 
 			return Layout(ref value, options);
+		}
+
+		public static ConsoleTable DumpFields<T>(T[] values)
+		{
+			var type   = new MetaType(typeof(T));
+			var fields = type.InstanceFields.ToArray();
+			var table  = new ConsoleTable();
+
+			table.AddColumn('#');
+
+			foreach (var field in fields) {
+				table.AddColumn(field.CleanName);
+			}
+
+			int i = 0;
+			foreach (var value in values) {
+				var fieldValues = new List<object>(fields.Length + 1)
+				{
+					i++
+				};
+
+				fieldValues.AddRange(fields.Select(field => field.ToValueString(value)));
+
+				table.Rows.Add(fieldValues.ToArray());
+			}
+
+			return table;
 		}
 
 		#endregion

@@ -39,9 +39,11 @@ namespace RazorSharp.CoreClr.Structures
 	///         </item>
 	///     </list>
 	/// </summary>
-	[ClrSymNamespace("WKS")]
+	[ClrSymNamespace(GC_WORKSTATION)]
 	internal unsafe struct GCHeap
 	{
+		private const string GC_WORKSTATION = "WKS";
+		
 		/// <summary>
 		///     Returns the number of GCs that have occurred.
 		///     <remarks>

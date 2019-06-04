@@ -4,12 +4,12 @@ using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using SimpleSharp.Diagnostics;
 
-namespace RazorSharp.CoreClr.Meta.Transient
+namespace RazorSharp.CoreClr.Meta.Virtual
 {
 	/// <summary>
 	/// Represents the <see cref="ObjHeader"/> pointer in heap memory of an object.
 	/// </summary>
-	public unsafe class ObjectHeaderField : TransientField
+	public unsafe class ObjectHeaderField : VirtualField
 	{
 		internal ObjectHeaderField() : base(-IntPtr.Size, -IntPtr.Size*2) { }
 		

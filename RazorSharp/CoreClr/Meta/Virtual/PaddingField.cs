@@ -1,9 +1,9 @@
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 
-namespace RazorSharp.CoreClr.Meta.Transient
+namespace RazorSharp.CoreClr.Meta.Virtual
 {
-	public class PaddingField : TransientField
+	public class PaddingField : VirtualField
 	{
 		internal PaddingField(int memAndFieldOffset, int size) 
 			: base(memAndFieldOffset, memAndFieldOffset, size) { }

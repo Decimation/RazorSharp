@@ -58,41 +58,6 @@ namespace RazorSharp.Native.Win32
 		[DllImport(PSAPI_DLL)]
 		private static extern bool GetModuleInformation(IntPtr hProcess, IntPtr hModule, IntPtr lpmodinfo, uint cb);
 
-		internal static NativeModule[] GetProcessModules(Process p)
-		{
-			var pairs = new List<NativeModule>();
-
-
-			// Setting up the variable for the second argument for EnumProcessModules
-			var hMods = new IntPtr[Constants.KIBIBYTE];
-
-			var gch      = GCHandle.Alloc(hMods, GCHandleType.Pinned); // Don't forget to free this later
-			var pModules = gch.AddrOfPinnedObject();
-
-			// Setting up the rest of the parameters for EnumProcessModules
-			uint uiSize = (uint) (IntPtr.Size * hMods.Length);
-
-			if (EnumProcessModules(p.Handle, pModules, uiSize, out uint cbNeeded) == 1) {
-				// To determine how many modules were enumerated by the call to EnumProcessModules,
-				// divide the resulting value in the lpcbNeeded parameter by sizeof(HMODULE).
-				int uiTotalNumberOfModules = (int) (cbNeeded / IntPtr.Size);
-
-				for (int i = 0; i < uiTotalNumberOfModules; i++) {
-					var strbld = new StringBuilder(Constants.KIBIBYTE);
-
-					GetModuleFileNameEx(p.Handle, hMods[i], strbld, strbld.Capacity);
-
-					pairs.Add(new NativeModule(strbld.ToString(), hMods[i]));
-				}
-			}
-
-			// Must free the GCHandle object
-			gch.Free();
-
-			return pairs.ToArray();
-		}
-
-
 		/// <summary>
 		///     Retrieves a module handle for the specified module. The module must have been loaded by the calling process.
 		/// </summary>

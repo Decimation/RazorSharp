@@ -11,6 +11,9 @@ using RazorSharp.Memory.Pointers;
 
 namespace RazorSharp.CoreClr.Structures
 {
+	/// <summary>
+	/// Provides utilities for working with the GC heap.
+	/// </summary>
 	[ClrSymNamespace]
 	public static class GlobalHeap
 	{
@@ -56,9 +59,14 @@ namespace RazorSharp.CoreClr.Structures
 
 		internal static Pointer<GCHeap> GlobalHeapValue => g_pGCHeap;
 
+		/// <summary>
+		/// Returns the number of garbage collections that have occurred.
+		/// </summary>
 		public static int GCCount => GlobalHeapValue.Reference.GCCount;
 
 		#endregion
+
+		#region Allocate object
 
 		/// <summary>
 		/// Allocates a zero-initialized object on the GC heap.
@@ -71,14 +79,14 @@ namespace RazorSharp.CoreClr.Structures
 
 		private static unsafe T AllocateObjectInternal<T>(Type type, int fHandleCom = default)
 		{
-			var ptr= AllocateObject(type.GetMethodTable().ToPointer<MethodTable>(), fHandleCom);
+			var ptr = AllocateObject(type.GetMethodTable().ToPointer<MethodTable>(), fHandleCom);
 			return Unsafe.Read<T>(&ptr);
 		}
 
 		/// <summary>
 		/// Allocates a zero-initialized object on the GC heap.
 		/// </summary>
-		public static object AllocateObject(Type type, int fHandleCom = default)
+		internal static object AllocateObject(Type type, int fHandleCom = default)
 		{
 			return AllocateObjectInternal<object>(type, fHandleCom);
 		}
@@ -86,26 +94,26 @@ namespace RazorSharp.CoreClr.Structures
 		/// <summary>
 		/// Allocates a zero-initialized object on the GC heap.
 		/// </summary>
-		public static T AllocateObject<T>(int fHandleCom = default)
+		internal static T AllocateObject<T>(int fHandleCom = default)
 		{
 			return AllocateObjectInternal<T>(typeof(T), fHandleCom);
 		}
+
+		#endregion
+
+		#region Heap pointer
 
 		public static bool IsHeapPointer<T>(T value, bool smallHeapOnly = false) where T : class
 		{
 			return GlobalHeapValue.Reference.IsHeapPointer(value, smallHeapOnly);
 		}
 
-		internal static unsafe bool IsHeapPointer(Pointer<byte> obj, bool smallHeapOnly = false)
+		public static unsafe bool IsHeapPointer(Pointer<byte> obj, bool smallHeapOnly = false)
 		{
 			return GlobalHeapValue.Reference.IsHeapPointer(obj.ToPointer(), smallHeapOnly);
 		}
 
-		internal static string Debug()
-		{
-			return g_pGCHeap.ToInt64().ToString("X");
-		}
-
+		#endregion
 
 		static GlobalHeap()
 		{

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using RazorSharp.CoreClr.Meta.Transient;
+using RazorSharp.CoreClr.Meta.Virtual;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
 using SimpleSharp.Utilities;

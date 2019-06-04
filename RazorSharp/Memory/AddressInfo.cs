@@ -28,7 +28,7 @@ namespace RazorSharp.Memory
 
 			Page        = Kernel32.VirtualQuery(ptr.Address);
 			Module      = Modules.FromAddress(ptr);
-			Segment     = Segments.GetSegment(ptr, Module?.FileName);
+			Segment     = Segments.FromAddress(ptr, Module?.FileName);
 			IsAllocated = AllocHelper.IsAllocated(ptr);
 		}
 
