@@ -185,9 +185,10 @@
     <Compile Include="Import\Attributes\SymImportAttribute.cs" />
     <Compile Include="Import\Attributes\SymImportOptions.cs" />
     <Compile Include="Import\Attributes\SymNamespaceAttribute.cs" />
-    <Compile Include="ILDump.cs" />
+    <Compile Include="InspectIL.cs" />
     <Compile Include="Import\SymImportException.cs" />
     <Compile Include="Import\Symload.cs" />
+    <Compile Include="Instruction.cs" />
     <Compile Include="Memory\Cleanup.cs" />
     <Compile Include="Memory\MemInfo.cs" />
     <Compile Include="Memory\OffsetOptions.cs" />
@@ -267,6 +268,7 @@
     <Compile Include="CoreClr\Structures\ObjHeader.cs" />
     <Compile Include="CoreClr\Structures\PackedDWORDFields.cs" />
     <Compile Include="CoreClr\Runtime.cs" />
+    <Compile Include="OpCodeTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\Binary\Attributes\Bitfield.cs" />
     <Compile Include="Utilities\Binary\Attributes\BitfieldAttribute.cs" />

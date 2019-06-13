@@ -64,6 +64,11 @@ namespace RazorSharp.Analysis
 			return Layout(ref value, options);
 		}
 
+		public static ConsoleTable DumpFields<T>(T values)
+		{
+			return DumpFields(new[] {values});
+		}
+
 		public static ConsoleTable DumpFields<T>(T[] values)
 		{
 			var type   = new MetaType(typeof(T));
@@ -75,13 +80,10 @@ namespace RazorSharp.Analysis
 			foreach (var field in fields) {
 				table.AddColumn(field.CleanName);
 			}
-
-			int i = 0;
-			foreach (var value in values) {
-				var fieldValues = new List<object>(fields.Length + 1)
-				{
-					i++
-				};
+			
+			for (int i = 0; i < values.Length; i++) {
+				var value       = values[i];
+				var fieldValues = new List<object>(fields.Length + 1) {i};
 
 				fieldValues.AddRange(fields.Select(field => field.ToValueString(value)));
 
