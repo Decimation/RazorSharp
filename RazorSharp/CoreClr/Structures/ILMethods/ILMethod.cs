@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorSharp.Analysis;
 using RazorSharp.CoreClr.Structures.Enums;
 using SimpleSharp;
 using SimpleSharp.Utilities;
@@ -99,6 +100,8 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 			}
 		}*/
 
+
+		
 
 		internal byte[] GetILAsByteArray()
 		{

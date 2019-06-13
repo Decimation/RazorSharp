@@ -102,7 +102,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		private int Size {
 			get {
 				var p = (byte*) Unsafe.AddressOf(ref this);
-				return (*p + 1) >> 4;
+				return *(p + 1) >> 4;
 			}
 		}
 
@@ -113,7 +113,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 		/// </summary>
 		internal Pointer<byte> Code {
 			get {
-				byte* ptr = (byte*) Unsafe.AddressOf(ref this) + sizeof(int) * Size;
+				var ptr = (byte*)Unsafe.AddressOf(ref this) + sizeof(int) * Size;
 				return ptr;
 			}
 		}

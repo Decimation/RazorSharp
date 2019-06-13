@@ -48,7 +48,7 @@ namespace RazorSharp.Utilities
 
 		internal static OpCode[] GetAllOpCodes()
 		{
-			FieldInfo[] opCodesFields = typeof(OpCodes).GetFields(BindingFlags.Public | BindingFlags.Static);
+			FieldInfo[] opCodesFields = typeof(OpCodes).GetFields();
 			var         opCodes       = new OpCode[opCodesFields.Length];
 
 			for (int i = 0; i < opCodes.Length; i++) {

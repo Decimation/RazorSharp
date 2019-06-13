@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
@@ -10,8 +9,8 @@ using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures.ILMethods;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
-using SimpleSharp;
-using SimpleSharp.Strings;
+
+// ReSharper disable ReturnTypeCanBeEnumerable.Global
 
 #endregion
 
@@ -19,206 +18,131 @@ using SimpleSharp.Strings;
 // ReSharper disable CommentTypo
 // ReSharper disable InconsistentNaming
 
-namespace RazorSharp
+namespace RazorSharp.Analysis
 {
 	internal static unsafe class InspectIL
 	{
-		internal static readonly OpCode[] AllOpCodes;
+		/// <summary>
+		/// <para>Key: <see cref="OpCode.Value"/></para>
+		/// <para>Value: <see cref="OpCode"/></para>
+		/// </summary>
+		private static readonly Dictionary<short, OpCode> _opCodes = new Dictionary<short, OpCode>();
 
 		static InspectIL()
 		{
-			AllOpCodes = ReflectionUtil.GetAllOpCodes();
+			foreach (var opCode in ReflectionUtil.GetAllOpCodes()) {
+				_opCodes.Add(opCode.Value, opCode);
+			}
 		}
 
+		/// <summary>
+		/// Gets the <see cref="OpCode"/> where <see cref="OpCode.Value"/> matches <paramref name="value"/>
+ 		/// </summary>
+		/// <param name="value"><see cref="OpCode.Value"/></param>
+		/// <returns>Corresponding <see cref="OpCode"/></returns>
+		public static OpCode GetOpCode(short value) => _opCodes[value];
+		
 		public static Instruction[] GetInstructions(MethodBase methodBase)
 		{
-			MethodBody methodBody = methodBase.GetMethodBody();
+			var methodBody = methodBase.GetMethodBody();
 
-			byte[] bytes;
-			if (methodBody != null)
-			{
-				bytes = methodBody.GetILAsByteArray();
+			byte[] bytes = methodBody != null ? methodBody.GetILAsByteArray() : new byte[] { };
+
+			return GetInstructions(bytes);
+		}
+
+		private static MethodBase Resolve(int token,MethodBase methodBase)
+		{
+			Type[] genericMethodArguments = null;
+			if (methodBase.IsGenericMethod) {
+				genericMethodArguments = methodBase.GetGenericArguments();
 			}
-			else
-			{
-				bytes = new byte[] { };
-			}
-			
+
+			var genericArguments = methodBase.DeclaringType.GetGenericArguments();
+
+			return methodBase.Module.ResolveMethod(token, genericArguments,
+			                                                   genericMethodArguments);
+		}
+
+		public static Instruction[] GetInstructions(byte[] bytes)
+		{
 			var instructions = new List<Instruction>();
-			
+
 			int offset = 0;
 
-            while (offset < bytes.Length)
-            {
-                Instruction instruction = new Instruction();
-                instruction.Offset = offset;
+			const short  CODE    = 0xFE;
+			const ushort CODE_OR = 0xFE00;
 
-                short code = (short)bytes[offset++];
-                if (code == 0xfe)
-                {
-                    code = (short)(bytes[offset++] | 0xfe00);
-                }
+			while (offset < bytes.Length) {
+				var instruction = new Instruction {Offset = offset};
 
-                instruction.OpCode = OpCodeTranslator.GetOpCode(code);
+				short code = bytes[offset++];
+				if (code == CODE) {
+					code = (short) (bytes[offset++] | CODE_OR);
+				}
 
-                switch (instruction.OpCode.OperandType)
-                {
-                    case OperandType.InlineBrTarget:
-                        offset += 4;
-                        break;
+				instruction.OpCode = GetOpCode(code);
 
-                    case OperandType.InlineField:
-                        offset += 4;
-                        break;
+				switch (instruction.OpCode.OperandType) {
+					case OperandType.InlineBrTarget:
+					case OperandType.InlineField:
+					case OperandType.InlineI:
+					case OperandType.InlineTok:
+					case OperandType.InlineType:
+					case OperandType.InlineSig:
+					case OperandType.ShortInlineR:
+						offset += sizeof(int);
+						break;
 
-                    case OperandType.InlineI:
-                        offset += 4;
-                        break;
+					case OperandType.InlineR:
+					case OperandType.InlineI8:
+						offset += sizeof(long);
+						break;
 
-                    case OperandType.InlineI8:
-                        offset += 8;
-                        break;
+					case OperandType.InlineMethod:
+						int token = BitConverter.ToInt32(bytes, offset);
+						instruction.Data = token;
+						offset += sizeof(int);
+						break;
 
-                    case OperandType.InlineMethod:
-	                    int metaDataToken = OpCodeTranslator.GetInt32(bytes, offset);
+					case OperandType.InlineNone:
+						break;
 
-                        Type[] genericMethodArguments = null;
-                        if (methodBase.IsGenericMethod == true)
-                        {
-                            genericMethodArguments = methodBase.GetGenericArguments();
-                        }
+					case OperandType.InlineString:
+						int mdString = BitConverter.ToInt32(bytes, offset);
 
-                        instruction.Data = methodBase.Module.ResolveMethod(metaDataToken, methodBase.DeclaringType.GetGenericArguments(), genericMethodArguments);
-                        offset += 4;
-                        break;
+						instruction.Data =  mdString;
+						offset           += sizeof(int);
+						break;
 
-                    case OperandType.InlineNone:
-                        break;
+					case OperandType.InlineSwitch:
+						int count = BitConverter.ToInt32(bytes, offset) + 1;
+						offset += sizeof(int) * count;
+						break;
 
-                    case OperandType.InlineR:
-                        offset += 8;
-                        break;
 
-                    case OperandType.InlineSig:
-                        offset += 4;
-                        break;
+					case OperandType.InlineVar:
+						offset += sizeof(short);
+						break;
 
-                    case OperandType.InlineString:
-                        offset += 4;
-                        break;
+					case OperandType.ShortInlineVar:
+					case OperandType.ShortInlineBrTarget:
+					case OperandType.ShortInlineI:
+						offset += sizeof(byte);
+						break;
 
-                    case OperandType.InlineSwitch:
-                        int count = OpCodeTranslator.GetInt32(bytes,offset) + 1;
-                        offset += 4 * count;
-                        break;
+					default:
+						throw new NotImplementedException();
+				}
 
-                    case OperandType.InlineTok:
-                        offset += 4;
-                        break;
-
-                    case OperandType.InlineType:
-                        offset += 4;
-                        break;
-
-                    case OperandType.InlineVar:
-                        offset += 2;
-                        break;
-
-                    case OperandType.ShortInlineBrTarget:
-                        offset += 1;
-                        break;
-
-                    case OperandType.ShortInlineI:
-                        offset += 1;
-                        break;
-
-                    case OperandType.ShortInlineR:
-                        offset += 4;
-                        break;
-
-                    case OperandType.ShortInlineVar:
-                        offset += 1;
-                        break;
-
-                    default:
-                        throw new NotImplementedException();
-                }
-
-                instructions.Add(instruction);
-            }
-
-            return instructions.ToArray();
-		}
-		
-		internal static string ViewOpCode(OpCode opCode)
-		{
-			var table = new ConsoleTable("Property", "Value");
-			table.AddRow("Name", opCode.Name);
-			table.AddRow("Value", opCode.Value.ToString("X"));
-			if (opCode.Size==sizeof(short)) {
-				table.AddRow("Value", BitConverter.GetBytes(opCode.Value).AutoJoin());
+				instructions.Add(instruction);
 			}
-			table.AddRow("Size", opCode.Size);
-			table.AddRow("Operand type", opCode.OperandType);
-			table.AddRow("OpCode type", opCode.OpCodeType);
 
-
-			return table.ToString();
+			return instructions.ToArray();
 		}
 		
 
-		// kinda works
-		internal static OpCode GetOpCode(byte* b)
-		{
-			foreach (var opCode in AllOpCodes) {
-				switch (opCode.Size) {
-					case sizeof(short) when opCode.Value == *(short*) b:
-					case sizeof(byte) when opCode.Value == *b:
-						return opCode;
-				}
-			}
-
-			throw new Exception();
-			//return default;
-		}
-
-		// kinda works
-		internal static OpCode[] GetOpCodes(byte* b, int len)
-		{
-			var opCodesList = new List<OpCode>();
-
-			for (int i = 0; i < len; i++) {
-				foreach (var opCode in AllOpCodes) {
-					switch (opCode.Size) {
-						case sizeof(short): {
-							var shortPtr = (short*) (b + i);
-
-							if (opCode.Value == *shortPtr) {
-								opCodesList.Add(opCode);
-								i++;
-							}
-
-							break;
-						}
-
-						case sizeof(byte):
-						{
-							if (opCode.Value == b[i]) {
-								opCodesList.Add(opCode);
-							}
-
-							break;
-						}
-					}
-				}
-			}
-
-
-			return opCodesList.ToArray();
-		}
-
-
-		internal static string ILString(MethodInfo mi)
+		/*internal static string ILString(MethodInfo mi)
 		{
 			Pointer<ILMethod> il = mi.GetMethodDesc().Reference.GetILHeader();
 			return ILString(il.Reference.Code.ToPointer<byte>(), il.Reference.CodeSize);
@@ -1095,6 +1019,6 @@ namespace RazorSharp
 			}
 
 			return sb.ToString();
-		}
+		}*/
 	}
 }

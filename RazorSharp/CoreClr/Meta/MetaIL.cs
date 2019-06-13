@@ -2,6 +2,7 @@
 
 #region
 
+using RazorSharp.Analysis;
 using SimpleSharp;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.Enums;
@@ -102,6 +103,8 @@ namespace RazorSharp.CoreClr.Meta
 			return Value.Reference.GetILAsByteArray();
 		}
 
+		public Instruction[] Instructions => InspectIL.GetInstructions(GetILAsByteArray());
+		
 		public ConsoleTable ToTable()
 		{
 			return Value.Reference.ToTable();
