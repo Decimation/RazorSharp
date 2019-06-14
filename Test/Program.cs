@@ -81,6 +81,17 @@ namespace Test
 			return a + b;
 		}
 
+		struct MyStruct
+		{
+			private int   i;
+			private float f;
+
+			public void Deconstruct(out int i, out float f)
+			{
+				i = this.i;
+				f = this.f;
+			}
+		}
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
@@ -90,12 +101,19 @@ namespace Test
 
 			var fn = typeof(Program).GetAnyMethod("Add");
 
-			var il = fn.GetMethodDesc().Reference.GetILHeader();
+			var il = fn.GetMethodDesc()
+			           .Reference
+			           .GetILHeader();
 
 
 			foreach (var ins in InspectIL.GetInstructions(fn)) {
 				Console.WriteLine(ins);
 			}
+
+			var ms = new MyStruct();
+
+			var (i, f) = ms;
+			Console.WriteLine(i);
 		}
 	}
 }
