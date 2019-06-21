@@ -45,6 +45,16 @@ namespace RazorSharp.Utilities
 
 			return method.Invoke(instance, args);
 		}
+		
+		public static object InvokeGenericMethod(MethodInfo method,
+		                                         object          instance, Type[] typeArgs,
+		                                         params object[] args)
+		{
+			
+			method = method.MakeGenericMethod(typeArgs);
+
+			return method.Invoke(instance, args);
+		}
 
 		internal static OpCode[] GetAllOpCodes()
 		{

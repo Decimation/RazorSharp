@@ -64,7 +64,7 @@ namespace RazorSharp.Memory
 		public Region(Pointer<byte> lo, long size)
 		{
 			LowAddress  = lo;
-			HighAddress = lo + size;
+			HighAddress = (IntPtr) (lo.ToInt64() + size);
 		}
 
 		#endregion

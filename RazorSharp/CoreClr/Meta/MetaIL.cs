@@ -78,7 +78,7 @@ namespace RazorSharp.CoreClr.Meta
 		///         Equals <see cref="System.Reflection.MethodBody.LocalSignatureMetadataToken" />
 		///     </remarks>
 		/// </summary>
-		public int LocalVarSigTok => Value.Reference.LocalVarSigTok;
+		public int Token => Value.Reference.LocalVarSigTok;
 
 		/// <summary>
 		///     <remarks>

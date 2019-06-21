@@ -83,7 +83,7 @@ namespace RazorSharp.CoreClr
 
 		internal static TypeHandle GetHandle<T>(T value) where T : class
 		{
-			return Unsafe.AddressOfHeap(value).ReadAny<TypeHandle>();
+			return Unsafe.AddressOfHeap(value).Cast<TypeHandle>().Read();
 		}
 
 		#region Offset
@@ -108,7 +108,7 @@ namespace RazorSharp.CoreClr
 			var ptrValue = Unsafe.AddressOf(ref value).Cast();
 
 			fixed (void** ptrField = &field) {
-				return (int) (ptrField - ptrValue);
+				return (int) (((long)ptrField ) - ptrValue.ToInt64());
 			}
 		}
 
@@ -118,7 +118,7 @@ namespace RazorSharp.CoreClr
 			var ptrValue = Unsafe.AddressOf(ref value).Cast();
 			var ptrField = Unsafe.AddressOf(ref field).Cast();
 
-			return (int) (ptrField - ptrValue);
+			return (int) (ptrField.ToInt64() - ptrValue.ToInt64());
 		}
 
 		#endregion

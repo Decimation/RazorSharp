@@ -40,7 +40,7 @@ namespace RazorSharp.Native.Symbols
 		public Pointer<byte> GetSymAddress(string name)
 		{
 			long ofs = GetSymbol(name).Offset;
-			return BaseAddress + ofs;
+			return (BaseAddress + ofs);
 		}
 
 		public TDelegate GetFunction<TDelegate>(string name) where TDelegate : Delegate

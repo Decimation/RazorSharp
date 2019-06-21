@@ -52,7 +52,7 @@ namespace RazorSharp.Memory
 		{
 			lock (value) {
 				Pointer<byte> addr = AddressOfHeap(value, OffsetOptions.FIELDS);
-				return addr.ReadAny<T>();
+				return addr.Cast<T>().Read();
 			}
 		}
 
@@ -507,7 +507,7 @@ namespace RazorSharp.Memory
 		{
 			// Need to include the ObjHeader
 			Pointer<T> ptr = AddressOfHeap(value, OffsetOptions.HEADER).Address;
-			return ptr.Cast().CopyOut(HeapSize(value));
+			return ptr.Cast().Copy(HeapSize(value));
 		}
 
 		/// <summary>
@@ -520,7 +520,7 @@ namespace RazorSharp.Memory
 		public static byte[] MemoryOfVal<T>(T value)
 		{
 			Pointer<T> ptr = AddressOf(ref value);
-			return ptr.Cast().CopyOut(ptr.ElementSize);
+			return ptr.Cast().Copy(ptr.ElementSize);
 		}
 
 		public static byte[] MemoryOfFields<T>(T value) where T : class

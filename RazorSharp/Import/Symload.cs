@@ -228,7 +228,7 @@ namespace RazorSharp.Import
 						size = Unsafe.BaseSizeOfData(fieldType);
 					}
 
-					byte[] mem = addr.CopyOutBytes(size);
+					byte[] mem = addr.CopyBytes(size);
 
 					loadedValue = Unsafe.LoadFrom(fieldType, mem);
 
@@ -236,12 +236,12 @@ namespace RazorSharp.Import
 				case SymFieldOptions.LoadAs:
 					var fieldLoadType = symField.LoadAs ?? fieldType;
 
-					loadedValue = RtInfo.IsPointer(fieldLoadType) ? addr : addr.ReadAnyEx(fieldLoadType);
+					loadedValue = RtInfo.IsPointer(fieldLoadType) ? addr : addr.ReadAny(fieldLoadType);
 
 					break;
 				case SymFieldOptions.LoadFast:
 					int           fieldSize = fieldInfo.Size;
-					byte[]        memCpy    = addr.CopyOutBytes(fieldSize);
+					byte[]        memCpy    = addr.CopyBytes(fieldSize);
 					Pointer<byte> fieldAddr = fieldInfo.GetValueAddress(ref value);
 					fieldAddr.WriteAll(memCpy);
 					return;
@@ -256,7 +256,7 @@ namespace RazorSharp.Import
 				ptr.WritePointer((Pointer<byte>) loadedValue);
 			}
 			else {
-				ptr.WriteAnyEx(fieldType, loadedValue);
+				ptr.WriteAny(fieldType, loadedValue);
 			}
 		}
 

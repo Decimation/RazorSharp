@@ -22,8 +22,13 @@ namespace RazorSharp.Utilities
 		{
 			fixed (byte* ptr = mem) {
 				Pointer<TTo> memPtr = ptr;
-				return memPtr.CopyOut(mem.Length / memPtr.ElementSize);
+				return memPtr.Copy(mem.Length / memPtr.ElementSize);
 			}
+		}
+
+		public static TTo As<TFrom, TTo>(TFrom t)
+		{
+			return Convert<TFrom, TTo>(t, ConversionType.AS);
 		}
 
 		public static TTo Convert<TFrom, TTo>(TFrom t, ConversionType c = ConversionType.REINTERPRET)
@@ -44,7 +49,7 @@ namespace RazorSharp.Utilities
 		{
 			Pointer<byte> alloc = Mem.Alloc<byte>(mem.Length);
 			alloc.WriteAll(mem);
-			var read = alloc.ReadAny<TTo>();
+			var read = alloc.Cast<TTo>().Read();
 			Mem.Free(alloc);
 			return read;
 		}
@@ -60,7 +65,7 @@ namespace RazorSharp.Utilities
 		/// <returns></returns>
 		private static TTo ReinterpretCast<TFrom, TTo>(TFrom value)
 		{
-			return Unsafe.AddressOf(ref value).ReadAny<TTo>();
+			return Unsafe.AddressOf(ref value).Cast<TTo>().Read();
 		}
 	}
 }

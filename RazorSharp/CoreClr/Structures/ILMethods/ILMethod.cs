@@ -105,7 +105,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 
 		internal byte[] GetILAsByteArray()
 		{
-			return Code.CopyOut(CodeSize);
+			return Code.Copy(CodeSize);
 		}
 
 		internal CorILMethodFlags Flags {

@@ -93,6 +93,14 @@ namespace Test
 			}
 		}
 
+		public static T Get<T>()
+		{
+			if (typeof(T) == typeof(int)) {
+				return Conversions.As<int,T>(1);
+			}
+			return default;
+		}
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
@@ -114,6 +122,13 @@ namespace Test
 
 			var (i, f) = ms;
 			Console.WriteLine(i);
+			Console.WriteLine(Get<int>());
+
+			int iv = 123;
+			var ptr = Unsafe.AddressOf(ref iv);
+			Console.WriteLine(ptr.ReadAny(typeof(int)));
+			ptr.WriteAny(typeof(int),1);
+			Console.WriteLine(ptr.ReadAny(typeof(int)));
 		}
 	}
 }

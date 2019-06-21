@@ -160,17 +160,17 @@ namespace RazorSharp.Memory
 
 			// Write the pointer in the extra allocated bytes,
 			// pointing to the MethodTable* (skip over the extra pointer and the ObjHeader)
-			alloc.WriteAny(alloc.Address + Offsets.ObjectOverhead);
+			alloc.Cast<IntPtr>().Write(alloc.Address + Offsets.ObjectOverhead);
 
 			// Write the ObjHeader
 			// (this'll already be zeroed, but this is just self-documentation)
 			// +4 int (sync block)
 			// +4 int (padding, x64)
-			alloc.WriteAny(0L, 1);
+			alloc.Cast<long>().Write(0L, 1);
 
 			// Write the MethodTable
 			// Managed pointers point to the MethodTable* in the GC heap
-			alloc.WriteAny(methodTable, 2);
+			alloc.Cast<Pointer<MethodTable>>().Write(methodTable, 2);
 
 			Pointer<T> valuePtr = alloc.Cast<T>();
 
@@ -214,7 +214,7 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     <para>Frees memory allocated from <see cref="Alloc{T}" /> using <see cref="Marshal.FreeHGlobal" /></para>
 		/// </summary>
-		/// <param name="p">Pointer to allocated memory</param>
+		/// <param name="p">AltPointer to allocated memory</param>
 		public static void Free<T>(Pointer<T> p)
 		{
 			Marshal.FreeHGlobal(p.Address);
@@ -237,32 +237,6 @@ namespace RazorSharp.Memory
 			p.ZeroBytes(length);
 			Free(p);
 		}
-
-		#region String
-
-		/// <summary>
-		///     Allocates a native string from a UTF16 C# string
-		/// </summary>
-		/// <param name="s">Standard UTF16 C# string</param>
-		/// <param name="type">String type</param>
-		public static Pointer<byte> AllocString(string s, StringTypes type)
-		{
-			int           size = s.Length + 1;
-			Pointer<byte> ptr  = Alloc<byte>(size);
-			ptr.WriteString(s, type);
-			Conditions.Assert(ptr.ReadString(type) == s);
-
-			return ptr;
-		}
-
-		public static void FreeString(Pointer<byte> ptr)
-		{
-			int size = ptr.ReadUntil(x => x == 0x00) + 1;
-			ptr.ZeroBytes(size);
-			Free(ptr);
-		}
-
-		#endregion
 
 		#region Code
 
@@ -366,19 +340,19 @@ namespace RazorSharp.Memory
 		}
 
 		/*[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Write<T>(Pointer<byte> p, int byteOffset, T t)
+		public static void Write<T>(AltPointer<byte> p, int byteOffset, T t)
 		{
 			CSUnsafe.Write((p + byteOffset).ToPointer(), t);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T Read<T>(Pointer<byte> p, int byteOffset = 0)
+		public static T Read<T>(AltPointer<byte> p, int byteOffset = 0)
 		{
 			return CSUnsafe.Read<T>((p + byteOffset).ToPointer());
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ref T AsRef<T>(Pointer<byte> p, int byteOffset = 0)
+		public static ref T AsRef<T>(AltPointer<byte> p, int byteOffset = 0)
 		{
 			return ref CSUnsafe.AsRef<T>((p + byteOffset).ToPointer());
 		}*/
@@ -409,7 +383,7 @@ namespace RazorSharp.Memory
 
 		
 
-		// todo: the Copy methods should probably be implemented in Pointer for consistency
+		// todo: the Copy methods should probably be implemented in AltPointer for consistency
 
 		#region Copy
 
