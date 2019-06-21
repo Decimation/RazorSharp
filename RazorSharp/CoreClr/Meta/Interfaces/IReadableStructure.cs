@@ -1,9 +1,8 @@
-using System.Reflection;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 
-namespace RazorSharp.CoreClr.Meta
+namespace RazorSharp.CoreClr.Meta.Interfaces
 {
 	/// <summary>
 	/// Represents a readable structure or field in memory.

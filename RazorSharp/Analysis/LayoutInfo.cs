@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Meta.Interfaces;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Utilities;

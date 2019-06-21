@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using RazorSharp.CoreClr.Meta.Interfaces;
 using RazorSharp.CoreClr.Meta.Virtual;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
@@ -31,7 +32,7 @@ namespace RazorSharp.CoreClr.Meta
 	///     <list type="bullet">
 	///         <item>
 	///             <description>
-	///                 <see cref="MethodTable" />
+	///                 <see cref="Structures.MethodTable" />
 	///             </description>
 	///         </item>
 	///         <item>
@@ -63,7 +64,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		internal MetaType(Pointer<MethodTable> p)
 		{
-			Value = p;
+			MethodTable = p;
 
 			if (!p.Reference.Canon.IsNull && p.Reference.Canon.Address != p.Address)
 				Canon = new MetaType(p.Reference.Canon);
@@ -81,7 +82,7 @@ namespace RazorSharp.CoreClr.Meta
 			AllFields = new VirtualCollection<MetaField>(GetAnyField, GetAllFields);
 		}
 
-		private Pointer<EEClassLayoutInfo> LayoutInfo => Value.Reference.EEClass.Reference.LayoutInfo;
+		private Pointer<EEClassLayoutInfo> LayoutInfo => MethodTable.Reference.EEClass.Reference.LayoutInfo;
 
 		public IEnumerable<MetaField> InstanceFields {
 			get {
@@ -303,7 +304,7 @@ namespace RazorSharp.CoreClr.Meta
 			table.AddRow("Blittable", IsBlittable);
 
 
-			table.AddRow("Value", Value.ToString("P"));
+			table.AddRow("Value", MethodTable.ToString("P"));
 
 			return table;
 		}
@@ -337,11 +338,11 @@ namespace RazorSharp.CoreClr.Meta
 		public MetaType Parent { get; }
 
 
-		public CorElementType NormalType => Value.Reference.EEClass.Reference.NormalType;
+		public CorElementType NormalType => MethodTable.Reference.EEClass.Reference.NormalType;
 
 		public MemberInfo Info => RuntimeType;
 
-		public string Name => Value.Reference.Name;
+		public string Name => MethodTable.Reference.Name;
 
 		/// <summary>
 		///     Metadata token
@@ -350,30 +351,30 @@ namespace RazorSharp.CoreClr.Meta
 		///         <para>Equals <see cref="Type.MetadataToken" /></para>
 		///     </remarks>
 		/// </summary>
-		public int Token => Value.Reference.Token;
+		public int Token => MethodTable.Reference.Token;
 
 		/// <summary>
-		///     <para>Corresponding <see cref="Type" /> of this <see cref="MethodTable" /></para>
+		///     <para>Corresponding <see cref="Type" /> of this <see cref="Structures.MethodTable" /></para>
 		/// </summary>
-		public Type RuntimeType => Value.Reference.RuntimeType;
+		public Type RuntimeType => MethodTable.Reference.RuntimeType;
 
 		#region bool
 
 		public bool IsZeroSized => LayoutInfo.Reference.ZeroSized;
 
-		public bool HasLayout => Value.Reference.EEClass.Reference.HasLayout;
+		public bool HasLayout => MethodTable.Reference.EEClass.Reference.HasLayout;
 
-		public bool HasComponentSize => Value.Reference.HasComponentSize;
+		public bool HasComponentSize => MethodTable.Reference.HasComponentSize;
 
-		public bool IsArray => Value.Reference.IsArray;
+		public bool IsArray => MethodTable.Reference.IsArray;
 
-		public bool IsStringOrArray => Value.Reference.IsStringOrArray;
+		public bool IsStringOrArray => MethodTable.Reference.IsStringOrArray;
 
-		public bool IsBlittable => Value.Reference.IsBlittable;
+		public bool IsBlittable => MethodTable.Reference.IsBlittable;
 
-		public bool IsString => Value.Reference.IsString;
+		public bool IsString => MethodTable.Reference.IsString;
 
-		public bool ContainsPointers => Value.Reference.ContainsPointers;
+		public bool ContainsPointers => MethodTable.Reference.ContainsPointers;
 
 		#endregion
 
@@ -381,15 +382,15 @@ namespace RazorSharp.CoreClr.Meta
 
 		public LayoutFlags LayoutFlags => LayoutInfo.Reference.Flags;
 
-		public TypeAttributes TypeAttributes => Value.Reference.EEClass.Reference.TypeAttributes;
+		public TypeAttributes TypeAttributes => MethodTable.Reference.EEClass.Reference.TypeAttributes;
 
-		public VMFlags VMFlags => Value.Reference.EEClass.Reference.VMFlags;
+		public VMFlags VMFlags => MethodTable.Reference.EEClass.Reference.VMFlags;
 
-		public MethodTableFlags Flags => Value.Reference.Flags;
+		public MethodTableFlags Flags => MethodTable.Reference.Flags;
 
-		public MethodTableFlags2 Flags2 => Value.Reference.Flags2;
+		public MethodTableFlags2 Flags2 => MethodTable.Reference.Flags2;
 
-		public MethodTableFlagsLow FlagsLow => Value.Reference.FlagsLow;
+		public MethodTableFlagsLow FlagsLow => MethodTable.Reference.FlagsLow;
 
 		#endregion
 
@@ -400,7 +401,7 @@ namespace RazorSharp.CoreClr.Meta
 		///     <see cref="BaseSize" /> returns the size of instance fields for a boxed value, and
 		///     <see cref="NumInstanceFieldBytes" /> for an unboxed value.
 		/// </summary>
-		public int BaseSize => Value.Reference.BaseSize;
+		public int BaseSize => MethodTable.Reference.BaseSize;
 
 		/// <summary>
 		///     <para>The size of an individual element when this type is an array or string.</para>
@@ -411,13 +412,13 @@ namespace RazorSharp.CoreClr.Meta
 		///         <c>0</c> if <c>!</c><see cref="HasComponentSize" />, component size otherwise
 		///     </returns>
 		/// </summary>
-		public int ComponentSize => Value.Reference.ComponentSize;
+		public int ComponentSize => MethodTable.Reference.ComponentSize;
 
 		public int ManagedSize => (int) LayoutInfo.Reference.ManagedSize;
 
-		public int NativeSize => Value.Reference.EEClass.Reference.NativeSize;
+		public int NativeSize => MethodTable.Reference.EEClass.Reference.NativeSize;
 
-		public int BaseSizePadding => Value.Reference.EEClass.Reference.BaseSizePadding;
+		public int BaseSizePadding => MethodTable.Reference.EEClass.Reference.BaseSizePadding;
 
 		#endregion
 
@@ -426,30 +427,30 @@ namespace RazorSharp.CoreClr.Meta
 		/// <summary>
 		///     The number of instance fields in this type.
 		/// </summary>
-		public int NumInstanceFields => Value.Reference.NumInstanceFields;
+		public int NumInstanceFields => MethodTable.Reference.NumInstanceFields;
 
 		/// <summary>
 		///     The number of <c>static</c> fields in this type.
 		/// </summary>
-		public int NumStaticFields => Value.Reference.NumStaticFields;
+		public int NumStaticFields => MethodTable.Reference.NumStaticFields;
 
-		public int NumNonVirtualSlots => Value.Reference.NumNonVirtualSlots;
+		public int NumNonVirtualSlots => MethodTable.Reference.NumNonVirtualSlots;
 
 		/// <summary>
 		///     Number of methods in this type.
 		/// </summary>
-		public int NumMethods => Value.Reference.NumMethods;
+		public int NumMethods => MethodTable.Reference.NumMethods;
 
 		/// <summary>
 		///     The size of the instance fields in this type. This is the unboxed size of the type if the object is boxed.
 		///     (Minus padding and overhead of the base size.)
 		/// </summary>
-		public int NumInstanceFieldBytes => Value.Reference.NumInstanceFieldBytes;
+		public int NumInstanceFieldBytes => MethodTable.Reference.NumInstanceFieldBytes;
 
 		/// <summary>
 		///     The number of virtual methods in this type (<c>4</c> by default; from <see cref="Object" />)
 		/// </summary>
-		public int NumVirtuals => Value.Reference.NumVirtuals;
+		public int NumVirtuals => MethodTable.Reference.NumVirtuals;
 
 		/// <summary>
 		///     The number of interfaces this type implements
@@ -457,11 +458,16 @@ namespace RazorSharp.CoreClr.Meta
 		///         <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>Number of IFaces in IFaceMap</c> value.</para>
 		///     </remarks>
 		/// </summary>
-		public int NumInterfaces => Value.Reference.NumInterfaces;
+		public int NumInterfaces => MethodTable.Reference.NumInterfaces;
 
 		#endregion
 
-		private Pointer<MethodTable> Value { get; }
+		private Pointer<MethodTable> MethodTable { get; }
+
+		/// <summary>
+		/// Points to <see cref="MethodTable"/>
+		/// </summary>
+		public Pointer<byte> Value => MethodTable.Cast();
 
 		#endregion
 	}

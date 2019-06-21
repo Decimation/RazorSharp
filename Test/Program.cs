@@ -75,60 +75,16 @@ namespace Test
 			Console.WriteLine(layout);
 		}
 
-		private static int Add(int a, int b)
-		{
-			Console.WriteLine("hello");
-			return a + b;
-		}
-
-		struct MyStruct
-		{
-			private int   i;
-			private float f;
-
-			public void Deconstruct(out int i, out float f)
-			{
-				i = this.i;
-				f = this.f;
-			}
-		}
-
-		public static T Get<T>()
-		{
-			if (typeof(T) == typeof(int)) {
-				return Conversions.As<int,T>(1);
-			}
-			return default;
-		}
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			Global.SuppressLogger();
-			Console.Clear();
+			var rg = new int[] { 1,2,3,16};
+			
+			
+			
 
-			var fn = typeof(Program).GetAnyMethod("Add");
-
-			var il = fn.GetMethodDesc()
-			           .Reference
-			           .GetILHeader();
-
-
-			foreach (var ins in InspectIL.GetInstructions(fn)) {
-				Console.WriteLine(ins);
-			}
-
-			var ms = new MyStruct();
-
-			var (i, f) = ms;
-			Console.WriteLine(i);
-			Console.WriteLine(Get<int>());
-
-			int iv = 123;
-			var ptr = Unsafe.AddressOf(ref iv);
-			Console.WriteLine(ptr.ReadAny(typeof(int)));
-			ptr.WriteAny(typeof(int),1);
-			Console.WriteLine(ptr.ReadAny(typeof(int)));
+			Console.WriteLine(rg.FormatJoin(", ", "{0:X}"));
 		}
 	}
 }

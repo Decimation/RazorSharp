@@ -143,7 +143,7 @@ namespace RazorSharp.CoreClr
 
 		/// <summary>
 		/// Determines whether <paramref name="type"/> is a native pointer, <see cref="IntPtr"/>, <see cref="UIntPtr"/>,
-		/// <see cref="Pointer{T}"/>, or <see cref="FastPointer{T}"/>
+		/// or <see cref="Pointer{T}"/>
 		/// </summary>
 		public static bool IsPointer(Type type)
 		{
@@ -153,7 +153,7 @@ namespace RazorSharp.CoreClr
 
 			if (type.IsConstructedGenericType) {
 				var genDef = type.GetGenericTypeDefinition();
-				return genDef == typeof(Pointer<>) || genDef == typeof(FastPointer<>);
+				return genDef == typeof(Pointer<>);
 			}
 
 			return false;

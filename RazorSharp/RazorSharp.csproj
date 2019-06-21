@@ -139,8 +139,9 @@
     <Compile Include="Constants.cs" />
     <Compile Include="CoreClr\Clr.cs" />
     <Compile Include="CoreClr\Instruction.cs" />
-    <Compile Include="CoreClr\Meta\IMetadata.cs" />
-    <Compile Include="CoreClr\Meta\IReadableStructure.cs" />
+    <Compile Include="CoreClr\Meta\Interfaces\IMetadata.cs" />
+    <Compile Include="CoreClr\Meta\Interfaces\IReadableStructure.cs" />
+    <Compile Include="CoreClr\Meta\Interfaces\IToken.cs" />
     <Compile Include="CoreClr\Meta\MetaField.cs" />
     <Compile Include="CoreClr\Meta\MetaIL.cs" />
     <Compile Include="CoreClr\Meta\MetaMethod.cs" />
@@ -192,7 +193,6 @@
     <Compile Include="Memory\Cleanup.cs" />
     <Compile Include="Memory\MemInfo.cs" />
     <Compile Include="Memory\OffsetOptions.cs" />
-    <Compile Include="Memory\Pointers\FastPointer.cs" />
     <Compile Include="Memory\Pointers\Pointer.cs" />
     <Compile Include="Memory\Pointers\PointerFormat.cs" />
     <Compile Include="Memory\Pointers\StringTypes.cs" />

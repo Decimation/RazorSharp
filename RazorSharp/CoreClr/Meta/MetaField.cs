@@ -4,6 +4,7 @@
 
 using System;
 using System.Reflection;
+using RazorSharp.CoreClr.Meta.Interfaces;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory.Pointers;
@@ -23,7 +24,7 @@ namespace RazorSharp.CoreClr.Meta
 	///     <list type="bullet">
 	///         <item>
 	///             <description>
-	///                 <see cref="FieldDesc" />
+	///                 <see cref="Structures.FieldDesc" />
 	///             </description>
 	///         </item>
 	///     </list>
@@ -33,7 +34,7 @@ namespace RazorSharp.CoreClr.Meta
 	{
 		internal MetaField(Pointer<FieldDesc> p)
 		{
-			Value = p;
+			FieldDesc = p;
 		}
 
 		public MetaField(FieldInfo field) : this(field.GetFieldDesc()) { }
@@ -53,7 +54,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		public override string ToString()
 		{
-			var info = Value.Reference.Info;
+			var info = FieldDesc.Reference.Info;
 			return String.Format("{0} {1} (offset: {2}) (size: {3})", info.FieldType.Name, info.Name, Offset, Size);
 		}
 
@@ -61,44 +62,44 @@ namespace RazorSharp.CoreClr.Meta
 
 		#region bool
 
-		public bool IsPublic => Value.Reference.IsPublic;
+		public bool IsPublic => FieldDesc.Reference.IsPublic;
 
-		public bool IsPrivate => Value.Reference.IsPrivate;
+		public bool IsPrivate => FieldDesc.Reference.IsPrivate;
 
-		public bool IsInternal => Value.Reference.IsInternal;
+		public bool IsInternal => FieldDesc.Reference.IsInternal;
 
-		public bool IsPrivateProtected => Value.Reference.IsPrivateProtected;
+		public bool IsPrivateProtected => FieldDesc.Reference.IsPrivateProtected;
 
-		public bool IsProtectedInternal => Value.Reference.IsProtectedInternal;
+		public bool IsProtectedInternal => FieldDesc.Reference.IsProtectedInternal;
 
-		public bool IsPointer => Value.Reference.IsPointer;
+		public bool IsPointer => FieldDesc.Reference.IsPointer;
 
 		public bool IsAnyPointer => RtInfo.IsPointer(FieldType);
 
 		/// <summary>
 		///     Whether the field is <c>static</c>
 		/// </summary>
-		public bool IsStatic => Value.Reference.IsStatic;
+		public bool IsStatic => FieldDesc.Reference.IsStatic;
 
 		/// <summary>
 		///     Whether the field is decorated with a <see cref="ThreadStaticAttribute" /> attribute
 		/// </summary>
-		public bool IsThreadLocal => Value.Reference.IsThreadLocal;
+		public bool IsThreadLocal => FieldDesc.Reference.IsThreadLocal;
 
-		public bool IsRVA => Value.Reference.IsRVA;
+		public bool IsRVA => FieldDesc.Reference.IsRVA;
 
-		public bool IsFixedBuffer => Value.Reference.IsFixedBuffer;
+		public bool IsFixedBuffer => FieldDesc.Reference.IsFixedBuffer;
 
-		public bool IsBackingField => Value.Reference.IsBackingField;
+		public bool IsBackingField => FieldDesc.Reference.IsBackingField;
 
 		#endregion
 
 		/// <summary>
 		///     Access level of the field
 		/// </summary>
-		public ProtectionLevel Protection => Value.Reference.Protection;
+		public ProtectionLevel Protection => FieldDesc.Reference.Protection;
 
-		public CorElementType CorType => Value.Reference.CorType;
+		public CorElementType CorType => FieldDesc.Reference.CorType;
 
 		public int MemoryOffset {
 			get {
@@ -115,7 +116,7 @@ namespace RazorSharp.CoreClr.Meta
 		/// <summary>
 		///     <para>Size of the field</para>
 		/// </summary>
-		public int Size => Value.Reference.Size;
+		public int Size => FieldDesc.Reference.Size;
 
 		/// <summary>
 		///     Field metadata token
@@ -124,7 +125,7 @@ namespace RazorSharp.CoreClr.Meta
 		///         <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Field"</c> column in hexadecimal format.</para>
 		///     </remarks>
 		/// </summary>
-		public int Token => Value.Reference.Token;
+		public int Token => FieldDesc.Reference.Token;
 
 		/// <summary>
 		///     Offset in memory
@@ -133,18 +134,18 @@ namespace RazorSharp.CoreClr.Meta
 		///     </remarks>
 		/// </summary>
 		public int Offset {
-			get => Value.Reference.Offset;
-			set => Value.Reference.Offset = value;
+			get => FieldDesc.Reference.Offset;
+			set => FieldDesc.Reference.Offset = value;
 		}
 
 		/// <summary>
-		///     The corresponding <see cref="FieldInfo" /> of this <see cref="FieldDesc" />
+		///     The corresponding <see cref="FieldInfo" /> of this <see cref="Structures.FieldDesc" />
 		/// </summary>
-		public FieldInfo FieldInfo => Value.Reference.Info;
+		public FieldInfo FieldInfo => FieldDesc.Reference.Info;
 
 		public MemberInfo Info => FieldInfo;
 
-		public string Name => Value.Reference.Name;
+		public string Name => FieldDesc.Reference.Name;
 
 		public string CleanName {
 			get {
@@ -160,15 +161,20 @@ namespace RazorSharp.CoreClr.Meta
 			}
 		}
 
-		public Type EnclosingType => Value.Reference.EnclosingType;
+		public Type EnclosingType => FieldDesc.Reference.EnclosingType;
 
-		public Type FieldType => Value.Reference.FieldType;
+		public Type FieldType => FieldDesc.Reference.FieldType;
 
 		public string TypeName => FieldType.Name;
 
-		public MetaType EnclosingMetaType => new MetaType(Value.Reference.EnclosingMethodTable);
+		public MetaType EnclosingMetaType => new MetaType(FieldDesc.Reference.EnclosingMethodTable);
 
-		private Pointer<FieldDesc> Value { get; }
+		private Pointer<FieldDesc> FieldDesc { get; }
+
+		/// <summary>
+		/// Points to <see cref="FieldDesc"/>
+		/// </summary>
+		public Pointer<byte> Value => FieldDesc.Cast();
 
 //		public Pointer<MethodTable> FieldMethodTable => m_pFieldDesc.Reference.FieldMethodTable;
 
@@ -185,37 +191,37 @@ namespace RazorSharp.CoreClr.Meta
 
 		public Pointer<byte> GetStaticAddress()
 		{
-			return Value.Reference.GetStaticAddress();
+			return FieldDesc.Reference.GetStaticAddress();
 		}
 
 		public unsafe Pointer<byte> GetStaticAddress(Pointer<byte> value)
 		{
-			return Value.Reference.GetStaticAddress(value.ToPointer());
+			return FieldDesc.Reference.GetStaticAddress(value.ToPointer());
 		}
 
 		public Pointer<byte> GetStaticAddressHandle()
 		{
-			return Value.Reference.GetStaticAddressHandle();
+			return FieldDesc.Reference.GetStaticAddressHandle();
 		}
 
 		public Pointer<byte> GetCurrentStaticAddress()
 		{
-			return Value.Reference.GetCurrentStaticAddress();
+			return FieldDesc.Reference.GetCurrentStaticAddress();
 		}
 
 		public object GetValue(object value)
 		{
-			return Value.Reference.GetValue(value);
+			return FieldDesc.Reference.GetValue(value);
 		}
 
 		public void SetValue(object t, object value)
 		{
-			Value.Reference.SetValue(t, value);
+			FieldDesc.Reference.SetValue(t, value);
 		}
 
 		public Pointer<byte> GetAddress<TInstance>(ref TInstance value)
 		{
-			return Value.Reference.GetAddress(ref value);
+			return FieldDesc.Reference.GetAddress(ref value);
 		}
 
 		#endregion

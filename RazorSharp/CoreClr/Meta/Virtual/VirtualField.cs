@@ -2,6 +2,7 @@
 
 using System;
 using System.Reflection;
+using RazorSharp.CoreClr.Meta.Interfaces;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
@@ -52,6 +53,8 @@ namespace RazorSharp.CoreClr.Meta.Virtual
 		public abstract string TypeName { get; }
 
 		public MemberInfo Info => throw new NotSupportedException();
+
+		public Pointer<byte> Value => throw new NotSupportedException();
 
 		protected Pointer<byte> GetAddress<TInstance>(ref TInstance value, OffsetOptions options)
 		{

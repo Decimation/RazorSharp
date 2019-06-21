@@ -3,6 +3,7 @@
 #region
 
 using RazorSharp.Analysis;
+using RazorSharp.CoreClr.Meta.Interfaces;
 using SimpleSharp;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.Enums;
@@ -32,64 +33,69 @@ namespace RazorSharp.CoreClr.Meta
 	///         </item>
 	///         <item>
 	///             <description>
-	///                 <see cref="ILMethod" />
+	///                 <see cref="Structures.ILMethods.ILMethod" />
 	///             </description>
 	///         </item>
 	///     </list>
 	/// </summary>
-	public class MetaIL
+	public class MetaIL : IToken
 	{
 		internal MetaIL(Pointer<ILMethod> value)
 		{
-			Value = value;
+			ILMethod = value;
 		}
 
-		private Pointer<ILMethod> Value { get; }
+		private Pointer<ILMethod> ILMethod { get; }
+
+		/// <summary>
+		/// Points to <see cref="ILMethod"/>
+		/// </summary>
+		public Pointer<byte> Value => ILMethod.Cast();
 
 		/// <summary>
 		///     Whether this type is <see cref="TinyILMethod" />
 		/// </summary>
-		public bool IsTiny => Value.Reference.IsTiny;
+		public bool IsTiny => ILMethod.Reference.IsTiny;
 
 		/// <summary>
 		///     Whether this type is <see cref="FatILMethod" />
 		/// </summary>
-		public bool IsFat => Value.Reference.IsFat;
+		public bool IsFat => ILMethod.Reference.IsFat;
 
 		/// <summary>
 		///     Points to the JIT IL code
 		/// </summary>
-		public Pointer<byte> Code => Value.Reference.Code;
+		public Pointer<byte> Code => ILMethod.Reference.Code;
 
 		/// <summary>
 		///     Length/size of the IL code (<see cref="Code" />)
 		/// </summary>
-		public int CodeSize => Value.Reference.CodeSize;
+		public int CodeSize => ILMethod.Reference.CodeSize;
 
 		/// <summary>
 		///     <remarks>
 		///         Equals <see cref="System.Reflection.MethodBody.MaxStackSize" />
 		///     </remarks>
 		/// </summary>
-		public int MaxStack => Value.Reference.MaxStack;
+		public int MaxStack => ILMethod.Reference.MaxStack;
 
 		/// <summary>
 		///     <remarks>
 		///         Equals <see cref="System.Reflection.MethodBody.LocalSignatureMetadataToken" />
 		///     </remarks>
 		/// </summary>
-		public int Token => Value.Reference.LocalVarSigTok;
+		public int Token => ILMethod.Reference.LocalVarSigTok;
 
 		/// <summary>
 		///     <remarks>
 		///         <see cref="IsFat" /> must be <c>true</c>
 		///     </remarks>
 		/// </summary>
-		public CorILMethodFlags Flags => Value.Reference.Flags;
+		public CorILMethodFlags Flags => ILMethod.Reference.Flags;
 
 		public void WriteIL(byte[] opCodes)
 		{
-			Value.Reference.WriteIL(opCodes);
+			ILMethod.Reference.WriteIL(opCodes);
 		}
 
 		/// <summary>
@@ -100,14 +106,14 @@ namespace RazorSharp.CoreClr.Meta
 		/// <returns></returns>
 		public byte[] GetILAsByteArray()
 		{
-			return Value.Reference.GetILAsByteArray();
+			return ILMethod.Reference.GetILAsByteArray();
 		}
 
 		public Instruction[] Instructions => InspectIL.GetInstructions(GetILAsByteArray());
 		
 		public ConsoleTable ToTable()
 		{
-			return Value.Reference.ToTable();
+			return ILMethod.Reference.ToTable();
 		}
 
 		public override string ToString()

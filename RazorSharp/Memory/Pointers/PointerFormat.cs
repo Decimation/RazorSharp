@@ -23,13 +23,13 @@ namespace RazorSharp.Memory.Pointers
 		///         <item>
 		///             <description>
 		///                 If the <see cref="Pointer{T}" />'s type is a reference type, its string representation will be
-		///                 returned along with its heap pointer in <c>"P"</c> format.
+		///                 returned along with its heap pointer in <see cref="FORMAT_PTR"/> format.
 		///             </description>
 		///         </item>
 		///         <item>
 		///             <description>
 		///                 If the <see cref="Pointer{T}" />'s type is an <see cref="IList{T}" /> type, its
-		///                 contents will be returned along with its heap pointer in <c>"P"</c> format.
+		///                 contents will be returned along with its heap pointer in <see cref="FORMAT_PTR"/> format.
 		///             </description>
 		///         </item>
 		///         <item>
@@ -60,10 +60,23 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		public const string FORMAT_INT = "N";
 
+		/// <summary>
+		/// Displays <see cref="ArrayCount"/> elements
+		/// </summary>
+		public const string FORMAT_ARRAY = "RG";
+
 		internal const string VAL_FMT = "{0} ({1})";
 
 		internal const string CHAR_PTR = "Char*";
+
+		/// <summary>
+		/// Number of elements to display when using <see cref="FORMAT_ARRAY"/>
+		/// </summary>
+		public static int ArrayCount { get; set; } = 5;
 		
+		/// <summary>
+		/// Default format specifier
+		/// </summary>
 		public static string DefaultFormat { get; set; } = FORMAT_PTR;
 	}
 }

@@ -23,6 +23,7 @@ using RazorSharp.Native;
 using RazorSharp.Native.Win32;
 using RazorSharp.Native.Win32.Enums;
 using RazorSharp.Utilities;
+
 // ReSharper disable PossibleNullReferenceException
 
 // ReSharper disable HeuristicUnreachableCode
@@ -191,11 +192,30 @@ namespace RazorSharp.Memory.Pointers
 
 		#endregion
 
-		
+		#region Offset
+
+		// (void*) (((long) m_value) + byteOffset)
+		// (void*) (((long) m_value) + (elemOffset * ElementSize))
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private int CompleteSize(int elemCnt) => elemCnt * ElementSize;
 
+		/// <summary>
+		///     Returns the element index of a pointer relative to <see cref="Address" />
+		/// </summary>
+		/// <param name="current">Current pointer (high address)</param>
+		/// <returns>The index</returns>
+		public int OffsetIndex(Pointer<byte> current)
+		{
+			long delta = current.ToInt64() - ToInt64();
+			return (int) delta / ElementSize;
+		}
+
+		#endregion
+
 		#region Read / write
+
+		#region Pointer
 
 		public Pointer<TType> ReadPointer<TType>(int elemOffset = 0)
 		{
@@ -206,6 +226,8 @@ namespace RazorSharp.Memory.Pointers
 		{
 			Cast<Pointer<TType>>().Write(ptr, elemOffset);
 		}
+
+		#endregion
 
 		#region WriteAll
 
@@ -239,37 +261,52 @@ namespace RazorSharp.Memory.Pointers
 
 		#endregion
 
-		private object CastInternal(Type type)
-		{
-			var cast = GetType().GetMethods().First(f => f.Name == nameof(Cast) && f.IsGenericMethod);
-			var ptr  = ReflectionUtil.InvokeGenericMethod(cast, this, new[] {type});
-			return ptr;
-		}
+		#region Any
 
 		public void WriteAny(Type type, object value, int elemOffset = 0)
 		{
-			var ptr = CastInternal(type);
+			var ptr = CastAny(type);
 			var fn  = ptr.GetType().GetMethod(nameof(Write));
 			fn.Invoke(ptr, new object[] {value, elemOffset});
 		}
 
 		public object ReadAny(Type type, int elemOffset = 0)
 		{
-			var ptr = CastInternal(type);
+			var ptr = CastAny(type);
 			var fn  = ptr.GetType().GetMethod(nameof(Read));
 			return fn.Invoke(ptr, new object[] {elemOffset});
 		}
 
-		
+		#endregion
+
 
 		/// <summary>
 		///     Writes a value of type <typeparamref name="T" /> to <see cref="Address" />
 		/// </summary>
-		/// <param name="t">Value to write</param>
+		/// <param name="value">Value to write</param>
 		/// <param name="elemOffset">Element offset (of type <typeparamref name="T" />)</param>
-		public void Write(T t, int elemOffset = 0) => CSUnsafe.Write(OffsetFast(elemOffset), t);
+		public void Write(T value, int elemOffset = 0) => CSUnsafe.Write(OffsetFast(elemOffset), value);
 
 		#region String
+
+		/// <summary>
+		/// Reads a C-style string.
+		/// </summary>
+		public string ReadCString(StringTypes type = StringTypes.ANSI)
+		{
+			switch (type) {
+				case StringTypes.ANSI:
+					return ReadCString<byte>(type);
+				case StringTypes.UNI:
+					return ReadCString<short>(type);
+				case StringTypes.CHAR32:
+					return ReadCString<int>(type);
+				default:
+					throw new ArgumentOutOfRangeException(nameof(type), type, null);
+			}
+		}
+
+		private string ReadCString<TChar>(StringTypes type) => ReadPointer<TChar>().ReadString(type);
 
 		/// <summary>
 		///     Writes a native string type
@@ -335,7 +372,7 @@ namespace RazorSharp.Memory.Pointers
 		}
 
 		#endregion
-		
+
 
 		#region Safe write
 
@@ -449,19 +486,7 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Other methods
 
-		/// <summary>
-		///     Returns the element index of a pointer relative to <see cref="Address" />
-		/// </summary>
-		/// <param name="current">Current pointer (high address)</param>
-		/// <returns>The index</returns>
-		public int OffsetIndex(Pointer<byte> current)
-		{
-			long delta = current.ToInt64() - ToInt64();
-			return (int) delta / ElementSize;
-		}
-
-		
-		private bool IsCharPointer() => typeof(T) == typeof(char);
+		private static bool IsCharPointer() => typeof(T) == typeof(char);
 
 		public Pointer<T> AddressOfIndex(int index) => OffsetFast(index);
 
@@ -475,6 +500,8 @@ namespace RazorSharp.Memory.Pointers
 			Mem.Zero(m_value, byteCnt);
 		}
 
+		#region Cast
+
 		/// <summary>
 		///     Creates a new <see cref="Pointer{T}" /> of type <typeparamref name="TNew" />, pointing to
 		///     <see cref="Address" />
@@ -484,6 +511,15 @@ namespace RazorSharp.Memory.Pointers
 		public Pointer<TNew> Cast<TNew>() => new Pointer<TNew>(Address);
 
 		public Pointer<byte> Cast() => Cast<byte>();
+
+		public object CastAny(Type type)
+		{
+			var cast = GetType().GetMethods().First(f => f.Name == nameof(Cast) && f.IsGenericMethod);
+			var ptr  = ReflectionUtil.InvokeGenericMethod(cast, this, new[] {type});
+			return ptr;
+		}
+
+		#endregion
 
 		/// <summary>
 		///     Returns <see cref="Address" /> as a native pointer.
@@ -525,7 +561,7 @@ namespace RazorSharp.Memory.Pointers
 
 		#endregion
 
-		
+
 		#region Operators
 
 		#region Implicit and explicit conversions
@@ -577,21 +613,21 @@ namespace RazorSharp.Memory.Pointers
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void* OffsetFast(int elemCnt) => (void*) ((long) m_value + (elemCnt * ElementSize));
+		private void* OffsetFast(int elemCnt) => (void*) ((long) m_value + (CompleteSize(elemCnt)));
 
 		/// <summary>
 		///     Increment <see cref="Address" /> by the specified number of bytes
 		/// </summary>
-		/// <param name="right">Number of bytes to add</param>
+		/// <param name="byteCnt">Number of bytes to add</param>
 		/// <returns>
 		///     <c>this</c>
 		/// </returns>
-		public Pointer<T> Add(long right = 1)
+		public Pointer<T> Add(long byteCnt = 1)
 		{
 //			m_value = PointerUtil.Add(m_value, bytes).ToPointer();
 //			return this;
 
-			long val = ToInt64() + right;
+			long val = ToInt64() + byteCnt;
 			this = (void*) val;
 			return this;
 		}
@@ -600,11 +636,11 @@ namespace RazorSharp.Memory.Pointers
 		/// <summary>
 		///     Decrement <see cref="Address" /> by the specified number of bytes
 		/// </summary>
-		/// <param name="right">Number of bytes to subtract</param>
+		/// <param name="byteCnt">Number of bytes to subtract</param>
 		/// <returns>
 		///     <c>this</c>
 		/// </returns>
-		public Pointer<T> Subtract(long right = 1) => Add(-right);
+		public Pointer<T> Subtract(long byteCnt = 1) => Add(-byteCnt);
 
 
 		/// <summary>
@@ -646,8 +682,6 @@ namespace RazorSharp.Memory.Pointers
 			return p;
 		}
 
-		public static Pointer<T> operator +(Pointer<T> p, uint i) => p + (int) i;
-
 		/// <summary>
 		///     Decrements the <see cref="Address" /> by the specified number of elements.
 		///     <remarks>
@@ -663,8 +697,6 @@ namespace RazorSharp.Memory.Pointers
 			p.Decrement(i);
 			return p;
 		}
-
-		public static Pointer<T> operator -(Pointer<T> p, uint i) => p - (int) i;
 
 		/// <summary>
 		///     Increments the <see cref="Pointer{T}" /> by one element.
@@ -772,6 +804,18 @@ namespace RazorSharp.Memory.Pointers
 				formatProvider = CultureInfo.CurrentCulture;
 
 			switch (format.ToUpperInvariant()) {
+				case PointerFormat.FORMAT_ARRAY:
+				{
+					var rg = new string[PointerFormat.ArrayCount];
+
+					for (int i = 0; i < rg.Length; i++) {
+						rg[i] = AddressOfIndex(i).ToStringSafe();
+					}
+
+
+					return String.Join(StringConstants.JOIN_COMMA, rg);
+				}
+
 				case PointerFormat.FORMAT_INT:
 					return ToInt64().ToString();
 				case PointerFormat.FORMAT_OBJ:
@@ -780,6 +824,7 @@ namespace RazorSharp.Memory.Pointers
 					return Hex.ToHex(ToInt64());
 
 				case PointerFormat.FORMAT_BOTH:
+				{
 					string thisStr = ToStringSafe();
 
 					string typeName = typeof(T).ContainsAnyGenericParameters()
@@ -792,6 +837,8 @@ namespace RazorSharp.Memory.Pointers
 					                     thisStr.Contains(Environment.NewLine)
 						                     ? Environment.NewLine + thisStr
 						                     : thisStr);
+				}
+
 				default:
 					goto case PointerFormat.FORMAT_OBJ;
 			}
@@ -803,7 +850,6 @@ namespace RazorSharp.Memory.Pointers
 
 			if (IsNull)
 				return StringConstants.NULL_STR;
-
 
 			if (RtInfo.IsInteger<T>())
 				return String.Format(PointerFormat.VAL_FMT, Reference, Hex.TryCreateHex(Reference));
@@ -819,14 +865,14 @@ namespace RazorSharp.Memory.Pointers
 
 			if (!RtInfo.IsStruct<T>()) {
 				Pointer<byte> heapPtr = ReadPointer<byte>();
-				string           valueStr;
+				string        valueStr;
 
 				if (heapPtr.IsNull) {
 					valueStr = StringConstants.NULL_STR;
 					goto RETURN;
 				}
 
-				if (typeof(T).IsIListType())
+				if (typeof(T).IsIListType() && typeof(T) != typeof(string))
 					valueStr = $"[{((IEnumerable) Reference).AutoJoin()}]";
 				else
 					valueStr = Reference == null ? StringConstants.NULL_STR : Reference.ToString();
