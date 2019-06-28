@@ -4,7 +4,6 @@ using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
-using SimpleSharp.Extensions;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 

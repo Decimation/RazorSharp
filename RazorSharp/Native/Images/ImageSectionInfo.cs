@@ -1,11 +1,7 @@
 #region
 
-using System;
 using System.Runtime.InteropServices;
 using System.Text;
-using SimpleSharp.Strings;
-using RazorSharp.CoreClr;
-using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 
 #endregion

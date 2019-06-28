@@ -6,7 +6,7 @@ using SimpleSharp.Diagnostics;
 using SimpleSharp.Utilities;
 using RazorSharp.CoreClr;
 using RazorSharp.Native.Win32;
-using SimpleSharp.Extensions;
+using SimpleSharp.Files;
 
 // ReSharper disable RedundantAssignment
 

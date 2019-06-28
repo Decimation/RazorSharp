@@ -3,10 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
-using RazorSharp.CoreClr.Structures;
-using RazorSharp.Memory;
-using RazorSharp.Memory.Pointers;
-using RazorSharp.Utilities;
 using SimpleSharp;
 
 // ReSharper disable ParameterTypeCanBeEnumerable.Global

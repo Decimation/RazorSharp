@@ -2,23 +2,17 @@
 
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Text;
 using RazorSharp.Components;
 using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
-using RazorSharp.Import;
 using RazorSharp.Memory;
-using RazorSharp.Native.Symbols;
 using Serilog;
 using Serilog.Context;
 using Serilog.Core;
-using Serilog.Events;
-using Serilog.Sinks.SystemConsole.Themes;
 
 #endregion
 

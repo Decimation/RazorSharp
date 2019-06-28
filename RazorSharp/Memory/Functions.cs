@@ -2,7 +2,6 @@
 
 using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Structures;
@@ -10,7 +9,6 @@ using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32;
-using RazorSharp.Utilities;
 
 // ReSharper disable InvalidXmlDocComment
 

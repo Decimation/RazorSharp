@@ -112,8 +112,8 @@
       <HintPath>..\packages\Serilog.Sinks.Console.3.1.1\lib\net45\Serilog.Sinks.Console.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SimpleSharp, Version=1.1.2.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\SimpleSharp.1.1.2\lib\net472\SimpleSharp.dll</HintPath>
+    <Reference Include="SimpleSharp, Version=1.1.5.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\SimpleSharp.1.1.5\lib\net472\SimpleSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -139,11 +139,13 @@
     <Compile Include="Constants.cs" />
     <Compile Include="CoreClr\Clr.cs" />
     <Compile Include="CoreClr\Instruction.cs" />
+    <Compile Include="CoreClr\Meta\Interfaces\IClrStructure.cs" />
     <Compile Include="CoreClr\Meta\Interfaces\IMetadata.cs" />
     <Compile Include="CoreClr\Meta\Interfaces\IReadableStructure.cs" />
     <Compile Include="CoreClr\Meta\Interfaces\IToken.cs" />
     <Compile Include="CoreClr\Meta\MetaField.cs" />
     <Compile Include="CoreClr\Meta\MetaIL.cs" />
+    <Compile Include="CoreClr\Meta\MetaInfoType.cs" />
     <Compile Include="CoreClr\Meta\MetaMethod.cs" />
     <Compile Include="CoreClr\Meta\MetaType.cs" />
     <Compile Include="CoreClr\Meta\Virtual\ElementField.cs" />

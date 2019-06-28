@@ -4,9 +4,9 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using RazorSharp.CoreClr.Structures.Enums;
-using SimpleSharp;
 using SimpleSharp.Diagnostics;
 using RazorSharp.Memory;
+using SimpleSharp.Strings.Formatting;
 
 // ReSharper disable BuiltInTypeReferenceStyle
 // ReSharper disable ConvertToAutoPropertyWhenPossible

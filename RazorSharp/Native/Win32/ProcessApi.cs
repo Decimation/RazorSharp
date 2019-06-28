@@ -1,10 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using RazorSharp.CoreClr;
-using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Win32.Structures;
 
 namespace RazorSharp.Native.Win32

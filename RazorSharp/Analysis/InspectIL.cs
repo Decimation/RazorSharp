@@ -4,10 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
 using RazorSharp.CoreClr;
-using RazorSharp.CoreClr.Structures.ILMethods;
-using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 
 // ReSharper disable ReturnTypeCanBeEnumerable.Global

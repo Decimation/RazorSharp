@@ -5,24 +5,21 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using InlineIL;
 using JetBrains.Annotations;
-using SimpleSharp;
 using SimpleSharp.Diagnostics;
 using SimpleSharp.Extensions;
 using SimpleSharp.Strings;
 using RazorSharp.CoreClr;
-using RazorSharp.CoreClr.Structures;
 using RazorSharp.Native;
 using RazorSharp.Native.Win32;
 using RazorSharp.Native.Win32.Enums;
 using RazorSharp.Utilities;
+using SimpleSharp.Strings.Formatting;
 
 // ReSharper disable PossibleNullReferenceException
 
@@ -828,7 +825,7 @@ namespace RazorSharp.Memory.Pointers
 					string thisStr = ToStringSafe();
 
 					string typeName = typeof(T).ContainsAnyGenericParameters()
-						? Formatting.GenericName(typeof(T))
+						? SystemFormatting.GenericName(typeof(T))
 						: typeof(T).Name;
 
 					string typeNameDisplay = IsCharPointer() ? PointerFormat.CHAR_PTR : typeName;
@@ -842,6 +839,17 @@ namespace RazorSharp.Memory.Pointers
 				default:
 					goto case PointerFormat.FORMAT_OBJ;
 			}
+		}
+
+		public string ToStringAlt()
+		{
+			if (IsNull)
+				return StringConstants.NULL_STR;
+
+
+
+
+			return null;
 		}
 
 		public string ToStringSafe()

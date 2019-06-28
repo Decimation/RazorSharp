@@ -6,24 +6,21 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
-using SimpleSharp.Extensions;
-using SimpleSharp.Strings;
-using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Meta.Interfaces;
 using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.CoreClr.Structures.ILMethods;
 using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+using SimpleSharp.Enums;
+using SimpleSharp.Strings.Formatting;
 using Unsafe = RazorSharp.Memory.Unsafe;
 
 // ReSharper disable UnusedMember.Local
-
 // ReSharper disable NonReadonlyMemberInGetHashCode
-
 // ReSharper disable FieldCanBeMadeReadOnly.Local
-
 // ReSharper disable MemberCanBeMadeStatic.Local
 // ReSharper disable InconsistentNaming
 // ReSharper disable ConvertToAutoPropertyWhenPossible
@@ -70,7 +67,7 @@ namespace RazorSharp.CoreClr.Structures
 	/// </summary>
 	[ClrSymNamespace]
 	[StructLayout(LayoutKind.Sequential)]
-	internal unsafe struct MethodDesc
+	public unsafe struct MethodDesc : IClrStructure<MethodDesc>
 	{
 		private const int ALIGNMENT_SHIFT = 3;
 		private const int ALIGNMENT       = 1 << ALIGNMENT_SHIFT;
@@ -346,6 +343,13 @@ namespace RazorSharp.CoreClr.Structures
 				RuntimeHelpers.PrepareMethod(Info.MethodHandle);
 		}
 
+
+		public IMetadata<MethodDesc> ToMetaStructure()
+		{
+			fixed (MethodDesc* ptr = &this) {
+				return new MetaMethod(ptr);
+			}
+		}
 
 		public override string ToString()
 		{

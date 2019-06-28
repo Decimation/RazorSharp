@@ -1,15 +1,13 @@
 #region
 
-using System;
 using System.Diagnostics;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Native;
 using RazorSharp.Native.Images;
 using RazorSharp.Native.Win32;
 using RazorSharp.Native.Win32.Structures;
 using SimpleSharp;
-using SimpleSharp.Utilities;
+using SimpleSharp.Strings;
 
 #endregion
 

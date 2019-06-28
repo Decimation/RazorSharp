@@ -1,22 +1,15 @@
 #region
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using InlineIL;
-using JetBrains.Annotations;
 using SimpleSharp.Diagnostics;
-using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Native.Symbols;
 using RazorSharp.Utilities;
-using SimpleSharp.Strings;
 using Unsafe = RazorSharp.Memory.Unsafe;
 
 #endregion

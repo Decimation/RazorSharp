@@ -1,16 +1,11 @@
 ﻿#region
 
 using System;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using InlineIL;
-using JetBrains.Annotations;
 using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
-using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
-using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.Memory.Fixed;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;

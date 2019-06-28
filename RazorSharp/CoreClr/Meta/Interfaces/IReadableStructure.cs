@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
@@ -7,7 +8,7 @@ namespace RazorSharp.CoreClr.Meta.Interfaces
 	/// <summary>
 	/// Represents a readable structure or field in memory.
 	/// </summary>
-	public interface IReadableStructure : IMetadata
+	public interface IReadableStructure
 	{
 		/// <summary>
 		/// Gets the value of this structure.
@@ -40,5 +41,8 @@ namespace RazorSharp.CoreClr.Meta.Interfaces
 		/// The type name of this structure.
 		/// </summary>
 		string TypeName { get; }
+		
+		[CanBeNull]
+		string Name { get; }
 	}
 }

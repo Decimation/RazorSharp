@@ -2,12 +2,11 @@
 
 #region
 
-using System;
 using System.Runtime.InteropServices;
 using SimpleSharp;
-using SimpleSharp.Strings;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+using SimpleSharp.Strings.Formatting;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 

@@ -2,12 +2,13 @@
 
 using System;
 using System.Runtime.InteropServices;
-using RazorSharp.Analysis;
+using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.Enums;
 using SimpleSharp;
-using SimpleSharp.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+using SimpleSharp.Enums;
+using SimpleSharp.Strings.Formatting;
 
 #endregion
 
@@ -32,7 +33,7 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 	///     </list>
 	/// </summary>
 	[StructLayout(LayoutKind.Explicit)]
-	internal struct ILMethod
+	public struct ILMethod
 	{
 		/**
 		 * union
@@ -61,6 +62,12 @@ namespace RazorSharp.CoreClr.Structures.ILMethods
 			Code.SafeWrite(rgOpCodes);
 		}
 
+		public MetaIL ToMetaIL()
+		{
+			var ptr = Unsafe.AddressOf(ref this);
+			return new MetaIL(ptr);
+		}
+		
 		/*public OpCode[] OpCodes {
 			get { return ReflectionUtil.GetOpCodes(Code, CodeSize); }
 		}

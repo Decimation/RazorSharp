@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
-using SimpleSharp.Strings;
 using RazorSharp.Memory.Pointers;
+using SimpleSharp.Strings.Formatting;
 using static RazorSharp.Memory.Unsafe;
 
 #endregion

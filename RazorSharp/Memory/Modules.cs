@@ -2,13 +2,9 @@
 
 using System;
 using System.Diagnostics;
-using System.Linq;
-using SimpleSharp.Diagnostics;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Native;
 using RazorSharp.Native.Win32;
-using SimpleSharp.Strings;
 
 #endregion
 

@@ -3,9 +3,9 @@
 using System;
 using System.Runtime.InteropServices;
 using SimpleSharp;
-using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Memory;
+using SimpleSharp.Enums;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 

@@ -1,12 +1,11 @@
 #region
 
-using System;
 using System.Runtime;
 using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
 using SimpleSharp.Diagnostics;
 using RazorSharp.Memory;
-using RazorSharp.Memory.Pointers;
+
 #pragma warning disable 649
 
 // ReSharper disable ConvertToAutoPropertyWhenPossible

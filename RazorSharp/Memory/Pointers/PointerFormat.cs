@@ -2,8 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using SimpleSharp;
-using SimpleSharp.Strings;
+using SimpleSharp.Strings.Formatting;
 
 #endregion
 

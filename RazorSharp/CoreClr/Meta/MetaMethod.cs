@@ -5,11 +5,12 @@ using System.Reflection;
 using RazorSharp.CoreClr.Meta.Interfaces;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
-using SimpleSharp.Strings;
-using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory.Pointers;
+using SimpleSharp.Enums;
+using SimpleSharp.Strings;
+using SimpleSharp.Strings.Formatting;
 
 #endregion
 
@@ -28,11 +29,12 @@ namespace RazorSharp.CoreClr.Meta
 	///     </list>
 	/// <remarks>Corresponds to <see cref="System.Reflection.MethodInfo"/></remarks>
 	/// </summary>
-	public class MetaMethod : IMetadata
+	public class MetaMethod : IMetadata<MethodDesc>
 	{
 		internal MetaMethod(Pointer<MethodDesc> methodDesc)
 		{
-			MethodDesc = methodDesc;
+			Value = methodDesc;
+			MetaInfoType = MetaInfoType.METHOD;
 		}
 
 		public MetaMethod(MethodInfo methodInfo) : this(methodInfo.GetMethodDesc()) { }
@@ -52,16 +54,16 @@ namespace RazorSharp.CoreClr.Meta
 		///         <para>Address-sensitive</para>
 		///     </remarks>
 		/// </summary>
-		public int Token => MethodDesc.Reference.Token;
+		public int Token => Value.Reference.Token;
 
-		public string Name => MethodDesc.Reference.Name;
+		public string Name => Value.Reference.Name;
 
-		public Type EnclosingType => MethodDesc.Reference.EnclosingType;
+		public Type EnclosingType => Value.Reference.EnclosingType;
 
 		/// <summary>
 		///     The corresponding <see cref="MethodInfo" /> of this <see cref="Structures.MethodDesc" />
 		/// </summary>
-		public MethodInfo MethodInfo => MethodDesc.Reference.Info;
+		public MethodInfo MethodInfo => Value.Reference.Info;
 
 		public MemberInfo Info => MethodInfo;
 
@@ -77,8 +79,8 @@ namespace RazorSharp.CoreClr.Meta
 		///     </para>
 		/// </summary>
 		public Pointer<byte> Function {
-			get => MethodDesc.Reference.Function;
-			set => MethodDesc.Reference.Function = value.Address;
+			get => Value.Reference.Function;
+			set => Value.Reference.Function = value.Address;
 		}
 
 		/// <summary>
@@ -87,50 +89,47 @@ namespace RazorSharp.CoreClr.Meta
 		///     ngened code if <see cref="IsPreImplemented" /> is <c>true</c>.
 		///     <returns><see cref="IntPtr.Zero" /> if the method has no native code.</returns>
 		/// </summary>
-		public Pointer<byte> NativeCode => MethodDesc.Reference.NativeCode;
+		public Pointer<byte> NativeCode => Value.Reference.NativeCode;
 
-		public Pointer<byte> PreImplementedCode => MethodDesc.Reference.PreImplementedCode;
+		public Pointer<byte> PreImplementedCode => Value.Reference.PreImplementedCode;
 
 		// ChunkIndex
 		// MethodDescChunk
 		// SizeOf
 		// EnclosingMethodTable
 
-		public MetaType EnclosingMetaType => new MetaType(MethodDesc.Reference.EnclosingMethodTable);
+		public MetaType EnclosingMetaType => new MetaType(Value.Reference.EnclosingMethodTable);
 
-		public int SizeOf => MethodDesc.Reference.SizeOf;
+		public int SizeOf => Value.Reference.SizeOf;
 
 		// RVA
 
 
 		#region bool
 
-		public bool IsConstructor    => MethodDesc.Reference.IsConstructor;
-		public bool IsPreImplemented => MethodDesc.Reference.IsPreImplemented;
-		public bool HasThis          => MethodDesc.Reference.HasThis;
-		public bool HasILHeader      => MethodDesc.Reference.HasILHeader;
-		public bool IsUnboxingStub   => MethodDesc.Reference.IsUnboxingStub;
-		public bool IsIL             => MethodDesc.Reference.IsIL;
-		public bool IsStatic         => MethodDesc.Reference.IsStatic;
+		public bool IsConstructor    => Value.Reference.IsConstructor;
+		public bool IsPreImplemented => Value.Reference.IsPreImplemented;
+		public bool HasThis          => Value.Reference.HasThis;
+		public bool HasILHeader      => Value.Reference.HasILHeader;
+		public bool IsUnboxingStub   => Value.Reference.IsUnboxingStub;
+		public bool IsIL             => Value.Reference.IsIL;
+		public bool IsStatic         => Value.Reference.IsStatic;
 
-		public bool IsPointingToNativeCode => MethodDesc.Reference.IsPointingToNativeCode;
+		public bool IsPointingToNativeCode => Value.Reference.IsPointingToNativeCode;
 
 		#endregion
 
-		private Pointer<MethodDesc> MethodDesc { get; }
+		public Pointer<MethodDesc> Value { get; }
+		public MetaInfoType MetaInfoType { get; }
 
-		/// <summary>
-		/// Points to <see cref="MethodDesc"/>
-		/// </summary>
-		public Pointer<byte> Value => MethodDesc.Cast();
 
 		#region Flags
 
-		public MethodClassification     Classification => MethodDesc.Reference.Classification;
-		public MethodAttributes         Attributes     => MethodDesc.Reference.Attributes;
-		public MethodDescClassification Flags          => MethodDesc.Reference.Flags;
-		public MethodDescFlags2         Flags2         => MethodDesc.Reference.Flags2;
-		public MethodDescFlags3         Flags3         => MethodDesc.Reference.Flags3;
+		public MethodClassification     Classification => Value.Reference.Classification;
+		public MethodAttributes         Attributes     => Value.Reference.Attributes;
+		public MethodDescClassification Flags          => Value.Reference.Flags;
+		public MethodDescFlags2         Flags2         => Value.Reference.Flags2;
+		public MethodDescFlags3         Flags3         => Value.Reference.Flags3;
 
 		#endregion
 
@@ -151,17 +150,17 @@ namespace RazorSharp.CoreClr.Meta
 		public MetaIL GetILHeader(int fAllowOverrides = 0)
 		{
 			Conditions.Assert(IsIL);
-			return new MetaIL(MethodDesc.Reference.GetILHeader(fAllowOverrides));
+			return new MetaIL(Value.Reference.GetILHeader(fAllowOverrides));
 		}
 
 		public void Reset()
 		{
-			MethodDesc.Reference.Reset();
+			Value.Reference.Reset();
 		}
 
 		public TDelegate GetDelegate<TDelegate>() where TDelegate : Delegate
 		{
-			return MethodDesc.Reference.GetDelegate<TDelegate>();
+			return Value.Reference.GetDelegate<TDelegate>();
 		}
 
 		/// <summary>
@@ -169,7 +168,7 @@ namespace RazorSharp.CoreClr.Meta
 		/// </summary>
 		public void Prepare()
 		{
-			MethodDesc.Reference.Prepare();
+			Value.Reference.Prepare();
 		}
 
 

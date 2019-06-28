@@ -4,10 +4,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
-using SimpleSharp.Extensions;
 using SimpleSharp.Strings;
-using RazorSharp.Memory.Pointers;
 
 #endregion
 

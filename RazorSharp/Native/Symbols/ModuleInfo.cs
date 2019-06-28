@@ -1,9 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using SimpleSharp.Diagnostics;
-using RazorSharp.CoreClr;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 

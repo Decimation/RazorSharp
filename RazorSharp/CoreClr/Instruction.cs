@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
-using SimpleSharp.Strings;
+using SimpleSharp.Strings.Formatting;
 
 namespace RazorSharp.CoreClr
 {

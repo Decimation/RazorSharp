@@ -2,8 +2,8 @@
 
 using System;
 using System.Collections.Generic;
-using SimpleSharp.Utilities;
 using RazorSharp.Memory.Pointers;
+using SimpleSharp.Strings;
 
 #endregion
 

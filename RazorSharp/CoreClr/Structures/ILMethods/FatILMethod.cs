@@ -4,12 +4,13 @@
 
 using System.Runtime.InteropServices;
 using SimpleSharp;
-using SimpleSharp.Strings;
-using SimpleSharp.Utilities;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+using SimpleSharp.Enums;
+using SimpleSharp.Strings;
+using SimpleSharp.Strings.Formatting;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 

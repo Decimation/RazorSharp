@@ -9,7 +9,7 @@ using RazorSharp.Components;
 using RazorSharp.Memory;
 using RazorSharp.Native.Symbols;
 using SimpleSharp.Diagnostics;
-using SimpleSharp.Utilities;
+using SimpleSharp.Files;
 
 #endregion
 

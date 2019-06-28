@@ -5,6 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Meta.Interfaces;
 using RazorSharp.CoreClr.Structures.EE;
 using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Import;
@@ -13,8 +14,9 @@ using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
+using SimpleSharp.Enums;
 using SimpleSharp.Strings;
-using SimpleSharp.Utilities;
+using SimpleSharp.Strings.Formatting;
 
 // ReSharper disable UnusedMember.Local
 
@@ -80,13 +82,12 @@ namespace RazorSharp.CoreClr.Structures
 	/// </summary>
 	[ClrSymNamespace]
 	[StructLayout(LayoutKind.Sequential)]
-	internal unsafe struct MethodTable
+	public unsafe struct MethodTable : IClrStructure<MethodTable>
 	{
 		static MethodTable()
 		{
 			Symload.Load(typeof(MethodTable));
 		}
-
 
 		#region Properties and Accessors
 
@@ -334,7 +335,7 @@ namespace RazorSharp.CoreClr.Structures
 		///     Describes what the union at offset <c>40</c> (<see cref="m_union1" />)
 		///     contains.
 		/// </summary>
-		public LowBits UnionType {
+		internal LowBits UnionType {
 			get {
 				long l = (long) m_union1;
 				return (LowBits) (l & UNION_MASK);
@@ -342,6 +343,13 @@ namespace RazorSharp.CoreClr.Structures
 		}
 
 		#endregion
+
+		public IMetadata<MethodTable> ToMetaStructure()
+		{
+			fixed (MethodTable* ptr = &this) {
+				return new MetaType(ptr);
+			}
+		}
 
 		public override string ToString()
 		{

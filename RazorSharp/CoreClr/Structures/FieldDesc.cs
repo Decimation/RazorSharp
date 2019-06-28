@@ -1,21 +1,19 @@
 #region
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
-using SimpleSharp.Strings;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Meta.Interfaces;
 using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Utilities;
 using RazorSharp.Utilities.Binary;
-using RazorSharp.Utilities.Binary.Attributes;
+using SimpleSharp.Strings.Formatting;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 
@@ -54,7 +52,7 @@ namespace RazorSharp.CoreClr.Structures
 	/// </summary>
 	[ClrSymNamespace]
 	[StructLayout(LayoutKind.Sequential)]
-	internal unsafe struct FieldDesc
+	public unsafe struct FieldDesc : IClrStructure<FieldDesc>
 	{
 		static FieldDesc()
 		{
@@ -86,13 +84,8 @@ namespace RazorSharp.CoreClr.Structures
 		///     <para>unsigned m_dwOffset : 27;</para>
 		///     <para>unsigned m_type : 5;</para>
 		/// </summary>
-		[Bitfield("dwOffset",27)]
-		[Bitfield("type", 5)]
 		private uint m_dword2;
 
-		public uint dw1 => m_dword1;
-		public uint dw2 => m_dword2;
-		
 		#endregion
 
 		#region Accessors
@@ -120,10 +113,6 @@ namespace RazorSharp.CoreClr.Structures
 		internal int Offset {
 			get => (int) (m_dword2 & 0x7FFFFFF);
 			set => m_dword2 = (uint) Bits.WriteTo((int) m_dword2, 0, DW2_OFFSET_BITS, value);
-		}
-
-		internal int Offset2 {
-			get { return Bitfield.GetValue(this, nameof(m_dword2), "dwOffset"); }
 		}
 
 		private int TypeInt       => (int) ((m_dword2 >> 27) & 0x7FFFFFF);
@@ -159,13 +148,13 @@ namespace RazorSharp.CoreClr.Structures
 		/// </summary>
 		internal bool IsRVA => Bits.ReadBit(m_dword1, 26);
 
-		internal bool IsFixedBuffer => Formatting.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
+		internal bool IsFixedBuffer => SystemFormatting.TypeNameOfFixedBuffer(Name) == Info.FieldType.Name;
 
 		
 
 		internal bool IsBackingField {
 			get {
-				var backingFieldName = Formatting.NameOfBackingField(Name);
+				var backingFieldName = SystemFormatting.NameOfBackingField(Name);
 
 				return backingFieldName != null && backingFieldName != Name;
 			}
@@ -272,6 +261,12 @@ namespace RazorSharp.CoreClr.Structures
 
 		#endregion
 
+		public IMetadata<FieldDesc> ToMetaStructure()
+		{
+			fixed (FieldDesc* ptr = &this) {
+				return new MetaField(ptr);
+			}
+		}
 
 		/// <summary>
 		///     Returns the address of the field in the specified type.

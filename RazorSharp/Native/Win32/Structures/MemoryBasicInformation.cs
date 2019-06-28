@@ -4,7 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using RazorSharp.Native.Win32.Enums;
 using SimpleSharp;
-using SimpleSharp.Strings;
+using SimpleSharp.Strings.Formatting;
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
 

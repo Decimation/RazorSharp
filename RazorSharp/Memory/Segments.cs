@@ -4,13 +4,12 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using RazorSharp.Analysis;
 using SimpleSharp;
 using SimpleSharp.Extensions;
-using SimpleSharp.Strings;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Native.Images;
 using RazorSharp.Native.Win32;
+using SimpleSharp.Strings.Formatting;
 
 // ReSharper disable InconsistentNaming
 

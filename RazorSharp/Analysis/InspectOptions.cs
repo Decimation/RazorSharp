@@ -1,5 +1,4 @@
 using System;
-using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Meta.Interfaces;
 using RazorSharp.CoreClr.Meta.Virtual;
 using RazorSharp.CoreClr.Structures;

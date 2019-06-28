@@ -5,12 +5,12 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
-using SimpleSharp.Extensions;
-using SimpleSharp.Strings;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures.Enums;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+using SimpleSharp.Enums;
+using SimpleSharp.Strings.Formatting;
 
 // ReSharper disable UnusedMember.Local
 
