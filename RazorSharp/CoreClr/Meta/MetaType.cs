@@ -1,471 +1,374 @@
-#region
-
-#region
-
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using RazorSharp.CoreClr.Meta.Interfaces;
-using RazorSharp.CoreClr.Meta.Virtual;
+using RazorSharp.CoreClr.Meta.Base;
+using RazorSharp.CoreClr.Metadata;
+using RazorSharp.CoreClr.Metadata.Enums;
+using RazorSharp.CoreClr.Metadata.ExecutionEngine;
+using RazorSharp.Memory.Pointers;
+using RazorSharp.Reflection;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
-using RazorSharp.CoreClr.Structures;
-using RazorSharp.CoreClr.Structures.EE;
-using RazorSharp.CoreClr.Structures.Enums;
-using RazorSharp.Memory;
-using RazorSharp.Memory.Pointers;
-using RazorSharp.Utilities;
-using SimpleSharp.Enums;
 
-#endregion
-
+// ReSharper disable SwitchStatementMissingSomeCases
+// ReSharper disable ReturnTypeCanBeEnumerable.Global
+// ReSharper disable SuggestBaseTypeForParameter
 // ReSharper disable InconsistentNaming
-
-#endregion
 
 namespace RazorSharp.CoreClr.Meta
 {
 	/// <summary>
-	///     Exposes metadata from:
 	///     <list type="bullet">
-	///         <item>
-	///             <description>
-	///                 <see cref="Structures.MethodTable" />
-	///             </description>
-	///         </item>
-	///         <item>
-	///             <description>
-	///                 <see cref="EEClass" />
-	///             </description>
-	///         </item>
-	///         <item>
-	///             <description>
-	///                 <see cref="EEClassLayoutInfo" />
-	///             </description>
-	///         </item>
+	///         <item><description>CLR structure: <see cref="MethodTable"/>, <see cref="EEClass"/>, and
+	/// 		<see cref="TypeHandle"/></description></item>
+	///         <item><description>Reflection structure: <see cref="Type"/></description></item>
 	///     </list>
-	/// <remarks>Corresponds to <see cref="Type"/></remarks>
 	/// </summary>
-	public class MetaType : IMetadata<MethodTable>, IFormattable
+	public unsafe class MetaType : ClrStructure<MethodTable>
 	{
+		#region Constructor
+
+		// Root constructor
+		internal MetaType(Pointer<MethodTable> mt) : base(mt)
+		{
+			RuntimeType = Runtime.ResolveType(mt.Cast());
+			Fields      = new VirtualCollection<MetaField>(GetField, GetFields);
+			Methods     = new VirtualCollection<MetaMethod>(GetMethod, GetMethods);
+		}
+
+		public MetaType(Type t) : this(Runtime.ResolveHandle(t)) { }
+
+		#endregion
+
+		#region Accessors
+
+		public override MemberInfo Info => RuntimeType;
+
+		#region bool
+
+		public bool IsInteger {
+			get {
+				switch (Type.GetTypeCode(RuntimeType)) {
+					case TypeCode.Byte:
+					case TypeCode.SByte:
+					case TypeCode.UInt16:
+					case TypeCode.Int16:
+					case TypeCode.UInt32:
+					case TypeCode.Int32:
+					case TypeCode.UInt64:
+					case TypeCode.Int64:
+						return true;
+					default:
+						return false;
+				}
+			}
+		}
+
+		public bool IsReal {
+			get {
+				switch (Type.GetTypeCode(RuntimeType)) {
+					case TypeCode.Decimal:
+					case TypeCode.Double:
+					case TypeCode.Single:
+						return true;
+					default:
+						return false;
+				}
+			}
+		}
+
+		public bool IsNumeric => IsInteger || IsReal;
+
+		public bool IsStruct => RuntimeType.IsValueType;
+
+		public bool IsPointer => RuntimeType.IsPointer;
+
+		#region Unmanaged
+
 		/// <summary>
-		///     Exhaustive
+		/// Dummy class for use with <see cref="IsUnmanaged"/> and <see cref="IsUnmanaged"/>
 		/// </summary>
-		private const string FMT_E = "E";
+		// ReSharper disable once UnusedTypeParameter
+		private sealed class U<T> where T : unmanaged { }
 
 		/// <summary>
-		///     Basic
+		/// Determines whether this type fits the <c>unmanaged</c> type constraint.
 		/// </summary>
-		private const string FMT_B = "B";
-
-		public MetaType(Type t) : this(t.GetMethodTable()) { }
-
-		internal MetaType(Pointer<MethodTable> p)
-		{
-			Value = p;
-			MetaInfoType = MetaInfoType.TYPE;
-			
-
-			if (!p.Reference.Canon.IsNull && p.Reference.Canon.Address != p.Address)
-				Canon = new MetaType(p.Reference.Canon);
-
-			if (p.Reference.IsArray)
-				ElementType = new MetaType(p.Reference.ElementTypeHandle);
-
-			if (!p.Reference.Parent.IsNull) {
-				Parent = new MetaType(p.Reference.Parent);
+		public bool IsUnmanaged {
+			get {
+				try {
+					// ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+					typeof(U<>).MakeGenericType(RuntimeType);
+					return true;
+				}
+				catch {
+					return false;
+				}
 			}
-
-
-			Fields    = new VirtualCollection<MetaField>(GetField, GetFields);
-			Methods   = new VirtualCollection<MetaMethod>(GetMethod, GetMethods);
-			AllFields = new VirtualCollection<MetaField>(GetAnyField, GetAllFields);
 		}
 
-		private Pointer<EEClassLayoutInfo> LayoutInfo => Value.Reference.EEClass.Reference.LayoutInfo;
+		#endregion
 
-		public IEnumerable<MetaField> InstanceFields {
+
+		public bool IsAnyPointer {
 			get {
-				if (IsArray) {
-					return Array.Empty<MetaField>();
+				if (IsPointer || this == typeof(IntPtr) || this == typeof(UIntPtr) || this == typeof(Pointer)) {
+					return true;
 				}
 
-				return Fields
-				      .Where(f => !f.FieldInfo.IsStatic && !f.FieldInfo.IsLiteral)
-				      .OrderBy(f => f.Offset);
+				if (RuntimeType.IsConstructedGenericType) {
+					var genDef = RuntimeType.GetGenericTypeDefinition();
+					return genDef == typeof(Pointer<>);
+				}
+
+
+				return false;
 			}
 		}
+
+		#endregion
+
+		#region MethodTable
+
+		public short ComponentSize => Value.Reference.ComponentSize;
+
+		public MethodTableFlagsLow FlagsLow => Value.Reference.FlagsLow;
+
+		public int BaseSize => Value.Reference.BaseSize;
+
+		public MethodTableFlags2 Flags2 => Value.Reference.Flags2;
+
+		public override int Token => TokenUtil.TokenFromRid(Value.Reference.RawToken, CorTokenType.TypeDef);
+
+		public short VirtualsCount => Value.Reference.NumVirtuals;
+
+		public short InterfacesCount => Value.Reference.NumInterfaces;
+
+		public MetaType Parent => (Pointer<MethodTable>) Value.Reference.Parent;
+
+		public Pointer<byte> Module => Value.Reference.Module;
+
+		public Pointer<byte> WriteableData => Value.Reference.WriteableData;
+
+		public MethodTableFlags Flags => Value.Reference.Flags;
+
+		private Pointer<EEClass> EEClass => Value.Reference.EEClass;
+
+		public MetaType Canon => Value.Reference.Canon;
+
+		public Pointer<byte> PerInstInfo => Value.Reference.PerInstInfo;
+
+		public MetaType ElementTypeHandle => (Pointer<MethodTable>) Value.Reference.ElementTypeHandle;
+
+//		public Pointer<byte> MultipurposeSlot1 => Value.Reference.MultipurposeSlot1;
+
+		public Pointer<byte> InterfaceMap => Value.Reference.InterfaceMap;
+
+//		public Pointer<byte> MultipurposeSlot2 => Value.Reference.MultipurposeSlot2;
+
+		public Type RuntimeType { get; }
+
+		#endregion
+
+		#region EEClass
+
+		public Pointer<byte> GuidInfo => EEClass.Reference.GuidInfo;
+
+		public Pointer<byte> OptionalFields => EEClass.Reference.OptionalFields;
+
+		public Pointer<byte> Chunks => EEClass.Reference.Chunks;
+
+		public int NativeSize => (int) EEClass.Reference.NativeSize;
+
+		public CorInterfaceAttr ComInterfaceType => EEClass.Reference.ComInterfaceType;
+
+//		public Pointer<byte> CCWTemplate => EEClass.Reference.CCWTemplate;
+
+		public TypeAttributes Attributes => EEClass.Reference.Attributes;
+
+		public VMFlags VMFlags => EEClass.Reference.VMFlags;
+
+		public CorElementType NormType => EEClass.Reference.NormType;
+
+		public bool FieldsArePacked => EEClass.Reference.FieldsArePacked;
+
+		public int FixedEEClassFields => EEClass.Reference.FixedEEClassFields;
 
 		/// <summary>
-		/// <see cref="InstanceFields"/> with transient fields
+		/// Size of the padding in <see cref="BaseSize"/>
 		/// </summary>
-		public IEnumerable<IReadableStructure> MemoryFields {
+		public int BaseSizePadding => EEClass.Reference.BaseSizePadding;
+
+		public MetaLayout LayoutInfo {
 			get {
-				List<IReadableStructure> instanceFields = InstanceFields.Cast<IReadableStructure>().ToList();
+				Conditions.Require(HasLayout, nameof(HasLayout));
 
-				if (!IsStruct) {
-					instanceFields.Insert(0, GetObjectHeaderField());
-					instanceFields.Insert(1, GetMethodTableField());
-				}
-
-				return instanceFields;
+				return new MetaLayout(EEClass.Reference.LayoutInfo);
 			}
 		}
 
-		public IEnumerable<PaddingField> Padding {
+		public int InstanceFieldsCount => EEClass.Reference.NumInstanceFields;
+
+		/// <summary>
+		/// Number of fields that are not <see cref="MetaField.IsLiteral"/> but <see cref="MetaField.IsStatic"/>
+		/// </summary>
+		public int StaticFieldsCount => EEClass.Reference.NumStaticFields;
+
+		public int MethodsCount => EEClass.Reference.NumMethods;
+
+		public int NonVirtualSlotsCount => EEClass.Reference.NumNonVirtualSlots;
+
+		/// <summary>
+		/// Size of instance fields
+		/// </summary>
+		public int InstanceFieldsSize => BaseSize - BaseSizePadding;
+
+		public int FieldsCount => EEClass.Reference.FieldDescListLength;
+
+		public MetaField[] FieldList {
 			get {
-				var nextOffsetOrSize = NumInstanceFieldBytes;
-				var memFields        = InstanceFields.ToArray(); // todo: maybe use MemoryFields?
+				var ptr = (Pointer<FieldDesc>) EEClass.Reference.FieldDescList;
+				int len = FieldsCount;
 
-				for (int i = 0; i < memFields.Length; i++) {
-					// start padding
+				var rg = new MetaField[len];
 
-					if (i != memFields.Length - 1) {
-						nextOffsetOrSize = Fields[i + 1].Offset;
-					}
-
-					int nextSectOfsCandidate = Fields[i].Offset + Fields[i].Size;
-
-					if (nextSectOfsCandidate < nextOffsetOrSize) {
-						int padSize = nextOffsetOrSize - nextSectOfsCandidate;
-
-						yield return new PaddingField(nextSectOfsCandidate, padSize);
-					}
-
-					// end padding
-				}
-			}
-		}
-
-		public IReadableStructure[] GetElementFields(object value)
-		{
-			if (!IsStringOrArray) {
-				return Array.Empty<IReadableStructure>();
-			}
-
-			Conditions.Require(value.GetType() == RuntimeType, nameof(value));
-
-
-			int lim;
-
-			switch (value) {
-				case string str:
-					lim = str.Length - 1;
-					break;
-				case Array rg:
-					lim = rg.Length;
-					break;
-				default:
-					throw new InvalidOperationException();
-			}
-
-			var elementFields = new List<IReadableStructure>(lim);
-
-			if (IsArray) {
-				int d = 1;
-				if (MemInfo.Is64Bit) {
-					d++;
+				for (int i = 0; i < len; i++) {
+					rg[i] = new MetaField(ptr.AddressOfIndex(i));
 				}
 
-				elementFields.Capacity = lim + d;
-
-				elementFields.AddRange(ElementField.CreateArrayStructures());
-			}
-
-			for (int i = 0; i < lim; i++) {
-				var element = ElementField.Create(this, i);
-
-				elementFields.Add(element);
-			}
-
-			return elementFields.ToArray();
-		}
-
-		public bool IsStruct => RtInfo.IsStruct(RuntimeType);
-
-		internal static IReadableStructure GetMethodTableField() => new MethodTableField();
-
-		internal static IReadableStructure GetObjectHeaderField() => new ObjectHeaderField();
-
-		public IEnumerable<MetaField> MethodTableFields {
-			get {
-				var mtFields = RuntimeType.GetCorrespondingMethodTableFields();
-				foreach (var info in mtFields) {
-					yield return new MetaField(info);
-				}
+				return rg;
 			}
 		}
 
-		public string ToString(string format, IFormatProvider formatProvider)
-		{
-			if (String.IsNullOrEmpty(format))
-				format = FMT_B;
+		#region bool
 
-			if (formatProvider == null)
-				formatProvider = CultureInfo.CurrentCulture;
+		/// <summary>
+		///     Whether this <see cref="EEClass" /> has a <see cref="EEClassLayoutInfo" />
+		/// </summary>
+		public bool HasLayout => VMFlags.HasFlagFast(VMFlags.HasLayout);
+
+		public bool IsDelegate => VMFlags.HasFlagFast(VMFlags.Delegate);
+
+		public bool IsBlittable => HasLayout && LayoutInfo.Flags.HasFlagFast(LayoutFlags.Blittable);
+
+		public bool HasComponentSize => Flags.HasFlagFast(MethodTableFlags.HasComponentSize);
+
+		public bool IsArray => Flags.HasFlagFast(MethodTableFlags.Array);
 
 
-			switch (format.ToUpperInvariant()) {
-				case FMT_B:
-					return String.Format(
-						"{0} (token: {1}) (base size: {2}) (component size: {3}) (base fields size: {4})",
-						Name, Token, BaseSize, ComponentSize, NumInstanceFieldBytes);
-				case FMT_E:
-					return ToTable().ToString();
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+		public bool IsStringOrArray => HasComponentSize;
+
+
+		public bool IsString => HasComponentSize && !IsArray;
+
+
+		public bool ContainsPointers => Flags.HasFlagFast(MethodTableFlags.ContainsPointers);
+
+
+		public bool IsReferenceOrContainsReferences {
+			get { return !RuntimeType.IsValueType || ContainsPointers; }
 		}
 
-		private MetaField GetAnyField(string name)
-		{
-			var field = RuntimeType.GetAnyField(name);
-			Conditions.Require(!field.IsLiteral, "Field cannot be literal", nameof(field));
-			return new MetaField(field.GetFieldDesc());
-		}
+		#endregion
 
-		private MetaField[] GetAllFields()
-		{
-			FieldInfo[] fields     = RuntimeType.GetAllFields().Where(x => !x.IsLiteral).ToArray();
-			var         metaFields = new MetaField[fields.Length];
+		#endregion
 
-			for (int i = 0; i < fields.Length; i++) {
-				metaFields[i] = new MetaField(fields[i]);
-			}
+		/// <summary>
+		/// Gets a field with the name <param name="name"></param>
+		/// </summary>
+		/// <param name="name">Field name</param>
+		public MetaField this[string name] => Fields[name];
 
-			return metaFields;
-		}
+		public VirtualCollection<MetaField> Fields { get; }
+
+		public VirtualCollection<MetaMethod> Methods { get; }
 
 		private MetaField GetField(string name)
 		{
-			return new MetaField(RuntimeType.GetFieldDesc(name));
+			return RuntimeType.GetAnyField(name);
 		}
 
 		private MetaField[] GetFields()
 		{
-			Pointer<FieldDesc>[] fields = RuntimeType.GetFieldDescs();
-			var                  meta   = new MetaField[fields.Length];
-
-			for (int i = 0; i < fields.Length; i++)
-				meta[i] = new MetaField(fields[i]);
-
-			return meta;
+			return RuntimeType.GetAllFields().Select(f => (MetaField) f).ToArray();
 		}
 
 		private MetaMethod GetMethod(string name)
 		{
-			return new MetaMethod(RuntimeType.GetMethodDesc(name));
+			return RuntimeType.GetAnyMethod(name);
 		}
 
 		private MetaMethod[] GetMethods()
 		{
-			Pointer<MethodDesc>[] methods = RuntimeType.GetMethodDescs();
-			var                   meta    = new MetaMethod[methods.Length];
-
-			for (int i = 0; i < meta.Length; i++)
-				meta[i] = new MetaMethod(methods[i]);
-
-			return meta;
+			return RuntimeType.GetAllMethods().Select(m => (MetaMethod) m).ToArray();
 		}
 
-		private ConsoleTable ToTable()
+		#endregion
+
+		#region Override
+
+		public override ConsoleTable Debug {
+			get {
+				var table = base.Debug;
+
+				table.AddRow(nameof(Name), Name);
+				table.AddRow(nameof(BaseSize), BaseSize);
+				table.AddRow(nameof(ComponentSize), ComponentSize);
+				table.AddRow(nameof(NormType), NormType);
+
+				return table;
+			}
+		}
+
+		#endregion
+
+		#region Operators
+
+		public static implicit operator MetaType(Pointer<MethodTable> ptr)
 		{
-			var table = new ConsoleTable("Info", "Value");
-			table.AddRow("Name", Name);
-			table.AddRow("Token", Token);
-
-			/* -- Sizes -- */
-			table.AddRow("Base size", BaseSize);
-			table.AddRow("Component size", ComponentSize);
-			table.AddRow("Base fields size", NumInstanceFieldBytes);
-
-			/* -- Flags -- */
-			table.AddRow("Flags", EnumUtil.CreateString(Flags));
-			table.AddRow("Flags 2", EnumUtil.CreateString(Flags2));
-			table.AddRow("Low flags", EnumUtil.CreateString(FlagsLow));
-			table.AddRow("Attributes", EnumUtil.CreateString(TypeAttributes));
-			table.AddRow("Layout flags", HasLayout ? EnumUtil.CreateString(LayoutFlags) : "-");
-			table.AddRow("VM Flags", EnumUtil.CreateString(VMFlags));
-
-			/* -- Aux types -- */
-			table.AddRow("Canon type", Canon?.Name);
-			table.AddRow("Element type", ElementType?.Name);
-			table.AddRow("Parent type", Parent.Name);
-
-			/* -- Numbers -- */
-			table.AddRow("Number instance fields", NumInstanceFields);
-			table.AddRow("Number static fields", NumStaticFields);
-			table.AddRow("Number non virtual slots", NumNonVirtualSlots);
-			table.AddRow("Number methods", NumMethods);
-			table.AddRow("Number instance field bytes", NumInstanceFieldBytes);
-			table.AddRow("Number virtuals", NumVirtuals);
-			table.AddRow("Number interfaces", NumInterfaces);
-
-			table.AddRow("Blittable", IsBlittable);
-
-
-			table.AddRow("Value", Value.ToString("P"));
-
-			return table;
+			return new MetaType(ptr);
 		}
 
-		public override string ToString()
+		public static implicit operator MetaType(Type t)
 		{
-			return ToString(FMT_B);
+			return new MetaType(t);
 		}
 
-		public string ToString(string format)
+		public bool Equals(MetaType other)
 		{
-			return ToString(format, CultureInfo.CurrentCulture);
+			return base.Equals(other); /*&& RuntimeType == other.RuntimeType*/
 		}
 
-		public static implicit operator MetaType(Type type) => new MetaType(type);
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj))
+				return false;
 
-		#region Accessors
+			if (ReferenceEquals(this, obj))
+				return true;
 
-		public MetaField this[string name] => AllFields[name];
+			if (obj.GetType() != this.GetType())
+				return false;
 
-		public VirtualCollection<MetaField> Fields { get; }
+			return Equals((MetaType) obj);
+		}
 
-		public VirtualCollection<MetaField> AllFields { get; }
+		public override int GetHashCode()
+		{
+			unchecked {
+				return (base.GetHashCode() * 397) ^ RuntimeType.GetHashCode();
+			}
+		}
 
-		public VirtualCollection<MetaMethod> Methods { get; }
+		public static bool operator ==(MetaType left, MetaType right)
+		{
+			return Equals(left, right);
+		}
 
-		public MetaType Canon { get; }
-
-		public MetaType ElementType { get; }
-
-		public MetaType Parent { get; }
-
-
-		public CorElementType NormalType => Value.Reference.EEClass.Reference.NormalType;
-
-		public MemberInfo Info => RuntimeType;
-
-		public string Name => Value.Reference.Name;
-
-		/// <summary>
-		///     Metadata token
-		///     <remarks>
-		///         <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>"mdToken"</c> value in hexadecimal format.</para>
-		///         <para>Equals <see cref="Type.MetadataToken" /></para>
-		///     </remarks>
-		/// </summary>
-		public int Token => Value.Reference.Token;
-
-		/// <summary>
-		///     <para>Corresponding <see cref="Type" /> of this <see cref="Structures.MethodTable" /></para>
-		/// </summary>
-		public Type RuntimeType => Value.Reference.RuntimeType;
-
-		#region bool
-
-		public bool IsZeroSized => LayoutInfo.Reference.ZeroSized;
-
-		public bool HasLayout => Value.Reference.EEClass.Reference.HasLayout;
-
-		public bool HasComponentSize => Value.Reference.HasComponentSize;
-
-		public bool IsArray => Value.Reference.IsArray;
-
-		public bool IsStringOrArray => Value.Reference.IsStringOrArray;
-
-		public bool IsBlittable => Value.Reference.IsBlittable;
-
-		public bool IsString => Value.Reference.IsString;
-
-		public bool ContainsPointers => Value.Reference.ContainsPointers;
-
-		#endregion
-
-		#region Flags
-
-		public LayoutFlags LayoutFlags => LayoutInfo.Reference.Flags;
-
-		public TypeAttributes TypeAttributes => Value.Reference.EEClass.Reference.TypeAttributes;
-
-		public VMFlags VMFlags => Value.Reference.EEClass.Reference.VMFlags;
-
-		public MethodTableFlags Flags => Value.Reference.Flags;
-
-		public MethodTableFlags2 Flags2 => Value.Reference.Flags2;
-
-		public MethodTableFlagsLow FlagsLow => Value.Reference.FlagsLow;
-
-		#endregion
-
-		#region Size
-
-		/// <summary>
-		///     The base size of this class when allocated on the heap. Note that for value types
-		///     <see cref="BaseSize" /> returns the size of instance fields for a boxed value, and
-		///     <see cref="NumInstanceFieldBytes" /> for an unboxed value.
-		/// </summary>
-		public int BaseSize => Value.Reference.BaseSize;
-
-		/// <summary>
-		///     <para>The size of an individual element when this type is an array or string.</para>
-		///     <example>
-		///         If this type is a <c>string</c>, the component size will be <c>2</c>. (<c>sizeof(char)</c>)
-		///     </example>
-		///     <returns>
-		///         <c>0</c> if <c>!</c><see cref="HasComponentSize" />, component size otherwise
-		///     </returns>
-		/// </summary>
-		public int ComponentSize => Value.Reference.ComponentSize;
-
-		public int ManagedSize => (int) LayoutInfo.Reference.ManagedSize;
-
-		public int NativeSize => Value.Reference.EEClass.Reference.NativeSize;
-
-		public int BaseSizePadding => Value.Reference.EEClass.Reference.BaseSizePadding;
-
-		#endregion
-
-		#region Num
-
-		/// <summary>
-		///     The number of instance fields in this type.
-		/// </summary>
-		public int NumInstanceFields => Value.Reference.NumInstanceFields;
-
-		/// <summary>
-		///     The number of <c>static</c> fields in this type.
-		/// </summary>
-		public int NumStaticFields => Value.Reference.NumStaticFields;
-
-		public int NumNonVirtualSlots => Value.Reference.NumNonVirtualSlots;
-
-		/// <summary>
-		///     Number of methods in this type.
-		/// </summary>
-		public int NumMethods => Value.Reference.NumMethods;
-
-		/// <summary>
-		///     The size of the instance fields in this type. This is the unboxed size of the type if the object is boxed.
-		///     (Minus padding and overhead of the base size.)
-		/// </summary>
-		public int NumInstanceFieldBytes => Value.Reference.NumInstanceFieldBytes;
-
-		/// <summary>
-		///     The number of virtual methods in this type (<c>4</c> by default; from <see cref="Object" />)
-		/// </summary>
-		public int NumVirtuals => Value.Reference.NumVirtuals;
-
-		/// <summary>
-		///     The number of interfaces this type implements
-		///     <remarks>
-		///         <para>Equal to WinDbg's <c>!DumpMT /d</c> <c>Number of IFaces in IFaceMap</c> value.</para>
-		///     </remarks>
-		/// </summary>
-		public int NumInterfaces => Value.Reference.NumInterfaces;
-
-		#endregion
-
-		public Pointer<MethodTable> Value { get; }
-		public MetaInfoType MetaInfoType { get; }
+		public static bool operator !=(MetaType left, MetaType right)
+		{
+			return !Equals(left, right);
+		}
 
 		#endregion
 	}

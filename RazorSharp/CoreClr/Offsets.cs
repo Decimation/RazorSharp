@@ -2,16 +2,16 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using RazorSharp.CoreClr.Structures;
-using RazorSharp.CoreClr.Structures.Enums;
-
-// ReSharper disable ConvertToConstant.Global
+using RazorSharp.CoreClr.Metadata;
 
 #endregion
 
 namespace RazorSharp.CoreClr
 {
-	public static unsafe class Offsets
+	/// <summary>
+	/// Common runtime offsets.
+	/// </summary>
+	public static class Offsets
 	{
 		/// <summary>
 		///     The offset, in bytes, of an array's actual <see cref="MethodTable" /> pointer, relative to the
@@ -27,31 +27,41 @@ namespace RazorSharp.CoreClr
 		internal const int ARRAY_MT_PTR_OFFSET = 6;
 
 		/// <summary>
-		///     How many bytes to subtract from <see cref="MethodTable.m_pCanonMT" /> if
-		///     <see cref="MethodTable.UnionType" /> is <see cref="LowBits.MethodTable" />
-		///     <remarks>
-		///         <para>Source: /src/vm/methodtable.inl: 1180</para>
-		///     </remarks>
+		///     Size of the length field and first character
+		/// <list type="bullet">
+		///         <item>
+		///             <description>+ 2: First character</description>
+		///         </item>
+		///         <item>
+		///             <description>+ 4: String length</description>
+		///         </item>
+		///     </list>
 		/// </summary>
-		internal const int CANON_MT_UNION_MT_OFFSET = 2;
+		public static readonly int StringOverhead = sizeof(char) + sizeof(int);
 
 		/// <summary>
-		/// Size of the length field and padding (x64)
+		///     Size of the length field and padding (x64)
 		/// </summary>
-		public static readonly int ArrayStubSize = IntPtr.Size;
+		public static readonly int ArrayOverhead = IntPtr.Size;
 
 		/// <summary>
-		/// Size of the length field and first character
+		/// 	Size of <see cref="TypeHandle"/> and <see cref="ObjHeader"/>
+		///     <list type="bullet">
+		///         <item>
+		///             <description>+ <see cref="IntPtr.Size" />: <see cref="ObjHeader" /></description>
+		///         </item>
+		///         <item>
+		///             <description>+ <see cref="IntPtr.Size" />: <see cref="MethodDesc" /> pointer</description>
+		///         </item>
+		///     </list>
 		/// </summary>
-		public static readonly int StringStubSize = sizeof(char) + sizeof(int);
-
-		public static readonly int ObjectOverhead = sizeof(ObjHeader) + sizeof(MethodTable*);
+		public static readonly int ObjectOverhead = IntPtr.Size * 2;
 
 		/// <summary>
 		///     Heap offset to the first field.
 		///     <list type="bullet">
 		///         <item>
-		///             <description>+ 8 for <c>MethodTable*</c> (<see cref="IntPtr.Size" />)</description>
+		///             <description>+ <see cref="IntPtr.Size" /> for <see cref="TypeHandle" /></description>
 		///         </item>
 		///     </list>
 		/// </summary>
@@ -61,7 +71,7 @@ namespace RazorSharp.CoreClr
 		///     Heap offset to the first array element.
 		///     <list type="bullet">
 		///         <item>
-		///             <description>+ 8 for <c>MethodTable*</c> (<see cref="IntPtr.Size" />)</description>
+		///             <description>+ <see cref="IntPtr.Size" /> for <see cref="TypeHandle" /></description>
 		///         </item>
 		///         <item>
 		///             <description>+ 4 for length (<see cref="UInt32" />) </description>
@@ -71,8 +81,22 @@ namespace RazorSharp.CoreClr
 		///         </item>
 		///     </list>
 		/// </summary>
-		public static readonly int OffsetToArrayData = OffsetToData + ArrayStubSize;
+		public static readonly int OffsetToArrayData = OffsetToData + ArrayOverhead;
 
+		/// <summary>
+		///     Heap offset to the first string character.
+		/// </summary>
 		public static readonly int OffsetToStringData = RuntimeHelpers.OffsetToStringData;
+
+		/// <summary>
+		///     <para>Minimum GC object heap size</para>
+		///     <para>Sources:</para>
+		///     <list type="bullet">
+		///         <item>
+		///             <description>/src/vm/object.h: 119</description>
+		///         </item>
+		///     </list>
+		/// </summary>
+		public static readonly int MinObjectSize = ObjectOverhead + IntPtr.Size;
 	}
 }

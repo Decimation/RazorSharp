@@ -1,8 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\ModuleInit.Fody.2.0.0\build\ModuleInit.Fody.props" Condition="Exists('..\packages\ModuleInit.Fody.2.0.0\build\ModuleInit.Fody.props')" />
   <Import Project="..\packages\InlineIL.Fody.1.1.2\build\InlineIL.Fody.props" Condition="Exists('..\packages\InlineIL.Fody.1.1.2\build\InlineIL.Fody.props')" />
-  <Import Project="..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props')" />
-  <Import Project="..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props" Condition="Exists('..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -18,44 +17,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE;JETBRAINS_ANNOTATIONS</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <LangVersion>latest</LangVersion>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE;JETBRAINS_ANNOTATIONS</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <LangVersion>latest</LangVersion>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unit test|x64' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE;JETBRAINS_ANNOTATIONS;UNIT_TEST</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <LangVersion>latest</LangVersion>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -90,16 +51,19 @@
       <HintPath>..\packages\InlineIL.Fody.1.1.2\lib\net452\InlineIL.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="JetBrains.Annotations, Version=2019.1.1.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
-      <HintPath>..\packages\JetBrains.Annotations.2019.1.1\lib\net20\JetBrains.Annotations.dll</HintPath>
+    <Reference Include="JetBrains.Annotations, Version=2019.1.3.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
+      <HintPath>..\packages\JetBrains.Annotations.2019.1.3\lib\net20\JetBrains.Annotations.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="ModuleInit, Version=1.9.0.0, Culture=neutral, PublicKeyToken=409b3227471b0f0d">
-      <HintPath>..\packages\ModuleInit.Fody.1.9.0\lib\net452\ModuleInit.dll</HintPath>
+    <Reference Include="ModuleInit, Version=2.0.0.0, Culture=neutral, PublicKeyToken=409b3227471b0f0d">
+      <HintPath>..\packages\ModuleInit.Fody.2.0.0\lib\net452\ModuleInit.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
+    <Reference Include="NativeSharp, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\NativeSharp.1.0.3\lib\net472\NativeSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
       <HintPath>..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
       <Private>True</Private>
@@ -112,187 +76,124 @@
       <HintPath>..\packages\Serilog.Sinks.Console.3.1.1\lib\net45\Serilog.Sinks.Console.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SimpleSharp, Version=1.1.5.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\SimpleSharp.1.1.5\lib\net472\SimpleSharp.dll</HintPath>
+    <Reference Include="SimpleSharp, Version=1.1.6.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\SimpleSharp.1.1.6\lib\net472\SimpleSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Collections" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.IO" />
-    <Reference Include="System.Memory, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
-      <HintPath>..\..\..\.nuget\packages\system.memory\4.5.2\lib\netstandard2.0\System.Memory.dll</HintPath>
+    <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+      <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="System.Runtime" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+      <HintPath>..\packages\System.Memory.4.5.3\lib\netstandard2.0\System.Memory.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\packages\System.Numerics.Vectors.4.4.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Runtime.InteropServices" />
-    <Reference Include="System.Security" />
     <Reference Include="System.Threading.Thread" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Analysis\Inspect.cs" />
-    <Compile Include="Analysis\InspectIL.cs" />
-    <Compile Include="Analysis\InspectOptions.cs" />
-    <Compile Include="Analysis\InspectUtil.cs" />
-    <Compile Include="Analysis\LayoutInfo.cs" />
-    <Compile Include="Components\IAllocator.cs" />
-    <Compile Include="Components\Releasable.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="CoreClr\Clr.cs" />
-    <Compile Include="CoreClr\Instruction.cs" />
-    <Compile Include="CoreClr\Meta\Interfaces\IClrStructure.cs" />
-    <Compile Include="CoreClr\Meta\Interfaces\IMetadata.cs" />
-    <Compile Include="CoreClr\Meta\Interfaces\IReadableStructure.cs" />
-    <Compile Include="CoreClr\Meta\Interfaces\IToken.cs" />
+    <Compile Include="Clr.cs" />
+    <Compile Include="CoreClr\Constants.cs" />
+    <Compile Include="CoreClr\Metadata\Enums\CorEnums.cs" />
+    <Compile Include="CoreClr\Metadata\Enums\EEClassEnums.cs" />
+    <Compile Include="CoreClr\Metadata\Enums\EnumUtil.cs" />
+    <Compile Include="CoreClr\Metadata\Enums\FieldDescEnums.cs" />
+    <Compile Include="CoreClr\Metadata\Enums\MethodDescEnums.cs" />
+    <Compile Include="CoreClr\Metadata\Enums\MethodTableEnums.cs" />
+    <Compile Include="CoreClr\Metadata\ExecutionEngine\EEClass.cs" />
+    <Compile Include="CoreClr\Metadata\ExecutionEngine\EEClassLayoutInfo.cs" />
+    <Compile Include="CoreClr\Metadata\ExecutionEngine\LayoutEEClass.cs" />
+    <Compile Include="CoreClr\Metadata\FieldDesc.cs" />
+    <Compile Include="CoreClr\Metadata\JitIL\FatILMethod.cs" />
+    <Compile Include="CoreClr\Metadata\JitIL\ILMethod.cs" />
+    <Compile Include="CoreClr\Metadata\JitIL\InspectIL.cs" />
+    <Compile Include="CoreClr\Metadata\JitIL\Instruction.cs" />
+    <Compile Include="CoreClr\Metadata\JitIL\TinyILMethod.cs" />
+    <Compile Include="CoreClr\Metadata\MethodDesc.cs" />
+    <Compile Include="CoreClr\Metadata\MethodTable.cs" />
+    <Compile Include="CoreClr\Metadata\ObjHeader.cs" />
+    <Compile Include="CoreClr\Metadata\TypeHandle.cs" />
+    <Compile Include="CoreClr\Meta\Base\ClrStructure.cs" />
+    <Compile Include="CoreClr\Meta\Base\EmbeddedClrStructure.cs" />
+    <Compile Include="CoreClr\Meta\Base\PseudoClrStructure.cs" />
     <Compile Include="CoreClr\Meta\MetaField.cs" />
     <Compile Include="CoreClr\Meta\MetaIL.cs" />
-    <Compile Include="CoreClr\Meta\MetaInfoType.cs" />
+    <Compile Include="CoreClr\Meta\MetaLayout.cs" />
     <Compile Include="CoreClr\Meta\MetaMethod.cs" />
     <Compile Include="CoreClr\Meta\MetaType.cs" />
-    <Compile Include="CoreClr\Meta\Virtual\ElementField.cs" />
-    <Compile Include="CoreClr\Meta\Virtual\MethodTableField.cs" />
-    <Compile Include="CoreClr\Meta\Virtual\ObjectHeaderField.cs" />
-    <Compile Include="CoreClr\Meta\Virtual\PaddingField.cs" />
-    <Compile Include="CoreClr\Meta\Virtual\VirtualField.cs" />
     <Compile Include="CoreClr\Offsets.cs" />
-    <Compile Include="CoreClr\RtInfo.cs" />
-    <Compile Include="CoreClr\Structures\EE\EEClass.cs" />
-    <Compile Include="CoreClr\Structures\EE\EEClassFieldId.cs" />
-    <Compile Include="CoreClr\Structures\EE\EEClassLayoutInfo.cs" />
-    <Compile Include="CoreClr\Structures\EE\LayoutEEClass.cs" />
-    <Compile Include="CoreClr\Structures\EE\LayoutFlags.cs" />
-    <Compile Include="CoreClr\Structures\EE\VMFlags.cs" />
-    <Compile Include="CoreClr\Structures\Enums\CorElementType.cs" />
-    <Compile Include="CoreClr\Structures\Enums\CorILMethodFlags.cs" />
-    <Compile Include="CoreClr\Structures\Enums\CorTokenType.cs" />
-    <Compile Include="CoreClr\Structures\Enums\LowBits.cs" />
-    <Compile Include="CoreClr\Structures\Enums\MbMask.cs" />
-    <Compile Include="CoreClr\Structures\Enums\MethodClassification.cs" />
-    <Compile Include="CoreClr\Structures\Enums\MethodDescClassification.cs" />
-    <Compile Include="CoreClr\Structures\Enums\MethodDescFlags2.cs" />
-    <Compile Include="CoreClr\Structures\Enums\MethodDescFlags3.cs" />
-    <Compile Include="CoreClr\Structures\Enums\MethodTableFlags.cs" />
-    <Compile Include="CoreClr\Structures\Enums\MethodTableFlags2.cs" />
-    <Compile Include="CoreClr\Structures\Enums\MethodTableFlagsLow.cs" />
-    <Compile Include="CoreClr\Structures\Enums\ProtectionLevel.cs" />
-    <Compile Include="CoreClr\Structures\Enums\SyncBlockFlags.cs" />
-    <Compile Include="CoreClr\Structures\Enums\TokenType.cs" />
+    <Compile Include="CoreClr\Runtime.cs" />
+    <Compile Include="CoreClr\RuntimeInfo.cs" />
     <Compile Include="CoreClr\Structures\GCHeap.cs" />
     <Compile Include="CoreClr\Structures\GlobalHeap.cs" />
-    <Compile Include="CoreClr\Structures\ILMethods\ILMethod.cs" />
-    <Compile Include="CoreClr\Structures\ILMethods\FatILMethod.cs" />
-    <Compile Include="CoreClr\Structures\ILMethods\TinyILMethod.cs" />
-    <Compile Include="CoreClr\Structures\TypeDesc.cs" />
-    <Compile Include="CoreClr\Structures\TypeHandle.cs" />
-    <Compile Include="Import\Attributes\ClrSymNamespaceAttribute.cs" />
-    <Compile Include="Import\Attributes\SymCallAttribute.cs" />
-    <Compile Include="Import\Attributes\SymFieldAttribute.cs" />
-    <Compile Include="Import\Attributes\SymFieldOptions.cs" />
-    <Compile Include="Import\Attributes\SymImportAttribute.cs" />
-    <Compile Include="Import\Attributes\SymImportOptions.cs" />
-    <Compile Include="Import\Attributes\SymNamespaceAttribute.cs" />
-    <Compile Include="Import\SymImportException.cs" />
-    <Compile Include="Import\Symload.cs" />
-    <Compile Include="Memory\Cleanup.cs" />
-    <Compile Include="Memory\MemInfo.cs" />
+    <Compile Include="CoreClr\Structures\PackedDWORDFields.cs" />
+    <Compile Include="CoreClr\TokenUtil.cs" />
+    <Compile Include="Global.cs" />
+    <Compile Include="Import\Attributes\ImportAttribute.cs" />
+    <Compile Include="Import\Attributes\ImportCallAttribute.cs" />
+    <Compile Include="Import\Attributes\ImportFieldAttribute.cs" />
+    <Compile Include="Import\Attributes\ImportForwardCallAttribute.cs" />
+    <Compile Include="Import\Attributes\ImportMapAttribute.cs" />
+    <Compile Include="Import\Attributes\ImportNamespaceAttribute.cs" />
+    <Compile Include="Import\Enums\IdentifierOptions.cs" />
+    <Compile Include="Import\Enums\ImportCallOptions.cs" />
+    <Compile Include="Import\Enums\ImportFieldOptions.cs" />
+    <Compile Include="Import\IImportProvider.cs" />
+    <Compile Include="Import\ImportManager.cs" />
+    <Compile Include="Import\ModuleImport.cs" />
+    <Compile Include="Import\SymbolManager.cs" />
+    <Compile Include="Interop\DelegateCreator.cs" />
+    <Compile Include="Interop\Functions.cs" />
+    <Compile Include="Interop\FunctionTools.cs" />
+    <Compile Include="Interop\NativeFunctions.cs" />
+    <Compile Include="Memory\Bits.cs" />
+    <Compile Include="Memory\Conversions.cs" />
+    <Compile Include="Memory\Mem.cs" />
     <Compile Include="Memory\OffsetOptions.cs" />
     <Compile Include="Memory\Pointers\Pointer.cs" />
-    <Compile Include="Memory\Pointers\PointerFormat.cs" />
-    <Compile Include="Memory\Pointers\StringTypes.cs" />
+    <Compile Include="Memory\Pointers\PointerSettings.cs" />
     <Compile Include="Memory\SizeOfOptions.cs" />
     <Compile Include="Memory\Unsafe.cs" />
-    <Compile Include="Global.cs" />
-    <Compile Include="Memory\AddressInfo.cs" />
-    <Compile Include="Memory\Assembler.cs" />
-    <Compile Include="Memory\Fixed\GCHelper.cs" />
-    <Compile Include="Memory\Fixed\ObjectPinHandle.cs" />
-    <Compile Include="Memory\Fixed\ObjectPinner.cs" />
-    <Compile Include="Memory\Fixed\PinHandle.cs" />
-    <Compile Include="Memory\Fixed\PinHelper.cs" />
-    <Compile Include="Memory\Functions.cs" />
-    <Compile Include="Memory\MemScanner.cs" />
-    <Compile Include="Memory\Region.cs" />
-    <Compile Include="Memory\SegmentType.cs" />
+    <Compile Include="Model\Allocator.cs" />
+    <Compile Include="Model\IClosable.cs" />
+    <Compile Include="Model\Releasable.cs" />
     <Compile Include="ModuleInitializer.cs" />
-    <Compile Include="Native\Images\DllCharacteristics.cs" />
-    <Compile Include="Native\Images\ImageDataDirectory.cs" />
-    <Compile Include="Native\Images\ImageFileHeader.cs" />
-    <Compile Include="Native\Images\ImageNtHeaders64.cs" />
-    <Compile Include="Native\Images\ImageOptionalHeader32.cs" />
-    <Compile Include="Native\Images\ImageOptionalHeader64.cs" />
-    <Compile Include="Native\Images\ImageSectionCharacteristics.cs" />
-    <Compile Include="Native\Images\ImageSectionHeader.cs" />
-    <Compile Include="Native\Images\ImageSectionInfo.cs" />
-    <Compile Include="Native\Images\MachineType.cs" />
-    <Compile Include="Native\Images\MagicType.cs" />
-    <Compile Include="Native\Images\SubSystemType.cs" />
-    <Compile Include="Native\NativeHelp.cs" />
-    <Compile Include="Native\Symbols\SymbolFlag.cs" />
-    <Compile Include="Native\Symbols\ModuleInfo.cs" />
-    <Compile Include="Native\Symbols\Symbol.cs" />
-    <Compile Include="Native\Symbols\SymbolManager.cs" />
-    <Compile Include="Native\Symbols\SymbolUtil.cs" />
-    <Compile Include="Native\Symbols\SymbolInfo.cs" />
-    <Compile Include="Native\Symbols\SymTagEnum.cs" />
-    <Compile Include="Memory\AllocHelper.cs" />
-    <Compile Include="Memory\Mem.cs" />
-    <Compile Include="Memory\Modules.cs" />
-    <Compile Include="Memory\Segments.cs" />
-    <Compile Include="Native\Win32\DbgHelp.cs" />
-    <Compile Include="Native\Win32\Enums\AllocationType.cs" />
-    <Compile Include="Native\Win32\Enums\ConsoleOutputModes.cs" />
-    <Compile Include="Native\Win32\Enums\FreeTypes.cs" />
-    <Compile Include="Native\Win32\Enums\MemoryProtection.cs" />
-    <Compile Include="Native\Win32\Enums\MemState.cs" />
-    <Compile Include="Native\Win32\Enums\MemType.cs" />
-    <Compile Include="Native\Win32\Enums\ProcessAccess.cs" />
-    <Compile Include="Native\Win32\Enums\ProcessHeapEntryFlags.cs" />
-    <Compile Include="Native\Win32\Enums\ProcessorArchitecture.cs" />
-    <Compile Include="Native\Win32\Enums\StandardHandles.cs" />
-    <Compile Include="Native\Win32\HeapApi.cs" />
-    <Compile Include="Native\Win32\Kernel32.cs" />
-    <Compile Include="Native\Win32\Kernel32Impl.cs" />
-    <Compile Include="Native\Win32\ProcessApi.cs" />
-    <Compile Include="Native\Win32\Structures\Block.cs" />
-    <Compile Include="Native\Win32\Structures\MemoryBasicInformation.cs" />
-    <Compile Include="Native\Win32\Structures\NativeGuid.cs" />
-    <Compile Include="Native\Win32\Structures\NativeModuleInfo.cs" />
-    <Compile Include="Native\Win32\Structures\ProcessHeapEntry.cs" />
-    <Compile Include="Native\Win32\Structures\Region.cs" />
-    <Compile Include="Native\Win32\Structures\SystemInfo.cs" />
-    <Compile Include="Native\Win32\User32.cs" />
-    <Compile Include="CoreClr\ClrFunctions.cs" />
-    <Compile Include="CoreClr\Structures\DWFlags.cs" />
-    <Compile Include="CoreClr\Structures\FieldDesc.cs" />
-    <Compile Include="CoreClr\Structures\MethodDesc.cs" />
-    <Compile Include="CoreClr\Structures\MethodDescChunk.cs" />
-    <Compile Include="CoreClr\Structures\MethodTable.cs" />
-    <Compile Include="CoreClr\Structures\ObjHeader.cs" />
-    <Compile Include="CoreClr\Structures\PackedDWORDFields.cs" />
-    <Compile Include="CoreClr\Runtime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\Binary\Attributes\Bitfield.cs" />
-    <Compile Include="Utilities\Binary\Attributes\BitfieldAttribute.cs" />
-    <Compile Include="Utilities\Binary\Bits.cs" />
-    <Compile Include="Utilities\Conversions.cs" />
-    <Compile Include="Utilities\ConversionType.cs" />
-    <Compile Include="Utilities\ReflectionUtil.cs" />
-    <Compile Include="Utilities\StandardOut.cs" />
+    <Compile Include="Reflection\ReflectionUtil.cs" />
+    <Compile Include="Utilities\Fixed\ObjectPinner.cs" />
+    <Compile Include="Utilities\Fixed\PinHelper.cs" />
+    <Compile Include="Utilities\Modules.cs" />
+    <Compile Include="Utilities\Security\Exceptions\AmbiguousStateException.cs" />
+    <Compile Include="Utilities\Security\Exceptions\ClrException.cs" />
+    <Compile Include="Utilities\Security\Exceptions\CoreException.cs" />
+    <Compile Include="Utilities\Security\Exceptions\CorILException.cs" />
+    <Compile Include="Utilities\Security\Exceptions\ImageException.cs" />
+    <Compile Include="Utilities\Security\Exceptions\ImportException.cs" />
+    <Compile Include="Utilities\Security\Exceptions\SentryException.cs" />
+    <Compile Include="Utilities\Security\FailMessageTemplateAttribute.cs" />
+    <Compile Include="Utilities\Security\Guard.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Fody.5.1.1\build\Fody.targets" Condition="Exists('..\packages\Fody.5.1.1\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ModuleInit.Fody.1.9.0\build\ModuleInit.Fody.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.3.0.0\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\packages\Fody.5.1.1\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.5.1.1\build\Fody.targets'))" />
     <Error Condition="!Exists('..\packages\InlineIL.Fody.1.1.2\build\InlineIL.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\InlineIL.Fody.1.1.2\build\InlineIL.Fody.props'))" />
-    <Error Condition="!Exists('..\packages\Fody.5.0.6\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.5.0.6\build\Fody.targets'))" />
+    <Error Condition="!Exists('..\packages\ModuleInit.Fody.2.0.0\build\ModuleInit.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ModuleInit.Fody.2.0.0\build\ModuleInit.Fody.props'))" />
   </Target>
-  <Import Project="..\packages\Fody.5.0.6\build\Fody.targets" Condition="Exists('..\packages\Fody.5.0.6\build\Fody.targets')" />
   <!--<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>

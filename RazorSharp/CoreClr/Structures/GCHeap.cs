@@ -1,94 +1,62 @@
-#region
-
-using System.Runtime;
-using RazorSharp.Import;
+using System.Collections.Generic;
+using RazorSharp.CoreClr.Metadata;
 using RazorSharp.Import.Attributes;
-using SimpleSharp.Diagnostics;
+using RazorSharp.Import.Enums;
+using RazorSharp.Interop;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Pointers;
 
-#pragma warning disable 649
-
-// ReSharper disable ConvertToAutoPropertyWhenPossible
-// ReSharper disable MemberCanBeMadeStatic.Global
 // ReSharper disable InconsistentNaming
-
-#endregion
-
 
 namespace RazorSharp.CoreClr.Structures
 {
-	#region
+	
 
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-
-	#endregion
-
-	/// <summary>
-	///     <para>Represents the entire GC heap. This includes Gen 0, 1, 2, LOH, and other segments.</para>
-	///     <para>Corresponding files:</para>
-	///     <list type="bullet">
-	///         <item>
-	///             <description>/src/vm/gcheaputilities.cpp</description>
-	///         </item>
-	///         <item>
-	///             <description>/src/gc/gcimpl.h</description>
-	///         </item>
-	///         <item>
-	///             <description>/src/gc/gcinterface.h</description>
-	///         </item>
-	///     </list>
-	/// </summary>
-	[ClrSymNamespace(GC_WORKSTATION)]
+	[ImportNamespace(WKS_NAMESPACE)]
 	internal unsafe struct GCHeap
 	{
-		private const string GC_WORKSTATION = "WKS";
-		
-		/// <summary>
-		///     Returns the number of GCs that have occurred.
-		///     <remarks>
-		///         <para>Source: /src/gc/gcinterface.h: 710</para>
-		///     </remarks>
-		/// </summary>
-		internal int GCCount {
-			[SymCall("GetGcCount")]
-			get => throw new SymImportException(nameof(GCCount));
-		}
-
-		internal bool IsHeapPointer<T>(T value, bool smallHeapOnly = false) where T : class
-		{
-			return IsHeapPointer(Unsafe.AddressOfHeap(value).ToPointer(), smallHeapOnly);
-		}
-
-		/// <summary>
-		///     Returns true if this pointer points into a GC heap, false otherwise.
-		///     <remarks>
-		///         <para>Sources:</para>
-		///         <list type="bullet">
-		///             <item>
-		///                 <description>/src/gc/gcimpl.h: 164</description>
-		///             </item>
-		///             <item>
-		///                 <description>/src/gc/gcinterface.h: 700</description>
-		///             </item>
-		///         </list>
-		///     </remarks>
-		/// </summary>
-		/// <param name="obj">Pointer to an object in the GC heap</param>
-		/// <param name="smallHeapOnly">Whether to include small GC heaps only</param>
-		/// <returns><c>true</c> if <paramref name="obj" /> is a heap pointer; <c>false</c> otherwise</returns>
-		[SymCall]
-		internal bool IsHeapPointer(void* obj, bool smallHeapOnly = false)
-		{
-			throw new SymImportException(nameof(IsHeapPointer));
-		}
+		private const string WKS_NAMESPACE = "WKS";
 
 		static GCHeap()
 		{
-			Conditions.Require(!GCSettings.IsServerGC, "GC must be WKS", nameof(GCHeap));
+			ImportMap = new Dictionary<string, Pointer<byte>>();
+		}
+		
 
-			Symload.Load(typeof(GCHeap));
+		[ImportMap]
+		private static readonly Dictionary<string, Pointer<byte>> ImportMap;
+		
+		internal int GCCount {
+			[ImportCall("GetGcCount", ImportCallOptions.Map)]
+			get {
+				fixed (GCHeap* value = &this) {
+					return NativeFunctions.Call<int>((void*) ImportMap[nameof(GCCount)], value);
+				}
+			}
+		}
 
-			// Retrieve the global variables from the data segment of the CLR DLL
+		[ImportCall(IdentifierOptions.FullyQualified, ImportCallOptions.Map)]
+		internal static void* AllocateObject(MethodTable* mt, bool fHandleCom = false)
+		{
+			return NativeFunctions.CallReturnPointer((void*) ImportMap[nameof(AllocateObject)], mt, fHandleCom);
+		}
+
+		[ImportCall(ImportCallOptions.Map)]
+		internal bool IsHeapPointer(void* p, bool smallHeapOnly = false)
+		{
+			fixed (GCHeap* value = &this) {
+				return NativeFunctions.Call<bool, bool>((void*) ImportMap[nameof(IsHeapPointer)], value, 
+				                               p, smallHeapOnly);
+			}
+		}
+
+		internal bool IsHeapPointer<T>(T value, bool smallHeapOnly = false)
+		{
+			if (Unsafe.TryGetAddressOfHeap(value, out var ptr)) {
+				return IsHeapPointer(ptr.ToPointer(), smallHeapOnly);
+			}
+
+			return false;
 		}
 	}
 }

@@ -1,37 +1,25 @@
-#region
-
 using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Text;
-using RazorSharp.Components;
-using SimpleSharp.Diagnostics;
-using RazorSharp.CoreClr;
-using RazorSharp.Memory;
+using RazorSharp.Model;
 using Serilog;
 using Serilog.Context;
 using Serilog.Core;
-
-#endregion
+using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
+using SimpleSharp.Diagnostics;
 
 namespace RazorSharp
 {
 	/// <summary>
-	///     The core of RazorSharp. Contains the logger and such.
-	/// <para></para>
-	/// <list type="bullet">
-	///         <listheader>Implicit inheritance:</listheader>
-	///         <item>
-	///             <description>
-	///                 <see cref="Releasable" />
-	///             </description>
-	///         </item>
-	///     </list>
+	/// Contains the logger and other useful resources for CoreSharp.
 	/// </summary>
-	internal static class Global /*: Releasable */
+	internal sealed class Global : Releasable
 	{
+		
 		#region Logger
 
 		private const string CONTEXT_PROP = "Context";
@@ -42,56 +30,149 @@ namespace RazorSharp
 		private const string OUTPUT_TEMPLATE_ALT =
 			"[{Timestamp:HH:mm:ss.fff} ({Context}) {Level:u3}] {Message}{NewLine}";
 
-		internal static ILogger Log { get; private set; }
+		private const string OUTPUT_TEMPLATE_ALT_12_HR =
+			"[{Timestamp:hh:mm:ss.fff} ({Context}) {Level:u3}] {Message}{NewLine}";
+		
+		internal ILogger Log { get; private set; }
 
 		#endregion
 
 		/// <summary>
-		/// Name of this module.
+		/// Name of this assembly.
 		/// </summary>
-		internal const string NAME = "RazorSharp";
-		
-		internal static readonly Assembly Assembly;
+		internal const string NAME = "CoreSharp";
 
-		internal static bool IsSetup { get; private set; }
+		internal Assembly Assembly { get; }
+
+		#region Singleton
 
 		/// <summary>
-		///     Sets up the logger and other values
+		///     Gets an instance of <see cref="Global" />
 		/// </summary>
-		static Global()
+		internal static Global Value { get; private set; } = new Global();
+
+		private Global()
 		{
 #if DEBUG
 			var levelSwitch = new LoggingLevelSwitch
 			{
-				MinimumLevel = LogEventLevel.Verbose
+				MinimumLevel = LogEventLevel.Debug
 			};
-
 
 			Log = new LoggerConfiguration()
 			     .Enrich.FromLogContext()
 			     .MinimumLevel.ControlledBy(levelSwitch)
-			     .WriteTo.Console(outputTemplate: OUTPUT_TEMPLATE_ALT, theme: SystemConsoleTheme.Colored)
+			     .WriteTo.Console(outputTemplate: OUTPUT_TEMPLATE_ALT_12_HR, theme: SystemConsoleTheme.Colored)
 			     .CreateLogger();
 #else
 			SuppressLogger();
 #endif
-
 			Assembly = Assembly.Load(NAME);
 		}
 
-		internal static void SuppressLogger()
+		#endregion
+
+
+		#region Logger extensions
+
+		internal void SuppressLogger()
 		{
 			Log = Logger.None;
 		}
 
-		internal static void ContextLog(string prop, Action fn)
+		private void ContextLog(string ctx, Action<string, object[]> log, string msg, object[] args)
 		{
-			using (LogContext.PushProperty(CONTEXT_PROP, prop)) {
-				fn();
+			using (LogContext.PushProperty(CONTEXT_PROP, ctx)) {
+				log(msg, args);
 			}
 		}
 
-		private static void CheckCompatibility()
+		private const string COND_DEBUG = "DEBUG";
+
+		/// <summary>
+		/// Write a log event with the Debug level, associated exception, and context property.
+		/// <see cref="ILogger.Debug(string,object[])"/>
+		/// </summary>
+		/// <param name="ctx">Context property</param>
+		/// <param name="msg">Message template</param>
+		/// <param name="args">Property values</param>
+		[Conditional(COND_DEBUG)]
+		internal void WriteDebug(string ctx, string msg, params object[] args)
+		{
+			ContextLog(ctx, Log.Debug, msg, args);
+		}
+
+		/// <summary>
+		/// Write a log event with the Information level, associated exception, and context property.
+		/// <see cref="ILogger.Information(string,object[])"/>
+		/// </summary>
+		/// <param name="ctx">Context property</param>
+		/// <param name="msg">Message template</param>
+		/// <param name="args">Property values</param>
+		[Conditional(COND_DEBUG)]
+		internal void WriteInformation(string ctx, string msg, params object[] args)
+		{
+			ContextLog(ctx, Log.Information, msg, args);
+		}
+
+		/// <summary>
+		/// Write a log event with the Verbose level, associated exception, and context property.
+		/// <see cref="ILogger.Verbose(string,object[])"/>
+		/// </summary>
+		/// <param name="ctx">Context property</param>
+		/// <param name="msg">Message template</param>
+		/// <param name="args">Property values</param>
+		[Conditional(COND_DEBUG)]
+		internal void WriteVerbose(string ctx, string msg, params object[] args)
+		{
+			ContextLog(ctx, Log.Verbose, msg, args);
+		}
+
+		/// <summary>
+		/// Write a log event with the Warning level, associated exception, and context property.
+		/// <see cref="ILogger.Warning(string,object[])"/>
+		/// </summary>
+		/// <param name="ctx">Context property</param>
+		/// <param name="msg">Message template</param>
+		/// <param name="args">Property values</param>
+		[Conditional(COND_DEBUG)]
+		internal void WriteWarning(string ctx, string msg, params object[] args)
+		{
+			ContextLog(ctx, Log.Warning, msg, args);
+		}
+
+		/// <summary>
+		/// Write a log event with the Error level, associated exception, and context property.
+		/// <see cref="ILogger.Error(string,object[])"/>
+		/// </summary>
+		/// <param name="ctx">Context property</param>
+		/// <param name="msg">Message template</param>
+		/// <param name="args">Property values</param>
+		[Conditional(COND_DEBUG)]
+		internal void WriteError(string ctx, string msg, params object[] args)
+		{
+			ContextLog(ctx, Log.Error, msg, args);
+		}
+
+		/// <summary>
+		/// Write a log event with the Fatal level, associated exception, and context property.
+		/// <see cref="ILogger.Fatal(string,object[])"/>
+		/// </summary>
+		/// <param name="ctx">Context property</param>
+		/// <param name="msg">Message template</param>
+		/// <param name="args">Property values</param>
+		[Conditional(COND_DEBUG)]
+		internal void WriteFatal(string ctx, string msg, params object[] args)
+		{
+			ContextLog(ctx, Log.Fatal, msg, args);
+		}
+
+		#endregion
+		
+		/// <summary>
+		///     Checks compatibility
+		/// </summary>
+		private void CheckCompatibility()
 		{
 			/**
 			 * RazorSharp is tested on and targets:
@@ -102,7 +183,6 @@ namespace RazorSharp
 			 * - Workstation Concurrent GC
 			 *
 			 */
-			Conditions.Require(MemInfo.Is64Bit);
 			Conditions.Require(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
 			/**
@@ -122,34 +202,32 @@ namespace RazorSharp
 			}
 		}
 
-		/// <summary>
-		///     Checks compatibility
-		/// </summary>
-		internal static void Setup()
+		
+		public override void Setup()
 		{
 			CheckCompatibility();
 			Console.OutputEncoding = Encoding.Unicode;
-			IsSetup                = true;
+			
+			base.Setup();
 		}
 
 		/// <summary>
 		///     Disposes the logger and checks for any memory leaks
 		/// </summary>
-		internal static void Close()
+		public override void Close()
 		{
 			Conditions.Require(IsSetup);
-
-			if (Mem.IsMemoryInUse) {
-				Log.Warning("Memory leak: {Count} dangling pointer(s)", Mem.AllocCount);
-			}
 
 			if (Log is Logger logger) {
 				logger.Dispose();
 			}
 
 			Log = null;
+			
+			// Delete instance
+			Value = null;
 
-			IsSetup = false;
+			base.Close();
 		}
 	}
 }

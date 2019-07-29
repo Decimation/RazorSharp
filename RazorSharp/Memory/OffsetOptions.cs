@@ -1,11 +1,7 @@
-#region
-
 using System;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
-using RazorSharp.CoreClr.Structures;
-
-#endregion
+using RazorSharp.CoreClr.Metadata;
 
 namespace RazorSharp.Memory
 {
@@ -49,7 +45,7 @@ namespace RazorSharp.Memory
 
 		/// <summary>
 		///     Don't offset the heap pointer at all, so it
-		///     points to the <see cref="MethodTable" /> pointer.
+		///     points to the <see cref="TypeHandle"/>
 		/// </summary>
 		NONE
 	}

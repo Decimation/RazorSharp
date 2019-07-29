@@ -1,22 +1,23 @@
-﻿#region
+#region
 
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using SimpleSharp.Diagnostics;
+using InlineIL;
 using RazorSharp.CoreClr;
-using RazorSharp.CoreClr.Structures;
-using RazorSharp.Memory.Fixed;
+using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Metadata;
+using RazorSharp.Interop;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Utilities;
+using SimpleSharp.Diagnostics;
 
 #endregion
+
+// ReSharper disable SwitchStatementMissingSomeCases
 
 namespace RazorSharp.Memory
 {
 	#region
-
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
 
 	#endregion
 
@@ -30,7 +31,7 @@ namespace RazorSharp.Memory
 	///     <seealso cref="Span{T}" />
 	///     <seealso cref="Memory{T}" />
 	///     <seealso cref="Buffer" />
-	///     <seealso cref="CSUnsafe" />
+	///     <seealso cref="Mem" />
 	///     <seealso cref="System.Runtime.CompilerServices.JitHelpers" />
 	///     <seealso cref="Mem" />
 	/// </summary>
@@ -38,12 +39,7 @@ namespace RazorSharp.Memory
 	{
 		#region Other
 
-		/*public static TInt EnumValue<TEnum, TInt>(TEnum value) where TEnum : Enum
-		{
-			return AddrOf(ref value).Cast<TInt>().Read();
-		}*/
-
-		public static T Unbox<T>(object value) where T : struct
+		public static T UnboxRaw<T>(object value) where T : struct
 		{
 			lock (value) {
 				Pointer<byte> addr = AddressOfHeap(value, OffsetOptions.FIELDS);
@@ -51,54 +47,7 @@ namespace RazorSharp.Memory
 			}
 		}
 
-		public static object LoadFrom(Type type, byte[] mem)
-		{
-			return ReflectionUtil.InvokeGenericMethod(typeof(Unsafe), nameof(LoadFrom), null,new[] {type}, mem);
-		}
-
-		/// <summary>
-		/// Creates an instance of <typeparamref name="T"/> from <paramref name="mem"/>.
-		/// If <typeparamref name="T"/> is a reference type, <paramref name="mem"/> should not contain
-		/// object internals like its <see cref="MethodTable"/> pointer or its <see cref="ObjHeader"/>; it should
-		/// only contain its fields.
-		/// </summary>
-		/// <param name="mem">Memory to load from</param>
-		/// <typeparam name="T">Type to load</typeparam>
-		/// <returns>An instance created from <paramref name="mem"/></returns>
-		public static T LoadFrom<T>(byte[] mem)
-		{
-			T value = default;
-
-			Pointer<byte> addr;
-
-			if (RtInfo.IsStruct<T>()) {
-				addr = AddressOf(ref value).Cast();
-			}
-			else {
-				value = Runtime.AllocObject<T>();
-				addr  = AddressOfData(ref value).Cast();
-			}
-
-			addr.WriteAll(mem);
-
-			return value;
-		}
-
-		/// <summary>
-		///     Interprets a dynamically allocated reference type in the heap as a proper managed type. This is useful when
-		///     you only have a pointer to a reference type's data in the heap but cannot dereference it because the CLR
-		///     automatically dereferences managed reference types (pointer logistics is handled by the CLR).
-		/// </summary>
-		/// <param name="rawMem">Pointer to the reference type's raw data</param>
-		/// <typeparam name="T">Type to interpret the data as</typeparam>
-		/// <returns>A CLR-compliant reference type pointer to access the data pointed to by <paramref name="rawMem" /></returns>
-		public static T RawInterpret<T>(Pointer<byte> rawMem) where T : class
-		{
-			var cpy = rawMem.Address;
-			return CSUnsafe.Read<T>(&cpy);
-		}
-
-		public static T DeepCopy<T>(T value) where T : class
+		/*public static T DeepCopy<T>(T value) where T : class
 		{
 			Conditions.Require(!RtInfo.IsArrayOrString(value), nameof(value));
 
@@ -113,33 +62,16 @@ namespace RazorSharp.Memory
 
 				return valueCpy;
 			}
-		}
+		}*/
 
 		#endregion
 
 		#region Address
 
 		/// <summary>
-		///     Returns the address of a field in the specified type.
-		/// </summary>
-		/// <param name="instance">Instance of the enclosing type</param>
-		/// <param name="name">Name of the field</param>
-		public static Pointer<byte> AddressOfField<T>(ref T instance, string name)
-		{
-			Pointer<FieldDesc> fd = typeof(T).GetFieldDesc(name);
-			return fd.Reference.GetAddress(ref instance);
-		}
-
-		public static Pointer<byte> AddressOfField<T>(T instance, string name) where T : class
-		{
-			return AddressOfField(ref instance, name);
-		}
-
-
-		/// <summary>
 		///     <para>Returns the address of <paramref name="value" />.</para>
 		///     <remarks>
-		///         <para>Equals <see cref="CSUnsafe.AsPointer{T}" /></para>
+		///         <para>Equals <see cref="Mem.AsPointer{T}" /></para>
 		///     </remarks>
 		/// </summary>
 		/// <param name="value">Type to return the address of</param>
@@ -149,29 +81,29 @@ namespace RazorSharp.Memory
 		{
 			/*var tr = __makeref(t);
 			return *(IntPtr*) (&tr);*/
-			return CSUnsafe.AsPointer(ref value);
+			return AsPointer(ref value);
 		}
 
 		/// <summary>
-		/// Returns the address of the data of <see cref="value"/>. If <typeparamref name="T"/> is a value type,
-		/// this will return <see cref="AddressOf{T}"/>. If <typeparamref name="T"/> is a reference type,
-		/// this will return the equivalent of <see cref="AddressOfHeap{T}(T, OffsetOptions)"/> with
-		/// <see cref="OffsetOptions.FIELDS"/>.
+		///     Returns the address of the data of <paramref name="value"/>. If <typeparamref name="T" /> is a value type,
+		///     this will return <see cref="AddressOf{T}" />. If <typeparamref name="T" /> is a reference type,
+		///     this will return the equivalent of <see cref="AddressOfHeap{T}(T, OffsetOptions)" /> with
+		///     <see cref="OffsetOptions.FIELDS" />.
 		/// </summary>
-		public static Pointer<byte> AddressOfData<T>(ref T value)
+		public static Pointer<byte> AddressOfFields<T>(ref T value)
 		{
-			var addr = AddressOf(ref value);
+			Pointer<T> addr = AddressOf(ref value);
 
-			if (RtInfo.IsStruct(value)) {
+			if (RuntimeInfo.IsStruct(value)) {
 				return addr.Cast();
 			}
 
-			return addr.ReadPointer<byte>() + Offsets.OffsetToData;
+			return AddressOfHeapInternal(value, OffsetOptions.FIELDS);
 		}
 
 		public static bool TryGetAddressOfHeap<T>(T value, OffsetOptions options, out Pointer<byte> ptr)
 		{
-			if (RtInfo.IsStruct(value)) {
+			if (RuntimeInfo.IsStruct(value)) {
 				ptr = null;
 				return false;
 			}
@@ -217,23 +149,26 @@ namespace RazorSharp.Memory
 
 			switch (offset) {
 				case OffsetOptions.STRING_DATA:
-
-					Conditions.Require(RtInfo.IsString(value));
+				{
+					Conditions.Require(RuntimeInfo.IsString(value));
 					string s = value as string;
 					return heapPtr + Offsets.OffsetToStringData;
+				}
 
 				case OffsetOptions.ARRAY_DATA:
-
-					Conditions.Require(RtInfo.IsArray(value));
+				{
+					Conditions.Require(RuntimeInfo.IsArray(value));
 					return heapPtr + Offsets.OffsetToArrayData;
+				}
 
 				case OffsetOptions.FIELDS:
-
-					// todo: if the type is an array, should this return ArrayData,
-					// todo: ...and if it's a string, should this return StringData?
+				{
+					// todo: if the type is an array, should this return ArrayData, ...and if it's a string,
+					// ... should this return StringData?
 
 					// Skip over the MethodTable*
 					return heapPtr + Offsets.OffsetToData;
+				}
 
 				case OffsetOptions.NONE:
 					return heapPtr;
@@ -243,30 +178,6 @@ namespace RazorSharp.Memory
 				default:
 					throw new ArgumentOutOfRangeException(nameof(offset), offset, null);
 			}
-		}
-
-
-		public static Pointer<byte> AddressOfFunction<T>(string name)
-		{
-			return AddressOfFunction(typeof(T), name);
-		}
-
-		/// <summary>
-		///     Returns the entry point of the specified function (assembly code).
-		/// </summary>
-		/// <param name="t">Enclosing type</param>
-		/// <param name="name">Name of the function in <see cref="Type" /> <paramref name="t" /></param>
-		/// <returns></returns>
-		public static Pointer<byte> AddressOfFunction(Type t, string name)
-		{
-			Pointer<MethodDesc> md = t.GetMethodDesc(name);
-
-			// Function must be jitted
-
-			if (!md.Reference.IsPointingToNativeCode)
-				md.Reference.Prepare();
-
-			return md.Reference.Function;
 		}
 
 		#endregion
@@ -280,67 +191,55 @@ namespace RazorSharp.Memory
 
 		public static int SizeOf<T>(T value, SizeOfOptions options = SizeOfOptions.Intrinsic)
 		{
-//			if (Runtime.IsNullOrDefault(value) && options == SizeOfOptions.Intrinsic) { }
-
-			var mt      = typeof(T).GetMethodTable();
-			var eeClass = mt.Reference.EEClass;
+			MetaType mt = typeof(T);
 
 			if (options == SizeOfOptions.Auto) {
-				if (RtInfo.IsStruct<T>()) {
-					// Break into the next switch branch which will go to case Intrinsic
-					options = SizeOfOptions.Intrinsic;
-				}
-				else {
-					// Break into the next switch branch which will go to case Heap
-					options = SizeOfOptions.Heap;
-				}
+				// Break into the next switch branch which will go to resolved case
+				options = RuntimeInfo.IsStruct(value) ? SizeOfOptions.Intrinsic : SizeOfOptions.Heap;
 			}
 
 			// If a value was supplied
-			if (!RtInfo.IsNullOrDefault(value)) {
-				mt = value.GetType().GetMethodTable();
-
+			if (!RuntimeInfo.IsNil(value)) {
+				mt = new MetaType(value.GetType());
+				
 				switch (options) {
-					case SizeOfOptions.BaseFields:   return mt.Reference.NumInstanceFieldBytes;
-					case SizeOfOptions.BaseInstance: return mt.Reference.BaseSize;
+					case SizeOfOptions.BaseFields:   return mt.InstanceFieldsSize;
+					case SizeOfOptions.BaseInstance: return mt.BaseSize;
 					case SizeOfOptions.Heap:         return HeapSizeInternal(value);
+					case SizeOfOptions.Data:         return SizeOfData(value);
+					case SizeOfOptions.BaseData:     return BaseSizeOfData(mt.RuntimeType);
 				}
 			}
 
+
 			switch (options) {
 				// Note: Arrays native size == 0
-				case SizeOfOptions.Native: return eeClass.Reference.NativeSize;
+				case SizeOfOptions.Native: return mt.NativeSize;
+
 				// Note: Arrays have no layout
 				case SizeOfOptions.Managed:
-					if (eeClass.Reference.HasLayout)
-						return (int) eeClass.Reference.LayoutInfo.Reference.ManagedSize;
-					else {
-						return Constants.INVALID_VALUE;
-					}
+				{
+					return mt.HasLayout ? mt.LayoutInfo.ManagedSize : Constants.INVALID_VALUE;
+				}
 
-				case SizeOfOptions.Intrinsic:  return CSUnsafe.SizeOf<T>();
-				case SizeOfOptions.BaseFields: return mt.Reference.NumInstanceFieldBytes;
+				case SizeOfOptions.Intrinsic: return SizeOf<T>();
+
+				case SizeOfOptions.BaseFields: return mt.InstanceFieldsSize;
+
 				case SizeOfOptions.BaseInstance:
-					Conditions.Require(!RtInfo.IsStruct<T>(), nameof(value));
-					return mt.Reference.BaseSize;
-				case SizeOfOptions.Heap:
-					throw new ArgumentException($"A value must be supplied to use {SizeOfOptions.Heap}");
+				{
+					Conditions.Require(!RuntimeInfo.IsStruct<T>());
+					return mt.BaseSize;
+				}
 
-//				default:
-//					throw new ArgumentOutOfRangeException(nameof(options), options, null);
+				case SizeOfOptions.Heap:
+				case SizeOfOptions.Data:
+					throw new ArgumentException($"A value must be supplied to use {options}");
 			}
 
 
 			return Constants.INVALID_VALUE;
 		}
-
-		/// <summary>
-		///     <para>Returns the size of a type in memory.</para>
-		///     <para>Call to <see cref="CSUnsafe.SizeOf{T}()" /></para>
-		/// </summary>
-		/// <returns><see cref="IntPtr.Size" /> for reference types, size for value types</returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int SizeOf<T>() => CSUnsafe.SizeOf<T>();
 
 
 		#region HeapSize
@@ -357,7 +256,7 @@ namespace RazorSharp.Memory
 		///         <item>
 		///             <description>
 		///                 <see cref="MethodTable.BaseSize" /> = The base instance size of a type
-		///                 (<c>24</c> (x64) or <c>12</c> (x86) by default) (<see cref="Constants.MinObjectSize" />)
+		///                 (<c>24</c> (x64) or <c>12</c> (x86) by default) (<see cref="Offsets.MinObjectSize" />)
 		///             </description>
 		///         </item>
 		///         <item>
@@ -371,7 +270,10 @@ namespace RazorSharp.Memory
 		/// <remarks>
 		///     <para>Source: /src/vm/object.inl: 45</para>
 		///     <para>Equals the Son Of Strike "!do" command.</para>
-		///     <para>Equals <see cref="SizeOf{T}(T,RazorSharp.Memory.SizeOfOptions)" /> with <see cref="SizeOfOptions.BaseInstance"/> for objects that aren't arrays or strings.</para>
+		///     <para>
+		///         Equals <see cref="SizeOf{T}(T,SizeOfOptions)" /> with <see cref="SizeOfOptions.BaseInstance" /> for objects
+		///         that aren't arrays or strings.
+		///     </para>
 		///     <para>Note: This also includes padding and overhead (<see cref="ObjHeader" /> and <see cref="MethodTable" /> ptr.)</para>
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
@@ -382,15 +284,15 @@ namespace RazorSharp.Memory
 		private static int HeapSizeInternal<T>(T value)
 		{
 			// Sanity check
-			Conditions.Require(!RtInfo.IsStruct<T>());
+			Conditions.Require(!RuntimeInfo.IsStruct(value));
 
-			if (RtInfo.IsNullOrDefault(value)) {
+			if (RuntimeInfo.IsNil(value)) {
 				return Constants.INVALID_VALUE;
 			}
 
 			// By manually reading the MethodTable*, we can calculate the size correctly if the reference
 			// is boxed or cloaked
-			Pointer<MethodTable> methodTable = Runtime.ReadMethodTable(value);
+			var methodTable = Runtime.ReadMetaType(value);
 
 			// Value of GetSizeField()
 			int length = 0;
@@ -424,7 +326,7 @@ namespace RazorSharp.Memory
 			 *
 			 */
 
-			if (RtInfo.IsArray(value)) {
+			if (RuntimeInfo.IsArray(value)) {
 				var arr = value as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
@@ -432,19 +334,19 @@ namespace RazorSharp.Memory
 				length = arr.Length;
 
 				// Sanity check
-				Conditions.Assert(!RtInfo.IsString(value));
+				Conditions.Assert(!RuntimeInfo.IsString(value));
 			}
-			else if (RtInfo.IsString(value)) {
+			else if (RuntimeInfo.IsString(value)) {
 				string str = value as string;
 
 				// Sanity check
-				Conditions.Assert(!RtInfo.IsArray(value));
+				Conditions.Assert(!RuntimeInfo.IsArray(value));
 				Conditions.NotNull(str, nameof(str));
 
 				length = str.Length;
 			}
 
-			return methodTable.Reference.BaseSize + length * methodTable.Reference.ComponentSize;
+			return methodTable.BaseSize + length * methodTable.ComponentSize;
 		}
 
 		#endregion
@@ -452,35 +354,38 @@ namespace RazorSharp.Memory
 		#region Size of data
 
 		/// <summary>
-		///     Returns the size of the data in <paramref name="value"/>. If <typeparamref name="T"/> is a reference type,
-		/// this returns the size of <paramref name="value"/> not occupied by the <see cref="MethodTable" /> pointer and the <see cref="ObjHeader" />.
-		/// If <typeparamref name="T"/> is a value type, this returns <see cref="SizeOf{T}()"/>.
+		///     Returns the size of the data in <paramref name="value" />. If <typeparamref name="T" /> is a reference type,
+		///     this returns the size of <paramref name="value" /> not occupied by the <see cref="MethodTable" /> pointer and the
+		///     <see cref="ObjHeader" />.
+		///     If <typeparamref name="T" /> is a value type, this returns <see cref="SizeOf{T}()" />.
 		/// </summary>
-		public static int SizeOfData<T>(T value)
+		private static int SizeOfData<T>(T value)
 		{
-			if (RtInfo.IsStruct(value)) {
+			if (RuntimeInfo.IsStruct(value)) {
 				return SizeOf<T>();
 			}
-			else {
-				// Subtract the size of the ObjHeader and MethodTable*
-				return HeapSizeInternal(value) - (IntPtr.Size + sizeof(MethodTable*));
-			}
+
+			// Subtract the size of the ObjHeader and MethodTable*
+			return HeapSizeInternal(value) - Offsets.ObjectOverhead;
 		}
 
+
 		/// <summary>
-		///     Returns the base size of the data in the type specified by <paramref name="t"/>. If <paramref name="t"/> is a reference type,
-		/// this returns the size of data not occupied by the <see cref="MethodTable" /> pointer, <see cref="ObjHeader" />, padding, and overhead.
-		/// If <paramref name="t"/> is a value type, this returns <see cref="SizeOf{T}()"/>.
+		///     Returns the base size of the data in the type specified by <paramref name="t" />. If <paramref name="t" /> is a
+		///     reference type,
+		///     this returns the size of data not occupied by the <see cref="MethodTable" /> pointer, <see cref="ObjHeader" />,
+		///     padding, and overhead.
+		///     If <paramref name="t" /> is a value type, this returns <see cref="SizeOf{T}()" />.
 		/// </summary>
-		public static int BaseSizeOfData(Type t)
+		private static int BaseSizeOfData(Type t)
 		{
-			if (RtInfo.IsStruct(t)) {
-				return (int) ReflectionUtil.InvokeGenericMethod(typeof(Unsafe), nameof(SizeOf), null,new[] {t});
+			if (((MetaType) t).IsStruct) {
+				return (int) Functions.CallGenericMethod(typeof(Unsafe), nameof(SizeOf),
+				                                                null, new[] {t});
 			}
-			else {
-				// Subtract the size of the ObjHeader and MethodTable*
-				return t.GetMetaType().NumInstanceFieldBytes;
-			}
+
+			// Subtract the size of the ObjHeader and MethodTable*
+			return new MetaType(t).InstanceFieldsSize;
 		}
 
 		#endregion
@@ -501,7 +406,7 @@ namespace RazorSharp.Memory
 		public static byte[] MemoryOf<T>(T value) where T : class
 		{
 			// Need to include the ObjHeader
-			Pointer<T> ptr = AddressOfHeap(value, OffsetOptions.HEADER).Address;
+			Pointer<T> ptr = AddressOfHeap(value, OffsetOptions.HEADER);
 			return ptr.Cast().Copy(HeapSize(value));
 		}
 
@@ -524,8 +429,388 @@ namespace RazorSharp.Memory
 			var fields    = new byte[fieldSize];
 
 			// Skip over the MethodTable*
-			Marshal.Copy((AddressOfHeap(value) + IntPtr.Size).Address, fields, 0, fieldSize);
+			Marshal.Copy(AddressOfHeap(value, OffsetOptions.FIELDS).Address, fields, 0, fieldSize);
 			return fields;
+		}
+
+		#endregion
+		
+		#region Unsafe
+
+		// https://github.com/ltrzesniewski/InlineIL.Fody/blob/master/src/InlineIL.Examples/Unsafe.cs
+		// https://github.com/dotnet/corefx/blob/master/src/System.Runtime.CompilerServices.Unsafe/src/System.Runtime.CompilerServices.Unsafe.il
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static T Read<T>(void* source)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldobj(typeof(T));
+			return IL.Return<T>();
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static T ReadUnaligned<T>(void* source)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Unaligned(1);
+			IL.Emit.Ldobj(typeof(T));
+			return IL.Return<T>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static T ReadUnaligned<T>(ref byte source)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Unaligned(1);
+			IL.Emit.Ldobj(typeof(T));
+			return IL.Return<T>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void Write<T>(void* destination, T value)
+		{
+			IL.Emit.Ldarg(nameof(destination));
+			IL.Emit.Ldarg(nameof(value));
+			IL.Emit.Stobj(typeof(T));
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void WriteUnaligned<T>(void* destination, T value)
+		{
+			IL.Emit.Ldarg(nameof(destination));
+			IL.Emit.Ldarg(nameof(value));
+			IL.Emit.Unaligned(1);
+			IL.Emit.Stobj(typeof(T));
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void WriteUnaligned<T>(ref byte destination, T value)
+		{
+			IL.Emit.Ldarg(nameof(destination));
+			IL.Emit.Ldarg(nameof(value));
+			IL.Emit.Unaligned(1);
+			IL.Emit.Stobj(typeof(T));
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void Copy<T>(void* destination, ref T source)
+		{
+			IL.Emit.Ldarg(nameof(destination));
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldobj(typeof(T));
+			IL.Emit.Stobj(typeof(T));
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void Copy<T>(ref T destination, void* source)
+		{
+			IL.Emit.Ldarg(nameof(destination));
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldobj(typeof(T));
+			IL.Emit.Stobj(typeof(T));
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void* AsPointer<T>(ref T value)
+		{
+			IL.Emit.Ldarg(nameof(value));
+			IL.Emit.Conv_U();
+			return IL.ReturnPointer();
+		}
+
+
+		/// <summary>
+		///     <para>Returns the size of a type in memory.</para>
+		/// </summary>
+		/// <returns><see cref="IntPtr.Size" /> for reference types, size for value types</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static int SizeOf<T>()
+		{
+			IL.Emit.Sizeof(typeof(T));
+			return IL.Return<int>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void CopyBlock(void* destination, void* source, uint byteCount)
+		{
+			IL.Emit.Ldarg(nameof(destination));
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldarg(nameof(byteCount));
+			IL.Emit.Cpblk();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void CopyBlock(ref byte destination, ref byte source, uint byteCount)
+		{
+			IL.Emit.Ldarg(nameof(destination));
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldarg(nameof(byteCount));
+			IL.Emit.Cpblk();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void CopyBlockUnaligned(void* destination, void* source, uint byteCount)
+		{
+			IL.Emit.Ldarg(nameof(destination));
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldarg(nameof(byteCount));
+			IL.Emit.Unaligned(1);
+			IL.Emit.Cpblk();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void CopyBlockUnaligned(ref byte destination, ref byte source, uint byteCount)
+		{
+			IL.Emit.Ldarg(nameof(destination));
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldarg(nameof(byteCount));
+			IL.Emit.Unaligned(1);
+			IL.Emit.Cpblk();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void InitBlock(void* startAddress, byte value, uint byteCount)
+		{
+			IL.Emit.Ldarg(nameof(startAddress));
+			IL.Emit.Ldarg(nameof(value));
+			IL.Emit.Ldarg(nameof(byteCount));
+			IL.Emit.Initblk();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void InitBlock(ref byte startAddress, byte value, uint byteCount)
+		{
+			IL.Emit.Ldarg(nameof(startAddress));
+			IL.Emit.Ldarg(nameof(value));
+			IL.Emit.Ldarg(nameof(byteCount));
+			IL.Emit.Initblk();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void InitBlockUnaligned(void* startAddress, byte value, uint byteCount)
+		{
+			IL.Emit.Ldarg(nameof(startAddress));
+			IL.Emit.Ldarg(nameof(value));
+			IL.Emit.Ldarg(nameof(byteCount));
+			IL.Emit.Unaligned(1);
+			IL.Emit.Initblk();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void InitBlockUnaligned(ref byte startAddress, byte value, uint byteCount)
+		{
+			IL.Emit.Ldarg(nameof(startAddress));
+			IL.Emit.Ldarg(nameof(value));
+			IL.Emit.Ldarg(nameof(byteCount));
+			IL.Emit.Unaligned(1);
+			IL.Emit.Initblk();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static T As<T>(object o) where T : class
+		{
+			IL.Emit.Ldarg(nameof(o));
+			return IL.Return<T>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ref T AsRef<T>(void* source)
+		{
+			// For .NET Core the roundtrip via a local is no longer needed (update the constant as needed)
+#if NETCOREAPP
+            IL.Push(source);
+            return ref IL.ReturnRef<T>();
+#else
+			// Roundtrip via a local to avoid type mismatch on return that the JIT inliner chokes on.
+			IL.DeclareLocals(
+				false,
+				new LocalVar("local", typeof(int).MakeByRefType())
+			);
+
+			IL.Push(source);
+			IL.Emit.Stloc("local");
+			IL.Emit.Ldloc("local");
+			return ref IL.ReturnRef<T>();
+#endif
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ref T AsRef<T>(in T source)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			return ref IL.ReturnRef<T>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ref TTo As<TFrom, TTo>(ref TFrom source)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			return ref IL.ReturnRef<TTo>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ref T Unbox<T>(object box) where T : struct
+		{
+			IL.Push(box);
+			IL.Emit.Unbox(typeof(T));
+			return ref IL.ReturnRef<T>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ref T Add<T>(ref T source, int elementOffset)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldarg(nameof(elementOffset));
+			IL.Emit.Sizeof(typeof(T));
+			IL.Emit.Conv_I();
+			IL.Emit.Mul();
+			IL.Emit.Add();
+			return ref IL.ReturnRef<T>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void* Add<T>(void* source, int elementOffset)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldarg(nameof(elementOffset));
+			IL.Emit.Sizeof(typeof(T));
+			IL.Emit.Conv_I();
+			IL.Emit.Mul();
+			IL.Emit.Add();
+			return IL.ReturnPointer();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ref T Add<T>(ref T source, IntPtr elementOffset)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldarg(nameof(elementOffset));
+			IL.Emit.Sizeof(typeof(T));
+			IL.Emit.Mul();
+			IL.Emit.Add();
+			return ref IL.ReturnRef<T>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ref T AddByteOffset<T>(ref T source, IntPtr byteOffset)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldarg(nameof(byteOffset));
+			IL.Emit.Add();
+			return ref IL.ReturnRef<T>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ref T Subtract<T>(ref T source, int elementOffset)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldarg(nameof(elementOffset));
+			IL.Emit.Sizeof(typeof(T));
+			IL.Emit.Conv_I();
+			IL.Emit.Mul();
+			IL.Emit.Sub();
+			return ref IL.ReturnRef<T>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void* Subtract<T>(void* source, int elementOffset)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldarg(nameof(elementOffset));
+			IL.Emit.Sizeof(typeof(T));
+			IL.Emit.Conv_I();
+			IL.Emit.Mul();
+			IL.Emit.Sub();
+			return IL.ReturnPointer();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ref T Subtract<T>(ref T source, IntPtr elementOffset)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldarg(nameof(elementOffset));
+			IL.Emit.Sizeof(typeof(T));
+			IL.Emit.Mul();
+			IL.Emit.Sub();
+			return ref IL.ReturnRef<T>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ref T SubtractByteOffset<T>(ref T source, IntPtr byteOffset)
+		{
+			IL.Emit.Ldarg(nameof(source));
+			IL.Emit.Ldarg(nameof(byteOffset));
+			IL.Emit.Sub();
+			return ref IL.ReturnRef<T>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static IntPtr ByteOffset<T>(ref T origin, ref T target)
+		{
+			IL.Emit.Ldarg(nameof(target));
+			IL.Emit.Ldarg(nameof(origin));
+			IL.Emit.Sub();
+			return IL.Return<IntPtr>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool AreSame<T>(ref T left, ref T right)
+		{
+			IL.Emit.Ldarg(nameof(left));
+			IL.Emit.Ldarg(nameof(right));
+			IL.Emit.Ceq();
+			return IL.Return<bool>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsAddressGreaterThan<T>(ref T left, ref T right)
+		{
+			IL.Emit.Ldarg(nameof(left));
+			IL.Emit.Ldarg(nameof(right));
+			IL.Emit.Cgt_Un();
+			return IL.Return<bool>();
+		}
+
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static bool IsAddressLessThan<T>(ref T left, ref T right)
+		{
+			IL.Emit.Ldarg(nameof(left));
+			IL.Emit.Ldarg(nameof(right));
+			IL.Emit.Clt_Un();
+			return IL.Return<bool>();
 		}
 
 		#endregion

@@ -1,62 +1,37 @@
 #region
 
-#region
-
-using System;
 using System.Reflection;
-using RazorSharp.Analysis;
-using RazorSharp.CoreClr.Meta.Interfaces;
-using SimpleSharp;
-using RazorSharp.CoreClr.Structures.Enums;
-using RazorSharp.CoreClr.Structures.ILMethods;
+using NativeSharp.Kernel;
+using NativeSharp.Kernel.Enums;
+using RazorSharp.CoreClr.Meta.Base;
+using RazorSharp.CoreClr.Metadata.JitIL;
 using RazorSharp.Memory.Pointers;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
+
+// ReSharper disable ReturnTypeCanBeEnumerable.Global
 
 #endregion
 
 // ReSharper disable InconsistentNaming
 
-#endregion
-
 namespace RazorSharp.CoreClr.Meta
 {
 	/// <summary>
-	///     Exposes metadata from:
 	///     <list type="bullet">
-	///         <item>
-	///             <description>
-	///                 <see cref="FatILMethod" />
-	///             </description>
-	///         </item>
-	///         <item>
-	///             <description>
-	///                 <see cref="TinyILMethod" />
-	///             </description>
-	///         </item>
-	///         <item>
-	///             <description>
-	///                 <see cref="Structures.ILMethods.ILMethod" />
-	///             </description>
-	///         </item>
+	///         <item><description>CLR structure: <see cref="ILMethod"/></description></item>
+	///         <item><description>Reflection structure: <see cref="MethodBody"/></description></item>
 	///     </list>
 	/// </summary>
-	public class MetaIL : IMetadata<ILMethod>
+	public class MetaIL : PseudoClrStructure<ILMethod>
 	{
-		internal MetaIL(Pointer<ILMethod> value)
-		{
-			Value        = value;
-			MetaInfoType = MetaInfoType.IL;
-		}
+		#region Constructor
 
-		public string Name {
-			get => throw new InvalidOperationException();
-		}
+		internal MetaIL(Pointer<ILMethod> ptr) : base(ptr) { }
 
-		public MemberInfo Info {
-			get { throw new InvalidOperationException(); }
-		}
+		#endregion
 
-		public Pointer<ILMethod> Value        { get; }
-		public MetaInfoType      MetaInfoType { get; }
+		#region Accessors
 
 		/// <summary>
 		///     Whether this type is <see cref="TinyILMethod" />
@@ -83,14 +58,14 @@ namespace RazorSharp.CoreClr.Meta
 		///         Equals <see cref="System.Reflection.MethodBody.MaxStackSize" />
 		///     </remarks>
 		/// </summary>
-		public int MaxStack => Value.Reference.MaxStack;
+		public int MaxStackSize => Value.Reference.MaxStackSize;
 
 		/// <summary>
 		///     <remarks>
 		///         Equals <see cref="System.Reflection.MethodBody.LocalSignatureMetadataToken" />
 		///     </remarks>
 		/// </summary>
-		public int Token => Value.Reference.LocalVarSigTok;
+		public override int Token => Value.Reference.Token;
 
 		/// <summary>
 		///     <remarks>
@@ -99,32 +74,49 @@ namespace RazorSharp.CoreClr.Meta
 		/// </summary>
 		public CorILMethodFlags Flags => Value.Reference.Flags;
 
-		public void WriteIL(byte[] opCodes)
-		{
-			Value.Reference.WriteIL(opCodes);
-		}
-
 		/// <summary>
 		///     <remarks>
 		///         Equals <see cref="System.Reflection.MethodBody.GetILAsByteArray()" />
 		///     </remarks>
 		/// </summary>
 		/// <returns></returns>
-		public byte[] GetILAsByteArray()
+		public byte[] RawIL => Value.Reference.RawIL;
+
+		public Instruction[] Instructions => InspectIL.GetInstructions(RawIL);
+
+		#endregion
+
+		internal void SetCode(byte[] code) //todo: WIP
 		{
-			return Value.Reference.GetILAsByteArray();
+			Conditions.Require(code.Length <= CodeSize, nameof(code));
+
+			int ul  = code.Length;
+			var  ptr = Code.Address;
+
+			Kernel32.VirtualProtect(ptr, ul, MemoryProtection.ExecuteReadWrite, out var oldProtect);
+
+			Code.WriteAll(code);
+
+			Kernel32.VirtualProtect(ptr, ul, oldProtect, out oldProtect);
 		}
 
-		public Instruction[] Instructions => InspectIL.GetInstructions(GetILAsByteArray());
+		public override ConsoleTable Debug {
+			get {
+				var table = base.Debug;
 
-		public ConsoleTable ToTable()
-		{
-			return Value.Reference.ToTable();
-		}
+				table.AddRow(nameof(Code), Code);
+				table.AddRow(nameof(CodeSize), CodeSize);
+				table.AddRow(nameof(MaxStackSize), MaxStackSize);
 
-		public override string ToString()
-		{
-			return ToTable().ToString();
+				if (IsFat) {
+					table.AddRow(nameof(Flags), Flags);
+				}
+				
+				table.AddRow(nameof(IsTiny), IsTiny);
+				table.AddRow(nameof(IsFat), IsFat);
+
+				return table;
+			}
 		}
 	}
 }

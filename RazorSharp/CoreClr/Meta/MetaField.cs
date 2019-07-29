@@ -1,227 +1,149 @@
-#region
-
-#region
-
 using System;
 using System.Reflection;
-using RazorSharp.CoreClr.Meta.Interfaces;
-using RazorSharp.CoreClr.Structures;
-using RazorSharp.CoreClr.Structures.Enums;
+using RazorSharp.CoreClr.Meta.Base;
+using RazorSharp.CoreClr.Metadata;
+using RazorSharp.CoreClr.Metadata.Enums;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
-using SimpleSharp.Strings.Formatting;
+using SimpleSharp;
+using SimpleSharp.Diagnostics;
 
-#endregion
+// ReSharper disable SuggestBaseTypeForParameter
 
 // ReSharper disable InconsistentNaming
-
-#endregion
 
 namespace RazorSharp.CoreClr.Meta
 {
 	/// <summary>
-	///     Exposes metadata from:
 	///     <list type="bullet">
-	///         <item>
-	///             <description>
-	///                 <see cref="Structures.FieldDesc" />
-	///             </description>
-	///         </item>
+	///         <item><description>CLR structure: <see cref="FieldDesc"/></description></item>
+	///         <item><description>Reflection structure: <see cref="FieldInfo"/></description></item>
 	///     </list>
-	/// <remarks>Corresponds to <see cref="System.Reflection.FieldInfo"/></remarks>
 	/// </summary>
-	public class MetaField : IReadableStructure, IMetadata<FieldDesc>
+	public unsafe class MetaField : EmbeddedClrStructure<FieldDesc>
 	{
-		internal MetaField(Pointer<FieldDesc> p)
-		{
-			Value = p;
-			MetaInfoType = MetaInfoType.FIELD;
-		}
+		private const int FIELD_OFFSET_MAX = (1 << 27) - 1;
 
-		public MetaField(FieldInfo field) : this(field.GetFieldDesc()) { }
+		private const int FIELD_OFFSET_NEW_ENC = FIELD_OFFSET_MAX - 4;
 
-		public string ToValueString(object value)
-		{
-			var fieldValue = GetValue(value);
+		private const int DW2_OFFSET_BITS = 27;
+		
+		#region Constructors
 
-			if (IsAnyPointer) {
-				if (Hex.TryCreateHex(fieldValue, out string str)) {
-					return str;
-				}
-			}
+		internal MetaField(Pointer<FieldDesc> ptr) : base(ptr) { }
 
-			return fieldValue.ToString();
-		}
+		public MetaField(FieldInfo info) : this(Runtime.ResolveHandle(info)) { }
 
-		public override string ToString()
-		{
-			var info = Value.Reference.Info;
-			return String.Format("{0} {1} (offset: {2}) (size: {3})", info.FieldType.Name, info.Name, Offset, Size);
-		}
+		#endregion
 
 		#region Accessors
 
+		public FieldInfo FieldInfo => (FieldInfo) Info;
+		
+		public CorElementType CorType => Value.Reference.CorType;
+
+		public ProtectionLevel Protection => Value.Reference.ProtectionLevel;
+
+		public int Offset => Value.Reference.Offset;
+
+		public override MemberInfo Info => EnclosingType.RuntimeType.Module.ResolveField(Token);
+
+		public MetaType FieldType => FieldInfo.FieldType;
+
+		public override MetaType EnclosingType {
+			get { return (Pointer<MethodTable>) Value.Reference.GetApproxEnclosingMethodTable(); }
+		}
+
+		public override int Token => Value.Reference.Token;
+
+		public FieldAttributes Attributes => FieldInfo.Attributes;
+
+//		public bool IsPrivate {
+//			get => (((CorFieldAttr)Value.Reference.Dword1) & CorFieldAttr.fdFieldAccessMask) == CorFieldAttr.fdPrivate;
+//		}
+
 		#region bool
-
-		public bool IsPublic => Value.Reference.IsPublic;
-
-		public bool IsPrivate => Value.Reference.IsPrivate;
-
-		public bool IsInternal => Value.Reference.IsInternal;
-
-		public bool IsPrivateProtected => Value.Reference.IsPrivateProtected;
-
-		public bool IsProtectedInternal => Value.Reference.IsProtectedInternal;
 
 		public bool IsPointer => Value.Reference.IsPointer;
 
-		public bool IsAnyPointer => RtInfo.IsPointer(FieldType);
-
-		/// <summary>
-		///     Whether the field is <c>static</c>
-		/// </summary>
 		public bool IsStatic => Value.Reference.IsStatic;
 
-		/// <summary>
-		///     Whether the field is decorated with a <see cref="ThreadStaticAttribute" /> attribute
-		/// </summary>
 		public bool IsThreadLocal => Value.Reference.IsThreadLocal;
 
 		public bool IsRVA => Value.Reference.IsRVA;
 
-		public bool IsFixedBuffer => Value.Reference.IsFixedBuffer;
-
-		public bool IsBackingField => Value.Reference.IsBackingField;
+		public bool IsLiteral => FieldInfo.IsLiteral;
 
 		#endregion
 
-		/// <summary>
-		///     Access level of the field
-		/// </summary>
-		public ProtectionLevel Protection => Value.Reference.Protection;
+		#region Delegates
 
-		public CorElementType CorType => Value.Reference.CorType;
+		public int Size => Value.Reference.LoadSize();
 
-		public int MemoryOffset {
-			get {
-				int ofs = Offset;
-
-				if (!EnclosingMetaType.IsStruct) {
-					ofs += Offsets.OffsetToData;
-				}
-
-				return ofs;
-			}
-		}
-
-		/// <summary>
-		///     <para>Size of the field</para>
-		/// </summary>
-		public int Size => Value.Reference.Size;
-
-		/// <summary>
-		///     Field metadata token
-		///     <remarks>
-		///         <para>Equal to <see cref="System.Reflection.FieldInfo.MetadataToken" /></para>
-		///         <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Field"</c> column in hexadecimal format.</para>
-		///     </remarks>
-		/// </summary>
-		public int Token => Value.Reference.Token;
-
-		/// <summary>
-		///     Offset in memory
-		///     <remarks>
-		///         <para>Equal to WinDbg's <c>!DumpObj</c> <c>"Offset"</c> column in hexadecimal format.</para>
-		///     </remarks>
-		/// </summary>
-		public int Offset {
-			get => Value.Reference.Offset;
-			set => Value.Reference.Offset = value;
-		}
-
-		/// <summary>
-		///     The corresponding <see cref="FieldInfo" /> of this <see cref="Structures.FieldDesc" />
-		/// </summary>
-		public FieldInfo FieldInfo => Value.Reference.Info;
-
-		public MemberInfo Info => FieldInfo;
-		public MetaInfoType MetaInfoType { get; }
-
-		public string Name => Value.Reference.Name;
-
-		public string CleanName {
-			get {
-//				if (IsFixedBuffer) {
-//					return SystemFormatting.TypeNameOfFixedBuffer(Name);
-//				}
-
-				if (IsBackingField) {
-					return SystemFormatting.NameOfBackingField(Name);
-				}
-
-				return Name;
-			}
-		}
-
-		public Type EnclosingType => Value.Reference.EnclosingType;
-
-		public Type FieldType => Value.Reference.FieldType;
-
-		public string TypeName => FieldType.Name;
-
-		public MetaType EnclosingMetaType => new MetaType(Value.Reference.EnclosingMethodTable);
-
-		public Pointer<FieldDesc> Value { get; }
-
-//		public Pointer<MethodTable> FieldMethodTable => m_pFieldDesc.Reference.FieldMethodTable;
-
-//		public Pointer<MethodTable> EnclosingMethodTable => m_pFieldDesc.Reference.EnclosingMethodTable;
+		public Pointer<byte> GetStaticAddress() => Value.Reference.GetCurrentStaticAddress();
 
 		#endregion
 
-		#region Methods
+		#endregion
+		
 
 		public Pointer<byte> GetValueAddress<T>(ref T value)
 		{
-			return IsStatic ? GetCurrentStaticAddress() : GetAddress(ref value);
+			return IsStatic ? GetStaticAddress() : GetAddress(ref value);
 		}
 
-		public Pointer<byte> GetStaticAddress()
+		public Pointer<byte> GetAddress<T>(ref T value)
 		{
-			return Value.Reference.GetStaticAddress();
+			Conditions.Require(!IsStatic, nameof(IsStatic));
+			Conditions.Require(Offset != FIELD_OFFSET_NEW_ENC);
+
+			var data = Unsafe.AddressOfFields(ref value) + Offset;
+
+			return data;
 		}
 
-		public unsafe Pointer<byte> GetStaticAddress(Pointer<byte> value)
+		#region Operators
+
+		public static implicit operator MetaField(Pointer<FieldDesc> ptr)
 		{
-			return Value.Reference.GetStaticAddress(value.ToPointer());
+			return new MetaField(ptr);
 		}
 
-		public Pointer<byte> GetStaticAddressHandle()
+		public static implicit operator MetaField(FieldInfo t)
 		{
-			return Value.Reference.GetStaticAddressHandle();
+			return new MetaField(t);
 		}
 
-		public Pointer<byte> GetCurrentStaticAddress()
-		{
-			return Value.Reference.GetCurrentStaticAddress();
-		}
+		#region Equality
 
-		public object GetValue(object value)
-		{
-			return Value.Reference.GetValue(value);
-		}
+		
 
-		public void SetValue(object t, object value)
-		{
-			Value.Reference.SetValue(t, value);
-		}
+//		public static bool operator ==(MetaField left, MetaField right) => Equals(left, right);
 
-		public Pointer<byte> GetAddress<TInstance>(ref TInstance value)
-		{
-			return Value.Reference.GetAddress(ref value);
-		}
+//		public static bool operator !=(MetaField left, MetaField right) => !Equals(left, right);
 
 		#endregion
 
-		public static implicit operator MetaField(FieldInfo fieldInfo) => new MetaField(fieldInfo);
+		#endregion
+
+		#region Overrides
+
+		public override ConsoleTable Debug {
+			get {
+				var table = base.Debug;
+
+				table.AddRow(nameof(Offset), Offset);
+				table.AddRow(nameof(Size), Size);
+				table.AddRow(nameof(Type), FieldType.Name);
+
+				if (IsStatic) {
+					table.AddRow(nameof(GetStaticAddress), GetStaticAddress());
+				}
+
+				return table;
+			}
+		}
+
+		#endregion
 	}
 }

@@ -1,15 +1,13 @@
 using System;
 using System.Runtime.InteropServices;
-using RazorSharp.CoreClr.Structures;
-using RazorSharp.CoreClr.Structures.EE;
+using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Metadata;
+using RazorSharp.CoreClr.Metadata.ExecutionEngine;
 
 namespace RazorSharp.Memory
 {
-	#region
-
-	using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
-
-	#endregion
+	
 	
 	/// <summary>
 	/// Specifies how sizes are calculated
@@ -44,7 +42,7 @@ namespace RazorSharp.Memory
 		
 		/// <summary>
 		///     <para>Returns the normal size of a type in memory.</para>
-		///     <para>Call to <see cref="CSUnsafe.SizeOf{T}()" /></para>
+		///     <para>Call to <see cref="Unsafe.SizeOf{T}()" /></para>
 		/// </summary>
 		/// <remarks>
 		/// <para>Only a type parameter is needed</para>
@@ -55,7 +53,7 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     <para>Returns the base size of the fields (data) in the heap.</para>
 		///     <para>This follows the formula of:</para>
-		///     <para><see cref="MethodTable.BaseSize" /> - <see cref="EEClass.BaseSizePadding" /></para>
+		///     <para><see cref="MetaType.BaseSize" /> - <see cref="MetaType.BaseSizePadding" /></para>
 		/// <para>
 		///         If a value is supplied, this manually reads the <c>MethodTable*</c>, making
 		///         this work for boxed values.
@@ -68,24 +66,24 @@ namespace RazorSharp.Memory
 		///     <remarks>
 		/// <para>Only a type parameter is needed, or a value can be supplied</para>
 		///         <para>Supply a value if the value may be boxed.</para>
-		///         <para>Returned from <see cref="MethodTable.NumInstanceFieldBytes" /></para>
+		///         <para>Returned from <see cref="MetaType.InstanceFieldsSize" /></para>
 		///         <para>This includes field padding.</para>
 		///     </remarks>
 		/// </summary>
-		/// <returns><see cref="Constants.MinObjectSize" /> if type is an array, fields size otherwise</returns>
+		/// <returns><see cref="Offsets.MinObjectSize" /> if type is an array, fields size otherwise</returns>
 		BaseFields,
 		
 		/// <summary>
 		///     <para>Returns the base instance size according to the TypeHandle (<c>MethodTable</c>).</para>
 		///     <para>This is the minimum heap size of a type.</para>
-		///     <para>By default, this equals <see cref="Constants.MinObjectSize" /> (<c>24</c> (x64) or <c>12</c> (x84)).</para>
+		///     <para>By default, this equals <see cref="Offsets.MinObjectSize" /> (<c>24</c> (x64) or <c>12</c> (x84)).</para>
 		/// </summary>
 		/// <remarks>
 		/// <para>Only a type parameter is needed, or a value can be supplied</para>
-		///     <para>Returned from <see cref="MethodTable.BaseSize" /></para>
+		///     <para>Returned from <see cref="MetaType.BaseSize" /></para>
 		/// </remarks>
 		/// <returns>
-		///     <see cref="MethodTable.BaseSize" />
+		///     <see cref="MetaType.BaseSize" />
 		/// </returns>
 		BaseInstance,
 		
@@ -93,22 +91,22 @@ namespace RazorSharp.Memory
 		///     <para>Calculates the complete size of a reference type in heap memory.</para>
 		///     <para>This is the most accurate size calculation.</para>
 		///     <para>
-		///         This follows the size formula of: (<see cref="MethodTable.BaseSize" />) + (length) *
-		///         (<see cref="MethodTable.ComponentSize" />)
+		///         This follows the size formula of: (<see cref="MetaType.BaseSize" />) + (length) *
+		///         (<see cref="MetaType.ComponentSize" />)
 		///     </para>
 		///     <para>where:</para>
 		///     <list type="bullet">
 		///         <item>
 		///             <description>
-		///                 <see cref="MethodTable.BaseSize" /> = The base instance size of a type
-		///                 (<c>24</c> (x64) or <c>12</c> (x86) by default) (<see cref="Constants.MinObjectSize" />)
+		///                 <see cref="MetaType.BaseSize" /> = The base instance size of a type
+		///                 (<c>24</c> (x64) or <c>12</c> (x86) by default) (<see cref="Offsets.MinObjectSize" />)
 		///             </description>
 		///         </item>
 		///         <item>
 		///             <description>length	= array or string length; <c>1</c> otherwise</description>
 		///         </item>
 		///         <item>
-		///             <description><see cref="MethodTable.ComponentSize" /> = element size, if available; <c>0</c> otherwise</description>
+		///             <description><see cref="MetaType.ComponentSize" /> = element size, if available; <c>0</c> otherwise</description>
 		///         </item>
 		///     </list>
 		/// </summary>
@@ -121,9 +119,7 @@ namespace RazorSharp.Memory
 		/// </remarks>
 		/// <returns>The size of the type in heap memory, in bytes</returns>
 		Heap,
-		
-		
-		
+
 		/// <summary>
 		///     Calculates the complete size of the value's data. If the type parameter is
 		///     a value type, this is equal to option <see cref="Intrinsic"/>. If the type parameter is a
@@ -131,6 +127,17 @@ namespace RazorSharp.Memory
 		/// </summary>
 		Auto,
 		
+		/// <summary>
+		/// Requires a value.
+		/// <para><see cref="Unsafe.SizeOfData{T}"/></para>
+		/// </summary>
+		Data,
+		
+		/// <summary>
+		/// Does not require a value.
+		/// <para><see cref="Unsafe.BaseSizeOfData"/></para>
+		/// </summary>
+		BaseData,
 		
 	}
 }

@@ -1,9 +1,14 @@
 ﻿#region
 
 using System;
-using CSUnsafe = System.Runtime.CompilerServices.Unsafe;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.ExceptionServices;
-using RazorSharp.Analysis;
+using System.Runtime.InteropServices;
+using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Structures;
+using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 
 #endregion
@@ -24,28 +29,22 @@ namespace Test
 		// Testing library: Sandbox
 
 
-		private static void Test<T>(T value)
+		struct MyStruct
 		{
-			var options = InspectOptions.Values | InspectOptions.FieldOffsets
-			                                    | InspectOptions.Addresses
-			                                    | InspectOptions.InternalStructures
-			                                    | InspectOptions.MemoryOffsets
-			                                    | InspectOptions.AuxiliaryInfo
-			                                    | InspectOptions.ArrayOrString;
-
-			var layout = Inspect.Layout<T>(InspectOptions.Types);
-			layout.Options |= options;
-			layout.Populate(ref value);
-			Console.WriteLine(layout);
+			private int   a;
+			private short b;
 		}
 
+		class MyClass
+		{
+			public static string v = "foo";
+		}
 
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			var field = typeof(string).GetAnyField("m_firstChar").GetMetaField();
 			
-			Test("foo");
+			Process p;
 		}
 	}
 }

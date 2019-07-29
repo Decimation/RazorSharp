@@ -1,0 +1,584 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using JetBrains.Annotations;
+using RazorSharp.CoreClr;
+using RazorSharp.CoreClr.Meta;
+using RazorSharp.CoreClr.Metadata.Enums;
+using RazorSharp.Import.Attributes;
+using RazorSharp.Import.Enums;
+using RazorSharp.Interop;
+using RazorSharp.Memory;
+using RazorSharp.Memory.Pointers;
+using RazorSharp.Model;
+using RazorSharp.Reflection;
+using RazorSharp.Utilities.Security;
+using SimpleSharp.Diagnostics;
+using SimpleSharp.Strings;
+
+// ReSharper disable ParameterTypeCanBeEnumerable.Global
+
+namespace RazorSharp.Import
+{
+	using Map = Dictionary<string, Pointer<byte>>;
+
+	public sealed class ImportManager : Releasable
+	{
+		#region Constants
+
+		private const string GET_PROPERTY_PREFIX      = "get_";
+		private const string GET_PROPERTY_REPLACEMENT = "Get";
+
+		private const string CONTEXT = nameof(ImportManager);
+
+		private const string IMPORT_MAP_NAME = "ImportMap";
+
+		private static readonly string MAP_REQ_ERR =
+			$"Map must static, readonly, and of type {typeof(Dictionary<string, Pointer<byte>>)}";
+
+		private delegate void LoadMethodFunction(ImportAttribute attr, MethodInfo memberInfo, Pointer<byte> ptr);
+
+		private delegate void LoadFieldFunction<T>(ref T     value, IImportProvider ip, string id,
+		                                           MetaField field, ImportAttribute attr);
+
+		#endregion
+
+		#region Singleton
+
+		/// <summary>
+		///     Gets an instance of <see cref="ImportManager" />
+		/// </summary>
+		public static ImportManager Value { get; private set; } = new ImportManager();
+
+		private ImportManager()
+		{
+			base.Setup();
+		}
+
+		#endregion
+
+		#region Override
+
+		public override void Close()
+		{
+			UnloadAll();
+
+			// Sanity check
+			if (m_boundTypes.Count != 0 || m_typeImportMaps.Count != 0) {
+				throw Guard.ImportFail();
+			}
+
+			// Delete instance
+			Value = null;
+
+			base.Close();
+		}
+
+		#endregion
+
+		#region Fields
+
+		private readonly ISet<Type> m_boundTypes = new HashSet<Type>();
+
+		private readonly Dictionary<Type, Map> m_typeImportMaps = new Dictionary<Type, Map>();
+
+		#endregion
+
+		#region Helper
+
+		internal static string Combine(params string[] args)
+		{
+			const string SCOPE_RESOLUTION_OPERATOR = "::";
+
+			var sb = new StringBuilder();
+
+			for (int i = 0; i < args.Length; i++) {
+				sb.Append(args[i]);
+
+				if (i + 1 != args.Length) {
+					sb.Append(SCOPE_RESOLUTION_OPERATOR);
+				}
+			}
+
+			return sb.ToString();
+		}
+
+		private bool IsBound(Type t) => m_boundTypes.Contains(t);
+
+		private void VerifyImport(ImportAttribute attr, MemberInfo member)
+		{
+			switch (member.MemberType) {
+				case MemberTypes.Constructor:
+				case MemberTypes.Property:
+				case MemberTypes.Method:
+
+					if (!(attr is ImportCallAttribute)) {
+						throw Guard.ImportFail();
+					}
+
+					break;
+				case MemberTypes.Field:
+
+					if (!(attr is ImportFieldAttribute)) {
+						throw Guard.ImportFail();
+					}
+
+					break;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+		}
+
+		private static string ResolveIdentifier(ImportAttribute attr, [NotNull] MemberInfo member)
+		{
+			return ResolveIdentifier(attr, member, out _);
+		}
+
+		private static string ResolveIdentifier(ImportAttribute attr, [NotNull] MemberInfo member,
+		                                        out string      resolvedId)
+		{
+			Conditions.NotNull(member.DeclaringType, nameof(member.DeclaringType));
+//			VerifyImport(attr, member);
+
+			//var attr          = member.GetCustomAttribute<ImportAttribute>();
+			var nameSpaceAttr = member.DeclaringType.GetCustomAttribute<ImportNamespaceAttribute>();
+
+			if (nameSpaceAttr == null) {
+				throw Guard.ImportFail(
+					$"Type must be decorated with \"{nameof(ImportNamespaceAttribute)}\"");
+			}
+
+			// Resolve the symbol
+
+			resolvedId = attr.Identifier ?? member.Name;
+
+			string nameSpace          = nameSpaceAttr.Namespace;
+			string enclosingNamespace = member.DeclaringType.Name;
+
+			var options = attr.Options;
+
+			if (member.MemberType == MemberTypes.Method
+			    && attr is ImportCallAttribute callAttr
+			    && callAttr.CallOptions.HasFlagFast(ImportCallOptions.Constructor)) {
+				if (!options.HasFlagFast(IdentifierOptions.FullyQualified)) {
+					throw Guard.ImportFail(
+						$"\"{nameof(IdentifierOptions)}\" must be \"{nameof(IdentifierOptions.FullyQualified)}\"");
+				}
+
+				// return enclosingNamespace + SCOPE_RESOLUTION_OPERATOR + enclosingNamespace;
+				return Combine(enclosingNamespace, enclosingNamespace);
+			}
+
+
+			if (!options.HasFlagFast(IdentifierOptions.IgnoreEnclosingNamespace)) {
+				// resolvedId = enclosingNamespace + SCOPE_RESOLUTION_OPERATOR + resolvedId;
+				resolvedId = Combine(enclosingNamespace, resolvedId);
+			}
+
+			if (!options.HasFlagFast(IdentifierOptions.IgnoreNamespace)) {
+				if (nameSpace != null) {
+					// resolvedId = nameSpace + SCOPE_RESOLUTION_OPERATOR + resolvedId;
+					resolvedId = Combine(nameSpace, resolvedId);
+				}
+			}
+
+			if (options.HasFlagFast(IdentifierOptions.UseAccessorName)) {
+				Conditions.Require(member.MemberType == MemberTypes.Method);
+				resolvedId = resolvedId.Replace(GET_PROPERTY_PREFIX, GET_PROPERTY_REPLACEMENT);
+			}
+
+			Conditions.NotNull(resolvedId, nameof(resolvedId));
+
+			return resolvedId;
+		}
+
+		#endregion
+
+		#region Unload
+
+		private void UnloadMap(Type type, FieldInfo mapField)
+		{
+			var map = m_typeImportMaps[type];
+
+			map.Clear();
+
+			m_typeImportMaps.Remove(type);
+
+			mapField.SetValue(null, null);
+
+			// Sanity check
+			Conditions.AssertDebug(!m_typeImportMaps.ContainsKey(type));
+			Conditions.AssertDebug(mapField.GetValue(null) == null);
+		}
+
+		/// <summary>
+		/// Root unload function. Unloads and restores the type <paramref name="type"/>.
+		/// </summary>
+		public void Unload(Type type)
+		{
+			if (!IsBound(type)) {
+				return;
+			}
+
+			if (UsingMap(type, out var mapField)) {
+				UnloadMap(type, mapField);
+
+				Global.Value.Log.Verbose("Unloaded map in {Name}", type.Name);
+			}
+
+
+			(MemberInfo[] members, ImportAttribute[] attributes) = type.GetAnnotated<ImportAttribute>();
+
+			int lim = attributes.Length;
+
+			for (int i = 0; i < lim; i++) {
+				var mem  = members[i];
+				var attr = attributes[i];
+
+				bool wasBound = attr is ImportCallAttribute callAttr &&
+				                callAttr.CallOptions.HasFlagFast(ImportCallOptions.Bind);
+
+
+				switch (mem.MemberType) {
+					case MemberTypes.Property:
+						var propInfo = (PropertyInfo) mem;
+						var get      = propInfo.GetMethod;
+
+						// Calling the function will now result in an access violation
+						if (wasBound) {
+							FunctionTools.Restore(get);
+						}
+
+						break;
+					case MemberTypes.Field:
+						// The field will be deleted later
+						var fi = (FieldInfo) mem;
+						if (fi.IsStatic) {
+							fi.SetValue(null, default);
+						}
+
+						break;
+					case MemberTypes.Method:
+
+						// Calling the function will now result in an access violation
+						if (wasBound) {
+							FunctionTools.Restore((MethodInfo) mem);
+						}
+
+
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
+				}
+
+				Global.Value.Log.Verbose("Unloaded member {Name}", mem.Name);
+			}
+
+			m_boundTypes.Remove(type);
+
+			Global.Value.WriteVerbose(CONTEXT, "Unloaded {Name}", type.Name);
+		}
+
+		public void Unload<T>(ref T value)
+		{
+			var type = value.GetType();
+
+			Unload(type);
+
+			Mem.Destroy(ref value);
+		}
+
+		public void UnloadAll(Type[] t)
+		{
+			foreach (var type in t) {
+				Unload(type);
+			}
+		}
+
+		public void UnloadAll() => UnloadAll(m_boundTypes.ToArray());
+
+		#endregion
+
+		#region Load
+
+		#region Map
+
+		private void LoadMap(Type t, FieldInfo field)
+		{
+			if (!field.IsStatic || field.FieldType != typeof(Map)) {
+				throw Guard.ImportFail(MAP_REQ_ERR);
+			}
+
+			var map = (Map) field.GetValue(null);
+			m_typeImportMaps.Add(t, map);
+		}
+
+
+		private FieldInfo FindMapField(Type type)
+		{
+			var mapField = type.GetAnyField(IMPORT_MAP_NAME);
+
+			if (mapField != null && mapField.GetCustomAttribute<ImportMapAttribute>() == null) {
+				throw Guard.ImportFail(
+					$"Map field should be annotated with {nameof(ImportMapAttribute)}");
+			}
+
+			if (mapField == null) {
+				var (member, _) = type.GetFirstAnnotated<ImportMapAttribute>();
+
+				if (member != null) {
+					mapField = (FieldInfo) member;
+				}
+			}
+
+			return mapField;
+		}
+
+		private bool UsingMap(Type type, out FieldInfo mapField)
+		{
+			mapField = FindMapField(type);
+
+			bool exists = mapField != null;
+
+			if (exists) {
+				if (!mapField.IsStatic || !mapField.IsInitOnly || mapField.FieldType != typeof(Map)) {
+					throw Guard.ImportFail(MAP_REQ_ERR);
+				}
+
+				if (mapField.GetValue(null) == null) {
+					mapField.SetValue(null, new Map());
+				}
+			}
+
+			return exists;
+		}
+
+		#endregion
+
+		/// <summary>
+		///     Root load function. Loads <paramref name="value" /> of type <paramref name="type" /> using the
+		///     specified <see cref="IImportProvider" /> <paramref name="ip" />.
+		/// </summary>
+		/// <param name="value">Value of type <paramref name="type" /> to load</param>
+		/// <param name="type"><see cref="MetaType" /> of <paramref name="value" /></param>
+		/// <param name="ip"><see cref="IImportProvider" /> to use to load components</param>
+		/// <typeparam name="T">Type of <paramref name="value" /></typeparam>
+		/// <returns><paramref name="value" />, fully loaded</returns>
+		private T Load<T>(T value, Type type, IImportProvider ip)
+		{
+			if (IsBound(type)) {
+				return value;
+			}
+
+			if (UsingMap(type, out var mapField)) {
+				LoadMap(type, mapField);
+				value = LoadComponents(value, type, ip, LoadMethod);
+			}
+			else {
+				value = LoadComponents(value, type, ip);
+			}
+
+			m_boundTypes.Add(type);
+
+			Global.Value.WriteVerbose(CONTEXT, "Completed loading {Name}", type.Name);
+
+			return value;
+		}
+
+		/// <summary>
+		///     Loads <paramref name="value" /> using <paramref name="ip" />.
+		/// </summary>
+		/// <param name="value">Value to load</param>
+		/// <param name="ip"><see cref="IImportProvider" /> to use</param>
+		/// <typeparam name="T">Type of <paramref name="value" /></typeparam>
+		/// <returns><paramref name="value" />, fully loaded</returns>
+		public T Load<T>(T value, IImportProvider ip) => Load(value, value.GetType(), ip);
+
+		/// <summary>
+		///     Loads any non-instance components of type <paramref name="t" />.
+		/// </summary>
+		/// <param name="t"><see cref="Type" /> to load</param>
+		/// <param name="ip"><see cref="IImportProvider" /> to use</param>
+		/// <returns>A <c>default</c> object of type <paramref name="t" /></returns>
+		public object Load(Type t, IImportProvider ip) => Load(default(object), t, ip);
+
+		public void LoadAll(Type[] t, IImportProvider ip)
+		{
+			foreach (var type in t) {
+				Load(type, ip);
+			}
+		}
+
+		// Shortcut
+//		internal void LoadClr(Type t) => Load(t, Clr.Value.ClrSymbols);
+
+		// Shortcut
+//		internal void LoadAllClr(Type[] t) => LoadAll(t, Clr.Value.ClrSymbols);
+
+		#region Load field
+
+		private static object CopyInField(ImportFieldAttribute ifld, MetaField field, Pointer<byte> ptr)
+		{
+			var type = field.FieldType.RuntimeType;
+
+			int size = ifld.SizeConst;
+
+			if (size == Constants.INVALID_VALUE) {
+				size = Unsafe.SizeOf(type, SizeOfOptions.BaseData);
+			}
+
+			byte[] mem = ptr.CopyBytes(size);
+
+			return Conversions.AllocLoad(mem, type);
+		}
+
+		private static object ProxyLoadField(ImportFieldAttribute ifld, MetaField field, Pointer<byte> ptr)
+		{
+			var fieldLoadType = (MetaType) (ifld.LoadAs ?? field.FieldType.RuntimeType);
+
+			return fieldLoadType.IsAnyPointer ? ptr : ptr.ReadAny(fieldLoadType.RuntimeType);
+		}
+
+		private static void FastLoadField(MetaField fieldInfo, Pointer<byte> addr, Pointer<byte> fieldAddr)
+		{
+			int    fieldSize = fieldInfo.Size;
+			byte[] memCpy    = addr.CopyBytes(fieldSize);
+			fieldAddr.WriteAll(memCpy);
+		}
+
+		private void LoadField<T>(ref T           value,
+		                          IImportProvider ip,
+		                          string          identifier,
+		                          MetaField       field,
+		                          ImportAttribute attr)
+		{
+			var           ifld      = (ImportFieldAttribute) attr;
+			Pointer<byte> ptr       = ip.GetAddress(identifier);
+			var           options   = ifld.FieldOptions;
+			Pointer<byte> fieldAddr = field.GetValueAddress(ref value);
+
+			object fieldValue;
+
+			Global.Value.WriteDebug(CONTEXT, "Loading field {Id} with {Option}",
+			                        field.Name, options);
+
+			switch (options) {
+				case ImportFieldOptions.CopyIn:
+					fieldValue = CopyInField(ifld, field, ptr);
+					break;
+				case ImportFieldOptions.Proxy:
+					fieldValue = ProxyLoadField(ifld, field, ptr);
+					break;
+				case ImportFieldOptions.Fast:
+					FastLoadField(field, ptr, fieldAddr);
+					return;
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+
+			if (field.FieldType.IsAnyPointer) {
+				ptr.WritePointer((Pointer<byte>) fieldValue);
+			}
+			else {
+				ptr.WriteAny(field.FieldType.RuntimeType, fieldValue);
+			}
+		}
+
+		#endregion
+
+
+		private void LoadMethod(ImportAttribute attr, MethodInfo method, Pointer<byte> addr)
+		{
+			var callAttr = attr as ImportCallAttribute;
+			Conditions.NotNull(callAttr, nameof(callAttr));
+			var options = callAttr.CallOptions;
+
+			bool bind     = options.HasFlagFast(ImportCallOptions.Bind);
+			bool addToMap = options.HasFlagFast(ImportCallOptions.Map);
+
+			if (bind && addToMap) {
+				throw Guard.ImportFail(
+					$"The option {ImportCallOptions.Bind} cannot be used with {ImportCallOptions.Map}");
+			}
+
+			if (bind) {
+				Global.Value.Log.Warning("Binding {Name}", method.Name);
+				FunctionTools.SetEntryPoint(method, addr);
+			}
+
+			if (addToMap) {
+				var enclosing = method.DeclaringType;
+
+				if (enclosing == null) {
+					throw Guard.AmbiguousFail();
+				}
+
+				var name = method.Name;
+
+				if (name.StartsWith(GET_PROPERTY_PREFIX)) {
+					// The nameof operator does not return the name with the get prefix
+					name = name.Erase(GET_PROPERTY_PREFIX);
+				}
+
+
+				m_typeImportMaps[enclosing].Add(name, addr);
+			}
+		}
+
+
+		private static T LoadComponents<T>(T                    value,
+		                                   Type                 type,
+		                                   IImportProvider      ip,
+		                                   LoadMethodFunction   fn,
+		                                   LoadFieldFunction<T> fieldFn = null)
+		{
+			(MemberInfo[] members, ImportAttribute[] attributes) = type.GetAnnotated<ImportAttribute>();
+
+			int lim = attributes.Length;
+
+			if (lim == default) {
+				return value;
+			}
+
+			for (int i = 0; i < lim; i++) {
+				var attr = attributes[i];
+				var mem  = members[i];
+
+				// Resolve the symbol
+
+				string        id   = ResolveIdentifier(attr, mem);
+				Pointer<byte> addr = ip.GetAddress(id);
+
+				switch (mem.MemberType) {
+					case MemberTypes.Property:
+						var propInfo = (PropertyInfo) mem;
+						var get      = propInfo.GetMethod;
+						fn(attr, get, addr);
+						break;
+					case MemberTypes.Method:
+						// The import is a function or (ctor)
+						fn(attr, (MethodInfo) mem, addr);
+						break;
+					case MemberTypes.Field:
+						fieldFn?.Invoke(ref value, ip, id, (MetaField) mem, attr);
+						break;
+					default:
+						throw Guard.NotSupportedMemberFail(mem);
+				}
+
+				Global.Value.WriteVerbose(CONTEXT, "Loaded member {Id} @ {Addr}", id, addr);
+			}
+
+			return value;
+		}
+
+		private T LoadComponents<T>(T value, Type type, IImportProvider ip)
+		{
+			return LoadComponents(value, type, ip, LoadMethod, LoadField);
+		}
+
+		#endregion
+	}
+}
