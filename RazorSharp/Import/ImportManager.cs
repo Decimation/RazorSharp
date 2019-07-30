@@ -14,6 +14,7 @@ using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Model;
 using RazorSharp.Reflection;
+using RazorSharp.Utilities;
 using RazorSharp.Utilities.Security;
 using SimpleSharp.Diagnostics;
 using SimpleSharp.Strings;
@@ -506,6 +507,10 @@ namespace RazorSharp.Import
 			Conditions.NotNull(callAttr, nameof(callAttr));
 			var options = callAttr.CallOptions;
 
+			if (options == ImportCallOptions.None) {
+				throw Guard.ImportFail("You must specify an option");
+			}
+			
 			bool bind     = options.HasFlagFast(ImportCallOptions.Bind);
 			bool addToMap = options.HasFlagFast(ImportCallOptions.Map);
 
@@ -550,7 +555,6 @@ namespace RazorSharp.Import
 			int lim = attributes.Length;
 
 			if (lim == default) {
-//				Global.Value.Log.Debug("{Name} has no members annotated", type.Name);
 				return value;
 			}
 

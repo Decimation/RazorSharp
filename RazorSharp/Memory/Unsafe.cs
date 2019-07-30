@@ -143,10 +143,16 @@ namespace RazorSharp.Memory
 		{
 			// It is already assumed value is a class type
 
+			//var tr = __makeref(value);
+			//var heapPtr = **(IntPtr**) (&tr);
+
+			var heapPtr = AddressOf(ref value).ReadPointer();
+			
+			
 			// NOTE:
 			// Strings have their data offset by Offsets.OffsetToStringData
 			// Arrays have their data offset by IntPtr.Size * 2 bytes (may be different for 32 bit)
-			var heapPtr = *(IntPtr**) AddressOf(ref value);
+			
 
 			switch (offset) {
 				case OffsetOptions.STRING_DATA:

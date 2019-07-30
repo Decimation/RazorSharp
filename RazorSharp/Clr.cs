@@ -36,6 +36,9 @@ namespace RazorSharp
 		/// </summary>
 		internal Version ClrVersion { get; }
 
+		/// <summary>
+		/// CLR symbol access.
+		/// </summary>
 		internal ModuleImport ClrSymbols { get; }
 
 		/// <summary>
@@ -82,7 +85,6 @@ namespace RazorSharp
 
 		public override void Close()
 		{
-			
 			// Delete instance
 			Value = null;
 

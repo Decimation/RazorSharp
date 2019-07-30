@@ -127,6 +127,12 @@ namespace RazorSharp.Utilities.Security
 		#endregion
 
 		[Pure]
+		internal static InvalidOperationException InvalidOperationFail(string func)
+		{
+			return new InvalidOperationException($"Invalid operation attempted in {func}");
+		}
+		
+		[Pure]
 		internal static NotImplementedException NotImplementedFail(string func)
 		{
 			return new NotImplementedException($"{func} is not implemented.");
@@ -143,5 +149,7 @@ namespace RazorSharp.Utilities.Security
 		{
 			return new InvalidOperationException($"64 bit is required for the requested operation: {func} ");
 		}
+		
+		
 	}
 }

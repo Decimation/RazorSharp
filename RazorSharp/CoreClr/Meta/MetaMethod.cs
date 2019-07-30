@@ -5,6 +5,7 @@ using RazorSharp.CoreClr.Meta.Base;
 using RazorSharp.CoreClr.Metadata;
 using RazorSharp.CoreClr.Metadata.Enums;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Utilities;
 
 // ReSharper disable SuggestBaseTypeForParameter
 

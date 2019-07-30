@@ -1,7 +1,9 @@
 using System;
+using RazorSharp.Analysis;
+using RazorSharp.CoreClr.Metadata.Enums;
 using RazorSharp.Import.Enums;
 
-namespace RazorSharp.CoreClr.Metadata.Enums
+namespace RazorSharp.Utilities
 {
 	/// <summary>
 	/// Contains optimized versions of the <see cref="Enum.HasFlag"/> function.
@@ -10,6 +12,11 @@ namespace RazorSharp.CoreClr.Metadata.Enums
 	{
 		// ((uThis & uFlag) == uFlag)
 
+		public static bool HasFlagFast(this InspectOptions value, InspectOptions flag)
+		{
+			return (value & flag) == flag;
+		}
+		
 		public static bool HasFlagFast(this MethodDescFlags2 value, MethodDescFlags2 flag)
 		{
 			return (value & flag) == flag;

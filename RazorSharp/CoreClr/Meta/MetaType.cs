@@ -7,6 +7,7 @@ using RazorSharp.CoreClr.Metadata.Enums;
 using RazorSharp.CoreClr.Metadata.ExecutionEngine;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Reflection;
+using RazorSharp.Utilities;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
 
@@ -279,9 +280,9 @@ namespace RazorSharp.CoreClr.Meta
 		/// <param name="name">Field name</param>
 		public MetaField this[string name] => Fields[name];
 
-		public VirtualCollection<MetaField> Fields { get; }
+		public VirtualCollection<MetaField>  Fields         { get; }
 
-		public VirtualCollection<MetaMethod> Methods { get; }
+		public VirtualCollection<MetaMethod> Methods        { get; }
 
 		private MetaField GetField(string name)
 		{
@@ -290,7 +291,10 @@ namespace RazorSharp.CoreClr.Meta
 
 		private MetaField[] GetFields()
 		{
-			return RuntimeType.GetAllFields().Select(f => (MetaField) f).ToArray();
+			return RuntimeType.GetAllFields()
+			                  .Where(f => !f.IsLiteral)
+			                  .Select(f => (MetaField) f)
+			                  .ToArray();
 		}
 
 		private MetaMethod GetMethod(string name)

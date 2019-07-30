@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using RazorSharp.Analysis;
 using RazorSharp.CoreClr.Meta.Base;
 using RazorSharp.CoreClr.Metadata;
 using RazorSharp.CoreClr.Metadata.Enums;
@@ -20,7 +21,7 @@ namespace RazorSharp.CoreClr.Meta
 	///         <item><description>Reflection structure: <see cref="FieldInfo"/></description></item>
 	///     </list>
 	/// </summary>
-	public unsafe class MetaField : EmbeddedClrStructure<FieldDesc>
+	public unsafe class MetaField : EmbeddedClrStructure<FieldDesc>, IStructure
 	{
 		private const int FIELD_OFFSET_MAX = (1 << 27) - 1;
 
@@ -101,6 +102,17 @@ namespace RazorSharp.CoreClr.Meta
 
 			return data;
 		}
+
+		public object GetValue(object value)
+		{
+			return FieldInfo.GetValue(value);
+		}
+
+		public T GetValue<T>(T value)
+		{
+			return GetAddress(ref value).Cast<T>().Read();
+		}
+
 
 		#region Operators
 

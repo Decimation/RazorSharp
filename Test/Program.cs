@@ -5,12 +5,14 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using RazorSharp.Analysis;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Interop;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Reflection;
 using RazorSharp.Utilities;
 
 #endregion
@@ -30,17 +32,26 @@ namespace Test
 		// Common library: SimpleSharp
 		// Testing library: Sandbox
 
-		public static void Run<T>()
+		struct MyStruct
 		{
-			Console.WriteLine(">> {0}",typeof(T));
+			private int i;
+			private byte b;
+			private short s;
 		}
-		
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
+			MetaType mt = typeof(int);
 			
-			Run<int>();
-			Functions.CallGenericMethod(typeof(Program).GetMethod(nameof(Run)), typeof(int), null);
+			var   i  = 1;
+			var ms = new MyStruct();
+			
+			
+			
+			var oi = Inspect.Scan(ms, InspectOptions.Fields | InspectOptions.MemoryFields 
+			                                                | InspectOptions.Values | InspectOptions.Padding);
+			oi.Dump();
 		}
 	}
 }

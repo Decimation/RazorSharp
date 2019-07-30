@@ -11,20 +11,13 @@ namespace RazorSharp
 {
 	/// <summary>
 	///     Initializers shim. Every type that needs to be set up/closed implements <see cref="Releasable"/>.
-	///     <list type="bullet">
-	///         <listheader>Implicit inheritance:</listheader>
-	///         <item>
-	///             <description>
-	///                 <see cref="Releasable" />
-	///             </description>
-	///         </item>
-	///     </list>
+	/// This runs on module load.
 	/// </summary>
 	internal static class ModuleInitializer /*: Releasable */
 	{
 		private const string CONTEXT = "Init";
-		
-		internal static bool IsSetup { get; private set; }
+
+		private static bool IsSetup { get; set; }
 
 		/// <summary>
 		/// Core CLR types

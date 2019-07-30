@@ -20,12 +20,12 @@ namespace RazorSharp.Import.Enums
 		/// <summary>
 		///     Treat the method as a constructor. <see cref="IdentifierOptions.FullyQualified" /> must be used.
 		/// </summary>
-		Constructor = 1,
+		Constructor = 1 << 0,
 
 		/// <summary>
 		///     Sets the method entry point to the resolved address. This only works on 64 bit.
 		/// </summary>
-		Bind = 2,
+		Bind = 1 << 1,
 
 		/// <summary>
 		///     <para>
@@ -39,6 +39,6 @@ namespace RazorSharp.Import.Enums
 		///     </para>
 		///     <para>Best used in conjunction with the functions in <see cref="NativeFunctions" /></para>
 		/// </summary>
-		Map = 4
+		Map = 1 << 2
 	}
 }

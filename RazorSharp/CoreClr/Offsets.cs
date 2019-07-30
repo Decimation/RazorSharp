@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using RazorSharp.CoreClr.Metadata;
+// ReSharper disable ConvertToConstant.Global
 
 #endregion
 
@@ -85,6 +86,8 @@ namespace RazorSharp.CoreClr
 
 		/// <summary>
 		///     Heap offset to the first string character.
+		/// On 64 bit platforms, this should be 12 (8 + 4) and on 32 bit 8 (4 + 4).
+		/// (<see cref="IntPtr.Size"/> + <see cref="int"/>)
 		/// </summary>
 		public static readonly int OffsetToStringData = RuntimeHelpers.OffsetToStringData;
 

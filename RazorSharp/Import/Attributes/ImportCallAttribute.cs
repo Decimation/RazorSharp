@@ -2,6 +2,7 @@ using System;
 using JetBrains.Annotations;
 using RazorSharp.CoreClr.Metadata.Enums;
 using RazorSharp.Import.Enums;
+using RazorSharp.Utilities;
 
 namespace RazorSharp.Import.Attributes
 {

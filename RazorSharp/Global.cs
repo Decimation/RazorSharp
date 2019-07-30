@@ -44,8 +44,6 @@ namespace RazorSharp
 		/// </summary>
 		internal const string NAME = "RazorSharp";
 
-		internal Assembly Assembly { get; }
-
 		#region Singleton
 
 		/// <summary>
@@ -69,7 +67,6 @@ namespace RazorSharp
 #else
 //			SuppressLogger();
 #endif
-			Assembly = Assembly.Load(NAME);
 		}
 
 		#endregion
@@ -77,10 +74,25 @@ namespace RazorSharp
 
 		#region Logger extensions
 
-		/*internal void SuppressLogger()
+		/**
+		 * Note: be careful with the logger, as Serilog is only used in debug, and isn't included in
+		 * the Release build.
+		 */
+		
+		[Conditional(COND_DEBUG)]
+		internal void SuppressLoggerAndClear()
+		{
+			SuppressLogger();
+			Console.Clear();
+		}
+
+		
+		
+		[Conditional(COND_DEBUG)]
+		internal void SuppressLogger()
 		{
 			Log = Logger.None;
-		}*/
+		}
 
 		[Conditional(COND_DEBUG)]
 		private static void ContextLog(string ctx, Action<string, object[]> log, string msg, object[] args)
@@ -202,6 +214,7 @@ namespace RazorSharp
 				WriteWarning(NAME,"Debugging is enabled!");
 			}
 		}
+		
 
 
 		public override void Setup()

@@ -51,7 +51,7 @@ namespace RazorSharp.Import
 		/// <summary>
 		/// Gets an instance of <see cref="SymbolManager"/>
 		/// </summary>
-		public static SymbolManager Value { get; private set; } = new SymbolManager();
+		internal static SymbolManager Value { get; private set; } = new SymbolManager();
 
 		#endregion
 
@@ -114,6 +114,7 @@ namespace RazorSharp.Import
 			Global.Value.WriteVerbose(CONTEXT, "Loading image {Img}", m_pdb.Name);
 
 			UnloadModule();
+			
 			Conditions.Require(IsSetup, nameof(IsSetup));
 
 			Kernel32.GetFileParams(img, out ulong baseAddr, out ulong fileSize);

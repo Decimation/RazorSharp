@@ -352,7 +352,7 @@ namespace RazorSharp.Memory.Pointers
 		public object CastAny(Type type)
 		{
 			var cast = GetType().GetMethods().First(f => f.Name == nameof(Cast) && f.IsGenericMethod);
-			var ptr  = Functions.CallGenericMethod(cast, new[] {type}, this);
+			var ptr  = Functions.CallGenericMethod(cast, type, this);
 			return ptr;
 		}
 
