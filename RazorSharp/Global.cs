@@ -11,15 +11,15 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using SimpleSharp.Diagnostics;
+// ReSharper disable MemberCanBeMadeStatic.Global
 
 namespace RazorSharp
 {
 	/// <summary>
-	/// Contains the logger and other useful resources for CoreSharp.
+	/// Contains the logger and other useful resources for RazorSharp.
 	/// </summary>
 	internal sealed class Global : Releasable
 	{
-		
 		#region Logger
 
 		private const string CONTEXT_PROP = "Context";
@@ -32,15 +32,17 @@ namespace RazorSharp
 
 		private const string OUTPUT_TEMPLATE_ALT_12_HR =
 			"[{Timestamp:hh:mm:ss.fff} ({Context}) {Level:u3}] {Message}{NewLine}";
-		
-		internal ILogger Log { get; private set; }
+
+#if DEBUG
+		private ILogger Log { get; set; }
+#endif
 
 		#endregion
 
 		/// <summary>
 		/// Name of this assembly.
 		/// </summary>
-		internal const string NAME = "CoreSharp";
+		internal const string NAME = "RazorSharp";
 
 		internal Assembly Assembly { get; }
 
@@ -65,7 +67,7 @@ namespace RazorSharp
 			     .WriteTo.Console(outputTemplate: OUTPUT_TEMPLATE_ALT_12_HR, theme: SystemConsoleTheme.Colored)
 			     .CreateLogger();
 #else
-			SuppressLogger();
+//			SuppressLogger();
 #endif
 			Assembly = Assembly.Load(NAME);
 		}
@@ -75,12 +77,13 @@ namespace RazorSharp
 
 		#region Logger extensions
 
-		internal void SuppressLogger()
+		/*internal void SuppressLogger()
 		{
 			Log = Logger.None;
-		}
+		}*/
 
-		private void ContextLog(string ctx, Action<string, object[]> log, string msg, object[] args)
+		[Conditional(COND_DEBUG)]
+		private static void ContextLog(string ctx, Action<string, object[]> log, string msg, object[] args)
 		{
 			using (LogContext.PushProperty(CONTEXT_PROP, ctx)) {
 				log(msg, args);
@@ -168,7 +171,7 @@ namespace RazorSharp
 		}
 
 		#endregion
-		
+
 		/// <summary>
 		///     Checks compatibility
 		/// </summary>
@@ -177,11 +180,9 @@ namespace RazorSharp
 			/**
 			 * RazorSharp is tested on and targets:
 			 *
-			 * - x64
 			 * - Windows
 			 * - .NET CLR 4.7.2
 			 * - Workstation Concurrent GC
-			 *
 			 */
 			Conditions.Require(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
@@ -198,32 +199,32 @@ namespace RazorSharp
 			Conditions.Require(Type.GetType("Mono.Runtime") == null);
 
 			if (Debugger.IsAttached) {
-				Log.Warning("Debugging is enabled: some features may not work correctly");
+				WriteWarning(NAME,"Debugging is enabled!");
 			}
 		}
 
-		
+
 		public override void Setup()
 		{
 			CheckCompatibility();
 			Console.OutputEncoding = Encoding.Unicode;
-			
+
 			base.Setup();
 		}
 
 		/// <summary>
-		///     Disposes the logger and checks for any memory leaks
+		///     Disposes the logger
 		/// </summary>
 		public override void Close()
 		{
 			Conditions.Require(IsSetup);
-
+#if DEBUG
 			if (Log is Logger logger) {
 				logger.Dispose();
 			}
 
 			Log = null;
-			
+#endif
 			// Delete instance
 			Value = null;
 

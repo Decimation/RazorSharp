@@ -115,8 +115,12 @@ namespace RazorSharp.CoreClr.Metadata.JitIL
 		/// return (*(BYTE*)this &amp; CorILMethod_FormatMask) == CorILMethod_FatFormat;
 		/// </code>
 		/// </summary>
-		internal bool IsFat => (CorILMethodFlags) (*(byte*) Unsafe.AddressOf(ref this) &
-		                                           (byte) CorILMethodFlags.FormatMask) == CorILMethodFlags.FatFormat;
+		internal bool IsFat {
+			get {
+				return (CorILMethodFlags) (*(byte*) Unsafe.AddressOf(ref this) &
+				                           (byte) CorILMethodFlags.FormatMask) == CorILMethodFlags.FatFormat;
+			}
+		}
 
 		/// <summary>
 		///     <code>

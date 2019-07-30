@@ -9,7 +9,7 @@ using RazorSharp.CoreClr.Metadata;
 namespace RazorSharp.CoreClr
 {
 	/// <summary>
-	/// Common runtime offsets.
+	///     Common runtime offsets.
 	/// </summary>
 	public static class Offsets
 	{
@@ -28,7 +28,7 @@ namespace RazorSharp.CoreClr
 
 		/// <summary>
 		///     Size of the length field and first character
-		/// <list type="bullet">
+		///     <list type="bullet">
 		///         <item>
 		///             <description>+ 2: First character</description>
 		///         </item>
@@ -45,7 +45,7 @@ namespace RazorSharp.CoreClr
 		public static readonly int ArrayOverhead = IntPtr.Size;
 
 		/// <summary>
-		/// 	Size of <see cref="TypeHandle"/> and <see cref="ObjHeader"/>
+		///     Size of <see cref="TypeHandle" /> and <see cref="ObjHeader" />
 		///     <list type="bullet">
 		///         <item>
 		///             <description>+ <see cref="IntPtr.Size" />: <see cref="ObjHeader" /></description>

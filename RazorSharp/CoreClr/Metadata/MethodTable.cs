@@ -4,6 +4,7 @@ using System;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Metadata.Enums;
 using RazorSharp.CoreClr.Metadata.ExecutionEngine;
+using RazorSharp.Import.Attributes;
 using RazorSharp.Memory.Pointers;
 
 #endregion
@@ -45,6 +46,7 @@ namespace RazorSharp.CoreClr.Metadata
 		Indirection = 3
 	}
 
+	[ImportNamespace]
 	[StructLayout(LayoutKind.Sequential)]
 	public unsafe struct MethodTable
 	{

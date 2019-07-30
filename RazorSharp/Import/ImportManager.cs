@@ -35,9 +35,12 @@ namespace RazorSharp.Import
 
 		private const string IMPORT_MAP_NAME = "ImportMap";
 
-		private static readonly string MAP_REQ_ERR =
+		private static readonly string MapError =
 			$"Map must static, readonly, and of type {typeof(Dictionary<string, Pointer<byte>>)}";
 
+		private static readonly string NamespaceError = 
+			$"Type must be decorated with \"{nameof(ImportNamespaceAttribute)}\"";
+		
 		private delegate void LoadMethodFunction(ImportAttribute attr, MethodInfo memberInfo, Pointer<byte> ptr);
 
 		private delegate void LoadFieldFunction<T>(ref T     value, IImportProvider ip, string id,
@@ -131,6 +134,15 @@ namespace RazorSharp.Import
 			}
 		}
 
+		private static bool IsAnnotated(Type t, out ImportNamespaceAttribute attr)
+		{
+			attr = t.GetCustomAttribute<ImportNamespaceAttribute>();
+
+			return attr != null;
+		}
+
+		
+
 		private static string ResolveIdentifier(ImportAttribute attr, [NotNull] MemberInfo member)
 		{
 			return ResolveIdentifier(attr, member, out _);
@@ -140,14 +152,9 @@ namespace RazorSharp.Import
 		                                        out string      resolvedId)
 		{
 			Conditions.NotNull(member.DeclaringType, nameof(member.DeclaringType));
-//			VerifyImport(attr, member);
-
-			//var attr          = member.GetCustomAttribute<ImportAttribute>();
-			var nameSpaceAttr = member.DeclaringType.GetCustomAttribute<ImportNamespaceAttribute>();
-
-			if (nameSpaceAttr == null) {
-				throw Guard.ImportFail(
-					$"Type must be decorated with \"{nameof(ImportNamespaceAttribute)}\"");
+			
+			if (!IsAnnotated(member.DeclaringType, out var nameSpaceAttr)) {
+				throw Guard.ImportFail(NamespaceError);
 			}
 
 			// Resolve the symbol
@@ -225,7 +232,7 @@ namespace RazorSharp.Import
 			if (UsingMap(type, out var mapField)) {
 				UnloadMap(type, mapField);
 
-				Global.Value.Log.Verbose("Unloaded map in {Name}", type.Name);
+//				Global.Value.Log.Verbose("Unloaded map in {Name}", type.Name);
 			}
 
 
@@ -273,7 +280,7 @@ namespace RazorSharp.Import
 						throw new ArgumentOutOfRangeException();
 				}
 
-				Global.Value.Log.Verbose("Unloaded member {Name}", mem.Name);
+//				Global.Value.Log.Verbose("Unloaded member {Name}", mem.Name);
 			}
 
 			m_boundTypes.Remove(type);
@@ -308,7 +315,7 @@ namespace RazorSharp.Import
 		private void LoadMap(Type t, FieldInfo field)
 		{
 			if (!field.IsStatic || field.FieldType != typeof(Map)) {
-				throw Guard.ImportFail(MAP_REQ_ERR);
+				throw Guard.ImportFail(MapError);
 			}
 
 			var map = (Map) field.GetValue(null);
@@ -344,7 +351,7 @@ namespace RazorSharp.Import
 
 			if (exists) {
 				if (!mapField.IsStatic || !mapField.IsInitOnly || mapField.FieldType != typeof(Map)) {
-					throw Guard.ImportFail(MAP_REQ_ERR);
+					throw Guard.ImportFail(MapError);
 				}
 
 				if (mapField.GetValue(null) == null) {
@@ -370,6 +377,10 @@ namespace RazorSharp.Import
 		{
 			if (IsBound(type)) {
 				return value;
+			}
+
+			if (!IsAnnotated(type, out _)) {
+				throw Guard.ImportFail(NamespaceError);
 			}
 
 			if (UsingMap(type, out var mapField)) {
@@ -431,7 +442,7 @@ namespace RazorSharp.Import
 
 			byte[] mem = ptr.CopyBytes(size);
 
-			return Conversions.AllocLoad(mem, type);
+			return Conversions.AllocRaw(mem, type);
 		}
 
 		private static object ProxyLoadField(ImportFieldAttribute ifld, MetaField field, Pointer<byte> ptr)
@@ -504,7 +515,7 @@ namespace RazorSharp.Import
 			}
 
 			if (bind) {
-				Global.Value.Log.Warning("Binding {Name}", method.Name);
+//				Global.Value.Log.Warning("Binding {Name}", method.Name);
 				FunctionTools.SetEntryPoint(method, addr);
 			}
 
@@ -531,7 +542,7 @@ namespace RazorSharp.Import
 		private static T LoadComponents<T>(T                    value,
 		                                   Type                 type,
 		                                   IImportProvider      ip,
-		                                   LoadMethodFunction   fn,
+		                                   LoadMethodFunction   methodFn,
 		                                   LoadFieldFunction<T> fieldFn = null)
 		{
 			(MemberInfo[] members, ImportAttribute[] attributes) = type.GetAnnotated<ImportAttribute>();
@@ -539,6 +550,7 @@ namespace RazorSharp.Import
 			int lim = attributes.Length;
 
 			if (lim == default) {
+//				Global.Value.Log.Debug("{Name} has no members annotated", type.Name);
 				return value;
 			}
 
@@ -555,11 +567,11 @@ namespace RazorSharp.Import
 					case MemberTypes.Property:
 						var propInfo = (PropertyInfo) mem;
 						var get      = propInfo.GetMethod;
-						fn(attr, get, addr);
+						methodFn(attr, get, addr);
 						break;
 					case MemberTypes.Method:
 						// The import is a function or (ctor)
-						fn(attr, (MethodInfo) mem, addr);
+						methodFn(attr, (MethodInfo) mem, addr);
 						break;
 					case MemberTypes.Field:
 						fieldFn?.Invoke(ref value, ip, id, (MetaField) mem, attr);

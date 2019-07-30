@@ -31,7 +31,6 @@ namespace RazorSharp
 		/// </summary>
 		private static readonly Type[] CoreClrTypes =
 		{
-			typeof(Functions),
 			typeof(FunctionTools),
 			typeof(DelegateCreator),
 			typeof(MethodDesc),
@@ -44,7 +43,7 @@ namespace RazorSharp
 		/// <summary>
 		/// Core objects
 		/// </summary>
-		private static readonly Releasable[] CoreInitializers =
+		private static readonly Releasable[] CoreObjects =
 		{
 			Clr.Value,
 			SymbolManager.Value,
@@ -60,7 +59,7 @@ namespace RazorSharp
 			
 			// Original order: Clr, SymbolManager, Global
 
-			foreach (var core in CoreInitializers) {
+			foreach (var core in CoreObjects) {
 				core.Setup();
 			}
 			
@@ -76,7 +75,7 @@ namespace RazorSharp
 			
 			// Original order: Clr, Global, SymbolManager, Mem.Allocator
 
-			foreach (var core in CoreInitializers) {
+			foreach (var core in CoreObjects) {
 				core.Close();
 			}
 

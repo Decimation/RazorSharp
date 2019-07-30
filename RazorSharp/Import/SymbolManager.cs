@@ -21,8 +21,6 @@ namespace RazorSharp.Import
 	/// </summary>
 	internal sealed class SymbolManager : Releasable
 	{
-
-		
 		private const string CONTEXT = nameof(SymbolManager);
 
 		private IntPtr       m_proc;

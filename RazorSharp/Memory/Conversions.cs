@@ -12,9 +12,6 @@ namespace RazorSharp.Memory
 {
 	#region
 
-	
-	
-
 	#endregion
 
 	/// <summary>
@@ -26,18 +23,22 @@ namespace RazorSharp.Memory
 		///     Reinterprets a value as a value of the specified conversion type
 		/// </summary>
 		Reinterpret,
-		
+
 		/// <summary>
 		/// <see cref="System.Convert.ChangeType(object,Type)"/>
 		/// </summary>
 		Normal,
-		
+
 		/// <summary>
 		/// <see cref="Unsafe.As{T,T}"/>
 		/// </summary>
 		Proxy
 	}
-	
+
+	/// <summary>
+	/// <seealso cref="System.Convert"/>
+	/// <seealso cref="BitConverter"/>
+	/// </summary>
 	public static unsafe class Conversions
 	{
 		public static T ToObject<T>(Pointer<byte> ptr)
@@ -58,7 +59,7 @@ namespace RazorSharp.Memory
 		{
 			switch (c) {
 				case ConversionType.Reinterpret:
-					return Memory.Unsafe.AddressOf(ref t).Cast<TTo>().Read();
+					return Unsafe.AddressOf(ref t).Cast<TTo>().Read();
 				case ConversionType.Normal:
 					return (TTo) System.Convert.ChangeType(t, typeof(TTo));
 				case ConversionType.Proxy:
@@ -80,23 +81,23 @@ namespace RazorSharp.Memory
 		///     Creates an instance of <typeparamref name="T" /> from <paramref name="mem" />.
 		///     If <typeparamref name="T" /> is a reference type, <paramref name="mem" /> should not contain
 		///     object internals like its <see cref="MethodTable" /> pointer or its <see cref="ObjHeader" />; it should
-		///     only contain its fields. This memory does not need to be freed.
+		///     only contain its fields. This memory does not need to be freed, as it is GC allocated.
 		/// </summary>
 		/// <param name="mem">Memory to load from</param>
 		/// <typeparam name="T">Type to load</typeparam>
 		/// <returns>An instance created from <paramref name="mem" /></returns>
-		public static T AllocLoad<T>(byte[] mem)
+		public static T AllocRaw<T>(byte[] mem)
 		{
 			T value = default;
 
 			Pointer<byte> addr;
 
 			if (RuntimeInfo.IsStruct<T>()) {
-				addr = Memory.Unsafe.AddressOf(ref value).Cast();
+				addr = Unsafe.AddressOf(ref value).Cast();
 			}
 			else {
 				value = Runtime.AllocObject<T>();
-				addr  = Memory.Unsafe.AddressOfFields(ref value).Cast();
+				addr  = Unsafe.AddressOfFields(ref value).Cast();
 			}
 
 			addr.WriteAll(mem);
@@ -104,10 +105,10 @@ namespace RazorSharp.Memory
 			return value;
 		}
 
-		public static object AllocLoad(byte[] mem, Type type)
+		public static object AllocRaw(byte[] mem, Type type)
 		{
-			return Functions.CallGenericMethod(typeof(Conversions), nameof(AllocLoad),
-			                                          null, new[] {type}, mem);
+			return Functions.CallGenericMethod(typeof(Conversions).GetMethod(nameof(AllocRaw)), 
+			                                   type, null , mem);
 		}
 	}
 }

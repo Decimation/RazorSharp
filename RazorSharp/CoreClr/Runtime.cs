@@ -3,6 +3,7 @@ using System.Reflection;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Metadata;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Interop;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Reflection;
@@ -32,7 +33,7 @@ namespace RazorSharp.CoreClr
 		public static T AllocObject<T>(params object[] args)
 		{
 			var value = GlobalHeap.AllocateObject<T>();
-			ReflectionUtil.RunConstructor(value, args);
+			Functions.RunConstructor(value, args);
 			return value;
 		}
 

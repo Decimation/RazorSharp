@@ -6,7 +6,9 @@ using SimpleSharp.Diagnostics;
 
 namespace RazorSharp.Model
 {
-	
+	/// <summary>
+	/// Describes a type that allocates memory or resources.
+	/// </summary>
 	public class Allocator : IClosable
 	{
 		/// <summary>
@@ -55,7 +57,8 @@ namespace RazorSharp.Model
 			Conditions.Require(elemCnt > 0, nameof(elemCnt));
 			int size  = Mem.FullSize<T>(elemCnt);
 			var alloc = m_alloc(size);
-			Mem.Zero(alloc, size);
+			
+			((Pointer<byte>) alloc).Clear();
 
 			m_pointers.Add(alloc);
 

@@ -36,8 +36,8 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.2")]
-[assembly: AssemblyFileVersion("1.1.2")]
+[assembly: AssemblyVersion("1.2.6")]
+[assembly: AssemblyFileVersion("1.2.6")]
 
 
 // Test project
@@ -45,6 +45,9 @@ using System.Runtime.InteropServices;
 
 // Benchmarking/testing solution
 [assembly: InternalsVisibleTo("Sandbox")]
+
+// Nuget testing
+[assembly: InternalsVisibleTo("NSandbox")]
 
 // nuget pack
 // nuget pack -Prop Configuration=Release

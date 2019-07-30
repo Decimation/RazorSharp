@@ -12,11 +12,14 @@ namespace RazorSharp.Import.Attributes
 	[AttributeUsage(METHOD_TARGETS)]
 	public class ImportForwardCallAttribute : ImportCallAttribute
 	{
-		public ImportForwardCallAttribute(Type type, string id, ImportCallOptions options)
+		public ImportForwardCallAttribute(string nameSpace, string id, ImportCallOptions options)
 		{
-			Identifier = ImportManager.Combine(type.Name, id);
-			Options = IdentifierOptions.FullyQualified;
+			Identifier  = ImportManager.Combine(nameSpace, id);
+			Options     = IdentifierOptions.FullyQualified;
 			CallOptions = options;
 		}
+
+		public ImportForwardCallAttribute(Type type, string id, ImportCallOptions options)
+			: this(type.Name, id, options) { }
 	}
 }

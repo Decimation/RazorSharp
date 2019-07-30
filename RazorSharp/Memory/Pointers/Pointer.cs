@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Interop;
@@ -16,13 +16,9 @@ using SimpleSharp.Utilities;
 
 namespace RazorSharp.Memory.Pointers
 {
-	#region
-
 	
 
-	#endregion
-
-	// todo: decorate the remaining Pure methods with PureAttribute
+	
 
 	/// <summary>
 	///     <para>Represents a native pointer. Equals the size of <see cref="P:System.IntPtr.Size" />.</para>
@@ -127,6 +123,7 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Collection-esque operations
 
+		[Pure]
 		public IEnumerator<T> GetEnumerator(int elemCount)
 		{
 			for (int i = 0; i < elemCount; i++) {
@@ -141,9 +138,11 @@ namespace RazorSharp.Memory.Pointers
 		// (void*) (((long) m_value) + byteOffset)
 		// (void*) (((long) m_value) + (elemOffset * ElementSize))
 
+		[Pure]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void* OffsetFast(int elemCnt) => (void*) ((long) m_value + (FullSize(elemCnt)));
 
+		[Pure]
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private int FullSize(int elemCnt) => elemCnt * ElementSize;
 
@@ -152,6 +151,7 @@ namespace RazorSharp.Memory.Pointers
 		/// </summary>
 		/// <param name="current">Current pointer (high address)</param>
 		/// <returns>The index</returns>
+		[Pure]
 		public int OffsetIndex(Pointer<byte> current)
 		{
 			long delta = current.ToInt64() - ToInt64();
@@ -164,13 +164,15 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Pointer
 
+		[Pure]
 		public Pointer<byte> ReadPointer(int elemOffset = 0) => ReadPointer<byte>(elemOffset);
 
+		[Pure]
 		public Pointer<TType> ReadPointer<TType>(int elemOffset = 0)
 		{
 			return Cast<Pointer<TType>>().Read(elemOffset);
 		}
-
+		
 		public void WritePointer<TType>(Pointer<TType> ptr, int elemOffset = 0)
 		{
 			Cast<Pointer<TType>>().Write(ptr, elemOffset);
@@ -308,18 +310,31 @@ namespace RazorSharp.Memory.Pointers
 
 		#region Other methods
 
+		[Pure]
 		private static bool IsCharPointer() => typeof(T) == typeof(char);
 
+		[Pure]
 		public Pointer<T> AddressOfIndex(int index) => OffsetFast(index);
 
-		public void Zero(int elemCnt)
+		/// <summary>
+		/// Zeros <paramref name="elemCnt"/> elements.
+		/// </summary>
+		/// <param name="elemCnt">Number of elements to zero</param>
+		public void Clear(int elemCnt = 1)
 		{
-			Mem.Zero(m_value, FullSize(elemCnt));
+			for (int i = 0; i < elemCnt; i++)
+				this[i] = default;
 		}
-
-		public void ZeroBytes(int byteCnt)
+		
+		/// <summary>
+		/// Zeros <paramref name="byteCnt"/> bytes.
+		/// </summary>
+		/// <param name="byteCnt">Number of bytes to zero</param>
+		public void ClearBytes(int byteCnt)
 		{
-			Mem.Zero(m_value, byteCnt);
+			var bytePtr = Cast();
+			for (int i = 0; i < byteCnt; i++)
+				bytePtr[i] = default;
 		}
 
 		#region Cast
@@ -337,7 +352,7 @@ namespace RazorSharp.Memory.Pointers
 		public object CastAny(Type type)
 		{
 			var cast = GetType().GetMethods().First(f => f.Name == nameof(Cast) && f.IsGenericMethod);
-			var ptr  = Functions.CallGenericMethod(cast, this, new[] {type});
+			var ptr  = Functions.CallGenericMethod(cast, new[] {type}, this);
 			return ptr;
 		}
 
@@ -359,32 +374,31 @@ namespace RazorSharp.Memory.Pointers
 		///     Converts <see cref="Address" /> to a 32-bit signed integer.
 		/// </summary>
 		/// <returns></returns>
+		[Pure]
 		public int ToInt32() => (int) m_value;
 
 		/// <summary>
 		///     Converts <see cref="Address" /> to a 64-bit signed integer.
 		/// </summary>
 		/// <returns></returns>
+		[Pure]
 		public long ToInt64() => (long) m_value;
 
 		/// <summary>
 		///     Converts <see cref="Address" /> to a 64-bit unsigned integer.
 		/// </summary>
 		/// <returns></returns>
+		[Pure]
 		public ulong ToUInt64() => (ulong) m_value;
 
 		/// <summary>
 		///     Converts <see cref="Address" /> to a 32-bit unsigned integer.
 		/// </summary>
 		/// <returns></returns>
+		[Pure]
 		public uint ToUInt32() => (uint) m_value;
 
 		#endregion
-
-		public Span<T> AsSpan(int byteCnt)
-		{
-			return new Span<T>(m_value, byteCnt);
-		}
 
 		#endregion
 

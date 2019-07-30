@@ -20,12 +20,16 @@ namespace RazorSharp.Memory
 	{
 		public static bool Is64Bit => IntPtr.Size == sizeof(long) && Environment.Is64BitProcess;
 
+		/// <summary>
+		/// Represents a <c>null</c> pointer.
+		/// <seealso cref="IntPtr.Zero"/>
+		/// </summary>
 		public static readonly Pointer<byte> Nullptr = null;
 
 		static Mem()
 		{
-			Allocator = new Allocator(Marshal.AllocHGlobal, 
-			                          (ptr, size) => Marshal.ReAllocHGlobal(ptr, (IntPtr) size), 
+			Allocator = new Allocator(Marshal.AllocHGlobal,
+			                          (ptr, size) => Marshal.ReAllocHGlobal(ptr, (IntPtr) size),
 			                          Marshal.FreeHGlobal);
 		}
 
@@ -38,20 +42,18 @@ namespace RazorSharp.Memory
 
 		#endregion
 
-		#region Zero
 
-		public static void Zero<T>(ref T t)
+		/// <summary>
+		/// Zeros the memory of <paramref name="value"/>
+		/// </summary>
+		/// <param name="value">Value to zero</param>
+		/// <typeparam name="T">Type of <paramref name="value"/></typeparam>
+		public static void Clear<T>(ref T value)
 		{
-			Zero(Unsafe.AddressOf(ref t).Cast(), Unsafe.SizeOf<T>());
+			var ptr = Unsafe.AddressOf(ref value);
+			ptr.Clear();
 		}
 
-		public static void Zero(Pointer<byte> ptr, int length)
-		{
-			for (int i = 0; i < length; i++)
-				ptr[i] = default;
-		}
-
-		#endregion
 
 		#region Alloc / free
 
@@ -66,7 +68,7 @@ namespace RazorSharp.Memory
 			if (!RuntimeInfo.IsStruct(value)) {
 				int           size = Unsafe.SizeOf(value, SizeOfOptions.Data);
 				Pointer<byte> ptr  = Unsafe.AddressOfFields(ref value);
-				ptr.ZeroBytes(size);
+				ptr.ClearBytes(size);
 			}
 			else {
 				value = default;
@@ -78,12 +80,12 @@ namespace RazorSharp.Memory
 
 		#region Read / Write
 
-		internal static T ReadCurrentProcessMemory<T>(Pointer<byte> lpBaseAddress)
+		public static T ReadCurrentProcessMemory<T>(Pointer<byte> lpBaseAddress)
 		{
 			return ReadProcessMemory<T>(Process.GetCurrentProcess(), lpBaseAddress);
 		}
 
-		internal static T ReadProcessMemory<T>(Process proc, Pointer<byte> lpBaseAddress)
+		public static T ReadProcessMemory<T>(Process proc, Pointer<byte> lpBaseAddress)
 		{
 			T   t    = default;
 			int size = Unsafe.SizeOf<T>();
@@ -94,12 +96,12 @@ namespace RazorSharp.Memory
 			return t;
 		}
 
-		internal static void WriteCurrentProcessMemory<T>(Pointer<byte> lpBaseAddress, T value)
+		public static void WriteCurrentProcessMemory<T>(Pointer<byte> lpBaseAddress, T value)
 		{
 			WriteProcessMemory(Process.GetCurrentProcess(), lpBaseAddress, value);
 		}
 
-		internal static void WriteProcessMemory<T>(Process proc, Pointer<byte> lpBaseAddress, T value)
+		public static void WriteProcessMemory<T>(Process proc, Pointer<byte> lpBaseAddress, T value)
 		{
 			int dwSize = Unsafe.SizeOf<T>();
 			var ptr    = Unsafe.AddressOf(ref value);
@@ -108,7 +110,5 @@ namespace RazorSharp.Memory
 		}
 
 		#endregion
-
-		
 	}
 }

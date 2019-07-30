@@ -10,6 +10,8 @@ using RazorSharp.CoreClr.Metadata;
 using RazorSharp.Interop;
 using RazorSharp.Memory.Pointers;
 using SimpleSharp.Diagnostics;
+// ReSharper disable UnusedParameter.Global
+// ReSharper disable CommentTypo
 
 #endregion
 
@@ -23,7 +25,8 @@ namespace RazorSharp.Memory
 
 
 	/// <summary>
-	///     Provides utilities for manipulating pointers, memory, and types
+	///     Provides utilities for manipulating pointers, memory, and types. This class has CompilerServices's
+	/// 	Unsafe built in.
 	///     <seealso cref="BitConverter" />
 	///     <seealso cref="System.Convert" />
 	///     <seealso cref="MemoryMarshal" />
@@ -71,7 +74,7 @@ namespace RazorSharp.Memory
 		/// <summary>
 		///     <para>Returns the address of <paramref name="value" />.</para>
 		///     <remarks>
-		///         <para>Equals <see cref="Mem.AsPointer{T}" /></para>
+		///         <para>Equals <see cref="AsPointer{T}" /></para>
 		///     </remarks>
 		/// </summary>
 		/// <param name="value">Type to return the address of</param>
@@ -140,12 +143,10 @@ namespace RazorSharp.Memory
 		{
 			// It is already assumed value is a class type
 
-			var tr = __makeref(value);
-
 			// NOTE:
 			// Strings have their data offset by Offsets.OffsetToStringData
 			// Arrays have their data offset by IntPtr.Size * 2 bytes (may be different for 32 bit)
-			var heapPtr = **(IntPtr**) (&tr);
+			var heapPtr = *(IntPtr**) AddressOf(ref value);
 
 			switch (offset) {
 				case OffsetOptions.STRING_DATA:
@@ -380,8 +381,7 @@ namespace RazorSharp.Memory
 		private static int BaseSizeOfData(Type t)
 		{
 			if (((MetaType) t).IsStruct) {
-				return (int) Functions.CallGenericMethod(typeof(Unsafe), nameof(SizeOf),
-				                                                null, new[] {t});
+				return (int) Functions.CallGenericMethod(typeof(Unsafe).GetMethod(nameof(SizeOf)), t,  null);
 			}
 
 			// Subtract the size of the ObjHeader and MethodTable*

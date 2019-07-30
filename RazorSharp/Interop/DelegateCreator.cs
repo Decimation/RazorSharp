@@ -23,11 +23,11 @@ namespace RazorSharp.Interop
 		[ImportMap]
 		private static readonly Dictionary<string, Pointer<byte>> ImportMap;
 		
-		
-		[ImportCall("COMDelegate::ConvertToDelegate", IdentifierOptions.FullyQualified, CallOptions = ImportCallOptions.Map)]
+		[ImportForwardCall("COMDelegate", nameof(ConvertToDelegate), ImportCallOptions.Map)]
 		private static void* ConvertToDelegate(void* fn, void* mt)
 		{
-			return NativeFunctions.CallReturnPointer((void*) ImportMap[nameof(ConvertToDelegate)], fn, mt);
+			return NativeFunctions.CallReturnPointer((void*) ImportMap[nameof(ConvertToDelegate)], 
+			                                         fn, mt);
 		}
 		
 		public static Delegate CreateDelegateSafe(Pointer<byte> ptr, Type t)
@@ -49,7 +49,7 @@ namespace RazorSharp.Interop
 		/// <param name="ptr">Function pointer</param>
 		/// <param name="t"><see cref="Delegate" /> type</param>
 		/// <returns>A <see cref="Delegate" /> from <paramref name="ptr" /></returns>
-		public static unsafe Delegate CreateDelegate(Pointer<byte> ptr, Type t)
+		public static Delegate CreateDelegate(Pointer<byte> ptr, Type t)
 		{
 			MetaType mt = t;
 			return Conversions.ToObject<Delegate>(ConvertToDelegate(ptr.ToPointer(), mt.NativePointer));

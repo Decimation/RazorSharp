@@ -82,6 +82,7 @@ namespace RazorSharp
 
 		public override void Close()
 		{
+			
 			// Delete instance
 			Value = null;
 

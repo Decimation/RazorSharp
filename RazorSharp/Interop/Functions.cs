@@ -23,7 +23,6 @@ namespace RazorSharp.Interop
 	#endregion
 
 	
-	[ImportNamespace]
 	internal static class Functions
 	{
 		/// <summary>
@@ -98,24 +97,57 @@ namespace RazorSharp.Interop
 		/// <summary>
 		///     Executes a generic method
 		/// </summary>
-		/// <param name="t">Enclosing type</param>
-		/// <param name="name">Method name</param>
-		/// <param name="value">Instance of type <paramref name="t" />; <c>null</c> if the method is static</param>
+		/// <param name="method">Method to execute</param>
 		/// <param name="typeArgs">Generic type parameters</param>
+		/// <param name="value">Instance of type; <c>null</c> if the method is static</param>
 		/// <param name="args">Method arguments</param>
-		/// <returns>Return value of the method specified by <seealso cref="name" /></returns>
-		internal static object CallGenericMethod(Type   t,        string          name, object value,
-		                                         Type[] typeArgs, params object[] args)
+		/// <returns>Return value of the method specified by <paramref name="method"/></returns>
+		internal static object CallGenericMethod(MethodInfo      method,
+		                                         Type[]          typeArgs,
+		                                         object          value,
+		                                         params object[] args)
 		{
-			return t.GetAnyMethod(name).MakeGenericMethod(typeArgs).Invoke(value, args);
-		}
-
-		internal static object CallGenericMethod(MethodInfo      method, object value, 
-		                                         Type[] typeArgs, params object[] args)
-		{
+			
 			return method.MakeGenericMethod(typeArgs).Invoke(value, args);
 		}
 
+		internal static object CallGenericMethod(MethodInfo      method,
+		                                         Type            typeArg,
+		                                         object          value,
+		                                         params object[] args)
+		{
+			
+			return method.MakeGenericMethod(typeArg).Invoke(value, args);
+		}
+
 		#endregion
+
+		/// <summary>
+		///     Runs a constructor whose parameters match <paramref name="args" />
+		/// </summary>
+		/// <param name="value">Instance</param>
+		/// <param name="args">Constructor arguments</param>
+		/// <returns>
+		///     <c>true</c> if a matching constructor was found and executed;
+		///     <c>false</c> if a constructor couldn't be found
+		/// </returns>
+		internal static bool RunConstructor<T>(T value, params object[] args)
+		{
+			ConstructorInfo[] ctors    = value.GetType().GetConstructors();
+			Type[]            argTypes = args.Select(x => x.GetType()).ToArray();
+
+			foreach (var ctor in ctors) {
+				ParameterInfo[] paramz = ctor.GetParameters();
+
+				if (paramz.Length == args.Length) {
+					if (paramz.Select(x => x.ParameterType).SequenceEqual(argTypes)) {
+						ctor.Invoke(value, args);
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
 	}
 }

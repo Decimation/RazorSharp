@@ -8,6 +8,8 @@ using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Structures;
+using RazorSharp.Interop;
+using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 
@@ -28,23 +30,17 @@ namespace Test
 		// Common library: SimpleSharp
 		// Testing library: Sandbox
 
-
-		struct MyStruct
+		public static void Run<T>()
 		{
-			private int   a;
-			private short b;
+			Console.WriteLine(">> {0}",typeof(T));
 		}
-
-		class MyClass
-		{
-			public static string v = "foo";
-		}
-
+		
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
 			
-			Process p;
+			Run<int>();
+			Functions.CallGenericMethod(typeof(Program).GetMethod(nameof(Run)), typeof(int), null);
 		}
 	}
 }
