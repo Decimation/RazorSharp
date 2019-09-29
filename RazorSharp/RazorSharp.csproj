@@ -92,6 +92,7 @@
     <Compile Include="Analysis\IStructure.cs" />
     <Compile Include="Analysis\Inspect.cs" />
     <Compile Include="Analysis\InspectOptions.cs" />
+    <Compile Include="Analysis\ObjectGuide.cs" />
     <Compile Include="Analysis\ObjectInfo.cs" />
     <Compile Include="Analysis\PaddingField.cs" />
     <Compile Include="Clr.cs" />
@@ -153,10 +154,13 @@
     <Compile Include="Memory\OffsetOptions.cs" />
     <Compile Include="Memory\Pointers\Pointer.cs" />
     <Compile Include="Memory\Pointers\PointerSettings.cs" />
+    <Compile Include="Memory\Region.cs" />
+    <Compile Include="Memory\SigScanner.cs" />
     <Compile Include="Memory\SizeOfOptions.cs" />
     <Compile Include="Memory\Unsafe.cs" />
+    <Compile Include="Memory\Allocation.cs" />
     <Compile Include="Model\Allocator.cs" />
-    <Compile Include="Model\IClosable.cs" />
+    <Compile Include="Model\Closable.cs" />
     <Compile Include="Model\Releasable.cs" />
     <Compile Include="ModuleInitializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -164,7 +168,7 @@
     <Compile Include="Utilities\EnumUtil.cs" />
     <Compile Include="Utilities\Fixed\ObjectPinner.cs" />
     <Compile Include="Utilities\Fixed\PinHelper.cs" />
-    <Compile Include="Utilities\Modules.cs" />
+    <Compile Include="Utilities\ModuleUtil.cs" />
     <Compile Include="Utilities\Security\Exceptions\AmbiguousStateException.cs" />
     <Compile Include="Utilities\Security\Exceptions\ClrException.cs" />
     <Compile Include="Utilities\Security\Exceptions\CoreException.cs" />

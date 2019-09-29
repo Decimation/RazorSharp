@@ -23,6 +23,8 @@ namespace RazorSharp.Import
 	{
 		private const string CONTEXT = nameof(SymbolManager);
 
+		protected override string Id => CONTEXT;
+
 		private IntPtr       m_proc;
 		private ulong        m_modBase;
 		private string       m_singleNameBuffer;

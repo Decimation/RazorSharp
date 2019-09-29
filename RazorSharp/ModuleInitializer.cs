@@ -6,6 +6,7 @@ using RazorSharp.Import;
 using RazorSharp.Interop;
 using RazorSharp.Memory;
 using RazorSharp.Model;
+using SimpleSharp.Diagnostics;
 
 namespace RazorSharp
 {
@@ -36,12 +37,13 @@ namespace RazorSharp
 		/// <summary>
 		/// Core objects
 		/// </summary>
-		private static readonly Releasable[] CoreObjects =
+		private static readonly Closable[] CoreObjects =
 		{
 			Clr.Value,
 			SymbolManager.Value,
 			ImportManager.Value,
 			Global.Value,
+			Mem.Allocator
 		};
 
 		private static void Setup()
@@ -49,13 +51,15 @@ namespace RazorSharp
 			Global.Value.WriteInformation(CONTEXT, "Loading {Module}", Global.NAME);
 
 			// Init code
-			
+
 			// Original order: Clr, SymbolManager, Global
 
 			foreach (var core in CoreObjects) {
-				core.Setup();
+				if (core is Releasable releasable) {
+					releasable.Setup();
+				}
 			}
-			
+
 			ImportManager.Value.LoadAll(CoreClrTypes, Clr.Value.ClrSymbols);
 
 			IsSetup = true;
@@ -63,17 +67,17 @@ namespace RazorSharp
 
 		private static void Close()
 		{
+			Conditions.Require(IsSetup);
+			
 			// SHUT IT DOWN
 			Global.Value.WriteInformation(CONTEXT, "Unloading {Module}", Global.NAME);
-			
+
 			// Original order: Clr, Global, SymbolManager, Mem.Allocator
 
 			foreach (var core in CoreObjects) {
 				core.Close();
 			}
 
-			Mem.Allocator.Close();
-			
 			IsSetup = false;
 		}
 
@@ -88,7 +92,5 @@ namespace RazorSharp
 			var appDomain = AppDomain.CurrentDomain;
 			appDomain.ProcessExit += (sender, eventArgs) => { Close(); };
 		}
-
-		
 	}
 }

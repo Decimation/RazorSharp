@@ -21,6 +21,8 @@ namespace RazorSharp
 	{
 		private const string CONTEXT = nameof(Clr);
 
+		protected override string Id => CONTEXT;
+
 		/// <summary>
 		///     CLR DLL file
 		/// </summary>
@@ -47,6 +49,9 @@ namespace RazorSharp
 		///     <para>otherwise the symbol file will be automatically downloaded</para>
 		/// </summary>
 		internal FileInfo ClrPdb { get; }
+		
+		// symchk "C:\Windows\Microsoft.NET\Framework\v4.0.30319\clr.dll" /s SRV*C:\Users\Deci\Desktop\clr.pdb*http://msdl.microsoft.com/download/symbols
+		// symchk "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\clr.dll" /s SRV*C:\Users\Deci\Desktop\clr.pdb*http://msdl.microsoft.com/download/symbols
 
 		/// <summary>
 		///     CLR symbol file name
@@ -134,7 +139,7 @@ namespace RazorSharp
 		private Clr()
 		{
 			ClrDll     = GetClrDll();
-			ClrModule  = Modules.GetModule(CLR_DLL_SHORT);
+			ClrModule  = ModuleUtil.GetModule(CLR_DLL_SHORT);
 			ClrVersion = new Version(4, 0, 30319, 42000);
 
 			if (ClrPdb == null) {

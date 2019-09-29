@@ -36,6 +36,8 @@ namespace RazorSharp.Import
 
 		private const string IMPORT_MAP_NAME = "ImportMap";
 
+		protected override string Id => CONTEXT;
+
 		private static readonly string MapError =
 			$"Map must static, readonly, and of type {typeof(Dictionary<string, Pointer<byte>>)}";
 

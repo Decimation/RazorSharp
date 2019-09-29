@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using RazorSharp.Import;
 using SimpleSharp.Diagnostics;
 
@@ -33,24 +35,22 @@ namespace RazorSharp.Model
 	///         </item>
 	///     </list>
 	/// </summary>
-	public abstract class Releasable : IClosable
+	public abstract class Releasable : Closable
 	{
 		public bool IsSetup { get; protected set; }
-
-		public Releasable()
-		{
-			
-		}
+		
+		public Releasable() { }
 
 		public virtual void Setup()
 		{
 			IsSetup = true;
 		}
 
-		public virtual void Close()
+		public override void Close()
 		{
 			Conditions.Require(IsSetup, nameof(IsSetup));
 			IsSetup = false;
+			base.Close();
 		}
 	}
 }

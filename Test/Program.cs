@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
@@ -32,26 +33,15 @@ namespace Test
 		// Common library: SimpleSharp
 		// Testing library: Sandbox
 
-		struct MyStruct
-		{
-			private int i;
-			private byte b;
-			private short s;
-		}
-
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			MetaType mt = typeof(int);
-			
-			var   i  = 1;
-			var ms = new MyStruct();
-			
-			
-			
-			var oi = Inspect.Scan(ms, InspectOptions.Fields | InspectOptions.MemoryFields 
-			                                                | InspectOptions.Values | InspectOptions.Padding);
-			oi.Dump();
+			Global.Value.WriteDebug("g", "hi!");
+
+			var rField = typeof(string).GetAnyField("m_firstChar");
+			var mField = (MetaField) rField;
+
+			Console.WriteLine(mField);
 		}
 	}
 }

@@ -16,10 +16,6 @@ using SimpleSharp.Utilities;
 
 namespace RazorSharp.Memory.Pointers
 {
-	
-
-	
-
 	/// <summary>
 	///     <para>Represents a native pointer. Equals the size of <see cref="P:System.IntPtr.Size" />.</para>
 	///     <para>Can be represented as a native pointer in memory. </para>
@@ -172,7 +168,7 @@ namespace RazorSharp.Memory.Pointers
 		{
 			return Cast<Pointer<TType>>().Read(elemOffset);
 		}
-		
+
 		public void WritePointer<TType>(Pointer<TType> ptr, int elemOffset = 0)
 		{
 			Cast<Pointer<TType>>().Write(ptr, elemOffset);
@@ -325,7 +321,7 @@ namespace RazorSharp.Memory.Pointers
 			for (int i = 0; i < elemCnt; i++)
 				this[i] = default;
 		}
-		
+
 		/// <summary>
 		/// Zeros <paramref name="byteCnt"/> bytes.
 		/// </summary>

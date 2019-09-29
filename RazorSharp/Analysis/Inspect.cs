@@ -5,15 +5,11 @@ namespace RazorSharp.Analysis
 {
 	public static class Inspect
 	{
-		public static ObjectInfo Scan<T>(T value, InspectOptions options)
+		public static ObjectInfo Scan<T>(ref T value, InspectOptions options)
 		{
 			var info = Scan(value.GetType(), options);
 
-			info.Value = value;
-
-			if (options.HasFlagFast(InspectOptions.MemoryFields)) {
-				info.WithMemoryFields();
-			}
+			info.Update(ref value);
 
 			return info;
 		}
@@ -22,13 +18,7 @@ namespace RazorSharp.Analysis
 		{
 			var info = new ObjectInfo(t, options);
 
-			if (options.HasFlagFast(InspectOptions.Fields)) {
-				info.WithFields();
-			}
-
-			if (options.HasFlagFast(InspectOptions.Padding)) {
-				info.WithPaddingFields();
-			}
+			info.Update();
 
 			return info;
 		}

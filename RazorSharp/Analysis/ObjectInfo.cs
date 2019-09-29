@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using RazorSharp.CoreClr;
@@ -10,6 +11,7 @@ using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Security;
 using SimpleSharp.Diagnostics;
+
 // ReSharper disable ReturnTypeCanBeEnumerable.Local
 
 namespace RazorSharp.Analysis
@@ -22,7 +24,7 @@ namespace RazorSharp.Analysis
 
 		public MetaType Type { get; }
 
-		public object Value {
+		private object Value {
 			get => m_value;
 			set {
 				if (value.GetType() != Type || value == null) {
@@ -33,42 +35,74 @@ namespace RazorSharp.Analysis
 			}
 		}
 
-		public Pointer<byte> Address { get; private set; }
+		private Pointer<byte> Address { get; set; }
 
 		private InspectOptions Options { get; }
+
+		private InspectOptions Completed { get; set; }
+
+		private bool HasValue => Value != null;
+
+		private ObjectGuide[] m_guides;
 
 
 		internal ObjectInfo(MetaType t, InspectOptions options)
 		{
+			if (options.HasFlagFast(InspectOptions.None)) {
+				throw new ArgumentException();
+			}
+			
 			Type    = t;
 			Options = options;
 		}
 
-		private ObjectInfo Copy()
+		private void HandleOption(InspectOptions options, Action fn)
 		{
-			var info = new ObjectInfo(Type, Options)
-			{
-				Address    = Address,
-				Structures = Structures,
-				Value      = Value
-			};
-			return info;
+			if (Options.HasFlagFast(options) && !Completed.HasFlagFast(options)) {
+				fn();
+				Completed |= options;
+			}
 		}
 
-		internal ObjectInfo WithFields()
+		internal ObjectInfo Update<T>(ref T t)
 		{
-			var fields = Type.Fields.Where(f => !f.IsStatic).ToArray();
+			Update();
+			
+			Value = t;
+			Address = Unsafe.AddressOf(ref t).Cast();
+			
+			foreach (var objectGuide in m_guides) {
+				objectGuide.Update(ref t);
+			}
 
-			var structures = new List<IStructure>(fields.Length);
+			return this;
+		}
+		
+		internal ObjectInfo Update()
+		{
+			if (HasValue) {
+				HandleOption(InspectOptions.MemoryFields, AddMemoryFields);
+			}
 
-			structures.AddRange(fields);
+			HandleOption(InspectOptions.Fields, AddFields);
 
-			Structures = structures.ToArray();
+			HandleOption(InspectOptions.Padding, AddPaddingFields);
+
+			m_guides = BuildGuides();
 
 			return this;
 		}
 
-		internal ObjectInfo WithMemoryFields()
+		private void AddFields()
+		{
+			var fields = Type.Fields.Where(f => !f.IsStatic).ToArray();
+
+			var structures = new List<IStructure>(fields.Length);
+			structures.AddRange(fields);
+			Structures = structures.ToArray();
+		}
+
+		private void AddMemoryFields()
 		{
 			var structures = new List<IStructure>();
 
@@ -77,7 +111,7 @@ namespace RazorSharp.Analysis
 
 				if (Type.IsString) {
 					string s = m_value as string;
-				
+
 					// ReSharper disable once AssignNullToNotNullAttribute
 					array = s.ToArray();
 				}
@@ -92,38 +126,24 @@ namespace RazorSharp.Analysis
 					}
 				}
 
+				// ReSharper disable once PossibleNullReferenceException
 				for (int i = 0; i < array.Length; i++) {
 					structures.Add(new ComponentField(Type, i));
 				}
 			}
-			
 
 
 			// We assume that fields are already added
 			var buf = Structures.ToList();
 			buf.AddRange(structures);
 			Structures = buf.ToArray();
-
-			return this;
 		}
 
-		internal ObjectInfo WithPaddingFields()
+		private void AddPaddingFields()
 		{
-			var padding = GetPadding();
-			
-			// We assume that fields are already added
-			var buf = Structures.ToList();
-			buf.AddRange(padding);
-			Structures = buf.OrderBy(f=>f.Offset).ToArray();
-			
-			return this;
-		}
-		
-		private MemoryField[] GetPadding()
-		{
-			var padding = new List<MemoryField>();
+			var padding          = new List<MemoryField>();
 			var nextOffsetOrSize = Type.InstanceFieldsSize;
-			var memFields        = Type.Fields.Where(f=>!f.IsStatic).ToArray();
+			var memFields        = Type.Fields.Where(f => !f.IsStatic).ToArray();
 
 			for (int i = 0; i < memFields.Length; i++) {
 				// start padding
@@ -143,24 +163,28 @@ namespace RazorSharp.Analysis
 				// end padding
 			}
 
-			return padding.ToArray();
+
+			// We assume that fields are already added
+			var buf = Structures.ToList();
+			buf.AddRange(padding);
+			Structures = buf.OrderBy(f => f.Offset).ToArray();
 		}
 
 
+		private ObjectGuide[] BuildGuides()
+		{
+			var dumps = new ObjectGuide[Structures.Length];
+			for (int i = 0; i < dumps.Length; i++) {
+				dumps[i] = new ObjectGuide(Structures[i], Options);
+			}
+
+			return dumps;
+		}
+
 		public void Dump()
 		{
-			foreach (var structure in Structures) {
-				var sb = new StringBuilder();
-				sb.AppendFormat("Name: {0} | ", structure.Name)
-				  .AppendFormat("Offset: {0} | ", structure.Offset)
-				  .AppendFormat("Size: {0}", structure.Size);
-
-				if (Options.HasFlagFast(InspectOptions.Values)) {
-					sb.AppendFormat(" | Value: {0}", structure.GetValue(m_value));
-				}
-
-
-				Console.WriteLine(sb);
+			foreach (var structure in m_guides) {
+				Console.WriteLine(structure);
 			}
 		}
 

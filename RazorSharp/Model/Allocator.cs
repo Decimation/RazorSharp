@@ -7,9 +7,9 @@ using SimpleSharp.Diagnostics;
 namespace RazorSharp.Model
 {
 	/// <summary>
-	/// Describes a type that allocates memory or resources.
+	/// Allocates memory or resources.
 	/// </summary>
-	public class Allocator : IClosable
+	public class Allocator : Closable
 	{
 		/// <summary>
 		///     Counts the number of allocations (allocated pointers)
@@ -19,12 +19,14 @@ namespace RazorSharp.Model
 		public bool IsMemoryInUse => AllocCount > 0;
 
 		private readonly List<Pointer<byte>> m_pointers;
+
+		protected override string Id => "Allocator";
 		
-		public delegate IntPtr AllocFunction(int size);
+		public delegate Pointer<byte> AllocFunction(int size);
 
-		public delegate IntPtr ReAllocFunction(IntPtr p, int size);
+		public delegate Pointer<byte> ReAllocFunction(Pointer<byte> p, int size);
 
-		public delegate void FreeFunction(IntPtr p);
+		public delegate void FreeFunction(Pointer<byte> p);
 
 		private readonly AllocFunction m_alloc;
 
@@ -88,11 +90,13 @@ namespace RazorSharp.Model
 			return String.Format("Number of allocations: {0}", AllocCount);
 		}
 
-		public void Close()
+		public override void Close()
 		{
 			foreach (Pointer<byte> pointer in m_pointers) {
 				Free(pointer);
 			}
+			
+			base.Close();
 		}
 	}
 }

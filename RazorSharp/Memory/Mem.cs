@@ -28,9 +28,9 @@ namespace RazorSharp.Memory
 
 		static Mem()
 		{
-			Allocator = new Allocator(Marshal.AllocHGlobal,
-			                          (ptr, size) => Marshal.ReAllocHGlobal(ptr, (IntPtr) size),
-			                          Marshal.FreeHGlobal);
+			Allocator = new Allocator(Allocation.AllocHGlobal, 
+			                          Allocation.ReAllocHGlobal, 
+			                          Allocation.FreeHGlobal);
 		}
 
 		#region Calculation
@@ -58,8 +58,8 @@ namespace RazorSharp.Memory
 		#region Alloc / free
 
 		/// <summary>
-		/// A <see cref="Allocator"/> using <see cref="Marshal.AllocHGlobal(int)"/>,
-		/// <see cref="Marshal.ReAllocHGlobal"/>, and <see cref="Marshal.FreeHGlobal"/>
+		/// A <see cref="Allocator"/> using <see cref="Allocation.AllocHGlobal(int)"/>,
+		/// <see cref="Allocation.ReAllocHGlobal"/>, and <see cref="Allocation.FreeHGlobal"/>
 		/// </summary>
 		public static Allocator Allocator { get; }
 

@@ -2,6 +2,7 @@ using RazorSharp.Memory.Pointers;
 
 namespace RazorSharp.Analysis
 {
+	
 	public interface IStructure
 	{
 		string Name { get; }
