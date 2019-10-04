@@ -6,7 +6,6 @@ using RazorSharp.CoreClr.Metadata;
 using RazorSharp.CoreClr.Metadata.Enums;
 using RazorSharp.CoreClr.Metadata.ExecutionEngine;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Reflection;
 using RazorSharp.Utilities;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
@@ -139,7 +138,7 @@ namespace RazorSharp.CoreClr.Meta
 
 		public MethodTableFlags2 Flags2 => Value.Reference.Flags2;
 
-		public override int Token => TokenUtil.TokenFromRid(Value.Reference.RawToken, CorTokenType.TypeDef);
+		public override int Token => TokenHelper.TokenFromRid(Value.Reference.RawToken, CorTokenType.TypeDef);
 
 		public short VirtualsCount => Value.Reference.NumVirtuals;
 

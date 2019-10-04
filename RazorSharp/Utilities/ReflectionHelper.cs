@@ -4,12 +4,12 @@ using System.Reflection;
 
 // ReSharper disable ReturnTypeCanBeEnumerable.Global
 
-namespace RazorSharp.Reflection
+namespace RazorSharp.Utilities
 {
 	/// <summary>
 	/// Provides utilities for accessing members of a type.
 	/// </summary>
-	internal static class Access
+	internal static class ReflectionHelper
 	{
 		#region Flags
 
@@ -59,13 +59,13 @@ namespace RazorSharp.Reflection
 		internal static (MemberInfo, TAttribute) GetFirstAnnotated<TAttribute>(this Type t)
 			where TAttribute : Attribute
 		{
-			var rg = t.GetAnnotated<TAttribute>();
+			(MemberInfo[] memberInfos, TAttribute[] attributes) = t.GetAnnotated<TAttribute>();
 
-			if (rg.Item1.Length == default || rg.Item2.Length == default) {
+			if (memberInfos.Length == default || attributes.Length == default) {
 				return (null, null);
 			}
 
-			return (rg.Item1[0], rg.Item2[0]);
+			return (memberInfos[0], attributes[0]);
 		}
 
 		internal static (MemberInfo[], TAttribute[]) GetAnnotated<TAttribute>(this Type t)

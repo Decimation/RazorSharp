@@ -52,7 +52,7 @@ namespace RazorSharp.Interop
 		public static Delegate CreateDelegate(Pointer<byte> ptr, Type t)
 		{
 			MetaType mt = t;
-			return Conversions.ToObject<Delegate>(ConvertToDelegate(ptr.ToPointer(), mt.NativePointer));
+			return Converter.ToObject<Delegate>(ConvertToDelegate(ptr.ToPointer(), mt.NativePointer));
 		}
 
 		/// <summary>

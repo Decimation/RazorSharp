@@ -7,6 +7,7 @@ using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Metadata.Enums;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Components;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Security;

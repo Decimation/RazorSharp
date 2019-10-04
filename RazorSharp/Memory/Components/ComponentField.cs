@@ -2,7 +2,7 @@ using System;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 
-namespace RazorSharp.Analysis
+namespace RazorSharp.Memory.Components
 {
 	/// <summary>
 	/// Describes the component the <see cref="ComponentField"/> represents

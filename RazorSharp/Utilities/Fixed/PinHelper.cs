@@ -1,5 +1,6 @@
 using JetBrains.Annotations;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Enums;
 
 // ReSharper disable ClassCannotBeInstantiated
 
@@ -29,7 +30,7 @@ namespace RazorSharp.Utilities.Fixed
 		///  </code>
 		///     <remarks>
 		///         <para><c>pData</c> is what <c>Object::GetData()</c> returns in VM.</para>
-		///         <para><c>pData</c> is also equal to offsetting the pointer by <see cref="OffsetOptions.FIELDS" />. </para>
+		///         <para><c>pData</c> is also equal to offsetting the pointer by <see cref="OffsetOptions.Fields" />. </para>
 		///         <para>From <see cref="System.Runtime.CompilerServices.JitHelpers" />. </para>
 		///     </remarks>
 		/// </summary>
@@ -37,7 +38,7 @@ namespace RazorSharp.Utilities.Fixed
 		public sealed class PinningHelper
 		{
 			/// <summary>
-			///     Represents the first field in an object, such as <see cref="OffsetOptions.FIELDS" />.
+			///     Represents the first field in an object, such as <see cref="OffsetOptions.Fields" />.
 			/// </summary>
 			public byte Data;
 

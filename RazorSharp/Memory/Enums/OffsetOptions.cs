@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Metadata;
 
-namespace RazorSharp.Memory
+namespace RazorSharp.Memory.Enums
 {
 	/// <summary>
 	///     Offset options for <see cref="Unsafe.AddressOfHeap{T}(T,OffsetOptions)" />
@@ -14,7 +14,7 @@ namespace RazorSharp.Memory
 		///     Return the pointer offset by <c>-</c><see cref="IntPtr.Size" />,
 		///     so it points to the object's <see cref="ObjHeader" />.
 		/// </summary>
-		HEADER,
+		Header,
 
 		/// <summary>
 		///     If the type is a <see cref="string" />, return the
@@ -24,7 +24,7 @@ namespace RazorSharp.Memory
 		///         Note: Equal to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>.
 		///     </remarks>
 		/// </summary>
-		STRING_DATA,
+		StringData,
 
 		/// <summary>
 		///     If the type is an array, return
@@ -34,19 +34,19 @@ namespace RazorSharp.Memory
 		///         Note: Equal to <see cref="GCHandle.AddrOfPinnedObject" /> and <c>fixed</c>
 		///     </remarks>
 		/// </summary>
-		ARRAY_DATA,
+		ArrayData,
 
 		/// <summary>
 		///     If the type is a reference type, return
 		///     the pointer offset by <see cref="IntPtr.Size" /> so it points
 		///     to the object's fields.
 		/// </summary>
-		FIELDS,
+		Fields,
 
 		/// <summary>
 		///     Don't offset the heap pointer at all, so it
 		///     points to the <see cref="TypeHandle"/>
 		/// </summary>
-		NONE
+		None
 	}
 }

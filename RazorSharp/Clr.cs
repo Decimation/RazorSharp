@@ -139,7 +139,7 @@ namespace RazorSharp
 		private Clr()
 		{
 			ClrDll     = GetClrDll();
-			ClrModule  = ModuleUtil.GetModule(CLR_DLL_SHORT);
+			ClrModule  = ModuleHelper.GetModule(CLR_DLL_SHORT);
 			ClrVersion = new Version(4, 0, 30319, 42000);
 
 			if (ClrPdb == null) {

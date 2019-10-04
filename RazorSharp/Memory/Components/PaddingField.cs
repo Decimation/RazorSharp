@@ -1,4 +1,4 @@
-namespace RazorSharp.Analysis
+namespace RazorSharp.Memory.Components
 {
 	/// <summary>
 	/// Represents padding in memory.

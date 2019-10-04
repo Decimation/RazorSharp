@@ -4,6 +4,7 @@ using System;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Metadata;
 using RazorSharp.Interop;
+using RazorSharp.Memory.Enums;
 using RazorSharp.Memory.Pointers;
 
 #endregion
@@ -15,31 +16,10 @@ namespace RazorSharp.Memory
 	#endregion
 
 	/// <summary>
-	/// Specifies how a value will be converted
-	/// </summary>
-	public enum ConversionType
-	{
-		/// <summary>
-		///     Reinterprets a value as a value of the specified conversion type
-		/// </summary>
-		Reinterpret,
-
-		/// <summary>
-		/// <see cref="System.Convert.ChangeType(object,Type)"/>
-		/// </summary>
-		Normal,
-
-		/// <summary>
-		/// <see cref="Unsafe.As{T,T}"/>
-		/// </summary>
-		Proxy
-	}
-
-	/// <summary>
 	/// <seealso cref="System.Convert"/>
 	/// <seealso cref="BitConverter"/>
 	/// </summary>
-	public static unsafe class Conversions
+	public static unsafe class Converter
 	{
 		public static T ToObject<T>(Pointer<byte> ptr)
 		{
@@ -107,8 +87,8 @@ namespace RazorSharp.Memory
 
 		public static object AllocRaw(byte[] mem, Type type)
 		{
-			return Functions.CallGenericMethod(typeof(Conversions).GetMethod(nameof(AllocRaw)), 
-			                                   type, null , mem);
+			return Functions.CallGenericMethod(typeof(Converter).GetMethod(nameof(AllocRaw)),
+			                                   type, null, mem);
 		}
 	}
 }

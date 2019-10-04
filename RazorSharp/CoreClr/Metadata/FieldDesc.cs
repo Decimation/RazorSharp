@@ -6,6 +6,7 @@ using RazorSharp.Import.Enums;
 using RazorSharp.Interop;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Utilities;
 
 // ReSharper disable UnassignedGetOnlyAutoProperty
 // ReSharper disable InconsistentNaming
@@ -48,17 +49,17 @@ namespace RazorSharp.CoreClr.Metadata
 
 		#region Calculated values
 
-		private bool RequiresFullMBValue => Bits.ReadBit(Dword1, 31);
+		private bool RequiresFullMBValue => BinaryHelper.ReadBit(Dword1, 31);
 
 		internal int Token {
 			get {
 				var rawToken = (int) (Dword1 & 0xFFFFFF);
 				// Check if this FieldDesc is using the packed mb layout
 				if (!RequiresFullMBValue)
-					return TokenUtil.TokenFromRid(rawToken & (int) MbMask.PackedMbLayoutMbMask,
+					return TokenHelper.TokenFromRid(rawToken & (int) MbMask.PackedMbLayoutMbMask,
 					                              CorTokenType.FieldDef);
 
-				return TokenUtil.TokenFromRid(rawToken, CorTokenType.FieldDef);
+				return TokenHelper.TokenFromRid(rawToken, CorTokenType.FieldDef);
 			}
 		}
 
@@ -71,13 +72,13 @@ namespace RazorSharp.CoreClr.Metadata
 		internal bool IsPointer => CorType == CorElementType.Ptr;
 
 
-		internal bool IsStatic => Bits.ReadBit(Dword1, 24);
+		internal bool IsStatic => BinaryHelper.ReadBit(Dword1, 24);
 
 
-		internal bool IsThreadLocal => Bits.ReadBit(Dword1, 25);
+		internal bool IsThreadLocal => BinaryHelper.ReadBit(Dword1, 25);
 
 
-		internal bool IsRVA => Bits.ReadBit(Dword1, 26);
+		internal bool IsRVA => BinaryHelper.ReadBit(Dword1, 26);
 
 		#endregion
 

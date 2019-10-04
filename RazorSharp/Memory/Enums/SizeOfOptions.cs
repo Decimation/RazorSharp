@@ -5,10 +5,8 @@ using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Metadata;
 using RazorSharp.CoreClr.Metadata.ExecutionEngine;
 
-namespace RazorSharp.Memory
+namespace RazorSharp.Memory.Enums
 {
-	
-	
 	/// <summary>
 	/// Specifies how sizes are calculated
 	/// </summary>
@@ -25,7 +23,7 @@ namespace RazorSharp.Memory
 		/// </remarks>
 		/// <returns>The native size if the type has a native representation; <see cref="Constants.INVALID_VALUE" /> otherwise</returns>
 		Native,
-		
+
 		/// <summary>
 		///     Returns the managed size of an object.
 		/// </summary>
@@ -38,8 +36,8 @@ namespace RazorSharp.Memory
 		///     otherwise
 		/// </returns>
 		Managed,
-		
-		
+
+
 		/// <summary>
 		///     <para>Returns the normal size of a type in memory.</para>
 		///     <para>Call to <see cref="Unsafe.SizeOf{T}()" /></para>
@@ -49,7 +47,7 @@ namespace RazorSharp.Memory
 		/// </remarks>
 		/// <returns><see cref="IntPtr.Size" /> for reference types, size for value types</returns>
 		Intrinsic,
-		
+
 		/// <summary>
 		///     <para>Returns the base size of the fields (data) in the heap.</para>
 		///     <para>This follows the formula of:</para>
@@ -72,7 +70,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		/// <returns><see cref="Offsets.MinObjectSize" /> if type is an array, fields size otherwise</returns>
 		BaseFields,
-		
+
 		/// <summary>
 		///     <para>Returns the base instance size according to the TypeHandle (<c>MethodTable</c>).</para>
 		///     <para>This is the minimum heap size of a type.</para>
@@ -86,7 +84,7 @@ namespace RazorSharp.Memory
 		///     <see cref="MetaType.BaseSize" />
 		/// </returns>
 		BaseInstance,
-		
+
 		/// <summary>
 		///     <para>Calculates the complete size of a reference type in heap memory.</para>
 		///     <para>This is the most accurate size calculation.</para>
@@ -126,18 +124,17 @@ namespace RazorSharp.Memory
 		///     reference type, this is equal to <see cref="Heap"/>.
 		/// </summary>
 		Auto,
-		
+
 		/// <summary>
 		/// Requires a value.
 		/// <para><see cref="Unsafe.SizeOfData{T}"/></para>
 		/// </summary>
 		Data,
-		
+
 		/// <summary>
 		/// Does not require a value.
 		/// <para><see cref="Unsafe.BaseSizeOfData"/></para>
 		/// </summary>
 		BaseData,
-		
 	}
 }

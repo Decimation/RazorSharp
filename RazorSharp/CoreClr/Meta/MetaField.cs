@@ -5,6 +5,7 @@ using RazorSharp.CoreClr.Meta.Base;
 using RazorSharp.CoreClr.Metadata;
 using RazorSharp.CoreClr.Metadata.Enums;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Components;
 using RazorSharp.Memory.Pointers;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;

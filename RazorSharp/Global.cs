@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Text;
+using JetBrains.Annotations;
 using RazorSharp.Model;
 using Serilog;
 using Serilog.Context;
@@ -44,7 +45,7 @@ namespace RazorSharp
 		/// </summary>
 		internal const string NAME = "RazorSharp";
 
-		protected override string Id => "Global";
+		protected override string Id => nameof(Global);
 
 		#region Singleton
 
@@ -73,8 +74,20 @@ namespace RazorSharp
 
 		#endregion
 
+		#region Debug logger
 
-		#region Logger extensions
+		private const string FORMAT_PARAM = "msg";
+
+		[StringFormatMethod(FORMAT_PARAM)]
+		internal static void WriteLine(string msg, params object[] args)
+		{
+			Debug.WriteLine(msg, args: args);
+		}
+
+		#endregion
+		
+
+		#region Serilog logger extensions
 #if DEBUG
 		/**
 		 * Note: be careful with the logger, as Serilog is only used in debug, and isn't included in
@@ -87,10 +100,6 @@ namespace RazorSharp
 			SuppressLogger();
 			Console.Clear();
 		}
-
-
-
-		
 
 		[Conditional(COND_DEBUG)]
 		internal void SuppressLogger()

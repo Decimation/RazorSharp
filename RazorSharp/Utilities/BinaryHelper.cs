@@ -1,8 +1,8 @@
 using System.Runtime.CompilerServices;
 
-namespace RazorSharp.Memory
+namespace RazorSharp.Utilities
 {
-	internal static class Bits
+	internal static class BinaryHelper
 	{
 		/// <summary>
 		///     Reads <paramref name="bitCount" /> from <paramref name="value" /> at offset <paramref name="bitOfs" />

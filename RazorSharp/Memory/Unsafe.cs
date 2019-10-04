@@ -8,8 +8,10 @@ using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Metadata;
 using RazorSharp.Interop;
+using RazorSharp.Memory.Enums;
 using RazorSharp.Memory.Pointers;
 using SimpleSharp.Diagnostics;
+
 // ReSharper disable UnusedParameter.Global
 // ReSharper disable CommentTypo
 
@@ -19,11 +21,6 @@ using SimpleSharp.Diagnostics;
 
 namespace RazorSharp.Memory
 {
-	#region
-
-	#endregion
-
-
 	/// <summary>
 	///     Provides utilities for manipulating pointers, memory, and types. This class has CompilerServices's
 	/// 	Unsafe built in.
@@ -34,7 +31,6 @@ namespace RazorSharp.Memory
 	///     <seealso cref="Span{T}" />
 	///     <seealso cref="Memory{T}" />
 	///     <seealso cref="Buffer" />
-	///     <seealso cref="Mem" />
 	///     <seealso cref="System.Runtime.CompilerServices.JitHelpers" />
 	///     <seealso cref="Mem" />
 	/// </summary>
@@ -45,7 +41,7 @@ namespace RazorSharp.Memory
 		public static T UnboxRaw<T>(object value) where T : struct
 		{
 			lock (value) {
-				Pointer<byte> addr = AddressOfHeap(value, OffsetOptions.FIELDS);
+				Pointer<byte> addr = AddressOfHeap(value, OffsetOptions.Fields);
 				return addr.Cast<T>().Read();
 			}
 		}
@@ -91,7 +87,7 @@ namespace RazorSharp.Memory
 		///     Returns the address of the data of <paramref name="value"/>. If <typeparamref name="T" /> is a value type,
 		///     this will return <see cref="AddressOf{T}" />. If <typeparamref name="T" /> is a reference type,
 		///     this will return the equivalent of <see cref="AddressOfHeap{T}(T, OffsetOptions)" /> with
-		///     <see cref="OffsetOptions.FIELDS" />.
+		///     <see cref="OffsetOptions.Fields" />.
 		/// </summary>
 		public static Pointer<byte> AddressOfFields<T>(ref T value)
 		{
@@ -101,7 +97,7 @@ namespace RazorSharp.Memory
 				return addr.Cast();
 			}
 
-			return AddressOfHeapInternal(value, OffsetOptions.FIELDS);
+			return AddressOfHeapInternal(value, OffsetOptions.Fields);
 		}
 
 		public static bool TryGetAddressOfHeap<T>(T value, OffsetOptions options, out Pointer<byte> ptr)
@@ -117,7 +113,7 @@ namespace RazorSharp.Memory
 
 		public static bool TryGetAddressOfHeap<T>(T value, out Pointer<byte> ptr)
 		{
-			return TryGetAddressOfHeap(value, OffsetOptions.NONE, out ptr);
+			return TryGetAddressOfHeap(value, OffsetOptions.None, out ptr);
 		}
 
 		/// <summary>
@@ -136,7 +132,7 @@ namespace RazorSharp.Memory
 		/// <returns>The address of <paramref name="value" /></returns>
 		/// <exception cref="ArgumentOutOfRangeException">If <paramref name="offset"></paramref> is out of range.</exception>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static Pointer<byte> AddressOfHeap<T>(T value, OffsetOptions offset = OffsetOptions.NONE) where T : class
+		public static Pointer<byte> AddressOfHeap<T>(T value, OffsetOptions offset = OffsetOptions.None) where T : class
 			=> AddressOfHeapInternal(value, offset);
 
 		private static Pointer<byte> AddressOfHeapInternal<T>(T value, OffsetOptions offset)
@@ -147,28 +143,28 @@ namespace RazorSharp.Memory
 			//var heapPtr = **(IntPtr**) (&tr);
 
 			var heapPtr = AddressOf(ref value).ReadPointer();
-			
-			
+
+
 			// NOTE:
 			// Strings have their data offset by Offsets.OffsetToStringData
 			// Arrays have their data offset by IntPtr.Size * 2 bytes (may be different for 32 bit)
-			
+
 
 			switch (offset) {
-				case OffsetOptions.STRING_DATA:
+				case OffsetOptions.StringData:
 				{
 					Conditions.Require(RuntimeInfo.IsString(value));
 					string s = value as string;
 					return heapPtr + Offsets.OffsetToStringData;
 				}
 
-				case OffsetOptions.ARRAY_DATA:
+				case OffsetOptions.ArrayData:
 				{
 					Conditions.Require(RuntimeInfo.IsArray(value));
 					return heapPtr + Offsets.OffsetToArrayData;
 				}
 
-				case OffsetOptions.FIELDS:
+				case OffsetOptions.Fields:
 				{
 					// todo: if the type is an array, should this return ArrayData, ...and if it's a string,
 					// ... should this return StringData?
@@ -177,10 +173,10 @@ namespace RazorSharp.Memory
 					return heapPtr + Offsets.OffsetToData;
 				}
 
-				case OffsetOptions.NONE:
+				case OffsetOptions.None:
 					return heapPtr;
 
-				case OffsetOptions.HEADER:
+				case OffsetOptions.Header:
 					return heapPtr - Offsets.OffsetToData;
 				default:
 					throw new ArgumentOutOfRangeException(nameof(offset), offset, null);
@@ -208,7 +204,7 @@ namespace RazorSharp.Memory
 			// If a value was supplied
 			if (!RuntimeInfo.IsNil(value)) {
 				mt = new MetaType(value.GetType());
-				
+
 				switch (options) {
 					case SizeOfOptions.BaseFields:   return mt.InstanceFieldsSize;
 					case SizeOfOptions.BaseInstance: return mt.BaseSize;
@@ -387,7 +383,7 @@ namespace RazorSharp.Memory
 		private static int BaseSizeOfData(Type t)
 		{
 			if (((MetaType) t).IsStruct) {
-				return (int) Functions.CallGenericMethod(typeof(Unsafe).GetMethod(nameof(SizeOf)), t,  null);
+				return (int) Functions.CallGenericMethod(typeof(Unsafe).GetMethod(nameof(SizeOf)), t, null);
 			}
 
 			// Subtract the size of the ObjHeader and MethodTable*
@@ -412,7 +408,7 @@ namespace RazorSharp.Memory
 		public static byte[] MemoryOf<T>(T value) where T : class
 		{
 			// Need to include the ObjHeader
-			Pointer<T> ptr = AddressOfHeap(value, OffsetOptions.HEADER);
+			Pointer<T> ptr = AddressOfHeap(value, OffsetOptions.Header);
 			return ptr.Cast().Copy(HeapSize(value));
 		}
 
@@ -435,12 +431,12 @@ namespace RazorSharp.Memory
 			var fields    = new byte[fieldSize];
 
 			// Skip over the MethodTable*
-			Marshal.Copy(AddressOfHeap(value, OffsetOptions.FIELDS).Address, fields, 0, fieldSize);
+			Marshal.Copy(AddressOfHeap(value, OffsetOptions.Fields).Address, fields, 0, fieldSize);
 			return fields;
 		}
 
 		#endregion
-		
+
 		#region Unsafe
 
 		// https://github.com/ltrzesniewski/InlineIL.Fody/blob/master/src/InlineIL.Examples/Unsafe.cs

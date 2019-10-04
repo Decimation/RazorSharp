@@ -1,6 +1,6 @@
 using RazorSharp.Memory.Pointers;
 
-namespace RazorSharp.Analysis
+namespace RazorSharp.Memory.Components
 {
 	
 	public interface IStructure

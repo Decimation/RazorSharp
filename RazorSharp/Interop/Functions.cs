@@ -8,7 +8,6 @@ using System.Reflection;
 using NativeSharp.Kernel;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Reflection;
 
 // ReSharper disable SuggestBaseTypeForParameter
 

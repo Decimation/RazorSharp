@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using NativeSharp.Kernel;
 using RazorSharp.CoreClr;
+using RazorSharp.Memory.Allocation;
+using RazorSharp.Memory.Enums;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Model;
 
@@ -28,17 +30,12 @@ namespace RazorSharp.Memory
 
 		static Mem()
 		{
-			Allocator = new Allocator(Allocation.AllocHGlobal, 
-			                          Allocation.ReAllocHGlobal, 
-			                          Allocation.FreeHGlobal);
+			Allocator = new AllocationManager(Allocators.Local);
 		}
 
 		#region Calculation
 
-		public static int FullSize<T>(int elemCnt)
-		{
-			return Unsafe.SizeOf<T>() * elemCnt;
-		}
+		public static int FullSize<T>(int elemCnt) => Unsafe.SizeOf<T>() * elemCnt;
 
 		#endregion
 
@@ -56,12 +53,8 @@ namespace RazorSharp.Memory
 
 
 		#region Alloc / free
-
-		/// <summary>
-		/// A <see cref="Allocator"/> using <see cref="Allocation.AllocHGlobal(int)"/>,
-		/// <see cref="Allocation.ReAllocHGlobal"/>, and <see cref="Allocation.FreeHGlobal"/>
-		/// </summary>
-		public static Allocator Allocator { get; }
+		
+		public static AllocationManager Allocator { get; }
 
 		public static void Destroy<T>(ref T value)
 		{

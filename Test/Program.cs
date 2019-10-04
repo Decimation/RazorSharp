@@ -13,7 +13,6 @@ using RazorSharp.CoreClr.Structures;
 using RazorSharp.Interop;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Reflection;
 using RazorSharp.Utilities;
 
 #endregion
@@ -36,12 +35,7 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			Global.Value.WriteDebug("g", "hi!");
-
-			var rField = typeof(string).GetAnyField("m_firstChar");
-			var mField = (MetaField) rField;
-
-			Console.WriteLine(mField);
+			
 		}
 	}
 }

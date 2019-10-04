@@ -11,9 +11,9 @@ using RazorSharp.Import.Attributes;
 using RazorSharp.Import.Enums;
 using RazorSharp.Interop;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Enums;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Model;
-using RazorSharp.Reflection;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Security;
 using SimpleSharp.Diagnostics;
@@ -445,7 +445,7 @@ namespace RazorSharp.Import
 
 			byte[] mem = ptr.CopyBytes(size);
 
-			return Conversions.AllocRaw(mem, type);
+			return Converter.AllocRaw(mem, type);
 		}
 
 		private static object ProxyLoadField(ImportFieldAttribute ifld, MetaField field, Pointer<byte> ptr)

@@ -5,8 +5,9 @@ using RazorSharp.CoreClr.Metadata;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Interop;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Enums;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Reflection;
+using RazorSharp.Utilities;
 using RazorSharp.Utilities.Security;
 using SimpleSharp.Diagnostics;
 
@@ -116,7 +117,7 @@ namespace RazorSharp.CoreClr
 
 		internal static ObjHeader ReadObjHeader<T>(T value) where T : class
 		{
-			var ptr = Unsafe.AddressOfHeap(value, OffsetOptions.HEADER).Cast<ObjHeader>();
+			var ptr = Unsafe.AddressOfHeap(value, OffsetOptions.Header).Cast<ObjHeader>();
 			return ptr.Value;
 		}
 	}

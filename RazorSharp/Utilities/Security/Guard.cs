@@ -2,13 +2,14 @@ using System;
 using System.Reflection;
 using System.Text;
 using JetBrains.Annotations;
-using RazorSharp.Reflection;
 using RazorSharp.Utilities.Security.Exceptions;
 
 // ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Utilities.Security
 {
+	// todo: rewrite
+	
 	internal static class Guard
 	{
 		/// <summary>

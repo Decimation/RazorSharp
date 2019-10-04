@@ -12,7 +12,7 @@ namespace RazorSharp.Model
 		
 		public virtual void Close()
 		{
-			Debug.WriteLine(String.Format("Closed \"{0}\"", Id), "Closable");
+			Global.WriteLine("Closed \"{0}\"", Id);
 		}
 
 		public void Dispose() => Close();

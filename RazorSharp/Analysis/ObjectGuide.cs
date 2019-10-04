@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using RazorSharp.Memory;
+using RazorSharp.Memory.Components;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Security;

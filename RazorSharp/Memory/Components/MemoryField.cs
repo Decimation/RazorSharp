@@ -1,10 +1,7 @@
-using System;
 using RazorSharp.CoreClr.Meta;
-using RazorSharp.CoreClr.Structures;
-using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 
-namespace RazorSharp.Analysis
+namespace RazorSharp.Memory.Components
 {
 	public class MemoryField : IStructure
 	{
