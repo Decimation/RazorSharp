@@ -15,9 +15,9 @@ namespace RazorSharp.Utilities.Fixed
 		/// <summary>
 		///     Used for unsafe pinning of arbitrary objects.
 		/// </summary>
-		public static PinningHelper GetPinningHelper(object o)
+		public static PinningHelper GetPinningHelper(object value)
 		{
-			return Unsafe.As<PinningHelper>(o);
+			return Unsafe.As<PinningHelper>(value);
 		}
 
 

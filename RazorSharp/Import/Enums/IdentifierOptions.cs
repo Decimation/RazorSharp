@@ -14,7 +14,7 @@ namespace RazorSharp.Import.Enums
 		/// <summary>
 		/// Don't use <see cref="ImportNamespaceAttribute.Namespace"/> in the symbol name resolution.
 		/// </summary>
-		IgnoreNamespace = 1 << 0,
+		IgnoreNamespace = 1,
 		
 		/// <summary>
 		/// Don't use the enclosing type's name in the symbol name resolution.

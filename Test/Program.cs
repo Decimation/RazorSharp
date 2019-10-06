@@ -32,15 +32,14 @@ namespace Test
 	{
 		// Common library: SimpleSharp
 		// Testing library: Sandbox
-
-
-		
 		
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
 			MetaType t = typeof(string);
 			Console.WriteLine(t);
+			
+			
 		}
 	}
 }

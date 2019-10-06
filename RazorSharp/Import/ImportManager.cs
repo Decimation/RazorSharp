@@ -58,7 +58,7 @@ namespace RazorSharp.Import
 
 		private ImportManager()
 		{
-			base.Setup();
+			Setup();
 		}
 
 		#endregion

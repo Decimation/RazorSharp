@@ -40,9 +40,9 @@ namespace RazorSharp
 		/// </summary>
 		private static readonly Closable[] CoreObjects =
 		{
-			Clr.Value,
-			SymbolManager.Value,
-			ImportManager.Value,
+			Clr.Value,           // Calls Setup in ctor
+			SymbolManager.Value, // Calls Setup in ctor
+			ImportManager.Value, // Calls Setup in ctor
 			Global.Value,
 			Mem.Allocator
 		};
@@ -56,7 +56,7 @@ namespace RazorSharp
 			// Original order: Clr, SymbolManager, Global
 
 			foreach (var core in CoreObjects) {
-				if (core is Releasable releasable) {
+				if (core is Releasable releasable && !releasable.IsSetup) {
 					releasable.Setup();
 				}
 			}
@@ -69,7 +69,7 @@ namespace RazorSharp
 		private static void Close()
 		{
 			Conditions.Require(IsSetup);
-			
+
 			// SHUT IT DOWN
 			Global.Value.WriteInformation(CONTEXT, "Unloading {Module}", Global.NAME);
 

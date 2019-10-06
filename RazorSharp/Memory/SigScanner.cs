@@ -18,10 +18,7 @@ namespace RazorSharp.Memory
 			SelectRegion(r);
 		}
 
-		public SigScanner() : this(null)
-		{
-			
-		}
+		public SigScanner() : this(null) { }
 
 		private void EnsureSetup()
 		{

@@ -29,16 +29,15 @@ namespace RazorSharp.Memory.Components
 
 		public virtual object GetValue(object value)
 		{
-			
 			MetaType t = value.GetType();
 			// GetElementType doesn't work for some reason
-			
+
 			if (t.IsArray) {
 				t = t.ElementTypeHandle;
 			}
 
 			var ptr = GetAddress(ref value);
-			
+
 
 			return ptr.ReadAny(t.RuntimeType);
 		}

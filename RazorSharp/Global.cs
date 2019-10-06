@@ -79,6 +79,7 @@ namespace RazorSharp
 		private const string FORMAT_PARAM = "msg";
 
 		[StringFormatMethod(FORMAT_PARAM)]
+		[Conditional(COND_DEBUG)]
 		internal static void WriteLine(string msg, params object[] args)
 		{
 			Debug.WriteLine(msg, args: args);

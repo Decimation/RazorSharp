@@ -38,20 +38,22 @@ namespace RazorSharp.Model
 	public abstract class Releasable : Closable
 	{
 		public bool IsSetup { get; protected set; }
-		
+
 		public Releasable() { }
 
 		public virtual void Setup()
 		{
-			IsSetup = true;
-			Global.WriteLine("Setup \"{0}\"", Id);
+			if (!IsSetup) {
+				IsSetup = true;
+			}
 		}
 
 		public override void Close()
 		{
-			Conditions.Require(IsSetup, nameof(IsSetup));
-			IsSetup = false;
-			base.Close();
+			if (IsSetup) {
+				IsSetup = false;
+				base.Close();
+			}
 		}
 	}
 }

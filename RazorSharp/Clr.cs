@@ -4,7 +4,10 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using RazorSharp.CoreClr.Metadata;
+using RazorSharp.CoreClr.Structures;
 using RazorSharp.Import;
+using RazorSharp.Interop.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Model;
 using RazorSharp.Utilities;
@@ -46,7 +49,7 @@ namespace RazorSharp
 		/// CLR symbol access.
 		/// </summary>
 		internal IImportProvider Imports { get; }
-
+		
 		
 		private static FileInfo GetRuntimeFile(string fileName)
 		{

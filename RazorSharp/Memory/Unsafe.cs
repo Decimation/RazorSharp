@@ -225,8 +225,7 @@ namespace RazorSharp.Memory
 					return mt.HasLayout ? mt.LayoutInfo.ManagedSize : Constants.INVALID_VALUE;
 				}
 
-				case SizeOfOptions.Intrinsic: return SizeOf<T>();
-
+				case SizeOfOptions.Intrinsic:  return SizeOf<T>();
 				case SizeOfOptions.BaseFields: return mt.InstanceFieldsSize;
 
 				case SizeOfOptions.BaseInstance:

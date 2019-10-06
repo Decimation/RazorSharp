@@ -14,7 +14,7 @@ namespace RazorSharp.Import
 
 		public Pointer<byte> this[string key] => m_imports[key];
 
-		internal void Add(string s, Pointer<byte> p) => m_imports.Add(s, p);
+		internal void Add(string key, Pointer<byte> value) => m_imports.Add(key, value);
 
 		internal void Clear() => m_imports.Clear();
 		

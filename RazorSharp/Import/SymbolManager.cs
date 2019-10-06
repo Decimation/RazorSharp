@@ -46,7 +46,10 @@ namespace RazorSharp.Import
 
 		#region Singleton
 
-		private SymbolManager() { }
+		private SymbolManager()
+		{
+			Setup();
+		}
 
 		/// <summary>
 		/// Gets an instance of <see cref="SymbolManager"/>
