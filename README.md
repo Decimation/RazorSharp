@@ -25,11 +25,15 @@ Low-level utilities and tools for working with the CLR, CLR internal structures,
 - [x] Pinning unblittable objects
 
 # Compatibility
-`RazorSharp` is tested on:
-- 64-bit or 32-bit
+- 64-bit (only partial 32-bit support)
 - Windows only
 - .NET CLR only
 - Workstation GC
+
+# See also
+
+- [SharpUtils](https://github.com/IllidanS4/SharpUtils)
+- [CLR MD](https://github.com/microsoft/clrmd)
 
 # License
 
