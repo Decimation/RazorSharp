@@ -44,6 +44,7 @@ namespace RazorSharp.Model
 		public virtual void Setup()
 		{
 			IsSetup = true;
+			Global.WriteLine("Setup \"{0}\"", Id);
 		}
 
 		public override void Close()
