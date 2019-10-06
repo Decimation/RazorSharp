@@ -93,13 +93,6 @@ namespace RazorSharp
 		 * Note: be careful with the logger, as Serilog is only used in debug, and isn't included in
 		 * the Release build.
 		 */
-		
-		[Conditional(COND_DEBUG)]
-		internal void SuppressLoggerAndClear()
-		{
-			SuppressLogger();
-			Console.Clear();
-		}
 
 		[Conditional(COND_DEBUG)]
 		internal void SuppressLogger()

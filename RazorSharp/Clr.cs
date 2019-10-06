@@ -45,10 +45,9 @@ namespace RazorSharp
 		/// <summary>
 		/// CLR symbol access.
 		/// </summary>
-		internal ModuleImport Imports { get; }
+		internal IImportProvider Imports { get; }
 
 		
-
 		private static FileInfo GetRuntimeFile(string fileName)
 		{
 			string path = RuntimeEnvironment.GetRuntimeDirectory() + fileName;
