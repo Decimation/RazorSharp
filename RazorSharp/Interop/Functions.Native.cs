@@ -16,11 +16,12 @@ namespace RazorSharp.Interop
 
 	#endregion
 
-	/// <summary>
-	/// Provides functions for calling native functions using the <c>calli</c> opcode.
-	/// </summary>
+	
 	public static unsafe partial class Functions
 	{
+		/// <summary>
+		/// Provides functions for calling native functions using the <c>calli</c> opcode.
+		/// </summary>
 		public static class Native
 		{
 			#region Call

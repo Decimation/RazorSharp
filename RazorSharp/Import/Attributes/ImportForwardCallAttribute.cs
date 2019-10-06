@@ -10,7 +10,7 @@ namespace RazorSharp.Import.Attributes
 	/// </summary>
 	[MeansImplicitUse]
 	[AttributeUsage(METHOD_TARGETS)]
-	public class ImportForwardCallAttribute : ImportCallAttribute
+	public sealed class ImportForwardCallAttribute : ImportCallAttribute
 	{
 		public ImportForwardCallAttribute(string nameSpace, string id, ImportCallOptions options)
 		{

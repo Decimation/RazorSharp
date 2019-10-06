@@ -18,9 +18,9 @@ namespace RazorSharp.Memory
 			SelectRegion(r);
 		}
 
-		public SigScanner()
+		public SigScanner() : this(null)
 		{
-			SelectRegion(null);
+			
 		}
 
 		private void EnsureSetup()
@@ -50,27 +50,27 @@ namespace RazorSharp.Memory
 			return true;
 		}
 
-		public Pointer<byte> FindPattern(string szPattern)
+		public Pointer<byte> FindPattern(string pattern)
 		{
-			return FindPattern(Strings.ParseByteArray(szPattern));
+			return FindPattern(Strings.ParseByteArray(pattern));
 		}
 
-		public Pointer<byte> FindPattern(byte[] rgPattern)
+		public Pointer<byte> FindPattern(byte[] pattern)
 		{
 			EnsureSetup();
 
 			for (int i = 0; i < m_buffer.Length; i++) {
-				if (m_buffer[i] != rgPattern[0])
+				if (m_buffer[i] != pattern[0])
 					continue;
 
 
-				if (PatternCheck(i, rgPattern)) {
+				if (PatternCheck(i, pattern)) {
 					Pointer<byte> p = m_lo + i;
 					return p;
 				}
 			}
 
-			return IntPtr.Zero;
+			return Mem.Nullptr;
 		}
 	}
 }

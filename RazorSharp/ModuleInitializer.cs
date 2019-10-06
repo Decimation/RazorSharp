@@ -4,6 +4,7 @@ using RazorSharp.CoreClr.Metadata;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Import;
 using RazorSharp.Interop;
+using RazorSharp.Interop.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Model;
 using SimpleSharp.Diagnostics;
@@ -60,7 +61,7 @@ namespace RazorSharp
 				}
 			}
 
-			ImportManager.Value.LoadAll(CoreClrTypes, Clr.Value.ClrSymbols);
+			ImportManager.Value.LoadAll(CoreClrTypes, Clr.Value.Imports);
 
 			IsSetup = true;
 		}

@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Import.Enums;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 
-namespace RazorSharp.Interop
+namespace RazorSharp.Interop.Utilities
 {
 	/// <summary>
 	/// Provides utilities for creating delegates from function pointers.
@@ -17,16 +18,16 @@ namespace RazorSharp.Interop
 	{
 		static DelegateCreator()
 		{
-			ImportMap = new Dictionary<string, Pointer<byte>>();
+			Imports = new ImportMap();
 		}
 
-		[ImportMap]
-		private static readonly Dictionary<string, Pointer<byte>> ImportMap;
+		[ImportMapDesignation]
+		private static readonly ImportMap Imports;
 		
 		[ImportForwardCall("COMDelegate", nameof(ConvertToDelegate), ImportCallOptions.Map)]
 		private static void* ConvertToDelegate(void* fn, void* mt)
 		{
-			return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(ConvertToDelegate)], 
+			return Functions.Native.CallReturnPointer((void*) Imports[nameof(ConvertToDelegate)], 
 			                                         fn, mt);
 		}
 		

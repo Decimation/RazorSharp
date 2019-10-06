@@ -20,7 +20,7 @@ namespace RazorSharp.Import.Enums
 		/// <summary>
 		///     Treat the method as a constructor. <see cref="IdentifierOptions.FullyQualified" /> must be used.
 		/// </summary>
-		Constructor = 1 << 0,
+		Constructor = 1,
 
 		/// <summary>
 		///     Sets the method entry point to the resolved address. This only works on 64 bit.
@@ -29,9 +29,7 @@ namespace RazorSharp.Import.Enums
 
 		/// <summary>
 		///     <para>
-		///         Adds the resolved address to an import map (a <see cref="Dictionary{TKey,TValue}" /> in the enclosing type)
-		///         with the key being a <see cref="string" /> and the value being
-		///         a <see cref="byte" /> <see cref="Pointer{T}" />.
+		///         Adds the resolved address to an <see cref="ImportMap"/> in the enclosing type
 		///     </para>
 		///     <para>
 		///         The key of the import map is the name of the annotated member. The name is obtained using the

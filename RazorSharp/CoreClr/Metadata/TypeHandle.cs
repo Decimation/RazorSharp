@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Import.Enums;
 using RazorSharp.Interop;
@@ -16,7 +17,7 @@ namespace RazorSharp.CoreClr.Metadata
 	{
 		static TypeHandle()
 		{
-			ImportMap = new Dictionary<string, Pointer<byte>>();
+			Imports = new ImportMap();
 		}
 
 		#region Fields
@@ -32,14 +33,14 @@ namespace RazorSharp.CoreClr.Metadata
 
 		#endregion
 
-		[ImportMap]
-		private static readonly Dictionary<string, Pointer<byte>> ImportMap;
+		[ImportMapDesignation]
+		private static readonly ImportMap Imports;
 		
 		internal Pointer<MethodTable> MethodTable {
 			[ImportCall(IdentifierOptions.UseAccessorName, ImportCallOptions.Map)]
 			get {
 				fixed (TypeHandle* value = &this) {
-					return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(MethodTable)], value);
+					return Functions.Native.CallReturnPointer((void*) Imports[nameof(MethodTable)], value);
 				}
 			}
 		}

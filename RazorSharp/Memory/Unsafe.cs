@@ -383,7 +383,7 @@ namespace RazorSharp.Memory
 		private static int BaseSizeOfData(Type t)
 		{
 			if (((MetaType) t).IsStruct) {
-				return (int) Functions.CallGenericMethod(typeof(Unsafe).GetMethod(nameof(SizeOf)), t, null);
+				return (int) Functions.Reflection.CallGeneric(typeof(Unsafe).GetMethod(nameof(SizeOf)), t, null);
 			}
 
 			// Subtract the size of the ObjHeader and MethodTable*

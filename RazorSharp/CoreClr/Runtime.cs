@@ -34,7 +34,7 @@ namespace RazorSharp.CoreClr
 		public static T AllocObject<T>(params object[] args)
 		{
 			var value = GlobalHeap.AllocateObject<T>();
-			Functions.RunConstructor(value, args);
+			Functions.Reflection.CallConstructor(value, args);
 			return value;
 		}
 

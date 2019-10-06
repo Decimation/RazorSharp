@@ -13,7 +13,7 @@
     <AssemblyName>RazorSharp</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>8</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -30,7 +30,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>8</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
@@ -42,7 +42,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>8</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
@@ -131,19 +131,23 @@
     <Compile Include="Import\Attributes\ImportCallAttribute.cs" />
     <Compile Include="Import\Attributes\ImportFieldAttribute.cs" />
     <Compile Include="Import\Attributes\ImportForwardCallAttribute.cs" />
-    <Compile Include="Import\Attributes\ImportMapAttribute.cs" />
+    <Compile Include="Import\Attributes\ImportMapDesignationAttribute.cs" />
     <Compile Include="Import\Attributes\ImportNamespaceAttribute.cs" />
     <Compile Include="Import\Enums\IdentifierOptions.cs" />
     <Compile Include="Import\Enums\ImportCallOptions.cs" />
     <Compile Include="Import\Enums\ImportFieldOptions.cs" />
     <Compile Include="Import\IImportProvider.cs" />
     <Compile Include="Import\ImportManager.cs" />
+    <Compile Include="Import\ImportMap.cs" />
     <Compile Include="Import\ModuleImport.cs" />
     <Compile Include="Import\SymbolManager.cs" />
-    <Compile Include="Interop\DelegateCreator.cs" />
     <Compile Include="Interop\Functions.cs" />
-    <Compile Include="Interop\Refurbisher.cs" />
+    <Compile Include="Interop\Functions.Fluid.cs" />
+    <Compile Include="Interop\Functions.Reflection.cs" />
+    <Compile Include="Interop\Functions.Module.cs" />
     <Compile Include="Interop\Functions.Native.cs" />
+    <Compile Include="Interop\Utilities\DelegateCreator.cs" />
+    <Compile Include="Interop\Utilities\Refurbisher.cs" />
     <Compile Include="Memory\Allocation\Allocators.cs" />
     <Compile Include="Memory\Allocation\IAllocator.cs" />
     <Compile Include="Memory\Allocation\AllocationManager.cs" />
@@ -167,7 +171,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\BinaryHelper.cs" />
     <Compile Include="Utilities\ReflectionHelper.cs" />
-    <Compile Include="Utilities\EnumHelper.cs" />
+    <Compile Include="Utilities\EnumFlagHelper.cs" />
     <Compile Include="Utilities\Fixed\ObjectPinner.cs" />
     <Compile Include="Utilities\Fixed\PinHelper.cs" />
     <Compile Include="Utilities\ModuleHelper.cs" />

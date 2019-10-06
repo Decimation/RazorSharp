@@ -87,7 +87,7 @@ namespace RazorSharp.Memory
 
 		public static object AllocRaw(byte[] mem, Type type)
 		{
-			return Functions.CallGenericMethod(typeof(Converter).GetMethod(nameof(AllocRaw)),
+			return Functions.Reflection.CallGeneric(typeof(Converter).GetMethod(nameof(AllocRaw)),
 			                                   type, null, mem);
 		}
 	}

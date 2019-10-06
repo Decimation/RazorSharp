@@ -10,12 +10,14 @@ using RazorSharp.CoreClr.Metadata.Enums;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Import.Enums;
 using RazorSharp.Interop;
+using RazorSharp.Interop.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Enums;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Model;
 using RazorSharp.Utilities;
 using RazorSharp.Utilities.Security;
+using RazorSharp.Utilities.Security.Exceptions;
 using SimpleSharp.Diagnostics;
 using SimpleSharp.Strings;
 
@@ -23,7 +25,7 @@ using SimpleSharp.Strings;
 
 namespace RazorSharp.Import
 {
-	using Map = Dictionary<string, Pointer<byte>>;
+	
 
 	public sealed class ImportManager : Releasable
 	{
@@ -32,14 +34,10 @@ namespace RazorSharp.Import
 		private const string GET_PROPERTY_PREFIX      = "get_";
 		private const string GET_PROPERTY_REPLACEMENT = "Get";
 
-		private const string CONTEXT = nameof(ImportManager);
-
-		private const string IMPORT_MAP_NAME = "ImportMap";
-
-		protected override string Id => CONTEXT;
+		protected override string Id => nameof(ImportManager);
 
 		private static readonly string MapError =
-			$"Map must static, readonly, and of type {typeof(Dictionary<string, Pointer<byte>>)}";
+			$"Map must static, readonly, and of type {typeof(ImportMap)}";
 
 		private static readonly string NamespaceError = 
 			$"Type must be decorated with \"{nameof(ImportNamespaceAttribute)}\"";
@@ -88,7 +86,7 @@ namespace RazorSharp.Import
 
 		private readonly ISet<Type> m_boundTypes = new HashSet<Type>();
 
-		private readonly Dictionary<Type, Map> m_typeImportMaps = new Dictionary<Type, Map>();
+		private readonly Dictionary<Type, ImportMap> m_typeImportMaps = new Dictionary<Type, ImportMap>();
 
 		#endregion
 
@@ -288,7 +286,7 @@ namespace RazorSharp.Import
 
 			m_boundTypes.Remove(type);
 
-			Global.Value.WriteVerbose(CONTEXT, "Unloaded {Name}", type.Name);
+			Global.Value.WriteVerbose(Id, "Unloaded {Name}", type.Name);
 		}
 
 		public void Unload<T>(ref T value)
@@ -317,26 +315,26 @@ namespace RazorSharp.Import
 
 		private void LoadMap(Type t, FieldInfo field)
 		{
-			if (!field.IsStatic || field.FieldType != typeof(Map)) {
+			if (!field.IsStatic || field.FieldType != typeof(ImportMap)) {
 				throw Guard.ImportFail(MapError);
 			}
 
-			var map = (Map) field.GetValue(null);
+			var map = (ImportMap) field.GetValue(null);
 			m_typeImportMaps.Add(t, map);
 		}
 
 
 		private FieldInfo FindMapField(Type type)
 		{
-			var mapField = type.GetAnyField(IMPORT_MAP_NAME);
+			var mapField = type.GetAnyField(ImportMap.FIELD_NAME);
 
-			if (mapField != null && mapField.GetCustomAttribute<ImportMapAttribute>() == null) {
+			if (mapField != null && mapField.GetCustomAttribute<ImportMapDesignationAttribute>() == null) {
 				throw Guard.ImportFail(
-					$"Map field should be annotated with {nameof(ImportMapAttribute)}");
+					$"Map field should be annotated with {nameof(ImportMapDesignationAttribute)}");
 			}
 
 			if (mapField == null) {
-				var (member, _) = type.GetFirstAnnotated<ImportMapAttribute>();
+				var (member, _) = type.GetFirstAnnotated<ImportMapDesignationAttribute>();
 
 				if (member != null) {
 					mapField = (FieldInfo) member;
@@ -346,6 +344,13 @@ namespace RazorSharp.Import
 			return mapField;
 		}
 
+		private static bool CheckImportMap(FieldInfo mapField)
+		{
+			return mapField.IsStatic							// Must be static
+			       && mapField.IsInitOnly 						// Must be readonly
+			       && mapField.FieldType == typeof(ImportMap); 	// Must be of type ImportMap
+		}
+
 		private bool UsingMap(Type type, out FieldInfo mapField)
 		{
 			mapField = FindMapField(type);
@@ -353,12 +358,12 @@ namespace RazorSharp.Import
 			bool exists = mapField != null;
 
 			if (exists) {
-				if (!mapField.IsStatic || !mapField.IsInitOnly || mapField.FieldType != typeof(Map)) {
+				if (!CheckImportMap(mapField)) {
 					throw Guard.ImportFail(MapError);
 				}
 
 				if (mapField.GetValue(null) == null) {
-					mapField.SetValue(null, new Map());
+					throw new ImportException($"{typeof(ImportMap)} is null");
 				}
 			}
 
@@ -396,7 +401,7 @@ namespace RazorSharp.Import
 
 			m_boundTypes.Add(type);
 
-			Global.Value.WriteVerbose(CONTEXT, "Completed loading {Name}", type.Name);
+			Global.Value.WriteVerbose(Id, "Completed loading {Name}", type.Name);
 
 			return value;
 		}
@@ -475,7 +480,7 @@ namespace RazorSharp.Import
 
 			object fieldValue;
 
-			Global.Value.WriteDebug(CONTEXT, "Loading field {Id} with {Option}",
+			Global.Value.WriteDebug(Id, "Loading field {Id} with {Option}",
 			                        field.Name, options);
 
 			switch (options) {
@@ -586,7 +591,7 @@ namespace RazorSharp.Import
 						throw Guard.NotSupportedMemberFail(mem);
 				}
 
-				Global.Value.WriteVerbose(CONTEXT, "Loaded member {Id} @ {Addr}", id, addr);
+				Global.Value.WriteVerbose(null, "Loaded member {Id} @ {Addr}", id, addr);
 			}
 
 			return value;

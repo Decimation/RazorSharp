@@ -8,7 +8,7 @@ namespace RazorSharp.Import.Attributes
 {
 	[MeansImplicitUse]
 	[AttributeUsage(FIELD_TARGETS)]
-	public class ImportFieldAttribute : ImportAttribute
+	public sealed class ImportFieldAttribute : ImportAttribute
 	{
 		internal const AttributeTargets FIELD_TARGETS = AttributeTargets.Field;
 		

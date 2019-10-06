@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Metadata.Enums;
+using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Import.Enums;
 using RazorSharp.Interop;
@@ -19,17 +20,18 @@ namespace RazorSharp.CoreClr.Metadata
 	{
 		static FieldDesc()
 		{
-			ImportMap = new Dictionary<string, Pointer<byte>>();
+			Imports = new ImportMap();
 		}
 		
-		[ImportMap]
-		private static readonly Dictionary<string, Pointer<byte>> ImportMap;
+		[ImportMapDesignation]
+		private static readonly ImportMap Imports;
 
 		#region Fields
 
 		private MethodTable* EnclosingMethodTableStub { get; }
 
 		/// <summary>
+		/// <c>DWORD</c> #1
 		///     <para>unsigned m_mb : 24;</para>
 		///     <para>unsigned m_isStatic : 1;</para>
 		///     <para>unsigned m_isThreadLocal : 1;</para>
@@ -37,23 +39,24 @@ namespace RazorSharp.CoreClr.Metadata
 		///     <para>unsigned m_prot : 3;</para>
 		///     <para>unsigned m_requiresFullMbValue : 1;</para>
 		/// </summary>
-		internal uint Dword1 { get; }
+		private uint UInt1 { get; }
 
 		/// <summary>
+		/// <c>DWORD</c> #2
 		///     <para>unsigned m_dwOffset : 27;</para>
 		///     <para>unsigned m_type : 5;</para>
 		/// </summary>
-		internal uint Dword2 { get; }
+		private uint UInt2 { get; }
 
 		#endregion
 
 		#region Calculated values
 
-		private bool RequiresFullMBValue => BinaryHelper.ReadBit(Dword1, 31);
+		private bool RequiresFullMBValue => BinaryHelper.ReadBit(UInt1, 31);
 
 		internal int Token {
 			get {
-				var rawToken = (int) (Dword1 & 0xFFFFFF);
+				var rawToken = (int) (UInt1 & 0xFFFFFF);
 				// Check if this FieldDesc is using the packed mb layout
 				if (!RequiresFullMBValue)
 					return TokenHelper.TokenFromRid(rawToken & (int) MbMask.PackedMbLayoutMbMask,
@@ -63,22 +66,22 @@ namespace RazorSharp.CoreClr.Metadata
 			}
 		}
 
-		internal int Offset => (int) (Dword2 & 0x7FFFFFF);
+		internal int Offset => (int) (UInt2 & 0x7FFFFFF);
 
-		internal CorElementType CorType => (CorElementType) (int) ((Dword2 >> 27) & 0x7FFFFFF);
+		internal CorElementType CorType => (CorElementType) (int) ((UInt2 >> 27) & 0x7FFFFFF);
 
-		internal ProtectionLevel ProtectionLevel => (ProtectionLevel) (int) ((Dword1 >> 26) & 0x3FFFFFF);
+		internal ProtectionLevel ProtectionLevel => (ProtectionLevel) (int) ((UInt1 >> 26) & 0x3FFFFFF);
 
 		internal bool IsPointer => CorType == CorElementType.Ptr;
 
 
-		internal bool IsStatic => BinaryHelper.ReadBit(Dword1, 24);
+		internal bool IsStatic => BinaryHelper.ReadBit(UInt1, 24);
 
 
-		internal bool IsThreadLocal => BinaryHelper.ReadBit(Dword1, 25);
+		internal bool IsThreadLocal => BinaryHelper.ReadBit(UInt1, 25);
 
 
-		internal bool IsRVA => BinaryHelper.ReadBit(Dword1, 26);
+		internal bool IsRVA => BinaryHelper.ReadBit(UInt1, 26);
 
 		#endregion
 
@@ -88,7 +91,7 @@ namespace RazorSharp.CoreClr.Metadata
 		internal int LoadSize()
 		{
 			fixed (FieldDesc* value = &this) {
-				return Functions.Native.Call<int>((void*) ImportMap[nameof(LoadSize)], value);
+				return Functions.Native.Call<int>((void*) Imports[nameof(LoadSize)], value);
 			}
 		}
 
@@ -96,7 +99,7 @@ namespace RazorSharp.CoreClr.Metadata
 		internal void* GetCurrentStaticAddress()
 		{
 			fixed (FieldDesc* value = &this) {
-				return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(GetCurrentStaticAddress)], value);
+				return Functions.Native.CallReturnPointer((void*) Imports[nameof(GetCurrentStaticAddress)], value);
 			}
 		}
 
@@ -106,7 +109,7 @@ namespace RazorSharp.CoreClr.Metadata
 		internal void* GetApproxEnclosingMethodTable()
 		{
 			fixed (FieldDesc* value = &this) {
-				return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(GetApproxEnclosingMethodTable)],
+				return Functions.Native.CallReturnPointer((void*) Imports[nameof(GetApproxEnclosingMethodTable)],
 				                                value);
 			}
 		}

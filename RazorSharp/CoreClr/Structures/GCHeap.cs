@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using RazorSharp.CoreClr.Metadata;
+using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Import.Enums;
 using RazorSharp.Interop;
@@ -19,18 +20,18 @@ namespace RazorSharp.CoreClr.Structures
 
 		static GCHeap()
 		{
-			ImportMap = new Dictionary<string, Pointer<byte>>();
+			Imports = new ImportMap();
 		}
 		
 
-		[ImportMap]
-		private static readonly Dictionary<string, Pointer<byte>> ImportMap;
+		[ImportMapDesignation]
+		private static readonly ImportMap Imports;
 		
 		internal int GCCount {
 			[ImportCall("GetGcCount", ImportCallOptions.Map)]
 			get {
 				fixed (GCHeap* value = &this) {
-					return Functions.Native.Call<int>((void*) ImportMap[nameof(GCCount)], value);
+					return Functions.Native.Call<int>((void*) Imports[nameof(GCCount)], value);
 				}
 			}
 		}
@@ -38,14 +39,14 @@ namespace RazorSharp.CoreClr.Structures
 		[ImportCall(IdentifierOptions.FullyQualified, ImportCallOptions.Map)]
 		internal static void* AllocateObject(MethodTable* mt, bool fHandleCom = false)
 		{
-			return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(AllocateObject)], mt, fHandleCom);
+			return Functions.Native.CallReturnPointer((void*) Imports[nameof(AllocateObject)], mt, fHandleCom);
 		}
 
 		[ImportCall(ImportCallOptions.Map)]
 		internal bool IsHeapPointer(void* p, bool smallHeapOnly = false)
 		{
 			fixed (GCHeap* value = &this) {
-				return Functions.Native.Call<bool, bool>((void*) ImportMap[nameof(IsHeapPointer)], value, 
+				return Functions.Native.Call<bool, bool>((void*) Imports[nameof(IsHeapPointer)], value, 
 				                               p, smallHeapOnly);
 			}
 		}

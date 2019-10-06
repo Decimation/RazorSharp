@@ -11,7 +11,7 @@ namespace RazorSharp.Import.Attributes
 	/// </summary>
 	[MeansImplicitUse]
 	[AttributeUsage(AttributeTargets.Field)]
-	public class ImportMapAttribute : Attribute
+	public sealed class ImportMapDesignationAttribute : Attribute
 	{
 		
 	}

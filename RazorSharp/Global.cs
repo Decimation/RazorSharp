@@ -111,6 +111,10 @@ namespace RazorSharp
 		[Conditional(COND_DEBUG)]
 		private static void ContextLog(string ctx, Action<string, object[]> log, string msg, object[] args)
 		{
+			if (ctx == null) {
+				ctx = String.Empty;
+			}
+			
 			using (LogContext.PushProperty(CONTEXT_PROP, ctx)) {
 				log(msg, args);
 			}
@@ -218,7 +222,7 @@ namespace RazorSharp
 			 * Other versions will probably work but we're just making sure
 			 * todo - determine compatibility
 			 */
-			Conditions.Require(Environment.Version == Clr.Value.ClrVersion);
+			Conditions.Require(Environment.Version == Clr.Value.Version);
 
 			Conditions.Require(!GCSettings.IsServerGC);
 

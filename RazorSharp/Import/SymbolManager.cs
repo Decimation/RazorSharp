@@ -21,9 +21,7 @@ namespace RazorSharp.Import
 	/// </summary>
 	internal sealed class SymbolManager : Releasable
 	{
-		private const string CONTEXT = nameof(SymbolManager);
-
-		protected override string Id => CONTEXT;
+		protected override string Id => nameof(SymbolManager);
 
 		private IntPtr       m_proc;
 		private ulong        m_modBase;
@@ -113,7 +111,7 @@ namespace RazorSharp.Import
 		{
 			string img = m_pdb.FullName;
 
-			Global.Value.WriteVerbose(CONTEXT, "Loading image {Img}", m_pdb.Name);
+			Global.Value.WriteVerbose(Id, "Loading image {Img}", m_pdb.Name);
 
 			UnloadModule();
 			

@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Reflection;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Metadata;
+using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Import.Enums;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities.Security;
 
-namespace RazorSharp.Interop
+namespace RazorSharp.Interop.Utilities
 {
 	/// <summary>
 	/// Provides functions for resetting and setting the entry point for managed methods.
@@ -19,11 +20,11 @@ namespace RazorSharp.Interop
 	{
 		static Refurbisher()
 		{
-			ImportMap = new Dictionary<string, Pointer<byte>>();
+			Imports = new ImportMap();
 		}
 
-		[ImportMap]
-		private static readonly Dictionary<string, Pointer<byte>> ImportMap;
+		[ImportMapDesignation]
+		private static readonly ImportMap Imports;
 
 		/// <summary>
 		/// Resets the method represented by <paramref name="mi"/> to its original, blank state.
@@ -32,7 +33,7 @@ namespace RazorSharp.Interop
 		[ImportForwardCall(typeof(MethodDesc), nameof(MethodDesc.Reset), ImportCallOptions.Map)]
 		internal static void Restore(MethodInfo mi)
 		{
-			Functions.Native.CallVoid((void*) ImportMap[nameof(Restore)], Runtime.ResolveHandle(mi).ToPointer());
+			Functions.Native.CallVoid((void*) Imports[nameof(Restore)], Runtime.ResolveHandle(mi).ToPointer());
 		}
 
 		/// <summary>
@@ -51,7 +52,7 @@ namespace RazorSharp.Interop
 
 			Restore(mi);
 
-			return Functions.Native.Call<bool>((void*) ImportMap[nameof(SetEntryPoint)],
+			return Functions.Native.Call<bool>((void*) Imports[nameof(SetEntryPoint)],
 			                                  mi.MethodHandle.Value.ToPointer(), ptr.ToPointer());
 		}
 	}
