@@ -62,7 +62,7 @@ namespace RazorSharp.CoreClr.Metadata
 		internal void Reset()
 		{
 			fixed (MethodDesc* value = &this) {
-				NativeFunctions.CallVoid((void*) ImportMap[nameof(Reset)], value);
+				Functions.Native.CallVoid((void*) ImportMap[nameof(Reset)], value);
 			}
 		}
 
@@ -70,7 +70,7 @@ namespace RazorSharp.CoreClr.Metadata
 		internal bool IsPointingToNativeCode()
 		{
 			fixed (MethodDesc* value = &this) {
-				return NativeFunctions.Call<bool>((void*) ImportMap[nameof(IsPointingToNativeCode)], value);
+				return Functions.Native.Call<bool>((void*) ImportMap[nameof(IsPointingToNativeCode)], value);
 			}
 		}
 
@@ -79,7 +79,7 @@ namespace RazorSharp.CoreClr.Metadata
 			[ImportCall(IdentifierOptions.UseAccessorName, ImportCallOptions.Map)]
 			get {
 				fixed (MethodDesc* value = &this) {
-					return NativeFunctions.CallReturnPointer((void*) ImportMap[nameof(PreImplementedCode)], value);
+					return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(PreImplementedCode)], value);
 				}
 			}
 		}
@@ -89,7 +89,7 @@ namespace RazorSharp.CoreClr.Metadata
 			[ImportCall(IdentifierOptions.UseAccessorName, ImportCallOptions.Map)]
 			get {
 				fixed (MethodDesc* value = &this) {
-					return NativeFunctions.CallReturnPointer((void*) ImportMap[nameof(NativeCode)], value);
+					return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(NativeCode)], value);
 				}
 			}
 		}
@@ -98,7 +98,7 @@ namespace RazorSharp.CoreClr.Metadata
 		internal bool SetNativeCodeInterlocked(long p)
 		{
 			fixed (MethodDesc* value = &this) {
-				return NativeFunctions.Call<bool>((void*) ImportMap[nameof(SetNativeCodeInterlocked)],
+				return Functions.Native.Call<bool>((void*) ImportMap[nameof(SetNativeCodeInterlocked)],
 				                         value, (void*) p);
 			}
 		}
@@ -107,7 +107,7 @@ namespace RazorSharp.CoreClr.Metadata
 			[ImportCall("GetMemberDef", ImportCallOptions.Map)]
 			get {
 				fixed (MethodDesc* value = &this) {
-					return NativeFunctions.Call<int>((void*) ImportMap[nameof(Token)], value);
+					return Functions.Native.Call<int>((void*) ImportMap[nameof(Token)], value);
 				}
 			}
 		}
@@ -117,7 +117,7 @@ namespace RazorSharp.CoreClr.Metadata
 		internal void* GetILHeader(int fAllowOverrides)
 		{
 			fixed (MethodDesc* value = &this) {
-				return NativeFunctions.CallReturnPointer((void*) ImportMap[nameof(GetILHeader)], value, fAllowOverrides);
+				return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(GetILHeader)], value, fAllowOverrides);
 			}
 		}
 
@@ -126,7 +126,7 @@ namespace RazorSharp.CoreClr.Metadata
 			[ImportCall(IdentifierOptions.UseAccessorName, ImportCallOptions.Map)]
 			get {
 				fixed (MethodDesc* value = &this) {
-					return NativeFunctions.Call<long>((void*) ImportMap[nameof(RVA)], value);
+					return Functions.Native.Call<long>((void*) ImportMap[nameof(RVA)], value);
 				}
 			}
 		}
@@ -136,7 +136,7 @@ namespace RazorSharp.CoreClr.Metadata
 			[ImportCall(IdentifierOptions.UseAccessorName, ImportCallOptions.Map)]
 			get {
 				fixed (MethodDesc* value = &this) {
-					return (MethodTable*) NativeFunctions.CallReturnPointer((void*) ImportMap[nameof(MethodTable)], value);
+					return (MethodTable*) Functions.Native.CallReturnPointer((void*) ImportMap[nameof(MethodTable)], value);
 				}
 			}
 		}

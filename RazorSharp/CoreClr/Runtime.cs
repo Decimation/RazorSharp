@@ -120,5 +120,11 @@ namespace RazorSharp.CoreClr
 			var ptr = Unsafe.AddressOfHeap(value, OffsetOptions.Header).Cast<ObjHeader>();
 			return ptr.Value;
 		}
+
+		#region Function
+
+		
+
+		#endregion
 	}
 }

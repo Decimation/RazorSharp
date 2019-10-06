@@ -26,7 +26,7 @@ namespace RazorSharp.Interop
 		[ImportForwardCall("COMDelegate", nameof(ConvertToDelegate), ImportCallOptions.Map)]
 		private static void* ConvertToDelegate(void* fn, void* mt)
 		{
-			return NativeFunctions.CallReturnPointer((void*) ImportMap[nameof(ConvertToDelegate)], 
+			return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(ConvertToDelegate)], 
 			                                         fn, mt);
 		}
 		

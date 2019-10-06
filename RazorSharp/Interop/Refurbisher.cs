@@ -15,9 +15,9 @@ namespace RazorSharp.Interop
 	/// Provides functions for resetting and setting the entry point for managed methods.
 	/// </summary>
 	[ImportNamespace]
-	internal static unsafe class FunctionTools
+	internal static unsafe class Refurbisher
 	{
-		static FunctionTools()
+		static Refurbisher()
 		{
 			ImportMap = new Dictionary<string, Pointer<byte>>();
 		}
@@ -32,7 +32,7 @@ namespace RazorSharp.Interop
 		[ImportForwardCall(typeof(MethodDesc), nameof(MethodDesc.Reset), ImportCallOptions.Map)]
 		internal static void Restore(MethodInfo mi)
 		{
-			NativeFunctions.CallVoid((void*) ImportMap[nameof(Restore)], Runtime.ResolveHandle(mi).ToPointer());
+			Functions.Native.CallVoid((void*) ImportMap[nameof(Restore)], Runtime.ResolveHandle(mi).ToPointer());
 		}
 
 		/// <summary>
@@ -51,7 +51,7 @@ namespace RazorSharp.Interop
 
 			Restore(mi);
 
-			return NativeFunctions.Call<bool>((void*) ImportMap[nameof(SetEntryPoint)],
+			return Functions.Native.Call<bool>((void*) ImportMap[nameof(SetEntryPoint)],
 			                                  mi.MethodHandle.Value.ToPointer(), ptr.ToPointer());
 		}
 	}

@@ -37,7 +37,7 @@ namespace RazorSharp.Import.Enums
 		///         The key of the import map is the name of the annotated member. The name is obtained using the
 		///         <c>nameof</c> operator. The value is the resolved address.
 		///     </para>
-		///     <para>Best used in conjunction with the functions in <see cref="NativeFunctions" /></para>
+		///     <para>Best used in conjunction with the functions in <see cref="Functions.Native" /></para>
 		/// </summary>
 		Map = 1 << 2
 	}

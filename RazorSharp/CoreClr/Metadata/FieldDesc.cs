@@ -88,7 +88,7 @@ namespace RazorSharp.CoreClr.Metadata
 		internal int LoadSize()
 		{
 			fixed (FieldDesc* value = &this) {
-				return NativeFunctions.Call<int>((void*) ImportMap[nameof(LoadSize)], value);
+				return Functions.Native.Call<int>((void*) ImportMap[nameof(LoadSize)], value);
 			}
 		}
 
@@ -96,7 +96,7 @@ namespace RazorSharp.CoreClr.Metadata
 		internal void* GetCurrentStaticAddress()
 		{
 			fixed (FieldDesc* value = &this) {
-				return NativeFunctions.CallReturnPointer((void*) ImportMap[nameof(GetCurrentStaticAddress)], value);
+				return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(GetCurrentStaticAddress)], value);
 			}
 		}
 
@@ -106,7 +106,7 @@ namespace RazorSharp.CoreClr.Metadata
 		internal void* GetApproxEnclosingMethodTable()
 		{
 			fixed (FieldDesc* value = &this) {
-				return NativeFunctions.CallReturnPointer((void*) ImportMap[nameof(GetApproxEnclosingMethodTable)],
+				return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(GetApproxEnclosingMethodTable)],
 				                                value);
 			}
 		}

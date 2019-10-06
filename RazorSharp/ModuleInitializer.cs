@@ -25,7 +25,7 @@ namespace RazorSharp
 		/// </summary>
 		private static readonly Type[] CoreClrTypes =
 		{
-			typeof(FunctionTools),
+			typeof(Refurbisher),
 			typeof(DelegateCreator),
 			typeof(MethodDesc),
 			typeof(FieldDesc),

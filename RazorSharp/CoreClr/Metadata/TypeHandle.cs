@@ -39,7 +39,7 @@ namespace RazorSharp.CoreClr.Metadata
 			[ImportCall(IdentifierOptions.UseAccessorName, ImportCallOptions.Map)]
 			get {
 				fixed (TypeHandle* value = &this) {
-					return NativeFunctions.CallReturnPointer((void*) ImportMap[nameof(MethodTable)], value);
+					return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(MethodTable)], value);
 				}
 			}
 		}

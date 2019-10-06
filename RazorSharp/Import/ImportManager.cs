@@ -258,7 +258,7 @@ namespace RazorSharp.Import
 
 						// Calling the function will now result in an access violation
 						if (wasBound) {
-							FunctionTools.Restore(get);
+							Refurbisher.Restore(get);
 						}
 
 						break;
@@ -274,7 +274,7 @@ namespace RazorSharp.Import
 
 						// Calling the function will now result in an access violation
 						if (wasBound) {
-							FunctionTools.Restore((MethodInfo) mem);
+							Refurbisher.Restore((MethodInfo) mem);
 						}
 
 
@@ -523,7 +523,7 @@ namespace RazorSharp.Import
 
 			if (bind) {
 //				Global.Value.Log.Warning("Binding {Name}", method.Name);
-				FunctionTools.SetEntryPoint(method, addr);
+				Refurbisher.SetEntryPoint(method, addr);
 			}
 
 			if (addToMap) {

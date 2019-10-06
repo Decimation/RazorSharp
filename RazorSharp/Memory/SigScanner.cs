@@ -52,7 +52,7 @@ namespace RazorSharp.Memory
 
 		public Pointer<byte> FindPattern(string szPattern)
 		{
-			return FindPattern(StringUtil.ParseByteArray(szPattern));
+			return FindPattern(Strings.ParseByteArray(szPattern));
 		}
 
 		public Pointer<byte> FindPattern(byte[] rgPattern)

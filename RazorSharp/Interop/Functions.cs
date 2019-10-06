@@ -21,8 +21,8 @@ namespace RazorSharp.Interop
 
 	#endregion
 
-	
-	internal static class Functions
+
+	public static partial class Functions
 	{
 		/// <summary>
 		///     Gets an exported function
@@ -101,7 +101,7 @@ namespace RazorSharp.Interop
 		/// <param name="value">Instance of type; <c>null</c> if the method is static</param>
 		/// <param name="args">Method arguments</param>
 		/// <returns>Return value of the method specified by <paramref name="method"/></returns>
-		internal static object CallGenericMethod(MethodInfo      method,
+		public static object CallGenericMethod(MethodInfo      method,
 		                                         Type[]          typeArgs,
 		                                         object          value,
 		                                         params object[] args)
@@ -110,7 +110,7 @@ namespace RazorSharp.Interop
 			return method.MakeGenericMethod(typeArgs).Invoke(value, args);
 		}
 
-		internal static object CallGenericMethod(MethodInfo      method,
+		public static object CallGenericMethod(MethodInfo      method,
 		                                         Type            typeArg,
 		                                         object          value,
 		                                         params object[] args)
@@ -130,7 +130,7 @@ namespace RazorSharp.Interop
 		///     <c>true</c> if a matching constructor was found and executed;
 		///     <c>false</c> if a constructor couldn't be found
 		/// </returns>
-		internal static bool RunConstructor<T>(T value, params object[] args)
+		public static bool RunConstructor<T>(T value, params object[] args)
 		{
 			ConstructorInfo[] ctors    = value.GetType().GetConstructors();
 			Type[]            argTypes = args.Select(x => x.GetType()).ToArray();

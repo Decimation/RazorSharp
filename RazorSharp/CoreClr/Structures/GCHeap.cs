@@ -30,7 +30,7 @@ namespace RazorSharp.CoreClr.Structures
 			[ImportCall("GetGcCount", ImportCallOptions.Map)]
 			get {
 				fixed (GCHeap* value = &this) {
-					return NativeFunctions.Call<int>((void*) ImportMap[nameof(GCCount)], value);
+					return Functions.Native.Call<int>((void*) ImportMap[nameof(GCCount)], value);
 				}
 			}
 		}
@@ -38,14 +38,14 @@ namespace RazorSharp.CoreClr.Structures
 		[ImportCall(IdentifierOptions.FullyQualified, ImportCallOptions.Map)]
 		internal static void* AllocateObject(MethodTable* mt, bool fHandleCom = false)
 		{
-			return NativeFunctions.CallReturnPointer((void*) ImportMap[nameof(AllocateObject)], mt, fHandleCom);
+			return Functions.Native.CallReturnPointer((void*) ImportMap[nameof(AllocateObject)], mt, fHandleCom);
 		}
 
 		[ImportCall(ImportCallOptions.Map)]
 		internal bool IsHeapPointer(void* p, bool smallHeapOnly = false)
 		{
 			fixed (GCHeap* value = &this) {
-				return NativeFunctions.Call<bool, bool>((void*) ImportMap[nameof(IsHeapPointer)], value, 
+				return Functions.Native.Call<bool, bool>((void*) ImportMap[nameof(IsHeapPointer)], value, 
 				                               p, smallHeapOnly);
 			}
 		}
