@@ -36,7 +36,7 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			MetaType t = typeof(string);
+			MetaField t = typeof(string).GetAnyField("m_firstChar");
 			Console.WriteLine(t);
 			
 			

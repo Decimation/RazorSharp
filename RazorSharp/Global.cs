@@ -70,6 +70,7 @@ namespace RazorSharp
 #else
 //			SuppressLogger();
 #endif
+//			Setup();
 		}
 
 		#endregion

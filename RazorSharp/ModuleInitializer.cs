@@ -43,7 +43,7 @@ namespace RazorSharp
 			Clr.Value,           // Calls Setup in ctor
 			SymbolManager.Value, // Calls Setup in ctor
 			ImportManager.Value, // Calls Setup in ctor
-			Global.Value,
+			Global.Value,		 
 			Mem.Allocator
 		};
 
