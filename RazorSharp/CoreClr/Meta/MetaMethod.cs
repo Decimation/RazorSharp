@@ -83,11 +83,13 @@ namespace RazorSharp.CoreClr.Meta
 
 		public long RVA => Value.Reference.RVA;
 
+		[Obsolete]
 		private MetaIL GetILHeaderInternal(bool fAllowOverrides = default)
 		{
 			return new MetaIL(Value.Reference.GetILHeader(Convert.ToInt32(fAllowOverrides)));
 		}
 
+		[Obsolete]
 		public MetaIL ILHeader => GetILHeaderInternal();
 
 		public override MetaType EnclosingType => (Pointer<MethodTable>) Value.Reference.MethodTable;

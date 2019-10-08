@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -12,9 +11,10 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using SimpleSharp.Diagnostics;
+
 // ReSharper disable MemberCanBeMadeStatic.Global
 
-namespace RazorSharp
+namespace RazorSharp.Core
 {
 	/// <summary>
 	/// Contains the logger and other useful resources for RazorSharp.
@@ -70,7 +70,8 @@ namespace RazorSharp
 #else
 //			SuppressLogger();
 #endif
-//			Setup();
+			Setup();
+			Initializer.Setup();
 		}
 
 		#endregion

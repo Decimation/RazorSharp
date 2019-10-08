@@ -2,8 +2,10 @@
 
 using System;
 using System.Runtime.InteropServices;
+using RazorSharp.Core;
 using RazorSharp.CoreClr.Metadata.Enums;
 using RazorSharp.CoreClr.Metadata.ExecutionEngine;
+using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Memory.Pointers;
 
@@ -50,6 +52,11 @@ namespace RazorSharp.CoreClr.Metadata
 	[StructLayout(LayoutKind.Sequential)]
 	public unsafe struct MethodTable
 	{
+		static MethodTable()
+		{
+			ImportManager.Value.Load(typeof(MethodTable), Clr.Value.Imports);
+		}
+		
 		internal short               ComponentSize { get; }
 		internal MethodTableFlagsLow FlagsLow      { get; }
 		internal int                 BaseSize      { get; }

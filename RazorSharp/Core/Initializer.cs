@@ -1,21 +1,15 @@
 using System;
-using JetBrains.Annotations;
 using RazorSharp.CoreClr.Metadata;
 using RazorSharp.CoreClr.Structures;
 using RazorSharp.Import;
-using RazorSharp.Interop;
 using RazorSharp.Interop.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Model;
 using SimpleSharp.Diagnostics;
 
-namespace RazorSharp
+namespace RazorSharp.Core
 {
-	/// <summary>
-	///     Initializers shim. Every type that needs to be set up/closed implements <see cref="Releasable"/>.
-	/// This runs on module load.
-	/// </summary>
-	internal static class ModuleInitializer /*: Releasable */
+	internal static class Initializer
 	{
 		private const string CONTEXT = "Init";
 
@@ -43,55 +37,44 @@ namespace RazorSharp
 			Clr.Value,           // Calls Setup in ctor
 			SymbolManager.Value, // Calls Setup in ctor
 			ImportManager.Value, // Calls Setup in ctor
-			Global.Value,		 
+			Global.Value,        // Calls Setup in ctor
 			Mem.Allocator
 		};
 
-		private static void Setup()
+		internal static void Setup()
 		{
-			Global.Value.WriteInformation(CONTEXT, "Loading {Module}", Global.NAME);
-
-			// Init code
-
 			// Original order: Clr, SymbolManager, Global
 
-			foreach (var core in CoreObjects) {
+			/*foreach (var core in CoreObjects) {
 				if (core is Releasable releasable && !releasable.IsSetup) {
 					releasable.Setup();
 				}
 			}
 
-			ImportManager.Value.LoadAll(CoreClrTypes, Clr.Value.Imports);
+			ImportManager.Value.LoadAll(CoreClrTypes, Clr.Value.Imports);*/
+
+			// Register for domain unload
+			
+			var appDomain = AppDomain.CurrentDomain;
+			appDomain.ProcessExit += (sender, eventArgs) => { Close(); };
 
 			IsSetup = true;
 		}
 
-		private static void Close()
+
+		internal static void Close()
 		{
 			Conditions.Require(IsSetup);
 
 			// SHUT IT DOWN
-			Global.Value.WriteInformation(CONTEXT, "Unloading {Module}", Global.NAME);
 
 			// Original order: Clr, Global, SymbolManager, Mem.Allocator
-
+			
 			foreach (var core in CoreObjects) {
-				core.Close();
+				core?.Close();
 			}
 
 			IsSetup = false;
-		}
-
-		/// <summary>
-		///     Runs when this module is loaded.
-		/// </summary>
-		[UsedImplicitly]
-		public static void Initialize()
-		{
-			Setup();
-
-			var appDomain = AppDomain.CurrentDomain;
-			appDomain.ProcessExit += (sender, eventArgs) => { Close(); };
 		}
 	}
 }

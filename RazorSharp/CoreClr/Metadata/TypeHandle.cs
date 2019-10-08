@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using RazorSharp.Core;
 using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
 using RazorSharp.Import.Enums;
@@ -17,7 +18,7 @@ namespace RazorSharp.CoreClr.Metadata
 	{
 		static TypeHandle()
 		{
-			Imports = new ImportMap();
+			ImportManager.Value.Load(typeof(TypeHandle), Clr.Value.Imports);
 		}
 
 		#region Fields
@@ -34,7 +35,7 @@ namespace RazorSharp.CoreClr.Metadata
 		#endregion
 
 		[ImportMapDesignation]
-		private static readonly ImportMap Imports;
+		private static readonly ImportMap Imports = new ImportMap();
 		
 		internal Pointer<MethodTable> MethodTable {
 			[ImportCall(IdentifierOptions.UseAccessorName, ImportCallOptions.Map)]

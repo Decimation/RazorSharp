@@ -28,11 +28,6 @@ namespace RazorSharp.Memory
 		/// </summary>
 		public static readonly Pointer<byte> Nullptr = null;
 
-		static Mem()
-		{
-			Allocator = new AllocationManager(Allocators.Local);
-		}
-
 		#region Calculation
 
 		public static int FullSize<T>(int elemCnt) => Unsafe.SizeOf<T>() * elemCnt;
@@ -54,7 +49,7 @@ namespace RazorSharp.Memory
 
 		#region Alloc / free
 		
-		public static AllocationManager Allocator { get; }
+		public static AllocationManager Allocator { get; } = new AllocationManager(Allocators.Local);
 
 		public static void Destroy<T>(ref T value)
 		{

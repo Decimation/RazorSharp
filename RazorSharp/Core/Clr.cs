@@ -4,18 +4,14 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using RazorSharp.CoreClr.Metadata;
-using RazorSharp.CoreClr.Structures;
 using RazorSharp.Import;
-using RazorSharp.Interop.Utilities;
-using RazorSharp.Memory;
 using RazorSharp.Model;
 using RazorSharp.Utilities;
 using SimpleSharp.Diagnostics;
 
 #endregion
 
-namespace RazorSharp
+namespace RazorSharp.Core
 {
 	/// <summary>
 	///     Contains resources for working with the CLR.

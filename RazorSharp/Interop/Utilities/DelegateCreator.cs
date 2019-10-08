@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using RazorSharp.Core;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
@@ -18,11 +19,11 @@ namespace RazorSharp.Interop.Utilities
 	{
 		static DelegateCreator()
 		{
-			Imports = new ImportMap();
+			ImportManager.Value.Load(typeof(DelegateCreator), Clr.Value.Imports);
 		}
 
 		[ImportMapDesignation]
-		private static readonly ImportMap Imports;
+		private static readonly ImportMap Imports = new ImportMap();
 		
 		[ImportForwardCall("COMDelegate", nameof(ConvertToDelegate), ImportCallOptions.Map)]
 		private static void* ConvertToDelegate(void* fn, void* mt)

@@ -7,6 +7,7 @@ using NativeSharp.DebugHelp;
 using NativeSharp.DebugHelp.Enums;
 using NativeSharp.DebugHelp.Wrappers;
 using NativeSharp.Kernel;
+using RazorSharp.Core;
 using RazorSharp.Model;
 using RazorSharp.Utilities.Security;
 using SimpleSharp.Diagnostics;

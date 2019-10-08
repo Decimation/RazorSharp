@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using RazorSharp.Core;
 using RazorSharp.CoreClr.Metadata.Enums;
 using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
@@ -19,11 +21,11 @@ namespace RazorSharp.CoreClr.Metadata
 	{
 		static MethodDesc()
 		{
-			Imports = new ImportMap();
+			ImportManager.Value.Load(typeof(MethodDesc), Clr.Value.Imports);
 		}
 
 		[ImportMapDesignation]
-		private static readonly ImportMap Imports;
+		private static readonly ImportMap Imports = new ImportMap();
 
 		#region Fields
 
@@ -114,6 +116,7 @@ namespace RazorSharp.CoreClr.Metadata
 		}
 
 
+		[Obsolete]
 		[ImportCall(ImportCallOptions.Map)]
 		internal void* GetILHeader(int fAllowOverrides)
 		{

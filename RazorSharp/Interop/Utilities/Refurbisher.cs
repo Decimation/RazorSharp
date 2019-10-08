@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using RazorSharp.Core;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Metadata;
 using RazorSharp.Import;
@@ -20,11 +21,11 @@ namespace RazorSharp.Interop.Utilities
 	{
 		static Refurbisher()
 		{
-			Imports = new ImportMap();
+			ImportManager.Value.Load(typeof(Refurbisher), Clr.Value.Imports);
 		}
 
 		[ImportMapDesignation]
-		private static readonly ImportMap Imports;
+		private static readonly ImportMap Imports = new ImportMap();
 
 		/// <summary>
 		/// Resets the method represented by <paramref name="mi"/> to its original, blank state.

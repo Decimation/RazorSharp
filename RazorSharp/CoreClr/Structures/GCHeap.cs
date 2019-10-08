@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using RazorSharp.Core;
 using RazorSharp.CoreClr.Metadata;
 using RazorSharp.Import;
 using RazorSharp.Import.Attributes;
@@ -20,12 +21,12 @@ namespace RazorSharp.CoreClr.Structures
 
 		static GCHeap()
 		{
-			Imports = new ImportMap();
+			ImportManager.Value.Load(typeof(GCHeap), Clr.Value.Imports);
 		}
 		
 
 		[ImportMapDesignation]
-		private static readonly ImportMap Imports;
+		private static readonly ImportMap Imports = new ImportMap();
 		
 		internal int GCCount {
 			[ImportCall("GetGcCount", ImportCallOptions.Map)]

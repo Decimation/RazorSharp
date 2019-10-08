@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using RazorSharp.Core;
 
 namespace RazorSharp.Model
 {
