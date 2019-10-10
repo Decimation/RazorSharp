@@ -15,20 +15,21 @@ Low-level utilities and tools for working with the CLR, CLR internal structures,
 
 # Usage
 
-`RazorSharp` must be set up to use certain features. The module initializer does this automatically.
+Some structures of `RazorSharp` must be set up to use certain features. Their respective type initializers and constructors should do this automatically, but this is still being tested as static initialization can be tricky.
 
 # Features
 
-- [x] Calculating heap size of managed objects
-- [x] Taking the address of managed objects
-- [x] Pointer to managed types
-- [x] Pinning unblittable objects
+* Calculating heap size of managed objects
+* Taking the address of managed objects
+* Pointer to managed types
+* Pinning unblittable objects
 
 # Compatibility
-- 64-bit (only partial 32-bit support)
-- Windows only
-- .NET CLR only
-- Workstation GC
+* 64-bit (only partial 32-bit support)
+* Windows
+* .NET CLR
+* .NET Framework 4.7.2
+* Workstation GC
 
 # License
 
