@@ -23,6 +23,7 @@ Some structures of `RazorSharp` must be set up to use certain features. Their re
 * Taking the address of managed objects
 * Pointer to managed types
 * Pinning unblittable objects
+* And much more
 
 # Compatibility
 * 64-bit (only partial 32-bit support)
