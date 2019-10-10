@@ -30,11 +30,6 @@ Low-level utilities and tools for working with the CLR, CLR internal structures,
 - .NET CLR only
 - Workstation GC
 
-# See also
-
-- [SharpUtils](https://github.com/IllidanS4/SharpUtils)
-- [CLR MD](https://github.com/microsoft/clrmd)
-
 # License
 
 Icons made by <a href="https://www.freepik.com/" title="Freepik">Freepik</a>
