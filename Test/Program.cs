@@ -32,17 +32,20 @@ namespace Test
 	{
 		// Common library: SimpleSharp
 		// Testing library: Sandbox
-		
-		//
-		
+
+		static void Hello() { }
+
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			MetaField t = typeof(string).GetAnyField("m_firstChar");
-			Console.WriteLine(t);
+			MetaMethod t = typeof(Program).GetAnyMethod(nameof(Hello));
+			Console.WriteLine("{0:M}", t);
 
-			
+			MetaField f = typeof(string).GetAnyField("m_firstChar");
+			Console.WriteLine("{0:M}", f);
 
+			MetaType s = typeof(string);
+			Console.WriteLine("{0:M}", s);
 		}
 	}
 }

@@ -1,3 +1,5 @@
+using System;
+using System.Globalization;
 using System.Reflection;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities.Security;
@@ -10,7 +12,7 @@ namespace RazorSharp.CoreClr.Meta.Base
 	/// Describes a CLR structure that has metadata information.
 	/// </summary>
 	/// <typeparam name="TClr">CLR structure type</typeparam>
-	public abstract unsafe class ClrStructure<TClr> where TClr : unmanaged
+	public abstract unsafe class ClrStructure<TClr> : IFormattable where TClr : unmanaged
 	{
 		#region Fields
 
@@ -28,7 +30,9 @@ namespace RazorSharp.CoreClr.Meta.Base
 
 		public string Name => Info.Name;
 
-		public virtual ConsoleTable Debug {
+		protected virtual ConsoleTable InfoTable => IdTable;
+
+		private ConsoleTable IdTable {
 			get {
 				var table = new ConsoleTable("Property", "Value");
 
@@ -58,9 +62,18 @@ namespace RazorSharp.CoreClr.Meta.Base
 
 		#region ToString
 
-		public override string ToString()
+		public string ToString(string format) => ToString(format, CultureInfo.CurrentCulture);
+
+		public override string ToString() => ToString(ClrStructureSettings.DefaultFormat);
+
+		public string ToString(string format, IFormatProvider formatProvider)
 		{
-			return Debug.ToString();
+			return format switch
+			{
+				ClrStructureSettings.FORMAT_ALL => InfoTable.ToString(),
+				ClrStructureSettings.FORMAT_MIN => IdTable.ToString(),
+				_ => IdTable.ToString(),
+			};
 		}
 
 		#endregion

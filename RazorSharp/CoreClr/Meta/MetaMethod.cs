@@ -6,6 +6,7 @@ using RazorSharp.CoreClr.Metadata;
 using RazorSharp.CoreClr.Metadata.Enums;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
+using SimpleSharp;
 
 // ReSharper disable SuggestBaseTypeForParameter
 
@@ -38,12 +39,9 @@ namespace RazorSharp.CoreClr.Meta
 
 		#region bool
 
-		public bool IsRuntimeSupplied {
-			get {
-				return Classification == MethodClassification.FCall ||
-				       Classification == MethodClassification.Array;
-			}
-		}
+		public bool IsRuntimeSupplied =>
+			Classification == MethodClassification.FCall ||
+			Classification == MethodClassification.Array;
 
 		public bool IsNoMetadata => Classification == MethodClassification.Dynamic;
 
@@ -75,6 +73,14 @@ namespace RazorSharp.CoreClr.Meta
 		public void Prepare()
 		{
 			RuntimeHelpers.PrepareMethod(MethodInfo.MethodHandle);
+		}
+
+		protected override ConsoleTable InfoTable {
+			get {
+				var table = base.InfoTable;
+				table.AddRow(nameof(Classification), Classification);
+				return table;
+			}
 		}
 
 		#endregion

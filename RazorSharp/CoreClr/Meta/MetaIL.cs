@@ -1,5 +1,6 @@
 #region
 
+using System;
 using System.Reflection;
 using NativeSharp.Kernel;
 using NativeSharp.Kernel.Enums;
@@ -23,7 +24,8 @@ namespace RazorSharp.CoreClr.Meta
 	///         <item><description>Reflection structure: <see cref="MethodBody"/></description></item>
 	///     </list>
 	/// </summary>
-	public class MetaIL : PseudoClrStructure<ILMethod>
+	[Obsolete]
+	public class MetaIL : AnonymousClrStructure<ILMethod>
 	{
 		#region Constructor
 
@@ -100,9 +102,9 @@ namespace RazorSharp.CoreClr.Meta
 			Kernel32.VirtualProtect(ptr, ul, oldProtect, out oldProtect);
 		}
 
-		public override ConsoleTable Debug {
+		protected override ConsoleTable InfoTable {
 			get {
-				var table = base.Debug;
+				var table = base.InfoTable;
 
 				table.AddRow(nameof(Code), Code);
 				table.AddRow(nameof(CodeSize), CodeSize);

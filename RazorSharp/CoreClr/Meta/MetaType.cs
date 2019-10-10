@@ -48,32 +48,30 @@ namespace RazorSharp.CoreClr.Meta
 
 		public bool IsInteger {
 			get {
-				switch (Type.GetTypeCode(RuntimeType)) {
-					case TypeCode.Byte:
-					case TypeCode.SByte:
-					case TypeCode.UInt16:
-					case TypeCode.Int16:
-					case TypeCode.UInt32:
-					case TypeCode.Int32:
-					case TypeCode.UInt64:
-					case TypeCode.Int64:
-						return true;
-					default:
-						return false;
-				}
+				return Type.GetTypeCode(RuntimeType) switch
+				{
+					TypeCode.Byte => true,
+					TypeCode.SByte => true,
+					TypeCode.UInt16 => true,
+					TypeCode.Int16 => true,
+					TypeCode.UInt32 => true,
+					TypeCode.Int32 => true,
+					TypeCode.UInt64 => true,
+					TypeCode.Int64 => true,
+					_ => false
+				};
 			}
 		}
 
 		public bool IsReal {
 			get {
-				switch (Type.GetTypeCode(RuntimeType)) {
-					case TypeCode.Decimal:
-					case TypeCode.Double:
-					case TypeCode.Single:
-						return true;
-					default:
-						return false;
-				}
+				return Type.GetTypeCode(RuntimeType) switch
+				{
+					TypeCode.Decimal => true,
+					TypeCode.Double => true,
+					TypeCode.Single => true,
+					_ => false
+				};
 			}
 		}
 
@@ -112,7 +110,9 @@ namespace RazorSharp.CoreClr.Meta
 
 		public bool IsAnyPointer {
 			get {
-				if (IsPointer || this == typeof(IntPtr) || this == typeof(UIntPtr) || this == typeof(Pointer)) {
+				if (IsPointer || this == typeof(IntPtr)
+				              || this == typeof(UIntPtr)
+				              || this == typeof(Pointer)) {
 					return true;
 				}
 
@@ -265,9 +265,7 @@ namespace RazorSharp.CoreClr.Meta
 		public bool ContainsPointers => Flags.HasFlagFast(MethodTableFlags.ContainsPointers);
 
 
-		public bool IsReferenceOrContainsReferences {
-			get { return !RuntimeType.IsValueType || ContainsPointers; }
-		}
+		public bool IsReferenceOrContainsReferences => !RuntimeType.IsValueType || ContainsPointers;
 
 		#endregion
 
@@ -279,9 +277,9 @@ namespace RazorSharp.CoreClr.Meta
 		/// <param name="name">Field name</param>
 		public MetaField this[string name] => Fields[name];
 
-		public VirtualCollection<MetaField>  Fields         { get; }
+		public VirtualCollection<MetaField> Fields { get; }
 
-		public VirtualCollection<MetaMethod> Methods        { get; }
+		public VirtualCollection<MetaMethod> Methods { get; }
 
 		private MetaField GetField(string name)
 		{
@@ -310,9 +308,9 @@ namespace RazorSharp.CoreClr.Meta
 
 		#region Override
 
-		public override ConsoleTable Debug {
+		protected override ConsoleTable InfoTable {
 			get {
-				var table = base.Debug;
+				var table = base.InfoTable;
 
 				table.AddRow(nameof(Name), Name);
 				table.AddRow(nameof(BaseSize), BaseSize);

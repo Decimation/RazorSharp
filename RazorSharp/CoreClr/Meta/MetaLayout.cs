@@ -13,7 +13,7 @@ namespace RazorSharp.CoreClr.Meta
 	///         <item><description>Reflection structure: N/A</description></item>
 	///     </list>
 	/// </summary>
-	public unsafe class MetaLayout : PseudoClrStructure<EEClassLayoutInfo>
+	public unsafe class MetaLayout : AnonymousClrStructure<EEClassLayoutInfo>
 	{
 		#region Constructors
 

@@ -8,11 +8,11 @@ namespace RazorSharp.CoreClr.Meta.Base
 	/// or <see cref="Token"/>
 	/// </summary>
 	/// <typeparam name="TClr">CLR structure type</typeparam>
-	public abstract class PseudoClrStructure<TClr> : ClrStructure<TClr> where TClr : unmanaged
+	public abstract class AnonymousClrStructure<TClr> : ClrStructure<TClr> where TClr : unmanaged
 	{
 		#region Constructors
 
-		internal PseudoClrStructure(Pointer<TClr> ptr) : base(ptr) { }
+		internal AnonymousClrStructure(Pointer<TClr> ptr) : base(ptr) { }
 
 		#endregion
 

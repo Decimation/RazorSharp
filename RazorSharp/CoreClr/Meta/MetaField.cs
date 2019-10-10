@@ -141,9 +141,9 @@ namespace RazorSharp.CoreClr.Meta
 
 		#region Overrides
 
-		public override ConsoleTable Debug {
+		protected override ConsoleTable InfoTable {
 			get {
-				var table = base.Debug;
+				var table = base.InfoTable;
 
 				table.AddRow(nameof(Offset), Offset);
 				table.AddRow(nameof(Size), Size);

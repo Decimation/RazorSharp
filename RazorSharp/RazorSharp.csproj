@@ -106,8 +106,9 @@
     <Compile Include="CoreClr\Metadata\ObjHeader.cs" />
     <Compile Include="CoreClr\Metadata\TypeHandle.cs" />
     <Compile Include="CoreClr\Meta\Base\ClrStructure.cs" />
+    <Compile Include="CoreClr\Meta\Base\ClrStructureSettings.cs" />
     <Compile Include="CoreClr\Meta\Base\EmbeddedClrStructure.cs" />
-    <Compile Include="CoreClr\Meta\Base\PseudoClrStructure.cs" />
+    <Compile Include="CoreClr\Meta\Base\AnonymousClrStructure.cs" />
     <Compile Include="CoreClr\Meta\MetaField.cs" />
     <Compile Include="CoreClr\Meta\MetaIL.cs" />
     <Compile Include="CoreClr\Meta\MetaLayout.cs" />
