@@ -53,17 +53,17 @@ namespace RazorSharp.CoreClr.Metadata
 
 		#region Calculated values
 
-		private bool RequiresFullMBValue => BinaryHelper.ReadBit(UInt1, 31);
+		private bool RequiresFullMBValue => Bits.ReadBit(UInt1, 31);
 
 		internal int Token {
 			get {
 				var rawToken = (int) (UInt1 & 0xFFFFFF);
 				// Check if this FieldDesc is using the packed mb layout
 				if (!RequiresFullMBValue)
-					return TokenHelper.TokenFromRid(rawToken & (int) MbMask.PackedMbLayoutMbMask,
+					return Tokens.TokenFromRid(rawToken & (int) MbMask.PackedMbLayoutMbMask,
 					                              CorTokenType.FieldDef);
 
-				return TokenHelper.TokenFromRid(rawToken, CorTokenType.FieldDef);
+				return Tokens.TokenFromRid(rawToken, CorTokenType.FieldDef);
 			}
 		}
 
@@ -76,13 +76,13 @@ namespace RazorSharp.CoreClr.Metadata
 		internal bool IsPointer => CorType == CorElementType.Ptr;
 
 
-		internal bool IsStatic => BinaryHelper.ReadBit(UInt1, 24);
+		internal bool IsStatic => Bits.ReadBit(UInt1, 24);
 
 
-		internal bool IsThreadLocal => BinaryHelper.ReadBit(UInt1, 25);
+		internal bool IsThreadLocal => Bits.ReadBit(UInt1, 25);
 
 
-		internal bool IsRVA => BinaryHelper.ReadBit(UInt1, 26);
+		internal bool IsRVA => Bits.ReadBit(UInt1, 26);
 
 		#endregion
 

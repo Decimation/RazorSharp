@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace RazorSharp.Utilities
 {
-	internal static class BinaryHelper
+	internal static class Bits
 	{
 		/// <summary>
 		///     Reads <paramref name="bitCount" /> from <paramref name="value" /> at offset <paramref name="bitOfs" />

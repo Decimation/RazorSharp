@@ -8,7 +8,7 @@ namespace RazorSharp.Utilities
 	/// <summary>
 	/// Contains optimized versions of the <see cref="Enum.HasFlag"/> function.
 	/// </summary>
-	public static class EnumFlagHelper
+	public static class EnumFlags
 	{
 		// ((uThis & uFlag) == uFlag)
 

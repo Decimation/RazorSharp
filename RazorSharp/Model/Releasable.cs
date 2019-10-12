@@ -46,7 +46,7 @@ namespace RazorSharp.Model
 		{
 			if (!IsSetup) {
 				IsSetup = true;
-				Global.WriteLine("{0}::{1}", Id, nameof(Setup));
+				
 			}
 		}
 

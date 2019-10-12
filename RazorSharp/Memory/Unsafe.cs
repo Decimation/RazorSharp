@@ -187,10 +187,7 @@ namespace RazorSharp.Memory
 
 		#region Sizes
 
-		public static int SizeOf<T>(SizeOfOptions options)
-		{
-			return SizeOf<T>(default, options);
-		}
+		public static int SizeOf<T>(SizeOfOptions options) => SizeOf<T>(default, options);
 
 		public static int SizeOf<T>(T value, SizeOfOptions options = SizeOfOptions.Intrinsic)
 		{
@@ -381,12 +378,14 @@ namespace RazorSharp.Memory
 		/// </summary>
 		private static int BaseSizeOfData(Type t)
 		{
-			if (((MetaType) t).IsStruct) {
+			var mt = (MetaType) t;
+
+			if (mt.IsStruct) {
 				return (int) Functions.Reflection.CallGeneric(typeof(Unsafe).GetMethod(nameof(SizeOf)), t, null);
 			}
 
 			// Subtract the size of the ObjHeader and MethodTable*
-			return new MetaType(t).InstanceFieldsSize;
+			return mt.InstanceFieldsSize;
 		}
 
 		#endregion

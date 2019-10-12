@@ -22,17 +22,8 @@ namespace RazorSharp.Memory.Pointers
 			var mt = (MetaType) typeof(T);
 
 			if (mt.IsInteger)
-				return String.Format(Handle.VAL_FMT, ptr.Reference, Hex.TryCreateHex(ptr.Reference));
-
-			/* Special support for C-string */
-//			if (IsCharPointer())
-//				return ReadString(StringTypes.UNI);
-
-			/*if (typeof(T) == typeof(sbyte)) {
-				return inst.ReadString(StringTypes.AnsiStr);
-			}*/
-
-
+				return String.Format(VAL_FMT, ptr.Reference, Hex.TryCreateHex(ptr.Reference));
+			
 			if (!Runtime.Info.IsStruct<T>()) {
 				Pointer<byte> heapPtr = ptr.ReadPointer();
 				string        valueStr;
@@ -47,7 +38,7 @@ namespace RazorSharp.Memory.Pointers
 						valueStr = ptr.Reference == null ? StringConstants.NULL_STR : ptr.Reference.ToString();
 				}
 
-				return String.Format(Handle.VAL_FMT, valueStr, heapPtr.ToString(Handle.FORMAT_PTR));
+				return String.Format(VAL_FMT, valueStr, heapPtr.ToString(FORMAT_PTR));
 			}
 
 

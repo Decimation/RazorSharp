@@ -9,7 +9,7 @@ namespace RazorSharp.Utilities
 	/// <summary>
 	/// Provides utilities for accessing members of a type.
 	/// </summary>
-	internal static class ReflectionHelper
+	internal static class Members
 	{
 		#region Flags
 

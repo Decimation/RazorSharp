@@ -88,9 +88,10 @@ namespace RazorSharp.Core
 		}
 
 		#endregion
-		
+
 
 		#region Serilog logger extensions
+
 #if DEBUG
 		/**
 		 * Note: be careful with the logger, as Serilog is only used in debug, and isn't included in
@@ -103,14 +104,14 @@ namespace RazorSharp.Core
 			Log = Logger.None;
 		}
 #endif
-		
+
 		[Conditional(COND_DEBUG)]
 		private static void ContextLog(string ctx, Action<string, object[]> log, string msg, object[] args)
 		{
 			if (ctx == null) {
 				ctx = String.Empty;
 			}
-			
+
 			using (LogContext.PushProperty(CONTEXT_PROP, ctx)) {
 				log(msg, args);
 			}
@@ -218,18 +219,17 @@ namespace RazorSharp.Core
 			 * Other versions will probably work but we're just making sure
 			 * todo - determine compatibility
 			 */
+
 			Conditions.Require(Environment.Version == Clr.Value.Version);
 
 			Conditions.Require(!GCSettings.IsServerGC);
 
 			Conditions.Require(Type.GetType("Mono.Runtime") == null);
 
-			if (Debugger.IsAttached) {
+			if (Debugger.IsAttached) { 
 				WriteWarning(NAME,"Debugging is enabled!");
 			}
 		}
-		
-
 
 		public override void Setup()
 		{

@@ -10,11 +10,8 @@ namespace RazorSharp.Model
 	public abstract class Closable : IDisposable
 	{
 		protected abstract string Id { get; }
-		
-		public virtual void Close()
-		{
-			Global.WriteLine("{0}::{1}", Id, nameof(Close));
-		}
+
+		public virtual void Close() { }
 
 		public void Dispose() => Close();
 	}

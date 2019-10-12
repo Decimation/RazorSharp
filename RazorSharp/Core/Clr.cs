@@ -1,8 +1,10 @@
 #region
 
 using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using RazorSharp.Import;
 using RazorSharp.Model;
@@ -65,6 +67,7 @@ namespace RazorSharp.Core
 			base.Close();
 		}
 
+
 		#region Constants
 
 		/// <summary>
@@ -94,7 +97,7 @@ namespace RazorSharp.Core
 			
 			LibraryFile = GetRuntimeFile(CLR_DLL_SHORT);
 			SymbolsFile = GetRuntimeFile(CLR_PDB_SHORT);
-			Module      = ModuleHelper.FindModule(CLR_DLL_SHORT);
+			Module      = Modules.FindModule(CLR_DLL_SHORT);
 			Version     = new Version(4, 0, 30319, 42000);
 			Imports     = new ModuleImport(SymbolsFile, Module);
 

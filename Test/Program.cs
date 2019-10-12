@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
@@ -15,6 +16,8 @@ using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 using System.Linq;
+using RazorSharp.Core;
+using RazorSharp.Native;
 
 #endregion
 
@@ -38,8 +41,12 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			int i = 256;
-			Console.WriteLine(i.ToString("X"));
+			PEHeaderReader r = new PEHeaderReader(Clr.Value.Module.FileName);
+			
+
+			foreach (var info in r.ImageSectionHeaders) {
+				Console.WriteLine(info.Section);
+			}
 		}
 	}
 }

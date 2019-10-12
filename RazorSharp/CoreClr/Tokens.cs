@@ -4,7 +4,7 @@ using RazorSharp.Utilities.Security;
 
 namespace RazorSharp.CoreClr
 {
-	internal static class TokenHelper
+	internal static class Tokens
 	{
 		private const int RID_FROM_TOKEN = 0x00FFFFFF;
 

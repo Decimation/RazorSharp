@@ -51,6 +51,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
+    <Reference Include="NativeSharp, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\NativeSharp.1.0.3\lib\net472\NativeSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="SimpleSharp, Version=1.1.9.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\SimpleSharp.1.1.9\lib\net472\SimpleSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Core" />

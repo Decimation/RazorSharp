@@ -13,7 +13,7 @@ namespace RazorSharp.Memory
 		private byte[]        m_buffer;
 		private Pointer<byte> m_lo;
 
-		public SigScanner(Region r)
+		public SigScanner(Segment r)
 		{
 			SelectRegion(r);
 		}
@@ -27,7 +27,7 @@ namespace RazorSharp.Memory
 			}
 		}
 
-		public void SelectRegion(Region r)
+		public void SelectRegion(Segment r)
 		{
 			m_buffer = r.BaseAddress.CopyBytes(r.Size);
 			m_lo     = r.BaseAddress;

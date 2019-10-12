@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace RazorSharp.Utilities
 {
-	public static class ModuleHelper
+	public static class Modules
 	{
 		/// <summary>
 		///     The <see cref="ProcessModuleCollection" /> of the current <see cref="Process" />
