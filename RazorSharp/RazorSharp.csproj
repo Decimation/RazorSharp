@@ -116,7 +116,7 @@
     <Compile Include="CoreClr\Meta\MetaType.cs" />
     <Compile Include="CoreClr\Offsets.cs" />
     <Compile Include="CoreClr\Runtime.cs" />
-    <Compile Include="CoreClr\RuntimeInfo.cs" />
+    <Compile Include="CoreClr\Runtime.Info.cs" />
     <Compile Include="CoreClr\Structures\GCHeap.cs" />
     <Compile Include="CoreClr\Structures\GlobalHeap.cs" />
     <Compile Include="CoreClr\Structures\PackedDWORDFields.cs" />
@@ -153,12 +153,12 @@
     <Compile Include="Memory\Components\MemoryField.cs" />
     <Compile Include="Memory\Components\PaddingField.cs" />
     <Compile Include="Memory\Converter.cs" />
-    <Compile Include="Memory\Enums\ConversionType.cs" />
     <Compile Include="Memory\Enums\OffsetOptions.cs" />
     <Compile Include="Memory\Enums\SizeOfOptions.cs" />
+    <Compile Include="Memory\Mem.Kernel.cs" />
     <Compile Include="Memory\Mem.cs" />
+    <Compile Include="Memory\Pointers\Handle.cs" />
     <Compile Include="Memory\Pointers\Pointer.cs" />
-    <Compile Include="Memory\Pointers\PointerSettings.cs" />
     <Compile Include="Memory\Region.cs" />
     <Compile Include="Memory\SigScanner.cs" />
     <Compile Include="Memory\Unsafe.cs" />

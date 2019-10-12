@@ -13,7 +13,7 @@ using SimpleSharp.Diagnostics;
 
 namespace RazorSharp.CoreClr
 {
-	public static unsafe class Runtime
+	public static unsafe partial class Runtime
 	{
 		static Runtime()
 		{
@@ -50,7 +50,7 @@ namespace RazorSharp.CoreClr
 		internal static TypeHandle ReadTypeHandle<T>(T value)
 		{
 			// Value types do not have a MethodTable ptr, but they do have a TypeHandle.
-			if (RuntimeInfo.IsStruct(value))
+			if (Runtime.Info.IsStruct(value))
 				return ReadTypeHandle(value.GetType());
 
 			Unsafe.TryGetAddressOfHeap(value, out Pointer<byte> ptr);
@@ -82,17 +82,14 @@ namespace RazorSharp.CoreClr
 			if (member == null) {
 				throw new ArgumentNullException(nameof(member));
 			}
-			
-			switch (member) {
-				case Type t:
-					return ReadTypeHandle(t).MethodTable.Cast();
-				case FieldInfo field:
-					return field.FieldHandle.Value;
-				case MethodInfo method:
-					return method.MethodHandle.Value;
-			}
-			
-			throw Guard.NotSupportedMemberFail(member);
+
+			return member switch
+			{
+				Type t => ReadTypeHandle(t).MethodTable.Cast(),
+				FieldInfo field => field.FieldHandle.Value,
+				MethodInfo method => method.MethodHandle.Value,
+				_ => throw Guard.NotSupportedMemberFail(member)
+			};
 		}
 
 
@@ -120,11 +117,5 @@ namespace RazorSharp.CoreClr
 			var ptr = Unsafe.AddressOfHeap(value, OffsetOptions.Header).Cast<ObjHeader>();
 			return ptr.Value;
 		}
-
-		#region Function
-
-		
-
-		#endregion
 	}
 }

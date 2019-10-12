@@ -91,7 +91,7 @@ namespace RazorSharp.Memory.Pointers
 		///     Whether the value being pointed to is <c>default</c> or <c>null</c> bytes,
 		/// or this pointer is <c>null</c>.
 		/// </summary>
-		public bool IsNil => RuntimeInfo.IsNil(Reference);
+		public bool IsNil => Runtime.Info.IsNil(Reference);
 
 		#endregion
 
@@ -307,7 +307,7 @@ namespace RazorSharp.Memory.Pointers
 		#region Other methods
 
 		[Pure]
-		private static bool IsCharPointer() => typeof(T) == typeof(char);
+		internal static bool IsCharPointer() => typeof(T) == typeof(char);
 
 		[Pure]
 		public Pointer<T> AddressOfIndex(int index) => OffsetFast(index);
@@ -622,106 +622,21 @@ namespace RazorSharp.Memory.Pointers
 		/// <summary>
 		/// </summary>
 		/// <param name="format">
-		///     See <see cref="PointerSettings" /> for format options
+		///     See <see cref="Handle" /> for format options
 		/// </param>
 		/// <param name="formatProvider"></param>
 		/// <returns></returns>
 		[Pure]
 		public string ToString(string format, IFormatProvider formatProvider)
 		{
-			if (String.IsNullOrEmpty(format))
-				format = PointerSettings.DefaultFormat;
-
-			if (formatProvider == null)
-				formatProvider = CultureInfo.CurrentCulture;
-
-			switch (format.ToUpperInvariant()) {
-				case PointerSettings.FORMAT_ARRAY:
-				{
-					var rg = new string[PointerSettings.ArrayCount];
-
-					for (int i = 0; i < rg.Length; i++) {
-						rg[i] = AddressOfIndex(i).ToStringSafe();
-					}
-
-
-					return String.Join(StringConstants.JOIN_COMMA, rg);
-				}
-
-				case PointerSettings.FORMAT_INT:
-					return ToInt64().ToString();
-				case PointerSettings.FORMAT_OBJ:
-					return ToStringSafe();
-				case PointerSettings.FORMAT_PTR:
-					return Hex.ToHex(ToInt64());
-
-				case PointerSettings.FORMAT_BOTH:
-				{
-					string thisStr = ToStringSafe();
-
-					string typeName = typeof(T).ContainsAnyGenericParameters()
-						? SystemFormatting.GenericName(typeof(T))
-						: typeof(T).Name;
-
-					string typeNameDisplay = IsCharPointer() ? PointerSettings.CHAR_PTR : typeName;
-
-					return String.Format("{0} @ {1}: {2}", typeNameDisplay, Hex.ToHex(Address),
-					                     thisStr.Contains(Environment.NewLine)
-						                     ? Environment.NewLine + thisStr
-						                     : thisStr);
-				}
-
-				default:
-					goto case PointerSettings.FORMAT_OBJ;
-			}
+			return Handle.FormatPointer(this, format, formatProvider);
 		}
-
-		public string ToStringSafe()
-		{
-			// todo: rewrite this
-
-			if (IsNull)
-				return StringConstants.NULL_STR;
-
-			if (((MetaType) typeof(T)).IsInteger)
-				return String.Format(PointerSettings.VAL_FMT, Reference, Hex.TryCreateHex(Reference));
-
-			/* Special support for C-string */
-//			if (IsCharPointer())
-//				return ReadString(StringTypes.UNI);
-
-			/*if (typeof(T) == typeof(sbyte)) {
-				return inst.ReadString(StringTypes.AnsiStr);
-			}*/
-
-
-			if (!RuntimeInfo.IsStruct<T>()) {
-				Pointer<byte> heapPtr = ReadPointer();
-				string        valueStr;
-
-				if (heapPtr.IsNull) {
-					valueStr = StringConstants.NULL_STR;
-					goto RETURN;
-				}
-
-				if (typeof(T).IsIListType() && typeof(T) != typeof(string))
-					valueStr = $"[{((IEnumerable) Reference).AutoJoin()}]";
-				else
-					valueStr = Reference == null ? StringConstants.NULL_STR : Reference.ToString();
-
-				RETURN:
-				return String.Format(PointerSettings.VAL_FMT, valueStr, heapPtr.ToString(PointerSettings.FORMAT_PTR));
-			}
-
-
-			return Reference.ToString();
-		}
-
+		
 		[Pure]
 		public string ToString(string format) => ToString(format, CultureInfo.CurrentCulture);
 
 		[Pure]
-		public override string ToString() => ToString(PointerSettings.DefaultFormat);
+		public override string ToString() => ToString(Handle.DefaultFormat);
 
 		#endregion
 	}

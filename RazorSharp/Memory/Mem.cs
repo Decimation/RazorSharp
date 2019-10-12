@@ -18,7 +18,7 @@ namespace RazorSharp.Memory
 	///     <seealso cref="Mem" />
 	///     <para></para>
 	/// </summary>
-	public static unsafe class Mem
+	public static unsafe partial class Mem
 	{
 		public static bool Is64Bit => IntPtr.Size == sizeof(long) && Environment.Is64BitProcess;
 
@@ -35,25 +35,13 @@ namespace RazorSharp.Memory
 		#endregion
 
 
-		/// <summary>
-		/// Zeros the memory of <paramref name="value"/>
-		/// </summary>
-		/// <param name="value">Value to zero</param>
-		/// <typeparam name="T">Type of <paramref name="value"/></typeparam>
-		public static void Clear<T>(ref T value)
-		{
-			var ptr = Unsafe.AddressOf(ref value);
-			ptr.Clear();
-		}
-
-
 		#region Alloc / free
-		
+
 		public static AllocationManager Allocator { get; } = new AllocationManager(Allocators.Local);
 
 		public static void Destroy<T>(ref T value)
 		{
-			if (!RuntimeInfo.IsStruct(value)) {
+			if (!Runtime.Info.IsStruct(value)) {
 				int           size = Unsafe.SizeOf(value, SizeOfOptions.Data);
 				Pointer<byte> ptr  = Unsafe.AddressOfFields(ref value);
 				ptr.ClearBytes(size);
@@ -63,38 +51,15 @@ namespace RazorSharp.Memory
 			}
 		}
 
-		#endregion
-
-
-		#region Read / Write
-
-		public static T ReadCurrentProcessMemory<T>(Pointer<byte> lpBaseAddress)
+		/// <summary>
+		/// Zeros the memory of <paramref name="value"/>
+		/// </summary>
+		/// <param name="value">Value to zero</param>
+		/// <typeparam name="T">Type of <paramref name="value"/></typeparam>
+		public static void Clear<T>(ref T value)
 		{
-			return ReadProcessMemory<T>(Process.GetCurrentProcess(), lpBaseAddress);
-		}
-
-		public static T ReadProcessMemory<T>(Process proc, Pointer<byte> lpBaseAddress)
-		{
-			T   t    = default;
-			int size = Unsafe.SizeOf<T>();
-			var ptr  = Unsafe.AddressOf(ref t);
-
-			Kernel32.ReadProcessMemory(proc, lpBaseAddress.Address, ptr.Address, size);
-
-			return t;
-		}
-
-		public static void WriteCurrentProcessMemory<T>(Pointer<byte> lpBaseAddress, T value)
-		{
-			WriteProcessMemory(Process.GetCurrentProcess(), lpBaseAddress, value);
-		}
-
-		public static void WriteProcessMemory<T>(Process proc, Pointer<byte> lpBaseAddress, T value)
-		{
-			int dwSize = Unsafe.SizeOf<T>();
-			var ptr    = Unsafe.AddressOf(ref value);
-
-			Kernel32.WriteProcessMemory(proc, lpBaseAddress.Address, ptr.Address, dwSize);
+			var ptr = Unsafe.AddressOf(ref value);
+			ptr.Clear();
 		}
 
 		#endregion

@@ -13,6 +13,27 @@ namespace RazorSharp.Memory
 {
 	#region
 
+	/// <summary>
+	/// Specifies how a value will be converted
+	/// </summary>
+	public enum ConversionType
+	{
+		/// <summary>
+		///     Reinterprets a value as a value of the specified conversion type
+		/// </summary>
+		Reinterpret,
+
+		/// <summary>
+		/// <see cref="Convert.ChangeType(object,System.Type)"/>
+		/// </summary>
+		Normal,
+
+		/// <summary>
+		/// <see cref="Unsafe.As{T,T}"/>
+		/// </summary>
+		Proxy
+	}
+	
 	#endregion
 
 	/// <summary>
@@ -72,7 +93,7 @@ namespace RazorSharp.Memory
 
 			Pointer<byte> addr;
 
-			if (RuntimeInfo.IsStruct<T>()) {
+			if (Runtime.Info.IsStruct<T>()) {
 				addr = Unsafe.AddressOf(ref value).Cast();
 			}
 			else {

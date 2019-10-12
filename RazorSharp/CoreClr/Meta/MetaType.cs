@@ -9,6 +9,7 @@ using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
+using SimpleSharp.Utilities;
 
 // ReSharper disable SwitchStatementMissingSomeCases
 // ReSharper disable ReturnTypeCanBeEnumerable.Global
@@ -80,6 +81,10 @@ namespace RazorSharp.CoreClr.Meta
 		public bool IsStruct => RuntimeType.IsValueType;
 
 		public bool IsPointer => RuntimeType.IsPointer;
+
+		public bool IsIListType => RuntimeType.IsIListType();
+
+		public bool IsIEnumerableType => RuntimeType.IsEnumerableType();
 
 		#region Unmanaged
 

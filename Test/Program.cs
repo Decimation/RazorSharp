@@ -38,14 +38,8 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			MetaMethod t = typeof(Program).GetAnyMethod(nameof(Hello));
-			Console.WriteLine("{0:M}", t);
-
-			MetaField f = typeof(string).GetAnyField("m_firstChar");
-			Console.WriteLine("{0:M}", f);
-
-			MetaType s = typeof(string);
-			Console.WriteLine("{0:M}", s);
+			int i = 256;
+			Console.WriteLine(i.ToString("X"));
 		}
 	}
 }

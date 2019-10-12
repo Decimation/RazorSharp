@@ -93,7 +93,7 @@ namespace RazorSharp.Memory
 		{
 			Pointer<T> addr = AddressOf(ref value);
 
-			if (RuntimeInfo.IsStruct(value)) {
+			if (Runtime.Info.IsStruct(value)) {
 				return addr.Cast();
 			}
 
@@ -102,7 +102,7 @@ namespace RazorSharp.Memory
 
 		public static bool TryGetAddressOfHeap<T>(T value, OffsetOptions options, out Pointer<byte> ptr)
 		{
-			if (RuntimeInfo.IsStruct(value)) {
+			if (Runtime.Info.IsStruct(value)) {
 				ptr = null;
 				return false;
 			}
@@ -153,14 +153,14 @@ namespace RazorSharp.Memory
 			switch (offset) {
 				case OffsetOptions.StringData:
 				{
-					Conditions.Require(RuntimeInfo.IsString(value));
+					Conditions.Require(Runtime.Info.IsString(value));
 					string s = value as string;
 					return heapPtr + Offsets.OffsetToStringData;
 				}
 
 				case OffsetOptions.ArrayData:
 				{
-					Conditions.Require(RuntimeInfo.IsArray(value));
+					Conditions.Require(Runtime.Info.IsArray(value));
 					return heapPtr + Offsets.OffsetToArrayData;
 				}
 
@@ -198,11 +198,11 @@ namespace RazorSharp.Memory
 
 			if (options == SizeOfOptions.Auto) {
 				// Break into the next switch branch which will go to resolved case
-				options = RuntimeInfo.IsStruct(value) ? SizeOfOptions.Intrinsic : SizeOfOptions.Heap;
+				options = Runtime.Info.IsStruct(value) ? SizeOfOptions.Intrinsic : SizeOfOptions.Heap;
 			}
 
 			// If a value was supplied
-			if (!RuntimeInfo.IsNil(value)) {
+			if (!Runtime.Info.IsNil(value)) {
 				mt = new MetaType(value.GetType());
 
 				switch (options) {
@@ -230,7 +230,7 @@ namespace RazorSharp.Memory
 
 				case SizeOfOptions.BaseInstance:
 				{
-					Conditions.Require(!RuntimeInfo.IsStruct<T>());
+					Conditions.Require(!Runtime.Info.IsStruct<T>());
 					return mt.BaseSize;
 				}
 
@@ -286,9 +286,9 @@ namespace RazorSharp.Memory
 		private static int HeapSizeInternal<T>(T value)
 		{
 			// Sanity check
-			Conditions.Require(!RuntimeInfo.IsStruct(value));
+			Conditions.Require(!Runtime.Info.IsStruct(value));
 
-			if (RuntimeInfo.IsNil(value)) {
+			if (Runtime.Info.IsNil(value)) {
 				return Constants.INVALID_VALUE;
 			}
 
@@ -328,7 +328,7 @@ namespace RazorSharp.Memory
 			 *
 			 */
 
-			if (RuntimeInfo.IsArray(value)) {
+			if (Runtime.Info.IsArray(value)) {
 				var arr = value as Array;
 
 				// ReSharper disable once PossibleNullReferenceException
@@ -336,13 +336,13 @@ namespace RazorSharp.Memory
 				length = arr.Length;
 
 				// Sanity check
-				Conditions.Assert(!RuntimeInfo.IsString(value));
+				Conditions.Assert(!Runtime.Info.IsString(value));
 			}
-			else if (RuntimeInfo.IsString(value)) {
+			else if (Runtime.Info.IsString(value)) {
 				string str = value as string;
 
 				// Sanity check
-				Conditions.Assert(!RuntimeInfo.IsArray(value));
+				Conditions.Assert(!Runtime.Info.IsArray(value));
 				Conditions.NotNull(str, nameof(str));
 
 				length = str.Length;
@@ -363,7 +363,7 @@ namespace RazorSharp.Memory
 		/// </summary>
 		private static int SizeOfData<T>(T value)
 		{
-			if (RuntimeInfo.IsStruct(value)) {
+			if (Runtime.Info.IsStruct(value)) {
 				return SizeOf<T>();
 			}
 
