@@ -30,7 +30,7 @@ namespace RazorSharp.Interop
 				argTypes.Add(returnType);
 
 				var type = Expression.GetDelegateType(argTypes.ToArray());
-				return DelegateCreator.CreateDelegate(ptr, type);
+				return FunctionFactory.Delegates.Create(ptr, type);
 			}
 
 			/// <summary>

@@ -2,9 +2,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using RazorSharp.Interop;
+using RazorSharp.Interop.Structures;
 using RazorSharp.Interop.Utilities;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Native.Structures;
 using SimpleSharp.Diagnostics;
 
 namespace RazorSharp.Import
@@ -55,12 +55,12 @@ namespace RazorSharp.Import
 
 		public TDelegate GetFunctionSafe<TDelegate>(string name) where TDelegate : Delegate
 		{
-			return DelegateCreator.CreateDelegateSafe<TDelegate>(GetAddress(name));
+			return FunctionFactory.Delegates.CreateSafe<TDelegate>(GetAddress(name));
 		}
 
 		public TDelegate GetFunction<TDelegate>(string id) where TDelegate : Delegate
 		{
-			return DelegateCreator.CreateDelegate<TDelegate>(GetAddress(id));
+			return FunctionFactory.Delegates.Create<TDelegate>(GetAddress(id));
 		}
 	}
 }

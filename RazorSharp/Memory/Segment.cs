@@ -1,6 +1,6 @@
 using System.Diagnostics;
+using RazorSharp.Interop.Structures;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Native.Structures;
 
 namespace RazorSharp.Memory
 {

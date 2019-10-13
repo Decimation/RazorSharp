@@ -10,14 +10,13 @@ using RazorSharp;
 using RazorSharp.Analysis;
 using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Meta;
-using RazorSharp.CoreClr.Structures;
 using RazorSharp.Interop;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Pointers;
 using RazorSharp.Utilities;
 using System.Linq;
 using RazorSharp.Core;
-using RazorSharp.Native;
+using RazorSharp.Interop.Utilities;
 
 #endregion
 
@@ -39,11 +38,15 @@ namespace Test
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
-			PEHeaderReader r = new PEHeaderReader(Clr.Value.Module.FileName);
+			var f = (MetaField) typeof(string).GetAnyField("m_firstChar");
+			Console.WriteLine("{0:A}",f);
 
-			foreach (var info in r.ImageSectionHeaders) {
-				Console.WriteLine(info.Section);
-			}
+			var l = Runtime.AllocObject<List<int>>();
+			l.Add(1);
+			Console.WriteLine(l.Count);
+			Console.WriteLine(GCHeap.GCCount);
+			GC.Collect();
+			Console.WriteLine(GCHeap.GCCount);
 		}
 	}
 }

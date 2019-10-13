@@ -16,8 +16,8 @@ using RazorSharp.Memory.Pointers;
 
 namespace RazorSharp.Interop
 {
-	
-
-
+	/// <summary>
+	/// Provides methods of invoking various function types.
+	/// </summary>
 	public static partial class Functions { }
 }

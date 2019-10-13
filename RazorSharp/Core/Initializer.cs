@@ -1,7 +1,8 @@
 using System;
+using RazorSharp.CoreClr;
 using RazorSharp.CoreClr.Metadata;
-using RazorSharp.CoreClr.Structures;
 using RazorSharp.Import;
+using RazorSharp.Interop;
 using RazorSharp.Interop.Utilities;
 using RazorSharp.Memory;
 using RazorSharp.Model;
@@ -20,8 +21,7 @@ namespace RazorSharp.Core
 		/// </summary>
 		private static readonly Type[] CoreClrTypes =
 		{
-			typeof(Refurbisher),
-			typeof(DelegateCreator),
+			typeof(FunctionFactory),
 			typeof(MethodDesc),
 			typeof(FieldDesc),
 			typeof(MethodTable),

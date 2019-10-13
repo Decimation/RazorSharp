@@ -1,7 +1,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr.Metadata.Enums;
-using RazorSharp.CoreClr.Structures;
 using RazorSharp.Memory.Pointers;
 
 // ReSharper disable ArrangeAccessorOwnerBody

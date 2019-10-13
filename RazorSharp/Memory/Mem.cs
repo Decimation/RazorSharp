@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory.Allocation;
@@ -59,6 +60,43 @@ namespace RazorSharp.Memory
 		{
 			var ptr = Unsafe.AddressOf(ref value);
 			ptr.Clear();
+		}
+
+		#endregion
+
+		#region Read / write
+
+		/// <summary>
+		/// Reads in a block from a file and converts it to the struct
+		/// type specified by the template parameter
+		/// </summary>
+		public static T ReadFromBinaryReader<T>(BinaryReader reader)
+		{
+			// Read in a byte array
+			byte[] bytes = reader.ReadBytes(Marshal.SizeOf(typeof(T)));
+
+			// Pin the managed memory while, copy it out the data, then unpin it
+			var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+			var value  = (T) Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
+			handle.Free();
+
+			return value;
+		}
+
+		public static string ReadString(sbyte* first, int len)
+		{
+			if (first == null || len <= 0) {
+				return null;
+			}
+
+//			return Marshal.PtrToStringAuto(new IntPtr(first), len)
+//			              .Erase(StringConstants.NULL_TERMINATOR);
+
+			/*byte[] rg = new byte[len];
+			Marshal.Copy(new IntPtr(first), rg, 0, rg.Length);
+			return Encoding.ASCII.GetString(rg);*/
+
+			return new string(first, 0, len);
 		}
 
 		#endregion

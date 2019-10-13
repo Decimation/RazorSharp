@@ -2,8 +2,8 @@ using System;
 using InlineIL;
 using JetBrains.Annotations;
 using RazorSharp.CoreClr.Meta;
+using RazorSharp.Interop.Utilities;
 using RazorSharp.Memory;
-using RazorSharp.Native;
 using RazorSharp.Utilities.Security;
 
 namespace RazorSharp.CoreClr

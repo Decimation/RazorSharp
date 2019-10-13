@@ -2,7 +2,6 @@ using System;
 using System.Reflection;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.CoreClr.Metadata;
-using RazorSharp.CoreClr.Structures;
 using RazorSharp.Interop;
 using RazorSharp.Memory;
 using RazorSharp.Memory.Enums;
@@ -33,7 +32,7 @@ namespace RazorSharp.CoreClr
 		/// <returns>An initialized object</returns>
 		public static T AllocObject<T>(params object[] args)
 		{
-			var value = GlobalHeap.AllocateObject<T>();
+			var value = GCHeap.AllocateObject<T>();
 			Functions.Reflection.CallConstructor(value, args);
 			return value;
 		}

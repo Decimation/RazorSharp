@@ -4,9 +4,9 @@ using System;
 using System.Reflection;
 using RazorSharp.CoreClr.Meta.Base;
 using RazorSharp.CoreClr.Metadata.JitIL;
+using RazorSharp.Interop;
+using RazorSharp.Interop.Enums;
 using RazorSharp.Memory.Pointers;
-using RazorSharp.Native.Enums;
-using RazorSharp.Native.Win32;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
 
@@ -95,11 +95,11 @@ namespace RazorSharp.CoreClr.Meta
 			int ul  = code.Length;
 			var ptr = Code.Address;
 
-			NativeWin32.Kernel.VirtualProtect(ptr, ul, MemoryProtection.ExecuteReadWrite, out var oldProtect);
+			Win32.Kernel32.VirtualProtect(ptr, ul, MemoryProtection.ExecuteReadWrite, out var oldProtect);
 
 			Code.WriteAll(code);
 
-			NativeWin32.Kernel.VirtualProtect(ptr, ul, oldProtect, out oldProtect);
+			Win32.Kernel32.VirtualProtect(ptr, ul, oldProtect, out oldProtect);
 		}
 
 		protected override ConsoleTable InfoTable {

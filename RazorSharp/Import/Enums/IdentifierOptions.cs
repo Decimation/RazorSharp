@@ -12,12 +12,12 @@ namespace RazorSharp.Import.Enums
 		None = 0,
 		
 		/// <summary>
-		/// Don't use <see cref="ImportNamespaceAttribute.Namespace"/> in the symbol name resolution.
+		/// Don't use <see cref="ImportNamespaceAttribute.Namespace"/> in the identifier name resolution.
 		/// </summary>
 		IgnoreNamespace = 1,
 		
 		/// <summary>
-		/// Don't use the enclosing type's name in the symbol name resolution.
+		/// Don't use the enclosing type's name in the identifier name resolution.
 		/// </summary>
 		IgnoreEnclosingNamespace = 1 << 1,
 		
@@ -27,7 +27,7 @@ namespace RazorSharp.Import.Enums
 		UseAccessorName = 1 << 2,
 		
 		/// <summary>
-		/// Use only the symbol name.
+		/// Use only the identifier name.
 		/// <remarks>
 		/// This is a combination of <see cref="IgnoreNamespace"/>, <see cref="IgnoreEnclosingNamespace"/>.
 		/// This can also be used for global variables.

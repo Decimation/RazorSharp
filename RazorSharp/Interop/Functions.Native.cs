@@ -3,7 +3,7 @@
 using System.Reflection;
 using InlineIL;
 using JetBrains.Annotations;
-using RazorSharp.Native;
+using RazorSharp.Interop.Utilities;
 
 #endregion
 
@@ -22,7 +22,7 @@ namespace RazorSharp.Interop
 		// todo: reformat
 
 		/// <summary>
-		/// Provides functions for calling native functions using the <c>calli</c> opcode.
+		/// Provides methods for calling native functions using the IL <c>calli</c> opcode.
 		/// </summary>
 		public static class Native
 		{

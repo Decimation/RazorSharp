@@ -22,23 +22,23 @@ namespace RazorSharp.Interop
 			/// <param name="args">Method arguments</param>
 			/// <returns>Return value of the method specified by <paramref name="method"/></returns>
 			public static object CallGeneric(MethodInfo      method,
-			                                       Type[]          typeArgs,
-			                                       object          value,
-			                                       params object[] args)
+			                                 Type[]          typeArgs,
+			                                 object          value,
+			                                 params object[] args)
 			{
 				return method.MakeGenericMethod(typeArgs).Invoke(value, args);
 			}
 
 			public static object CallGeneric(MethodInfo      method,
-			                                       Type            typeArg,
-			                                       object          value,
-			                                       params object[] args)
+			                                 Type            typeArg,
+			                                 object          value,
+			                                 params object[] args)
 			{
 				return method.MakeGenericMethod(typeArg).Invoke(value, args);
 			}
 
 			#endregion
-			
+
 			/// <summary>
 			///     Runs a constructor whose parameters match <paramref name="args" />
 			/// </summary>
@@ -67,7 +67,5 @@ namespace RazorSharp.Interop
 				return false;
 			}
 		}
-
-		
 	}
 }
