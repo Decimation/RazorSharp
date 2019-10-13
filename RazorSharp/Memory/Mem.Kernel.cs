@@ -48,11 +48,11 @@ namespace RazorSharp.Memory
 			public static void ReadProcessMemory(Process       proc,     Pointer<byte> lpBaseAddress,
 			                                     Pointer<byte> lpBuffer, int           cb)
 			{
-				var hProc = Win32.Kernel32.OpenProcess(proc);
+				var hProc = Native.Kernel32.OpenProcess(proc);
 
 
 				// Read the memory
-				bool ok = (Win32.Kernel32.ReadProcessMemoryInternal(hProc, lpBaseAddress.Address,
+				bool ok = (Native.Kernel32.ReadProcessMemoryInternal(hProc, lpBaseAddress.Address,
 				                                                    lpBuffer.Address, cb,
 				                                                    out int numberOfBytesRead));
 
@@ -61,7 +61,7 @@ namespace RazorSharp.Memory
 				}
 
 				// Close the handle
-				Win32.Kernel32.CloseHandle(hProc);
+				Native.Kernel32.CloseHandle(hProc);
 			}
 
 			public static byte[] ReadProcessMemory(Process proc, Pointer<byte> lpBaseAddress, int cb)
@@ -112,10 +112,10 @@ namespace RazorSharp.Memory
 			public static void WriteProcessMemory(Process proc, Pointer<byte> lpBaseAddress, Pointer<byte> lpBuffer,
 			                                      int     dwSize)
 			{
-				var hProc = Win32.Kernel32.OpenProcess(proc);
+				var hProc = Native.Kernel32.OpenProcess(proc);
 
 				// Write the memory
-				bool ok = (Win32.Kernel32.WriteProcessMemoryInternal(hProc, lpBaseAddress.Address, lpBuffer.Address,
+				bool ok = (Native.Kernel32.WriteProcessMemoryInternal(hProc, lpBaseAddress.Address, lpBuffer.Address,
 				                                                     dwSize, out int numberOfBytesWritten));
 
 
@@ -125,7 +125,7 @@ namespace RazorSharp.Memory
 
 
 				// Close the handle
-				Win32.Kernel32.CloseHandle(hProc);
+				Native.Kernel32.CloseHandle(hProc);
 			}
 
 			public static void WriteProcessMemory(Process proc, Pointer<byte> lpBaseAddress, byte[] value)

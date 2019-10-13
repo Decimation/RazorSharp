@@ -95,11 +95,11 @@ namespace RazorSharp.CoreClr.Meta
 			int ul  = code.Length;
 			var ptr = Code.Address;
 
-			Win32.Kernel32.VirtualProtect(ptr, ul, MemoryProtection.ExecuteReadWrite, out var oldProtect);
+			Native.Kernel32.VirtualProtect(ptr, ul, MemoryProtection.ExecuteReadWrite, out var oldProtect);
 
 			Code.WriteAll(code);
 
-			Win32.Kernel32.VirtualProtect(ptr, ul, oldProtect, out oldProtect);
+			Native.Kernel32.VirtualProtect(ptr, ul, oldProtect, out oldProtect);
 		}
 
 		protected override ConsoleTable InfoTable {

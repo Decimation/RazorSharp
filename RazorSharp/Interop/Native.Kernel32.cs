@@ -12,7 +12,7 @@ namespace RazorSharp.Interop
 	using As = MarshalAsAttribute;
 	using Types = UnmanagedType;
 
-	internal static unsafe partial class Win32
+	internal static unsafe partial class Native
 	{
 		/// <summary>
 		/// Functions from <see cref="KERNEL32_DLL"/>
@@ -76,6 +76,8 @@ namespace RazorSharp.Interop
 
 			#endregion
 
+			#region Process
+
 			internal static IntPtr OpenProcess(Process proc, ProcessAccess flags = ProcessAccess.All)
 			{
 				return OpenProcess(flags, false, proc.Id);
@@ -85,6 +87,8 @@ namespace RazorSharp.Interop
 			{
 				return OpenProcess(Process.GetCurrentProcess(), flags);
 			}
+
+			#endregion
 
 			#endregion
 

@@ -11,7 +11,7 @@ namespace RazorSharp.Interop
 	using As = MarshalAsAttribute;
 	using Types = UnmanagedType;
 
-	internal static unsafe partial class Win32
+	internal static unsafe partial class Native
 	{
 		/// <summary>
 		/// Functions from <see cref="DBGHELP_DLL"/>
@@ -26,11 +26,12 @@ namespace RazorSharp.Interop
 
 			#region Abstraction
 
-			internal static void SymInitialize(IntPtr hProcess) => SymInitialize(hProcess, IntPtr.Zero, false);
+			internal static void SymInitialize(IntPtr hProcess) => 
+				SymInitialize(hProcess, IntPtr.Zero, false);
 
 
 			internal static ulong SymLoadModuleEx(IntPtr hProc, IntPtr hFile, string img, string mod, ulong dllBase,
-			                                    uint   fileSize)
+			                                      uint   fileSize)
 			{
 				return SymLoadModuleEx(hProc, hFile, img, mod, dllBase,
 				                       fileSize, IntPtr.Zero, default);
@@ -95,36 +96,29 @@ namespace RazorSharp.Interop
 			#region Sym enum types
 
 			[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
-			[DllImport(DBGHELP_DLL, SetLastError = true, CharSet = CharSet.Unicode,
-				EntryPoint                        = "SymEnumTypesByNameW")]
+			[DllImport(DBGHELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 			[return: As(Types.Bool)]
-			private static extern bool SymEnumTypesByName(IntPtr                 hProcess,
-			                                              ulong                  modBase,
-			                                              string                 mask,
-			                                              SymEnumSymbolsCallback callback,
-			                                              IntPtr                 pUserContext);
+			private static extern bool SymEnumTypesByName(IntPtr hProcess, ulong                  modBase,
+			                                              string mask,     SymEnumSymbolsCallback callback,
+			                                              IntPtr pUserContext);
 
 			[SuppressUnmanagedCodeSecurity]
 			[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
 			[DllImport(DBGHELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 			[return: As(Types.Bool)]
-			private static extern bool SymEnumTypes(IntPtr                 hProcess,
-			                                        ulong                  modBase,
-			                                        SymEnumSymbolsCallback callback,
-			                                        IntPtr                 pUserContext);
+			private static extern bool SymEnumTypes(IntPtr                 hProcess, ulong  modBase,
+			                                        SymEnumSymbolsCallback callback, IntPtr pUserContext);
 
 			#endregion
 
 			#region Sym enum symbols
 
 			[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
-			[DllImport(DBGHELP_DLL, SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SymEnumSymbolsW")]
+			[DllImport(DBGHELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 			[return: As(Types.Bool)]
-			internal static extern bool SymEnumSymbols(IntPtr                 hProcess,
-			                                           ulong                  modBase,
-			                                           string                 mask,
-			                                           SymEnumSymbolsCallback callback,
-			                                           IntPtr                 pUserContext);
+			internal static extern bool SymEnumSymbols(IntPtr hProcess, ulong                  modBase,
+			                                           string mask,     SymEnumSymbolsCallback callback,
+			                                           IntPtr pUserContext);
 
 			#endregion
 
@@ -162,18 +156,18 @@ namespace RazorSharp.Interop
 			private static extern ulong SymLoadModule64(IntPtr hProc, IntPtr h, string p, string s, ulong baseAddr,
 			                                            uint   fileSize);
 
-			
+
 			[DllImport(DBGHELP_DLL, SetLastError = true)]
 			private static extern bool SymGetModuleInfo64(IntPtr hProc, ulong qwAddr, IntPtr pModInfo);
 
-			// BOOL SymUnloadModule64(HANDLE hProcess, DWORD64 BaseOfDll)
+
 			[DllImport(DBGHELP_DLL)]
 			[return: As(Types.Bool)]
 			internal static extern bool SymUnloadModule64(IntPtr hProc, ulong baseAddr);
 
 
 			[DefaultDllImportSearchPaths(DllImportSearchPath.LegacyBehavior)]
-			[DllImport(DBGHELP_DLL, SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SymLoadModuleExW")]
+			[DllImport(DBGHELP_DLL, SetLastError = true, CharSet = CharSet.Unicode)]
 			private static extern ulong SymLoadModuleEx(IntPtr hProcess,   IntPtr hFile,     string imageName,
 			                                            string moduleName, ulong  baseOfDll, uint   dllSize,
 			                                            IntPtr data,       uint   flags);

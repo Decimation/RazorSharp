@@ -28,10 +28,8 @@ namespace RazorSharp.Interop.Structures
 			Tag          = (SymbolTag) pSymInfo->Tag;
 		}
 
-		public Symbol(IntPtr pSym) : this((SymbolInfo*) pSym){}
+		internal Symbol(IntPtr pSym) : this((SymbolInfo*) pSym, Native.DebugHelp.GetSymbolName(pSym)) { }
 
-		private Symbol(SymbolInfo* pSymInfo)
-			: this(pSymInfo, Mem.ReadString(&pSymInfo->Name, (int) pSymInfo->NameLen)) { }
 
 		public string Name { get; }
 
@@ -73,7 +71,7 @@ namespace RazorSharp.Interop.Structures
 		}
 
 		internal const uint MAX_SYM_NAME = 2000;
-		
+
 		internal static readonly int StructureSize = Marshal.SizeOf<SymbolInfo>();
 	}
 }

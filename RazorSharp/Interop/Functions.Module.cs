@@ -15,8 +15,8 @@ namespace RazorSharp.Interop
 			/// </summary>
 			public static TDelegate FindExportedFunction<TDelegate>(string dllName, string fn) where TDelegate : Delegate
 			{
-				var hModule = Win32.Kernel32.GetModuleHandle(dllName);
-				var hFn     = Win32.Kernel32.GetProcAddress(hModule, fn);
+				var hModule = Interop.Native.Kernel32.GetModuleHandle(dllName);
+				var hFn     = Interop.Native.Kernel32.GetProcAddress(hModule, fn);
 				return FunctionFactory.Delegates.Create<TDelegate>(hFn);
 			}
 		}

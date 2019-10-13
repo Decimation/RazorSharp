@@ -149,9 +149,9 @@
     <Compile Include="Interop\Functions.Reflection.cs" />
     <Compile Include="Interop\Functions.Module.cs" />
     <Compile Include="Interop\Functions.Native.cs" />
-    <Compile Include="Interop\Win32.cs" />
-    <Compile Include="Interop\Win32.DebugHelp.cs" />
-    <Compile Include="Interop\Win32.Kernel32.cs" />
+    <Compile Include="Interop\Native.cs" />
+    <Compile Include="Interop\Native.DebugHelp.cs" />
+    <Compile Include="Interop\Native.Kernel32.cs" />
     <Compile Include="Interop\Structures\ImageDataDirectory.cs" />
     <Compile Include="Interop\Structures\ImageDOSHeader.cs" />
     <Compile Include="Interop\Structures\ImageFileHeader.cs" />
