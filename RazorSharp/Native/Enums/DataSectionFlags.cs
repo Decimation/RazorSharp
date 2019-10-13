@@ -1,6 +1,8 @@
 using System;
 
-namespace RazorSharp.Native.Structures
+// ReSharper disable InconsistentNaming
+
+namespace RazorSharp.Native.Enums
 {
 	[Flags]
 	public enum DataSectionFlags : uint

@@ -1,6 +1,6 @@
 using System;
-using NativeSharp.Kernel;
 using RazorSharp.Interop.Utilities;
+using RazorSharp.Native.Win32;
 
 namespace RazorSharp.Interop
 {
@@ -16,8 +16,8 @@ namespace RazorSharp.Interop
 			/// </summary>
 			public static TDelegate FindExportedFunction<TDelegate>(string dllName, string fn) where TDelegate : Delegate
 			{
-				var hModule = Kernel32.GetModuleHandle(dllName);
-				var hFn     = Kernel32.GetProcAddress(hModule, fn);
+				var hModule = NativeWin32.Kernel.GetModuleHandle(dllName);
+				var hFn     = NativeWin32.Kernel.GetProcAddress(hModule, fn);
 				return DelegateCreator.CreateDelegate<TDelegate>(hFn);
 			}
 		}

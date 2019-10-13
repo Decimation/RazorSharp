@@ -1,10 +1,10 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using NativeSharp.DebugHelp.Wrappers;
 using RazorSharp.Interop;
 using RazorSharp.Interop.Utilities;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Native.Structures;
 using SimpleSharp.Diagnostics;
 
 namespace RazorSharp.Import

@@ -3,12 +3,12 @@ using InlineIL;
 using JetBrains.Annotations;
 using RazorSharp.CoreClr.Meta;
 using RazorSharp.Memory;
+using RazorSharp.Native;
 using RazorSharp.Utilities.Security;
 
 namespace RazorSharp.CoreClr
 {
-	using UI = UsedImplicitlyAttribute;
-
+	
 	/// <summary>
 	/// Provides auxiliary runtime information and convenience functions
 	/// </summary>
@@ -71,7 +71,7 @@ namespace RazorSharp.CoreClr
 			///
 			/// <remarks>"Nil" is <c>null</c> or <c>default</c>.</remarks>
 			/// </summary>
-			public static bool IsNil<T>([CanBeNull, UI] T value)
+			public static bool IsNil<T>([CanBeNull, Native] T value)
 			{
 				// Fastest method for calculating whether a value is nil.
 				IL.Emit.Ldarg(nameof(value));

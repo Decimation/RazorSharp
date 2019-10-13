@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using NativeSharp.DebugHelp;
-using NativeSharp.DebugHelp.Enums;
-using NativeSharp.DebugHelp.Wrappers;
-using NativeSharp.Kernel;
 using RazorSharp.Core;
 using RazorSharp.Model;
+using RazorSharp.Native.Enums;
+using RazorSharp.Native.Structures;
+using RazorSharp.Native.Win32;
 using RazorSharp.Utilities.Security;
 using SimpleSharp.Diagnostics;
 
@@ -19,6 +18,7 @@ namespace RazorSharp.Import
 {
 	/// <summary>
 	/// Provides access to symbols in a specified image
+	/// <para>https://github.com/Microsoft/microsoft-pdb</para>
 	/// </summary>
 	internal sealed class SymbolManager : Releasable
 	{
@@ -62,7 +62,7 @@ namespace RazorSharp.Import
 		public override void Close()
 		{
 			UnloadModule();
-			DbgHelp.SymCleanup(m_proc);
+			NativeWin32.Debug.SymCleanup(m_proc);
 
 			m_proc    = IntPtr.Zero;
 			m_modBase = default;
@@ -78,9 +78,9 @@ namespace RazorSharp.Import
 
 		public override void Setup()
 		{
-			m_proc = Kernel32.GetCurrentProcess();
+			m_proc = NativeWin32.Kernel.GetCurrentProcess();
 
-			var options = DbgHelp.SymGetOptions();
+			var options = NativeWin32.Debug.SymGetOptions();
 
 			// SYMOPT_DEBUG option asks DbgHelp to print additional troubleshooting
 			// messages to debug output - use the debugger's Debug Output window
@@ -88,10 +88,10 @@ namespace RazorSharp.Import
 
 			options |= SymbolOptions.DEBUG;
 
-			DbgHelp.SymSetOptions(options);
+			NativeWin32.Debug.SymSetOptions(options);
 
 			// Initialize DbgHelp and load symbols for all modules of the current process 
-			DbgHelp.SymInitialize(m_proc, IntPtr.Zero, false);
+			NativeWin32.Debug.SymInitialize(m_proc);
 
 
 			base.Setup();
@@ -100,7 +100,7 @@ namespace RazorSharp.Import
 		private void UnloadModule()
 		{
 			if (IsImageLoaded) {
-				DbgHelp.SymUnloadModule64(m_proc, m_modBase);
+				NativeWin32.Debug.SymUnloadModule64(m_proc, m_modBase);
 			}
 		}
 
@@ -121,10 +121,10 @@ namespace RazorSharp.Import
 			
 			Conditions.Require(IsSetup, nameof(IsSetup));
 
-			Kernel32.GetFileParams(img, out ulong baseAddr, out ulong fileSize);
+			NativeWin32.Kernel.GetFileParams(img, out ulong baseAddr, out ulong fileSize);
 
 
-			m_modBase = DbgHelp.SymLoadModuleEx(
+			m_modBase = NativeWin32.Debug.SymLoadModuleEx(
 				m_proc,         // Process handle of the current process
 				IntPtr.Zero,    // Handle to the module's image file (not needed)
 				img,            // Path/name of the file
@@ -154,7 +154,7 @@ namespace RazorSharp.Import
 
 			m_symBuffer = new List<Symbol>();
 
-			DbgHelp.SymEnumSymbols(
+			NativeWin32.Debug.SymEnumSymbols(
 				m_proc,             // Process handle of the current process
 				m_modBase,          // Base address of the module
 				null,               // Mask (NULL -> all symbols)
@@ -186,7 +186,7 @@ namespace RazorSharp.Import
 		{
 			//CheckModule();
 
-			return DbgHelp.GetSymbol(m_proc, name);
+			return NativeWin32.Debug.GetSymbol(m_proc, name);
 		}
 
 		private void ClearBuffer()
@@ -204,7 +204,7 @@ namespace RazorSharp.Import
 			m_symBuffer        = new List<Symbol>();
 			m_singleNameBuffer = name;
 
-			DbgHelp.SymEnumSymbols(
+			NativeWin32.Debug.SymEnumSymbols(
 				m_proc,                  // Process handle of the current process
 				m_modBase,               // Base address of the module
 				null,                    // Mask (NULL -> all symbols)
@@ -223,7 +223,7 @@ namespace RazorSharp.Import
 
 		private bool SymNameContainsCallback(IntPtr sym, uint symSize, IntPtr userCtx)
 		{
-			string symName = DbgHelp.GetSymbolName(sym);
+			string symName = NativeWin32.Debug.GetSymbolName(sym);
 
 			if (symName.Contains(m_singleNameBuffer)) {
 				m_symBuffer.Add(new Symbol(sym));

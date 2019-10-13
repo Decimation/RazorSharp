@@ -55,10 +55,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="NativeSharp, Version=1.0.3.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\NativeSharp.1.0.3\lib\net472\NativeSharp.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
       <HintPath>..\packages\Serilog.2.8.0\lib\net46\Serilog.dll</HintPath>
       <Private>True</Private>
@@ -164,14 +160,31 @@
     <Compile Include="Memory\Unsafe.cs" />
     <Compile Include="Model\Closable.cs" />
     <Compile Include="Model\Releasable.cs" />
+    <Compile Include="Native\Enums\DataSectionFlags.cs" />
+    <Compile Include="Native\Enums\ImageSectionCharacteristics.cs" />
+    <Compile Include="Native\Enums\MemoryProtection.cs" />
+    <Compile Include="Native\Enums\MemState.cs" />
+    <Compile Include="Native\Enums\MemType.cs" />
+    <Compile Include="Native\Enums\SymbolOptions.cs" />
+    <Compile Include="Native\Enums\ProcessAccess.cs" />
+    <Compile Include="Native\Enums\SymbolFlag.cs" />
+    <Compile Include="Native\Enums\SymbolTag.cs" />
+    <Compile Include="Native\NativeAttribute.cs" />
+    <Compile Include="Native\NativeHelp.cs" />
     <Compile Include="Native\PEHeaderReader.cs" />
-    <Compile Include="Native\Structures\DataSectionFlags.cs" />
     <Compile Include="Native\Structures\ImageDataDirectory.cs" />
     <Compile Include="Native\Structures\ImageDOSHeader.cs" />
     <Compile Include="Native\Structures\ImageFileHeader.cs" />
     <Compile Include="Native\Structures\ImageOptionalHeader32.cs" />
     <Compile Include="Native\Structures\ImageOptionalHeader64.cs" />
     <Compile Include="Native\Structures\ImageSectionHeader.cs" />
+    <Compile Include="Native\Structures\ImageSectionInfo.cs" />
+    <Compile Include="Native\Structures\MemoryBasicInformation.cs" />
+    <Compile Include="Native\Structures\Symbol.cs" />
+    <Compile Include="Native\Structures\SymbolInfo.cs" />
+    <Compile Include="Native\Win32\NativeWin32.cs" />
+    <Compile Include="Native\Win32\NativeWin32.Debug.cs" />
+    <Compile Include="Native\Win32\NativeWin32.Kernel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\Bits.cs" />
     <Compile Include="Utilities\Members.cs" />

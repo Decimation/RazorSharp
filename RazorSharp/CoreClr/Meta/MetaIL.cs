@@ -2,11 +2,11 @@
 
 using System;
 using System.Reflection;
-using NativeSharp.Kernel;
-using NativeSharp.Kernel.Enums;
 using RazorSharp.CoreClr.Meta.Base;
 using RazorSharp.CoreClr.Metadata.JitIL;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Native.Enums;
+using RazorSharp.Native.Win32;
 using SimpleSharp;
 using SimpleSharp.Diagnostics;
 
@@ -93,13 +93,13 @@ namespace RazorSharp.CoreClr.Meta
 			Conditions.Require(code.Length <= CodeSize, nameof(code));
 
 			int ul  = code.Length;
-			var  ptr = Code.Address;
+			var ptr = Code.Address;
 
-			Kernel32.VirtualProtect(ptr, ul, MemoryProtection.ExecuteReadWrite, out var oldProtect);
+			NativeWin32.Kernel.VirtualProtect(ptr, ul, MemoryProtection.ExecuteReadWrite, out var oldProtect);
 
 			Code.WriteAll(code);
 
-			Kernel32.VirtualProtect(ptr, ul, oldProtect, out oldProtect);
+			NativeWin32.Kernel.VirtualProtect(ptr, ul, oldProtect, out oldProtect);
 		}
 
 		protected override ConsoleTable InfoTable {
@@ -113,7 +113,7 @@ namespace RazorSharp.CoreClr.Meta
 				if (IsFat) {
 					table.AddRow(nameof(Flags), Flags);
 				}
-				
+
 				table.AddRow(nameof(IsTiny), IsTiny);
 				table.AddRow(nameof(IsFat), IsFat);
 

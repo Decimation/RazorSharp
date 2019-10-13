@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using NativeSharp.DebugHelp.Wrappers;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Native.Structures;
 
 namespace RazorSharp.Memory
 {

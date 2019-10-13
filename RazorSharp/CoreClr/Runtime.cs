@@ -114,7 +114,7 @@ namespace RazorSharp.CoreClr
 
 		internal static ObjHeader ReadObjHeader<T>(T value) where T : class
 		{
-			var ptr = Unsafe.AddressOfHeap(value, OffsetOptions.Header).Cast<ObjHeader>();
+			Pointer<ObjHeader> ptr = Unsafe.AddressOfHeap(value, OffsetOptions.Header).Cast<ObjHeader>();
 			return ptr.Value;
 		}
 	}

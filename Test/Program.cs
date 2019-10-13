@@ -36,13 +36,10 @@ namespace Test
 		// Common library: SimpleSharp
 		// Testing library: Sandbox
 
-		static void Hello() { }
-
 		[HandleProcessCorruptedStateExceptions]
 		public static void Main(string[] args)
 		{
 			PEHeaderReader r = new PEHeaderReader(Clr.Value.Module.FileName);
-			
 
 			foreach (var info in r.ImageSectionHeaders) {
 				Console.WriteLine(info.Section);

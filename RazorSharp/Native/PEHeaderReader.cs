@@ -1,7 +1,10 @@
 using System;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using RazorSharp.Native.Structures;
+
+// ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Native
 {
@@ -19,39 +22,25 @@ namespace RazorSharp.Native
 	/// Reads in the header information of the Portable Executable format.
 	/// Provides information such as the date the assembly was compiled.
 	/// </summary>
-	// ReSharper disable once InconsistentNaming
 	public class PEHeaderReader
 	{
-		#region File Header Structures
-
-		
-
-		#endregion File Header Structures
-
-		#region Private Fields
-
-		/// <summary>
-		/// The DOS header
-		/// </summary>
-		private readonly ImageDOSHeader m_dosHeader;
-
-		#endregion Private Fields
-
 		#region Public Methods
 
 		public PEHeaderReader(string filePath)
 		{
 			// Read in the DLL or EXE and get the timestamp
-			using var stream = new FileStream(filePath, System.IO.FileMode.Open, System.IO.FileAccess.Read);
+			using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
 			var       reader = new BinaryReader(stream);
-			m_dosHeader = FromBinaryReader<ImageDOSHeader>(reader);
+
+			DOSHeader = FromBinaryReader<ImageDOSHeader>(reader);
 
 			// Add 4 bytes to the offset
-			stream.Seek(m_dosHeader.e_lfanew, SeekOrigin.Begin);
+			stream.Seek(DOSHeader.ELfanew, SeekOrigin.Begin);
 
-			UInt32 ntHeadersSignature = reader.ReadUInt32();
+			uint ntHeadersSignature = reader.ReadUInt32();
 			FileHeader = FromBinaryReader<ImageFileHeader>(reader);
-			if (this.Is32BitHeader) {
+			
+			if (Is32BitHeader) {
 				OptionalHeader32 = FromBinaryReader<ImageOptionalHeader32>(reader);
 			}
 			else {
@@ -72,7 +61,7 @@ namespace RazorSharp.Native
 		{
 			// Get the path to the calling assembly, which is the path to the
 			// DLL or EXE that we want the time of
-			string filePath = System.Reflection.Assembly.GetCallingAssembly().Location;
+			string filePath = Assembly.GetCallingAssembly().Location;
 
 			// Get and return the timestamp
 			return new PEHeaderReader(filePath);
@@ -86,7 +75,7 @@ namespace RazorSharp.Native
 		{
 			// Get the path to the calling assembly, which is the path to the
 			// DLL or EXE that we want the time of
-			string filePath = System.Reflection.Assembly.GetAssembly(typeof(PEHeaderReader)).Location;
+			string filePath = Assembly.GetAssembly(typeof(PEHeaderReader)).Location;
 
 			// Get and return the timestamp
 			return new PEHeaderReader(filePath);
@@ -126,6 +115,8 @@ namespace RazorSharp.Native
 			}
 		}
 
+		public ImageDOSHeader DOSHeader { get; }
+
 		/// <summary>
 		/// Gets the file header
 		/// </summary>
@@ -156,6 +147,7 @@ namespace RazorSharp.Native
 
 				// Add in the number of seconds since 1970/1/1
 				date = date.AddSeconds(FileHeader.TimeDateStamp);
+
 				// Adjust to local timezone
 				date += TimeZone.CurrentTimeZone.GetUtcOffset(date);
 

@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using NativeSharp.Kernel;
 using RazorSharp.Memory.Pointers;
+using RazorSharp.Native.Win32;
 
 namespace RazorSharp.Memory
 {
@@ -19,7 +19,7 @@ namespace RazorSharp.Memory
 				int size = Unsafe.SizeOf<T>();
 				var ptr  = Unsafe.AddressOf(ref t);
 
-				Kernel32.ReadProcessMemory(proc, lpBaseAddress.Address, ptr.Address, size);
+				NativeWin32.Kernel.ReadProcessMemory(proc, lpBaseAddress.Address, ptr.Address, size);
 
 				return t;
 			}
@@ -32,7 +32,7 @@ namespace RazorSharp.Memory
 				int dwSize = Unsafe.SizeOf<T>();
 				var ptr    = Unsafe.AddressOf(ref value);
 
-				Kernel32.WriteProcessMemory(proc, lpBaseAddress.Address, ptr.Address, dwSize);
+				NativeWin32.Kernel.WriteProcessMemory(proc, lpBaseAddress.Address, ptr.Address, dwSize);
 			}
 
 			#endregion

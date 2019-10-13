@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using NativeSharp.Kernel;
 using RazorSharp.CoreClr;
 using RazorSharp.Memory.Allocation;
 using RazorSharp.Memory.Enums;

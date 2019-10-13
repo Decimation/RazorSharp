@@ -1,12 +1,14 @@
 using System;
 using System.Runtime.InteropServices;
+using JetBrains.Annotations;
 
 namespace RazorSharp.Native.Structures
 {
+	[Native]
 	[StructLayout(LayoutKind.Sequential)]
 	public struct ImageDataDirectory
 	{
-		public UInt32 VirtualAddress;
-		public UInt32 Size;
+		public uint VirtualAddress { get; }
+		public uint Size { get; }
 	}
 }

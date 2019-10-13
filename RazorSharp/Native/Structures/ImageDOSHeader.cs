@@ -1,41 +1,168 @@
 using System;
+
 // ReSharper disable InconsistentNaming
 
 namespace RazorSharp.Native.Structures
 {
+	[Native]
 	public struct ImageDOSHeader
 	{
 		// DOS .EXE header
-		public UInt16 e_magic;    // Magic number
-		public UInt16 e_cblp;     // Bytes on last page of file
-		public UInt16 e_cp;       // Pages in file
-		public UInt16 e_crlc;     // Relocations
-		public UInt16 e_cparhdr;  // Size of header in paragraphs
-		public UInt16 e_minalloc; // Minimum extra paragraphs needed
-		public UInt16 e_maxalloc; // Maximum extra paragraphs needed
-		public UInt16 e_ss;       // Initial (relative) SS value
-		public UInt16 e_sp;       // Initial SP value
-		public UInt16 e_csum;     // Checksum
-		public UInt16 e_ip;       // Initial IP value
-		public UInt16 e_cs;       // Initial (relative) CS value
-		public UInt16 e_lfarlc;   // File address of relocation table
-		public UInt16 e_ovno;     // Overlay number
-		public UInt16 e_res_0;    // Reserved words
-		public UInt16 e_res_1;    // Reserved words
-		public UInt16 e_res_2;    // Reserved words
-		public UInt16 e_res_3;    // Reserved words
-		public UInt16 e_oemid;    // OEM identifier (for e_oeminfo)
-		public UInt16 e_oeminfo;  // OEM information; e_oemid specific
-		public UInt16 e_res2_0;   // Reserved words
-		public UInt16 e_res2_1;   // Reserved words
-		public UInt16 e_res2_2;   // Reserved words
-		public UInt16 e_res2_3;   // Reserved words
-		public UInt16 e_res2_4;   // Reserved words
-		public UInt16 e_res2_5;   // Reserved words
-		public UInt16 e_res2_6;   // Reserved words
-		public UInt16 e_res2_7;   // Reserved words
-		public UInt16 e_res2_8;   // Reserved words
-		public UInt16 e_res2_9;   // Reserved words
-		public UInt32 e_lfanew;   // File address of new exe header
+
+		/// <summary>
+		/// Magic number
+		/// </summary>
+		public ushort EMagic { get; }
+
+		/// <summary>
+		/// Bytes on last page of file
+		/// </summary>
+		public ushort ECblp { get; }
+
+		/// <summary>
+		/// Pages in file
+		/// </summary>
+		public ushort ECp { get; }
+
+		/// <summary>
+		/// Relocations
+		/// </summary>
+		public ushort ECrlc { get; }
+
+		/// <summary>
+		/// Size of header in paragraphs
+		/// </summary>
+		public ushort ECparhdr { get; }
+
+
+		/// <summary>
+		/// Minimum extra paragraphs needed
+		/// </summary>
+		public ushort EMinalloc { get; }
+
+		/// <summary>
+		/// Maximum extra paragraphs needed
+		/// </summary>
+		public ushort EMaxalloc { get; }
+
+		/// <summary>
+		/// Initial (relative) SS value
+		/// </summary>
+		public ushort ESs { get; }
+
+		/// <summary>
+		/// Initial SP value
+		/// </summary>
+		public ushort ESp { get; }
+
+		/// <summary>
+		/// Checksum
+		/// </summary>
+		public ushort ECsum { get; }
+
+		/// <summary>
+		/// Initial IP value
+		/// </summary>
+		public ushort EIp { get; }
+
+		/// <summary>
+		/// Initial (relative) CS value
+		/// </summary>
+		public ushort ECs { get; }
+
+		/// <summary>
+		/// File address of relocation table
+		/// </summary>
+		public ushort ELfarlc { get; }
+
+		/// <summary>
+		/// Overlay number
+		/// </summary>
+		public ushort EOvno { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes0 { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes1 { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes2 { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes3 { get; }
+
+		/// <summary>
+		/// OEM identifier (for <see cref="EOeminfo"/>)
+		/// </summary>
+		public ushort EOemid { get; }
+
+		/// <summary>
+		/// OEM information; <see cref="EOemid"/> specific
+		/// </summary>
+		public ushort EOeminfo { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes20 { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes21 { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes22 { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes23 { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes24 { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes25 { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes26 { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes27 { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes28 { get; }
+
+		/// <summary>
+		/// Reserved
+		/// </summary>
+		public ushort ERes29 { get; }
+
+		/// <summary>
+		/// File address of new exe header
+		/// </summary>
+		public uint ELfanew { get; }
 	}
 }
