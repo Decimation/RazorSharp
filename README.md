@@ -7,6 +7,10 @@
 
 Low-level utilities and tools for working with the CLR, CLR internal structures, and memory.
 
+# Notice
+
+**For a new and improved .NET Core implementation, see [NeoCore](https://github.com/Decimation/NeoCore).**
+
 # Goals
 
 `RazorSharp` aims to provide functionality similar to that of `ClrMD`, `WinDbg SOS`, and `Reflection` but in a more detailed fashion while also exposing more underlying metadata and CLR functionality.
