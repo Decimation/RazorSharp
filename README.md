@@ -9,7 +9,7 @@ Low-level utilities and tools for working with the CLR, CLR internal structures,
 
 # Notice
 
-**For a new and improved .NET Core implementation, see [NeoCore](https://github.com/Decimation/NeoCore).**
+**For a new and improved .NET 5 implementation, see [Novus](https://github.com/Decimation/Novus).**
 
 # Goals
 
